@@ -1,0 +1,48 @@
+{
+  "name": "@albus/core",
+  "version": "0.0.4",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/albus-core"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "tsc": "tsc --noEmit && echo",
+    "build": "tsc --emitDeclarationOnly && vite build",
+    "publish:git": "gitpkg publish",
+    "_prepare": "pnpm run build",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@metaplex-foundation/mpl-token-metadata": "^2.12.0",
+    "@stablelib/random": "^1.0.2",
+    "@stablelib/sha256": "^1.0.1",
+    "@stablelib/x25519": "^1.0.3",
+    "@stablelib/ed25519": "^1.0.3",
+    "@stablelib/xchacha20poly1305": "^1.0.1",
+    "@solana/web3.js": "^1.77.3",
+    "axios": "^1.4.0",
+    "crypto-browserify": "^3.12.0",
+    "ffjavascript": "^0.2.59",
+    "did-jwt-vc": "^3.2.2",
+    "did-jwt": "^7.2.2",
+    "did-resolver": "^4.1.0",
+    "key-did-resolver": "^3.0.0",
+    "web-did-resolver": "^2.0.24",
+    "jsonld-signatures": "^11.2.1",
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
+    "snarkjs": "^0.7.0",
+    "poseidon-encryption": "^1.0.2",
+    "uint8arrays": "^4.0.4"
+  }
+}
