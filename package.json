@@ -1,0 +1,45 @@
+{
+  "name": "@albus/sdk",
+  "version": "0.0.6",
+  "description": "Albus Protocol SDK",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/albus-sdk"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "main": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite build --watch",
+    "tsc": "tsc --noEmit && echo",
+    "build": "tsc --emitDeclarationOnly && vite build",
+    "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
+    "prepare": "pnpm run build",
+    "test": "vitest",
+    "_build": "unbuild"
+  },
+  "dependencies": {
+    "@albus/core": "*",
+    "@coral-xyz/anchor": "^0.28.0",
+    "@metaplex-foundation/beet": "^0.7.1",
+    "@metaplex-foundation/beet-solana": "^0.4.0",
+    "@solana/web3.js": "^1.77.3"
+  },
+  "devDependencies": {
+    "@metaplex-foundation/solita": "^0.19.4"
+  },
+  "peerDependencies": {
+    "snarkjs": "*"
+  }
+}

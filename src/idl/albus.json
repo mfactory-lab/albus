@@ -1,0 +1,633 @@
+{
+  "version": "0.0.5",
+  "name": "albus",
+  "instructions": [
+    {
+      "name": "addServiceProvider",
+      "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "AddServiceProviderData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteServiceProvider",
+      "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createProofRequest",
+      "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proofRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "circuitMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "circuitMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateProofRequestData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteProofRequest",
+      "accounts": [
+        {
+          "name": "proofRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "prove",
+      "accounts": [
+        {
+          "name": "proofRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "ProveData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verify",
+      "accounts": [
+        {
+          "name": "proofRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "VerifyData"
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ServiceProvider",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Authority that manages the service"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "code",
+            "docs": [
+              "Unique code identifying the service"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Name of the service"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "proofRequestCount",
+            "docs": [
+              "Total number of proof requests"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Timestamp for when the service was created"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed used to derive program-derived account seeds"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProofRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "serviceProvider",
+            "docs": [
+              "Address of the [ServiceProvider] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "circuit",
+            "docs": [
+              "Address of the circuit associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "docs": [
+              "Address of the request initiator"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Timestamp for when the request was created"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "expiredAt",
+            "docs": [
+              "Timestamp for when the request will expire"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "verifiedAt",
+            "docs": [
+              "Timestamp for when the proof was verified"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "provedAt",
+            "docs": [
+              "Timestamp for when the user was added to the proof"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Status of the request"
+            ],
+            "type": {
+              "defined": "ProofRequestStatus"
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed used to derive program-derived account seeds"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "proof",
+            "docs": [
+              "Proof itself"
+            ],
+            "type": {
+              "option": {
+                "defined": "Proof"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "AddServiceProviderData",
+      "docs": [
+        "Data required to add a new service provider"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "docs": [
+              "The unique code representing the service"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the service"
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateProofRequestData",
+      "docs": [
+        "Data required to create a new proof request"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "expiresIn",
+            "docs": [
+              "Time in seconds until the request expires"
+            ],
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProveData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proof",
+            "type": {
+              "defined": "Proof"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifyData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "status",
+            "type": {
+              "defined": "ProofRequestStatus"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Proof",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "protocol",
+            "type": "string"
+          },
+          {
+            "name": "curve",
+            "type": "string"
+          },
+          {
+            "name": "piA",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "piB",
+            "type": {
+              "vec": {
+                "vec": "string"
+              }
+            }
+          },
+          {
+            "name": "piC",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "publicInputs",
+            "type": {
+              "vec": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProofRequestStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Proved"
+          },
+          {
+            "name": "Verified"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "CreateProofRequestEvent",
+      "fields": [
+        {
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "DeleteProofRequestEvent",
+      "fields": [
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ProveEvent",
+      "fields": [
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proof",
+          "type": {
+            "defined": "Proof"
+          },
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VerifyEvent",
+      "fields": [
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RejectEvent",
+      "fields": [
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized action"
+    },
+    {
+      "code": 6001,
+      "name": "Unverified",
+      "msg": "Unverified"
+    },
+    {
+      "code": 6002,
+      "name": "Unproved",
+      "msg": "Unproved"
+    },
+    {
+      "code": 6003,
+      "name": "Expired",
+      "msg": "Expired"
+    },
+    {
+      "code": 6004,
+      "name": "WrongData",
+      "msg": "Wrong data"
+    },
+    {
+      "code": 6005,
+      "name": "IncorrectOwner",
+      "msg": "Incorrect owner"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidMetadata",
+      "msg": "Invalid metadata"
+    }
+  ],
+  "metadata": {
+    "address": "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz",
+    "origin": "anchor",
+    "binaryVersion": "0.28.0",
+    "libVersion": "0.28.0"
+  }
+}

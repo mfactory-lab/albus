@@ -1,0 +1,1 @@
+{"version":3,"file":"proof.d.ts","sourceRoot":"","sources":["../../src/utils/proof.ts"],"names":[],"mappings":"AA8BA,UAAU,sBAAsB;IAC9B,MAAM,EAAE,MAAM,CAAC,MAAM,EAAE,GAAG,CAAC,CAAA;IAC3B,WAAW,EAAE,MAAM,CAAC,MAAM,EAAE,GAAG,CAAC,CAAA;IAChC,cAAc,EAAE,MAAM,EAAE,CAAA;CACzB;AAED,wBAAgB,iBAAiB,CAAC,EAAE,MAAM,EAAE,cAAc,EAAE,WAAW,EAAE,EAAE,sBAAsB;;EAmBhG"}
