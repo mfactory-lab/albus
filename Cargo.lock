@@ -91,10 +91,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "albus-client"
-version = "0.0.1"
-
-[[package]]
 name = "anchor-attribute-access-control"
 version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

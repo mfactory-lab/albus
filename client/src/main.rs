@@ -1,52 +1,86 @@
-use elastic_elgamal::{app::{ChoiceParams, EncryptedChoice}, group::Ristretto,
-                      DiscreteLogTable, Keypair, RingProof, RangeDecomposition, RangeProof};
-use merlin::Transcript;
-use rand::thread_rng;
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(clippy::uninlined_format_args)]
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+mod circuit;
+
+use bellman::{
+    self,
+    groth16::{
+        create_proof, generate_random_parameters, prepare_verifying_key, verify_proof,
+        Proof as BellmanProof,
+    },
+};
+use bls12_381::{Bls12, Scalar};
+use ff::{Field, PrimeField};
+use rand::{thread_rng, Rng};
+
+use crate::circuit::CubeDemo;
+
+fn main() {
+    // This may not be cryptographically safe, use
+    // `OsRng` (for example) in production software.
     let mut rng = thread_rng();
 
-    let decomposition = RangeDecomposition::optimal(15).into();
+    println!("Creating parameters...");
 
-    let mut rng = thread_rng();
-    let receiver = Keypair::<Ristretto>::generate(&mut rng);
+    // Create parameters for our circuit
+    let params = {
+        let c = CubeDemo::<Scalar> { x: None };
+        generate_random_parameters::<Bls12, _, _>(c, &mut rng).unwrap()
+    };
 
-    let (ciphertext, proof) = RangeProof::new(
-        receiver.public(),
-        &decomposition,
-        10,
-        &mut Transcript::new(b"test"),
-        &mut rng,
+    println!(
+        "params 1: {}, {}, {}, {}, {}",
+        params.l.len(),
+        params.h.len(),
+        params.a.len(),
+        params.b_g1.len(),
+        params.b_g2.len()
     );
-    let ciphertext = ciphertext.into();
+    // Prepare the verification key (for proof verification)
+    // let pvk = prepare_verifying_key(&params.vk);
 
-    proof
-        .verify(
-            receiver.public(),
-            &RangeDecomposition::optimal(11).into(),
-            ciphertext,
-            &mut Transcript::new(b"test"),
-        )
-        .unwrap();
+    println!("Creating proofs...");
 
-    // let (pk, sk) = Keypair::<Ristretto>::generate(&mut rng).into_tuple();
-    // let choice_params = ChoiceParams::multi(pk.clone(), 5);
-    //
-    // let choices = [true, false, true, true, false];
-    // let enc = EncryptedChoice::new(&choice_params, &choices, &mut rng);
-    // let recovered_choices = enc.verify(&choice_params)?;
-    //
-    // let res = pk.verify_bool(recovered_choices[0], enc.range_proof())?;
+    // Create an instance of circuit
+    let c = CubeDemo::<Scalar> {
+        x: Scalar::from_str_vartime("3"),
+    };
 
+    let assignments =
+        groth16::assignments::extract_assignments::<CubeDemo<Scalar>, Bls12>(c).unwrap();
+    let (input, aux) = assignments.get_assignments();
+    let m = assignments.num_constraints();
+    let cap = assignments.qap();
+    let r = Scalar::random(&mut rng);
+    let s = Scalar::random(&mut rng);
 
-    // println!("{:?}",recovered_choices);
-    // println!("{:?}",recovered_choices);
+    let groth_params = groth16::assignments::create_params(params);
 
-    // let lookup_table = DiscreteLogTable::new(0..=1);
-    // for (idx, &v) in recovered_choices.iter().enumerate() {
-    //
-    //     println!("{:?}", v.random_element());
-    //     // assert_eq!(sk.decrypt(v, &lookup_table), Some(choices[idx] as u64));
-    // }
-    Ok(())
+    let proof = groth16::prover::create_proof::<Bls12>(
+        groth_params.clone(),
+        input.as_ref(),
+        aux.as_ref(),
+        r,
+        s,
+        cap,
+        m,
+    );
+
+    println!("groth proof: {:#?}", proof);
+
+    println!("{:#?}", &input[1..]);
+
+    groth16::verifier::verify_proof(&proof, &input[1..], &groth_params.vk).unwrap();
+
+    // let bellproof = create_proof(c, &params, r.clone(), s.clone()).unwrap();
+    // println!("bellman proof: {:?}", bellproof);
+
+    // let bproof = BellmanProof {
+    //     a: grothproof.a.clone(),
+    //     b: grothproof.b.clone(),
+    //     c: grothproof.c.clone(),
+    // };
+    // verify_proof(&pvk, &bproof, &input[1..]).expect("Verification error");
 }
