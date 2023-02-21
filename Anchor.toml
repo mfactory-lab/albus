@@ -1,0 +1,19 @@
+[features]
+seeds = false
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[scripts]
+test = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[programs.localnet]
+albus = "9SfbhzHrx5xczfoiTo2VVpG5oukcS5Schgy2ppLH3zQd"
+
+#[[test.genesis]]
+#address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"
+#program = "target/deploy/stake_pool.so"
