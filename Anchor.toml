@@ -12,7 +12,7 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-albus = "9SfbhzHrx5xczfoiTo2VVpG5oukcS5Schgy2ppLH3zQd"
+albus = "8Q3WDsNM7cBy7xSXqZMhR2LzGfGKgYAdWWLPKpj9orJb"
 
 #[[test.genesis]]
 #address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"

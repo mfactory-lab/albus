@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "name": "albus",
+  "instructions": [
+    {
+      "name": "verifyProof",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized action"
+    }
+  ],
+  "metadata": {
+    "address": "8Q3WDsNM7cBy7xSXqZMhR2LzGfGKgYAdWWLPKpj9orJb",
+    "origin": "anchor",
+    "binaryVersion": "0.26.0",
+    "libVersion": "0.26.0"
+  }
+}

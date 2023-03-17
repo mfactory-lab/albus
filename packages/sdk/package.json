@@ -1,0 +1,16 @@
+{
+  "name": "@albus/sdk",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "api:gen": "DEBUG='(solita|rustbin):(info|error)' solita"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.3",
+    "@solana/web3.js": "^1.73"
+  },
+  "devDependencies": {
+    "@metaplex-foundation/solita": "^0.19"
+  }
+}

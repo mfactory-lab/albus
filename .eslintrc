@@ -1,6 +1,6 @@
 {
   "extends": [
-    "@antfu/eslint-config-vue"
+    "@antfu/eslint-config"
   ],
   "rules": {
     "curly": ["error", "all"],

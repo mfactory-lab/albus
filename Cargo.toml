@@ -1,8 +1,7 @@
 [workspace]
 members = [
-    "client",
-    "groth16",
-    "programs/*"
+  "crates/*",
+#    "programs/*"
 ]
 
 [profile.release]

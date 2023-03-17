@@ -1,0 +1,20 @@
+{
+  "name": "@albus/cli",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "cli": "ts-node ./src/index.ts"
+  },
+  "dependencies": {
+    "@metaplex-foundation/js": "^0.18",
+    "@solana/spl-token": "^0.3",
+    "@solana/web3.js": "^1.73",
+    "snarkjs": "^0.6.9",
+    "commander": "^10.0.0",
+    "chalk": "^4.1.2",
+    "loglevel": "^1.8.0",
+    "r1csfile": "0.0.45",
+    "circom2": "^0.2.13",
+    "node-fetch": "^2.6.9"
+  }
+}
