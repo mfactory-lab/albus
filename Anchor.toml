@@ -12,8 +12,12 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-albus = "8Q3WDsNM7cBy7xSXqZMhR2LzGfGKgYAdWWLPKpj9orJb"
+albus = "6kGaStV1raq9ZT8rKAm1ki9BAoL6JMqRMy5ivYzdyuzg"
 
-#[[test.genesis]]
-#address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"
-#program = "target/deploy/stake_pool.so"
+[[test.genesis]]
+address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+program = "target/deploy/token.so"
+
+[[test.genesis]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+program = "target/deploy/metadata.so"

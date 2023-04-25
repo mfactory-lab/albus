@@ -3,8 +3,41 @@
   "name": "albus",
   "instructions": [
     {
-      "name": "verifyProof",
+      "name": "addServiceProvider",
       "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "AddServiceProviderData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteServiceProvider",
+      "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
         {
           "name": "authority",
           "isMut": true,
@@ -17,6 +50,372 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "createZkpRequest",
+      "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "circuitMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "circuitMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateZKPRequestData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteZkpRequest",
+      "accounts": [
+        {
+          "name": "zkpRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "prove",
+      "accounts": [
+        {
+          "name": "zkpRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proofMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "verify",
+      "accounts": [
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ServiceProvider",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Service's manager authority"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "code",
+            "docs": [
+              "Unique service code"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the service"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "zkpRequestCount",
+            "docs": [
+              "Total zkp request"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed for deriving PDA seeds"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKPRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "serviceProvider",
+            "docs": [
+              "[ServiceProvider] address"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "circuit",
+            "docs": [
+              "Circuit address"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "docs": [
+              "Request initiator"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "proof",
+            "docs": [
+              "Proof NFT mint address"
+            ],
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Request creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "expiredAt",
+            "docs": [
+              "Request expiration date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "verifiedAt",
+            "docs": [
+              "Date the proof was verified"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "Bump seed for deriving PDA seeds"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "AddServiceProviderData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateZKPRequestData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "expiresIn",
+            "type": "u32"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "CreateZKPRequestEvent",
+      "fields": [
+        {
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "DeleteZKPRequestEvent",
+      "fields": [
+        {
+          "name": "zkpRequest",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ProveEvent",
+      "fields": [
+        {
+          "name": "zkpRequest",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proof",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VerifyEvent",
+      "fields": [
+        {
+          "name": "zkpRequest",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -24,12 +423,32 @@
       "code": 6000,
       "name": "Unauthorized",
       "msg": "Unauthorized action"
+    },
+    {
+      "code": 6001,
+      "name": "Unverified",
+      "msg": "Unverified"
+    },
+    {
+      "code": 6002,
+      "name": "Expired",
+      "msg": "Expired"
+    },
+    {
+      "code": 6003,
+      "name": "IncorrectOwner",
+      "msg": "Incorrect owner"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidMetadata",
+      "msg": "Invalid metadata"
     }
   ],
   "metadata": {
-    "address": "8Q3WDsNM7cBy7xSXqZMhR2LzGfGKgYAdWWLPKpj9orJb",
+    "address": "6kGaStV1raq9ZT8rKAm1ki9BAoL6JMqRMy5ivYzdyuzg",
     "origin": "anchor",
-    "binaryVersion": "0.26.0",
-    "libVersion": "0.26.0"
+    "binaryVersion": "0.27.0",
+    "libVersion": "0.27.0"
   }
 }

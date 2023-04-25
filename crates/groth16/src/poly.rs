@@ -1,6 +1,7 @@
-use ff::PrimeField;
 #[cfg(not(any(test, feature = "std")))]
 use alloc::vec::Vec;
+
+use ff::PrimeField;
 
 pub fn fft_params<S: PrimeField>(l: usize) -> (S, usize, u32) {
     let mut m = 1;
@@ -118,12 +119,13 @@ pub fn coset_mul_assign<S: PrimeField>(a: &mut Vec<S>, mut b: Vec<S>) {
 mod tests {
     use core::ops::{AddAssign, MulAssign};
 
-    use bls12_381::{ Scalar as BlsScalar};
-    use rand::thread_rng;
+    use bellman::{
+        domain::{EvaluationDomain, Scalar},
+        multicore::Worker,
+    };
+    use bls12_381::Scalar as BlsScalar;
     use ff::Field;
-    use bellman::domain::{ EvaluationDomain, Scalar };
-    use bellman::multicore::Worker;
-
+    use rand::thread_rng;
 
     use super::*;
 
@@ -133,7 +135,7 @@ mod tests {
         b.resize(m, S::zero());
         fft(a.as_mut_slice(), &omega, exp);
         fft(b.as_mut_slice(), &omega, exp);
-    
+
         for (x, y) in a.iter_mut().zip(b.iter()) {
             x.mul_assign(y);
         }
@@ -142,10 +144,12 @@ mod tests {
     #[test]
     fn inverse_correctness() {
         let mut rng = thread_rng();
-        let a: Vec<Scalar<BlsScalar>> = (0..32).map(|_| Scalar(BlsScalar::random(&mut rng))).collect();
+        let a: Vec<Scalar<BlsScalar>> = (0..32)
+            .map(|_| Scalar(BlsScalar::random(&mut rng)))
+            .collect();
         let avals: Vec<BlsScalar> = a.iter().map(|t| t.0).collect();
         let mut a2: Vec<BlsScalar> = a.iter().map(|t| t.0).collect();
-        
+
         // fft with bellman
         let mut domain = EvaluationDomain::from_coeffs(a.clone()).unwrap();
         let worker = Worker::new();
@@ -182,7 +186,7 @@ mod tests {
             for (j, y) in b.iter().enumerate() {
                 let mut prod = x.clone();
                 prod.mul_assign(y);
-                naive[i+j].add_assign(prod)
+                naive[i + j].add_assign(prod)
             }
         }
 

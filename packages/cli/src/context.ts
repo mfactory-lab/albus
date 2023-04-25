@@ -1,16 +1,18 @@
-import { Buffer } from 'buffer'
-import fs from 'fs'
+import { Buffer } from 'node:buffer'
+import fs from 'node:fs'
 import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet, web3 } from '@project-serum/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import { clusterUrl } from './utils'
+import config from './config'
 
 export interface Context {
   cluster: Cluster | string
   provider: AnchorProvider
   keypair: Keypair
   metaplex: Metaplex
+  config: typeof config
 }
 
 const context: Context = {
@@ -28,6 +30,7 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
   const walletKeypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(fs.readFileSync(keypair).toString())))
   const wallet = new Wallet(walletKeypair)
 
+  context.config = config
   context.cluster = cluster
   context.provider = new AnchorProvider(connection, wallet, opts)
   context.keypair = walletKeypair

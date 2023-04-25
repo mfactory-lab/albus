@@ -32,6 +32,89 @@ createErrorFromCodeLookup.set(0x1770, () => new UnauthorizedError())
 createErrorFromNameLookup.set('Unauthorized', () => new UnauthorizedError())
 
 /**
+ * Unverified: 'Unverified'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class UnverifiedError extends Error {
+  readonly code: number = 0x1771
+  readonly name: string = 'Unverified'
+  constructor() {
+    super('Unverified')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, UnverifiedError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1771, () => new UnverifiedError())
+createErrorFromNameLookup.set('Unverified', () => new UnverifiedError())
+
+/**
+ * Expired: 'Expired'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class ExpiredError extends Error {
+  readonly code: number = 0x1772
+  readonly name: string = 'Expired'
+  constructor() {
+    super('Expired')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, ExpiredError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1772, () => new ExpiredError())
+createErrorFromNameLookup.set('Expired', () => new ExpiredError())
+
+/**
+ * IncorrectOwner: 'Incorrect owner'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class IncorrectOwnerError extends Error {
+  readonly code: number = 0x1773
+  readonly name: string = 'IncorrectOwner'
+  constructor() {
+    super('Incorrect owner')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, IncorrectOwnerError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1773, () => new IncorrectOwnerError())
+createErrorFromNameLookup.set('IncorrectOwner', () => new IncorrectOwnerError())
+
+/**
+ * InvalidMetadata: 'Invalid metadata'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class InvalidMetadataError extends Error {
+  readonly code: number = 0x1774
+  readonly name: string = 'InvalidMetadata'
+  constructor() {
+    super('Invalid metadata')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, InvalidMetadataError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1774, () => new InvalidMetadataError())
+createErrorFromNameLookup.set(
+  'InvalidMetadata',
+  () => new InvalidMetadataError(),
+)
+
+/**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  * @category generated

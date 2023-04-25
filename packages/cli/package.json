@@ -6,15 +6,28 @@
     "cli": "ts-node ./src/index.ts"
   },
   "dependencies": {
+    "@albus/core": "workspace:*",
+    "@faker-js/faker": "^7.6",
     "@metaplex-foundation/js": "^0.18",
     "@solana/spl-token": "^0.3",
     "@solana/web3.js": "^1.73",
     "snarkjs": "^0.6.9",
     "commander": "^10.0.0",
     "chalk": "^4.1.2",
+    "circomlibjs": "^0.1.7",
     "loglevel": "^1.8.0",
     "r1csfile": "0.0.45",
     "circom2": "^0.2.13",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.9",
+    "@digitalbazaar/vc": "^6.0.1",
+    "@stablelib/random": "^1.0.2",
+    "@stablelib/sha256": "^1.0.1",
+    "@stablelib/x25519": "^1.0.3",
+    "@stablelib/ed25519": "^1.0.3",
+    "@stablelib/xchacha20poly1305": "^1.0.1",
+    "ed2curve-esm": "0.3.0-alpha-1",
+    "@noble/ed25519": "^1.7.3",
+    "@noble/curves": "^1.0.0",
+    "uint8arrays": "^3.1.1"
   }
 }

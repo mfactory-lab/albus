@@ -1,5 +1,134 @@
 # Albus
 
+# Делить ключи и собирать ключи без трастед персоны
+
+On-Chain
+- fix smart contract
+- generate sdk
+
+Identity
+- Create identity NFT 
+- Add identity account (update merkle root)
+- Delete identity account (update merkle root)
+
+CLI
+- Create Proof Request
+- Verify request
+- Show all requests
+- Delete selected request
+
+
+tx with pubkey
+
+verify request
+proof request
+issue credential
+
+Identity (NFT)
+- accounts_root
+- accounts_encrypted [] ()
+
+VC (NFT)
+
+Issuer ------> Holder -------> Verifier
+
+1. Нужно создавать/обновлять merkle root не раскрывая добавленого ключа
+
+nonce
+
+1. Проверить что 
+
+# New circuit
+  private: private key
+  new merkleRoot
+  proof
+
+# 3 circuit
+1. доказать что хеш его кошелька
+  - pivate pubKey
+  - public hash of pubkey
+  - hesh of merkle tree
+2. что єто его кошелек (что есть приватній ключ)
+3. новый меркль рут и доказал что знает до него путь
+
+
+# Circuit for pub key encryption verify
+  private: msg
+  public: ePubKey, Hash
+
+
+1. проверить можно ли MT перегенерить без знаний всего дерева
+
+1. did document (web)
+
+1. Список кошельков
+2. связать кошельки
+3. клеймы связать
+
+# Подумать
+1. Как обновлять меркль без истории транзакций
+
+# MVP
+1. Test KYC в виде CLI
+  - проверка дубликатов заглушка
+  - шифруем и передаем во владение
+  - передает 2 did
+  - NFT
+2. Пользователь
+   - NFT идентификатор
+   - в нем хранится хеш кошелька
+   - он не может его удалить
+   - на него мы генерируем did
+3. удаление запроса
+
+
+приходит запрос
+
+---
+
+# Roadmap
+On-chain
+- store proof data on-chain
+- generate NFT proof
+
+# R&D
+sparse merkle tree
+shamir
+
+# DID
+Изучить как использовать
+did:sol, web did
+- check did:ipid: (https://did-ipid.github.io/ipid-did-method/)
+
+- KYC (did kyc - public)
+- Defi proto
+- User
+
+# Encryption
+threshold cryptography
+shamir algo (https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing)
+
+# TODO
+FHE (Fully Homomorphic Encryption)
+
+# Vocabulary
+claim = verifiable credentials
+verifiable presentation
+
+# NFT
+ - did kyc + did holder + date
+ - encrypted vcred
+
+# expire: 1 day
+
+- client did
+- 
+# Issuer
+ - many KYC providers
+ - store on-chain (encrypted by 3 )
+
+# Holder
+
 1. Создается KYC
 2. Получили данные, проверили подписи
 

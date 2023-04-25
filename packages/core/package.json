@@ -1,0 +1,18 @@
+{
+  "name": "@albus/core",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "circomlibjs": "^0.1",
+    "ffjavascript": "^0.2",
+    "@stablelib/random": "^1.0.2",
+    "@stablelib/sha256": "^1.0.1",
+    "@stablelib/x25519": "^1.0.3",
+    "@stablelib/ed25519": "^1.0.3",
+    "@stablelib/xchacha20poly1305": "^1.0.1",
+    "uint8arrays": "^3.1.1",
+    "circomlib": "^2.0.5",
+    "poseidon-encryption": "^1.0"
+  }
+}

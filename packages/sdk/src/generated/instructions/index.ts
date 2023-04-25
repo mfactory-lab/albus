@@ -1,1 +1,6 @@
-export * from './verifyProof'
+export * from './addServiceProvider'
+export * from './createZkpRequest'
+export * from './deleteServiceProvider'
+export * from './deleteZkpRequest'
+export * from './prove'
+export * from './verify'

@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import { toBigNumber, toMetaplexFile } from '@metaplex-foundation/js'
 import chalk from 'chalk'
 import log from 'loglevel'
@@ -6,38 +6,37 @@ import * as snarkjs from 'snarkjs'
 import { useContext } from '../context'
 import { downloadFile } from '../utils'
 
-const CIRCUITS_PATH = './circuits'
-const NFT_SYMBOL = 'ALBS'
-const NFT_CREATORS = []
-
+/**
+ * Generate new circuit NFT
+ */
 export async function createCircuit(opts: any) {
   const circuitName = opts.name
 
-  if (!fs.existsSync(`${CIRCUITS_PATH}/${circuitName}.r1cs`)
-    || !fs.existsSync(`${CIRCUITS_PATH}/${circuitName}.wasm`)) {
-    log.error(chalk.red('Invalid circuit'))
+  const { metaplex, config } = useContext()
+
+  if (!fs.existsSync(`${config.circuitPath}/${circuitName}.r1cs`)
+    || !fs.existsSync(`${config.circuitPath}/${circuitName}.wasm`)) {
+    log.error(chalk.red('Unknown circuit'))
     return
   }
 
-  const { metaplex } = useContext()
-
-  const r1csInfo = await snarkjs.r1cs.info(`${CIRCUITS_PATH}/${circuitName}.r1cs`)
+  const r1csInfo = await snarkjs.r1cs.info(`${config.circuitPath}/${circuitName}.r1cs`)
   const power = Math.ceil(Math.log2(r1csInfo.nVars)).toString().padStart(2, '0')
 
   // Download PowersOfTau from Hermez
-  if (!fs.existsSync(`${CIRCUITS_PATH}/powersOfTau28_hez_final_${power}.ptau`)) {
+  if (!fs.existsSync(`${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`)) {
     log.info(`Downloading powersOfTau with power ${power} from Hermez`)
     await downloadFile(
       `https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${power}.ptau`,
-      `${CIRCUITS_PATH}/powersOfTau28_hez_final_${power}.ptau`,
+      `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
     )
   }
 
   log.info('Generating keys...')
   await snarkjs.zKey.newZKey(
-    `${CIRCUITS_PATH}/${circuitName}.r1cs`,
-    `${CIRCUITS_PATH}/powersOfTau28_hez_final_${power}.ptau`,
-    `${CIRCUITS_PATH}/${circuitName}.zkey`,
+    `${config.circuitPath}/${circuitName}.r1cs`,
+    `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
+    `${config.circuitPath}/${circuitName}.zkey`,
   )
 
   // log.info('Exporting verification Key...')
@@ -48,7 +47,7 @@ export async function createCircuit(opts: any) {
   // NFT generation
   log.info('Uploading zKey file...')
   const zkeyUri = await metaplex.storage().upload(
-    toMetaplexFile(fs.readFileSync(`${CIRCUITS_PATH}/${circuitName}.zkey`), 'circuit.zkey'),
+    toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitName}.zkey`), 'circuit.zkey'),
   )
   log.info('Done')
   log.info(`Uri: ${zkeyUri}`)
@@ -59,7 +58,7 @@ export async function createCircuit(opts: any) {
 
   log.info('Uploading wasm file...')
   const wasmUri = await metaplex.storage().upload(
-    toMetaplexFile(fs.readFileSync(`${CIRCUITS_PATH}/${circuitName}.wasm`), 'circuit.wasm'),
+    toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitName}.wasm`), 'circuit.wasm'),
   )
   log.info('Done')
   log.info(`Uri: ${wasmUri}`)
@@ -75,7 +74,7 @@ export async function createCircuit(opts: any) {
       name,
       zkey_url: zkeyUri,
       wasm_url: wasmUri,
-      external_url: 'https://albus.finance',
+      external_url: config.nftExternalUrl,
     })
   log.info('Done')
   log.info(`Metadata uri: ${metadataUri}`)
@@ -87,8 +86,8 @@ export async function createCircuit(opts: any) {
       uri: metadataUri,
       name,
       sellerFeeBasisPoints: 0,
-      symbol: NFT_SYMBOL,
-      creators: NFT_CREATORS,
+      symbol: config.nftSymbol,
+      creators: config.nftCreators,
       isMutable: true,
       maxSupply: toBigNumber(1),
     })

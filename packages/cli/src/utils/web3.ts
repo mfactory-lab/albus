@@ -1,8 +1,8 @@
 import { LAMPORTS_PER_SOL, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import type { Cluster, Transaction } from '@solana/web3.js'
-import { BN } from '@project-serum/anchor'
+import * as anchor from '@project-serum/anchor'
 
-export const clusterUrl = (c: Cluster) => {
+export function clusterUrl(c: Cluster) {
   switch (c) {
     case 'mainnet-beta':
       // return 'https://rpc.theindex.io'
@@ -29,7 +29,7 @@ export function inspectTransaction(tx: Transaction, cluster: Cluster = 'mainnet-
   }
 }
 
-export function lamportsToSol(lamports: number | BN): number {
+export function lamportsToSol(lamports: number | anchor.BN): number {
   if (typeof lamports === 'number') {
     return Math.abs(lamports) / LAMPORTS_PER_SOL
   }
@@ -48,5 +48,5 @@ export function solToLamports(amount: number): number {
   if (isNaN(amount)) {
     return Number(0)
   }
-  return new BN(amount.toFixed(9).replace('.', '')).toNumber()
+  return new anchor.BN(amount.toFixed(9).replace('.', '')).toNumber()
 }

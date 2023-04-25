@@ -1,0 +1,3 @@
+pub const AUTHORIZED_AUTHORITY: &[&str] = &[
+    // ...
+];
