@@ -51,7 +51,7 @@ export const proveInstructionDiscriminator = [
  */
 export function createProveInstruction(
   accounts: ProveInstructionAccounts,
-  programId = new web3.PublicKey('6kGaStV1raq9ZT8rKAm1ki9BAoL6JMqRMy5ivYzdyuzg'),
+  programId = new web3.PublicKey('5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5'),
 ) {
   const [data] = proveStruct.serialize({
     instructionDiscriminator: proveInstructionDiscriminator,
