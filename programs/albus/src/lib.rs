@@ -7,7 +7,7 @@ mod utils;
 use anchor_lang::prelude::*;
 use instructions::*;
 
-declare_id!("8Q3WDsNM7cBy7xSXqZMhR2LzGfGKgYAdWWLPKpj9orJb");
+declare_id!("5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5");
 
 #[program]
 pub mod albus {

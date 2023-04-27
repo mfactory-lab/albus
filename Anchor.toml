@@ -12,11 +12,7 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-albus = "6kGaStV1raq9ZT8rKAm1ki9BAoL6JMqRMy5ivYzdyuzg"
-
-[[test.genesis]]
-address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-program = "target/deploy/token.so"
+albus = "5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5"
 
 [[test.genesis]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"

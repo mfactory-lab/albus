@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, Token};
+use anchor_spl::token::Mint;
 
 use crate::{
     events::CreateZKPRequestEvent,

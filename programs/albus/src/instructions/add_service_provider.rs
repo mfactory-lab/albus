@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::log::sol_log_compute_units;
 
 use crate::state::ServiceProvider;
 
@@ -11,7 +10,7 @@ pub fn handler(ctx: Context<AddServiceProvider>, data: AddServiceProviderData) -
     sp.name = data.name;
     sp.authority = ctx.accounts.authority.key();
     sp.created_at = timestamp;
-    sp.bump = ctx.bumps["service"];
+    sp.bump = ctx.bumps["service_provider"];
 
     Ok(())
 }
@@ -38,6 +37,4 @@ pub struct AddServiceProvider<'info> {
     pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
-}
-
 }
