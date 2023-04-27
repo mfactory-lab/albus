@@ -254,13 +254,13 @@ export class AlbusClient {
   /**
    * Load all zkp requests
    */
-  async loadAllZKPRequests(filter: { service_provider?: Address; circuit?: Address; proof?: Address } = {}) {
+  async loadAllZKPRequests(filter: { serviceProvider?: Address; circuit?: Address; proof?: Address } = {}) {
     const builder = ZKPRequest.gpaBuilder()
       .addFilter('accountDiscriminator', zKPRequestDiscriminator)
       .addFilter('owner', this.provider.publicKey)
 
-    if (filter.service_provider) {
-      builder.addFilter('serviceProvider', new PublicKey(filter.service_provider))
+    if (filter.serviceProvider) {
+      builder.addFilter('serviceProvider', new PublicKey(filter.serviceProvider))
     }
 
     if (filter.circuit) {
