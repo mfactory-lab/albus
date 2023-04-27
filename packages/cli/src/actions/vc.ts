@@ -1,43 +1,50 @@
-// import vc from '@digitalbazaar/vc'
-//
-// export async function createVC(opts: any) {
-//   // Generate a new DID and keypair
-//   const didKey = new Ed25519KeyPair()
-//
-//   // Sample unsigned credential
-//   const credential = {
-//     '@context': [
-//       'https://www.w3.org/2018/credentials/v1',
-//       'https://www.w3.org/2018/credentials/examples/v1',
-//     ],
-//     'id': 'https://example.com/credentials/1872',
-//     'type': ['VerifiableCredential', 'AlumniCredential'],
-//     'issuer': 'https://example.edu/issuers/565049',
-//     'issuanceDate': '2010-01-01T19:23:24Z',
-//     'credentialSubject': {
-//       id: 'did:example:ebfeb1f712ebc6f1c276e12ec21',
-//       alumniOf: 'Example University',
-//     },
-//   }
-//
-//   // Sign the credential using the DID keypair
-//   const signedCredential = await vc.issue({
-//     credential,
-//     suite: new Ed25519Signature2018({
-//       key: didKey,
-//       date: '2022-03-30T09:00:00Z',
-//     }),
-//     documentLoader: customLoader, // Optional document loader function
-//   })
-//
-//   // Verify the credential using the DID public key
-//   const verificationResult = await vc.verify({
-//     credential: signedCredential,
-//     suite: new Ed25519Signature2018(),
-//     documentLoader: customLoader, // Optional document loader function
-//   })
-//
-//   console.log(verificationResult)
-//
-//   process.exit(0)
-// }
+import type { Issuer, JwtCredentialPayload } from 'did-jwt-vc'
+import { createVerifiableCredentialJwt, verifyCredential } from 'did-jwt-vc'
+import type { ResolverRegistry } from 'did-resolver'
+import { Resolver } from 'did-resolver'
+import { getResolver } from 'web-did-resolver'
+import { ES256KSigner, hexToBytes } from 'did-jwt'
+import { useContext } from '../context'
+
+export async function test() {
+  const { keypair } = useContext()
+
+  const vcPayload: JwtCredentialPayload = {
+    sub: 'did:web:skounis.github.io',
+    nbf: 1562950282,
+    vc: {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      'type': ['VerifiableCredential'],
+      'credentialSubject': {
+        givenName: 'Vladyslav',
+      },
+    },
+  }
+
+  // Create a singer by using a private key.
+  // const key = '8eb63d435de4d634bc5f3df79c361e9233f55c9c2fca097758eefb018c4c61df'
+  const key = 'd43935a06a9f549cb5c0a138170f972ae855610a5a5bb211f6c7e75a5cfc8c73'
+  const signer = ES256KSigner(hexToBytes(key))
+
+  const issuer: Issuer = {
+    did: 'did:web:albus.finance',
+    signer,
+    // signer: EdDSASigner(keypair.secretKey),
+    // signer: EdDSAPoseidonSigner(keypair.secretKey),
+    // alg: 'EdDSA',
+  }
+
+  const vcJwt = await createVerifiableCredentialJwt(vcPayload, issuer)
+  console.log(vcJwt)
+  // validateJwtCredentialPayload(vcJwt)
+  // Resolve and Verify
+
+  const resolver = new Resolver({
+    // Prepare the did:web resolver
+    ...getResolver(),
+  } as ResolverRegistry)
+
+  // Verify the Credential
+  const verifiedVC = await verifyCredential(vcJwt, resolver)
+  console.log('//// Verified Credentials:\n', verifiedVC)
+}

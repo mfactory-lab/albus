@@ -9,7 +9,7 @@ import { downloadFile } from '../utils'
 /**
  * Generate new circuit NFT
  */
-export async function createCircuit(opts: any) {
+export async function create(opts: any) {
   const circuitName = opts.name
 
   const { metaplex, config } = useContext()

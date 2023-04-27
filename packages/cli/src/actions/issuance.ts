@@ -1,28 +1,51 @@
 import { faker } from '@faker-js/faker'
 import { toBigNumber } from '@metaplex-foundation/js'
+import type { PublicKey } from '@solana/web3.js'
+import { Keypair } from '@solana/web3.js'
+import { EdDSASigner } from 'did-jwt'
+import type { Issuer, JwtCredentialPayload } from 'did-jwt-vc'
+import { createVerifiableCredentialJwt } from 'did-jwt-vc'
 import log from 'loglevel'
+import { crypto } from '@albus/core'
 import { useContext } from '../context'
-import { encryptMessage } from '../utils/crypto'
 
-interface Opts {}
+interface Opts {
+  provider: string
+}
 
 /**
  * Issue new Verifiable Credential
  */
 export async function issueVerifiableCredential(_opts: Opts) {
-  const { metaplex, config, keypair } = useContext()
+  const { keypair } = useContext()
 
-  const credential = generateFakeCredential('sumsub')
-  const encCredential = await encryptMessage(JSON.stringify(credential), keypair.publicKey)
+  // Issue new verifiable credentials
+  const vc = await issueFakeVerifiableCredential(keypair.publicKey)
+
+  // Encrypt verifiable credentials
+  const encVc = await crypto.xc20p.encrypt(JSON.stringify(vc), keypair.publicKey)
+
+  // Generate new VerifiableCredential-NFT
+  await mintVerifiableCredentialNFT(encVc)
+
+  process.exit(0)
+}
+
+/**
+ * Mint `VerifiableCredential` NFT
+ */
+async function mintVerifiableCredentialNFT(vcJwt: string) {
+  const { metaplex, config } = useContext()
+  log.info('Uploading NFT metadata...')
 
   const name = 'ALBUS Verifiable Credential'
 
-  log.info('Uploading NFT metadata...')
   const { uri: metadataUri } = await metaplex
     .nfts()
     .uploadMetadata({
       name,
-      verifiable_credential: encCredential,
+      image: config.logoUrl,
+      vc: vcJwt,
       external_url: config.nftExternalUrl,
     })
   log.info('Done')
@@ -43,56 +66,54 @@ export async function issueVerifiableCredential(_opts: Opts) {
 
   log.info('Done')
   log.info(`Mint: ${nft.address}`)
-
-  process.exit(0)
 }
 
 /**
- * Generate fake `VerifiableCredential` data
+ * Issue fake `VerifiableCredential`
  */
-function generateFakeCredential(issuer: 'sumsub') {
+async function issueFakeVerifiableCredential(holder: PublicKey) {
+  const { config } = useContext()
+
+  // Generate fake KYC data (sumsub.com)
   const data = generateFakeSumSubData()
 
-  switch (issuer) {
-    case 'sumsub':
-      return {
-        '@context': [
-          'https://www.w3.org/2018/credentials/v1',
-          'https://schema.org',
-        ],
-        'type': ['VerifiableCredential'],
-        'issuer': 'did:web:sumsub.com',
-        'issuanceDate': data.createdAt,
-        'credentialSubject': {
-          // id: 'did:key:z6MkfxQU7dy8eKxyHpG267FV23agZQu9zmokd8BprepfHALi',
-          givenName: data.info.firstNameEn,
-          familyName: data.info.lastNameEn,
-          // additionalName: '',
-          // https://schema.org/GenderType
-          gender: data.info.gender === 'M' ? 'male' : 'female',
-          birthDate: data.info.dob,
-          birthPlace: data.info.placeOfBirthEn,
-          nationality: data.info.nationality,
-          country: data.info.country,
-          countryOfBirth: data.info.countryOfBirth,
-        },
-        'proof': {
-          type: 'Ed25519Signature2018',
-          verificationMethod: {
-            '@context': 'https://w3id.org/security/v1',
-            'id': 'did:holo:b2B37C890824242Cb9B0FE5614fA2221B79901E',
-            'type': 'Holochain',
-          },
-          created: '2021-11-05T03:12:54Z',
-          proofPurpose: 'assertionMethod',
-          jws: 'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..dXNHwJ-9iPMRQ4AUcv9j-7LuImTiWAG0sDYbRRDDiyAjOV9CUmjLMKiePpytoAmGNGNTHDlEOsTa4CS3dZ7yBg',
-        },
-      }
+  const vcPayload: JwtCredentialPayload = {
+    sub: `did:key:${holder.toBase58()}`,
+    vc: {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      'type': ['VerifiableCredential'],
+      'credentialSubject': {
+        givenName: data.info.firstNameEn,
+        familyName: data.info.lastNameEn,
+        // additionalName: '',
+        // https://schema.org/GenderType
+        gender: data.info.gender === 'M' ? 'male' : 'female',
+        birthDate: data.info.dob,
+        birthPlace: data.info.placeOfBirthEn,
+        nationality: data.info.nationality,
+        country: data.info.country,
+        countryOfBirth: data.info.countryOfBirth,
+      },
+    },
   }
 
-  throw new Error('Invalid issuer')
+  const signerKeypair = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
+
+  // Create a singer by using a private key.
+  const signer = EdDSASigner(signerKeypair.secretKey)
+
+  const issuer: Issuer = {
+    // did: 'did:web:albus.finance',
+    did: `did:key:${signerKeypair.publicKey.toBase58()}`,
+    signer,
+  }
+
+  return await createVerifiableCredentialJwt(vcPayload, issuer)
 }
 
+/**
+ * SumSub Fake Data
+ */
 function generateFakeSumSubData() {
   const countryCode = faker.address.countryCode('alpha-3')
 
