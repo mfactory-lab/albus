@@ -176,6 +176,9 @@ importers:
 
   packages/sdk:
     dependencies:
+      '@metaplex-foundation/js':
+        specifier: ^0.18
+        version: 0.18.3
       '@solana/spl-token':
         specifier: ^0.3
         version: 0.3.7(@solana/web3.js@1.73.2)

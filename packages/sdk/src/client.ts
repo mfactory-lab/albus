@@ -1,8 +1,10 @@
 import { Buffer } from 'node:buffer'
 import type { Address, AnchorProvider } from '@project-serum/anchor'
 import { BorshCoder, EventManager } from '@project-serum/anchor'
-import type { Commitment, ConfirmOptions } from '@solana/web3.js'
+import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import { Metaplex } from '@metaplex-foundation/js'
+import * as snarkjs from 'snarkjs'
 import idl from '../idl/albus.json'
 import {
   PROGRAM_ID,
@@ -64,7 +66,114 @@ export class AlbusClient {
   }
 
   /**
-   * Prove existing ZKP request
+   * Check that the selected {@link props.user} is compliant
+   * for {@link props.circuit} and selected service provider
+   * if {@link props.full} is true, then the full verification
+   * process will be performed
+   *
+   * @param {CheckCompliance} props
+   */
+  async checkCompliance(props: CheckCompliance) {
+    const user = props.user ?? this.provider.publicKey
+    const [addr] = this.getZKPRequestPDA(
+      this.getServiceProviderPDA(props.serviceProviderCode),
+      props.circuit,
+      user,
+    )
+    const req = await this.loadZKPRequest(addr)
+    this.validateZKPRequest(req)
+    if (props.full) {
+      return await this.verifyZKPRequestInternal(req)
+    }
+    return true
+  }
+
+  /**
+   * Confirm that the {@link ZKPRequest} has not expired,
+   * it is proven and verified
+   *
+   * @param {ZKPRequest} req
+   */
+  validateZKPRequest(req: ZKPRequest) {
+    if (req.expiredAt > 0 && req.expiredAt < Date.now()) {
+      throw new Error('ZKP Request is expired')
+    }
+    if (!req.proof) {
+      throw new Error('ZKP Request is not proved')
+    }
+    if (req.verifiedAt <= 0) {
+      throw new Error('ZKP Request is not verified')
+    }
+  }
+
+  /**
+   * Full {@link ZKPRequest} verification
+   *
+   * @param {PublicKeyInitData} serviceProvider
+   * @param {PublicKeyInitData} circuit
+   * @param {PublicKeyInitData} user
+   * @returns {Promise<boolean>}
+   */
+  async verifyZKPRequest(
+    serviceProvider: PublicKeyInitData,
+    circuit: PublicKeyInitData,
+    user?: PublicKeyInitData,
+  ) {
+    return this.verifyZKPRequestByAddress(
+      this.getZKPRequestPDA(serviceProvider, circuit, user ?? this.provider.publicKey),
+    )
+  }
+
+  /**
+   * Full {@link ZKPRequest} verification for selected {@link addr}
+   *
+   * @param {PublicKeyInitData} addr
+   * @returns {Promise<boolean>}
+   */
+  async verifyZKPRequestByAddress(addr: PublicKeyInitData) {
+    return this.verifyZKPRequestInternal(await this.loadZKPRequest(addr))
+  }
+
+  /**
+   * Internal {@link ZKPRequest} verification
+   *
+   * @param {ZKPRequest} req
+   * @returns {Promise<boolean>}
+   */
+  async verifyZKPRequestInternal(req: ZKPRequest) {
+    if (!req.proof) {
+      throw new Error('ZKP request is not proved')
+    }
+
+    const metaplex = Metaplex.make(this.connection)
+
+    const circuitNft = await metaplex.nfts().findByMint({
+      mintAddress: new PublicKey(req.circuit),
+      loadJsonMetadata: true,
+    })
+
+    if (!circuitNft.json?.vk) {
+      throw new Error('Invalid circuit. Metadata does not contain verification key')
+    }
+
+    const proofNft = await metaplex.nfts().findByMint({
+      mintAddress: new PublicKey(req.proof),
+      loadJsonMetadata: true,
+    })
+
+    if (!proofNft.json?.proof) {
+      throw new Error('Invalid proof. Metadata does not contain proof data')
+    }
+
+    const vk = proofNft.json?.vk as snarkjs.VK
+    const proof = proofNft.json?.proof as snarkjs.SnarkjsProof
+    const publicSignals = (proofNft.json?.public_input ?? []) as any
+
+    return await snarkjs.groth16.verify(vk, publicSignals, proof)
+  }
+
+  /**
+   * Prove existing {@link ZKPRequest}
    */
   async prove(props: ProveProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -90,7 +199,7 @@ export class AlbusClient {
   }
 
   /**
-   * Verify existing ZKP request
+   * Verify existing {@link ZKPRequest}
    */
   async verify(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
@@ -113,7 +222,7 @@ export class AlbusClient {
   }
 
   /**
-   * Create new ZKP request
+   * Create new {@link ZKPRequest}
    */
   async createZKPRequest(props: CreateZKPRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -150,7 +259,7 @@ export class AlbusClient {
   }
 
   /**
-   * Delete ZKP request
+   * Delete {@link ZKPRequest}
    */
   async deleteZKPRequest(props: DeleteZKPRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -173,7 +282,7 @@ export class AlbusClient {
   }
 
   /**
-   * Add new service provider
+   * Add new {@link ServiceProvider}
    */
   async addServiceProvider(props: AddServiceProviderProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -202,7 +311,7 @@ export class AlbusClient {
   }
 
   /**
-   * Delete service provider
+   * Delete a {@link ServiceProvider}
    */
   async deleteServiceProvider(props: DeleteServiceProviderProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -226,7 +335,7 @@ export class AlbusClient {
   }
 
   /**
-   * Load all service providers
+   * Load all {@link ServiceProvider}'s
    */
   async loadAllServiceProviders(filter: { authority?: Address } = {}) {
     const builder = ServiceProvider.gpaBuilder()
@@ -282,19 +391,19 @@ export class AlbusClient {
   /**
    * Load zkp request by {@link addr}
    */
-  async loadZKPRequest(addr: PublicKey, commitment?: Commitment) {
-    return ZKPRequest.fromAccountAddress(this.provider.connection, addr, commitment)
+  async loadZKPRequest(addr: PublicKeyInitData, commitment?: Commitment) {
+    return ZKPRequest.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
   }
 
   /**
    * Get channel device PDA
    */
-  getZKPRequestPDA(service_provider: PublicKey, circuit_mint: PublicKey, authority: PublicKey) {
+  getZKPRequestPDA(serviceProvider: PublicKeyInitData, circuitMint: PublicKeyInitData, requester: PublicKeyInitData) {
     return PublicKey.findProgramAddressSync([
       Buffer.from(ZKP_REQUEST_SEED_PREFIX),
-      service_provider.toBuffer(),
-      circuit_mint.toBuffer(),
-      authority.toBuffer(),
+      new PublicKey(serviceProvider).toBuffer(),
+      new PublicKey(circuitMint).toBuffer(),
+      new PublicKey(requester).toBuffer(),
     ], this.programId)
   }
 
@@ -335,4 +444,11 @@ export interface ProveProps {
 
 export interface VerifyProps {
   zkpRequest: PublicKey
+}
+
+export interface CheckCompliance {
+  serviceProviderCode: string
+  circuit: PublicKey
+  user?: PublicKey
+  full?: boolean
 }
