@@ -1,7 +1,7 @@
 [workspace]
 members = [
-#  "crates/*",
-  "programs/*"
+  "programs/albus",
+  "programs/verified_transfer"
 ]
 
 [profile.release]
