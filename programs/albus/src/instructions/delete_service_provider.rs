@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::state::ServiceProvider;
 
-pub fn handler(ctx: Context<DeleteServiceProvider>) -> Result<()> {
+pub fn handler(_ctx: Context<DeleteServiceProvider>) -> Result<()> {
     Ok(())
 }
 
