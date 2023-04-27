@@ -1,6 +1,7 @@
-export * as circuit from './createCircuit'
+export * as circuit from './circuit'
 export * as prove from './prove'
 export * as verify from './verify'
 export * as identity from './identity'
 export * as issuance from './issuance'
 export * as test from './test'
+export * as vc from './vc'

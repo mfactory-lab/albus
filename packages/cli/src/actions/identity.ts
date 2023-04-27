@@ -97,10 +97,10 @@ const poseidonPromise = buildPoseidon()
 export async function signPoseidon(secretKey: Uint8Array, inputs: Uint8Array[]) {
   const poseidon = await poseidonPromise
   const hash = poseidon(inputs)
-  const [s, r8x, r8y] = await edBabyJubJub.signPoseidon(secretKey, hash)
+  const { s, r8 } = await edBabyJubJub.signPoseidon(secretKey, hash)
   const pubkey = await edBabyJubJub.privateKeyToPublicKey(secretKey)
   return {
-    sig: [r8x, r8y, s],
+    sig: [r8[0], r8[1], s],
     pubkey,
     hash,
   }

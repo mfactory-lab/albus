@@ -9,7 +9,7 @@ import { downloadFile } from '../utils'
 
 interface GenerateProofOpts {
   // Circuit NFT address
-  circuit: string | PublicKey
+  circuit: string
   // Path to input json file
   input: string
 }

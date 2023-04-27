@@ -37,6 +37,13 @@ id.command('create')
   .description('Create new use identity')
   .action(actions.identity.create)
 
+// Verifiable Credentials
+
+const vc = cli.command('vc')
+
+vc.command('test')
+  .action(actions.vc.test)
+
 // Issuer
 
 const kyc = cli.command('issuer')
@@ -50,7 +57,7 @@ kyc.command('generate')
 cli.command('create')
   .description('Create new circuit NFT')
   .requiredOption('--name <NAME>', 'Circuit name')
-  .action(actions.circuit.createCircuit)
+  .action(actions.circuit.create)
 
 cli.command('prove')
   .description('Generate new proof')
