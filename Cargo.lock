@@ -2283,6 +2283,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "verified-transfer"
+version = "0.0.1"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+]
+
+[[package]]
 name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
