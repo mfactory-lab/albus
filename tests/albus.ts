@@ -1,4 +1,6 @@
 import { AlbusClient } from '@albus/sdk'
+import type { PublicKeyInitData } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { assert } from 'chai'
 import { AnchorProvider, Wallet, web3 } from '@project-serum/anchor'
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
@@ -22,6 +24,12 @@ async function mintNFT(metaplex: Metaplex) {
   return nft
 }
 
+async function airdrop(addr: PublicKeyInitData, amount = 10) {
+  await provider.connection.confirmTransaction(
+    await provider.connection.requestAirdrop(new PublicKey(addr), amount * web3.LAMPORTS_PER_SOL),
+  )
+}
+
 describe('albus', () => {
   const client = new AlbusClient(provider)
   const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(payerKeypair))
@@ -29,9 +37,7 @@ describe('albus', () => {
   let mint: web3.PublicKey
 
   before(async () => {
-    await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(payerKeypair.publicKey, 10 * web3.LAMPORTS_PER_SOL),
-    )
+    await airdrop(payerKeypair.publicKey)
   })
 
   it('can add service provider', async () => {
@@ -46,9 +52,7 @@ describe('albus', () => {
 
   it('can not create ZKP request with unauthorized update authority', async () => {
     const payerKeypair = web3.Keypair.generate()
-    await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(payerKeypair.publicKey, 10 * web3.LAMPORTS_PER_SOL),
-    )
+    await airdrop(payerKeypair.publicKey)
     const nft = await mintNFT(metaplex)
     const mint = nft.address
     try {
