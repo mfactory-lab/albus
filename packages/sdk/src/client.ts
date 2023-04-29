@@ -4,7 +4,7 @@ import { BorshCoder, EventManager } from '@project-serum/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import { Metaplex } from '@metaplex-foundation/js'
-import * as snarkjs from 'snarkjs'
+import snarkjs from 'snarkjs'
 import idl from '../idl/albus.json'
 import {
   PROGRAM_ID,
@@ -80,11 +80,16 @@ export class AlbusClient {
       props.circuit,
       user,
     )
+
+    // verify on-chain request
     const req = await this.loadZKPRequest(addr)
     this.validateZKPRequest(req)
+
+    // full proof verification
     if (props.full) {
       return await this.verifyZKPRequestInternal(req)
     }
+
     return true
   }
 
