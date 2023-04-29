@@ -1,5 +1,23 @@
 # Albus
 
+create identity
+
+show all VCs
+issue new VC
+
+create zkp request
+show all zkp requests
+show single zkp request
+
+prove zkp request (from VC)
+
+verify zkp request
+
+register service provider
+delete service provider
+
+---
+
 On-Chain
 - fix smart contract
 - generate sdk

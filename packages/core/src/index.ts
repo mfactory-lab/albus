@@ -1,2 +1,2 @@
 export * as crypto from './crypto'
-// export * as utils from './utils'
+export * as utils from './utils'
