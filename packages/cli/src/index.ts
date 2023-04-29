@@ -33,37 +33,50 @@ test.command('e').action(actions.test.encryption)
 
 const id = cli.command('identity')
 
-id.command('create')
-  .description('Create new use identity')
+id.command('new')
+  .description('Create new identity')
   .action(actions.identity.create)
 
 // Verifiable Credentials
 
 const vc = cli.command('vc')
 
+vc.command('all')
+  .description('Show all VCs')
+  .action(actions.vc.showAll)
+
+vc.command('issue')
+  .description('Issue new VC')
+  .option('--provider <CODE>', 'KYC provider unique code')
+  .option('-e,--encrypt', 'Encrypt VC with holder public key')
+  .action(actions.vc.issue)
+
 vc.command('test')
   .action(actions.vc.test)
 
-// Issuer
-
-const kyc = cli.command('issuer')
-
-kyc.command('generate')
-  .description('Issue new Verifiable Credential')
-  .action(actions.issuance.issueVerifiableCredential)
-
 // ZKP
 
-cli.command('create')
+const circuit = cli.command('circuit')
+
+circuit.command('create')
   .description('Create new circuit NFT')
   .requiredOption('--name <NAME>', 'Circuit name')
   .action(actions.circuit.create)
 
-cli.command('prove')
-  .description('Generate new proof')
+const prove = cli.command('prove')
+
+prove.command('create')
+  .description('Create new proof')
   .requiredOption('--circuit <CIRCUIT_MINT>', 'Circuit mint address')
   .option('--input <PATH>', 'Input file path')
-  .action(actions.prove.generateProof)
+  .action(actions.prove.create)
+
+prove.command('request')
+  .description('Create prove for ZKP Request')
+  .argument('req', 'ZKP Request address')
+  .requiredOption('--vc <VC_ADDR>', 'VC address')
+  .option('--force', 'Override existing prove')
+  .action(actions.prove.createForRequest)
 
 cli.command('verify')
   .description('Verify proof')

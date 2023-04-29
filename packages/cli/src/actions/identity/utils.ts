@@ -1,35 +1,10 @@
-import type { Keypair } from '@solana/web3.js'
-import { PublicKey } from '@solana/web3.js'
+import type { Keypair, PublicKey } from '@solana/web3.js'
 import type { SMT } from 'circomlibjs'
 import { buildPoseidon, newMemEmptyTrie } from 'circomlibjs'
 import { crypto } from '@albus/core'
-import { useContext } from '../context'
 
 const { hash, edBabyJubJub } = crypto
 const { arrayToBigInt } = crypto.utils
-
-interface Opts {}
-
-/**
- * Generate new Identity NFT
- */
-export async function create(_opts: Opts) {
-  const { keypair } = useContext()
-
-  const identity = new Identity()
-  identity.accounts = [
-    {
-      pubkey: new PublicKey('tiAmFd9rd4J3NE38VfP6QLihHpQa27diYvRXMWx1GdE'),
-      meta: { name: 'Tiamo' },
-    },
-  ]
-
-  const res = await identity.addAccount(keypair, { name: 'Test' })
-
-  console.log(JSON.stringify(res))
-
-  process.exit(0)
-}
 
 export class Identity {
   did: string | undefined

@@ -96,5 +96,5 @@ declare module 'snarkjs' {
     verifyFromR1cs: any;
   };
 
-  export { SnarkjsProof, VK, groth16, plonk, powersOfTau, r1cs, wtns, zKey };
+  export { SnarkjsProof, PublicSignals, VK, groth16, plonk, powersOfTau, r1cs, wtns, zKey };
 }

@@ -1,10 +1,7 @@
-import os from 'node:os'
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import type { SnarkjsProof } from 'snarkjs'
 import * as snarkjs from 'snarkjs'
 import { useContext } from '../context'
-import { downloadFile } from '../utils'
 
 interface VerifyProofOpts {
   // Circuit NFT address
@@ -24,8 +21,8 @@ export async function verifyProof(opts: VerifyProofOpts) {
     loadJsonMetadata: true,
   })
 
-  if (!circuitNft.json?.zkey_url) {
-    throw new Error('Invalid circuit, `zkey_url` is undefined')
+  if (!circuitNft.json?.vk) {
+    throw new Error('Invalid circuit, `vk` is undefined')
   }
 
   // Find proof NFT
@@ -38,23 +35,25 @@ export async function verifyProof(opts: VerifyProofOpts) {
     throw new Error('Invalid proof, metadata does not contain proof data')
   }
 
-  log.debug('Downloading zkey file...')
-  const zkeyFile = `${os.tmpdir()}/circuit.zkey`
-  await downloadFile(String(circuitNft.json.zkey_url), zkeyFile)
+  // log.debug('Downloading zkey file...')
+  // const zkeyFile = `${os.tmpdir()}/circuit.zkey`
+  // await downloadFile(String(circuitNft.json.vk), zkeyFile)
+  // log.debug('Exporting verification key...')
+  // const vk = await snarkjs.zKey.exportVerificationKey(zkeyFile)
 
-  log.debug('Exporting verification key...')
-  const vk = await snarkjs.zKey.exportVerificationKey(zkeyFile)
+  const vk = circuitNft.json?.vk as snarkjs.VK
+  const proof = proofNft.json?.proof as snarkjs.SnarkjsProof
+  const publicSignals = (proofNft.json?.public_input ?? []) as any
+
+  log.debug('VK:', vk)
+  log.debug('Proof:', proof)
+  log.debug('PublicSignals:', publicSignals)
 
   log.debug('Verifying proof...')
 
-  const proof = proofNft.json?.proof as SnarkjsProof
-  log.debug('Proof:', proof)
+  const status = await snarkjs.groth16.verify(vk, publicSignals, proof)
 
-  const publicSignals = (proofNft.json?.public_input ?? []) as any
-  log.debug('PublicSignals:', publicSignals)
-
-  const res = await snarkjs.groth16.verify(vk, publicSignals, proof)
-  console.log(res)
+  log.info('Status:', status)
 
   process.exit(0)
 }

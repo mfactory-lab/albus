@@ -4,6 +4,7 @@ export default {
   nftSymbol: 'ALBUS',
   nftCreators: [],
   logoUrl: 'https://arweave.net/hcbme7qK8G-aos2akxPub-nm7XGNaZ0Tr-sh7syqWxk',
+  issuerDid: 'did:web:albus.finance',
   issuerSecretKey: [
     150, 232, 72, 116, 118, 190, 184, 233, 180, 142, 79,
     28, 230, 201, 241, 99, 143, 64, 133, 92, 114, 38,

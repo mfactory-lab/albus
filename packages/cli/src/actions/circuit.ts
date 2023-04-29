@@ -6,17 +6,21 @@ import * as snarkjs from 'snarkjs'
 import { useContext } from '../context'
 import { downloadFile } from '../utils'
 
+interface Opts {
+  name: string
+}
+
 /**
  * Generate new circuit NFT
  */
-export async function create(opts: any) {
+export async function create(opts: Opts) {
   const circuitName = opts.name
 
   const { metaplex, config } = useContext()
 
   if (!fs.existsSync(`${config.circuitPath}/${circuitName}.r1cs`)
     || !fs.existsSync(`${config.circuitPath}/${circuitName}.wasm`)) {
-    log.error(chalk.red('Unknown circuit'))
+    log.error(chalk.red('Unknown circuit, `r1cs` or `wasm` not exists'))
     return
   }
 
@@ -33,48 +37,58 @@ export async function create(opts: any) {
   }
 
   log.info('Generating keys...')
+
+  const zKeyFile = `${config.circuitPath}/${circuitName}.zkey`
+
   await snarkjs.zKey.newZKey(
     `${config.circuitPath}/${circuitName}.r1cs`,
     `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
-    `${config.circuitPath}/${circuitName}.zkey`,
+    zKeyFile,
   )
 
-  // log.info('Exporting verification Key...')
-  // const vk = await snarkjs.zKey.exportVerificationKey(`${CIRCUITS_PATH}/${circuitName}.zkey`)
+  log.info('Exporting verification Key...')
+  const vk = await snarkjs.zKey.exportVerificationKey(zKeyFile)
   // fs.writeFileSync(`${CIRCUITS_PATH}/vk.json`, JSON.stringify(vk))
   // log.info('Done')
 
   // NFT generation
+
   log.info('Uploading zKey file...')
-  const zkeyUri = await metaplex.storage().upload(
+  const zkeyUrl = await metaplex.storage().upload(
     toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitName}.zkey`), 'circuit.zkey'),
   )
   log.info('Done')
-  log.info(`Uri: ${zkeyUri}`)
-
-  // const verification_key = await metaplex.storage().uploadJson(
-  //   toMetaplexFile(Buffer.from(JSON.stringify(vk)), 'vk.json'),
-  // )
+  log.info(`Uri: ${zkeyUrl}`)
 
   log.info('Uploading wasm file...')
-  const wasmUri = await metaplex.storage().upload(
+  const wasmUrl = await metaplex.storage().upload(
     toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitName}.wasm`), 'circuit.wasm'),
   )
   log.info('Done')
-  log.info(`Uri: ${wasmUri}`)
+  log.info(`Uri: ${wasmUrl}`)
 
-  // NFT generation
+  // Mint new Circuit NFT
+  await mintNft({ name: 'ALBUS Circuit', vk, zkeyUrl, wasmUrl })
 
-  const name = 'Age circuit'
+  process.exit(0)
+}
+
+/**
+ * Mint new Circuit NFT
+ */
+async function mintNft(props: { name: string; vk: snarkjs.VK; zkeyUrl: string; wasmUrl: string }) {
+  const { metaplex, config } = useContext()
 
   log.info('Uploading NFT metadata...')
   const { uri: metadataUri } = await metaplex
     .nfts()
     .uploadMetadata({
-      name,
-      zkey_url: zkeyUri,
-      wasm_url: wasmUri,
+      name: props.name,
+      image: config.logoUrl,
       external_url: config.nftExternalUrl,
+      wasm_url: props.wasmUrl,
+      zkey_url: props.zkeyUrl,
+      vk: props.vk,
     })
   log.info('Done')
   log.info(`Metadata uri: ${metadataUri}`)
@@ -84,9 +98,9 @@ export async function create(opts: any) {
     .nfts()
     .create({
       uri: metadataUri,
-      name,
+      name: props.name,
       sellerFeeBasisPoints: 0,
-      symbol: config.nftSymbol,
+      symbol: `${config.nftSymbol}-C`,
       creators: config.nftCreators,
       isMutable: true,
       maxSupply: toBigNumber(1),
@@ -94,6 +108,4 @@ export async function create(opts: any) {
 
   log.info('Done')
   log.info(`Mint: ${nft.address}`)
-
-  process.exit(0)
 }
