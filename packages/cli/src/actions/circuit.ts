@@ -7,24 +7,25 @@ import { useContext } from '../context'
 import { downloadFile } from '../utils'
 
 interface Opts {
-  name: string
+  // Circuit identifier
+  id: string
 }
 
 /**
  * Generate new circuit NFT
  */
 export async function create(opts: Opts) {
-  const circuitName = opts.name
+  const circuitId = opts.id
 
   const { metaplex, config } = useContext()
 
-  if (!fs.existsSync(`${config.circuitPath}/${circuitName}.r1cs`)
-    || !fs.existsSync(`${config.circuitPath}/${circuitName}.wasm`)) {
+  if (!fs.existsSync(`${config.circuitPath}/${circuitId}.r1cs`)
+    || !fs.existsSync(`${config.circuitPath}/${circuitId}.wasm`)) {
     log.error(chalk.red('Unknown circuit, `r1cs` or `wasm` not exists'))
     return
   }
 
-  const r1csInfo = await snarkjs.r1cs.info(`${config.circuitPath}/${circuitName}.r1cs`)
+  const r1csInfo = await snarkjs.r1cs.info(`${config.circuitPath}/${circuitId}.r1cs`)
   const power = Math.ceil(Math.log2(r1csInfo.nVars)).toString().padStart(2, '0')
 
   // Download PowersOfTau from Hermez
@@ -38,10 +39,10 @@ export async function create(opts: Opts) {
 
   log.info('Generating keys...')
 
-  const zKeyFile = `${config.circuitPath}/${circuitName}.zkey`
+  const zKeyFile = `${config.circuitPath}/${circuitId}.zkey`
 
   await snarkjs.zKey.newZKey(
-    `${config.circuitPath}/${circuitName}.r1cs`,
+    `${config.circuitPath}/${circuitId}.r1cs`,
     `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
     zKeyFile,
   )
@@ -55,20 +56,20 @@ export async function create(opts: Opts) {
 
   log.info('Uploading zKey file...')
   const zkeyUrl = await metaplex.storage().upload(
-    toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitName}.zkey`), 'circuit.zkey'),
+    toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitId}.zkey`), 'circuit.zkey'),
   )
   log.info('Done')
   log.info(`Uri: ${zkeyUrl}`)
 
   log.info('Uploading wasm file...')
   const wasmUrl = await metaplex.storage().upload(
-    toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitName}.wasm`), 'circuit.wasm'),
+    toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitId}.wasm`), 'circuit.wasm'),
   )
   log.info('Done')
   log.info(`Uri: ${wasmUrl}`)
 
   // Mint new Circuit NFT
-  await mintNft({ name: 'ALBUS Circuit', vk, zkeyUrl, wasmUrl })
+  await mintNft({ name: 'ALBUS Circuit', id: circuitId, vk, zkeyUrl, wasmUrl })
 
   process.exit(0)
 }
@@ -76,7 +77,7 @@ export async function create(opts: Opts) {
 /**
  * Mint new Circuit NFT
  */
-async function mintNft(props: { name: string; vk: snarkjs.VK; zkeyUrl: string; wasmUrl: string }) {
+async function mintNft(props: { id: string; name: string; vk: snarkjs.VK; zkeyUrl: string; wasmUrl: string }) {
   const { metaplex, config } = useContext()
 
   log.info('Uploading NFT metadata...')
@@ -86,9 +87,13 @@ async function mintNft(props: { name: string; vk: snarkjs.VK; zkeyUrl: string; w
       name: props.name,
       image: config.logoUrl,
       external_url: config.nftExternalUrl,
+      circuit_id: props.id,
       wasm_url: props.wasmUrl,
       zkey_url: props.zkeyUrl,
       vk: props.vk,
+      attributes: [
+        { trait_type: 'id', value: props.id },
+      ],
     })
   log.info('Done')
   log.info(`Metadata uri: ${metadataUri}`)
