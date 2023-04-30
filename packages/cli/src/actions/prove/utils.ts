@@ -24,6 +24,10 @@ export async function loadCircuit(addr: PublicKeyInitData) {
     throw new Error('Invalid circuit! Bad symbol')
   }
 
+  if (!nft.json?.circuit_id) {
+    throw new Error('Invalid circuit! `circuit_id` is undefined')
+  }
+
   if (!nft.json?.zkey_url) {
     throw new Error('Invalid circuit! `zkey_url` is undefined')
   }
@@ -34,8 +38,9 @@ export async function loadCircuit(addr: PublicKeyInitData) {
 
   return {
     address: nft.address,
-    wasmUrl: String(nft.json?.wasm_url),
-    zkeyUrl: String(nft.json?.zkey_url),
+    id: String(nft.json.circuit_id),
+    wasmUrl: String(nft.json.wasm_url),
+    zkeyUrl: String(nft.json.zkey_url),
   }
 }
 
@@ -103,31 +108,34 @@ export async function mintProofNFT(circuit: PublicKey, proof: SnarkjsProof, publ
   return nft
 }
 
+interface GenerateProofProps {
+  wasmUrl: string
+  zkeyUrl: string
+  input?: { [key: string]: any }
+  inputFile?: string
+}
+
 /**
  * Create new Proof
  */
-export async function generateProof(circuitAddr: PublicKeyInitData, input?: string | Object) {
-  const circuit = await loadCircuit(circuitAddr)
-
+export async function generateProof(props: GenerateProofProps) {
   log.debug('Downloading wasm file...')
   const wasmFile = `${os.tmpdir()}/circuit.wasm`
-  await downloadFile(circuit.wasmUrl, wasmFile)
+  await downloadFile(props.wasmUrl, wasmFile)
 
   log.debug('Downloading zkey file...')
   const zkeyFile = `${os.tmpdir()}/circuit.zkey`
-  await downloadFile(circuit.zkeyUrl, zkeyFile)
+  await downloadFile(props.zkeyUrl, zkeyFile)
 
-  let inputSignals = {}
-  if (input) {
-    if (typeof input === 'string') {
-      inputSignals = JSON.parse(fs.readFileSync(input).toString())
-    } else {
-      inputSignals = input
-    }
+  let input = {}
+  if (props.inputFile) {
+    input = JSON.parse(fs.readFileSync(props.inputFile).toString())
+  } else if (props.input) {
+    input = props.input
   }
 
   const { proof, publicSignals }
-    = await snarkjs.groth16.fullProve(inputSignals, wasmFile, zkeyFile)
+    = await snarkjs.groth16.fullProve(input, wasmFile, zkeyFile)
 
   fs.unlinkSync(wasmFile)
   fs.unlinkSync(zkeyFile)
