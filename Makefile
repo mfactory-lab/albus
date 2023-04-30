@@ -12,7 +12,7 @@ args := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 
 .PHONY: circom
 circom: ## circom
-	circom ./circuits/$(args).circom --json -l node_modules --r1cs --wasm -o ./tmp
+	circom ./circuits/$(args).circom -l node_modules --r1cs --wasm --sym -o ./tmp
 %::
 	@true
 
