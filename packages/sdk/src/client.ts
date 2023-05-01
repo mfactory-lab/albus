@@ -1,21 +1,25 @@
 import { Buffer } from 'node:buffer'
+import { Metaplex } from '@metaplex-foundation/js'
 import type { Address, AnchorProvider } from '@project-serum/anchor'
 import { BorshCoder, EventManager } from '@project-serum/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
-import { Metaplex } from '@metaplex-foundation/js'
 import snarkjs from 'snarkjs'
 import idl from '../idl/albus.json'
 import {
   PROGRAM_ID,
   ServiceProvider,
   ZKPRequest,
+  ZKPRequestStatus,
   createAddServiceProviderInstruction,
   createCreateZkpRequestInstruction,
   createDeleteServiceProviderInstruction,
   createDeleteZkpRequestInstruction,
   createProveInstruction,
-  createVerifyInstruction, errorFromCode, serviceProviderDiscriminator, zKPRequestDiscriminator,
+  createVerifyInstruction,
+  errorFromCode,
+  serviceProviderDiscriminator,
+  zKPRequestDiscriminator,
 } from './generated'
 import { getMetadataPDA } from './utils'
 
@@ -232,6 +236,41 @@ export class AlbusClient {
     const instruction = createVerifyInstruction(
       {
         zkpRequest: props.zkpRequest,
+        authority: this.provider.publicKey,
+      },
+      {
+        data: {
+          status: ZKPRequestStatus.Verified,
+        },
+      },
+    )
+
+    let signature: string
+
+    const tx = new Transaction().add(instruction)
+
+    try {
+      signature = await this.provider.sendAndConfirm(tx, [], opts)
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+
+    return { signature }
+  }
+
+  /**
+   * Verify existing {@link ZKPRequest}
+   */
+  async deny(props: VerifyProps, opts?: ConfirmOptions) {
+    const instruction = createVerifyInstruction(
+      {
+        zkpRequest: props.zkpRequest,
+        authority: this.provider.publicKey,
+      },
+      {
+        data: {
+          status: ZKPRequestStatus.Denied,
+        },
       },
     )
 
