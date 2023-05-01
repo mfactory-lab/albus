@@ -8,6 +8,10 @@
 import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
+import {
+  ZKPRequestStatus,
+  zKPRequestStatusBeet,
+} from '../types/ZKPRequestStatus'
 
 /**
  * Arguments used to create {@link ZKPRequest}
@@ -22,6 +26,8 @@ export interface ZKPRequestArgs {
   createdAt: beet.bignum
   expiredAt: beet.bignum
   verifiedAt: beet.bignum
+  provedAt: beet.bignum
+  status: ZKPRequestStatus
   bump: number
 }
 
@@ -42,6 +48,8 @@ export class ZKPRequest implements ZKPRequestArgs {
     readonly createdAt: beet.bignum,
     readonly expiredAt: beet.bignum,
     readonly verifiedAt: beet.bignum,
+    readonly provedAt: beet.bignum,
+    readonly status: ZKPRequestStatus,
     readonly bump: number,
   ) {}
 
@@ -57,6 +65,8 @@ export class ZKPRequest implements ZKPRequestArgs {
       args.createdAt,
       args.expiredAt,
       args.verifiedAt,
+      args.provedAt,
+      args.status,
       args.bump,
     )
   }
@@ -203,6 +213,18 @@ export class ZKPRequest implements ZKPRequestArgs {
         }
         return x
       })(),
+      provedAt: (() => {
+        const x = <{ toNumber: () => number }> this.provedAt
+        if (typeof x.toNumber === 'function') {
+          try {
+            return x.toNumber()
+          } catch (_) {
+            return x
+          }
+        }
+        return x
+      })(),
+      status: `ZKPRequestStatus.${ZKPRequestStatus[this.status]}`,
       bump: this.bump,
     }
   }
@@ -227,6 +249,8 @@ export const zKPRequestBeet = new beet.FixableBeetStruct<
     ['createdAt', beet.i64],
     ['expiredAt', beet.i64],
     ['verifiedAt', beet.i64],
+    ['provedAt', beet.i64],
+    ['status', zKPRequestStatusBeet],
     ['bump', beet.u8],
   ],
   ZKPRequest.fromArgs,

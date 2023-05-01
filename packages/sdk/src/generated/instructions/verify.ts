@@ -7,28 +7,45 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
+import type { VerifyData } from '../types/VerifyData'
+import { verifyDataBeet } from '../types/VerifyData'
 
 /**
  * @category Instructions
  * @category Verify
  * @category generated
  */
-export const verifyStruct = new beet.BeetArgsStruct<{
-  instructionDiscriminator: number[] /* size: 8 */
-}>(
-  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
+export interface VerifyInstructionArgs {
+  data: VerifyData
+}
+/**
+ * @category Instructions
+ * @category Verify
+ * @category generated
+ */
+export const verifyStruct = new beet.BeetArgsStruct<
+  VerifyInstructionArgs & {
+    instructionDiscriminator: number[] /* size: 8 */
+  }
+>(
+  [
+    ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
+    ['data', verifyDataBeet],
+  ],
   'VerifyInstructionArgs',
 )
 /**
  * Accounts required by the _verify_ instruction
  *
- * @property [] zkpRequest
+ * @property [_writable_] zkpRequest
+ * @property [_writable_, **signer**] authority
  * @category Instructions
  * @category Verify
  * @category generated
  */
 export interface VerifyInstructionAccounts {
   zkpRequest: web3.PublicKey
+  authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -41,22 +58,31 @@ export const verifyInstructionDiscriminator = [
  * Creates a _Verify_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
+ * @param args to provide as instruction data to the program
+ *
  * @category Instructions
  * @category Verify
  * @category generated
  */
 export function createVerifyInstruction(
   accounts: VerifyInstructionAccounts,
+  args: VerifyInstructionArgs,
   programId = new web3.PublicKey('5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5'),
 ) {
   const [data] = verifyStruct.serialize({
     instructionDiscriminator: verifyInstructionDiscriminator,
+    ...args,
   })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: accounts.zkpRequest,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
+    },
+    {
+      pubkey: accounts.authority,
+      isWritable: true,
+      isSigner: true,
     },
     {
       pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,

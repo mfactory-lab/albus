@@ -3,7 +3,7 @@ use anchor_spl::token::Mint;
 
 use crate::{
     events::CreateZKPRequestEvent,
-    state::{ServiceProvider, ZKPRequest},
+    state::{ServiceProvider, ZKPRequest, ZKPRequestStatus},
     utils::assert_valid_circuit,
 };
 
@@ -18,6 +18,7 @@ pub fn handler(ctx: Context<CreateZKPRequest>, data: CreateZKPRequestData) -> Re
     req.proof = None;
     req.circuit = circuit_metadata.mint;
     req.created_at = timestamp;
+    req.status = ZKPRequestStatus::Pending;
     if data.expires_in > 0 {
         req.expired_at = timestamp.saturating_add(data.expires_in as i64);
     }

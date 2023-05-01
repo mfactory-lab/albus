@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::{events::ProveEvent, state::ZKPRequest, utils::assert_valid_proof, AlbusError};
+use crate::{events::ProveEvent, state::{ZKPRequest, ZKPRequestStatus}, utils::assert_valid_proof, AlbusError};
 
 pub fn handler(ctx: Context<Prove>) -> Result<()> {
     // Check that proof is a valid Albus NFT
@@ -16,8 +16,10 @@ pub fn handler(ctx: Context<Prove>) -> Result<()> {
         return Err(AlbusError::Expired.into());
     }
 
+    req.status = ZKPRequestStatus::Proved;
     req.proof = Some(proof_metadata.mint);
-    req.verified_at = timestamp;
+    req.proved_at = timestamp;
+    req.verified_at = 0;
 
     emit!(ProveEvent {
         zkp_request: req.key(),
