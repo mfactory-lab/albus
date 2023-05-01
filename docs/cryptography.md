@@ -6,8 +6,11 @@ Threshold cryptography
 - Verifiable secret sharing (VSS) [https://en.wikipedia.org/wiki/Verifiable_secret_sharing]
 
 FHE (Fully Homomorphic Encryption)
+Searchable Encryption (Albus Score Calculation)
 
 ---
 
 Poseidon (Hash/Encrypt)
 Mimc
+
+---
