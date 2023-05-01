@@ -6,6 +6,7 @@ export default {
   logoUrl: 'https://arweave.net/hcbme7qK8G-aos2akxPub-nm7XGNaZ0Tr-sh7syqWxk',
   issuerDid: 'did:web:albus.finance',
   issuerSecretKey: [
+    // Pubkey: 5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH
     150, 232, 72, 116, 118, 190, 184, 233, 180, 142, 79,
     28, 230, 201, 241, 99, 143, 64, 133, 92, 114, 38,
     178, 85, 162, 156, 222, 236, 53, 103, 158, 16, 72,

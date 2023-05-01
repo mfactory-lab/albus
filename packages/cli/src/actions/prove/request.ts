@@ -33,7 +33,6 @@ export async function createForRequest(addr: string, opts: Opts) {
   const cred = await loadCredential(opts.vc)
 
   const resolver = new Resolver({
-    // Prepare the did:web resolver
     ...WebDidResolver.getResolver(),
     ...KeyDidResolver.getResolver(),
   } as ResolverRegistry)
@@ -55,7 +54,7 @@ export async function createForRequest(addr: string, opts: Opts) {
   const { proof, publicSignals } = await generateProof({
     wasmUrl: circuit.wasmUrl,
     zkeyUrl: circuit.zkeyUrl,
-    input: prepareInput(circuit.id, vcInfo),
+    input: prepareCircuitInput(circuit.id, vcInfo),
   })
 
   log.debug('Done')
@@ -76,7 +75,7 @@ export async function createForRequest(addr: string, opts: Opts) {
  * Generate input signals for selected circuit
  * TODO: refactory
  */
-function prepareInput(circuitId: string, payload: Record<string, any>): Record<string, any> {
+function prepareCircuitInput(circuitId: string, payload: Record<string, any>): Record<string, any> {
   switch (circuitId) {
     case 'age': {
       const birthDate = String(payload.birthDate).split('-')

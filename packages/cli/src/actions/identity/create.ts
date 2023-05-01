@@ -1,4 +1,5 @@
 import { toBigNumber } from '@metaplex-foundation/js'
+import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '../../context'
 
@@ -33,6 +34,8 @@ export async function create(_opts: Opts) {
   log.info('Done')
   log.info(`Metadata uri: ${metadataUri}`)
 
+  const updateAuthority = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
+
   log.info('Minting new NFT...')
   const { nft } = await metaplex
     .nfts()
@@ -43,10 +46,12 @@ export async function create(_opts: Opts) {
       symbol: `${config.nftSymbol}-ID`,
       creators: config.nftCreators,
       isMutable: true,
+      updateAuthority,
       maxSupply: toBigNumber(1),
     })
 
-  // TODO: implement
+  log.info('Done')
+  log.info(`Mint: ${nft.address}`)
 
   process.exit(0)
 }

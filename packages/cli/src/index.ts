@@ -24,11 +24,6 @@ cli
     log.info(`# Cluster: ${cluster}`)
   })
 
-// Test
-
-const test = cli.command('test')
-test.command('e').action(actions.test.encryption)
-
 // Identity
 
 const id = cli.command('identity')
@@ -54,7 +49,7 @@ vc.command('issue')
 vc.command('test')
   .action(actions.vc.test)
 
-// ZKP
+// Circuit
 
 const circuit = cli.command('circuit')
 
@@ -62,6 +57,8 @@ circuit.command('create')
   .description('Create new circuit NFT')
   .requiredOption('--name <NAME>', 'Circuit name')
   .action(actions.circuit.create)
+
+// Proving
 
 const prove = cli.command('prove')
 
@@ -78,11 +75,20 @@ prove.command('request')
   .option('--force', 'Override existing prove')
   .action(actions.prove.createForRequest)
 
-cli.command('verify')
+// Verification
+
+const verify = cli.command('verify')
+
+verify.command('proof')
   .description('Verify proof')
   .requiredOption('--circuit <CIRCUIT_MINT>', 'Circuit mint address')
   .requiredOption('--proof <PROOF_MINT>', 'Proof mint address')
   .action(actions.verify.verifyProof)
+
+verify.command('request')
+  .description('Verify ZKP Request')
+  .argument('req', 'ZKP Request address')
+  .action(actions.verify.verifyRequest)
 
 cli.parseAsync(process.argv).then(
   () => {},

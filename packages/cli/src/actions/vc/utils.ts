@@ -175,6 +175,8 @@ export async function mintVerifiableCredentialNFT(vc: string) {
   log.info('Done')
   log.info(`Metadata uri: ${metadataUri}`)
 
+  const updateAuthority = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
+
   log.info('Minting new NFT...')
   const { nft } = await metaplex
     .nfts()
@@ -185,6 +187,7 @@ export async function mintVerifiableCredentialNFT(vc: string) {
       symbol: `${config.nftSymbol}-VC`,
       creators: config.nftCreators,
       isMutable: true,
+      updateAuthority,
       maxSupply: toBigNumber(1),
     })
 

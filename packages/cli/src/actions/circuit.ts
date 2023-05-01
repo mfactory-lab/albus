@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { Keypair } from '@solana/web3.js'
 import { toBigNumber, toMetaplexFile } from '@metaplex-foundation/js'
 import chalk from 'chalk'
 import log from 'loglevel'
@@ -80,6 +81,8 @@ export async function create(opts: Opts) {
 async function mintNft(props: { id: string; name: string; vk: snarkjs.VK; zkeyUrl: string; wasmUrl: string }) {
   const { metaplex, config } = useContext()
 
+  const updateAuthority = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
+
   log.info('Uploading NFT metadata...')
   const { uri: metadataUri } = await metaplex
     .nfts()
@@ -108,6 +111,7 @@ async function mintNft(props: { id: string; name: string; vk: snarkjs.VK; zkeyUr
       symbol: `${config.nftSymbol}-C`,
       creators: config.nftCreators,
       isMutable: true,
+      updateAuthority,
       maxSupply: toBigNumber(1),
     })
 

@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import { toBigNumber } from '@metaplex-foundation/js'
 import type { PublicKeyInitData } from '@solana/web3.js'
-import { PublicKey } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
 import type { PublicSignals, SnarkjsProof } from 'snarkjs'
@@ -10,7 +10,7 @@ import { useContext } from '../../context'
 import { downloadFile } from '../../utils'
 
 /**
- * Load and validate Circuit
+ * Load and validate Circuit NFT
  */
 export async function loadCircuit(addr: PublicKeyInitData) {
   const { metaplex, config } = useContext()
@@ -25,27 +25,32 @@ export async function loadCircuit(addr: PublicKeyInitData) {
   }
 
   if (!nft.json?.circuit_id) {
-    throw new Error('Invalid circuit! `circuit_id` is undefined')
+    throw new Error('Invalid circuit! Metadata does not contain `circuit_id`')
   }
 
   if (!nft.json?.zkey_url) {
-    throw new Error('Invalid circuit! `zkey_url` is undefined')
+    throw new Error('Invalid circuit! Metadata does not contain `zkey_url`')
   }
 
   if (!nft.json?.wasm_url) {
-    throw new Error('Invalid circuit! `wasm_url` is undefined')
+    throw new Error('Invalid circuit! Metadata does not contain `wasm_url`')
+  }
+
+  if (!nft.json?.vk) {
+    throw new Error('Invalid circuit! Metadata does not contain verification key.')
   }
 
   return {
     address: nft.address,
     id: String(nft.json.circuit_id),
+    vk: nft.json.vk as snarkjs.VK,
     wasmUrl: String(nft.json.wasm_url),
     zkeyUrl: String(nft.json.zkey_url),
   }
 }
 
 /**
- * Load and validate VC
+ * Load and validate VC NFT
  */
 export async function loadCredential(addr: PublicKeyInitData) {
   const { metaplex, config } = useContext()
@@ -66,6 +71,33 @@ export async function loadCredential(addr: PublicKeyInitData) {
   return {
     address: nft.address,
     payload: nft.json.vc as string,
+  }
+}
+
+/**
+ * Load and validate Proof NFT
+ */
+export async function loadProof(addr: PublicKeyInitData) {
+  const { metaplex, config } = useContext()
+
+  const nft = await metaplex.nfts().findByMint({
+    mintAddress: new PublicKey(addr),
+    loadJsonMetadata: true,
+  })
+
+  if (nft.symbol !== `${config.nftSymbol}-P`) {
+    throw new Error('Invalid proof! Bad symbol')
+  }
+
+  if (!nft.json?.proof) {
+    throw new Error('Invalid proof! Metadata does not contain proof info.')
+  }
+
+  return {
+    address: nft.address,
+    circuit: nft.json.circuit,
+    proofData: nft.json.proof as snarkjs.SnarkjsProof,
+    publicInput: (nft.json.public_input ?? []) as snarkjs.PublicSignals,
   }
 }
 
@@ -92,6 +124,8 @@ export async function mintProofNFT(circuit: PublicKey, proof: SnarkjsProof, publ
   log.info('Done')
   log.info(`Metadata uri: ${metadataUri}`)
 
+  const updateAuthority = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
+
   log.info('Minting new NFT...')
   const { nft } = await metaplex
     .nfts()
@@ -102,6 +136,7 @@ export async function mintProofNFT(circuit: PublicKey, proof: SnarkjsProof, publ
       symbol: `${config.nftSymbol}-P`,
       creators: config.nftCreators,
       isMutable: true,
+      updateAuthority,
       maxSupply: toBigNumber(1),
     })
 
