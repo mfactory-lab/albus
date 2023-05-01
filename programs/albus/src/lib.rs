@@ -56,8 +56,6 @@ pub enum AlbusError {
     Unproved,
     #[msg("Expired")]
     Expired,
-    #[msg("Denied")]
-    Denied,
     #[msg("Wrong data")]
     WrongData,
     #[msg("Incorrect owner")]

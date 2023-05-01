@@ -15,9 +15,6 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
         return Err(AlbusError::Unauthorized.into());
     }
 
-    if req.status == ZKPRequestStatus::Denied {
-        return Err(AlbusError::Denied.into());
-    }
     if req.status != ZKPRequestStatus::Proved {
         return Err(AlbusError::Unproved.into());
     }
