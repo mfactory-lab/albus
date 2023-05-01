@@ -66,10 +66,11 @@ export class AlbusClient {
   }
 
   /**
-   * Check that the selected {@link props.user} is compliant
-   * for {@link props.circuit} and service provider.
-   * If {@link props.full} is true, then the full verification
-   * process will be performed
+   * Verify that the selected user, specified by {@link props.user},
+   * is compliant with respect to the {@link props.circuit}
+   * and the service provider.
+   * If the {@link props.full} property is set to true,
+   * the full verification process will be performed.
    *
    * @param {CheckCompliance} props
    */
@@ -94,10 +95,18 @@ export class AlbusClient {
   }
 
   /**
-   * Confirm that the {@link ZKPRequest} has not expired,
-   * it is proven and verified
+   * Validates a Zero Knowledge Proof (ZKP) request.
    *
-   * @param {ZKPRequest} req
+   * A ZKP request must satisfy the following criteria:
+   *
+   * - The `expiredAt` property must be greater than the current time, or zero to indicate no expiration.
+   * - The `proof` property must be truthy, i.e., not `null`, `undefined`, `false`, `0`, or an empty string.
+   * - The `verifiedAt` property must be greater than zero to indicate that the request has been verified.
+   *
+   * If any of these conditions are not met, an error is thrown with a descriptive message.
+   *
+   * @param {ZKPRequest} req The ZKP request object to validate.
+   * @throws An error with a message indicating why the request is invalid.
    */
   validateZKPRequest(req: ZKPRequest) {
     if (req.expiredAt > 0 && req.expiredAt < Date.now()) {
@@ -140,10 +149,23 @@ export class AlbusClient {
   }
 
   /**
-   * Internal {@link ZKPRequest} verification
+   * Verifies a Zero Knowledge Proof (ZKP) request internally using Metaplex and snarkjs libraries.
    *
-   * @param {ZKPRequest} req
-   * @returns {Promise<boolean>}
+   * The verification process involves the following steps:
+   *
+   * 1. Checking that the `proof` property of the request object is truthy.
+   * 2. Loading the circuit NFT metadata using the Metaplex API, based on the `circuit` property of the request.
+   * 3. Checking that the circuit metadata contains a verification key (`vk` property).
+   * 4. Loading the proof NFT metadata using the Metaplex API, based on the `proof` property of the request.
+   * 5. Checking that the proof metadata contains a proof data (`proof` property).
+   * 6. Extracting the verification key, proof, and public signals from the proof metadata.
+   * 7. Using the snarkjs library to perform a Groth16 verification of the proof using the verification key and public signals.
+   *
+   * If any of these steps fails, an error is thrown with a descriptive message.
+   *
+   * @param {ZKPRequest} req The ZKP request object to verify.
+   * @returns A promise that resolves to a boolean indicating whether the proof is valid.
+   * @throws An error with a message indicating why the proof is invalid.
    */
   async verifyZKPRequestInternal(req: ZKPRequest) {
     if (!req.proof) {
