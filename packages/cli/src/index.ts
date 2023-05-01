@@ -24,45 +24,71 @@ cli
     log.info(`# Cluster: ${cluster}`)
   })
 
-// Test
-
-const test = cli.command('test')
-test.command('e').action(actions.test.encryption)
-
 // Identity
 
 const id = cli.command('identity')
 
-id.command('create')
-  .description('Create new use identity')
+id.command('new')
+  .description('Create new identity')
   .action(actions.identity.create)
 
-// Issuer
+// Verifiable Credentials
 
-const kyc = cli.command('issuer')
+const vc = cli.command('vc')
 
-kyc.command('generate')
-  .description('Issue new Verifiable Credential')
-  .action(actions.issuance.issueVerifiableCredential)
+vc.command('all')
+  .description('Show all VCs')
+  .action(actions.vc.showAll)
 
-// ZKP
+vc.command('issue')
+  .description('Issue new VC')
+  .option('--provider <CODE>', 'KYC provider unique code')
+  .option('-e,--encrypt', 'Encrypt VC with holder public key')
+  .action(actions.vc.issue)
 
-cli.command('create')
+vc.command('test')
+  .action(actions.vc.test)
+
+// Circuit
+
+const circuit = cli.command('circuit')
+
+circuit.command('create')
   .description('Create new circuit NFT')
   .requiredOption('--name <NAME>', 'Circuit name')
-  .action(actions.circuit.createCircuit)
+  .action(actions.circuit.create)
 
-cli.command('prove')
-  .description('Generate new proof')
+// Proving
+
+const prove = cli.command('prove')
+
+prove.command('create')
+  .description('Create new proof')
   .requiredOption('--circuit <CIRCUIT_MINT>', 'Circuit mint address')
   .option('--input <PATH>', 'Input file path')
-  .action(actions.prove.generateProof)
+  .action(actions.prove.create)
 
-cli.command('verify')
+prove.command('request')
+  .description('Create prove for ZKP Request')
+  .argument('req', 'ZKP Request address')
+  .requiredOption('--vc <VC_ADDR>', 'VC address')
+  .option('--force', 'Override existing prove')
+  .action(actions.prove.createForRequest)
+
+// Verification
+
+const verify = cli.command('verify')
+
+verify.command('proof')
   .description('Verify proof')
   .requiredOption('--circuit <CIRCUIT_MINT>', 'Circuit mint address')
   .requiredOption('--proof <PROOF_MINT>', 'Proof mint address')
   .action(actions.verify.verifyProof)
+
+verify.command('request')
+  .description('Verify ZKP Request')
+  .argument('req', 'ZKP Request address')
+  .action(actions.verify.verifyRequest)
 
 cli.parseAsync(process.argv).then(
   () => {},

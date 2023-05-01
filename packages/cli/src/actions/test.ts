@@ -1,4 +1,6 @@
 import { Buffer } from 'node:buffer'
+import fs from 'node:fs'
+import { toMetaplexFile } from '@metaplex-foundation/js'
 import { crypto } from '@albus/core'
 import { useContext } from '../context'
 
@@ -7,7 +9,14 @@ interface Opts {}
 const { arrayToBigInt, bigIntToArray, toUTF8String } = crypto.utils
 
 export async function encryption(_opts: Opts) {
-  const { keypair } = useContext()
+  const { metaplex, keypair } = useContext()
+
+  const logoUri = await metaplex.storage().upload(
+    toMetaplexFile(fs.readFileSync('./assets/logo.svg'), 'logo.svg'),
+  )
+
+  console.log(logoUri)
+  return
 
   // const sharedSecret = await nobleED25519.getSharedSecret(keypair.secretKey.slice(32), ekp.publicKey.toBytes())
   // const sharedSecret = sharedKey(convertSecretKey(keypair.secretKey), convertPublicKey(ekp.publicKey.toBytes()))

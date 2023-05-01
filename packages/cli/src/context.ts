@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
+import { AlbusClient } from '@albus/sdk'
 import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet, web3 } from '@project-serum/anchor'
 import type { Cluster } from '@solana/web3.js'
@@ -12,6 +13,7 @@ export interface Context {
   provider: AnchorProvider
   keypair: Keypair
   metaplex: Metaplex
+  client: AlbusClient
   config: typeof config
 }
 
@@ -42,6 +44,8 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
       providerUrl: context.provider.connection.rpcEndpoint,
       timeout: 60000,
     }))
+
+  context.client = new AlbusClient(context.provider)
 
   return context
 }

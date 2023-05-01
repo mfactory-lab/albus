@@ -20,7 +20,7 @@ export const XC20P_IV_LENGTH = NONCE_LENGTH
 export const XC20P_TAG_LENGTH = TAG_LENGTH
 export const XC20P_EPK_LENGTH = 32
 
-// a 64-byte private key on the X25519 curve.
+// a 64-byte private key on the Ed25519 curve.
 // In string form it is base58-encoded
 export type PrivateKey = number[] | string | Buffer | Uint8Array
 
@@ -85,7 +85,7 @@ function xc20pDecrypter(key: Uint8Array): Decrypter {
 /**
  * Encrypt a message with a PublicKey
  */
-export async function encryptMessage(message: string, pubKey: PublicKey): Promise<string> {
+export async function encrypt(message: string, pubKey: PublicKey): Promise<string> {
   const epk = generateKeyPair()
   const sharedSecret = sharedKey(epk.secretKey, convertPublicKey(pubKey.toBytes()))
   const kek = concatKDF(
@@ -108,7 +108,7 @@ export async function encryptMessage(message: string, pubKey: PublicKey): Promis
 /**
  * Decrypt an encrypted message for the with the key that was used to encrypt it
  */
-export async function decryptMessage(encryptedMessage: string, privateKey: PrivateKey): Promise<string> {
+export async function decrypt(encryptedMessage: string, privateKey: PrivateKey): Promise<string> {
   const encMessage = base64ToBytes(encryptedMessage)
   const iv = encMessage.subarray(0, XC20P_IV_LENGTH)
   const tag = encMessage.subarray(XC20P_IV_LENGTH, XC20P_IV_LENGTH + XC20P_TAG_LENGTH)

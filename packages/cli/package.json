@@ -2,6 +2,8 @@
   "name": "@albus/cli",
   "version": "0.0.1",
   "private": true,
+  "main": "src/index.ts",
+  "sideEffects": false,
   "scripts": {
     "cli": "ts-node ./src/index.ts"
   },
@@ -28,6 +30,7 @@
     "ed2curve-esm": "0.3.0-alpha-1",
     "@noble/ed25519": "^1.7.3",
     "@noble/curves": "^1.0.0",
-    "uint8arrays": "^3.1.1"
+    "key-did-resolver": "^1.4",
+    "web-did-resolver": "^2.0"
   }
 }
