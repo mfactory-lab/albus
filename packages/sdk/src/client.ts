@@ -67,8 +67,8 @@ export class AlbusClient {
 
   /**
    * Check that the selected {@link props.user} is compliant
-   * for {@link props.circuit} and selected service provider
-   * if {@link props.full} is true, then the full verification
+   * for {@link props.circuit} and service provider.
+   * If {@link props.full} is true, then the full verification
    * process will be performed
    *
    * @param {CheckCompliance} props
