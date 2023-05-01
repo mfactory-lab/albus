@@ -18,6 +18,7 @@ importers:
       '@types/mocha': ^10.0.1
       '@types/node': ^18.16.3
       chai: ^4.3.7
+      crypto: ^1.0.1
       eslint: ^8.39.0
       mocha: ^10.2.0
       ts-mocha: ^10.0.0
@@ -38,6 +39,7 @@ importers:
       '@types/mocha': 10.0.1
       '@types/node': 18.16.3
       chai: 4.3.7
+      crypto: 1.0.1
       eslint: 8.39.0
       mocha: 10.2.0
       ts-mocha: 10.0.0_mocha@10.2.0
@@ -2465,6 +2467,11 @@ packages:
 
   /crypto-js/3.3.0:
     resolution: {integrity: sha512-DIT51nX0dCfKltpRiXV+/TVZq+Qq2NgF4644+K7Ttnla7zEzqc+kjJyiB96BHNyUTBxyjzRcZYpUdZa+QAqi6Q==}
+
+  /crypto/1.0.1:
+    resolution: {integrity: sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==}
+    deprecated: This package is no longer supported. It's now a built-in Node module. If you've depended on crypto, you should switch to the one that's built-in.
+    dev: true
 
   /cssesc/3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
