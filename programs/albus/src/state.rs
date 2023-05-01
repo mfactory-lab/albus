@@ -1,5 +1,4 @@
-use anchor_lang::prelude::*;
-use anchor_lang::AnchorDeserialize;
+use anchor_lang::{prelude::*, AnchorDeserialize};
 
 const MAX_SERVICE_CODE_LEN: usize = 16;
 const MAX_SERVICE_NAME_LEN: usize = 32;

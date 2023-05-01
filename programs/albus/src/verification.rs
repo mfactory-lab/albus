@@ -1,6 +1,9 @@
 use anchor_lang::prelude::*;
 
-use crate::{AlbusError, state::{ZKPRequest, ZKPRequestStatus}};
+use crate::{
+    state::{ZKPRequest, ZKPRequestStatus},
+    AlbusError,
+};
 
 pub fn check(zkp_request: AccountInfo) -> Result<()> {
     let req = ZKPRequest::try_from_slice(zkp_request.data.take())?;
@@ -15,18 +18,18 @@ pub fn check(zkp_request: AccountInfo) -> Result<()> {
         ZKPRequestStatus::Verified => {
             msg!("Verified!");
             Ok(())
-        },
+        }
         ZKPRequestStatus::Proved => {
             msg!("Failure: ZKP request status is 'Proved'");
             Err(AlbusError::Unverified.into())
-        },
+        }
         ZKPRequestStatus::Pending => {
             msg!("Failure: ZKP request status is 'Pending'");
             Err(AlbusError::Unverified.into())
-        },
+        }
         ZKPRequestStatus::Denied => {
             msg!("Failure: ZKP request status is 'Denied'");
             Err(AlbusError::Unverified.into())
-        },
+        }
     }
 }

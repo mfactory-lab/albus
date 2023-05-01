@@ -39,3 +39,14 @@ pub struct VerifyEvent {
     pub owner: Pubkey,
     pub timestamp: i64,
 }
+
+#[event]
+pub struct DenyEvent {
+    #[index]
+    pub zkp_request: Pubkey,
+    #[index]
+    pub service_provider: Pubkey,
+    pub circuit: Pubkey,
+    pub owner: Pubkey,
+    pub timestamp: i64,
+}

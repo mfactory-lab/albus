@@ -1,16 +1,21 @@
+use std::str::FromStr;
+
 use anchor_lang::prelude::*;
 
-use crate::{events::VerifyEvent, state::{ZKPRequest, ZKPRequestStatus}, AlbusError, constants::AUTHORIZED_AUTHORITY};
-
-use std::str::FromStr;
+use crate::{
+    constants::AUTHORIZED_AUTHORITY,
+    events::{DenyEvent, VerifyEvent},
+    state::{ZKPRequest, ZKPRequestStatus},
+    AlbusError,
+};
 
 pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
     let req = &mut ctx.accounts.zkp_request;
 
     if !AUTHORIZED_AUTHORITY.is_empty()
         && !AUTHORIZED_AUTHORITY
-        .iter()
-        .any(|a| Pubkey::from_str(a).unwrap() == ctx.accounts.authority.key())
+            .iter()
+            .any(|a| Pubkey::from_str(a).unwrap() == ctx.accounts.authority.key())
     {
         return Err(AlbusError::Unauthorized.into());
     }
@@ -28,18 +33,28 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
     req.status = data.status;
     req.verified_at = timestamp;
 
-    emit!(VerifyEvent {
-        zkp_request: req.key(),
-        service_provider: req.service_provider,
-        circuit: req.circuit,
-        owner: req.owner,
-        timestamp,
-    });
-
     match req.status {
-        ZKPRequestStatus::Verified => msg!("Verified!"),
-        ZKPRequestStatus::Denied => msg!("Denied!"),
-        _ => return Err(AlbusError::WrongData.into())
+        ZKPRequestStatus::Verified => {
+            emit!(VerifyEvent {
+                zkp_request: req.key(),
+                service_provider: req.service_provider,
+                circuit: req.circuit,
+                owner: req.owner,
+                timestamp,
+            });
+            msg!("Verified!");
+        }
+        ZKPRequestStatus::Denied => {
+            emit!(DenyEvent {
+                zkp_request: req.key(),
+                service_provider: req.service_provider,
+                circuit: req.circuit,
+                owner: req.owner,
+                timestamp,
+            });
+            msg!("Denied!")
+        }
+        _ => return Err(AlbusError::WrongData.into()),
     }
 
     Ok(())
