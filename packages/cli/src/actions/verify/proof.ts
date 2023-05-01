@@ -1,9 +1,9 @@
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
-import { useContext } from '../context'
+import { useContext } from '../../context'
 
-interface VerifyProofOpts {
+interface Opts {
   // Circuit NFT address
   circuit: string
   // Proof NFT address
@@ -13,7 +13,7 @@ interface VerifyProofOpts {
 /**
  * Verify the proof
  */
-export async function verifyProof(opts: VerifyProofOpts) {
+export async function verifyProof(opts: Opts) {
   const { metaplex } = useContext()
 
   const circuitNft = await metaplex.nfts().findByMint({
@@ -22,7 +22,7 @@ export async function verifyProof(opts: VerifyProofOpts) {
   })
 
   if (!circuitNft.json?.vk) {
-    throw new Error('Invalid circuit, `vk` is undefined')
+    throw new Error('Invalid circuit! Metadata does not contain verification key.')
   }
 
   // Find proof NFT
@@ -32,7 +32,7 @@ export async function verifyProof(opts: VerifyProofOpts) {
   })
 
   if (!proofNft.json?.proof) {
-    throw new Error('Invalid proof, metadata does not contain proof data')
+    throw new Error('Invalid proof! Metadata does not contain proof information.')
   }
 
   // log.debug('Downloading zkey file...')
