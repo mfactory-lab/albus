@@ -1,6 +1,11 @@
 use anchor_lang::prelude::*;
 
-use crate::{events::ProveEvent, state::{ZKPRequest, ZKPRequestStatus}, utils::assert_valid_proof, AlbusError};
+use crate::{
+    events::ProveEvent,
+    state::{ZKPRequest, ZKPRequestStatus},
+    utils::assert_valid_proof,
+    AlbusError,
+};
 
 pub fn handler(ctx: Context<Prove>) -> Result<()> {
     // Check that proof is a valid Albus NFT
