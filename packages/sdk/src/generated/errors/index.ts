@@ -92,33 +92,13 @@ createErrorFromCodeLookup.set(0x1773, () => new ExpiredError())
 createErrorFromNameLookup.set('Expired', () => new ExpiredError())
 
 /**
- * Denied: 'Denied'
- *
- * @category Errors
- * @category generated
- */
-export class DeniedError extends Error {
-  readonly code: number = 0x1774
-  readonly name: string = 'Denied'
-  constructor() {
-    super('Denied')
-    if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, DeniedError)
-    }
-  }
-}
-
-createErrorFromCodeLookup.set(0x1774, () => new DeniedError())
-createErrorFromNameLookup.set('Denied', () => new DeniedError())
-
-/**
  * WrongData: 'Wrong data'
  *
  * @category Errors
  * @category generated
  */
 export class WrongDataError extends Error {
-  readonly code: number = 0x1775
+  readonly code: number = 0x1774
   readonly name: string = 'WrongData'
   constructor() {
     super('Wrong data')
@@ -128,7 +108,7 @@ export class WrongDataError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1775, () => new WrongDataError())
+createErrorFromCodeLookup.set(0x1774, () => new WrongDataError())
 createErrorFromNameLookup.set('WrongData', () => new WrongDataError())
 
 /**
@@ -138,7 +118,7 @@ createErrorFromNameLookup.set('WrongData', () => new WrongDataError())
  * @category generated
  */
 export class IncorrectOwnerError extends Error {
-  readonly code: number = 0x1776
+  readonly code: number = 0x1775
   readonly name: string = 'IncorrectOwner'
   constructor() {
     super('Incorrect owner')
@@ -148,7 +128,7 @@ export class IncorrectOwnerError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1776, () => new IncorrectOwnerError())
+createErrorFromCodeLookup.set(0x1775, () => new IncorrectOwnerError())
 createErrorFromNameLookup.set('IncorrectOwner', () => new IncorrectOwnerError())
 
 /**
@@ -158,7 +138,7 @@ createErrorFromNameLookup.set('IncorrectOwner', () => new IncorrectOwnerError())
  * @category generated
  */
 export class InvalidMetadataError extends Error {
-  readonly code: number = 0x1777
+  readonly code: number = 0x1776
   readonly name: string = 'InvalidMetadata'
   constructor() {
     super('Invalid metadata')
@@ -168,7 +148,7 @@ export class InvalidMetadataError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1777, () => new InvalidMetadataError())
+createErrorFromCodeLookup.set(0x1776, () => new InvalidMetadataError())
 createErrorFromNameLookup.set(
   'InvalidMetadata',
   () => new InvalidMetadataError(),

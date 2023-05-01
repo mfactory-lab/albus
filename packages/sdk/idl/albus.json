@@ -503,21 +503,16 @@
     },
     {
       "code": 6004,
-      "name": "Denied",
-      "msg": "Denied"
-    },
-    {
-      "code": 6005,
       "name": "WrongData",
       "msg": "Wrong data"
     },
     {
-      "code": 6006,
+      "code": 6005,
       "name": "IncorrectOwner",
       "msg": "Incorrect owner"
     },
     {
-      "code": 6007,
+      "code": 6006,
       "name": "InvalidMetadata",
       "msg": "Invalid metadata"
     }
