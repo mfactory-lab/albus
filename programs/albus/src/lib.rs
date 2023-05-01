@@ -3,6 +3,7 @@ mod events;
 mod instructions;
 mod state;
 mod utils;
+pub mod verification;
 
 use anchor_lang::prelude::*;
 use instructions::*;
@@ -40,8 +41,8 @@ pub mod albus {
         prove::handler(ctx)
     }
 
-    pub fn verify(ctx: Context<Verify>) -> Result<()> {
-        verify::handler(ctx)
+    pub fn verify(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
+        verify::handler(ctx, data)
     }
 }
 
@@ -51,8 +52,12 @@ pub enum AlbusError {
     Unauthorized,
     #[msg("Unverified")]
     Unverified,
+    #[msg("Unproved")]
+    Unproved,
     #[msg("Expired")]
     Expired,
+    #[msg("Wrong data")]
+    WrongData,
     #[msg("Incorrect owner")]
     IncorrectOwner,
     #[msg("Invalid metadata")]

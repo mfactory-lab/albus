@@ -1,18 +1,22 @@
-import { AlbusClient } from '@albus/sdk'
+import { AlbusClient, ZKPRequestStatus } from '@albus/sdk'
+import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
+import { AnchorProvider, Wallet, web3 } from '@project-serum/anchor'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { assert } from 'chai'
-import { AnchorProvider, Wallet, web3 } from '@project-serum/anchor'
-import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
 
 const payerKeypair = web3.Keypair.fromSecretKey(Uint8Array.from([46, 183, 156, 94, 55, 128, 248, 0, 49, 70, 183, 244, 178, 0, 0, 236, 212, 131, 76, 78, 112, 48, 25, 79, 249, 33, 43, 158, 199, 2, 168, 18, 55, 174, 166, 159, 57, 67, 197, 158, 255, 142, 177, 177, 47, 39, 35, 185, 148, 253, 191, 58, 219, 119, 104, 89, 225, 26, 244, 119, 160, 6, 156, 227]))
 const opts = AnchorProvider.defaultOptions()
 
-const provider = new AnchorProvider(
-  new web3.Connection('http://localhost:8899', opts.preflightCommitment),
-  new Wallet(payerKeypair),
-  AnchorProvider.defaultOptions(),
-)
+function newProvider(payerKeypair: web3.Keypair) {
+  return new AnchorProvider(
+    new web3.Connection('http://localhost:8899', opts.preflightCommitment),
+    new Wallet(payerKeypair),
+    AnchorProvider.defaultOptions(),
+  )
+}
+
+const provider = newProvider(payerKeypair)
 
 async function mintNFT(metaplex: Metaplex) {
   const { nft } = await metaplex.nfts().create({
@@ -50,9 +54,10 @@ describe('albus', () => {
     assert.equal(serviceProviderData.zkpRequestCount, 0)
   })
 
-  it('can not create ZKP request with unauthorized update authority', async () => {
-    const payerKeypair = web3.Keypair.generate()
-    await airdrop(payerKeypair.publicKey)
+  it('can not create ZKP request with unauthorized update authority of circuit NFT metadata', async () => {
+    const newPayerKeypair = web3.Keypair.generate()
+    const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
+    await airdrop(newPayerKeypair.publicKey)
     const nft = await mintNFT(metaplex)
     const mint = nft.address
     try {
@@ -83,7 +88,28 @@ describe('albus', () => {
     assert.equal(ZKPRequestData.circuit.equals(mint), true)
     assert.equal(ZKPRequestData.owner.equals(payerKeypair.publicKey), true)
     assert.equal(ZKPRequestData.proof, null)
+    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Pending)
     assert.equal(serviceProviderData.zkpRequestCount, 1)
+  })
+
+  it('can not prove ZKP request with unauthorized update authority of proof NFT metadata', async () => {
+    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
+    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+
+    const newPayerKeypair = web3.Keypair.generate()
+    const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
+    await airdrop(newPayerKeypair.publicKey)
+    const proofNft = await mintNFT(metaplex)
+
+    try {
+      await client.prove({
+        proofMetadata: proofNft.metadataAddress,
+        zkpRequest: ZKPRequestAddress,
+      })
+      assert.ok(false)
+    } catch (e: any) {
+      assertErrorCode(e, 'Unauthorized')
+    }
   })
 
   it('can prove ZKP request', async () => {
@@ -99,10 +125,52 @@ describe('albus', () => {
     const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
     const serviceProviderData = await client.loadServiceProvider(serviceProviderAddress)
     assert.equal((ZKPRequestData.proof !== undefined), true)
+    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Proved)
     if (ZKPRequestData.proof) {
       assert.equal(ZKPRequestData.proof.equals(nft.address), true)
     }
     assert.equal(serviceProviderData.zkpRequestCount, 1)
+  })
+
+  it('can not verify ZKP request with unauthorized authority', async () => {
+    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
+    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+
+    const newPayerKeypair = web3.Keypair.generate()
+    const provider = newProvider(newPayerKeypair)
+    const newClient = new AlbusClient(provider)
+    await airdrop(newPayerKeypair.publicKey)
+
+    try {
+      await newClient.verify({
+        zkpRequest: ZKPRequestAddress,
+      })
+      assert.ok(false)
+    } catch (e: any) {
+      assertErrorCode(e, 'Unauthorized')
+    }
+  })
+
+  it('can not verify unproved ZKP request', async () => {
+    const nft = await mintNFT(metaplex)
+    const mint = nft.address
+
+    await client.createZKPRequest({
+      circuitMint: mint,
+      serviceProviderCode: 'code',
+    })
+
+    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
+    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+
+    try {
+      await client.verify({
+        zkpRequest: ZKPRequestAddress,
+      })
+      assert.ok(false)
+    } catch (e: any) {
+      assertErrorCode(e, 'Unproved')
+    }
   })
 
   it('can verify ZKP request', async () => {
@@ -112,6 +180,27 @@ describe('albus', () => {
     await client.verify({
       zkpRequest: ZKPRequestAddress,
     })
+
+    const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
+    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Verified)
+  })
+
+  it('can deny ZKP request', async () => {
+    const nft = await mintNFT(metaplex)
+    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
+    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+
+    await client.prove({
+      proofMetadata: nft.metadataAddress,
+      zkpRequest: ZKPRequestAddress,
+    })
+
+    await client.deny({
+      zkpRequest: ZKPRequestAddress,
+    })
+
+    const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
+    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Denied)
   })
 
   it('can delete ZKP request', async () => {

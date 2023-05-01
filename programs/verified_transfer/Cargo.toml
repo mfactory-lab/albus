@@ -14,3 +14,4 @@ cpi = ["no-entrypoint"]
 [dependencies]
 anchor-lang = { version = "0.27.0"}
 anchor-spl = { version = "0.27.0" }
+albus = { path = "../albus", features = ["no-entrypoint"] }

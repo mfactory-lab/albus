@@ -146,8 +146,13 @@
       "accounts": [
         {
           "name": "zkpRequest",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
         },
         {
           "name": "systemProgram",
@@ -155,7 +160,14 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "VerifyData"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -266,6 +278,22 @@
             "type": "i64"
           },
           {
+            "name": "provedAt",
+            "docs": [
+              "Date the user was added the proof"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "ZKP request status"
+            ],
+            "type": {
+              "defined": "ZKPRequestStatus"
+            }
+          },
+          {
             "name": "bump",
             "docs": [
               "Bump seed for deriving PDA seeds"
@@ -301,6 +329,40 @@
           {
             "name": "expiresIn",
             "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifyData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "status",
+            "type": {
+              "defined": "ZKPRequestStatus"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ZKPRequestStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Proved"
+          },
+          {
+            "name": "Verified"
+          },
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Denied"
           }
         ]
       }
@@ -431,16 +493,26 @@
     },
     {
       "code": 6002,
+      "name": "Unproved",
+      "msg": "Unproved"
+    },
+    {
+      "code": 6003,
       "name": "Expired",
       "msg": "Expired"
     },
     {
-      "code": 6003,
+      "code": 6004,
+      "name": "WrongData",
+      "msg": "Wrong data"
+    },
+    {
+      "code": 6005,
       "name": "IncorrectOwner",
       "msg": "Incorrect owner"
     },
     {
-      "code": 6004,
+      "code": 6006,
       "name": "InvalidMetadata",
       "msg": "Invalid metadata"
     }

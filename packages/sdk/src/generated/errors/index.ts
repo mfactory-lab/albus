@@ -52,13 +52,33 @@ createErrorFromCodeLookup.set(0x1771, () => new UnverifiedError())
 createErrorFromNameLookup.set('Unverified', () => new UnverifiedError())
 
 /**
+ * Unproved: 'Unproved'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class UnprovedError extends Error {
+  readonly code: number = 0x1772
+  readonly name: string = 'Unproved'
+  constructor() {
+    super('Unproved')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, UnprovedError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1772, () => new UnprovedError())
+createErrorFromNameLookup.set('Unproved', () => new UnprovedError())
+
+/**
  * Expired: 'Expired'
  *
  * @category Errors
  * @category generated
  */
 export class ExpiredError extends Error {
-  readonly code: number = 0x1772
+  readonly code: number = 0x1773
   readonly name: string = 'Expired'
   constructor() {
     super('Expired')
@@ -68,8 +88,28 @@ export class ExpiredError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1772, () => new ExpiredError())
+createErrorFromCodeLookup.set(0x1773, () => new ExpiredError())
 createErrorFromNameLookup.set('Expired', () => new ExpiredError())
+
+/**
+ * WrongData: 'Wrong data'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class WrongDataError extends Error {
+  readonly code: number = 0x1774
+  readonly name: string = 'WrongData'
+  constructor() {
+    super('Wrong data')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, WrongDataError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1774, () => new WrongDataError())
+createErrorFromNameLookup.set('WrongData', () => new WrongDataError())
 
 /**
  * IncorrectOwner: 'Incorrect owner'
@@ -78,7 +118,7 @@ createErrorFromNameLookup.set('Expired', () => new ExpiredError())
  * @category generated
  */
 export class IncorrectOwnerError extends Error {
-  readonly code: number = 0x1773
+  readonly code: number = 0x1775
   readonly name: string = 'IncorrectOwner'
   constructor() {
     super('Incorrect owner')
@@ -88,7 +128,7 @@ export class IncorrectOwnerError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1773, () => new IncorrectOwnerError())
+createErrorFromCodeLookup.set(0x1775, () => new IncorrectOwnerError())
 createErrorFromNameLookup.set('IncorrectOwner', () => new IncorrectOwnerError())
 
 /**
@@ -98,7 +138,7 @@ createErrorFromNameLookup.set('IncorrectOwner', () => new IncorrectOwnerError())
  * @category generated
  */
 export class InvalidMetadataError extends Error {
-  readonly code: number = 0x1774
+  readonly code: number = 0x1776
   readonly name: string = 'InvalidMetadata'
   constructor() {
     super('Invalid metadata')
@@ -108,7 +148,7 @@ export class InvalidMetadataError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1774, () => new InvalidMetadataError())
+createErrorFromCodeLookup.set(0x1776, () => new InvalidMetadataError())
 createErrorFromNameLookup.set(
   'InvalidMetadata',
   () => new InvalidMetadataError(),

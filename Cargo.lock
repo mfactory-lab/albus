@@ -2286,6 +2286,7 @@ dependencies = [
 name = "verified-transfer"
 version = "0.0.1"
 dependencies = [
+ "albus",
  "anchor-lang",
  "anchor-spl",
 ]

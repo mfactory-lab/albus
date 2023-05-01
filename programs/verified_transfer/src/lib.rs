@@ -1,5 +1,3 @@
-mod albus;
-
 use anchor_lang::prelude::*;
 
 declare_id!("4goQchSHCB4zSa3vjn2NdjnWhYuzn3oYSbx1kVwwZdHS");
@@ -8,21 +6,14 @@ declare_id!("4goQchSHCB4zSa3vjn2NdjnWhYuzn3oYSbx1kVwwZdHS");
 pub mod verified_transfer {
     use anchor_lang::system_program;
     use anchor_spl::token;
+    use albus::verification::check;
     use super::*;
 
     pub fn transfer(
         ctx: Context<VerifiedTransfer>,
         amount: u64,
     ) -> Result<()> {
-        albus::verify(
-            CpiContext::new(
-                ctx.accounts.albus_program.to_account_info(),
-                albus::Verify {
-                    zkp_request: ctx.accounts.zkp_request.to_account_info(),
-                    system_program: ctx.accounts.system_program.to_account_info(),
-                },
-            ),
-        )?;
+        check(ctx.accounts.zkp_request.to_account_info())?;
 
         system_program::transfer(
             CpiContext::new(
@@ -42,15 +33,7 @@ pub mod verified_transfer {
         ctx: Context<VerifiedSplTransfer>,
         amount: u64,
     ) -> Result<()> {
-        albus::verify(
-            CpiContext::new(
-                ctx.accounts.albus_program.to_account_info(),
-                albus::Verify {
-                    zkp_request: ctx.accounts.zkp_request.to_account_info(),
-                    system_program: ctx.accounts.system_program.to_account_info(),
-                },
-            ),
-        )?;
+        check(ctx.accounts.zkp_request.to_account_info())?;
 
         token::transfer(
             CpiContext::new(

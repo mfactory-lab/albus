@@ -8,11 +8,13 @@ use crate::{constants::AUTHORIZED_AUTHORITY, AlbusError};
 pub fn assert_valid_proof(account: &AccountInfo) -> Result<Metadata> {
     assert_valid_metadata(account, None, None)
     // TODO: check symbol, name, etc...
+    // ALBUS-P
 }
 
 pub fn assert_valid_circuit(account: &AccountInfo) -> Result<Metadata> {
     assert_valid_metadata(account, None, None)
     // TODO: check symbol, name, etc...
+    // ALBUS-C
 }
 
 pub fn assert_valid_metadata(
