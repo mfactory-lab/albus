@@ -125,6 +125,7 @@ describe('albus', () => {
     const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
     const serviceProviderData = await client.loadServiceProvider(serviceProviderAddress)
     assert.equal((ZKPRequestData.proof !== undefined), true)
+    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Proved)
     if (ZKPRequestData.proof) {
       assert.equal(ZKPRequestData.proof.equals(nft.address), true)
     }
@@ -150,6 +151,28 @@ describe('albus', () => {
     }
   })
 
+  it('can not verify unproved ZKP request', async () => {
+    const nft = await mintNFT(metaplex)
+    const mint = nft.address
+
+    await client.createZKPRequest({
+      circuitMint: mint,
+      serviceProviderCode: 'code',
+    })
+
+    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
+    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+
+    try {
+      await client.verify({
+        zkpRequest: ZKPRequestAddress,
+      })
+      assert.ok(false)
+    } catch (e: any) {
+      assertErrorCode(e, 'Unproved')
+    }
+  })
+
   it('can verify ZKP request', async () => {
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
@@ -157,6 +180,27 @@ describe('albus', () => {
     await client.verify({
       zkpRequest: ZKPRequestAddress,
     })
+
+    const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
+    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Verified)
+  })
+
+  it('can deny ZKP request', async () => {
+    const nft = await mintNFT(metaplex)
+    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
+    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+
+    await client.prove({
+      proofMetadata: nft.metadataAddress,
+      zkpRequest: ZKPRequestAddress,
+    })
+
+    await client.deny({
+      zkpRequest: ZKPRequestAddress,
+    })
+
+    const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
+    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Denied)
   })
 
   it('can delete ZKP request', async () => {
