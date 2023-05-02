@@ -2,7 +2,7 @@ import { AlbusClient, ZKPRequestStatus } from '@albus/sdk'
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
 import { web3 } from '@project-serum/anchor'
 import { assert } from 'chai'
-import { airdrop, mintNFT, newProvider, payerKeypair, provider } from './utils'
+import { airdrop, assertErrorCode, mintNFT, newProvider, payerKeypair, provider } from './utils'
 
 describe('albus', () => {
   const client = new AlbusClient(provider)
@@ -188,7 +188,3 @@ describe('albus', () => {
     })
   })
 })
-
-export function assertErrorCode(error: { logs?: string[] }, code: string) {
-  assert.ok(String((error?.logs ?? []).join('')).includes(`Error Code: ${code}`))
-}

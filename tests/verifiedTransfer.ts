@@ -2,7 +2,8 @@ import { AlbusClient } from '@albus/sdk'
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
 import { TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import * as web3 from '@solana/web3.js'
-import { createSplTransferInstruction, createTransferInstruction, mintNFT, payerKeypair, provider } from './utils'
+import { assert } from 'chai'
+import { assertErrorCode, createSplTransferInstruction, createTransferInstruction, mintNFT, payerKeypair, provider } from './utils'
 
 describe('verified transfer', () => {
   const client = new AlbusClient(provider)
@@ -103,6 +104,47 @@ describe('verified transfer', () => {
     } catch (e: any) {
       console.log(e)
       throw e
+    }
+  })
+
+  it('can not transfer with albus verification check if ZKP request is not verified', async () => {
+    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
+    const nft = await mintNFT(metaplex)
+    const mint = nft.address
+
+    await client.createZKPRequest({
+      circuitMint: mint,
+      serviceProviderCode: 'code',
+    })
+
+    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+
+    await client.prove({
+      proofMetadata: nft.metadataAddress,
+      zkpRequest: ZKPRequestAddress,
+    })
+
+    const instruction = createTransferInstruction(
+      {
+        albus_program: client.programId,
+        receiver: payerKeypair.publicKey,
+        sender: payerKeypair.publicKey,
+        zkp_request: ZKPRequestAddress,
+      },
+      {
+        data: {
+          amount: 100,
+        },
+      },
+    )
+
+    const tx = new web3.Transaction().add(instruction)
+
+    try {
+      await provider.sendAndConfirm(tx, [])
+      assert.ok(false)
+    } catch (e: any) {
+      assertErrorCode(e, 'Unverified')
     }
   })
 })
