@@ -259,9 +259,9 @@ export class AlbusClient {
   }
 
   /**
-   * Verify existing {@link ZKPRequest}
+   * Reject existing {@link ZKPRequest}
    */
-  async deny(props: VerifyProps, opts?: ConfirmOptions) {
+  async reject(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
       {
         zkpRequest: props.zkpRequest,
@@ -269,7 +269,7 @@ export class AlbusClient {
       },
       {
         data: {
-          status: ZKPRequestStatus.Denied,
+          status: ZKPRequestStatus.Rejected,
         },
       },
     )

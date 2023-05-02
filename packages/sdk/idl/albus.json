@@ -362,7 +362,7 @@
             "name": "Pending"
           },
           {
-            "name": "Denied"
+            "name": "Rejected"
           }
         ]
       }
@@ -451,6 +451,36 @@
     },
     {
       "name": "VerifyEvent",
+      "fields": [
+        {
+          "name": "zkpRequest",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RejectEvent",
       "fields": [
         {
           "name": "zkpRequest",

@@ -165,12 +165,12 @@ describe('albus', () => {
       zkpRequest: ZKPRequestAddress,
     })
 
-    await client.deny({
+    await client.reject({
       zkpRequest: ZKPRequestAddress,
     })
 
     const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
-    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Denied)
+    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Rejected)
   })
 
   it('can delete ZKP request', async () => {

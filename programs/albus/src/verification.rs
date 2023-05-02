@@ -5,7 +5,7 @@ use crate::{
     AlbusError,
 };
 
-pub fn check(zkp_request: AccountInfo) -> Result<()> {
+pub fn check_compliant(zkp_request: AccountInfo) -> Result<()> {
     let mut data = &zkp_request
         .data
         .try_borrow_mut()
@@ -31,7 +31,7 @@ pub fn check(zkp_request: AccountInfo) -> Result<()> {
             msg!("Failure: ZKP request status is 'Pending'");
             Err(AlbusError::Unverified.into())
         }
-        ZKPRequestStatus::Denied => {
+        ZKPRequestStatus::Rejected => {
             msg!("Failure: ZKP request status is 'Denied'");
             Err(AlbusError::Unverified.into())
         }

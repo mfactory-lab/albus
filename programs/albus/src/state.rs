@@ -58,7 +58,7 @@ pub enum ZKPRequestStatus {
     Proved,
     Verified,
     Pending,
-    Denied,
+    Rejected,
 }
 
 impl ZKPRequest {

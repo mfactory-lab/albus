@@ -41,7 +41,7 @@ pub struct VerifyEvent {
 }
 
 #[event]
-pub struct DenyEvent {
+pub struct RejectEvent {
     #[index]
     pub zkp_request: Pubkey,
     #[index]

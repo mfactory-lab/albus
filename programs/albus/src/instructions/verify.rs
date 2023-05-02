@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 
 use crate::{
     constants::AUTHORIZED_AUTHORITY,
-    events::{DenyEvent, VerifyEvent},
+    events::{RejectEvent, VerifyEvent},
     state::{ZKPRequest, ZKPRequestStatus},
     AlbusError,
 };
@@ -44,15 +44,15 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
             });
             msg!("Verified!");
         }
-        ZKPRequestStatus::Denied => {
-            emit!(DenyEvent {
+        ZKPRequestStatus::Rejected => {
+            emit!(RejectEvent {
                 zkp_request: req.key(),
                 service_provider: req.service_provider,
                 circuit: req.circuit,
                 owner: req.owner,
                 timestamp,
             });
-            msg!("Denied!")
+            msg!("Rejected!")
         }
         _ => return Err(AlbusError::WrongData.into()),
     }

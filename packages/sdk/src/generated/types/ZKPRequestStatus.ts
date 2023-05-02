@@ -15,7 +15,7 @@ export enum ZKPRequestStatus {
   Proved,
   Verified,
   Pending,
-  Denied,
+  Rejected,
 }
 
 /**
