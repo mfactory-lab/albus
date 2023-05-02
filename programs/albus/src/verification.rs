@@ -6,7 +6,11 @@ use crate::{
 };
 
 pub fn check(zkp_request: AccountInfo) -> Result<()> {
-    let req = ZKPRequest::try_from_slice(zkp_request.data.take())?;
+    let mut data = &zkp_request
+        .data
+        .try_borrow_mut()
+        .map_err(|_| ErrorCode::AccountDidNotDeserialize)?[..];
+    let req = ZKPRequest::try_deserialize(&mut data)?;
 
     let timestamp = Clock::get()?.unix_timestamp;
 
