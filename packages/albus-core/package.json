@@ -19,6 +19,7 @@
     "circomlib": "^2.0.5",
     "circomlibjs": "^0.1",
     "poseidon-encryption": "^1.0",
-    "uint8arrays": "^3.1.1"
+    "uint8arrays": "^3.1.1",
+    "node-fetch": "^2.6.9"
   }
 }

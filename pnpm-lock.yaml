@@ -176,6 +176,9 @@ importers:
       jsonld-signatures:
         specifier: ^11.0
         version: 11.1.0
+      node-fetch:
+        specifier: ^2.6.9
+        version: 2.6.9
       poseidon-encryption:
         specifier: ^1.0
         version: 1.0.2
