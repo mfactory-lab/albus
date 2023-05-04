@@ -1,5 +1,6 @@
 import log from 'loglevel'
 import snarkjs from 'snarkjs'
+import { PublicKey } from '@solana/web3.js'
 import { useContext } from '../../context'
 import { loadCircuit, loadProof } from '../prove/utils'
 
@@ -30,7 +31,15 @@ export async function verifyRequest(addr: string, opts: Opts) {
 
   log.info('Status:', status)
 
-  // TODO: update ZKPRequest
+  if (status) {
+    await client.verify({
+      zkpRequest: new PublicKey(addr),
+    })
+  } else {
+    await client.reject({
+      zkpRequest: new PublicKey(addr),
+    })
+  }
 
   process.exit(0)
 }
