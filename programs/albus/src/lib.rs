@@ -8,7 +8,7 @@ pub mod verification;
 use anchor_lang::prelude::*;
 use instructions::*;
 
-declare_id!("5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5");
+declare_id!("ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz");
 
 #[program]
 pub mod albus {

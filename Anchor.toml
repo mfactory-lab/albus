@@ -12,7 +12,7 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-albus = "5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5"
+albus = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz"
 verified-transfer = "4goQchSHCB4zSa3vjn2NdjnWhYuzn3oYSbx1kVwwZdHS"
 
 [[test.genesis]]
