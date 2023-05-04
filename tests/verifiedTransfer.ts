@@ -2,7 +2,7 @@ import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
 import { TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import * as web3 from '@solana/web3.js'
 import { assert } from 'chai'
-import { AlbusClient } from '../packages/albus-sdk'
+import { AlbusClient } from '@albus/sdk'
 import { assertErrorCode, createSplTransferInstruction, createTransferInstruction, mintNFT, payerKeypair, provider } from './utils'
 
 describe('verified transfer', () => {

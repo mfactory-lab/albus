@@ -4,7 +4,7 @@ import type { Address, AnchorProvider } from '@project-serum/anchor'
 import { BorshCoder, EventManager } from '@project-serum/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
-import snarkjs from 'snarkjs'
+import * as snarkjs from 'snarkjs'
 import idl from '../idl/albus.json'
 import {
   PROGRAM_ID,

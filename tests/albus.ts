@@ -1,7 +1,7 @@
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
 import { web3 } from '@project-serum/anchor'
 import { assert } from 'chai'
-import { AlbusClient, ZKPRequestStatus } from '../packages/albus-sdk'
+import { AlbusClient, ZKPRequestStatus } from '@albus/sdk'
 import { airdrop, assertErrorCode, mintNFT, newProvider, payerKeypair, provider } from './utils'
 
 describe('albus', () => {
