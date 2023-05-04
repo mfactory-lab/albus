@@ -90,6 +90,71 @@ verify.command('request')
   .argument('req', 'ZKP Request address')
   .action(actions.verify.verifyRequest)
 
+// Service provider
+
+const serviceProvider = cli.command('sp')
+
+serviceProvider.command('add')
+  .description('Add service provider')
+  .requiredOption('--code <CODE>', 'Service provider`s unique code')
+  .requiredOption('--name <NAME>', 'Service provider`s name')
+  .action(actions.sp.addServiceProvider)
+
+serviceProvider.command('remove')
+  .description('Remove service provider')
+  .argument('code', 'Service provider`s unique code')
+  .action(actions.sp.removeServiceProvider)
+
+serviceProvider.command('show')
+  .description('Show service provider`s info')
+  .argument('addr', 'Service provider PDA`s address')
+  .action(actions.sp.showServiceProviderInfo)
+
+serviceProvider.command('find')
+  .description('Find and show service provider`s info')
+  .argument('code', 'Service provider`s unique code')
+  .action(actions.sp.findServiceProviderInfo)
+
+serviceProvider.command('show-all')
+  .description('Show all service providers with optional filter by authority')
+  .argument('authority', 'Service provider`s authority')
+  .action(actions.sp.showAllServiceProviders)
+
+// ZKP request
+
+const zkp = cli.command('zkp')
+
+zkp.command('create')
+  .description('Create ZKP request')
+  .requiredOption('--code <CODE>', 'Service provider`s unique code')
+  .requiredOption('--mint <MINT>', 'Circuit`s mint')
+  .option('--expires <EXPIRES>', 'Expires in some time duration')
+  .action(actions.zkp.createZKPRequest)
+
+zkp.command('delete')
+  .description('Delete ZKP request')
+  .argument('addr', 'ZKP request PDA`s address')
+  .action(actions.zkp.deleteZKPRequest)
+
+zkp.command('show')
+  .description('Show ZKP request`s info')
+  .argument('addr', 'ZKP request PDA`s address')
+  .action(actions.zkp.showZKPRequestInfo)
+
+zkp.command('find')
+  .description('Find and show ZKP request`s info')
+  .requiredOption('--sp <SP>', 'Service provider PDA`s address')
+  .requiredOption('--mint <MINT>', 'Circuit`s mint')
+  .requiredOption('--requester <REQUESTER>', 'Owner`s authority')
+  .action(actions.zkp.findZKPRequestInfo)
+
+zkp.command('show-all')
+  .description('Show all ZKP requests with optional filter by service provider, circuit and proof')
+  .option('--sp <SP>', 'Service provider PDA`s address')
+  .option('--circuit <CIRCUIT>', 'Circuit`s mint')
+  .option('--proof <PROOF>', 'Proof`s mint')
+  .action(actions.zkp.showAllZKPRequests)
+
 cli.parseAsync(process.argv).then(
   () => {},
   (e: unknown) => {

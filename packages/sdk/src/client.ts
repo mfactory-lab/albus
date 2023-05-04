@@ -422,8 +422,8 @@ export class AlbusClient {
   /**
    * Load service provider by {@link addr}
    */
-  async loadServiceProvider(addr: PublicKey, commitment?: Commitment) {
-    return ServiceProvider.fromAccountAddress(this.provider.connection, addr, commitment)
+  async loadServiceProvider(addr: PublicKeyInitData, commitment?: Commitment) {
+    return ServiceProvider.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
   }
 
   /**
