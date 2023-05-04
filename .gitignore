@@ -9,3 +9,6 @@ test-ledger
 /tmp
 /.secrets/
 /circuits/*.ptau
+/circuits/*.r1cs
+/circuits/*.wasm
+/circuits/*.sym
