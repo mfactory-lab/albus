@@ -8,11 +8,32 @@ help: ## Show this help
 
 # ----------------------------------------------------------------------------------------------------------------------
 
+program = albus
+program_id = $(shell sed -n 's/^ *${program}.*=.*"\([^"]*\)".*/\1/p' Anchor.toml | head -1)
+cluster = devnet
+
 args := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 
 .PHONY: circom
-circom: ## circom
+circom: ## Build circom
 	circom ./circuits/$(args).circom -l node_modules --r1cs --wasm --sym -o ./tmp
+
+.PHONY: build
+build: ## Build program
+	anchor build -p $(program)
+
+.PHONY: deploy
+deploy: build ## Deploy program
+	anchor deploy -p $(program) --provider.cluster $(cluster)
+
+.PHONY: test
+test: ## Test program
+	anchor test --skip-lint --provider.cluster localnet
+
+.PHONY: upgrade
+upgrade: build ## Upgrade program
+	anchor upgrade -p $(program_id) --provider.cluster $(cluster) ./target/deploy/$(program).so
+
 %::
 	@true
 
