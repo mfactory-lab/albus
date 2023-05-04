@@ -14,7 +14,7 @@ interface Opts {
 }
 
 export async function create(opts: Opts) {
-  const { client, provider, cluster } = useContext()
+  const { client, provider } = useContext()
 
   try {
     const { signature } = await client.createZKPRequest({
@@ -24,7 +24,7 @@ export async function create(opts: Opts) {
     })
 
     log.info(`Signature: ${signature}`)
-    log.info(exploreTransaction(signature, cluster))
+    log.info(exploreTransaction(signature))
 
     await find({
       sp: opts.sp,

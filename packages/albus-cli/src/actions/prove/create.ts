@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { snark } from '../../../../albus-core'
+import { exploreAddress } from '../../utils'
 import { loadCircuit, mintProofNFT } from './utils'
 
 interface Opts {
@@ -32,4 +33,5 @@ export async function create(opts: Opts) {
 
   log.info('Done')
   log.info(`Mint: ${nft.address}`)
+  log.info(exploreAddress(nft.address))
 }

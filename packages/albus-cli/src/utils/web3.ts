@@ -1,6 +1,7 @@
 import { LAMPORTS_PER_SOL, PublicKey, clusterApiUrl } from '@solana/web3.js'
-import type { Cluster, Transaction } from '@solana/web3.js'
+import type { Cluster, PublicKeyInitData, Transaction } from '@solana/web3.js'
 import * as anchor from '@project-serum/anchor'
+import { useContext } from '../context'
 
 export function clusterUrl(c: Cluster) {
   switch (c) {
@@ -12,8 +13,18 @@ export function clusterUrl(c: Cluster) {
   return clusterApiUrl(c as any)
 }
 
-export function exploreTransaction(signature: string, cluster: Cluster = 'mainnet-beta') {
-  return `https://explorer.solana.com/tx/${signature}?cluster=${cluster}`
+function exploreLink(id: string, opts: { type: 'tx' | 'address'; cluster?: Cluster }) {
+  return `https://explorer.solana.com/${opts.type}/${id}?cluster=${opts.cluster ?? 'mainnet-beta'}`
+}
+
+export function exploreAddress(addr: PublicKeyInitData) {
+  const { cluster } = useContext()
+  return exploreLink(new PublicKey(addr).toString(), { type: 'address', cluster })
+}
+
+export function exploreTransaction(signature: string) {
+  const { cluster } = useContext()
+  return exploreLink(signature, { type: 'tx', cluster })
 }
 
 /**

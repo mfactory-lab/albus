@@ -29,12 +29,16 @@ export async function verifyRequest(addr: string, _opts: Opts) {
 
   const isVerified = await snarkjs.groth16.verify(circuit.vk, proof.publicInput, proof.payload)
 
-  if (isVerified) {
-    await client.verify({ zkpRequest: new PublicKey(addr) })
-    log.debug('Verified!')
-  } else {
-    await client.reject({ zkpRequest: new PublicKey(addr) })
-    log.debug('Rejected!')
+  try {
+    if (isVerified) {
+      await client.verify({ zkpRequest: new PublicKey(addr) })
+      log.debug('Verified!')
+    } else {
+      await client.reject({ zkpRequest: new PublicKey(addr) })
+      log.debug('Rejected!')
+    }
+  } catch (e) {
+    log.error(e)
   }
 
   process.exit(0)

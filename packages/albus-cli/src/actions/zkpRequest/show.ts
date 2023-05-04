@@ -1,5 +1,7 @@
+import { ZKPRequestStatus } from '@albus/sdk'
 import log from 'loglevel'
 import { useContext } from '../../context'
+import { exploreAddress } from '../../utils'
 
 export async function show(addr: string) {
   const { client } = useContext()
@@ -10,13 +12,18 @@ export async function show(addr: string) {
   log.info(`Address: ${addr}`)
   log.info(`Service provider: ${zkpRequest.serviceProvider}`)
   log.info(`Circuit: ${zkpRequest.circuit}`)
+  log.info(exploreAddress(zkpRequest.circuit))
   log.info(`Owner: ${zkpRequest.owner}`)
+  log.info(exploreAddress(zkpRequest.owner))
   log.info(`Proof: ${zkpRequest.proof}`)
+  if (zkpRequest.proof) {
+    log.info(exploreAddress(zkpRequest.proof))
+  }
   log.info(`Created at: ${zkpRequest.createdAt}`)
   log.info(`Expired at: ${zkpRequest.expiredAt}`)
-  log.info(`Verified at: ${zkpRequest.verifiedAt}`)
   log.info(`Proved at: ${zkpRequest.provedAt}`)
-  log.info(`Status: ${zkpRequest.status}`)
+  log.info(`Verification date: ${zkpRequest.verifiedAt}`)
+  log.info(`Status: ${ZKPRequestStatus[zkpRequest.status]}`)
   log.info('--------------------------------------------------------------------------')
 }
 
