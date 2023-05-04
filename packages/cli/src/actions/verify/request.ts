@@ -1,6 +1,6 @@
-import log from 'loglevel'
-import snarkjs from 'snarkjs'
 import { PublicKey } from '@solana/web3.js'
+import log from 'loglevel'
+import * as snarkjs from 'snarkjs'
 import { useContext } from '../../context'
 import { loadCircuit, loadProof } from '../prove/utils'
 
@@ -9,7 +9,7 @@ interface Opts {}
 /**
  * Verify ZKP request
  */
-export async function verifyRequest(addr: string, opts: Opts) {
+export async function verifyRequest(addr: string, _opts: Opts) {
   const { client } = useContext()
 
   const req = await client.loadZKPRequest(addr)
@@ -21,24 +21,20 @@ export async function verifyRequest(addr: string, opts: Opts) {
   const circuit = await loadCircuit(req.circuit)
   const proof = await loadProof(req.proof)
 
-  log.debug('VerificationKey:', circuit.vk)
-  log.debug('Proof:', proof.proofData)
+  log.debug('VK:', circuit.vk)
+  log.debug('Proof:', proof.payload)
   log.debug('PublicSignals:', proof.publicInput)
 
   log.debug('Verifying proof...')
 
-  const status = await snarkjs.groth16.verify(circuit.vk, proof.publicInput, proof.proofData)
+  const isVerified = await snarkjs.groth16.verify(circuit.vk, proof.publicInput, proof.payload)
 
-  log.info('Status:', status)
-
-  if (status) {
-    await client.verify({
-      zkpRequest: new PublicKey(addr),
-    })
+  if (isVerified) {
+    await client.verify({ zkpRequest: new PublicKey(addr) })
+    log.debug('Verified!')
   } else {
-    await client.reject({
-      zkpRequest: new PublicKey(addr),
-    })
+    await client.reject({ zkpRequest: new PublicKey(addr) })
+    log.debug('Rejected!')
   }
 
   process.exit(0)

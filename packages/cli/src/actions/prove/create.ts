@@ -1,6 +1,8 @@
+import fs from 'node:fs'
 import { PublicKey } from '@solana/web3.js'
+import { snark } from '@albus/core'
 import log from 'loglevel'
-import { generateProof, loadCircuit, mintProofNFT } from './utils'
+import { loadCircuit, mintProofNFT } from './utils'
 
 interface Opts {
   // Circuit NFT address
@@ -10,14 +12,16 @@ interface Opts {
 }
 
 export async function create(opts: Opts) {
-  log.debug('Generating proof...')
-
+  log.debug('Circuit loading...')
   const circuit = await loadCircuit(opts.circuit)
 
-  const { proof, publicSignals } = await generateProof({
+  const input = opts.input ? JSON.parse(fs.readFileSync(opts.input).toString()) : undefined
+
+  log.debug('Generating proof...')
+  const { proof, publicSignals } = await snark.generateProof({
     wasmUrl: circuit.wasmUrl,
     zkeyUrl: circuit.zkeyUrl,
-    inputFile: opts.input,
+    input,
   })
 
   log.info('Done')

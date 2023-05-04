@@ -1,7 +1,6 @@
-import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
-import { useContext } from '../../context'
+import { loadCircuit, loadProof } from '../prove/utils'
 
 interface Opts {
   // Circuit NFT address
@@ -14,46 +13,22 @@ interface Opts {
  * Verify the proof
  */
 export async function verifyProof(opts: Opts) {
-  const { metaplex } = useContext()
+  const circuit = await loadCircuit(opts.circuit)
+  const proof = await loadProof(opts.proof)
 
-  const circuitNft = await metaplex.nfts().findByMint({
-    mintAddress: new PublicKey(opts.circuit),
-    loadJsonMetadata: true,
-  })
-
-  if (!circuitNft.json?.vk) {
-    throw new Error('Invalid circuit! Metadata does not contain verification key.')
-  }
-
-  // Find proof NFT
-  const proofNft = await metaplex.nfts().findByMint({
-    mintAddress: new PublicKey(opts.proof),
-    loadJsonMetadata: true,
-  })
-
-  if (!proofNft.json?.proof) {
-    throw new Error('Invalid proof! Metadata does not contain proof information.')
-  }
-
-  // log.debug('Downloading zkey file...')
-  // const zkeyFile = `${os.tmpdir()}/circuit.zkey`
-  // await downloadFile(String(circuitNft.json.vk), zkeyFile)
-  // log.debug('Exporting verification key...')
-  // const vk = await snarkjs.zKey.exportVerificationKey(zkeyFile)
-
-  const vk = circuitNft.json?.vk as snarkjs.VK
-  const proof = proofNft.json?.proof as snarkjs.SnarkjsProof
-  const publicSignals = (proofNft.json?.public_input ?? []) as any
-
-  log.debug('VK:', vk)
-  log.debug('Proof:', proof)
-  log.debug('PublicSignals:', publicSignals)
+  log.debug('VK:', circuit.vk)
+  log.debug('Proof:', proof.payload)
+  log.debug('PublicSignals:', proof.publicInput)
 
   log.debug('Verifying proof...')
 
-  const status = await snarkjs.groth16.verify(vk, publicSignals, proof)
+  const isVerified = await snarkjs.groth16.verify(circuit.vk, proof.publicInput, proof.payload)
 
-  log.info('Status:', status)
+  if (isVerified) {
+    log.debug('Verified!')
+  } else {
+    log.debug('Rejected!')
+  }
 
   process.exit(0)
 }

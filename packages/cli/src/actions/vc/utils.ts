@@ -63,6 +63,10 @@ export async function issueVerifiableCredential(holder: PublicKey, opts?: IssueO
   return await createVerifiableCredentialJwt(vcPayload, issuer)
 }
 
+/**
+ * Generates a credential subject with fake data.
+ * @returns {CredentialSubject}
+ */
 function generateCredentialSubject(): CredentialSubject {
   const data = generateFakeSumSubData()
 

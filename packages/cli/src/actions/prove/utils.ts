@@ -1,13 +1,9 @@
-import fs from 'node:fs'
-import os from 'node:os'
 import { toBigNumber } from '@metaplex-foundation/js'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import * as snarkjs from 'snarkjs'
-import type { PublicSignals, SnarkjsProof } from 'snarkjs'
+import type { PublicSignals, SnarkjsProof, VK } from 'snarkjs'
 import { useContext } from '../../context'
-import { downloadFile } from '../../utils'
 
 /**
  * Load and validate Circuit NFT
@@ -43,7 +39,7 @@ export async function loadCircuit(addr: PublicKeyInitData) {
   return {
     address: nft.address,
     id: String(nft.json.circuit_id),
-    vk: nft.json.vk as snarkjs.VK,
+    vk: nft.json.vk as VK,
     wasmUrl: String(nft.json.wasm_url),
     zkeyUrl: String(nft.json.zkey_url),
   }
@@ -96,8 +92,8 @@ export async function loadProof(addr: PublicKeyInitData) {
   return {
     address: nft.address,
     circuit: nft.json.circuit,
-    proofData: nft.json.proof as snarkjs.SnarkjsProof,
-    publicInput: (nft.json.public_input ?? []) as snarkjs.PublicSignals,
+    payload: nft.json.proof as SnarkjsProof,
+    publicInput: (nft.json.public_input ?? []) as PublicSignals,
   }
 }
 
@@ -141,39 +137,4 @@ export async function mintProofNFT(circuit: PublicKey, proof: SnarkjsProof, publ
     })
 
   return nft
-}
-
-interface GenerateProofProps {
-  wasmUrl: string
-  zkeyUrl: string
-  input?: { [key: string]: any }
-  inputFile?: string
-}
-
-/**
- * Create new Proof
- */
-export async function generateProof(props: GenerateProofProps) {
-  log.debug('Downloading wasm file...')
-  const wasmFile = `${os.tmpdir()}/circuit.wasm`
-  await downloadFile(props.wasmUrl, wasmFile)
-
-  log.debug('Downloading zkey file...')
-  const zkeyFile = `${os.tmpdir()}/circuit.zkey`
-  await downloadFile(props.zkeyUrl, zkeyFile)
-
-  let input = {}
-  if (props.inputFile) {
-    input = JSON.parse(fs.readFileSync(props.inputFile).toString())
-  } else if (props.input) {
-    input = props.input
-  }
-
-  const { proof, publicSignals }
-    = await snarkjs.groth16.fullProve(input, wasmFile, zkeyFile)
-
-  fs.unlinkSync(wasmFile)
-  fs.unlinkSync(zkeyFile)
-
-  return { proof, publicSignals }
 }

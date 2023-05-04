@@ -55,7 +55,7 @@ const circuit = cli.command('circuit')
 
 circuit.command('create')
   .description('Create new circuit NFT')
-  .requiredOption('--name <NAME>', 'Circuit name')
+  .argument('name', 'Circuit name')
   .action(actions.circuit.create)
 
 // Proving

@@ -31,8 +31,8 @@ declare module 'snarkjs' {
           | readonly bigint[] | readonly number[]
           | readonly (readonly bigint[])[] | readonly (readonly number[])[];
       },
-      wasmFile: string,
-      zkeyFileName: string,
+      wasmFile: string | { type: string, data: Uint8Array },
+      zkeyFileName: string | { type: string, data: Uint8Array },
       logger?: unknown,
     ) => Promise<SNARK>;
     readonly prove: (
@@ -89,9 +89,9 @@ declare module 'snarkjs' {
     exportBellman: any;
     exportJson: any;
     exportSolidityVerifier: any;
-    exportVerificationKey: (zkeyName: string) => Promise<VK>;
+    exportVerificationKey: (zkeyName: string | { type: string }) => Promise<VK>;
     importBellman: any;
-    newZKey: (r1csName: string, ptauName: string, zkeyName: string, logger?: unknown) => Promise<any>;
+    newZKey: (r1csName: string, ptauName: string, zkeyName: string | { type: string }, logger?: unknown) => Promise<any>;
     verifyFromInit: any;
     verifyFromR1cs: any;
   };

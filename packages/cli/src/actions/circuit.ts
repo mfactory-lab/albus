@@ -7,17 +7,12 @@ import * as snarkjs from 'snarkjs'
 import { useContext } from '../context'
 import { downloadFile } from '../utils'
 
-interface Opts {
-  // Circuit identifier
-  id: string
-}
+interface Opts {}
 
 /**
  * Generate new circuit NFT
  */
-export async function create(opts: Opts) {
-  const circuitId = opts.id
-
+export async function create(circuitId: string, _opts: Opts) {
   const { metaplex, config } = useContext()
 
   if (!fs.existsSync(`${config.circuitPath}/${circuitId}.r1cs`)
@@ -40,7 +35,7 @@ export async function create(opts: Opts) {
 
   log.info('Generating keys...')
 
-  const zKeyFile = `${config.circuitPath}/${circuitId}.zkey`
+  const zKeyFile = { type: 'mem', data: new Uint8Array() }
 
   await snarkjs.zKey.newZKey(
     `${config.circuitPath}/${circuitId}.r1cs`,
@@ -50,14 +45,12 @@ export async function create(opts: Opts) {
 
   log.info('Exporting verification Key...')
   const vk = await snarkjs.zKey.exportVerificationKey(zKeyFile)
-  // fs.writeFileSync(`${CIRCUITS_PATH}/vk.json`, JSON.stringify(vk))
-  // log.info('Done')
 
   // NFT generation
 
   log.info('Uploading zKey file...')
   const zkeyUrl = await metaplex.storage().upload(
-    toMetaplexFile(fs.readFileSync(`${config.circuitPath}/${circuitId}.zkey`), 'circuit.zkey'),
+    toMetaplexFile(zKeyFile.data, 'circuit.zkey'),
   )
   log.info('Done')
   log.info(`Uri: ${zkeyUrl}`)
@@ -75,10 +68,18 @@ export async function create(opts: Opts) {
   process.exit(0)
 }
 
+interface MintProps {
+  id: string
+  name: string
+  zkeyUrl: string
+  wasmUrl: string
+  vk: snarkjs.VK
+}
+
 /**
  * Mint new Circuit NFT
  */
-async function mintNft(props: { id: string; name: string; vk: snarkjs.VK; zkeyUrl: string; wasmUrl: string }) {
+async function mintNft(props: MintProps) {
   const { metaplex, config } = useContext()
 
   const updateAuthority = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))

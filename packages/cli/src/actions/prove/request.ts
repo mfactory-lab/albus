@@ -1,13 +1,13 @@
+import { crypto, snark } from '@albus/core'
 import { PublicKey } from '@solana/web3.js'
 import { verifyCredential } from 'did-jwt-vc'
 import type { ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import log from 'loglevel'
-import { crypto } from '@albus/core'
 import * as WebDidResolver from 'web-did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import { useContext } from '../../context'
-import { generateProof, loadCircuit, loadCredential, mintProofNFT } from './utils'
+import { loadCircuit, loadCredential, mintProofNFT } from './utils'
 
 interface Opts {
   // Verifiable Credential Address
@@ -51,7 +51,7 @@ export async function createForRequest(addr: string, opts: Opts) {
 
   const circuit = await loadCircuit(req.circuit)
 
-  const { proof, publicSignals } = await generateProof({
+  const { proof, publicSignals } = await snark.generateProof({
     wasmUrl: circuit.wasmUrl,
     zkeyUrl: circuit.zkeyUrl,
     input: prepareCircuitInput(circuit.id, vcInfo),
