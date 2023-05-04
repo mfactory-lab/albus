@@ -46,8 +46,8 @@ vc.command('issue')
   .option('-e,--encrypt', 'Encrypt VC with holder public key')
   .action(actions.vc.issue)
 
-vc.command('test')
-  .action(actions.vc.test)
+// vc.command('test')
+//   .action(actions.vc.test)
 
 // Circuit
 
