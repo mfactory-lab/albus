@@ -95,7 +95,7 @@ export class ServiceProvider implements ServiceProviderArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      '5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5',
+      'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz',
     ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, serviceProviderBeet)

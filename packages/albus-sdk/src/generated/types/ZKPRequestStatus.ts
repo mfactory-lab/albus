@@ -12,9 +12,9 @@ import * as beet from '@metaplex-foundation/beet'
  * @category generated
  */
 export enum ZKPRequestStatus {
+  Pending,
   Proved,
   Verified,
-  Pending,
   Rejected,
 }
 

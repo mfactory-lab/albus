@@ -179,42 +179,42 @@
           {
             "name": "authority",
             "docs": [
-              "Service's manager authority"
+              "Authority that manages the service"
             ],
             "type": "publicKey"
           },
           {
             "name": "code",
             "docs": [
-              "Unique service code"
+              "Unique code identifying the service"
             ],
             "type": "string"
           },
           {
             "name": "name",
             "docs": [
-              "The name of the service"
+              "Name of the service"
             ],
             "type": "string"
           },
           {
             "name": "zkpRequestCount",
             "docs": [
-              "Total zkp request"
+              "Total number of zero-knowledge proof requests"
             ],
             "type": "u64"
           },
           {
             "name": "createdAt",
             "docs": [
-              "Creation date"
+              "Timestamp for when the service was created"
             ],
             "type": "i64"
           },
           {
             "name": "bump",
             "docs": [
-              "Bump seed for deriving PDA seeds"
+              "Bump seed used to derive program-derived account seeds"
             ],
             "type": "u8"
           }
@@ -229,28 +229,28 @@
           {
             "name": "serviceProvider",
             "docs": [
-              "[ServiceProvider] address"
+              "Address of the [ServiceProvider] associated with this request"
             ],
             "type": "publicKey"
           },
           {
             "name": "circuit",
             "docs": [
-              "Circuit address"
+              "Address of the circuit associated with this request"
             ],
             "type": "publicKey"
           },
           {
             "name": "owner",
             "docs": [
-              "Request initiator"
+              "Address of the request initiator"
             ],
             "type": "publicKey"
           },
           {
             "name": "proof",
             "docs": [
-              "Proof NFT mint address"
+              "Optional address of the proof NFT mint"
             ],
             "type": {
               "option": "publicKey"
@@ -259,35 +259,35 @@
           {
             "name": "createdAt",
             "docs": [
-              "Request creation date"
+              "Timestamp for when the request was created"
             ],
             "type": "i64"
           },
           {
             "name": "expiredAt",
             "docs": [
-              "Request expiration date"
+              "Timestamp for when the request will expire"
             ],
             "type": "i64"
           },
           {
             "name": "verifiedAt",
             "docs": [
-              "Date the proof was verified"
+              "Timestamp for when the proof was verified"
             ],
             "type": "i64"
           },
           {
             "name": "provedAt",
             "docs": [
-              "Date the user was added the proof"
+              "Timestamp for when the user was added to the proof"
             ],
             "type": "i64"
           },
           {
             "name": "status",
             "docs": [
-              "ZKP request status"
+              "Status of the ZKP request"
             ],
             "type": {
               "defined": "ZKPRequestStatus"
@@ -296,7 +296,7 @@
           {
             "name": "bump",
             "docs": [
-              "Bump seed for deriving PDA seeds"
+              "Bump seed used to derive program-derived account seeds"
             ],
             "type": "u8"
           }
@@ -307,15 +307,24 @@
   "types": [
     {
       "name": "AddServiceProviderData",
+      "docs": [
+        "Data required to add a new service provider"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "code",
+            "docs": [
+              "The unique code representing the service"
+            ],
             "type": "string"
           },
           {
             "name": "name",
+            "docs": [
+              "The name of the service"
+            ],
             "type": "string"
           }
         ]
@@ -323,11 +332,17 @@
     },
     {
       "name": "CreateZKPRequestData",
+      "docs": [
+        "Data required to create a new ZKP request"
+      ],
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "expiresIn",
+            "docs": [
+              "Time in seconds until the request expires"
+            ],
             "type": "u32"
           }
         ]
@@ -353,13 +368,13 @@
         "kind": "enum",
         "variants": [
           {
+            "name": "Pending"
+          },
+          {
             "name": "Proved"
           },
           {
             "name": "Verified"
-          },
-          {
-            "name": "Pending"
           },
           {
             "name": "Rejected"
@@ -548,7 +563,7 @@
     }
   ],
   "metadata": {
-    "address": "5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5",
+    "address": "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz",
     "origin": "anchor",
     "binaryVersion": "0.27.0",
     "libVersion": "0.27.0"

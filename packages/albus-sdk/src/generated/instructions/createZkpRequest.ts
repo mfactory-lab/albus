@@ -75,7 +75,7 @@ export const createZkpRequestInstructionDiscriminator = [
 export function createCreateZkpRequestInstruction(
   accounts: CreateZkpRequestInstructionAccounts,
   args: CreateZkpRequestInstructionArgs,
-  programId = new web3.PublicKey('5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5'),
+  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
   const [data] = createZkpRequestStruct.serialize({
     instructionDiscriminator: createZkpRequestInstructionDiscriminator,

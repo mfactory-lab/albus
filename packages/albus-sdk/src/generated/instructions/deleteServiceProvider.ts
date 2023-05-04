@@ -49,7 +49,7 @@ export const deleteServiceProviderInstructionDiscriminator = [
  */
 export function createDeleteServiceProviderInstruction(
   accounts: DeleteServiceProviderInstructionAccounts,
-  programId = new web3.PublicKey('5dAMQUdhhsMwS8m7zVhKzVxiDNEHkTdCZ28dowCmVsj5'),
+  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
   const [data] = deleteServiceProviderStruct.serialize({
     instructionDiscriminator: deleteServiceProviderInstructionDiscriminator,
