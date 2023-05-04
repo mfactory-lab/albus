@@ -1,13 +1,13 @@
 import log from 'loglevel'
 import { useContext } from '../../context'
 
-export async function showZKPRequestInfo(addr: string) {
+export async function show(addr: string) {
   const { client } = useContext()
 
   const zkpRequest = await client.loadZKPRequest(addr)
 
   log.info('--------------------------------------------------------------------------')
-  log.info(`ZKP Request PDA: ${addr}`)
+  log.info(`Address: ${addr}`)
   log.info(`Service provider: ${zkpRequest.serviceProvider}`)
   log.info(`Circuit: ${zkpRequest.circuit}`)
   log.info(`Owner: ${zkpRequest.owner}`)
@@ -20,17 +20,17 @@ export async function showZKPRequestInfo(addr: string) {
   log.info('--------------------------------------------------------------------------')
 }
 
-interface FindOpts {
+interface SearchOpts {
   sp: string
-  mint: string
+  circuit: string
   requester: string
 }
 
-export async function findZKPRequestInfo(opts: FindOpts) {
+export async function find(opts: SearchOpts) {
   const { client } = useContext()
-
-  const [zkpRequestAddr] = client.getZKPRequestPDA(opts.sp, opts.mint, opts.requester)
-  await showZKPRequestInfo(zkpRequestAddr.toString())
+  const [serviceProviderAddr] = client.getServiceProviderPDA(opts.sp)
+  const [zkpRequestAddr] = client.getZKPRequestPDA(serviceProviderAddr, opts.circuit, opts.requester)
+  await show(zkpRequestAddr.toString())
 }
 
 interface ShowAllOpts {
@@ -39,15 +39,21 @@ interface ShowAllOpts {
   proof?: string
 }
 
-export async function showAllZKPRequests(opts: ShowAllOpts) {
-  const { client, cluster } = useContext()
+export async function showAll(opts: ShowAllOpts) {
+  const { client } = useContext()
 
-  const zkpRequests = await client.loadAllZKPRequests({ serviceProvider: opts.sp, circuit: opts.circuit, proof: opts.proof })
+  const items = await client.loadAllZKPRequests({
+    serviceProvider: opts.sp,
+    circuit: opts.circuit,
+    proof: opts.proof,
+  })
 
   log.info('--------------------------------------------------------------------------')
-  for (const sp of zkpRequests) {
-    log.info(`ZKP Request PDA: ${sp.pubkey}`)
-    log.info(`See full info: "pnpm cli -c ${cluster} zkp show ${sp.pubkey}"`)
+  log.info('Address | Circuit | Service Provider | Proof | Requester')
+  log.info('--------------------------------------------------------------------------')
+
+  for (const item of items) {
+    log.info(`${item.pubkey} | ${item.data.circuit} | ${item.data.serviceProvider} | ${item.data.proof} | ${item.data.owner}`)
     log.info('--------------------------------------------------------------------------')
   }
 }

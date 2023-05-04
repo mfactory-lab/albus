@@ -5,14 +5,15 @@ import * as anchor from '@project-serum/anchor'
 export function clusterUrl(c: Cluster) {
   switch (c) {
     case 'mainnet-beta':
-      // return 'https://rpc.theindex.io'
-      // return 'https://ssc-dao.genesysgo.net'
-      // return 'https://jpoolone.genesysgo.net'
       return 'https://solana-api.projectserum.com/'
     case 'testnet':
       return 'https://testnet.rpcpool.com'
   }
   return clusterApiUrl(c as any)
+}
+
+export function exploreTransaction(signature: string, cluster: Cluster = 'mainnet-beta') {
+  return `https://explorer.solana.com/tx/${signature}?cluster=${cluster}`
 }
 
 /**

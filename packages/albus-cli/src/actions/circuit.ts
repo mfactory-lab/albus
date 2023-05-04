@@ -63,13 +63,13 @@ export async function create(circuitId: string, _opts: Opts) {
   log.info(`Uri: ${wasmUrl}`)
 
   // Mint new Circuit NFT
-  await mintNft({ name: 'ALBUS Circuit', id: circuitId, vk, zkeyUrl, wasmUrl })
+  await mintNft({ name: 'ALBUS Circuit', code: circuitId, vk, zkeyUrl, wasmUrl })
 
   process.exit(0)
 }
 
 interface MintProps {
-  id: string
+  code: string
   name: string
   zkeyUrl: string
   wasmUrl: string
@@ -91,12 +91,12 @@ async function mintNft(props: MintProps) {
       name: props.name,
       image: config.logoUrl,
       external_url: config.nftExternalUrl,
-      circuit_id: props.id,
+      circuit_id: props.code,
       wasm_url: props.wasmUrl,
       zkey_url: props.zkeyUrl,
       vk: props.vk,
       attributes: [
-        { trait_type: 'id', value: props.id },
+        { trait_type: 'code', value: props.code },
       ],
     })
   log.info('Done')
