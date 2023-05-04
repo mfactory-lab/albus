@@ -5,17 +5,17 @@ const MAX_SERVICE_NAME_LEN: usize = 32;
 
 #[account]
 pub struct ServiceProvider {
-    /// Service's manager authority
+    /// Authority that manages the service
     pub authority: Pubkey,
-    /// Unique service code
+    /// Unique code identifying the service
     pub code: String,
-    /// The name of the service
+    /// Name of the service
     pub name: String,
-    /// Total zkp request
+    /// Total number of zero-knowledge proof requests
     pub zkp_request_count: u64,
-    /// Creation date
+    /// Timestamp for when the service was created
     pub created_at: i64,
-    /// Bump seed for deriving PDA seeds
+    /// Bump seed used to derive program-derived account seeds
     pub bump: u8,
 }
 
@@ -29,35 +29,36 @@ impl ServiceProvider {
 
 #[account]
 pub struct ZKPRequest {
-    /// [ServiceProvider] address
+    /// Address of the [ServiceProvider] associated with this request
     pub service_provider: Pubkey,
     // /// TODO: specific VC issuer
     // pub issuer: Pubkey,
-    /// Circuit address
+    /// Address of the circuit associated with this request
     pub circuit: Pubkey,
-    /// Request initiator
+    /// Address of the request initiator
     pub owner: Pubkey,
-    /// Proof NFT mint address
+    /// Optional address of the proof NFT mint
     pub proof: Option<Pubkey>,
-    /// Request creation date
+    /// Timestamp for when the request was created
     pub created_at: i64,
-    /// Request expiration date
+    /// Timestamp for when the request will expire
     pub expired_at: i64,
-    /// Date the proof was verified
+    /// Timestamp for when the proof was verified
     pub verified_at: i64,
-    /// Date the user was added the proof
+    /// Timestamp for when the user was added to the proof
     pub proved_at: i64,
-    /// ZKP request status
+    /// Status of the ZKP request
     pub status: ZKPRequestStatus,
-    /// Bump seed for deriving PDA seeds
+    /// Bump seed used to derive program-derived account seeds
     pub bump: u8,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Clone)]
+#[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone)]
 pub enum ZKPRequestStatus {
+    #[default]
+    Pending,
     Proved,
     Verified,
-    Pending,
     Rejected,
 }
 
