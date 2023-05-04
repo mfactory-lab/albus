@@ -39,7 +39,7 @@ function POSEIDON_C_ALT(t) {
     }
     else{
     	return [0];
-    
+
     }
 }
 
@@ -247,6 +247,6 @@ function POSEIDON_M_ALT(t) {
     }
     else{
         return [[0]];
-    } 
-    
+    }
+
 }

@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import { PublicKey } from '@solana/web3.js'
-import { snark } from '@albus/core'
 import log from 'loglevel'
+import { snark } from '../../../../albus-core'
 import { loadCircuit, mintProofNFT } from './utils'
 
 interface Opts {

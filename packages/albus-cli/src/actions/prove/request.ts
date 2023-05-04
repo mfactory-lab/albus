@@ -1,4 +1,3 @@
-import { crypto, snark } from '@albus/core'
 import { PublicKey } from '@solana/web3.js'
 import { verifyCredential } from 'did-jwt-vc'
 import type { ResolverRegistry } from 'did-resolver'
@@ -6,6 +5,7 @@ import { Resolver } from 'did-resolver'
 import log from 'loglevel'
 import * as WebDidResolver from 'web-did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
+import { crypto, snark } from '../../../../albus-core'
 import { useContext } from '../../context'
 import { loadCircuit, loadCredential, mintProofNFT } from './utils'
 

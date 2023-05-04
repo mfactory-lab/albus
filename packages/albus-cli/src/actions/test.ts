@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
 import { toMetaplexFile } from '@metaplex-foundation/js'
-import { crypto } from '@albus/core'
+import { crypto } from '../../../albus-core'
 import { useContext } from '../context'
 
 interface Opts {}
