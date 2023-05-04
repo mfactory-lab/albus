@@ -1,6 +1,6 @@
 [package]
 name = "albus"
-version = "0.0.1"
+version = "0.0.2"
 license = "Apache-2.0"
 description = "Albus Protocol Program"
 edition = "2021"
@@ -13,7 +13,7 @@ no-entrypoint = []
 cpi = ["no-entrypoint"]
 
 [dependencies]
-# fix deserealization error: https://github.com/solana-labs/solana/issues/30188
+# Fix: https://github.com/solana-labs/solana/issues/30188
 solana-program = "~1.14.16"
 anchor-lang = { version = "0.27.0", features = ["init-if-needed"]}
 anchor-spl = { version = "0.27.0" }
