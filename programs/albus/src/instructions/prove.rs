@@ -7,8 +7,9 @@ use crate::{
     AlbusError,
 };
 
+/// Proves the [ZKPRequest] by validating the proof metadata and updating its status to `Proved`.
+/// Returns an error if the request has expired or if the proof metadata is invalid.
 pub fn handler(ctx: Context<Prove>) -> Result<()> {
-    // Check that proof is a valid Albus NFT
     let proof_metadata = assert_valid_proof(&ctx.accounts.proof_metadata)?;
 
     // TODO: check that proof has valid circuit ?
@@ -24,6 +25,7 @@ pub fn handler(ctx: Context<Prove>) -> Result<()> {
     req.status = ZKPRequestStatus::Proved;
     req.proof = Some(proof_metadata.mint);
     req.proved_at = timestamp;
+    // reset the verification time if it was previously provided
     req.verified_at = 0;
 
     emit!(ProveEvent {

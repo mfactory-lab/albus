@@ -9,9 +9,13 @@ use crate::{
     AlbusError,
 };
 
+/// Verifies the [ZKPRequest] and updates its status accordingly.
+/// Returns an error if the authority is not authorized, the request has not been proved,
+/// the request has expired or the status is not valid.
 pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
     let req = &mut ctx.accounts.zkp_request;
 
+    // Check that the authority is authorized to perform this action
     if !AUTHORIZED_AUTHORITY.is_empty()
         && !AUTHORIZED_AUTHORITY
             .iter()
@@ -20,12 +24,13 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
         return Err(AlbusError::Unauthorized.into());
     }
 
+    // Check that the ZKP request has already been proved
     if req.status != ZKPRequestStatus::Proved {
         return Err(AlbusError::Unproved.into());
     }
 
+    // Check that the ZKP request has not yet expired
     let timestamp = Clock::get()?.unix_timestamp;
-
     if req.expired_at > 0 && req.expired_at < timestamp {
         return Err(AlbusError::Expired.into());
     }

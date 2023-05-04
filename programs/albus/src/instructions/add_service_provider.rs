@@ -15,9 +15,12 @@ pub fn handler(ctx: Context<AddServiceProvider>, data: AddServiceProviderData) -
     Ok(())
 }
 
+/// Data required to add a new service provider
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct AddServiceProviderData {
+    /// The unique code representing the service
     pub code: String,
+    /// The name of the service
     pub name: String,
 }
 

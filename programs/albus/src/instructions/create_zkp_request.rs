@@ -37,8 +37,10 @@ pub fn handler(ctx: Context<CreateZKPRequest>, data: CreateZKPRequestData) -> Re
     Ok(())
 }
 
+/// Data required to create a new ZKP request
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateZKPRequestData {
+    /// Time in seconds until the request expires
     pub expires_in: u32,
 }
 

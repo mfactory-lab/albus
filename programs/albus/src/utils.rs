@@ -3,18 +3,25 @@ use std::str::FromStr;
 use anchor_lang::prelude::*;
 use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 
-use crate::{constants::AUTHORIZED_AUTHORITY, AlbusError};
+use crate::{
+    constants::{AUTHORIZED_AUTHORITY, NFT_SYMBOL_PREFIX},
+    AlbusError,
+};
 
 pub fn assert_valid_proof(account: &AccountInfo) -> Result<Metadata> {
-    assert_valid_metadata(account, None, None)
-    // TODO: check symbol, name, etc...
-    // ALBUS-P
+    let metadata = assert_valid_metadata(account, None, None)?;
+    if metadata.data.symbol != format!("{}-P", NFT_SYMBOL_PREFIX) {
+        return Err(AlbusError::InvalidMetadata.into());
+    }
+    Ok(metadata)
 }
 
 pub fn assert_valid_circuit(account: &AccountInfo) -> Result<Metadata> {
-    assert_valid_metadata(account, None, None)
-    // TODO: check symbol, name, etc...
-    // ALBUS-C
+    let metadata = assert_valid_metadata(account, None, None)?;
+    if metadata.data.symbol != format!("{}-C", NFT_SYMBOL_PREFIX) {
+        return Err(AlbusError::InvalidMetadata.into());
+    }
+    Ok(metadata)
 }
 
 pub fn assert_valid_metadata(
