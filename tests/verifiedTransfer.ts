@@ -1,12 +1,15 @@
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
+import { BN } from '@project-serum/anchor'
 import { TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import * as web3 from '@solana/web3.js'
 import { assert } from 'chai'
 import { AlbusClient } from '@albus/sdk'
-import { assertErrorCode, createSplTransferInstruction, createTransferInstruction, mintNFT, payerKeypair, provider } from './utils'
+import { VerifiedTransferClient } from '@verified-transfer/sdk'
+import { assertErrorCode, mintNFT, payerKeypair, provider } from './utils'
 
 describe('verified transfer', () => {
   const client = new AlbusClient(provider)
+  const verifiedTransferClient = new VerifiedTransferClient(provider)
   const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(payerKeypair))
 
   it('can transfer SOL with albus verification check', async () => {
@@ -33,28 +36,12 @@ describe('verified transfer', () => {
       zkpRequest: ZKPRequestAddress,
     })
 
-    const instruction = createTransferInstruction(
-      {
-        albus_program: client.programId,
-        receiver: payerKeypair.publicKey,
-        sender: payerKeypair.publicKey,
-        zkp_request: ZKPRequestAddress,
-      },
-      {
-        data: {
-          amount: 100,
-        },
-      },
-    )
-
-    const tx = new web3.Transaction().add(instruction)
-
-    try {
-      await provider.sendAndConfirm(tx, [])
-    } catch (e: any) {
-      console.log(e)
-      throw e
-    }
+    await verifiedTransferClient.transfer({
+      albusProgram: client.programId,
+      amount: new BN(100),
+      receiver: payerKeypair.publicKey,
+      zkpRequest: ZKPRequestAddress,
+    })
   })
 
   it('can transfer tokens with albus verification check', async () => {
@@ -84,31 +71,15 @@ describe('verified transfer', () => {
     const source = await getOrCreateAssociatedTokenAccount(provider.connection, payerKeypair, tokenMint, payerKeypair.publicKey)
     await mintTo(provider.connection, payerKeypair, tokenMint, source.address, payerKeypair.publicKey, 100)
 
-    const instruction = createSplTransferInstruction(
-      {
-        albus_program: client.programId,
-        destination: source.address,
-        receiver: payerKeypair.publicKey,
-        sender: payerKeypair.publicKey,
-        source: source.address,
-        tokenMint,
-        zkp_request: ZKPRequestAddress,
-      },
-      {
-        data: {
-          amount: 100,
-        },
-      },
-    )
-
-    const tx = new web3.Transaction().add(instruction)
-
-    try {
-      await provider.sendAndConfirm(tx, [])
-    } catch (e: any) {
-      console.log(e)
-      throw e
-    }
+    await verifiedTransferClient.splTransfer({
+      destination: source.address,
+      source: source.address,
+      tokenMint,
+      albusProgram: client.programId,
+      amount: new BN(100),
+      receiver: payerKeypair.publicKey,
+      zkpRequest: ZKPRequestAddress,
+    })
   })
 
   it('can not transfer with albus verification check if ZKP request is not verified', async () => {
@@ -123,31 +94,13 @@ describe('verified transfer', () => {
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
-    const proofNft = await mintNFT(metaplex, 'ALBUS-P')
-
-    await client.prove({
-      proofMetadata: proofNft.metadataAddress,
-      zkpRequest: ZKPRequestAddress,
-    })
-
-    const instruction = createTransferInstruction(
-      {
-        albus_program: client.programId,
-        receiver: payerKeypair.publicKey,
-        sender: payerKeypair.publicKey,
-        zkp_request: ZKPRequestAddress,
-      },
-      {
-        data: {
-          amount: 100,
-        },
-      },
-    )
-
-    const tx = new web3.Transaction().add(instruction)
-
     try {
-      await provider.sendAndConfirm(tx, [])
+      await verifiedTransferClient.transfer({
+        albusProgram: client.programId,
+        amount: new BN(100),
+        receiver: payerKeypair.publicKey,
+        zkpRequest: ZKPRequestAddress,
+      })
       assert.ok(false)
     } catch (e: any) {
       assertErrorCode(e, 'Unverified')
