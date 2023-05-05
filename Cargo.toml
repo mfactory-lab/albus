@@ -1,7 +1,8 @@
 [workspace]
 members = [
   "programs/albus",
-  "programs/verified_transfer"
+  "programs/verified_transfer",
+  "packages/verification"
 ]
 
 [profile.release]
