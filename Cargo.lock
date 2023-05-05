@@ -2041,6 +2041,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "verification"
+version = "0.1.0"
+dependencies = [
+ "arrayref",
+ "solana-sdk",
+]
+
+[[package]]
 name = "verified-transfer"
 version = "0.0.1"
 dependencies = [
