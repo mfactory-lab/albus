@@ -1,5 +1,6 @@
 import log from 'loglevel'
 import { useContext } from '../../context'
+import { exploreAddress } from '../../utils'
 import { issueVerifiableCredential, mintVerifiableCredentialNFT } from './utils'
 
 interface Opts {
@@ -23,6 +24,7 @@ export async function issue(opts: Opts) {
 
   log.info('Done')
   log.info(`Mint: ${nft.address}`)
+  log.info(exploreAddress(nft.address))
 
   process.exit(0)
 }

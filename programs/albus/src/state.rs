@@ -15,6 +15,8 @@ pub struct ServiceProvider {
     pub zkp_request_count: u64,
     /// Timestamp for when the service was created
     pub created_at: i64,
+    // /// TODO:
+    // pub status: u8,
     /// Bump seed used to derive program-derived account seeds
     pub bump: u8,
 }
@@ -53,6 +55,7 @@ pub struct ZKPRequest {
     pub bump: u8,
 }
 
+#[repr(u8)]
 #[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone)]
 pub enum ZKPRequestStatus {
     #[default]

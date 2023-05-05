@@ -18,6 +18,10 @@ args := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 circom: ## Build circom
 	circom ./circuits/$(args).circom -l node_modules --r1cs --wasm --sym -o ./tmp
 
+.PHONY: bump
+bump: ## Bump albus program version
+	cd ./programs/albus/ && cargo bump
+
 .PHONY: build
 build: ## Build program
 	anchor build -p $(program)

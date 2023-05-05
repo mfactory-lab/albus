@@ -1,18 +1,30 @@
 import { LAMPORTS_PER_SOL, PublicKey, clusterApiUrl } from '@solana/web3.js'
-import type { Cluster, Transaction } from '@solana/web3.js'
+import type { Cluster, PublicKeyInitData, Transaction } from '@solana/web3.js'
 import * as anchor from '@project-serum/anchor'
+import { useContext } from '../context'
 
 export function clusterUrl(c: Cluster) {
   switch (c) {
     case 'mainnet-beta':
-      // return 'https://rpc.theindex.io'
-      // return 'https://ssc-dao.genesysgo.net'
-      // return 'https://jpoolone.genesysgo.net'
       return 'https://solana-api.projectserum.com/'
     case 'testnet':
       return 'https://testnet.rpcpool.com'
   }
   return clusterApiUrl(c as any)
+}
+
+function exploreLink(id: string, opts: { type: 'tx' | 'address'; cluster?: Cluster }) {
+  return `https://explorer.solana.com/${opts.type}/${id}?cluster=${opts.cluster ?? 'mainnet-beta'}`
+}
+
+export function exploreAddress(addr: PublicKeyInitData) {
+  const { cluster } = useContext()
+  return exploreLink(new PublicKey(addr).toString(), { type: 'address', cluster })
+}
+
+export function exploreTransaction(signature: string) {
+  const { cluster } = useContext()
+  return exploreLink(signature, { type: 'tx', cluster })
 }
 
 /**

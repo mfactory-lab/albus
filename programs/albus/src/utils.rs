@@ -8,9 +8,13 @@ use crate::{
     AlbusError,
 };
 
+fn is_valid_symbol(symbol: &str, code: &str) -> bool {
+    symbol.starts_with(&format!("{}-{}", NFT_SYMBOL_PREFIX, code))
+}
+
 pub fn assert_valid_proof(account: &AccountInfo) -> Result<Metadata> {
     let metadata = assert_valid_metadata(account, None, None)?;
-    if metadata.data.symbol != format!("{}-P", NFT_SYMBOL_PREFIX) {
+    if !is_valid_symbol(&metadata.data.symbol, "P") {
         return Err(AlbusError::InvalidMetadata.into());
     }
     Ok(metadata)
@@ -18,7 +22,7 @@ pub fn assert_valid_proof(account: &AccountInfo) -> Result<Metadata> {
 
 pub fn assert_valid_circuit(account: &AccountInfo) -> Result<Metadata> {
     let metadata = assert_valid_metadata(account, None, None)?;
-    if metadata.data.symbol != format!("{}-C", NFT_SYMBOL_PREFIX) {
+    if !is_valid_symbol(&metadata.data.symbol, "C") {
         return Err(AlbusError::InvalidMetadata.into());
     }
     Ok(metadata)

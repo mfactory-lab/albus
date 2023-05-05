@@ -7,6 +7,7 @@ import * as WebDidResolver from 'web-did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import { crypto, snark } from '../../../../albus-core'
 import { useContext } from '../../context'
+import { exploreAddress } from '../../utils'
 import { loadCircuit, loadCredential, mintProofNFT } from './utils'
 
 interface Opts {
@@ -58,14 +59,14 @@ export async function createForRequest(addr: string, opts: Opts) {
   })
 
   log.debug('Done')
-  log.info({ proof, publicSignals })
+  log.info({ publicSignals })
 
   log.debug('Minting nft...')
   const nft = await mintProofNFT(req.circuit, proof, publicSignals)
 
   log.debug('Done')
-
   log.info(`Mint: ${nft.address}`)
+  log.info(exploreAddress(nft.address))
 
   // Mark zkp-request as proved
   await client.prove({ zkpRequest: reqAddr, proofMetadata: nft.metadataAddress })

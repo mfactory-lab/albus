@@ -1,27 +1,5 @@
 # Misc
 
-create identity
-
-show all VCs
-issue new VC
-
-create zkp request
-show all zkp requests
-show single zkp request
-
-prove zkp request (from VC)
-
-verify zkp request
-
-register service provider
-delete service provider
-
----
-
-On-Chain
-- fix smart contract
-- generate sdk
-
 # MVP
 1. Test KYC в виде CLI
 - проверка дубликатов заглушка
@@ -33,31 +11,8 @@ On-Chain
   - в нем хранится хеш кошелька
   - он не может его удалить
   - на него мы генерируем did
-3. удаление запроса
-
-
-приходит запрос
 
 ---
-
-# Roadmap
-On-chain
-- store proof data on-chain
-- generate NFT proof
-
-# Encryption
-threshold cryptography
-shamir algo (https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing)
-
-# Vocabulary
-claim = verifiable credentials
-verifiable presentation
-
-# NFT
-- did kyc + did holder + date
-- encrypted vcred
-
-# expire: 1 day
 
 - client did
 -

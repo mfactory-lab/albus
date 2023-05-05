@@ -4,7 +4,7 @@ import { useContext } from '../../context'
 
 interface Opts {}
 
-export async function deleteZKPRequest(addr: string, opts: Opts) {
+export async function remove(addr: string, opts: Opts) {
   const { client } = useContext()
 
   const signature = await client.deleteZKPRequest({

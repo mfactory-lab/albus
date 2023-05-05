@@ -1,3 +1,5 @@
+import log from 'loglevel'
+import fetch from 'node-fetch'
 import * as snarkjs from 'snarkjs'
 
 interface GenerateProofProps {
@@ -20,6 +22,7 @@ export async function generateProof(props: GenerateProofProps) {
 }
 
 async function fetchBytes(url: string) {
+  log.debug(`Loading file ${url}...`)
   const resp = await fetch(url)
   return new Uint8Array(await resp.arrayBuffer())
 }
