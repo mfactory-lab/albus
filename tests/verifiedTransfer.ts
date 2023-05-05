@@ -12,7 +12,7 @@ describe('verified transfer', () => {
   it('can transfer SOL with albus verification check', async () => {
     await client.addServiceProvider({ code: 'code', name: 'name' })
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const nft = await mintNFT(metaplex)
+    const nft = await mintNFT(metaplex, 'ALBUS-C')
     const mint = nft.address
 
     await client.createZKPRequest({
@@ -22,8 +22,10 @@ describe('verified transfer', () => {
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
+    const proofNft = await mintNFT(metaplex, 'ALBUS-P')
+
     await client.prove({
-      proofMetadata: nft.metadataAddress,
+      proofMetadata: proofNft.metadataAddress,
       zkpRequest: ZKPRequestAddress,
     })
 
@@ -57,7 +59,7 @@ describe('verified transfer', () => {
 
   it('can transfer tokens with albus verification check', async () => {
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const nft = await mintNFT(metaplex)
+    const nft = await mintNFT(metaplex, 'ALBUS-C')
     const mint = nft.address
 
     await client.createZKPRequest({
@@ -67,8 +69,10 @@ describe('verified transfer', () => {
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
+    const proofNft = await mintNFT(metaplex, 'ALBUS-P')
+
     await client.prove({
-      proofMetadata: nft.metadataAddress,
+      proofMetadata: proofNft.metadataAddress,
       zkpRequest: ZKPRequestAddress,
     })
 
@@ -109,7 +113,7 @@ describe('verified transfer', () => {
 
   it('can not transfer with albus verification check if ZKP request is not verified', async () => {
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const nft = await mintNFT(metaplex)
+    const nft = await mintNFT(metaplex, 'ALBUS-C')
     const mint = nft.address
 
     await client.createZKPRequest({
@@ -119,8 +123,10 @@ describe('verified transfer', () => {
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
+    const proofNft = await mintNFT(metaplex, 'ALBUS-P')
+
     await client.prove({
-      proofMetadata: nft.metadataAddress,
+      proofMetadata: proofNft.metadataAddress,
       zkpRequest: ZKPRequestAddress,
     })
 

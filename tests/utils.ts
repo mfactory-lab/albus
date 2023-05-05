@@ -20,11 +20,11 @@ export function newProvider(payerKeypair: web3.Keypair) {
 
 export const provider = newProvider(payerKeypair)
 
-export async function mintNFT(metaplex: Metaplex) {
+export async function mintNFT(metaplex: Metaplex, symbol: string) {
   const { nft } = await metaplex.nfts().create({
     uri: 'http://localhost/metadata.json',
     name: 'ALBUS NFT',
-    symbol: 'ALBUS',
+    symbol,
     sellerFeeBasisPoints: 500,
   })
   return nft
