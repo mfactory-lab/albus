@@ -2,7 +2,7 @@
 members = [
   "programs/albus",
   "programs/verified_transfer",
-  "packages/verification"
+  "packages/albus-verifier"
 ]
 
 [profile.release]

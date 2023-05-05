@@ -1,14 +1,13 @@
 use arrayref::{array_ref, array_refs};
-use solana_sdk::{
-    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, pubkey::Pubkey,
+use solana_program::{
+    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError,
     sysvar::Sysvar,
 };
 
-pub const DISCRIMINATOR: &'static [u8] = &[218, 125, 94, 109, 164, 128, 230, 47];
+pub const DISCRIMINATOR: &'static [u8] = &[196, 177, 30, 25, 231, 233, 97, 178];
 pub const SPACE: usize = 8 + 32 + 32 + 32 + (1 + 32) + 8 + 8 + 8 + 8 + 1 + 1;
 
 pub enum ZKPRequestStatus {
-    #[default]
     Pending,
     Proved,
     Verified,
@@ -28,7 +27,7 @@ impl ZKPRequestStatus {
 }
 
 pub fn check_compliant(zkp_request: AccountInfo) -> Result<(), ProgramError> {
-    let mut data = &zkp_request
+    let data = &zkp_request
         .data
         .try_borrow_mut()
         .map_err(|_| ProgramError::InvalidAccountData)?[..];
@@ -39,7 +38,7 @@ pub fn check_compliant(zkp_request: AccountInfo) -> Result<(), ProgramError> {
         array_refs![data, 8, 32, 32, 32, 33, 8, 8, 8, 8, 1, 1];
 
     if discriminator != DISCRIMINATOR {
-        Err(ProgramError::InvalidAccountData)
+        return Err(ProgramError::InvalidAccountData);
     }
 
     let expired_at = i64::from_le_bytes(*expired_at);
