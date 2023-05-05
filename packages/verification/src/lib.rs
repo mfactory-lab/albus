@@ -1,10 +1,8 @@
 use arrayref::{array_ref, array_refs};
-use solana_sdk::account_info::AccountInfo;
-use solana_sdk::clock::Clock;
-use solana_sdk::msg;
-use solana_sdk::program_error::ProgramError;
-use solana_sdk::pubkey::Pubkey;
-use solana_sdk::sysvar::Sysvar;
+use solana_sdk::{
+    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, pubkey::Pubkey,
+    sysvar::Sysvar,
+};
 
 pub const DISCRIMINATOR: &'static [u8] = &[218, 125, 94, 109, 164, 128, 230, 47];
 pub const SPACE: usize = 8 + 32 + 32 + 32 + (1 + 32) + 8 + 8 + 8 + 8 + 1 + 1;
@@ -24,7 +22,7 @@ impl ZKPRequestStatus {
             Some(1) => Ok(ZKPRequestStatus::Proved),
             Some(2) => Ok(ZKPRequestStatus::Verified),
             Some(3) => Ok(ZKPRequestStatus::Rejected),
-            _ => Err(ProgramError::InvalidAccountData)
+            _ => Err(ProgramError::InvalidAccountData),
         }
     }
 }
