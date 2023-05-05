@@ -17,6 +17,7 @@ importers:
       '@types/chai': ^4.3.5
       '@types/mocha': ^10.0.1
       '@types/node': ^18.16.3
+      '@verified-transfer/sdk': workspace:verified-transfer-sdk
       chai: ^4.3.7
       eslint: ^8.39.0
       mocha: ^10.2.0
@@ -25,6 +26,7 @@ importers:
     dependencies:
       '@albus/sdk': link:packages/albus-sdk
       '@project-serum/anchor': 0.26.0
+      '@verified-transfer/sdk': link:packages/verified-transfer-sdk
     devDependencies:
       '@antfu/eslint-config': 0.38.5_tbtvr3a5zwdiktqy4vlmx63mqq
       '@metaplex-foundation/js': 0.18.3
@@ -110,57 +112,26 @@ importers:
       elliptic: ^6.5.4
       ffjavascript: ^0.2
       jsonld-signatures: ^11.0
+      node-fetch: ^2.6.9
       poseidon-encryption: ^1.0
       uint8arrays: ^3.1.1
     dependencies:
-      '@stablelib/ed25519':
-        specifier: ^1.0.3
-        version: 1.0.3
-      '@stablelib/random':
-        specifier: ^1.0.2
-        version: 1.0.2
-      '@stablelib/sha256':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/x25519':
-        specifier: ^1.0.3
-        version: 1.0.3
-      '@stablelib/xchacha20poly1305':
-        specifier: ^1.0.1
-        version: 1.0.1
-      circomlib:
-        specifier: ^2.0.5
-        version: 2.0.5
-      circomlibjs:
-        specifier: ^0.1
-        version: 0.1.7
-      did-jwt:
-        specifier: ^7.0
-        version: 7.0.0
-      did-jwt-vc:
-        specifier: ^3.1.3
-        version: 3.1.3
-      did-resolver:
-        specifier: ^4.1
-        version: 4.1.0
-      elliptic:
-        specifier: ^6.5.4
-        version: 6.5.4
-      ffjavascript:
-        specifier: ^0.2
-        version: 0.2.57
-      jsonld-signatures:
-        specifier: ^11.0
-        version: 11.1.0
-      node-fetch:
-        specifier: ^2.6.9
-        version: 2.6.9
-      poseidon-encryption:
-        specifier: ^1.0
-        version: 1.0.2
-      uint8arrays:
-        specifier: ^3.1.1
-        version: 3.1.1
+      '@stablelib/ed25519': 1.0.3
+      '@stablelib/random': 1.0.2
+      '@stablelib/sha256': 1.0.1
+      '@stablelib/x25519': 1.0.3
+      '@stablelib/xchacha20poly1305': 1.0.1
+      circomlib: 2.0.5
+      circomlibjs: 0.1.7
+      did-jwt: 7.0.0
+      did-jwt-vc: 3.1.3
+      did-resolver: 4.1.0
+      elliptic: 6.5.4
+      ffjavascript: 0.2.57
+      jsonld-signatures: 11.1.0
+      node-fetch: 2.6.9
+      poseidon-encryption: 1.0.2
+      uint8arrays: 3.1.1
 
   packages/albus-sdk:
     specifiers:
@@ -172,6 +143,20 @@ importers:
       '@metaplex-foundation/js': 0.18.3
       '@solana/spl-token': 0.3.7_@solana+web3.js@1.75.0
       '@solana/web3.js': 1.75.0
+    devDependencies:
+      '@metaplex-foundation/solita': 0.19.4
+
+  packages/verified-transfer-sdk:
+    specifiers:
+      '@metaplex-foundation/js': ^0.18
+      '@metaplex-foundation/solita': ^0.19
+      '@solana/spl-token': ^0.3
+      '@solana/web3.js': ^1.73
+    dependencies:
+      '@metaplex-foundation/js': 0.18.3
+      '@solana/spl-token': 0.3.7_@solana+web3.js@1.75.0
+      '@solana/web3.js': 1.75.0
+
     devDependencies:
       '@metaplex-foundation/solita': 0.19.4
 

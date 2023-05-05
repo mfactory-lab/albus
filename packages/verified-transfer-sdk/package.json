@@ -1,0 +1,18 @@
+{
+  "name": "@verified-transfer/sdk",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "sideEffects": false,
+  "scripts": {
+    "api:gen": "DEBUG='(solita|rustbin):(info|error)' solita"
+  },
+  "dependencies": {
+    "@metaplex-foundation/js": "^0.18",
+    "@solana/spl-token": "^0.3",
+    "@solana/web3.js": "^1.73"
+  },
+  "devDependencies": {
+    "@metaplex-foundation/solita": "^0.19"
+  }
+}

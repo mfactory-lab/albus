@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@albus/sdk": "workspace:*",
+    "@verified-transfer/sdk": "workspace:verified-transfer-sdk",
     "@project-serum/anchor": "^0.26.0"
   },
   "devDependencies": {

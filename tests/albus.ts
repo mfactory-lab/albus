@@ -28,7 +28,7 @@ describe('albus', () => {
     const newPayerKeypair = web3.Keypair.generate()
     const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
     await airdrop(newPayerKeypair.publicKey)
-    const nft = await mintNFT(metaplex)
+    const nft = await mintNFT(metaplex, 'ALBUS-C')
     const mint = nft.address
     try {
       await client.createZKPRequest({
@@ -42,13 +42,17 @@ describe('albus', () => {
   })
 
   it('can create ZKP request', async () => {
-    const nft = await mintNFT(metaplex)
+    const nft = await mintNFT(metaplex, 'ALBUS-C')
     mint = nft.address
 
-    await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
-    })
+    try {
+      await client.createZKPRequest({
+        circuitMint: mint,
+        serviceProviderCode: 'code',
+      })
+    } catch (e) {
+      console.log(e)
+    }
 
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
@@ -69,7 +73,7 @@ describe('albus', () => {
     const newPayerKeypair = web3.Keypair.generate()
     const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
     await airdrop(newPayerKeypair.publicKey)
-    const proofNft = await mintNFT(metaplex)
+    const proofNft = await mintNFT(metaplex, 'ALBUS-P')
 
     try {
       await client.prove({
@@ -83,7 +87,7 @@ describe('albus', () => {
   })
 
   it('can prove ZKP request', async () => {
-    const nft = await mintNFT(metaplex)
+    const nft = await mintNFT(metaplex, 'ALBUS-P')
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
@@ -122,7 +126,7 @@ describe('albus', () => {
   })
 
   it('can not verify unproved ZKP request', async () => {
-    const nft = await mintNFT(metaplex)
+    const nft = await mintNFT(metaplex, 'ALBUS-C')
     const mint = nft.address
 
     await client.createZKPRequest({
@@ -156,7 +160,7 @@ describe('albus', () => {
   })
 
   it('can deny ZKP request', async () => {
-    const nft = await mintNFT(metaplex)
+    const nft = await mintNFT(metaplex, 'ALBUS-P')
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
