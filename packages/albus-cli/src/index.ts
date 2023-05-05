@@ -51,17 +51,6 @@ vc.command('issue')
   .action(actions.vc.issue)
 
 // ------------------------------------------
-// Circuit
-// ------------------------------------------
-
-const circuit = cli.command('circuit')
-
-circuit.command('create')
-  .description('Create new circuit NFT')
-  .argument('name', 'Circuit name')
-  .action(actions.circuit.create)
-
-// ------------------------------------------
 // Proving
 // ------------------------------------------
 
@@ -69,14 +58,14 @@ const prove = cli.command('prove')
 
 prove.command('create')
   .description('Create new proof')
-  .requiredOption('--circuit <CIRCUIT_MINT>', 'Circuit mint address')
+  .requiredOption('--circuit <ADDR>', 'Circuit mint address')
   .option('--input <PATH>', 'Input file path')
   .action(actions.prove.create)
 
 prove.command('request')
   .description('Create prove for ZKP Request')
   .argument('req', 'ZKP Request address')
-  .requiredOption('--vc <VC_ADDR>', 'VC address')
+  .requiredOption('--vc <ADDR>', 'VC address')
   .option('--force', 'Override existing prove')
   .action(actions.prove.createForRequest)
 
@@ -88,8 +77,8 @@ const verify = cli.command('verify')
 
 verify.command('proof')
   .description('Verify proof')
-  .requiredOption('--circuit <CIRCUIT_MINT>', 'Circuit mint address')
-  .requiredOption('--proof <PROOF_MINT>', 'Proof mint address')
+  .requiredOption('--circuit <ADDR>', 'Circuit mint address')
+  .requiredOption('--proof <ADDR>', 'Proof mint address')
   .action(actions.verify.verifyProof)
 
 verify.command('request')
@@ -106,8 +95,8 @@ const request = cli.command('request')
 request.command('create')
   .description('Create ZKP request')
   .requiredOption('--sp <CODE>', 'Service provider`s unique code')
-  .requiredOption('--circuit <MINT>', 'Circuit`s mint')
-  .option('--expires-in <EXPIRES>', 'Expires in some time duration')
+  .requiredOption('--circuit <ADDR>', 'Circuit`s mint')
+  .option('--expires-in <SECONDS>', 'Expires in some time duration')
   .action(actions.request.create)
 
 request.command('remove')
@@ -121,17 +110,17 @@ request.command('show')
   .action(actions.request.show)
 
 request.command('find')
-  .description('Search ZKP Request')
-  .requiredOption('--sp <PUBKEY>', 'Service provider address')
-  .requiredOption('--owner <PUBKEY>', 'Request creator')
-  .requiredOption('--circuit <MINT>', 'Circuit`s mint')
+  .description('Find ZKP Request')
+  .requiredOption('--sp <CODE>', 'Service provider address')
+  .requiredOption('--owner <ADDR>', 'Request creator')
+  .requiredOption('--circuit <ADDR>', 'Circuit`s mint')
   .action(actions.request.find)
 
 request.command('all')
   .description('Show all ZKP requests')
   .option('--sp <CODE>', 'Filter by Service provider')
-  .option('--circuit <CIRCUIT>', 'Filter by Circuit mint')
-  .option('--proof <PROOF>', 'Filter by Proof mint')
+  .option('--circuit <ADDR>', 'Filter by Circuit mint')
+  .option('--proof <ADDR>', 'Filter by Proof mint')
   .action(actions.request.showAll)
 
 // ------------------------------------------
@@ -139,6 +128,14 @@ request.command('all')
 // ------------------------------------------
 
 const admin = cli.command('admin')
+
+const circuit = admin.command('circuit')
+  .description('Circuit Management')
+
+circuit.command('create')
+  .description('Create new circuit NFT')
+  .argument('name', 'Circuit name')
+  .action(actions.admin.circuit.create)
 
 const sp = admin.command('sp')
   .description('Service Provider Management')

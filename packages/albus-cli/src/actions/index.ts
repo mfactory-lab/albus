@@ -1,5 +1,4 @@
 export * as admin from './admin'
-export * as circuit from './circuit'
 export * as prove from './prove'
 export * as verify from './verify'
 export * as identity from './identity'
