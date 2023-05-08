@@ -11,7 +11,7 @@ pub mod verified_transfer {
     use super::*;
 
     pub fn transfer(ctx: Context<VerifiedTransfer>, amount: u64) -> Result<()> {
-        check_compliant(&ctx.accounts.zkp_request)?;
+        check_compliant(&ctx.accounts.zkp_request, Some(ctx.accounts.sender.key()))?;
 
         system_program::transfer(
             CpiContext::new(
@@ -28,7 +28,7 @@ pub mod verified_transfer {
     }
 
     pub fn spl_transfer(ctx: Context<VerifiedSplTransfer>, amount: u64) -> Result<()> {
-        check_compliant(&ctx.accounts.zkp_request)?;
+        check_compliant(&ctx.accounts.zkp_request, Some(ctx.accounts.sender.key()))?;
 
         token::transfer(
             CpiContext::new(
