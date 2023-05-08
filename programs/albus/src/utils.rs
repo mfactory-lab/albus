@@ -8,13 +8,29 @@ use crate::{
     AlbusError,
 };
 
+const PROOF_SYMBOL_CODE: &str = "P";
+const CIRCUIT_SYMBOL_CODE: &str = "C";
+
+/// Check that the `authority` key is authorized
+pub fn assert_authorized(authority: &Pubkey) -> Result<()> {
+    if !AUTHORIZED_AUTHORITY.is_empty()
+        && !AUTHORIZED_AUTHORITY
+            .iter()
+            .any(|a| Pubkey::from_str(a).unwrap() == *authority)
+    {
+        Err(AlbusError::Unauthorized.into())
+    } else {
+        Ok(())
+    }
+}
+
 fn is_valid_symbol(symbol: &str, code: &str) -> bool {
     symbol.starts_with(&format!("{}-{}", NFT_SYMBOL_PREFIX, code))
 }
 
 pub fn assert_valid_proof(account: &AccountInfo) -> Result<Metadata> {
     let metadata = assert_valid_metadata(account, None, None)?;
-    if !is_valid_symbol(&metadata.data.symbol, "P") {
+    if !is_valid_symbol(&metadata.data.symbol, PROOF_SYMBOL_CODE) {
         return Err(AlbusError::InvalidMetadata.into());
     }
     Ok(metadata)
@@ -22,7 +38,7 @@ pub fn assert_valid_proof(account: &AccountInfo) -> Result<Metadata> {
 
 pub fn assert_valid_circuit(account: &AccountInfo) -> Result<Metadata> {
     let metadata = assert_valid_metadata(account, None, None)?;
-    if !is_valid_symbol(&metadata.data.symbol, "C") {
+    if !is_valid_symbol(&metadata.data.symbol, CIRCUIT_SYMBOL_CODE) {
         return Err(AlbusError::InvalidMetadata.into());
     }
     Ok(metadata)
@@ -46,13 +62,8 @@ pub fn assert_valid_metadata(
         if !auth.iter().any(|a| a == &metadata.update_authority) {
             return Err(AlbusError::Unauthorized.into());
         }
-    // check predefined authorities
-    } else if !AUTHORIZED_AUTHORITY.is_empty()
-        && !AUTHORIZED_AUTHORITY
-            .iter()
-            .any(|a| Pubkey::from_str(a).unwrap() == metadata.update_authority)
-    {
-        return Err(AlbusError::Unauthorized.into());
+    } else {
+        assert_authorized(&metadata.update_authority)?;
     }
 
     // determine authorized creator
