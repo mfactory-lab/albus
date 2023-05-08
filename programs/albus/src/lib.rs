@@ -3,7 +3,6 @@ mod events;
 mod instructions;
 mod state;
 mod utils;
-pub mod verification;
 
 use anchor_lang::prelude::*;
 use instructions::*;
