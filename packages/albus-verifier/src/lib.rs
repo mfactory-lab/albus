@@ -1,12 +1,11 @@
-use arrayref::{array_ref, array_refs};
+use arrayref::array_refs;
 use solana_program::{
-    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError,
-    sysvar::Sysvar,
+    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, sysvar::Sysvar,
 };
 
-pub const DISCRIMINATOR: &'static [u8] = &[196, 177, 30, 25, 231, 233, 97, 178];
-pub const SPACE: usize = 8 + 32 + 32 + 32 + (1 + 32) + 8 + 8 + 8 + 8 + 1 + 1;
+pub const ZKP_REQUEST_DISCRIMINATOR: &[u8] = &[196, 177, 30, 25, 231, 233, 97, 178];
 
+#[repr(u8)]
 pub enum ZKPRequestStatus {
     Pending,
     Proved,
@@ -14,36 +13,36 @@ pub enum ZKPRequestStatus {
     Rejected,
 }
 
-impl ZKPRequestStatus {
-    pub fn from_bytes(data: &[u8]) -> Result<ZKPRequestStatus, ProgramError> {
-        match data.first() {
-            Some(0) => Ok(ZKPRequestStatus::Pending),
-            Some(1) => Ok(ZKPRequestStatus::Proved),
-            Some(2) => Ok(ZKPRequestStatus::Verified),
-            Some(3) => Ok(ZKPRequestStatus::Rejected),
+impl TryFrom<u8> for ZKPRequestStatus {
+    type Error = ProgramError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Pending),
+            1 => Ok(Self::Proved),
+            2 => Ok(Self::Verified),
+            3 => Ok(Self::Rejected),
             _ => Err(ProgramError::InvalidAccountData),
         }
     }
 }
 
-pub fn check_compliant(zkp_request: AccountInfo) -> Result<(), ProgramError> {
-    let data = &zkp_request
+pub fn check_compliant(acc: &AccountInfo) -> Result<(), ProgramError> {
+    let data = &acc
         .data
-        .try_borrow_mut()
-        .map_err(|_| ProgramError::InvalidAccountData)?[..];
+        .take()
+        .try_into()
+        .map_err(|_| ProgramError::InvalidAccountData)?;
 
-    let data = array_ref![data, 0, SPACE];
-
-    let (discriminator, _, _, _, _, _, expired_at, _, _, status, _) =
+    let (discriminator, _, _, _, _, _, expired_at, _, _, [status], _) =
         array_refs![data, 8, 32, 32, 32, 33, 8, 8, 8, 8, 1, 1];
 
-    if discriminator != DISCRIMINATOR {
+    if discriminator != ZKP_REQUEST_DISCRIMINATOR {
         return Err(ProgramError::InvalidAccountData);
     }
 
     let expired_at = i64::from_le_bytes(*expired_at);
-    let status = ZKPRequestStatus::from_bytes(status)?;
-
+    let status = ZKPRequestStatus::try_from(*status)?;
     let timestamp = Clock::get()?.unix_timestamp;
 
     if expired_at > 0 && expired_at < timestamp {
@@ -57,16 +56,104 @@ pub fn check_compliant(zkp_request: AccountInfo) -> Result<(), ProgramError> {
             Ok(())
         }
         ZKPRequestStatus::Proved => {
-            msg!("Failure: ZKP request status is 'Proved'");
+            msg!("Error: ZKP request is proved");
             Err(ProgramError::Custom(2))
         }
         ZKPRequestStatus::Pending => {
-            msg!("Failure: ZKP request status is 'Pending'");
-            Err(ProgramError::Custom(2))
+            msg!("Error: ZKP request is Pending");
+            Err(ProgramError::Custom(3))
         }
         ZKPRequestStatus::Rejected => {
-            msg!("Failure: ZKP request status is 'Denied'");
-            Err(ProgramError::Custom(2))
+            msg!("Error: ZKP request is Rejected");
+            Err(ProgramError::Custom(4))
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use solana_program::{account_info::AccountInfo, clock::Clock, pubkey::Pubkey};
+
+    use super::*;
+
+    #[test]
+    fn test_verified() {
+        solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
+
+        let addr = Pubkey::new_unique();
+        let lamp = &mut 0;
+        let mut data = get_zkp_request(ZKPRequestStatus::Verified, 0);
+
+        let acc = AccountInfo::new(
+            &addr,
+            false,
+            false,
+            lamp,
+            data.as_mut_slice(),
+            &addr,
+            false,
+            0,
+        );
+
+        assert_eq!(check_compliant(&acc), Ok(()));
+    }
+
+    #[test]
+    fn test_expired() {
+        solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
+
+        let addr = Pubkey::new_unique();
+        let lamp = &mut 0;
+        let mut data = get_zkp_request(ZKPRequestStatus::Proved, 1);
+
+        let acc = AccountInfo::new(
+            &addr,
+            false,
+            false,
+            lamp,
+            data.as_mut_slice(),
+            &addr,
+            false,
+            0,
+        );
+
+        assert_eq!(check_compliant(&acc), Err(ProgramError::Custom(1)));
+    }
+
+    fn get_zkp_request(status: ZKPRequestStatus, expired_at: i64) -> Vec<u8> {
+        [
+            ZKP_REQUEST_DISCRIMINATOR,
+            &Pubkey::new_unique().to_bytes(),
+            &Pubkey::new_unique().to_bytes(),
+            &Pubkey::new_unique().to_bytes(),
+            &[1],
+            &Pubkey::new_unique().to_bytes(),
+            &0i64.to_le_bytes(),
+            &expired_at.to_le_bytes(),
+            &0i64.to_le_bytes(),
+            &0i64.to_le_bytes(),
+            &(status as u8).to_le_bytes(),
+            &0u8.to_le_bytes(),
+        ]
+        .into_iter()
+        .flatten()
+        .copied()
+        .collect::<Vec<_>>()
+    }
+
+    struct SyscallStubs {}
+    impl solana_program::program_stubs::SyscallStubs for SyscallStubs {
+        fn sol_get_clock_sysvar(&self, var_addr: *mut u8) -> u64 {
+            unsafe {
+                *(var_addr as *mut _ as *mut Clock) = Clock {
+                    slot: 1,
+                    epoch_start_timestamp: 2,
+                    epoch: 3,
+                    leader_schedule_epoch: 4,
+                    unix_timestamp: 5,
+                };
+            }
+            solana_program::entrypoint::SUCCESS
         }
     }
 }
