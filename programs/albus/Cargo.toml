@@ -15,7 +15,8 @@ cpi = ["no-entrypoint"]
 [dependencies]
 # Fix: https://github.com/solana-labs/solana/issues/30188
 #solana-program = "~1.14.16"
-anchor-lang = { version = "^0.27", features = ["init-if-needed"]}
-anchor-spl = { version = "^0.27" }
+anchor-lang = { version = "0.27.0", features = ["init-if-needed"]}
+anchor-spl = { version = "0.27.0" }
 mpl-token-metadata = { version = "1.9.1", features = ["no-entrypoint"] }
-#winnow = "=0.4.1"
+# fix: error: package `winnow v0.4.6` cannot be built because it requires rustc 1.64.0 or newer
+winnow = "=0.4.1"
