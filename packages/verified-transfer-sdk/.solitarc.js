@@ -1,18 +1,22 @@
-const os = require('os');
-const path = require('path');
+const os = require('os')
+const path = require('path')
 
-const programDir = path.join(__dirname, '..', '..', 'programs', 'verified_transfer');
-const idlDir = path.join(__dirname, 'idl');
-const sdkDir = path.join(__dirname, 'src', 'generated');
-const binaryInstallDir = path.join(os.homedir(), '.cargo');
-// const binaryInstallDir = path.join(__dirname, '.crates');
+const programName = 'verified_transfer'
+const programId = 'ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2'
+
+const programDir = path.join(__dirname, '..', '..', 'programs', 'verified_transfer')
+const idlGenerator = 'anchor'
+const idlDir = path.join(__dirname, 'idl')
+const sdkDir = path.join(__dirname, 'src', 'generated')
+const binaryInstallDir = path.join(os.homedir(), '.cargo')
+// const binaryInstallDir = path.join(__dirname, '.crates')
 
 module.exports = {
-  idlGenerator: 'anchor',
-  programName: 'verified_transfer',
-  programId: '4goQchSHCB4zSa3vjn2NdjnWhYuzn3oYSbx1kVwwZdHS',
+  programId,
+  programName,
+  programDir,
+  idlGenerator,
   idlDir,
   sdkDir,
   binaryInstallDir,
-  programDir,
-};
+}

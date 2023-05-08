@@ -77,7 +77,7 @@ export const splTransferInstructionDiscriminator = [
 export function createSplTransferInstruction(
   accounts: SplTransferInstructionAccounts,
   args: SplTransferInstructionArgs,
-  programId = new web3.PublicKey('4goQchSHCB4zSa3vjn2NdjnWhYuzn3oYSbx1kVwwZdHS')
+  programId = new web3.PublicKey('ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2')
 ) {
   const [data] = splTransferStruct.serialize({
     instructionDiscriminator: splTransferInstructionDiscriminator,
