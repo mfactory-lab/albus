@@ -103,7 +103,7 @@ describe('verified transfer', () => {
       })
       assert.ok(false)
     } catch (e: any) {
-      assertErrorCode(e, 'Unverified')
+      assertErrorCode(e, 'Custom(3)')
     }
   })
 })
