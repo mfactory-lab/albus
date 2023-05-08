@@ -1,7 +1,5 @@
-import * as beet from '@metaplex-foundation/beet'
 import type { Metaplex } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet, web3 } from '@project-serum/anchor'
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { assert } from 'chai'
