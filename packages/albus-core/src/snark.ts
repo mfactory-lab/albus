@@ -9,7 +9,8 @@ interface GenerateProofProps {
 }
 
 /**
- * Create new Proof
+ * Generates a proof using the `groth16` proof system.
+ * @returns {Promise<SNARK>}
  */
 export async function generateProof(props: GenerateProofProps) {
   return snarkjs.groth16.fullProve(props.input ?? {}, {
@@ -21,6 +22,9 @@ export async function generateProof(props: GenerateProofProps) {
   })
 }
 
+/**
+ * Fetches bytes from the specified URL using the fetch API.
+ */
 async function fetchBytes(url: string) {
   log.debug(`Loading file ${url}...`)
   const resp = await fetch(url)

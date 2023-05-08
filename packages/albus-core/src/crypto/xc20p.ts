@@ -83,7 +83,7 @@ function xc20pDecrypter(key: Uint8Array): Decrypter {
 }
 
 /**
- * Encrypt a message with a PublicKey
+ * Encrypt a message with a `PublicKey`
  */
 export async function encrypt(message: string, pubKey: PublicKey): Promise<string> {
   const epk = generateKeyPair()
@@ -106,7 +106,7 @@ export async function encrypt(message: string, pubKey: PublicKey): Promise<strin
 }
 
 /**
- * Decrypt an encrypted message for the with the key that was used to encrypt it
+ * Decrypt an encrypted message with the key that was used to encrypt it
  */
 export async function decrypt(encryptedMessage: string, privateKey: PrivateKey): Promise<string> {
   const encMessage = base64ToBytes(encryptedMessage)

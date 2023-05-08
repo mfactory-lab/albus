@@ -153,7 +153,7 @@ export class AlbusClient {
   }
 
   /**
-   * Verifies a Zero Knowledge Proof (ZKP) request internally using Metaplex and snarkjs libraries.
+   * Verifies a Zero Knowledge Proof (ZKP) request internally.
    *
    * The verification process involves the following steps:
    *
