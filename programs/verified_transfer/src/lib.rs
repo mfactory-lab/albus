@@ -4,14 +4,14 @@ declare_id!("4goQchSHCB4zSa3vjn2NdjnWhYuzn3oYSbx1kVwwZdHS");
 
 #[program]
 pub mod verified_transfer {
-    use albus::verification::check_compliant;
+    use albus_verifier::check_compliant;
     use anchor_lang::system_program;
     use anchor_spl::token;
 
     use super::*;
 
     pub fn transfer(ctx: Context<VerifiedTransfer>, amount: u64) -> Result<()> {
-        check_compliant(ctx.accounts.zkp_request.to_account_info())?;
+        check_compliant(&ctx.accounts.zkp_request)?;
 
         system_program::transfer(
             CpiContext::new(
@@ -28,7 +28,7 @@ pub mod verified_transfer {
     }
 
     pub fn spl_transfer(ctx: Context<VerifiedSplTransfer>, amount: u64) -> Result<()> {
-        check_compliant(ctx.accounts.zkp_request.to_account_info())?;
+        check_compliant(&ctx.accounts.zkp_request)?;
 
         token::transfer(
             CpiContext::new(
