@@ -1,4 +1,4 @@
-![Albus logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/albus-logo.png)
+![Albus logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/albus-logo.png | width=100)
 
 # Introduction
 
