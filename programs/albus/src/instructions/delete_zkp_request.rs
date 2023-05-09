@@ -1,11 +1,13 @@
 use anchor_lang::prelude::*;
 
+use crate::utils::cmp_pubkeys;
 use crate::{events::DeleteZKPRequestEvent, state::ZKPRequest, AlbusError};
 
 pub fn handler(ctx: Context<DeleteZKPRequest>) -> Result<()> {
     let req = &mut ctx.accounts.zkp_request;
 
-    if req.owner.key() != ctx.accounts.authority.key() {
+    if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
+        msg!("Error: Only request owner can delete it!");
         return Err(AlbusError::Unauthorized.into());
     }
 

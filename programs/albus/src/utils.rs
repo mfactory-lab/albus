@@ -1,6 +1,8 @@
 use std::str::FromStr;
 
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::program_memory::sol_memcmp;
+use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 
 use crate::{
@@ -10,6 +12,11 @@ use crate::{
 
 const PROOF_SYMBOL_CODE: &str = "P";
 const CIRCUIT_SYMBOL_CODE: &str = "C";
+
+/// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`
+pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {
+    sol_memcmp(a.as_ref(), b.as_ref(), PUBKEY_BYTES) == 0
+}
 
 /// Check that the `authority` key is authorized
 pub fn assert_authorized(authority: &Pubkey) -> Result<()> {

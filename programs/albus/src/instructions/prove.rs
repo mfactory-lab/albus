@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 
+use crate::utils::cmp_pubkeys;
 use crate::{
     events::ProveEvent,
     state::{ZKPRequest, ZKPRequestStatus},
@@ -10,22 +11,24 @@ use crate::{
 /// Proves the [ZKPRequest] by validating the proof metadata and updating its status to `Proved`.
 /// Returns an error if the request has expired or if the proof metadata is invalid.
 pub fn handler(ctx: Context<Prove>) -> Result<()> {
-    let proof_metadata = assert_valid_proof(&ctx.accounts.proof_metadata)?;
+    let req = &mut ctx.accounts.zkp_request;
 
-    // TODO: check that proof has valid circuit ?
+    if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
+        msg!("Error: Only request owner can prove it!");
+        return Err(AlbusError::Unauthorized.into());
+    }
 
     let timestamp = Clock::get()?.unix_timestamp;
-
-    let req = &mut ctx.accounts.zkp_request;
 
     if req.expired_at > 0 && req.expired_at < timestamp {
         return Err(AlbusError::Expired.into());
     }
 
+    let proof_metadata = assert_valid_proof(&ctx.accounts.proof_metadata)?;
+
     req.status = ZKPRequestStatus::Proved;
     req.proof = Some(proof_metadata.mint);
     req.proved_at = timestamp;
-    // reset the verification time if it was previously provided
     req.verified_at = 0;
 
     emit!(ProveEvent {

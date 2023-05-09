@@ -1,8 +1,11 @@
 use anchor_lang::prelude::*;
 
 use crate::state::ServiceProvider;
+use crate::utils::assert_authorized;
 
 pub fn handler(ctx: Context<AddServiceProvider>, data: AddServiceProviderData) -> Result<()> {
+    assert_authorized(&ctx.accounts.authority.key())?;
+
     let timestamp = Clock::get()?.unix_timestamp;
 
     let sp = &mut ctx.accounts.service_provider;
