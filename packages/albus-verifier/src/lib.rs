@@ -4,7 +4,9 @@ use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 use solana_program::{
     account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, sysvar::Sysvar,
 };
+use std::str::FromStr;
 
+pub const ALBUS_PROGRAM_ID: &str = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz";
 pub const ZKP_REQUEST_DISCRIMINATOR: &[u8] = &[196, 177, 30, 25, 231, 233, 97, 178];
 
 #[repr(u8)]
@@ -38,6 +40,19 @@ pub fn check_compliant(
         .take()
         .try_into()
         .map_err(|_| ProgramError::InvalidAccountData)?;
+
+    let albus_program_id =
+        Pubkey::from_str(ALBUS_PROGRAM_ID).map_err(|_| ProgramError::IncorrectProgramId)?;
+
+    // Assert the account is owned by albus program
+    if sol_memcmp(
+        zkp_request.owner.as_ref(),
+        albus_program_id.as_ref(),
+        PUBKEY_BYTES,
+    ) != 0
+    {
+        return Err(ProgramError::IllegalOwner);
+    }
 
     let (discriminator, _, _, owner, _, _, expired_at, _, _, [status], _) =
         array_refs![data, 8, 32, 32, 32, 33, 8, 8, 8, 8, 1, 1];
@@ -73,14 +88,37 @@ pub fn check_compliant(
             Err(ProgramError::Custom(2))
         }
         ZKPRequestStatus::Pending => {
-            msg!("Error: ZKP request is Pending");
+            msg!("Error: ZKP request is pending");
             Err(ProgramError::Custom(3))
         }
         ZKPRequestStatus::Rejected => {
-            msg!("Error: ZKP request is Rejected");
+            msg!("Error: ZKP request is rejected");
             Err(ProgramError::Custom(4))
         }
     }
+}
+
+/// Generates the service provider program address for the Albus protocol
+pub fn find_service_provider_address(program_id: &Pubkey, code: &str) -> (Pubkey, u8) {
+    Pubkey::find_program_address(&[b"service-provider", code.as_bytes()], program_id)
+}
+
+/// Generates the zkp request program address for the Albus protocol
+pub fn find_zkp_request_address(
+    program_id: &Pubkey,
+    service_provider: &Pubkey,
+    circuit: &Pubkey,
+    user: &Pubkey,
+) -> (Pubkey, u8) {
+    Pubkey::find_program_address(
+        &[
+            b"zkp-request",
+            &service_provider.to_bytes(),
+            &circuit.to_bytes(),
+            &user.to_bytes(),
+        ],
+        program_id,
+    )
 }
 
 #[cfg(test)]
@@ -93,10 +131,11 @@ mod test {
     fn test_verified() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
+        let program_id = Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap();
         let addr = Pubkey::new_unique();
-        let owner = Pubkey::new_unique();
+        let user = Pubkey::new_unique();
         let lamp = &mut 0;
-        let mut data = get_zkp_request(ZKPRequestStatus::Verified, 0, owner);
+        let mut data = get_zkp_request(ZKPRequestStatus::Verified, 0, user);
 
         let acc = AccountInfo::new(
             &addr,
@@ -104,18 +143,19 @@ mod test {
             false,
             lamp,
             data.as_mut_slice(),
-            &addr,
+            &program_id,
             false,
             0,
         );
 
-        assert_eq!(check_compliant(&acc, Some(owner)), Ok(()));
+        assert_eq!(check_compliant(&acc, Some(user)), Ok(()));
     }
 
     #[test]
     fn test_expired() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
+        let program_id = Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap();
         let addr = Pubkey::new_unique();
         let lamports = &mut 0;
         let mut data = get_zkp_request(ZKPRequestStatus::Proved, 1, Pubkey::new_unique());
@@ -126,7 +166,7 @@ mod test {
             false,
             lamports,
             data.as_mut_slice(),
-            &addr,
+            &program_id,
             false,
             0,
         );
@@ -138,6 +178,7 @@ mod test {
     fn test_ownership() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
+        let program_id = Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap();
         let addr = Pubkey::new_unique();
         let owner = Pubkey::new_unique();
         let lamports = &mut 0;
@@ -149,7 +190,7 @@ mod test {
             false,
             lamports,
             data.as_mut_slice(),
-            &addr,
+            &program_id,
             false,
             0,
         );
