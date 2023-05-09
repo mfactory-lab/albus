@@ -1,7 +1,6 @@
 [workspace]
 members = [
-  "programs/albus",
-  "programs/verified_transfer",
+  "programs/*",
   "packages/albus-verifier"
 ]
 

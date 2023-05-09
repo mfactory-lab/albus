@@ -42,7 +42,6 @@ export const splTransferStruct = new beet.BeetArgsStruct<
  * @property [_writable_] source
  * @property [_writable_] destination
  * @property [] zkpRequest
- * @property [] albusProgram
  * @category Instructions
  * @category SplTransfer
  * @category generated
@@ -54,7 +53,6 @@ export type SplTransferInstructionAccounts = {
   source: web3.PublicKey
   destination: web3.PublicKey
   zkpRequest: web3.PublicKey
-  albusProgram: web3.PublicKey
   tokenProgram?: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -111,11 +109,6 @@ export function createSplTransferInstruction(
     },
     {
       pubkey: accounts.zkpRequest,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.albusProgram,
       isWritable: false,
       isSigner: false,
     },

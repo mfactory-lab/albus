@@ -21,11 +21,6 @@
           "isSigner": false
         },
         {
-          "name": "albusProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -68,11 +63,6 @@
         },
         {
           "name": "zkpRequest",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "albusProgram",
           "isMut": false,
           "isSigner": false
         },
