@@ -37,5 +37,5 @@ Albus is a blockchain protocol designed to ensure that users transacting with de
 # Contacts
 
 - Alexander Ray, co-founder, CEO, technology/architecture [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/alex-a-ray/)<br>
-- Sonny Wolfson, Co-Founder, CBDO [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/sonny-wolfson-22297621/)<br>
+- Sonny Wolfson, co-founder, CBDO [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/sonny-wolfson-22297621/)<br>
 - Leo Krassovitski, co-founder, COO, UI/UX/frontend [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/leonid-krassovitski/)
