@@ -1,9 +1,9 @@
 [package]
-name = "albus-verifier"
 version = "0.1.0"
+name = "albus-verifier"
+description = "Albus on-chain compliance check"
+license = "AGPL-3.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 arrayref = "^0.3.7"
