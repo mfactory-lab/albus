@@ -38,7 +38,6 @@ export const transferStruct = new beet.BeetArgsStruct<
  * @property [_writable_, **signer**] sender
  * @property [_writable_] receiver
  * @property [] zkpRequest
- * @property [] albusProgram
  * @category Instructions
  * @category Transfer
  * @category generated
@@ -47,7 +46,6 @@ export type TransferInstructionAccounts = {
   sender: web3.PublicKey
   receiver: web3.PublicKey
   zkpRequest: web3.PublicKey
-  albusProgram: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -88,11 +86,6 @@ export function createTransferInstruction(
     },
     {
       pubkey: accounts.zkpRequest,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.albusProgram,
       isWritable: false,
       isSigner: false,
     },

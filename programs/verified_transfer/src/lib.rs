@@ -57,9 +57,6 @@ pub mod verified_transfer {
         /// CHECK: Albus ZKP request
         pub zkp_request: AccountInfo<'info>,
 
-        /// CHECK: Albus program
-        pub albus_program: AccountInfo<'info>,
-
         pub system_program: Program<'info, System>,
     }
 
@@ -91,9 +88,6 @@ pub mod verified_transfer {
 
         /// CHECK: Albus ZKP request
         pub zkp_request: AccountInfo<'info>,
-
-        /// CHECK: Albus program
-        pub albus_program: AccountInfo<'info>,
 
         pub token_program: Program<'info, token::Token>,
 

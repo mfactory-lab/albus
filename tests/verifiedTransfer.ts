@@ -37,7 +37,6 @@ describe('verified transfer', () => {
     })
 
     await verifiedTransferClient.transfer({
-      albusProgram: client.programId,
       amount: new BN(100),
       receiver: payerKeypair.publicKey,
       zkpRequest: ZKPRequestAddress,
@@ -75,7 +74,6 @@ describe('verified transfer', () => {
       destination: source.address,
       source: source.address,
       tokenMint,
-      albusProgram: client.programId,
       amount: new BN(100),
       receiver: payerKeypair.publicKey,
       zkpRequest: ZKPRequestAddress,
@@ -96,7 +94,6 @@ describe('verified transfer', () => {
 
     try {
       await verifiedTransferClient.transfer({
-        albusProgram: client.programId,
         amount: new BN(100),
         receiver: payerKeypair.publicKey,
         zkpRequest: ZKPRequestAddress,

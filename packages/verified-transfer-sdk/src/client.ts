@@ -22,7 +22,6 @@ export class VerifiedTransferClient {
   async transfer(props: TransferProps, opts?: ConfirmOptions) {
     const instruction = createTransferInstruction(
       {
-        albusProgram: props.albusProgram,
         receiver: props.receiver,
         sender: this.provider.publicKey,
         zkpRequest: props.zkpRequest,
@@ -42,7 +41,6 @@ export class VerifiedTransferClient {
   async splTransfer(props: SplTransferProps, opts?: ConfirmOptions) {
     const instruction = createSplTransferInstruction(
       {
-        albusProgram: props.albusProgram,
         destination: props.destination,
         receiver: props.receiver,
         sender: this.provider.publicKey,
@@ -63,7 +61,6 @@ export class VerifiedTransferClient {
 export interface TransferProps {
   receiver: PublicKey
   zkpRequest: PublicKey
-  albusProgram: PublicKey
   amount: BN
 }
 
@@ -72,7 +69,6 @@ export interface SplTransferProps {
   source: PublicKey
   destination: PublicKey
   zkpRequest: PublicKey
-  albusProgram: PublicKey
   tokenMint: PublicKey
   amount: BN
 }
