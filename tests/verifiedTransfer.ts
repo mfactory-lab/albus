@@ -19,8 +19,8 @@ describe('verified transfer', () => {
     const mint = nft.address
 
     await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
+      circuit: mint,
+      serviceCode: 'code',
     })
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
@@ -49,8 +49,8 @@ describe('verified transfer', () => {
     const mint = nft.address
 
     await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
+      circuit: mint,
+      serviceCode: 'code',
     })
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
@@ -86,8 +86,8 @@ describe('verified transfer', () => {
     const mint = nft.address
 
     await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
+      circuit: mint,
+      serviceCode: 'code',
     })
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)

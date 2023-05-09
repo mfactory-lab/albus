@@ -81,7 +81,7 @@ export class AlbusClient {
   async checkCompliance(props: CheckCompliance) {
     const user = props.user ?? this.provider.publicKey
     const [addr] = this.getZKPRequestPDA(
-      this.getServiceProviderPDA(props.serviceProviderCode),
+      this.getServiceProviderPDA(props.serviceCode),
       props.circuit,
       user,
     )
@@ -292,15 +292,15 @@ export class AlbusClient {
    */
   async createZKPRequest(props: CreateZKPRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const [serviceProvider] = this.getServiceProviderPDA(props.serviceProviderCode)
-    const [zkpRequest] = this.getZKPRequestPDA(serviceProvider, props.circuitMint, authority)
-    const circuitMetadata = getMetadataPDA(props.circuitMint)
+    const [serviceProvider] = this.getServiceProviderPDA(props.serviceCode)
+    const [zkpRequest] = this.getZKPRequestPDA(serviceProvider, props.circuit, authority)
+    const circuitMetadata = getMetadataPDA(props.circuit)
 
     const instruction = createCreateZkpRequestInstruction(
       {
         serviceProvider,
         zkpRequest,
-        circuitMint: props.circuitMint,
+        circuitMint: props.circuit,
         circuitMetadata,
         authority,
       },
@@ -427,12 +427,12 @@ export class AlbusClient {
   }
 
   /**
-   * Load all zkp requests
+   * Search zkp requests
    */
-  async loadAllZKPRequests(filter: { serviceProvider?: Address; circuit?: Address; proof?: Address } = {}) {
+  async searchZKPRequests(filter: { user?: Address; serviceProvider?: Address; circuit?: Address; proof?: Address } = {}) {
     const builder = ZKPRequest.gpaBuilder()
       .addFilter('accountDiscriminator', zKPRequestDiscriminator)
-      .addFilter('owner', this.provider.publicKey)
+      .addFilter('owner', filter.user ? new PublicKey(filter.user) : this.provider.publicKey)
 
     if (filter.serviceProvider) {
       builder.addFilter('serviceProvider', new PublicKey(filter.serviceProvider))
@@ -464,12 +464,12 @@ export class AlbusClient {
   /**
    * Get channel device PDA
    */
-  getZKPRequestPDA(serviceProvider: PublicKeyInitData, circuitMint: PublicKeyInitData, requester: PublicKeyInitData) {
+  getZKPRequestPDA(service: PublicKeyInitData, circuit: PublicKeyInitData, user: PublicKeyInitData) {
     return PublicKey.findProgramAddressSync([
       Buffer.from(ZKP_REQUEST_SEED_PREFIX),
-      new PublicKey(serviceProvider).toBuffer(),
-      new PublicKey(circuitMint).toBuffer(),
-      new PublicKey(requester).toBuffer(),
+      new PublicKey(service).toBuffer(),
+      new PublicKey(circuit).toBuffer(),
+      new PublicKey(user).toBuffer(),
     ], this.programId)
   }
 
@@ -485,8 +485,8 @@ export class AlbusClient {
 }
 
 export interface CreateZKPRequestProps {
-  serviceProviderCode: string
-  circuitMint: PublicKey
+  serviceCode: string
+  circuit: PublicKey
   expiresIn?: number
 }
 
@@ -513,7 +513,7 @@ export interface VerifyProps {
 }
 
 export interface CheckCompliance {
-  serviceProviderCode: string
+  serviceCode: string
   circuit: PublicKey
   user?: PublicKey
   full?: boolean

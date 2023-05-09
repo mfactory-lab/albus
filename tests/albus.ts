@@ -32,8 +32,8 @@ describe('albus', () => {
     const mint = nft.address
     try {
       await client.createZKPRequest({
-        circuitMint: mint,
-        serviceProviderCode: 'code',
+        circuit: mint,
+        serviceCode: 'code',
       })
       assert.ok(false)
     } catch (e: any) {
@@ -47,8 +47,8 @@ describe('albus', () => {
 
     try {
       await client.createZKPRequest({
-        circuitMint: mint,
-        serviceProviderCode: 'code',
+        circuit: mint,
+        serviceCode: 'code',
       })
     } catch (e) {
       console.log(e)
@@ -130,8 +130,8 @@ describe('albus', () => {
     const mint = nft.address
 
     await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
+      circuit: mint,
+      serviceCode: 'code',
     })
 
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
