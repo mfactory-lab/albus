@@ -53,13 +53,18 @@ export async function showAll() {
       audience: config.issuerDid,
     })
 
-    let vcInfo = vc.verifiableCredential.credentialSubject as Record<string, any>
-    if (vcInfo.encrypted) {
-      vcInfo = JSON.parse(await crypto.xc20p.decrypt(vcInfo.encrypted, keypair.secretKey))
+    let credentialSubject = vc.verifiableCredential.credentialSubject as Record<string, any>
+    if (credentialSubject.encrypted) {
+      credentialSubject = JSON.parse(await crypto.xc20p.decrypt(credentialSubject.encrypted, keypair.secretKey))
     }
 
-    log.info('Mint:', metadata.mintAddress.toString())
-    log.info('VerifiableCredential:', vcInfo)
+    log.info('Id:', vc.verifiableCredential.id)
+    log.info('MintAddress:', metadata.mintAddress.toString())
+    log.info('Issuer:', vc.verifiableCredential.issuer)
+    log.info('IssuanceDate:', vc.verifiableCredential.issuanceDate)
+    log.info('ExpirationDate:', vc.verifiableCredential.expirationDate)
+    log.info('VerifiableCredential:', credentialSubject)
+
     log.info('--------------------------------------------------------------------------')
   }
 }
