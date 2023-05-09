@@ -1,8 +1,9 @@
 use arrayref::array_refs;
+use solana_program::program_memory::sol_memcmp;
+use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 use solana_program::{
     account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, sysvar::Sysvar,
 };
-use solana_program::pubkey::Pubkey;
 
 pub const ZKP_REQUEST_DISCRIMINATOR: &[u8] = &[196, 177, 30, 25, 231, 233, 97, 178];
 
@@ -28,8 +29,11 @@ impl TryFrom<u8> for ZKPRequestStatus {
     }
 }
 
-pub fn check_compliant(acc: &AccountInfo, request_initiator: Option<Pubkey>) -> Result<(), ProgramError> {
-    let data = &acc
+pub fn check_compliant(
+    zkp_request: &AccountInfo,
+    zkp_request_owner: Option<Pubkey>,
+) -> Result<(), ProgramError> {
+    let data = &zkp_request
         .data
         .take()
         .try_into()
@@ -39,13 +43,13 @@ pub fn check_compliant(acc: &AccountInfo, request_initiator: Option<Pubkey>) -> 
         array_refs![data, 8, 32, 32, 32, 33, 8, 8, 8, 8, 1, 1];
 
     if discriminator != ZKP_REQUEST_DISCRIMINATOR {
+        msg!("Error: Invalid account discriminator!");
         return Err(ProgramError::InvalidAccountData);
     }
 
-    if let Some(request_initiator) = request_initiator {
-        let owner = Pubkey::from(*owner);
-        if request_initiator != owner {
-            msg!("Invalid owner authority!");
+    if let Some(key) = zkp_request_owner {
+        if sol_memcmp(key.as_ref(), owner, PUBKEY_BYTES) != 0 {
+            msg!("Error: Invalid request owner!");
             return Err(ProgramError::InvalidAccountData);
         }
     }
@@ -113,14 +117,14 @@ mod test {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
         let addr = Pubkey::new_unique();
-        let lamp = &mut 0;
+        let lamports = &mut 0;
         let mut data = get_zkp_request(ZKPRequestStatus::Proved, 1, Pubkey::new_unique());
 
         let acc = AccountInfo::new(
             &addr,
             false,
             false,
-            lamp,
+            lamports,
             data.as_mut_slice(),
             &addr,
             false,
@@ -131,25 +135,33 @@ mod test {
     }
 
     #[test]
-    fn test_invalid_owner() {
+    fn test_ownership() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
         let addr = Pubkey::new_unique();
-        let lamp = &mut 0;
-        let mut data = get_zkp_request(ZKPRequestStatus::Proved, 1, Pubkey::new_unique());
+        let owner = Pubkey::new_unique();
+        let lamports = &mut 0;
+        let mut data = get_zkp_request(ZKPRequestStatus::Verified, 0, owner);
 
         let acc = AccountInfo::new(
             &addr,
             false,
             false,
-            lamp,
+            lamports,
             data.as_mut_slice(),
             &addr,
             false,
             0,
         );
 
-        assert_eq!(check_compliant(&acc, Some(Pubkey::new_unique())), Err(ProgramError::InvalidAccountData));
+        // valid owner
+        assert_eq!(check_compliant(&acc, Some(owner)), Ok(()));
+
+        // invalid owner
+        assert_eq!(
+            check_compliant(&acc, Some(Pubkey::new_unique())),
+            Err(ProgramError::InvalidAccountData)
+        );
     }
 
     fn get_zkp_request(status: ZKPRequestStatus, expired_at: i64, owner: Pubkey) -> Vec<u8> {
