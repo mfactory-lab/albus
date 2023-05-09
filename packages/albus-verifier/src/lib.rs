@@ -9,6 +9,11 @@ use std::str::FromStr;
 pub const ALBUS_PROGRAM_ID: &str = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz";
 pub const ZKP_REQUEST_DISCRIMINATOR: &[u8] = &[196, 177, 30, 25, 231, 233, 97, 178];
 
+/// Returns the address of the Albus program.
+pub fn program_id() -> Pubkey {
+    Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap()
+}
+
 #[repr(u8)]
 pub enum ZKPRequestStatus {
     Pending,
@@ -62,6 +67,7 @@ pub fn check_compliant(
         return Err(ProgramError::InvalidAccountData);
     }
 
+    // Checks if the provided `zkp_request_owner` is equal to zkp request's `owner`.
     if let Some(key) = zkp_request_owner {
         if sol_memcmp(key.as_ref(), owner, PUBKEY_BYTES) != 0 {
             msg!("Error: Invalid request owner!");
