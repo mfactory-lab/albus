@@ -1,5 +1,5 @@
 [package]
-version = "0.1.0"
+version = "0.1.1"
 name = "albus-verifier"
 description = "Albus on-chain compliance check"
 license = "AGPL-3.0"
