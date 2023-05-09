@@ -4,10 +4,10 @@
 
 Albus is a blockchain protocol designed to ensure that users transacting with decentralized finance (DeFi) services comply with predefined policies, while preserving user anonymity and privacy. Drawing on technologies such as Zero-Knowledge Proof (ZKP) and Self-Sovereign Identity (SSI), Albus manages personal data of users in a secure and confidential manner. 
 
-# Website
+# Website and litepaper
 
-[Albus website](https://albus.finance/)
-[Albus litepaper](https://albus.finance/assets/download/litepaper.pdf)
+- [Albus website](https://albus.finance/)<br>
+- [Albus litepaper](https://albus.finance/assets/download/litepaper.pdf)
 
 # Full documentation
 
@@ -36,6 +36,6 @@ Albus is a blockchain protocol designed to ensure that users transacting with de
 
 # Contacts
 
-Alexander Ray, co-founder, CEO, technology/architecture [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/alex-a-ray/)
-Sonny Wolfson, Co-Founder, CBDO [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/sonny-wolfson-22297621/)
-Leo Krassovitski, co-founder, COO, UI/UX/frontend [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/leonid-krassovitski/)
+- Alexander Ray, co-founder, CEO, technology/architecture [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/alex-a-ray/)<br>
+- Sonny Wolfson, Co-Founder, CBDO [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/sonny-wolfson-22297621/)<br>
+- Leo Krassovitski, co-founder, COO, UI/UX/frontend [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/leonid-krassovitski/)
