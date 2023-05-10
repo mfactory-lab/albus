@@ -4,6 +4,7 @@ import type { Address, AnchorProvider } from '@project-serum/anchor'
 import { BorshCoder, EventManager } from '@project-serum/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import type { PublicSignals, SnarkjsProof, VK } from 'snarkjs'
 import * as snarkjs from 'snarkjs'
 import idl from '../idl/albus.json'
 import {
@@ -25,6 +26,11 @@ import { getMetadataPDA } from './utils'
 
 const SERVICE_PROVIDER_SEED_PREFIX = 'service-provider'
 const ZKP_REQUEST_SEED_PREFIX = 'zkp-request'
+const NFT_SYMBOL_PREFIX = 'ALBUS'
+const PROOF_SYMBOL_CODE = 'P'
+const CIRCUIT_SYMBOL_CODE = 'C'
+const VC_SYMBOL_CODE = 'VC'
+// const IDENTITY_SYMBOL_CODE = 'ID'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -41,6 +47,10 @@ export class AlbusClient {
 
   get connection() {
     return this.provider.connection
+  }
+
+  get metaplex() {
+    return Metaplex.make(this.connection)
   }
 
   /**
@@ -78,36 +88,67 @@ export class AlbusClient {
    *
    * @param {CheckCompliance} props
    */
-  async checkCompliance(props: CheckCompliance) {
+  async verifyCompliance(props: CheckCompliance) {
     const user = props.user ?? this.provider.publicKey
-    const [addr] = this.getZKPRequestPDA(
-      this.getServiceProviderPDA(props.serviceCode),
-      props.circuit,
-      user,
-    )
+    const [service] = this.getServiceProviderPDA(props.serviceCode)
+    const [zkpRequest] = this.getZKPRequestPDA(service, props.circuit, user)
 
-    // verify on-chain request
-    const req = await this.loadZKPRequest(addr)
+    const req = await this.loadZKPRequest(zkpRequest)
     this.validateZKPRequest(req)
 
-    // full proof verification
+    // full ZK proof verification
     if (props.full) {
-      return await this.verifyZKPRequestInternal(req)
+      return await this.verifyProof(req.proof!)
     }
 
     return true
   }
 
   /**
+   * Verify a ZK Proof with specified {@link addr}
+   */
+  async verifyProof(addr: PublicKeyInitData) {
+    const proof = await this.loadProof(addr)
+    const circuit = await this.loadCircuit(proof.circuit)
+
+    return snarkjs.groth16.verify(circuit.vk, proof.publicInput, proof.payload)
+  }
+
+  /**
+   * Verify ZKP request for the specified service code and circuit.
+   * If {@link user} is undefined, provider.pubkey will be used.
+   *
+   * @param {string} serviceCode
+   * @param {PublicKeyInitData} circuit
+   * @param {PublicKeyInitData|undefined} user
+   * @returns {Promise<boolean>}
+   */
+  async verifySpecific(
+    serviceCode: string,
+    circuit: PublicKeyInitData,
+    user?: PublicKeyInitData,
+  ) {
+    const [service] = this.getServiceProviderPDA(serviceCode)
+    const [zkpRequest] = this.getZKPRequestPDA(service, circuit, user ?? this.provider.publicKey)
+    return this.verifyZKPRequest(zkpRequest)
+  }
+
+  /**
+   * Verify ZKP request with specified {@link addr}
+   *
+   * @param {PublicKeyInitData} addr
+   * @returns {Promise<boolean>}
+   */
+  async verifyZKPRequest(addr: PublicKeyInitData) {
+    const req = await this.loadZKPRequest(addr)
+    if (!req.proof) {
+      throw new Error('ZKP Request is not proved yet')
+    }
+    return this.verifyProof(req.proof)
+  }
+
+  /**
    * Validates a Zero Knowledge Proof (ZKP) request.
-   *
-   * A ZKP request must satisfy the following criteria:
-   *
-   * - The `expiredAt` property must be greater than the current time, or zero to indicate no expiration.
-   * - The `proof` property must be truthy, i.e., not `null`, `undefined`, `false`, `0`, or an empty string.
-   * - The `verifiedAt` property must be greater than zero to indicate that the request has been verified.
-   *
-   * If any of these conditions are not met, an error is thrown with a descriptive message.
    *
    * @param {ZKPRequest} req The ZKP request object to validate.
    * @throws An error with a message indicating why the request is invalid.
@@ -117,7 +158,7 @@ export class AlbusClient {
       throw new Error('ZKP Request is expired')
     }
     if (!req.proof) {
-      throw new Error('ZKP Request is not proved')
+      throw new Error('ZKP Request is not proved yet')
     }
     if (req.verifiedAt <= 0) {
       throw new Error('ZKP Request is not verified')
@@ -125,86 +166,97 @@ export class AlbusClient {
   }
 
   /**
-   * Full {@link ZKPRequest} verification
-   *
-   * @param {PublicKeyInitData} serviceProvider
-   * @param {PublicKeyInitData} circuit
-   * @param {PublicKeyInitData} user
-   * @returns {Promise<boolean>}
+   * Load and validate Circuit NFT
    */
-  async verifyZKPRequest(
-    serviceProvider: PublicKeyInitData,
-    circuit: PublicKeyInitData,
-    user?: PublicKeyInitData,
-  ) {
-    return this.verifyZKPRequestByAddress(
-      this.getZKPRequestPDA(serviceProvider, circuit, user ?? this.provider.publicKey),
-    )
-  }
-
-  /**
-   * Full {@link ZKPRequest} verification for selected {@link addr}
-   *
-   * @param {PublicKeyInitData} addr
-   * @returns {Promise<boolean>}
-   */
-  async verifyZKPRequestByAddress(addr: PublicKeyInitData) {
-    return this.verifyZKPRequestInternal(await this.loadZKPRequest(addr))
-  }
-
-  /**
-   * Verifies a Zero Knowledge Proof (ZKP) request internally.
-   *
-   * The verification process involves the following steps:
-   *
-   * 1. Checking that the `proof` property of the request object is truthy.
-   * 2. Loading the circuit NFT metadata using the Metaplex API, based on the `circuit` property of the request.
-   * 3. Checking that the circuit metadata contains a verification key (`vk` property).
-   * 4. Loading the proof NFT metadata using the Metaplex API, based on the `proof` property of the request.
-   * 5. Checking that the proof metadata contains a proof data (`proof` property).
-   * 6. Extracting the verification key, proof, and public signals from the proof metadata.
-   * 7. Using the snarkjs library to perform a Groth16 verification of the proof using the verification key and public signals.
-   *
-   * If any of these steps fails, an error is thrown with a descriptive message.
-   *
-   * @param {ZKPRequest} req The ZKP request object to verify.
-   * @returns A promise that resolves to a boolean indicating whether the proof is valid.
-   * @throws An error with a message indicating why the proof is invalid.
-   */
-  async verifyZKPRequestInternal(req: ZKPRequest) {
-    if (!req.proof) {
-      throw new Error('ZKP request is not proved')
-    }
-
-    const metaplex = Metaplex.make(this.connection)
-
-    const circuitNft = await metaplex.nfts().findByMint({
-      mintAddress: new PublicKey(req.circuit),
+  async loadCircuit(addr: PublicKeyInitData) {
+    const nft = await this.metaplex.nfts().findByMint({
+      mintAddress: new PublicKey(addr),
       loadJsonMetadata: true,
     })
 
-    if (!circuitNft.json?.vk) {
-      throw new Error('Invalid circuit. Metadata does not contain verification key')
+    if (nft.symbol !== `${NFT_SYMBOL_PREFIX}-${CIRCUIT_SYMBOL_CODE}`) {
+      throw new Error('Invalid circuit! Bad symbol.')
     }
 
-    const proofNft = await metaplex.nfts().findByMint({
-      mintAddress: new PublicKey(req.proof),
-      loadJsonMetadata: true,
-    })
-
-    if (!proofNft.json?.proof) {
-      throw new Error('Invalid proof. Metadata does not contain proof data')
+    if (!nft.json?.circuit_id) {
+      throw new Error('Invalid circuit! Metadata does not contain `circuit_id`.')
     }
 
-    const vk = proofNft.json?.vk as snarkjs.VK
-    const proof = proofNft.json?.proof as snarkjs.SnarkjsProof
-    const publicSignals = (proofNft.json?.public_input ?? []) as any
+    if (!nft.json?.zkey_url) {
+      throw new Error('Invalid circuit! Metadata does not contain `zkey_url`.')
+    }
 
-    return await snarkjs.groth16.verify(vk, publicSignals, proof)
+    if (!nft.json?.wasm_url) {
+      throw new Error('Invalid circuit! Metadata does not contain `wasm_url`.')
+    }
+
+    if (!nft.json?.vk) {
+      throw new Error('Invalid circuit! Metadata does not contain verification key.')
+    }
+
+    return {
+      address: nft.address,
+      id: String(nft.json.circuit_id),
+      vk: nft.json.vk as VK,
+      wasmUrl: String(nft.json.wasm_url),
+      zkeyUrl: String(nft.json.zkey_url),
+    }
   }
 
   /**
-   * Prove existing {@link ZKPRequest}
+   * Load and validate Proof NFT
+   */
+  async loadProof(addr: PublicKeyInitData) {
+    const nft = await this.metaplex.nfts().findByMint({
+      mintAddress: new PublicKey(addr),
+      loadJsonMetadata: true,
+    })
+
+    if (nft.symbol !== `${NFT_SYMBOL_PREFIX}-${PROOF_SYMBOL_CODE}`) {
+      throw new Error('Invalid proof! Bad symbol.')
+    }
+
+    if (!nft.json?.proof) {
+      throw new Error('Invalid proof! Metadata does not contain `proof` payload.')
+    }
+
+    if (!nft.json?.circuit) {
+      throw new Error('Invalid proof! Metadata does not contain `circuit` address.')
+    }
+
+    return {
+      address: nft.address,
+      circuit: new PublicKey(nft.json.circuit),
+      payload: nft.json.proof as SnarkjsProof,
+      publicInput: (nft.json.public_input ?? []) as PublicSignals,
+    }
+  }
+
+  /**
+   * Load and validate Verifiable Credential NFT
+   */
+  async loadCredential(addr: PublicKeyInitData) {
+    const nft = await this.metaplex.nfts().findByMint({
+      mintAddress: new PublicKey(addr),
+      loadJsonMetadata: true,
+    })
+
+    if (nft.symbol !== `${NFT_SYMBOL_PREFIX}-${VC_SYMBOL_CODE}`) {
+      throw new Error('Invalid credential! Bad symbol.')
+    }
+
+    if (!nft.json?.vc) {
+      throw new Error('Invalid credential! Metadata does not contain `vc` payload.')
+    }
+
+    return {
+      address: nft.address,
+      payload: nft.json.vc as string,
+    }
+  }
+
+  /**
+   * Prove {@link ZKPRequest}
    */
   async prove(props: ProveProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -216,21 +268,17 @@ export class AlbusClient {
       },
     )
 
-    let signature: string
-
-    const tx = new Transaction().add(instruction)
-
     try {
-      signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
-
-    return { signature }
   }
 
   /**
-   * Verify existing {@link ZKPRequest}
+   * Verify {@link ZKPRequest}
    */
   async verify(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
@@ -245,17 +293,13 @@ export class AlbusClient {
       },
     )
 
-    let signature: string
-
-    const tx = new Transaction().add(instruction)
-
     try {
-      signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
-
-    return { signature }
   }
 
   /**
@@ -274,17 +318,13 @@ export class AlbusClient {
       },
     )
 
-    let signature: string
-
-    const tx = new Transaction().add(instruction)
-
     try {
-      signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
-
-    return { signature }
   }
 
   /**
@@ -311,17 +351,13 @@ export class AlbusClient {
       },
     )
 
-    let signature: string
-
-    const tx = new Transaction().add(instruction)
-
     try {
-      signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
-
-    return { signature }
   }
 
   /**
@@ -334,17 +370,13 @@ export class AlbusClient {
       authority,
     })
 
-    let signature: string
-
-    const tx = new Transaction().add(instruction)
-
     try {
-      signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
-
-    return { signature }
   }
 
   /**
@@ -363,17 +395,13 @@ export class AlbusClient {
       },
     })
 
-    let signature: string
-
-    const tx = new Transaction().add(instruction)
-
     try {
-      signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
-
-    return { signature }
   }
 
   /**
@@ -387,17 +415,13 @@ export class AlbusClient {
       authority,
     })
 
-    let signature: string
-
-    const tx = new Transaction().add(instruction)
-
     try {
-      signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
-
-    return { signature }
   }
 
   /**
