@@ -7,7 +7,7 @@ import { EdDSASigner } from 'did-jwt'
 import type { Issuer, JwtCredentialPayload } from 'did-jwt-vc'
 import { createVerifiableCredentialJwt } from 'did-jwt-vc'
 import log from 'loglevel'
-import { crypto } from '../../../../albus-core'
+import { crypto } from '@albus/core'
 import { useContext } from '../../context'
 
 export interface IssueOpts {

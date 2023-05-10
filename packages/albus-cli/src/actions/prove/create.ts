@@ -1,9 +1,10 @@
 import fs from 'node:fs'
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import { snark } from '../../../../albus-core'
+import { snark } from '@albus/core'
+import { useContext } from '../../context'
 import { exploreAddress } from '../../utils'
-import { loadCircuit, mintProofNFT } from './utils'
+import { mintProofNFT } from './utils'
 
 interface Opts {
   // Circuit NFT address
@@ -13,8 +14,10 @@ interface Opts {
 }
 
 export async function create(opts: Opts) {
+  const { client } = useContext()
+
   log.debug('Circuit loading...')
-  const circuit = await loadCircuit(opts.circuit)
+  const circuit = await client.loadCircuit(opts.circuit)
 
   const input = opts.input ? JSON.parse(fs.readFileSync(opts.input).toString()) : undefined
 

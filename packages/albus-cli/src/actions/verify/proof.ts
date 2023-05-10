@@ -1,10 +1,7 @@
 import log from 'loglevel'
-import * as snarkjs from 'snarkjs'
-import { loadCircuit, loadProof } from '../prove/utils'
+import { useContext } from '../../context'
 
 interface Opts {
-  // Circuit NFT address
-  circuit: string
   // Proof NFT address
   proof: string
 }
@@ -13,16 +10,20 @@ interface Opts {
  * Verify the proof
  */
 export async function verifyProof(opts: Opts) {
-  const circuit = await loadCircuit(opts.circuit)
-  const proof = await loadProof(opts.proof)
+  const { client } = useContext()
 
+  const proof = await client.loadProof(opts.proof)
+  const circuit = await client.loadCircuit(proof.circuit)
+
+  log.debug('Circuit:', circuit.id)
+  log.debug('CircuitAddress:', circuit.address)
   log.debug('VK:', circuit.vk)
   log.debug('Proof:', proof.payload)
   log.debug('PublicSignals:', proof.publicInput)
 
   log.debug('Verifying proof...')
 
-  const isVerified = await snarkjs.groth16.verify(circuit.vk, proof.publicInput, proof.payload)
+  const isVerified = await client.verifyProof(proof)
 
   if (isVerified) {
     log.debug('Verified!')
