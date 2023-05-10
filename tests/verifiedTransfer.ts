@@ -28,8 +28,8 @@ describe('verified transfer', () => {
     const proofNft = await mintNFT(metaplex, 'ALBUS-P')
 
     await client.prove({
-      proofMetadata: proofNft.metadataAddress,
       zkpRequest: ZKPRequestAddress,
+      proofMint: proofNft.address,
     })
 
     await client.verify({
@@ -58,8 +58,8 @@ describe('verified transfer', () => {
     const proofNft = await mintNFT(metaplex, 'ALBUS-P')
 
     await client.prove({
-      proofMetadata: proofNft.metadataAddress,
       zkpRequest: ZKPRequestAddress,
+      proofMint: proofNft.address,
     })
 
     await client.verify({

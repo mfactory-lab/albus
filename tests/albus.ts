@@ -77,7 +77,7 @@ describe('albus', () => {
 
     try {
       await client.prove({
-        proofMetadata: proofNft.metadataAddress,
+        proofMint: proofNft.address,
         zkpRequest: ZKPRequestAddress,
       })
       assert.ok(false)
@@ -92,7 +92,7 @@ describe('albus', () => {
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
     await client.prove({
-      proofMetadata: nft.metadataAddress,
+      proofMint: nft.address,
       zkpRequest: ZKPRequestAddress,
     })
 
@@ -165,7 +165,7 @@ describe('albus', () => {
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
     await client.prove({
-      proofMetadata: nft.metadataAddress,
+      proofMint: nft.address,
       zkpRequest: ZKPRequestAddress,
     })
 
