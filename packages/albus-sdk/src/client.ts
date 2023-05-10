@@ -262,8 +262,8 @@ export class AlbusClient {
     const authority = this.provider.publicKey
     const instruction = createProveInstruction(
       {
-        zkpRequest: props.zkpRequest,
-        proofMetadata: props.proofMetadata,
+        zkpRequest: new PublicKey(props.zkpRequest),
+        proofMetadata: getMetadataPDA(new PublicKey(props.proofMint)),
         authority,
       },
     )
@@ -283,7 +283,7 @@ export class AlbusClient {
   async verify(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
       {
-        zkpRequest: props.zkpRequest,
+        zkpRequest: new PublicKey(props.zkpRequest),
         authority: this.provider.publicKey,
       },
       {
@@ -308,7 +308,7 @@ export class AlbusClient {
   async reject(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
       {
-        zkpRequest: props.zkpRequest,
+        zkpRequest: new PublicKey(props.zkpRequest),
         authority: this.provider.publicKey,
       },
       {
@@ -334,13 +334,15 @@ export class AlbusClient {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.getServiceProviderPDA(props.serviceCode)
     const [zkpRequest] = this.getZKPRequestPDA(serviceProvider, props.circuit, authority)
-    const circuitMetadata = getMetadataPDA(props.circuit)
+
+    const circuitMint = new PublicKey(props.circuit)
+    const circuitMetadata = getMetadataPDA(circuitMint)
 
     const instruction = createCreateZkpRequestInstruction(
       {
         serviceProvider,
         zkpRequest,
-        circuitMint: props.circuit,
+        circuitMint,
         circuitMetadata,
         authority,
       },
@@ -366,7 +368,7 @@ export class AlbusClient {
   async deleteZKPRequest(props: DeleteZKPRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const instruction = createDeleteZkpRequestInstruction({
-      zkpRequest: props.zkpRequest,
+      zkpRequest: new PublicKey(props.zkpRequest),
       authority,
     })
 
@@ -456,7 +458,7 @@ export class AlbusClient {
   async searchZKPRequests(filter: { user?: Address; serviceProvider?: Address; circuit?: Address; proof?: Address } = {}) {
     const builder = ZKPRequest.gpaBuilder()
       .addFilter('accountDiscriminator', zKPRequestDiscriminator)
-      .addFilter('owner', filter.user ? new PublicKey(filter.user) : this.provider.publicKey)
+      .addFilter('owner', new PublicKey(filter.user ?? this.provider.publicKey))
 
     if (filter.serviceProvider) {
       builder.addFilter('serviceProvider', new PublicKey(filter.serviceProvider))
@@ -510,12 +512,12 @@ export class AlbusClient {
 
 export interface CreateZKPRequestProps {
   serviceCode: string
-  circuit: PublicKey
+  circuit: PublicKeyInitData
   expiresIn?: number
 }
 
 export interface DeleteZKPRequestProps {
-  zkpRequest: PublicKey
+  zkpRequest: PublicKeyInitData
 }
 
 export interface AddServiceProviderProps {
@@ -528,17 +530,17 @@ export interface DeleteServiceProviderProps {
 }
 
 export interface ProveProps {
-  zkpRequest: PublicKey
-  proofMetadata: PublicKey
+  zkpRequest: PublicKeyInitData
+  proofMint: PublicKeyInitData
 }
 
 export interface VerifyProps {
-  zkpRequest: PublicKey
+  zkpRequest: PublicKeyInitData
 }
 
 export interface CheckCompliance {
   serviceCode: string
-  circuit: PublicKey
-  user?: PublicKey
+  circuit: PublicKeyInitData
+  user?: PublicKeyInitData
   full?: boolean
 }
