@@ -137,7 +137,7 @@ mod test {
     fn test_verified() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
-        let program_id = Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap();
+        let program_id = program_id();
         let addr = Pubkey::new_unique();
         let user = Pubkey::new_unique();
         let lamp = &mut 0;
@@ -161,7 +161,7 @@ mod test {
     fn test_expired() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
-        let program_id = Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap();
+        let program_id = program_id();
         let addr = Pubkey::new_unique();
         let lamports = &mut 0;
         let mut data = get_zkp_request(ZKPRequestStatus::Proved, 1, Pubkey::new_unique());
@@ -184,7 +184,7 @@ mod test {
     fn test_ownership() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
-        let program_id = Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap();
+        let program_id = program_id();
         let addr = Pubkey::new_unique();
         let owner = Pubkey::new_unique();
         let lamports = &mut 0;
