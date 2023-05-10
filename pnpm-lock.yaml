@@ -197,9 +197,6 @@ importers:
       '@project-serum/anchor':
         specifier: ^0.26
         version: 0.26.0
-      '@solana/spl-token':
-        specifier: ^0.3
-        version: 0.3.7(@solana/web3.js@1.75.0)
       '@solana/web3.js':
         specifier: ^1.73
         version: 1.75.0
