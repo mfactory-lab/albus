@@ -15,7 +15,7 @@ pub fn handle(ctx: Context<VerifiedWithdrawStake>, amount: u64) -> Result<()> {
         &ctx.accounts.stake_pool_withdraw_authority.key(),
         &ctx.accounts.stake_to_split.key(),
         &ctx.accounts.stake_to_receive.key(),
-        &ctx.accounts.authority.key(),
+        &ctx.accounts.user_stake_authority.key(),
         &ctx.accounts.authority.key(),
         &ctx.accounts.pool_tokens_from.key(),
         &ctx.accounts.manager_fee_account.key(),
@@ -30,7 +30,7 @@ pub fn handle(ctx: Context<VerifiedWithdrawStake>, amount: u64) -> Result<()> {
         ctx.accounts.stake_pool_withdraw_authority.to_account_info(),
         ctx.accounts.stake_to_split.to_account_info(),
         ctx.accounts.stake_to_receive.to_account_info(),
-        ctx.accounts.authority.to_account_info(),
+        ctx.accounts.user_stake_authority.to_account_info(),
         ctx.accounts.authority.to_account_info(),
         ctx.accounts.pool_tokens_from.to_account_info(),
         ctx.accounts.manager_fee_account.to_account_info(),
@@ -50,12 +50,14 @@ pub struct VerifiedWithdrawStake<'info> {
     /// CHECK: Albus ZKP request
     pub zkp_request: AccountInfo<'info>,
 
-    #[account(mut)]
     pub authority: Signer<'info>,
 
     /// CHECK: Stake pool account
     #[account(mut)]
     pub stake_pool: AccountInfo<'info>,
+
+    /// CHECK: User account to set as a new withdraw authority
+    pub user_stake_authority: AccountInfo<'info>,
 
     /// CHECK: Stake pool's validator list storage account
     #[account(mut)]

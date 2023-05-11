@@ -2,27 +2,18 @@ use albus_verifier::check_compliant;
 use anchor_lang::prelude::*;
 use spl_stake_pool::{id, solana_program::program::invoke};
 
-pub fn handle(ctx: Context<VerifiedDepositSol>, amount: u64) -> Result<()> {
+pub fn handle<'info>(
+    ctx: Context<'_, '_, '_, 'info, VerifiedDepositSol<'info>>,
+    amount: u64,
+) -> Result<()> {
     check_compliant(
         &ctx.accounts.zkp_request,
         Some(ctx.accounts.authority.key()),
     )?;
 
-    let ix = spl_stake_pool::instruction::deposit_sol(
-        &id(),
-        &ctx.accounts.stake_pool.key(),
-        &ctx.accounts.stake_pool_withdraw_authority.key(),
-        &ctx.accounts.reserve_stake.key(),
-        &ctx.accounts.authority.key(),
-        &ctx.accounts.pool_tokens_to.key(),
-        &ctx.accounts.manager_fee_account.key(),
-        &ctx.accounts.referrer_pool_tokens_account.key(),
-        &ctx.accounts.pool_mint.key(),
-        &ctx.accounts.token_program.key(),
-        amount,
-    );
+    let ix;
 
-    let account_infos = vec![
+    let mut account_infos = vec![
         ctx.accounts.stake_pool.to_account_info(),
         ctx.accounts.stake_pool_withdraw_authority.to_account_info(),
         ctx.accounts.reserve_stake.to_account_info(),
@@ -34,6 +25,39 @@ pub fn handle(ctx: Context<VerifiedDepositSol>, amount: u64) -> Result<()> {
         ctx.accounts.system_program.to_account_info(),
         ctx.accounts.token_program.to_account_info(),
     ];
+
+    if let Some(sol_deposit_authority) = ctx.remaining_accounts.get(0) {
+        account_infos.push(sol_deposit_authority.to_account_info());
+
+        ix = spl_stake_pool::instruction::deposit_sol_with_authority(
+            &id(),
+            &ctx.accounts.stake_pool.key(),
+            &sol_deposit_authority.key(),
+            &ctx.accounts.stake_pool_withdraw_authority.key(),
+            &ctx.accounts.reserve_stake.key(),
+            &ctx.accounts.authority.key(),
+            &ctx.accounts.pool_tokens_to.key(),
+            &ctx.accounts.manager_fee_account.key(),
+            &ctx.accounts.referrer_pool_tokens_account.key(),
+            &ctx.accounts.pool_mint.key(),
+            &ctx.accounts.token_program.key(),
+            amount,
+        );
+    } else {
+        ix = spl_stake_pool::instruction::deposit_sol(
+            &id(),
+            &ctx.accounts.stake_pool.key(),
+            &ctx.accounts.stake_pool_withdraw_authority.key(),
+            &ctx.accounts.reserve_stake.key(),
+            &ctx.accounts.authority.key(),
+            &ctx.accounts.pool_tokens_to.key(),
+            &ctx.accounts.manager_fee_account.key(),
+            &ctx.accounts.referrer_pool_tokens_account.key(),
+            &ctx.accounts.pool_mint.key(),
+            &ctx.accounts.token_program.key(),
+            amount,
+        );
+    }
 
     invoke(&ix, &account_infos)?;
 

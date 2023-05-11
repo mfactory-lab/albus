@@ -2,51 +2,100 @@ use albus_verifier::check_compliant;
 use anchor_lang::prelude::*;
 use spl_stake_pool::{id, solana_program::program::invoke};
 
-pub fn handle(ctx: Context<VerifiedDepositStake>) -> Result<()> {
+pub fn handle<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedDepositStake<'info>>) -> Result<()> {
     check_compliant(
         &ctx.accounts.zkp_request,
         Some(ctx.accounts.authority.key()),
     )?;
 
-    let ixs = spl_stake_pool::instruction::deposit_stake(
-        &id(),
-        &ctx.accounts.stake_pool.key(),
-        &ctx.accounts.validator_list_storage.key(),
-        &ctx.accounts.stake_pool_withdraw_authority.key(),
-        &ctx.accounts.deposit_stake.key(),
-        &ctx.accounts.authority.key(),
-        &ctx.accounts.validator_stake.key(),
-        &ctx.accounts.reserve_stake.key(),
-        &ctx.accounts.pool_tokens_to.key(),
-        &ctx.accounts.manager_fee_account.key(),
-        &ctx.accounts.referrer_pool_tokens_account.key(),
-        &ctx.accounts.pool_mint.key(),
-        &ctx.accounts.token_program.key(),
-    );
+    let ixs;
 
-    let deposit_account_infos = vec![
-        ctx.accounts.stake_pool.to_account_info(),
-        ctx.accounts.validator_list_storage.to_account_info(),
-        ctx.accounts.stake_pool_deposit_authority.to_account_info(),
-        ctx.accounts.stake_pool_withdraw_authority.to_account_info(),
-        ctx.accounts.deposit_stake.to_account_info(),
-        ctx.accounts.validator_stake.to_account_info(),
-        ctx.accounts.reserve_stake.to_account_info(),
-        ctx.accounts.pool_tokens_to.to_account_info(),
-        ctx.accounts.manager_fee_account.to_account_info(),
-        ctx.accounts.referrer_pool_tokens_account.to_account_info(),
-        ctx.accounts.pool_mint.to_account_info(),
-        ctx.accounts.clock.to_account_info(),
-        ctx.accounts.stake_history.to_account_info(),
-        ctx.accounts.token_program.to_account_info(),
-        ctx.accounts.stake_program.to_account_info(),
-    ];
+    let deposit_account_infos;
 
-    let authorize_account_infos = vec![
-        ctx.accounts.deposit_stake.to_account_info(),
-        ctx.accounts.clock.to_account_info(),
-        ctx.accounts.authority.to_account_info(),
-    ];
+    let authorize_account_infos;
+
+    if let Some(stake_pool_deposit_authority) = ctx.remaining_accounts.get(0) {
+        authorize_account_infos = vec![
+            ctx.accounts.deposit_stake.to_account_info(),
+            ctx.accounts.clock.to_account_info(),
+            stake_pool_deposit_authority.to_account_info(),
+        ];
+
+        deposit_account_infos = vec![
+            ctx.accounts.stake_pool.to_account_info(),
+            ctx.accounts.validator_list_storage.to_account_info(),
+            stake_pool_deposit_authority.to_account_info(),
+            ctx.accounts.stake_pool_withdraw_authority.to_account_info(),
+            ctx.accounts.deposit_stake.to_account_info(),
+            ctx.accounts.validator_stake.to_account_info(),
+            ctx.accounts.reserve_stake.to_account_info(),
+            ctx.accounts.pool_tokens_to.to_account_info(),
+            ctx.accounts.manager_fee_account.to_account_info(),
+            ctx.accounts.referrer_pool_tokens_account.to_account_info(),
+            ctx.accounts.pool_mint.to_account_info(),
+            ctx.accounts.clock.to_account_info(),
+            ctx.accounts.stake_history.to_account_info(),
+            ctx.accounts.token_program.to_account_info(),
+            ctx.accounts.stake_program.to_account_info(),
+        ];
+
+        ixs = spl_stake_pool::instruction::deposit_stake_with_authority(
+            &id(),
+            &ctx.accounts.stake_pool.key(),
+            &ctx.accounts.validator_list_storage.key(),
+            &stake_pool_deposit_authority.key(),
+            &ctx.accounts.stake_pool_withdraw_authority.key(),
+            &ctx.accounts.deposit_stake.key(),
+            &ctx.accounts.authority.key(),
+            &ctx.accounts.validator_stake.key(),
+            &ctx.accounts.reserve_stake.key(),
+            &ctx.accounts.pool_tokens_to.key(),
+            &ctx.accounts.manager_fee_account.key(),
+            &ctx.accounts.referrer_pool_tokens_account.key(),
+            &ctx.accounts.pool_mint.key(),
+            &ctx.accounts.token_program.key(),
+        );
+    } else {
+        authorize_account_infos = vec![
+            ctx.accounts.deposit_stake.to_account_info(),
+            ctx.accounts.clock.to_account_info(),
+            ctx.accounts.authority.to_account_info(),
+        ];
+
+        deposit_account_infos = vec![
+            ctx.accounts.stake_pool.to_account_info(),
+            ctx.accounts.validator_list_storage.to_account_info(),
+            ctx.accounts.stake_pool_deposit_authority.to_account_info(),
+            ctx.accounts.stake_pool_withdraw_authority.to_account_info(),
+            ctx.accounts.deposit_stake.to_account_info(),
+            ctx.accounts.validator_stake.to_account_info(),
+            ctx.accounts.reserve_stake.to_account_info(),
+            ctx.accounts.pool_tokens_to.to_account_info(),
+            ctx.accounts.manager_fee_account.to_account_info(),
+            ctx.accounts.referrer_pool_tokens_account.to_account_info(),
+            ctx.accounts.pool_mint.to_account_info(),
+            ctx.accounts.clock.to_account_info(),
+            ctx.accounts.stake_history.to_account_info(),
+            ctx.accounts.token_program.to_account_info(),
+            ctx.accounts.stake_program.to_account_info(),
+        ];
+
+        ixs = spl_stake_pool::instruction::deposit_stake(
+            &id(),
+            &ctx.accounts.stake_pool.key(),
+            &ctx.accounts.validator_list_storage.key(),
+            &ctx.accounts.stake_pool_withdraw_authority.key(),
+            &ctx.accounts.deposit_stake.key(),
+            &ctx.accounts.authority.key(),
+            &ctx.accounts.validator_stake.key(),
+            &ctx.accounts.reserve_stake.key(),
+            &ctx.accounts.pool_tokens_to.key(),
+            &ctx.accounts.manager_fee_account.key(),
+            &ctx.accounts.referrer_pool_tokens_account.key(),
+            &ctx.accounts.pool_mint.key(),
+            &ctx.accounts.token_program.key(),
+        );
+    }
 
     for ix in ixs.iter() {
         if ix.program_id == id() {

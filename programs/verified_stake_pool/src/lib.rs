@@ -10,15 +10,23 @@ pub mod verified_stake_pool {
 
     use super::*;
 
-    pub fn deposit_sol(ctx: Context<VerifiedDepositSol>, amount: u64) -> Result<()> {
+    pub fn deposit_sol<'info>(
+        ctx: Context<'_, '_, '_, 'info, VerifiedDepositSol<'info>>,
+        amount: u64,
+    ) -> Result<()> {
         deposit_sol::handle(ctx, amount)
     }
 
-    pub fn deposit_stake(ctx: Context<VerifiedDepositStake>) -> Result<()> {
+    pub fn deposit_stake<'info>(
+        ctx: Context<'_, '_, '_, 'info, VerifiedDepositStake<'info>>,
+    ) -> Result<()> {
         deposit_stake::handle(ctx)
     }
 
-    pub fn withdraw_sol(ctx: Context<VerifiedWithdrawSol>, amount: u64) -> Result<()> {
+    pub fn withdraw_sol<'info>(
+        ctx: Context<'_, '_, '_, 'info, VerifiedWithdrawSol<'info>>,
+        amount: u64,
+    ) -> Result<()> {
         withdraw_sol::handle(ctx, amount)
     }
 
