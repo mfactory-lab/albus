@@ -1,9 +1,12 @@
-use anchor_lang::prelude::*;
 use albus_verifier::check_compliant;
-use spl_stake_pool::{solana_program::program::invoke, id};
+use anchor_lang::prelude::*;
+use spl_stake_pool::{id, solana_program::program::invoke};
 
 pub fn handle(ctx: Context<VerifiedDepositStake>) -> Result<()> {
-    check_compliant(&ctx.accounts.zkp_request, Some(ctx.accounts.authority.key()))?;
+    check_compliant(
+        &ctx.accounts.zkp_request,
+        Some(ctx.accounts.authority.key()),
+    )?;
 
     let ixs = spl_stake_pool::instruction::deposit_stake(
         &id(),

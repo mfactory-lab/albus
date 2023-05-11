@@ -1,9 +1,12 @@
-use anchor_lang::prelude::*;
 use albus_verifier::check_compliant;
-use spl_stake_pool::{solana_program::program::invoke, id};
+use anchor_lang::prelude::*;
+use spl_stake_pool::{id, solana_program::program::invoke};
 
 pub fn handle(ctx: Context<VerifiedDepositSol>, amount: u64) -> Result<()> {
-    check_compliant(&ctx.accounts.zkp_request, Some(ctx.accounts.authority.key()))?;
+    check_compliant(
+        &ctx.accounts.zkp_request,
+        Some(ctx.accounts.authority.key()),
+    )?;
 
     let ix = spl_stake_pool::instruction::deposit_sol(
         &id(),
@@ -16,7 +19,7 @@ pub fn handle(ctx: Context<VerifiedDepositSol>, amount: u64) -> Result<()> {
         &ctx.accounts.referrer_pool_tokens_account.key(),
         &ctx.accounts.pool_mint.key(),
         &ctx.accounts.token_program.key(),
-        amount
+        amount,
     );
 
     let account_infos = vec![

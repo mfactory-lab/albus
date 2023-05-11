@@ -1,8 +1,8 @@
 use arrayref::array_refs;
 use solana_program::{
-    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, sysvar::Sysvar,
+    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, pubkey::Pubkey,
+    sysvar::Sysvar,
 };
-use solana_program::pubkey::Pubkey;
 
 pub const ZKP_REQUEST_DISCRIMINATOR: &[u8] = &[196, 177, 30, 25, 231, 233, 97, 178];
 
@@ -28,7 +28,10 @@ impl TryFrom<u8> for ZKPRequestStatus {
     }
 }
 
-pub fn check_compliant(acc: &AccountInfo, request_initiator: Option<Pubkey>) -> Result<(), ProgramError> {
+pub fn check_compliant(
+    acc: &AccountInfo,
+    request_initiator: Option<Pubkey>,
+) -> Result<(), ProgramError> {
     let data = &acc
         .data
         .take()
@@ -149,7 +152,10 @@ mod test {
             0,
         );
 
-        assert_eq!(check_compliant(&acc, Some(Pubkey::new_unique())), Err(ProgramError::InvalidAccountData));
+        assert_eq!(
+            check_compliant(&acc, Some(Pubkey::new_unique())),
+            Err(ProgramError::InvalidAccountData)
+        );
     }
 
     fn get_zkp_request(status: ZKPRequestStatus, expired_at: i64, owner: Pubkey) -> Vec<u8> {
