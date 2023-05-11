@@ -32,6 +32,7 @@ Albus is a blockchain protocol designed to ensure that users transacting with de
     - [Circuit management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#circuit-management)
     - [DeFi service management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#defi-service-management)
     - [ZKP request management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#zkp-request-management)
+- [Integration](https://github.com/mfactory-lab/albus/wiki/Integration)
 - [Reference list](https://github.com/mfactory-lab/albus/wiki/Reference-list)
 
 # Contacts
