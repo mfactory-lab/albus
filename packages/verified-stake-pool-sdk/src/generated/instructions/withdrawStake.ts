@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawStake
  * @category generated
  */
-export type WithdrawStakeInstructionArgs = {
+export interface WithdrawStakeInstructionArgs {
   amount: beet.bignum
 }
 /**
@@ -31,14 +31,15 @@ export const withdrawStakeStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['amount', beet.u64],
   ],
-  'WithdrawStakeInstructionArgs'
+  'WithdrawStakeInstructionArgs',
 )
 /**
  * Accounts required by the _withdrawStake_ instruction
  *
  * @property [] zkpRequest
- * @property [_writable_, **signer**] authority
+ * @property [**signer**] authority
  * @property [_writable_] stakePool
+ * @property [] userStakeAuthority
  * @property [_writable_] validatorListStorage
  * @property [] stakePoolWithdrawAuthority
  * @property [_writable_] stakeToSplit
@@ -52,10 +53,11 @@ export const withdrawStakeStruct = new beet.BeetArgsStruct<
  * @category WithdrawStake
  * @category generated
  */
-export type WithdrawStakeInstructionAccounts = {
+export interface WithdrawStakeInstructionAccounts {
   zkpRequest: web3.PublicKey
   authority: web3.PublicKey
   stakePool: web3.PublicKey
+  userStakeAuthority: web3.PublicKey
   validatorListStorage: web3.PublicKey
   stakePoolWithdrawAuthority: web3.PublicKey
   stakeToSplit: web3.PublicKey
@@ -86,7 +88,7 @@ export const withdrawStakeInstructionDiscriminator = [
 export function createWithdrawStakeInstruction(
   accounts: WithdrawStakeInstructionAccounts,
   args: WithdrawStakeInstructionArgs,
-  programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e')
+  programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e'),
 ) {
   const [data] = withdrawStakeStruct.serialize({
     instructionDiscriminator: withdrawStakeInstructionDiscriminator,
@@ -100,12 +102,17 @@ export function createWithdrawStakeInstruction(
     },
     {
       pubkey: accounts.authority,
-      isWritable: true,
+      isWritable: false,
       isSigner: true,
     },
     {
       pubkey: accounts.stakePool,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.userStakeAuthority,
+      isWritable: false,
       isSigner: false,
     },
     {

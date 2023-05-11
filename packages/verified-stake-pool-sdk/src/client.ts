@@ -26,6 +26,20 @@ export class VerifiedStakePoolClient {
    * Deposit SOL
    */
   async depositSol(props: DepositSolProps, opts?: ConfirmOptions) {
+    let anchorRemainingAccounts
+    let signers
+    if (props.solDepositAuthority) {
+      anchorRemainingAccounts = [{
+        pubkey: props.solDepositAuthority.publicKey,
+        isWritable: false,
+        isSigner: true,
+      }]
+      signers = [props.solDepositAuthority]
+    } else {
+      anchorRemainingAccounts = []
+      signers = []
+    }
+
     const instruction = createDepositSolInstruction(
       {
         authority: this.provider.publicKey,
@@ -37,6 +51,7 @@ export class VerifiedStakePoolClient {
         stakePool: props.stakePool,
         stakePoolWithdrawAuthority: props.stakePoolWithdrawAuthority,
         zkpRequest: props.zkpRequest,
+        anchorRemainingAccounts,
       },
       {
         amount: props.amount,
@@ -44,13 +59,27 @@ export class VerifiedStakePoolClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    await this.provider.sendAndConfirm(tx, signers, opts)
   }
 
   /**
    * Deposit stake account
    */
   async depositStake(props: DepositStakeProps, opts?: ConfirmOptions) {
+    let anchorRemainingAccounts
+    let signers
+    if (props.stakePoolDepositAuthoritySigner) {
+      anchorRemainingAccounts = [{
+        pubkey: props.stakePoolDepositAuthoritySigner.publicKey,
+        isWritable: false,
+        isSigner: true,
+      }]
+      signers = [props.stakePoolDepositAuthoritySigner]
+    } else {
+      anchorRemainingAccounts = []
+      signers = []
+    }
+
     const instruction = createDepositStakeInstruction(
       {
         authority: this.provider.publicKey,
@@ -69,17 +98,32 @@ export class VerifiedStakePoolClient {
         validatorListStorage: props.validatorListStorage,
         validatorStake: props.validatorStake,
         zkpRequest: props.zkpRequest,
+        anchorRemainingAccounts,
       },
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    await this.provider.sendAndConfirm(tx, signers, opts)
   }
 
   /**
    * Withdraw SOL
    */
   async withdrawSol(props: WithdrawSolProps, opts?: ConfirmOptions) {
+    let anchorRemainingAccounts
+    let signers
+    if (props.solWithdrawAuthority) {
+      anchorRemainingAccounts = [{
+        pubkey: props.solWithdrawAuthority.publicKey,
+        isWritable: false,
+        isSigner: true,
+      }]
+      signers = [props.solWithdrawAuthority]
+    } else {
+      anchorRemainingAccounts = []
+      signers = []
+    }
+
     const instruction = createWithdrawSolInstruction(
       {
         authority: this.provider.publicKey,
@@ -94,6 +138,7 @@ export class VerifiedStakePoolClient {
         stakePoolWithdrawAuthority: props.stakePoolWithdrawAuthority,
         stakeProgram: this.stakeProgram,
         zkpRequest: props.zkpRequest,
+        anchorRemainingAccounts,
       },
       {
         amount: props.amount,
@@ -101,7 +146,7 @@ export class VerifiedStakePoolClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    await this.provider.sendAndConfirm(tx, signers, opts)
   }
 
   /**
@@ -110,6 +155,7 @@ export class VerifiedStakePoolClient {
   async withdrawStake(props: WithdrawStakeProps, opts?: ConfirmOptions) {
     const instruction = createWithdrawStakeInstruction(
       {
+        userStakeAuthority: props.userStakeAuthority,
         authority: this.provider.publicKey,
         clock: this.clock,
         managerFeeAccount: props.managerFeeAccount,
@@ -143,6 +189,7 @@ export interface DepositSolProps {
   stakePool: PublicKey
   stakePoolWithdrawAuthority: PublicKey
   amount: BN
+  solDepositAuthority?: web3.Signer
 }
 
 export interface DepositStakeProps {
@@ -158,6 +205,7 @@ export interface DepositStakeProps {
   depositStake: PublicKey
   validatorListStorage: PublicKey
   validatorStake: PublicKey
+  stakePoolDepositAuthoritySigner?: web3.Signer
 }
 
 export interface WithdrawSolProps {
@@ -170,6 +218,7 @@ export interface WithdrawSolProps {
   stakePoolWithdrawAuthority: PublicKey
   poolTokensFrom: PublicKey
   amount: BN
+  solWithdrawAuthority?: web3.Signer
 }
 
 export interface WithdrawStakeProps {
@@ -182,5 +231,6 @@ export interface WithdrawStakeProps {
   stakePoolWithdrawAuthority: PublicKey
   poolTokensFrom: PublicKey
   validatorListStorage: PublicKey
+  userStakeAuthority: PublicKey
   amount: BN
 }

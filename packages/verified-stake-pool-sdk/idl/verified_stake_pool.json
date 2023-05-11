@@ -245,12 +245,17 @@
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
           "name": "stakePool",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userStakeAuthority",
+          "isMut": false,
           "isSigner": false
         },
         {
