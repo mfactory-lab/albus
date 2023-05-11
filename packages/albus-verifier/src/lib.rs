@@ -2,7 +2,8 @@ use arrayref::array_refs;
 use solana_program::program_memory::sol_memcmp;
 use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 use solana_program::{
-    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, sysvar::Sysvar,
+    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, pubkey::Pubkey,
+    sysvar::Sysvar,
 };
 use std::str::FromStr;
 
