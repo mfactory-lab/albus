@@ -10,12 +10,10 @@
     "amman:stop": "amman stop",
     "test": "CI=1 ts-node-esm tests/albus.ts"
   },
-  "dependencies": {
+  "devDependencies": {
     "@albus/sdk": "workspace:*",
     "@verified-transfer/sdk": "workspace:verified-transfer-sdk",
-    "@project-serum/anchor": "^0.26.0"
-  },
-  "devDependencies": {
+    "@project-serum/anchor": "^0.26.0",
     "@antfu/eslint-config": "^0.38.5",
     "@metaplex-foundation/js": "^0.18.3",
     "@solana/spl-token": "^0.3.6",
