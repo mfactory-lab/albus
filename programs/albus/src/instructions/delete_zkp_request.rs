@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::utils::cmp_pubkeys;
-use crate::{events::DeleteZKPRequestEvent, state::ZKPRequest, AlbusError};
+use crate::{events::DeleteZKPRequestEvent, state::ZKPRequest, utils::cmp_pubkeys, AlbusError};
 
 pub fn handler(ctx: Context<DeleteZKPRequest>) -> Result<()> {
     let req = &mut ctx.accounts.zkp_request;

@@ -1,9 +1,9 @@
 use anchor_lang::prelude::*;
 
-use crate::utils::assert_authorized;
 use crate::{
     events::{RejectEvent, VerifyEvent},
     state::{ZKPRequest, ZKPRequestStatus},
+    utils::assert_authorized,
     AlbusError,
 };
 
