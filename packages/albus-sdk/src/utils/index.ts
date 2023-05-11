@@ -1,7 +1,7 @@
 /*
  * This file is part of Albus code.
  *
- * Copyright (c) 2023, jFactory GmbH
+ * Copyright (c) 2023, mFactory GmbH
  *
  * Albus is free software: you can redistribute it
  * and/or modify it under the terms of the GNU Affero General Public License
@@ -23,7 +23,7 @@
  * Albus code without disclosing the source code of
  * your own applications.
  *
- * The developer of this program can be contacted at <info@jfactory.ch>.
+ * The developer of this program can be contacted at <info@albus.finance>.
  */
 
 export * from './metadata'

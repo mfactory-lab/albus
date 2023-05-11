@@ -1,3 +1,31 @@
+<!--
+  - This file is part of Albus code.
+  -
+  - Copyright (c) 2023, mFactory GmbH
+  -
+  - Albus is free software: you can redistribute it
+  - and/or modify it under the terms of the GNU Affero General Public License
+  - as published by the Free Software Foundation, either version 3
+  - of the License, or (at your option) any later version.
+  -
+  - Albus is distributed in the hope that it
+  - will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  - warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  - See the GNU Affero General Public License for more details.
+  -
+  - You should have received a copy of the GNU Affero General Public License
+  - along with this program.
+  - If not, see <https://www.gnu.org/licenses/agpl-3.0.html>.
+  -
+  - You can be released from the requirements of the Affero GNU General Public License
+  - by purchasing a commercial license. The purchase of such a license is
+  - mandatory as soon as you develop commercial activities using the
+  - Albus code without disclosing the source code of
+  - your own applications.
+  -
+  - The developer of this program can be contacted at <info@albus.finance>.
+  -->
+
 <svg width="480" height="703" viewBox="0 0 480 703" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_1_8)">
 <path d="M70.7022 133.218V191.471L79.0283 209.78C66.2696 229.747 37.7571 280.672 25.777 324.619C10.802 379.537 22.4426 407.83 40.7521 462.759C55.3977 506.686 112.303 519.904 138.938 521.012C144.479 548.196 157.238 609.884 163.897 639.175C170.556 668.466 195.514 682.453 207.165 685.777L222.14 647.501C223.248 663.584 231.125 695.76 253.757 695.76C276.389 695.76 284.266 663.584 285.374 647.501L310.333 677.451L343.627 614.206L355.268 521.012H373.577L433.478 481.058C443.461 464.416 464.765 429.145 470.097 421.148C475.418 413.161 472.313 366.779 470.097 344.586L433.488 258.04C425.72 235.847 409.857 191.471 408.529 191.471C407.191 191.471 414.619 173.72 418.512 164.835V93.2746L470.097 28.3627L433.488 18.3794L373.577 28.3627L267.075 10.0532H223.807L120.629 28.3627L59.0516 18.3794H15.7837L79.0283 93.2746L70.7022 133.218Z" fill="#23353D"/>
