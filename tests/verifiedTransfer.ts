@@ -19,8 +19,8 @@ describe('verified transfer', () => {
     const mint = nft.address
 
     await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
+      circuit: mint,
+      serviceCode: 'code',
     })
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
@@ -28,8 +28,8 @@ describe('verified transfer', () => {
     const proofNft = await mintNFT(metaplex, 'ALBUS-P')
 
     await client.prove({
-      proofMetadata: proofNft.metadataAddress,
       zkpRequest: ZKPRequestAddress,
+      proofMint: proofNft.address,
     })
 
     await client.verify({
@@ -49,8 +49,8 @@ describe('verified transfer', () => {
     const mint = nft.address
 
     await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
+      circuit: mint,
+      serviceCode: 'code',
     })
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
@@ -58,8 +58,8 @@ describe('verified transfer', () => {
     const proofNft = await mintNFT(metaplex, 'ALBUS-P')
 
     await client.prove({
-      proofMetadata: proofNft.metadataAddress,
       zkpRequest: ZKPRequestAddress,
+      proofMint: proofNft.address,
     })
 
     await client.verify({
@@ -86,8 +86,8 @@ describe('verified transfer', () => {
     const mint = nft.address
 
     await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
+      circuit: mint,
+      serviceCode: 'code',
     })
 
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)

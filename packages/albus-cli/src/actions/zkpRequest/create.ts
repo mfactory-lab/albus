@@ -18,8 +18,8 @@ export async function create(opts: Opts) {
 
   try {
     const { signature } = await client.createZKPRequest({
-      serviceProviderCode: opts.sp,
-      circuitMint: new PublicKey(opts.circuit),
+      serviceCode: opts.sp,
+      circuit: new PublicKey(opts.circuit),
       expiresIn: opts.expiresIn,
     })
 

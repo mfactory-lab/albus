@@ -1,9 +1,7 @@
-use std::str::FromStr;
-
 use anchor_lang::prelude::*;
 
+use crate::utils::assert_authorized;
 use crate::{
-    constants::AUTHORIZED_AUTHORITY,
     events::{RejectEvent, VerifyEvent},
     state::{ZKPRequest, ZKPRequestStatus},
     AlbusError,
@@ -16,13 +14,7 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
     let req = &mut ctx.accounts.zkp_request;
 
     // Check that the authority is authorized to perform this action
-    if !AUTHORIZED_AUTHORITY.is_empty()
-        && !AUTHORIZED_AUTHORITY
-            .iter()
-            .any(|a| Pubkey::from_str(a).unwrap() == ctx.accounts.authority.key())
-    {
-        return Err(AlbusError::Unauthorized.into());
-    }
+    assert_authorized(&ctx.accounts.authority.key())?;
 
     // Check that the ZKP request has already been proved
     if req.status != ZKPRequestStatus::Proved {
@@ -59,7 +51,10 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
             });
             msg!("Rejected!")
         }
-        _ => return Err(AlbusError::WrongData.into()),
+        _ => {
+            msg!("Invalid status!");
+            return Err(AlbusError::WrongData.into());
+        }
     }
 
     Ok(())

@@ -1,14 +1,17 @@
 use anchor_lang::prelude::*;
 
 use crate::state::ServiceProvider;
+use crate::utils::assert_authorized;
 
-pub fn handler(_ctx: Context<DeleteServiceProvider>) -> Result<()> {
+pub fn handler(ctx: Context<DeleteServiceProvider>) -> Result<()> {
+    assert_authorized(&ctx.accounts.authority.key())?;
+
     Ok(())
 }
 
 #[derive(Accounts)]
 pub struct DeleteServiceProvider<'info> {
-    #[account(mut, has_one = authority, close = authority)]
+    #[account(mut, close = authority)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 
     #[account(mut)]

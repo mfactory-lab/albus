@@ -1,8 +1,6 @@
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import * as snarkjs from 'snarkjs'
 import { useContext } from '../../context'
-import { loadCircuit, loadProof } from '../prove/utils'
 
 interface Opts {}
 
@@ -12,24 +10,12 @@ interface Opts {}
 export async function verifyRequest(addr: string, _opts: Opts) {
   const { client } = useContext()
 
-  const req = await client.loadZKPRequest(addr)
-
-  if (!req.proof) {
-    throw new Error('ZKP request is not proved!')
-  }
-
-  const circuit = await loadCircuit(req.circuit)
-  const proof = await loadProof(req.proof)
-
-  log.debug('VK:', circuit.vk)
-  log.debug('Proof:', proof.payload)
-  log.debug('PublicSignals:', proof.publicInput)
-
   log.debug('Verifying proof...')
-
-  const isVerified = await snarkjs.groth16.verify(circuit.vk, proof.publicInput, proof.payload)
+  const isVerified = await client.verifyZKPRequest(addr)
+  log.debug('Status:', isVerified)
 
   try {
+    log.debug('Update on-chain status...')
     if (isVerified) {
       await client.verify({ zkpRequest: new PublicKey(addr) })
       log.debug('Verified!')

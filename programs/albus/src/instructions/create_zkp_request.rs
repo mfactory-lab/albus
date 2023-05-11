@@ -15,14 +15,17 @@ pub fn handler(ctx: Context<CreateZKPRequest>, data: CreateZKPRequestData) -> Re
     let req = &mut ctx.accounts.zkp_request;
     req.service_provider = ctx.accounts.service_provider.key();
     req.owner = ctx.accounts.authority.key();
-    req.proof = None;
     req.circuit = circuit_metadata.mint;
+    req.proof = None;
+    req.proved_at = 0;
+    req.verified_at = 0;
     req.created_at = timestamp;
     req.status = ZKPRequestStatus::Pending;
+    req.bump = ctx.bumps["zkp_request"];
+
     if data.expires_in > 0 {
         req.expired_at = timestamp.saturating_add(data.expires_in as i64);
     }
-    req.bump = ctx.bumps["zkp_request"];
 
     let sp = &mut ctx.accounts.service_provider;
     sp.zkp_request_count += 1;

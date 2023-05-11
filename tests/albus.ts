@@ -32,8 +32,8 @@ describe('albus', () => {
     const mint = nft.address
     try {
       await client.createZKPRequest({
-        circuitMint: mint,
-        serviceProviderCode: 'code',
+        circuit: mint,
+        serviceCode: 'code',
       })
       assert.ok(false)
     } catch (e: any) {
@@ -47,8 +47,8 @@ describe('albus', () => {
 
     try {
       await client.createZKPRequest({
-        circuitMint: mint,
-        serviceProviderCode: 'code',
+        circuit: mint,
+        serviceCode: 'code',
       })
     } catch (e) {
       console.log(e)
@@ -77,7 +77,7 @@ describe('albus', () => {
 
     try {
       await client.prove({
-        proofMetadata: proofNft.metadataAddress,
+        proofMint: proofNft.address,
         zkpRequest: ZKPRequestAddress,
       })
       assert.ok(false)
@@ -92,7 +92,7 @@ describe('albus', () => {
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
     await client.prove({
-      proofMetadata: nft.metadataAddress,
+      proofMint: nft.address,
       zkpRequest: ZKPRequestAddress,
     })
 
@@ -130,8 +130,8 @@ describe('albus', () => {
     const mint = nft.address
 
     await client.createZKPRequest({
-      circuitMint: mint,
-      serviceProviderCode: 'code',
+      circuit: mint,
+      serviceCode: 'code',
     })
 
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
@@ -165,7 +165,7 @@ describe('albus', () => {
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
     await client.prove({
-      proofMetadata: nft.metadataAddress,
+      proofMint: nft.address,
       zkpRequest: ZKPRequestAddress,
     })
 

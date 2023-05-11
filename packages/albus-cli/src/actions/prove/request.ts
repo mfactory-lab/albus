@@ -5,10 +5,10 @@ import { Resolver } from 'did-resolver'
 import log from 'loglevel'
 import * as WebDidResolver from 'web-did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
-import { crypto, snark } from '../../../../albus-core'
+import { crypto, snark } from '@albus/core'
 import { useContext } from '../../context'
 import { exploreAddress } from '../../utils'
-import { loadCircuit, loadCredential, mintProofNFT } from './utils'
+import { mintProofNFT } from './utils'
 
 interface Opts {
   // Verifiable Credential Address
@@ -31,7 +31,7 @@ export async function createForRequest(addr: string, opts: Opts) {
   }
 
   log.debug(`Loading credential ${opts.vc}...`)
-  const cred = await loadCredential(opts.vc)
+  const cred = await client.loadCredential(opts.vc)
 
   const resolver = new Resolver({
     ...WebDidResolver.getResolver(),
@@ -50,7 +50,7 @@ export async function createForRequest(addr: string, opts: Opts) {
 
   log.debug('Generating proof...')
 
-  const circuit = await loadCircuit(req.circuit)
+  const circuit = await client.loadCircuit(req.circuit)
 
   const { proof, publicSignals } = await snark.generateProof({
     wasmUrl: circuit.wasmUrl,
