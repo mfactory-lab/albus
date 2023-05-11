@@ -27,7 +27,7 @@ let user = &Pubkey::new();
 // Albus circuit address
 let circuit = &Pubkey::new();
 // Generate Service address
-let (service_provider, _) = albus_verifier::find_service_provider_address(&ALBUS_PROGRAM_ID, "<YOUR_CODE>");
+let (service_provider, _) = albus_verifier::find_service_provider_address(&ALBUS_PROGRAM_ID, "<SERVICE_CODE>");
 // Generate ZKP request address
 let (zkp_request_addr, _) = albus_verifier::find_zkp_request_address(&ALBUS_PROGRAM_ID, &service_provider, &circuit, &user);
 ```
