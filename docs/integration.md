@@ -35,7 +35,7 @@ let (zkp_request_addr, _) = albus_verifier::find_zkp_request_address(&ALBUS_PROG
 Find Service address by code
 ```rust
 let ALBUS_PROGRAM_ID = albus_verifier::program_id();
-let (service_provider, _) = albus_verifier::find_service_provider_address(&ALBUS_PROGRAM_ID, "<YOUR_CODE>");
+let (service_provider, _) = albus_verifier::find_service_provider_address(&ALBUS_PROGRAM_ID, "<SERVICE_CODE>");
 ```
 
 ### Off-chain usage
@@ -74,7 +74,26 @@ const circuit = new Pubkey("...")
 const user = new Pubkey("...")
 // Full verification process (verify provided zk proof)
 const full = false
+
 await client.checkCompliance({ serviceCode: '...', circuit, user, full })
+```
+
+Verify ZKP request by address
+
+```typescript
+await client.verifyZKPRequest("<ZKP_REQUEST_ADDRESS>")
+```
+
+Verify ZKP request for the specified service code and circuit.
+
+```typescript
+await client.verifySpecific("<SERVICE_CODE>", "<CIRCUIT_ADDRESS>", "<OPTIONAL_USER_ADDRESS>")
+```
+
+Verify proof by specified address
+
+```typescript
+await client.verifyProof("<ADDRESS>")
 ```
 
 Prove the ZKP request that was created earlier
@@ -82,18 +101,18 @@ Prove the ZKP request that was created earlier
 ```typescript
 // ZKP Reqeust address
 const zkpRequest = new Pubkey("...")
-/// Proof NFT Metadata address
-const proofMetadata = new Pubkey("...")
+/// Proof NFT address
+const proofMint = new Pubkey("...")
 // Prove ZKP request
-await client.prove({ zkpRequest, proofMetadata })
+await client.prove({ zkpRequest, proofMint })
 ```
 
 Create new ZKP request
 
 ```typescript
 const { signature } = await client.createZKPRequest({
-  serviceCode: "<CODE>",
-  circuit: new PublicKey('...'),
+  serviceCode: "<SERVICE_CODE>",
+  circuit: "<CIRCUIT_ADDRESS>",
   // (optional) expiration in seconds
   expiresIn: 0
 })
@@ -102,37 +121,36 @@ const { signature } = await client.createZKPRequest({
 Find ZKP request address by service code, circuit address and user address
 
 ```typescript
-// Find Service address
-const serviceAddr = client.getServiceProviderPDA('<CODE>')
+// Find service address
+const service = client.getServiceProviderPDA('<SERVICE_CODE>')
 // Albus circuit address
 const circuit = new Pubkey("...")
 // User wallet
 const user = new Pubkey("...")
-// Find ZKP Reqeust address
-const zkpRequestAddr = client.getZKPRequestPDA(serviceAddr, circuit, user)
+// Find ZKP reqeust address
+const zkpRequestAddr = client.getZKPRequestPDA(service, circuit, user)
 ```
 
 Load ZKP request by address
 
 ```typescript
-const zkpRequest = await client.loadZKPRequest(zkpRequestAddr)
+const zkpRequest = await client.loadZKPRequest("<ZKP_REQUEST_ADDRESS>")
 ```
 
 Search ZKP requests for user
 
 ```typescript
-const user = new PublicKey()
+const user = "<USER_ADDRESS>"
 // (optional) filter by circuit
 const circuit = undefined
 // (optional) filter by service
 const serviceProvider = undefined
-// find zkp requests
+// Find all ZKP requests
 const data = await client.searchZKPRequests({ user, circuit })
 ```
 
 Delete ZKP request
 
 ```typescript
-const zkpRequest = new PublicKey()
-const { signature } = await client.deleteZKPRequest({ zkpRequest })
+const { signature } = await client.deleteZKPRequest({ zkpRequest: "<ZKP_REQUEST_ADDRESS>" })
 ```
