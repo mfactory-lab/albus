@@ -33,4 +33,8 @@ pub mod verified_stake_pool {
     pub fn withdraw_stake(ctx: Context<VerifiedWithdrawStake>, amount: u64) -> Result<()> {
         withdraw_stake::handle(ctx, amount)
     }
+
+    pub fn add_validator(ctx: Context<VerifiedAddValidator>) -> Result<()> {
+        add_validator::handle(ctx)
+    }
 }
