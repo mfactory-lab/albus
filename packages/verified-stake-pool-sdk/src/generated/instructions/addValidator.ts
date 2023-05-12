@@ -5,83 +5,75 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as splToken from '@solana/spl-token'
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
 
 /**
  * @category Instructions
- * @category DepositStake
+ * @category AddValidator
  * @category generated
  */
-export const depositStakeStruct = new beet.BeetArgsStruct<{
+export const addValidatorStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'DepositStakeInstructionArgs'
+  'AddValidatorInstructionArgs'
 )
 /**
- * Accounts required by the _depositStake_ instruction
+ * Accounts required by the _addValidator_ instruction
  *
  * @property [] zkpRequest
- * @property [_writable_, **signer**] authority
+ * @property [**signer**] staker
+ * @property [_writable_, **signer**] funder
  * @property [_writable_] stakePool
  * @property [_writable_] validatorListStorage
  * @property [] stakePoolWithdrawAuthority
- * @property [] stakePoolDepositAuthority
- * @property [_writable_] depositStake
- * @property [_writable_] validatorStake
- * @property [_writable_] reserveStake
- * @property [_writable_] poolTokensTo
- * @property [_writable_] managerFeeAccount
- * @property [_writable_] referrerPoolTokensAccount
- * @property [_writable_] poolMint
+ * @property [_writable_] stake
+ * @property [] validator
  * @property [] stakeProgram
- * @property [] stakeHistory
+ * @property [] stakeConfig
  * @property [] clock
+ * @property [] stakeHistory
  * @category Instructions
- * @category DepositStake
+ * @category AddValidator
  * @category generated
  */
-export type DepositStakeInstructionAccounts = {
+export type AddValidatorInstructionAccounts = {
   zkpRequest: web3.PublicKey
-  authority: web3.PublicKey
+  staker: web3.PublicKey
+  funder: web3.PublicKey
   stakePool: web3.PublicKey
   validatorListStorage: web3.PublicKey
   stakePoolWithdrawAuthority: web3.PublicKey
-  stakePoolDepositAuthority: web3.PublicKey
-  depositStake: web3.PublicKey
-  validatorStake: web3.PublicKey
-  reserveStake: web3.PublicKey
-  poolTokensTo: web3.PublicKey
-  managerFeeAccount: web3.PublicKey
-  referrerPoolTokensAccount: web3.PublicKey
-  poolMint: web3.PublicKey
-  tokenProgram?: web3.PublicKey
+  stake: web3.PublicKey
+  validator: web3.PublicKey
   stakeProgram: web3.PublicKey
-  stakeHistory: web3.PublicKey
+  stakeConfig: web3.PublicKey
+  rent?: web3.PublicKey
   clock: web3.PublicKey
+  stakeHistory: web3.PublicKey
+  systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const depositStakeInstructionDiscriminator = [
-  160, 167, 9, 220, 74, 243, 228, 43,
+export const addValidatorInstructionDiscriminator = [
+  250, 113, 53, 54, 141, 117, 215, 185,
 ]
 
 /**
- * Creates a _DepositStake_ instruction.
+ * Creates a _AddValidator_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @category Instructions
- * @category DepositStake
+ * @category AddValidator
  * @category generated
  */
-export function createDepositStakeInstruction(
-  accounts: DepositStakeInstructionAccounts,
+export function createAddValidatorInstruction(
+  accounts: AddValidatorInstructionAccounts,
   programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e')
 ) {
-  const [data] = depositStakeStruct.serialize({
-    instructionDiscriminator: depositStakeInstructionDiscriminator,
+  const [data] = addValidatorStruct.serialize({
+    instructionDiscriminator: addValidatorInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
@@ -90,7 +82,12 @@ export function createDepositStakeInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.authority,
+      pubkey: accounts.staker,
+      isWritable: false,
+      isSigner: true,
+    },
+    {
+      pubkey: accounts.funder,
       isWritable: true,
       isSigner: true,
     },
@@ -110,47 +107,12 @@ export function createDepositStakeInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.stakePoolDepositAuthority,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.depositStake,
+      pubkey: accounts.stake,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.validatorStake,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.reserveStake,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.poolTokensTo,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.managerFeeAccount,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.referrerPoolTokensAccount,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.poolMint,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
+      pubkey: accounts.validator,
       isWritable: false,
       isSigner: false,
     },
@@ -160,12 +122,27 @@ export function createDepositStakeInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.stakeHistory,
+      pubkey: accounts.stakeConfig,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.rent ?? web3.SYSVAR_RENT_PUBKEY,
       isWritable: false,
       isSigner: false,
     },
     {
       pubkey: accounts.clock,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.stakeHistory,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,
       isWritable: false,
       isSigner: false,
     },

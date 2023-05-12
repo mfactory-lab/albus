@@ -4,10 +4,10 @@ import type { ConfirmOptions, PublicKey } from '@solana/web3.js'
 import { Transaction } from '@solana/web3.js'
 import {
   PROGRAM_ID,
+  createAddValidatorInstruction,
   createDepositSolInstruction,
   createDepositStakeInstruction,
-  createWithdrawSolInstruction,
-  createWithdrawStakeInstruction,
+  createWithdrawSolInstruction, createWithdrawStakeInstruction,
 } from './generated'
 
 export class VerifiedStakePoolClient {
@@ -15,6 +15,7 @@ export class VerifiedStakePoolClient {
   clock = web3.SYSVAR_CLOCK_PUBKEY
   stakeProgram = web3.StakeProgram.programId
   stakeHistory = web3.SYSVAR_STAKE_HISTORY_PUBKEY
+  stakeConfig = web3.STAKE_CONFIG_ID
 
   constructor(private readonly provider: AnchorProvider) {}
 
@@ -177,6 +178,31 @@ export class VerifiedStakePoolClient {
     const tx = new Transaction().add(instruction)
     await this.provider.sendAndConfirm(tx, [], opts)
   }
+
+  /**
+   * Add validator to stake pool
+   */
+  async addValidator(props: AddValidatorProps, opts?: ConfirmOptions) {
+    const instruction = createAddValidatorInstruction(
+      {
+        clock: this.clock,
+        funder: this.provider.publicKey,
+        stake: props.stake,
+        stakeConfig: this.stakeConfig,
+        stakeHistory: this.stakeHistory,
+        stakePool: props.stakePool,
+        stakePoolWithdrawAuthority: props.stakePoolWithdrawAuthority,
+        stakeProgram: this.stakeProgram,
+        staker: props.staker.publicKey,
+        validator: props.validator,
+        validatorListStorage: props.validatorListStorage,
+        zkpRequest: props.zkpRequest,
+      },
+    )
+
+    const tx = new Transaction().add(instruction)
+    await this.provider.sendAndConfirm(tx, [props.staker], opts)
+  }
 }
 
 export interface DepositSolProps {
@@ -233,4 +259,14 @@ export interface WithdrawStakeProps {
   validatorListStorage: PublicKey
   userStakeAuthority: PublicKey
   amount: BN
+}
+
+export interface AddValidatorProps {
+  zkpRequest: PublicKey
+  stake: PublicKey
+  staker: web3.Signer
+  stakePool: PublicKey
+  stakePoolWithdrawAuthority: PublicKey
+  validator: PublicKey
+  validatorListStorage: PublicKey
 }
