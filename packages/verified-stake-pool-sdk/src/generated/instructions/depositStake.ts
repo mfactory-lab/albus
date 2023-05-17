@@ -36,6 +36,7 @@ export const depositStakeStruct = new beet.BeetArgsStruct<{
  * @property [_writable_] managerFeeAccount
  * @property [_writable_] referrerPoolTokensAccount
  * @property [_writable_] poolMint
+ * @property [] stakePoolProgram
  * @property [] stakeProgram
  * @property [] stakeHistory
  * @property [] clock
@@ -57,6 +58,7 @@ export type DepositStakeInstructionAccounts = {
   managerFeeAccount: web3.PublicKey
   referrerPoolTokensAccount: web3.PublicKey
   poolMint: web3.PublicKey
+  stakePoolProgram: web3.PublicKey
   tokenProgram?: web3.PublicKey
   stakeProgram: web3.PublicKey
   stakeHistory: web3.PublicKey
@@ -147,6 +149,11 @@ export function createDepositStakeInstruction(
     {
       pubkey: accounts.poolMint,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.stakePoolProgram,
+      isWritable: false,
       isSigner: false,
     },
     {

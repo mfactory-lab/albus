@@ -32,6 +32,7 @@ export const addValidatorStruct = new beet.BeetArgsStruct<{
  * @property [] validator
  * @property [] stakeProgram
  * @property [] stakeConfig
+ * @property [] stakePoolProgram
  * @property [] clock
  * @property [] stakeHistory
  * @category Instructions
@@ -49,6 +50,7 @@ export type AddValidatorInstructionAccounts = {
   validator: web3.PublicKey
   stakeProgram: web3.PublicKey
   stakeConfig: web3.PublicKey
+  stakePoolProgram: web3.PublicKey
   rent?: web3.PublicKey
   clock: web3.PublicKey
   stakeHistory: web3.PublicKey
@@ -123,6 +125,11 @@ export function createAddValidatorInstruction(
     },
     {
       pubkey: accounts.stakeConfig,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.stakePoolProgram,
       isWritable: false,
       isSigner: false,
     },

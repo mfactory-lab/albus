@@ -45,6 +45,7 @@ export const withdrawSolStruct = new beet.BeetArgsStruct<
  * @property [_writable_] lamportsTo
  * @property [_writable_] managerFeeAccount
  * @property [_writable_] poolMint
+ * @property [] stakePoolProgram
  * @property [] stakeProgram
  * @property [] stakeHistory
  * @property [] clock
@@ -62,6 +63,7 @@ export type WithdrawSolInstructionAccounts = {
   lamportsTo: web3.PublicKey
   managerFeeAccount: web3.PublicKey
   poolMint: web3.PublicKey
+  stakePoolProgram: web3.PublicKey
   tokenProgram?: web3.PublicKey
   stakeProgram: web3.PublicKey
   stakeHistory: web3.PublicKey
@@ -136,6 +138,11 @@ export function createWithdrawSolInstruction(
     {
       pubkey: accounts.poolMint,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.stakePoolProgram,
+      isWritable: false,
       isSigner: false,
     },
     {

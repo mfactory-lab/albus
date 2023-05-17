@@ -53,6 +53,7 @@ export class VerifiedStakePoolClient {
         stakePoolWithdrawAuthority: props.stakePoolWithdrawAuthority,
         zkpRequest: props.zkpRequest,
         anchorRemainingAccounts,
+        stakePoolProgram: props.stakePoolProgram,
       },
       {
         amount: props.amount,
@@ -100,6 +101,7 @@ export class VerifiedStakePoolClient {
         validatorStake: props.validatorStake,
         zkpRequest: props.zkpRequest,
         anchorRemainingAccounts,
+        stakePoolProgram: props.stakePoolProgram,
       },
     )
 
@@ -140,6 +142,7 @@ export class VerifiedStakePoolClient {
         stakeProgram: this.stakeProgram,
         zkpRequest: props.zkpRequest,
         anchorRemainingAccounts,
+        stakePoolProgram: props.stakePoolProgram,
       },
       {
         amount: props.amount,
@@ -169,6 +172,7 @@ export class VerifiedStakePoolClient {
         stakeToSplit: props.stakeToSplit,
         validatorListStorage: props.validatorListStorage,
         zkpRequest: props.zkpRequest,
+        stakePoolProgram: props.stakePoolProgram,
       },
       {
         amount: props.amount,
@@ -197,6 +201,7 @@ export class VerifiedStakePoolClient {
         validator: props.validator,
         validatorListStorage: props.validatorListStorage,
         zkpRequest: props.zkpRequest,
+        stakePoolProgram: props.stakePoolProgram,
       },
     )
 
@@ -214,6 +219,7 @@ export interface DepositSolProps {
   reserveStake: PublicKey
   stakePool: PublicKey
   stakePoolWithdrawAuthority: PublicKey
+  stakePoolProgram: PublicKey
   amount: BN
   solDepositAuthority?: web3.Signer
 }
@@ -231,6 +237,7 @@ export interface DepositStakeProps {
   depositStake: PublicKey
   validatorListStorage: PublicKey
   validatorStake: PublicKey
+  stakePoolProgram: PublicKey
   stakePoolDepositAuthoritySigner?: web3.Signer
 }
 
@@ -244,6 +251,7 @@ export interface WithdrawSolProps {
   stakePoolWithdrawAuthority: PublicKey
   poolTokensFrom: PublicKey
   amount: BN
+  stakePoolProgram: PublicKey
   solWithdrawAuthority?: web3.Signer
 }
 
@@ -258,6 +266,7 @@ export interface WithdrawStakeProps {
   poolTokensFrom: PublicKey
   validatorListStorage: PublicKey
   userStakeAuthority: PublicKey
+  stakePoolProgram: PublicKey
   amount: BN
 }
 
@@ -269,4 +278,5 @@ export interface AddValidatorProps {
   stakePoolWithdrawAuthority: PublicKey
   validator: PublicKey
   validatorListStorage: PublicKey
+  stakePoolProgram: PublicKey
 }

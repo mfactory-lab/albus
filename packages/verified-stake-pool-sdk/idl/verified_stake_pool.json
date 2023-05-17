@@ -51,6 +51,11 @@
           "isSigner": false
         },
         {
+          "name": "stakePoolProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -137,6 +142,11 @@
           "isSigner": false
         },
         {
+          "name": "stakePoolProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -205,6 +215,11 @@
         {
           "name": "poolMint",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "stakePoolProgram",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -294,6 +309,11 @@
           "isSigner": false
         },
         {
+          "name": "stakePoolProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -366,6 +386,11 @@
         },
         {
           "name": "stakeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakePoolProgram",
           "isMut": false,
           "isSigner": false
         },

@@ -45,6 +45,7 @@ export const depositSolStruct = new beet.BeetArgsStruct<
  * @property [_writable_] managerFeeAccount
  * @property [_writable_] referrerPoolTokensAccount
  * @property [_writable_] poolMint
+ * @property [] stakePoolProgram
  * @category Instructions
  * @category DepositSol
  * @category generated
@@ -59,6 +60,7 @@ export type DepositSolInstructionAccounts = {
   managerFeeAccount: web3.PublicKey
   referrerPoolTokensAccount: web3.PublicKey
   poolMint: web3.PublicKey
+  stakePoolProgram: web3.PublicKey
   tokenProgram?: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -131,6 +133,11 @@ export function createDepositSolInstruction(
     {
       pubkey: accounts.poolMint,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.stakePoolProgram,
+      isWritable: false,
       isSigner: false,
     },
     {
