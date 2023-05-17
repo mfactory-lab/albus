@@ -13,6 +13,8 @@
   "devDependencies": {
     "@albus/sdk": "workspace:*",
     "@verified-transfer/sdk": "workspace:verified-transfer-sdk",
+    "@verified-stake-pool/sdk": "workspace:verified-stake-pool-sdk",
+    "@solana/spl-stake-pool": "mfactory-lab/jfactory-stake-pool#7fc7dd2f7a23e7d91a62ca08301ee0890c1cb2a9",
     "@project-serum/anchor": "^0.26.0",
     "@antfu/eslint-config": "^0.38.5",
     "@metaplex-foundation/js": "^0.18.3",
