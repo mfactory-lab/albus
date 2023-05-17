@@ -1,6 +1,6 @@
 use albus_verifier::check_compliant;
 use anchor_lang::prelude::*;
-use spl_stake_pool::{id, solana_program::program::invoke};
+use spl_stake_pool::solana_program::program::invoke;
 
 pub fn handle<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedDepositStake<'info>>) -> Result<()> {
     check_compliant(
@@ -40,7 +40,7 @@ pub fn handle<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedDepositStake<'info>
         ];
 
         ixs = spl_stake_pool::instruction::deposit_stake_with_authority(
-            &id(),
+            &ctx.accounts.stake_pool_program.key(),
             &ctx.accounts.stake_pool.key(),
             &ctx.accounts.validator_list_storage.key(),
             &stake_pool_deposit_authority.key(),
@@ -81,7 +81,7 @@ pub fn handle<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedDepositStake<'info>
         ];
 
         ixs = spl_stake_pool::instruction::deposit_stake(
-            &id(),
+            &ctx.accounts.stake_pool_program.key(),
             &ctx.accounts.stake_pool.key(),
             &ctx.accounts.validator_list_storage.key(),
             &ctx.accounts.stake_pool_withdraw_authority.key(),
@@ -98,7 +98,7 @@ pub fn handle<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedDepositStake<'info>
     }
 
     for ix in ixs.iter() {
-        if ix.program_id == id() {
+        if ix.program_id == ctx.accounts.stake_pool_program.key() {
             invoke(ix, &deposit_account_infos)?;
         } else {
             invoke(ix, &authorize_account_infos)?;
@@ -157,6 +157,9 @@ pub struct VerifiedDepositStake<'info> {
     /// CHECK: Stake pool's token mint account
     #[account(mut)]
     pub pool_mint: AccountInfo<'info>,
+
+    /// CHECK: Stake pool program id
+    pub stake_pool_program: AccountInfo<'info>,
 
     /// CHECK: Spl token program id
     pub token_program: AccountInfo<'info>,

@@ -1,6 +1,6 @@
 use albus_verifier::check_compliant;
 use anchor_lang::prelude::*;
-use spl_stake_pool::{id, solana_program::program::invoke};
+use spl_stake_pool::solana_program::program::invoke;
 
 pub fn handle(ctx: Context<VerifiedAddValidator>) -> Result<()> {
     check_compliant(
@@ -9,7 +9,7 @@ pub fn handle(ctx: Context<VerifiedAddValidator>) -> Result<()> {
     )?;
 
     let ix = spl_stake_pool::instruction::add_validator_to_pool(
-        &id(),
+        &ctx.accounts.stake_pool_program.key(),
         &ctx.accounts.stake_pool.key(),
         &ctx.accounts.staker.key(),
         &ctx.accounts.funder.key(),
@@ -73,6 +73,9 @@ pub struct VerifiedAddValidator<'info> {
 
     /// CHECK: Stake config sysvar id
     pub stake_config: AccountInfo<'info>,
+
+    /// CHECK: Stake pool program id
+    pub stake_pool_program: AccountInfo<'info>,
 
     pub rent: Sysvar<'info, Rent>,
     pub clock: Sysvar<'info, Clock>,

@@ -1,6 +1,6 @@
 use albus_verifier::check_compliant;
 use anchor_lang::prelude::*;
-use spl_stake_pool::{id, solana_program::program::invoke};
+use spl_stake_pool::solana_program::program::invoke;
 
 pub fn handle<'info>(
     ctx: Context<'_, '_, '_, 'info, VerifiedDepositSol<'info>>,
@@ -30,7 +30,7 @@ pub fn handle<'info>(
         account_infos.push(sol_deposit_authority.to_account_info());
 
         ix = spl_stake_pool::instruction::deposit_sol_with_authority(
-            &id(),
+            &ctx.accounts.stake_pool_program.key(),
             &ctx.accounts.stake_pool.key(),
             &sol_deposit_authority.key(),
             &ctx.accounts.stake_pool_withdraw_authority.key(),
@@ -45,7 +45,7 @@ pub fn handle<'info>(
         );
     } else {
         ix = spl_stake_pool::instruction::deposit_sol(
-            &id(),
+            &ctx.accounts.stake_pool_program.key(),
             &ctx.accounts.stake_pool.key(),
             &ctx.accounts.stake_pool_withdraw_authority.key(),
             &ctx.accounts.reserve_stake.key(),
@@ -98,6 +98,9 @@ pub struct VerifiedDepositSol<'info> {
     /// CHECK: Stake pool's token mint account
     #[account(mut)]
     pub pool_mint: AccountInfo<'info>,
+
+    /// CHECK: Stake pool program id
+    pub stake_pool_program: AccountInfo<'info>,
 
     /// CHECK: Spl token program id
     pub token_program: AccountInfo<'info>,

@@ -1,6 +1,6 @@
 use albus_verifier::check_compliant;
 use anchor_lang::prelude::*;
-use spl_stake_pool::{id, solana_program::program::invoke};
+use spl_stake_pool::solana_program::program::invoke;
 
 pub fn handle(ctx: Context<VerifiedWithdrawStake>, amount: u64) -> Result<()> {
     check_compliant(
@@ -9,7 +9,7 @@ pub fn handle(ctx: Context<VerifiedWithdrawStake>, amount: u64) -> Result<()> {
     )?;
 
     let ix = spl_stake_pool::instruction::withdraw_stake(
-        &id(),
+        &ctx.accounts.stake_pool_program.key(),
         &ctx.accounts.stake_pool.key(),
         &ctx.accounts.validator_list_storage.key(),
         &ctx.accounts.stake_pool_withdraw_authority.key(),
@@ -85,6 +85,9 @@ pub struct VerifiedWithdrawStake<'info> {
     /// CHECK: Stake pool's token mint account
     #[account(mut)]
     pub pool_mint: AccountInfo<'info>,
+
+    /// CHECK: Stake pool program id
+    pub stake_pool_program: AccountInfo<'info>,
 
     /// CHECK: Spl token program id
     pub token_program: AccountInfo<'info>,
