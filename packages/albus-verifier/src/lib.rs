@@ -27,12 +27,15 @@
  */
 
 use arrayref::array_refs;
-use solana_program::program_memory::sol_memcmp;
-use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 use solana_program::{
-    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, sysvar::Sysvar,
+    account_info::AccountInfo,
+    clock::Clock,
+    msg,
+    program_error::ProgramError,
+    program_memory::sol_memcmp,
+    pubkey::{Pubkey, PUBKEY_BYTES},
+    sysvar::Sysvar,
 };
-use std::str::FromStr;
 
 pub const ALBUS_PROGRAM_ID: &str = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz";
 pub const ZKP_REQUEST_DISCRIMINATOR: &[u8] = &[196, 177, 30, 25, 231, 233, 97, 178];

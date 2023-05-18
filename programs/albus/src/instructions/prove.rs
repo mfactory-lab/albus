@@ -28,11 +28,10 @@
 
 use anchor_lang::prelude::*;
 
-use crate::utils::cmp_pubkeys;
 use crate::{
     events::ProveEvent,
     state::{ZKPRequest, ZKPRequestStatus},
-    utils::assert_valid_proof,
+    utils::{assert_valid_proof, cmp_pubkeys},
     AlbusError,
 };
 
