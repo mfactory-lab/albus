@@ -97,7 +97,7 @@ export async function createForRequest(addr: string, opts: Opts) {
   log.info(exploreAddress(nft.address))
 
   // Mark zkp-request as proved
-  await client.prove({ zkpRequest: reqAddr, proofMetadata: nft.metadataAddress })
+  await client.prove({ zkpRequest: reqAddr, proofMint: nft.mint })
 }
 
 /**
