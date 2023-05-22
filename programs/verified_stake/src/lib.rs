@@ -26,10 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::stake;
+use anchor_lang::{prelude::*, solana_program::stake};
 
-declare_id!("8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR");
+declare_id!("CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr");
 
 #[program]
 pub mod verified_stake {
@@ -48,11 +47,7 @@ pub mod verified_stake {
             Some(ctx.accounts.authority.key()),
         )?;
 
-        let ix = stake::instruction::initialize(
-            &ctx.accounts.stake.key(),
-            &authorized,
-            &lockup,
-        );
+        let ix = stake::instruction::initialize(&ctx.accounts.stake.key(), &authorized, &lockup);
 
         let account_infos = vec![
             ctx.accounts.stake.to_account_info(),
@@ -73,10 +68,7 @@ pub mod verified_stake {
             Some(ctx.accounts.withdrawer.key()),
         )?;
 
-        let ix = stake::instruction::initialize_checked(
-            &ctx.accounts.stake.key(),
-            &authorized,
-        );
+        let ix = stake::instruction::initialize_checked(&ctx.accounts.stake.key(), &authorized);
 
         let account_infos = vec![
             ctx.accounts.stake.to_account_info(),
@@ -90,10 +82,7 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn split(
-        ctx: Context<VerifiedSplit>,
-        lamports: u64,
-    ) -> Result<()> {
+    pub fn split(ctx: Context<VerifiedSplit>, lamports: u64) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),
@@ -127,9 +116,7 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn merge(
-        ctx: Context<VerifiedMerge>,
-    ) -> Result<()> {
+    pub fn merge(ctx: Context<VerifiedMerge>) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),
@@ -193,9 +180,7 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn deactivate(
-        ctx: Context<VerifiedDeactivate>,
-    ) -> Result<()> {
+    pub fn deactivate(ctx: Context<VerifiedDeactivate>) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),
@@ -217,9 +202,7 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn delegate(
-        ctx: Context<VerifiedDelegate>,
-    ) -> Result<()> {
+    pub fn delegate(ctx: Context<VerifiedDelegate>) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),
@@ -245,9 +228,7 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn redelegate(
-        ctx: Context<VerifiedRedelegate>,
-    ) -> Result<()> {
+    pub fn redelegate(ctx: Context<VerifiedRedelegate>) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),

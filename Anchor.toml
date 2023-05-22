@@ -17,6 +17,7 @@ wallet = "~/.config/solana/id.json"
 albus = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz"
 verified-transfer = "ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2"
 verified-swap = "8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR"
+verified-stake = "CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr"
 
 [[test.genesis]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
