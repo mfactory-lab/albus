@@ -28,8 +28,7 @@
 
 use anchor_lang::prelude::*;
 
-use crate::state::ServiceProvider;
-use crate::utils::assert_authorized;
+use crate::{state::ServiceProvider, utils::assert_authorized};
 
 pub fn handler(ctx: Context<DeleteServiceProvider>) -> Result<()> {
     assert_authorized(&ctx.accounts.authority.key())?;
