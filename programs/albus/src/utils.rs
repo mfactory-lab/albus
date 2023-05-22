@@ -28,9 +28,10 @@
 
 use std::str::FromStr;
 
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::program_memory::sol_memcmp;
-use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
+use anchor_lang::{
+    prelude::*,
+    solana_program::{program_memory::sol_memcmp, pubkey::PUBKEY_BYTES},
+};
 use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 
 use crate::{
