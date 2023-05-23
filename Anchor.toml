@@ -16,6 +16,7 @@ wallet = "~/.config/solana/id.json"
 [programs.localnet]
 albus = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz"
 verified-transfer = "ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2"
+verified-swap = "8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR"
 verified-stake-pool = "HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e"
 
 [[test.genesis]]

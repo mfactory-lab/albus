@@ -153,6 +153,14 @@ importers:
     devDependencies:
       '@metaplex-foundation/solita': 0.19.4
 
+  packages/verified-swap-sdk:
+    specifiers:
+      '@metaplex-foundation/solita': ^0.19
+      '@solana/web3.js': ^1.73
+    dependencies:
+    '@solana/web3.js': 1.76.0
+    devDependencies:
+      '@metaplex-foundation/solita': 0.19.4
   packages/verified-stake-pool-sdk:
     specifiers:
       '@metaplex-foundation/js': ^0.18
