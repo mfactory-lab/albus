@@ -1,0 +1,439 @@
+{
+  "version": "0.0.1",
+  "name": "verified_stake",
+  "instructions": [
+    {
+      "name": "split",
+      "accounts": [
+        {
+          "name": "splitStake",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "lamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "splitWithSeed",
+      "accounts": [
+        {
+          "name": "splitStake",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "base",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "lamports",
+          "type": "u64"
+        },
+        {
+          "name": "seed",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "merge",
+      "accounts": [
+        {
+          "name": "destinationStake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "sourceStake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeHistory",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "withdraw",
+      "accounts": [
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "withdrawer",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "destination",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeHistory",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "lamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "delegate",
+      "accounts": [
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeHistory",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeConfig",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "redelegate",
+      "accounts": [
+        {
+          "name": "uninitializedStake",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeConfig",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "redelegateWithSeed",
+      "accounts": [
+        {
+          "name": "uninitializedStake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "base",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeConfig",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "seed",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "authorize",
+      "accounts": [
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "newAuthorized",
+          "type": "publicKey"
+        },
+        {
+          "name": "stakeAuthorize",
+          "type": {
+            "defined": "StakeAuthorize"
+          }
+        }
+      ]
+    },
+    {
+      "name": "authorizeChecked",
+      "accounts": [
+        {
+          "name": "stake",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newAuthorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "authorized",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "zkpRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "stakeProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "clock",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "stakeAuthorize",
+          "type": {
+            "defined": "StakeAuthorize"
+          }
+        }
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "StakeAuthorize",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Staker"
+          },
+          {
+            "name": "Withdrawer"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "address": "CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr",
+    "origin": "anchor",
+    "binaryVersion": "0.27.0",
+    "libVersion": "0.27.0"
+  }
+}
