@@ -33,8 +33,10 @@ declare_id!("CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr");
 #[program]
 pub mod verified_stake {
     use albus_verifier::check_compliant;
-    use anchor_lang::prelude::borsh::{BorshDeserialize, BorshSerialize};
-    use anchor_lang::solana_program::program::invoke;
+    use anchor_lang::{
+        prelude::borsh::{BorshDeserialize, BorshSerialize},
+        solana_program::program::invoke,
+    };
 
     use super::*;
 
@@ -48,7 +50,7 @@ pub mod verified_stake {
         fn into(self) -> stake::state::StakeAuthorize {
             match self {
                 StakeAuthorize::Staker => stake::state::StakeAuthorize::Staker,
-                StakeAuthorize::Withdrawer => stake::state::StakeAuthorize::Withdrawer
+                StakeAuthorize::Withdrawer => stake::state::StakeAuthorize::Withdrawer,
             }
         }
     }
@@ -88,7 +90,11 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn split_with_seed(ctx: Context<VerifiedSplitWithSeed>, lamports: u64, seed: String) -> Result<()> {
+    pub fn split_with_seed(
+        ctx: Context<VerifiedSplitWithSeed>,
+        lamports: u64,
+        seed: String,
+    ) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),
@@ -253,7 +259,10 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn redelegate_with_seed(ctx: Context<VerifiedRedelegateWithSeed>, seed: String) -> Result<()> {
+    pub fn redelegate_with_seed(
+        ctx: Context<VerifiedRedelegateWithSeed>,
+        seed: String,
+    ) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),
@@ -292,7 +301,11 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn authorize<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedAuthorize<'info>>, new_authorized: Pubkey, stake_authorize: StakeAuthorize) -> Result<()> {
+    pub fn authorize<'info>(
+        ctx: Context<'_, '_, '_, 'info, VerifiedAuthorize<'info>>,
+        new_authorized: Pubkey,
+        stake_authorize: StakeAuthorize,
+    ) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),
@@ -324,7 +337,10 @@ pub mod verified_stake {
         Ok(())
     }
 
-    pub fn authorize_checked<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedAuthorizeChecked<'info>>, stake_authorize: StakeAuthorize) -> Result<()> {
+    pub fn authorize_checked<'info>(
+        ctx: Context<'_, '_, '_, 'info, VerifiedAuthorizeChecked<'info>>,
+        stake_authorize: StakeAuthorize,
+    ) -> Result<()> {
         check_compliant(
             &ctx.accounts.zkp_request,
             Some(ctx.accounts.authorized.key()),
