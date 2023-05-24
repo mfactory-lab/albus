@@ -2449,6 +2449,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "verified-stake"
+version = "0.0.1"
+dependencies = [
+ "albus-verifier 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang",
+ ]
+
+[[package]]
+name = "verified-swap"
+version = "0.0.1"
+dependencies = [
+ "albus-verifier 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "anchor-lang",
+ "spl-token-swap",
+ ]
+
+
+[[package]]
 name = "verified-stake-pool"
 version = "0.0.1"
 dependencies = [

@@ -26,6 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+use std::str::FromStr;
+
 use arrayref::array_refs;
 use solana_program::{
     account_info::AccountInfo,
