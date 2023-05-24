@@ -26,5 +26,43 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as verifiedTransfer from './verified-transfer'
-export * as verifiedStake from './verified-stake'
+import { Buffer } from 'node:buffer'
+import fs from 'node:fs'
+import { Keypair, PublicKey } from '@solana/web3.js'
+import { StakeAuthorize } from '@verified-stake/sdk/src/generated'
+import log from 'loglevel'
+import { useContext } from '../../context'
+import { exploreTransaction } from '../../utils'
+
+interface Opts {
+  zkp: string
+  stake: string
+  newAuthorizedPath: string
+  authorized: string
+}
+
+export async function authorizeChecked(opts: Opts) {
+  const { stakeClient } = useContext()
+
+  const newAuthorizedKeypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(fs.readFileSync(opts.newAuthorizedPath).toString())))
+
+  let authorized = StakeAuthorize.Staker
+
+  if (opts.authorized === 'w') {
+    authorized = StakeAuthorize.Withdrawer
+  }
+
+  try {
+    const signature = await stakeClient.authorizeChecked({
+      newAuthorized: newAuthorizedKeypair,
+      stake: new PublicKey(opts.stake),
+      stakeAuthorized: authorized,
+      zkpRequest: new PublicKey(opts.zkp),
+    })
+
+    log.info(`Signature: ${signature}`)
+    log.info(exploreTransaction(signature))
+  } catch (e) {
+    log.error(e)
+  }
+}

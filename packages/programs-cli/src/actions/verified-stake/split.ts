@@ -26,5 +26,34 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as verifiedTransfer from './verified-transfer'
-export * as verifiedStake from './verified-stake'
+import { Keypair, PublicKey } from '@solana/web3.js'
+import { BN } from '@project-serum/anchor'
+import log from 'loglevel'
+import { useContext } from '../../context'
+import { exploreTransaction } from '../../utils'
+
+interface Opts {
+  zkp: string
+  stake: string
+  amount: string
+}
+
+export async function split(opts: Opts) {
+  const { stakeClient } = useContext()
+
+  const splitKeypair = Keypair.generate()
+
+  try {
+    const signature = await stakeClient.split({
+      lamports: new BN(opts.amount),
+      splitStake: splitKeypair,
+      stake: new PublicKey(opts.stake),
+      zkpRequest: new PublicKey(opts.zkp),
+    })
+
+    log.info(`Signature: ${signature}`)
+    log.info(exploreTransaction(signature))
+  } catch (e) {
+    log.error(e)
+  }
+}

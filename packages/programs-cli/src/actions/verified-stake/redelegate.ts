@@ -26,5 +26,36 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as verifiedTransfer from './verified-transfer'
-export * as verifiedStake from './verified-stake'
+import { Buffer } from 'node:buffer'
+import fs from 'node:fs'
+import { Keypair, PublicKey } from '@solana/web3.js'
+import log from 'loglevel'
+import { useContext } from '../../context'
+import { exploreTransaction } from '../../utils'
+
+interface Opts {
+  zkp: string
+  stake: string
+  vote: string
+  newStakePath: string
+}
+
+export async function redelegate(opts: Opts) {
+  const { stakeClient } = useContext()
+
+  const newStakeKeypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(fs.readFileSync(opts.newStakePath).toString())))
+
+  try {
+    const signature = await stakeClient.redelegate({
+      stake: new PublicKey(opts.stake),
+      uninitializedStake: newStakeKeypair,
+      vote: new PublicKey(opts.vote),
+      zkpRequest: new PublicKey(opts.zkp),
+    })
+
+    log.info(`Signature: ${signature}`)
+    log.info(exploreTransaction(signature))
+  } catch (e) {
+    log.error(e)
+  }
+}

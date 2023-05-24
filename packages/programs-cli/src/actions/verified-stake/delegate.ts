@@ -26,5 +26,30 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as verifiedTransfer from './verified-transfer'
-export * as verifiedStake from './verified-stake'
+import { PublicKey } from '@solana/web3.js'
+import log from 'loglevel'
+import { useContext } from '../../context'
+import { exploreTransaction } from '../../utils'
+
+interface Opts {
+  zkp: string
+  stake: string
+  vote: string
+}
+
+export async function delegate(opts: Opts) {
+  const { stakeClient } = useContext()
+
+  try {
+    const signature = await stakeClient.delegate({
+      stake: new PublicKey(opts.stake),
+      vote: new PublicKey(opts.vote),
+      zkpRequest: new PublicKey(opts.zkp),
+    })
+
+    log.info(`Signature: ${signature}`)
+    log.info(exploreTransaction(signature))
+  } catch (e) {
+    log.error(e)
+  }
+}

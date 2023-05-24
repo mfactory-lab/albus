@@ -26,5 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as verifiedTransfer from './verified-transfer'
-export * as verifiedStake from './verified-stake'
+export * from './authorize'
+export * from './authorizeChecked'
+export * from './delegate'
+export * from './merge'
+export * from './redelegate'
+export * from './redelegateWithSeed'
+export * from './split'
+export * from './splitWithSeed'
+export * from './withdraw'

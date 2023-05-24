@@ -73,6 +73,81 @@ transfer.command('spl-transfer')
   .requiredOption('-m, --mint <MINT>', 'Token mint address')
   .action(actions.verifiedTransfer.splTransfer)
 
+// ------------------------------------------
+// Verified stake program
+// ------------------------------------------
+
+const stake = cli.command('vrf-stake')
+
+stake.command('authorize')
+  .description('Authorize stake')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-s, --stake <STAKE>', 'Stake address')
+  .requiredOption('-n, --new-authorized <NEW_AUTHORIZED>', 'New authorized address')
+  .requiredOption('-a, --authorized <AUTHORIZED>', '`w` for withdrawer authority, default - staker authority')
+  .action(actions.verifiedTransfer.transfer)
+
+stake.command('authorize-checked')
+  .description('Authorize stake checked')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .requiredOption('-m, --mint <MINT>', 'Token mint address')
+  .action(actions.verifiedTransfer.splTransfer)
+
+stake.command('transfer')
+  .description('Transfer SOL')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .action(actions.verifiedTransfer.transfer)
+
+stake.command('spl-transfer')
+  .description('Transfer spl tokens')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .requiredOption('-m, --mint <MINT>', 'Token mint address')
+  .action(actions.verifiedTransfer.splTransfer)
+
+stake.command('transfer')
+  .description('Transfer SOL')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .action(actions.verifiedTransfer.transfer)
+
+stake.command('spl-transfer')
+  .description('Transfer spl tokens')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .requiredOption('-m, --mint <MINT>', 'Token mint address')
+  .action(actions.verifiedTransfer.splTransfer)
+
+stake.command('transfer')
+  .description('Transfer SOL')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .action(actions.verifiedTransfer.transfer)
+
+stake.command('spl-transfer')
+  .description('Transfer spl tokens')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .requiredOption('-m, --mint <MINT>', 'Token mint address')
+  .action(actions.verifiedTransfer.splTransfer)
+
+stake.command('spl-transfer')
+  .description('Transfer spl tokens')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .requiredOption('-m, --mint <MINT>', 'Token mint address')
+  .action(actions.verifiedTransfer.splTransfer)
+
 cli.parseAsync(process.argv).then(
   () => {},
   (e: unknown) => {
