@@ -153,6 +153,37 @@ importers:
     devDependencies:
       '@metaplex-foundation/solita': 0.19.4
 
+  packages/programs-cli:
+    specifiers:
+      '@verified-stake-pool/sdk': workspace:*
+      '@verified-stake/sdk': workspace:*
+      '@verified-swap/sdk': workspace:*
+      '@verified-transfer/sdk': workspace:*
+      chalk: ^4.1.2
+      commander: ^10.0.0
+      loglevel: ^1.8.0
+    dependencies:
+      '@verified-stake-pool/sdk': link:../verified-stake-pool-sdk
+      '@verified-stake/sdk': link:../verified-stake-sdk
+      '@verified-swap/sdk': link:../verified-swap-sdk
+      '@verified-transfer/sdk': link:../verified-transfer-sdk
+      chalk: 4.1.2
+      commander: 10.0.1
+      loglevel: 1.8.1
+
+  packages/verified-stake-pool-sdk:
+    specifiers:
+      '@metaplex-foundation/js': ^0.18
+      '@metaplex-foundation/solita': ^0.19
+      '@solana/spl-token': ^0.3
+      '@solana/web3.js': ^1.73
+    dependencies:
+      '@metaplex-foundation/js': 0.18.3
+      '@solana/spl-token': 0.3.7_@solana+web3.js@1.76.0
+      '@solana/web3.js': 1.76.0
+    devDependencies:
+      '@metaplex-foundation/solita': 0.19.4
+
   packages/verified-stake-sdk:
     specifiers:
       '@metaplex-foundation/solita': ^0.19
@@ -167,19 +198,6 @@ importers:
       '@metaplex-foundation/solita': ^0.19
       '@solana/web3.js': ^1.73
     dependencies:
-      '@solana/web3.js': 1.76.0
-    devDependencies:
-      '@metaplex-foundation/solita': 0.19.4
-
-  packages/verified-stake-pool-sdk:
-    specifiers:
-      '@metaplex-foundation/js': ^0.18
-      '@metaplex-foundation/solita': ^0.19
-      '@solana/spl-token': ^0.3
-      '@solana/web3.js': ^1.73
-    dependencies:
-      '@metaplex-foundation/js': 0.18.3
-      '@solana/spl-token': 0.3.7_@solana+web3.js@1.76.0
       '@solana/web3.js': 1.76.0
     devDependencies:
       '@metaplex-foundation/solita': 0.19.4
