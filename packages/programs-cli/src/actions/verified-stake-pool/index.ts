@@ -26,6 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as verifiedTransfer from './verified-transfer'
-export * as verifiedStake from './verified-stake'
-export * as verifiedStakePool from './verified-stake-pool'
+export * from './addValidator'
+export * from './depositSol'
+export * from './depositStake'
+export * from './withdrawSol'
+export * from './withdrawStake'
