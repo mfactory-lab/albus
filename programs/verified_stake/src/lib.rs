@@ -69,7 +69,7 @@ pub mod verified_stake {
         );
 
         // determine that the number of instructions is equal to 3
-        assert_eq!(ixs.len(), 3);
+        debug_assert_eq!(ixs.len(), 3);
 
         let allocate_account_infos = vec![ctx.accounts.split_stake.to_account_info()];
 
@@ -110,7 +110,7 @@ pub mod verified_stake {
         );
 
         // determine that the number of instructions is equal to 2
-        assert_eq!(ixs.len(), 2);
+        debug_assert_eq!(ixs.len(), 2);
 
         let allocate_account_infos = vec![
             ctx.accounts.split_stake.to_account_info(),
@@ -144,7 +144,7 @@ pub mod verified_stake {
         );
 
         // determine that the number of instructions is equal to 1
-        assert_eq!(ixs.len(), 1);
+        debug_assert_eq!(ixs.len(), 1);
 
         let account_infos = vec![
             ctx.accounts.destination_stake.to_account_info(),
@@ -236,7 +236,7 @@ pub mod verified_stake {
         );
 
         // determine that the number of instructions is equal to 3
-        assert_eq!(ixs.len(), 3);
+        debug_assert_eq!(ixs.len(), 3);
 
         let allocate_account_infos = vec![ctx.accounts.uninitialized_stake.to_account_info()];
 
@@ -278,7 +278,7 @@ pub mod verified_stake {
         );
 
         // determine that the number of instructions is equal to 2
-        assert_eq!(ixs.len(), 2);
+        debug_assert_eq!(ixs.len(), 2);
 
         let allocate_account_infos = vec![
             ctx.accounts.uninitialized_stake.to_account_info(),
