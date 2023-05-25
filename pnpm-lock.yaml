@@ -155,6 +155,7 @@ importers:
 
   packages/programs-cli:
     specifiers:
+      '@solana/spl-token-swap': ^0.2.2
       '@verified-stake-pool/sdk': workspace:*
       '@verified-stake/sdk': workspace:*
       '@verified-swap/sdk': workspace:*
@@ -163,6 +164,7 @@ importers:
       commander: ^10.0.0
       loglevel: ^1.8.0
     dependencies:
+      '@solana/spl-token-swap': 0.2.2
       '@verified-stake-pool/sdk': link:../verified-stake-pool-sdk
       '@verified-stake/sdk': link:../verified-stake-sdk
       '@verified-swap/sdk': link:../verified-swap-sdk
@@ -1078,6 +1080,19 @@ packages:
     engines: {node: '>=5.10'}
     dependencies:
       buffer: 6.0.3
+
+  /@solana/spl-token-swap/0.2.2:
+    resolution: {integrity: sha512-PZ3wrRhY3WpRdfANLrluXbfR3iFPzuzpx4R4QupwAwpxi75npvbZrpjezIJzHUpVXD9msBkAjuczWHpCZOm+wg==}
+    dependencies:
+      '@solana/buffer-layout': 4.0.1
+      '@solana/web3.js': 1.76.0
+      bn.js: 5.2.1
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+    dev: false
 
   /@solana/spl-token/0.1.8:
     resolution: {integrity: sha512-LZmYCKcPQDtJgecvWOgT/cnoIQPWjdH+QVyzPcFvyDUiT0DiRjZaam4aqNUyvchLFhzgunv3d9xOoyE34ofdoQ==}
