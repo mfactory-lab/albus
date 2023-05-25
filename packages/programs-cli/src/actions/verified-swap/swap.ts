@@ -70,7 +70,7 @@ export async function swap(opts: Opts) {
       amountIn: new BN(opts.amount),
       authority: new PublicKey(opts.authority),
       destination: destination.address,
-      minimumAmountOut: new BN(opts.amount),
+      minimumAmountOut: new BN(opts.min),
       poolFee: tokenSwap.feeAccount,
       poolMint: tokenSwap.poolToken,
       source: source.address,
