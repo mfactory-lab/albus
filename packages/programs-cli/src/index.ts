@@ -148,6 +148,106 @@ stake.command('spl-transfer')
   .requiredOption('-m, --mint <MINT>', 'Token mint address')
   .action(actions.verifiedTransfer.splTransfer)
 
+// ------------------------------------------
+// Verified stake pool program
+// ------------------------------------------
+
+const stakePool = cli.command('vrf-stake')
+
+stakePool.command('authorize')
+  .description('Authorize stake')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-s, --stake <STAKE>', 'Stake address')
+  .requiredOption('-n, --new-authorized <NEW_AUTHORIZED>', 'New authorized address')
+  .requiredOption('-a, --authorized <AUTHORIZED>', '`w` for withdrawer authority, default - staker authority')
+  .action(actions.verifiedTransfer.transfer)
+
+stakePool.command('authorize-checked')
+  .description('Authorize stake checked')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .requiredOption('-m, --mint <MINT>', 'Token mint address')
+  .action(actions.verifiedTransfer.splTransfer)
+
+stakePool.command('transfer')
+  .description('Transfer SOL')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .action(actions.verifiedTransfer.transfer)
+
+stakePool.command('spl-transfer')
+  .description('Transfer spl tokens')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .requiredOption('-m, --mint <MINT>', 'Token mint address')
+  .action(actions.verifiedTransfer.splTransfer)
+
+stakePool.command('transfer')
+  .description('Transfer SOL')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-r, --receiver <RECEIVER>', 'Receiver address')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount of lamports')
+  .action(actions.verifiedTransfer.transfer)
+
+// ------------------------------------------
+// Verified swap program
+// ------------------------------------------
+
+const swap = cli.command('vrf-swap')
+
+swap.command('deposit-all')
+  .description('Deposit all token types')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-s, --swap <SWAP>', 'Swap address')
+  .requiredOption('-ma, --maxA <MAX_A>', 'Maximum token A amount')
+  .requiredOption('-mb, --maxB <MAX_B>', 'Maximum token B amount')
+  .requiredOption('-at, --authority <AUTHORITY>', 'Swap authority')
+  .requiredOption('-a, --amount <AMOUNT>', 'Pool token amount')
+  .action(actions.verifiedSwap.depositAll)
+
+swap.command('deposit-single')
+  .description('Deposit single token type')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-s, --swap <SWAP>', 'Swap address')
+  .requiredOption('-mp, --minP <MIN_P>', 'Minimum pool token amount')
+  .requiredOption('-t, --token <TOKEN>', 'Token type to deposit')
+  .requiredOption('-at, --authority <AUTHORITY>', 'Swap authority')
+  .requiredOption('-a, --amount <AMOUNT>', 'Deposit amount')
+  .action(actions.verifiedSwap.depositSingle)
+
+swap.command('swap')
+  .description('Swap tokens')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-s, --swap <SWAP>', 'Swap address')
+  .requiredOption('-m, --min <MIN>', 'Minimum amount out')
+  .requiredOption('-t, --tokenIn <TOKEN_IN>', 'Input token type')
+  .requiredOption('-at, --authority <AUTHORITY>', 'Swap authority')
+  .requiredOption('-a, --amount <AMOUNT>', 'Amount in')
+  .action(actions.verifiedSwap.swap)
+
+swap.command('withdraw-all')
+  .description('Withdraw all token types')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-s, --swap <SWAP>', 'Swap address')
+  .requiredOption('-ma, --minA <MIN_A>', 'Minimum token A amount')
+  .requiredOption('-mb, --minB <MIN_B>', 'Minimum token B amount')
+  .requiredOption('-at, --authority <AUTHORITY>', 'Swap authority')
+  .requiredOption('-a, --amount <AMOUNT>', 'Pool token amount')
+  .action(actions.verifiedSwap.withdrawAll)
+
+swap.command('withdraw-single')
+  .description('Withdraw single token type')
+  .requiredOption('-z, --zkp <ZKP>', 'ZKP request')
+  .requiredOption('-s, --swap <SWAP>', 'Swap address')
+  .requiredOption('-mp, --maxP <MAX_P>', 'Maximum pool token amount')
+  .requiredOption('-t, --token <TOKEN>', 'Token type to withdraw')
+  .requiredOption('-at, --authority <AUTHORITY>', 'Swap authority')
+  .requiredOption('-a, --amount <AMOUNT>', 'Deposit amount')
+  .action(actions.verifiedSwap.withdrawSingle)
+
 cli.parseAsync(process.argv).then(
   () => {},
   (e: unknown) => {
