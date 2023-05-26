@@ -4,9 +4,9 @@ import { TOKEN_PROGRAM_ID, createAssociatedTokenAccount, createMint } from '@sol
 import * as web3 from '@solana/web3.js'
 import { AlbusClient } from '@albus/sdk'
 import { VerifiedStakePoolClient } from '@verified-stake-pool/sdk'
-import { STAKE_POOL_PROGRAM_ID, initialize } from '@solana/spl-stake-pool'
+import { STAKE_POOL_PROGRAM_ID, initialize, addValidatorToPool, getStakePoolAccount } from '@solana/spl-stake-pool'
 import { assert } from 'chai'
-import { assertErrorCode, mintNFT, payerKeypair, provider } from './utils'
+import {airdrop, assertErrorCode, mintNFT, payerKeypair, provider} from './utils'
 
 describe('verified stake pool', () => {
   const client = new AlbusClient(provider)
@@ -106,7 +106,7 @@ describe('verified stake pool', () => {
 
     const createAccountTransaction1 = web3.VoteProgram.createAccount({
       fromPubkey: provider.publicKey,
-      lamports: lamportsForVoteAccount1,
+      lamports: lamportsForVoteAccount1 + 3 * web3.LAMPORTS_PER_SOL,
       voteInit: new web3.VoteInit(provider.publicKey, provider.publicKey, provider.publicKey, 0),
       votePubkey,
     })
@@ -117,26 +117,14 @@ describe('verified stake pool', () => {
       console.log(e)
     }
 
-    // TODO: Stake account address not properly derived from the validator address
-    const validatorStakeKeypair = web3.Keypair.generate()
-    validatorStakeAccount = validatorStakeKeypair.publicKey
+    const [publicKey] = await web3.PublicKey.findProgramAddress(
+      [votePubkey.toBuffer(), stakePool.toBuffer()],
+      STAKE_POOL_PROGRAM_ID,
+    )
 
-    const lamportsForStakeAccount2
-      = (await provider.connection.getMinimumBalanceForRentExemption(
-        web3.StakeProgram.space,
-      ))
+    validatorStakeAccount = publicKey
 
-    const createAccountTransaction2 = web3.StakeProgram.createAccount({
-      fromPubkey: provider.wallet.publicKey,
-      authorized: new web3.Authorized(
-        votePubkey,
-        votePubkey,
-      ),
-      lamports: lamportsForStakeAccount2 + web3.LAMPORTS_PER_SOL,
-      stakePubkey: validatorStakeAccount,
-    })
-    await provider.sendAndConfirm(createAccountTransaction2, [payerKeypair, validatorStakeKeypair])
-
+    // TODO: FIX: InsufficientDelegation error while delegating stake
     try {
       await verifiedStakePoolClient.addValidator({
         stake: validatorStakeAccount,
@@ -150,6 +138,7 @@ describe('verified stake pool', () => {
       })
     } catch (e) {
       console.log(e)
+      throw e
     }
   })
 
