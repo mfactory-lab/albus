@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
 import { BN } from '@project-serum/anchor'
 import { TOKEN_PROGRAM_ID, createAssociatedTokenAccount, createMint } from '@solana/spl-token'
@@ -50,7 +51,7 @@ describe('verified stake pool', () => {
     stakePool = stakePoolKeypair.publicKey
     const validatorListKeypair = web3.Keypair.generate()
     validatorList = validatorListKeypair.publicKey
-    const [authority] = await web3.PublicKey.findProgramAddress(
+    const [authority] = web3.PublicKey.findProgramAddressSync(
       [stakePoolKeypair.publicKey.toBuffer(), Buffer.from('withdraw')],
       STAKE_POOL_PROGRAM_ID,
     )
