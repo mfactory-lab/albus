@@ -4,9 +4,9 @@ import { TOKEN_PROGRAM_ID, createAssociatedTokenAccount, createMint } from '@sol
 import * as web3 from '@solana/web3.js'
 import { AlbusClient } from '@albus/sdk'
 import { VerifiedStakePoolClient } from '@verified-stake-pool/sdk'
-import { STAKE_POOL_PROGRAM_ID, initialize, addValidatorToPool, getStakePoolAccount } from '@solana/spl-stake-pool'
+import { STAKE_POOL_PROGRAM_ID, initialize } from '@solana/spl-stake-pool'
 import { assert } from 'chai'
-import {airdrop, assertErrorCode, mintNFT, payerKeypair, provider} from './utils'
+import { assertErrorCode, mintNFT, payerKeypair, provider } from './utils'
 
 describe('verified stake pool', () => {
   const client = new AlbusClient(provider)
@@ -81,7 +81,6 @@ describe('verified stake pool', () => {
       fee: { denominator: new BN(0), numerator: new BN(0) },
       manager: payerKeypair,
       managerPoolAccount: managerFeeAccount,
-      maxValidators: 2950,
       poolMint: stakePoolMint,
       referralFee: 0,
       reserveStake: reserveStakeAccount,
