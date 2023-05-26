@@ -1,12 +1,16 @@
 use albus_verifier::check_compliant;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::vote::state::VoteState;
 use spl_stake_pool::solana_program::program::invoke;
 
 pub fn handle(ctx: Context<VerifiedAddValidator>) -> Result<()> {
-    check_compliant(
-        &ctx.accounts.zkp_request,
-        Some(ctx.accounts.validator.key()),
-    )?;
+    // TODO: deserialize VoteState and check authorized_withdrawer with albus
+    // let vote_account = VoteState::deserialize(ctx.accounts.validator.data.take()).unwrap();
+    // msg!("{:?}", vote_account);
+    // check_compliant(
+    //     &ctx.accounts.zkp_request,
+    //     Some(vote_account.authorized_withdrawer),
+    // )?;
 
     let ix = spl_stake_pool::instruction::add_validator_to_pool(
         &ctx.accounts.stake_pool_program.key(),
