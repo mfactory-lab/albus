@@ -32,7 +32,7 @@ export class VerifiedTransferClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -54,7 +54,7 @@ export class VerifiedTransferClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 }
 
