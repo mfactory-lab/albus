@@ -26,10 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { vc } from '@albus/core'
 import log from 'loglevel'
 import { useContext } from '../../context'
 import { exploreAddress } from '../../utils'
-import { issueVerifiableCredential, mintVerifiableCredentialNFT } from './utils'
+import { generateCredentialSubject, mintVerifiableCredentialNFT } from './utils'
 
 interface Opts {
   // provider: string
@@ -40,15 +41,20 @@ interface Opts {
  * Issue new Verifiable Credential
  */
 export async function issue(opts: Opts) {
-  const { keypair } = useContext()
+  const { keypair, config } = useContext()
+
+  const creds = generateCredentialSubject()
 
   // Issue new Verifiable Credential
-  const vc = await issueVerifiableCredential(keypair.publicKey, {
+  const res = await vc.create(creds, {
+    issuerSecretKey: config.issuerSecretKey,
     encrypt: opts.encrypt,
+    holder: keypair.publicKey,
+    aud: [config.issuerDid],
   })
 
   // Generate new VC-NFT
-  const nft = await mintVerifiableCredentialNFT(vc)
+  const nft = await mintVerifiableCredentialNFT(res)
 
   log.info('Done')
   log.info(`Mint: ${nft.address}`)
