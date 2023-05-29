@@ -5,7 +5,7 @@ import { TOKEN_PROGRAM_ID, createAssociatedTokenAccount, createMint } from '@sol
 import * as web3 from '@solana/web3.js'
 import { AlbusClient } from '@albus/sdk'
 import { VerifiedStakePoolClient } from '@verified-stake-pool/sdk'
-import { STAKE_POOL_PROGRAM_ID, initialize } from '@solana/spl-stake-pool'
+import { STAKE_POOL_PROGRAM_ID, addValidatorToPool, initialize, depositStake } from '@solana/spl-stake-pool'
 import { assert } from 'chai'
 import { assertErrorCode, mintNFT, payerKeypair, provider } from './utils'
 
@@ -124,22 +124,65 @@ describe('verified stake pool', () => {
 
     validatorStakeAccount = publicKey
 
-    // TODO: FIX: InsufficientDelegation error while delegating stake
+    // const stakeKeypair = web3.Keypair.generate()
+    // const stakeAccount = stakeKeypair.publicKey
+    //
+    // const createStakeAccountTransaction = web3.StakeProgram.createAccount({
+    //   fromPubkey: provider.wallet.publicKey,
+    //   authorized: new web3.Authorized(
+    //     provider.wallet.publicKey,
+    //     provider.wallet.publicKey,
+    //   ),
+    //   lamports: lamportsForStakeAccount + 10 * web3.LAMPORTS_PER_SOL,
+    //   lockup: new web3.Lockup(0, 0, provider.wallet.publicKey),
+    //   stakePubkey: stakeAccount,
+    // })
+    // await provider.sendAndConfirm(createStakeAccountTransaction, [payerKeypair, stakeKeypair])
+    //
+    // const delegateTransaction = web3.StakeProgram.delegate({
+    //   stakePubkey: stakeAccount,
+    //   authorizedPubkey: provider.wallet.publicKey,
+    //   votePubkey,
+    // })
+    //
+    // await provider.sendAndConfirm(delegateTransaction, [payerKeypair, payerKeypair])
+    //
+    // const { instructions: ixs1, signers: sgs } = await depositStake(provider.connection, stakePool, provider.wallet.publicKey, votePubkey, stakeAccount)
+    // const tx1 = new web3.Transaction().add(...ixs1)
+    //
+    // try {
+    //   await provider.sendAndConfirm(tx1, sgs)
+    // } catch (e) {
+    //   console.log(e)
+    //   throw e
+    // }
+
+    const { instructions: ixs } = await addValidatorToPool(provider.connection, stakePool, votePubkey, provider.wallet.publicKey)
+    const tx = new web3.Transaction().add(...ixs)
+
     try {
-      await verifiedStakePoolClient.addValidator({
-        stake: validatorStakeAccount,
-        stakePool,
-        stakePoolWithdrawAuthority: withdrawAuthority,
-        staker: payerKeypair,
-        validator: votePubkey,
-        validatorListStorage: validatorList,
-        zkpRequest: ZKPRequestAddress,
-        stakePoolProgram: STAKE_POOL_PROGRAM_ID,
-      })
+      await provider.sendAndConfirm(tx)
     } catch (e) {
       console.log(e)
       throw e
     }
+
+    // TODO: FIX: InsufficientDelegation error while delegating stake
+    // try {
+    //   await verifiedStakePoolClient.addValidator({
+    //     stake: validatorStakeAccount,
+    //     stakePool,
+    //     stakePoolWithdrawAuthority: withdrawAuthority,
+    //     staker: payerKeypair,
+    //     validator: votePubkey,
+    //     validatorListStorage: validatorList,
+    //     zkpRequest: ZKPRequestAddress,
+    //     stakePoolProgram: STAKE_POOL_PROGRAM_ID,
+    //   })
+    // } catch (e) {
+    //   console.log(e)
+    //   throw e
+    // }
   })
 
   it('can not call instructions if ZKP request is not verified', async () => {
