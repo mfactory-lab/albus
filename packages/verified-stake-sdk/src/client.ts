@@ -55,7 +55,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [props.splitStake], opts)
+    return await this.provider.sendAndConfirm(tx, [props.splitStake], opts)
   }
 
   /**
@@ -78,7 +78,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [props.splitStake, props.base], opts)
+    return await this.provider.sendAndConfirm(tx, [props.splitStake, props.base], opts)
   }
 
   /**
@@ -98,7 +98,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -121,7 +121,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -142,7 +142,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -162,7 +162,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [props.uninitializedStake], opts)
+    return await this.provider.sendAndConfirm(tx, [props.uninitializedStake], opts)
   }
 
   /**
@@ -186,7 +186,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [props.base], opts)
+    return await this.provider.sendAndConfirm(tx, [props.base], opts)
   }
 
   /**
@@ -208,7 +208,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -230,7 +230,7 @@ export class VerifiedStakeClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [props.newAuthorized], opts)
+    return await this.provider.sendAndConfirm(tx, [props.newAuthorized], opts)
   }
 }
 

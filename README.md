@@ -2,11 +2,11 @@
 
 # Introduction
 
-Albus is a blockchain protocol designed to ensure that users transacting with decentralized finance (DeFi) services comply with predefined policies, while preserving user anonymity and privacy. Drawing on technologies such as Zero-Knowledge Proof (ZKP) and Self-Sovereign Identity (SSI), Albus manages personal data of users in a secure and confidential manner. 
+Albus is a Compliance-as-a-Service (CaaS) protocol that verifies compliance of users with predefined policies of decentralized finance (DeFi) services for specific transactions, while preserving user anonymity and privacy. Drawing on technologies such as Zero-Knowledge Proof (ZKP) and Self-Sovereign Identity (SSI), Albus manages personal data of users in a secure and confidential manner.
 
 # Website and litepaper
 
-- [Albus website](https://albus.finance/)<br>
+- [Albus website](https://albus.finance/)
 - [Albus litepaper](https://albus.finance/assets/download/litepaper.pdf)
 
 # Full documentation

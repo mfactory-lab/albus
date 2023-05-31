@@ -44,7 +44,7 @@ export class VerifiedSwapClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -71,7 +71,7 @@ export class VerifiedSwapClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -99,7 +99,7 @@ export class VerifiedSwapClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -128,7 +128,7 @@ export class VerifiedSwapClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
@@ -158,7 +158,7 @@ export class VerifiedSwapClient {
     )
 
     const tx = new Transaction().add(instruction)
-    await this.provider.sendAndConfirm(tx, [], opts)
+    return await this.provider.sendAndConfirm(tx, [], opts)
   }
 }
 
