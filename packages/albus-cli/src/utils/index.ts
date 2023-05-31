@@ -26,5 +26,4 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './http'
 export * from './web3'

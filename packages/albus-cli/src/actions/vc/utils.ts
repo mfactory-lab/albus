@@ -26,76 +26,18 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { encodeDidKey } from '@albus/core/src/utils'
+import type { vc } from '@albus/core'
 import { faker } from '@faker-js/faker'
 import { toBigNumber } from '@metaplex-foundation/js'
-import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import { EdDSASigner } from 'did-jwt'
-import type { Issuer, JwtCredentialPayload } from 'did-jwt-vc'
-import { createVerifiableCredentialJwt } from 'did-jwt-vc'
 import log from 'loglevel'
-import { crypto } from '@albus/core'
 import { useContext } from '../../context'
-
-export interface IssueOpts {
-  encrypt?: boolean
-  nbf?: number
-  exp?: number
-}
-
-type CredentialSubject = Record<string, any>
-
-/**
- * Issue `VerifiableCredential`
- */
-export async function issueVerifiableCredential(holder: PublicKey, opts?: IssueOpts) {
-  const { config } = useContext()
-
-  let credentialSubject = generateCredentialSubject()
-
-  if (opts?.encrypt) {
-    credentialSubject = {
-      encrypted: await crypto.xc20p.encrypt(JSON.stringify(credentialSubject), holder),
-    }
-  }
-
-  const signerKeypair = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
-  const signer = EdDSASigner(signerKeypair.secretKey)
-
-  const issuer: Issuer = {
-    // did: 'did:web:albus.finance',
-    did: encodeDidKey(signerKeypair.publicKey.toBytes()),
-    signer,
-    alg: 'EdDSA',
-  }
-
-  const vcPayload: JwtCredentialPayload = {
-    sub: encodeDidKey(holder.toBytes()),
-    aud: [config.issuerDid],
-    vc: {
-      '@context': ['https://www.w3.org/2018/credentials/v1'],
-      'type': ['VerifiableCredential'],
-      'credentialSubject': credentialSubject,
-    },
-  }
-
-  if (opts?.exp) {
-    vcPayload.exp = opts.exp
-  }
-
-  if (opts?.nbf) {
-    vcPayload.nbf = opts.nbf
-  }
-
-  return await createVerifiableCredentialJwt(vcPayload, issuer)
-}
 
 /**
  * Generates a credential subject with fake data.
  * @returns {CredentialSubject}
  */
-function generateCredentialSubject(): CredentialSubject {
+export function generateCredentialSubject(): vc.CredentialSubject {
   const data = generateFakeSumSubData()
 
   return {

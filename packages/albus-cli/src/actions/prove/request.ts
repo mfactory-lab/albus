@@ -27,13 +27,8 @@
  */
 
 import { PublicKey } from '@solana/web3.js'
-import { verifyCredential } from 'did-jwt-vc'
-import type { ResolverRegistry } from 'did-resolver'
-import { Resolver } from 'did-resolver'
 import log from 'loglevel'
-import * as WebDidResolver from 'web-did-resolver'
-import * as KeyDidResolver from 'key-did-resolver'
-import { crypto, snark } from '@albus/core'
+import { snark, vc } from '@albus/core'
 import { useContext } from '../../context'
 import { exploreAddress } from '../../utils'
 import { mintProofNFT } from './utils'
@@ -61,29 +56,19 @@ export async function createForRequest(addr: string, opts: Opts) {
   log.debug(`Loading credential ${opts.vc}...`)
   const cred = await client.loadCredential(opts.vc)
 
-  const resolver = new Resolver({
-    ...WebDidResolver.getResolver(),
-    ...KeyDidResolver.getResolver(),
-  } as ResolverRegistry)
-
   log.debug('Verifying credential...')
-  const vc = await verifyCredential(cred.payload, resolver, {
+  const { data } = await vc.verify(cred.payload, {
+    decryptionKey: keypair.secretKey,
     audience: config.issuerDid,
   })
 
-  let vcInfo = vc.verifiableCredential.credentialSubject as Record<string, any>
-  if (vcInfo.encrypted) {
-    vcInfo = JSON.parse(await crypto.xc20p.decrypt(vcInfo.encrypted, keypair.secretKey))
-  }
-
   log.debug('Generating proof...')
-
   const circuit = await client.loadCircuit(req.circuit)
 
   const { proof, publicSignals } = await snark.generateProof({
     wasmUrl: circuit.wasmUrl,
     zkeyUrl: circuit.zkeyUrl,
-    input: prepareCircuitInput(circuit.id, vcInfo),
+    input: prepareCircuitInput(circuit.id, data),
   })
 
   log.debug('Done')

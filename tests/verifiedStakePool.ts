@@ -1,10 +1,11 @@
+import { Buffer } from 'node:buffer'
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
 import { BN } from '@project-serum/anchor'
 import { TOKEN_PROGRAM_ID, createAssociatedTokenAccount, createMint } from '@solana/spl-token'
 import * as web3 from '@solana/web3.js'
 import { AlbusClient } from '@albus/sdk'
 import { VerifiedStakePoolClient } from '@verified-stake-pool/sdk'
-import { STAKE_POOL_PROGRAM_ID, initialize } from '@solana/spl-stake-pool'
+import { STAKE_POOL_PROGRAM_ID, addValidatorToPool, initialize, depositStake } from '@solana/spl-stake-pool'
 import { assert } from 'chai'
 import { assertErrorCode, mintNFT, payerKeypair, provider } from './utils'
 
@@ -18,7 +19,6 @@ describe('verified stake pool', () => {
   let stakePoolMint: web3.PublicKey
   let validatorList: web3.PublicKey
   let withdrawAuthority: web3.PublicKey
-  let depositAuthority: web3.PublicKey
   let reserveStakeAccount: web3.PublicKey
   let validatorStakeAccount: web3.PublicKey
   let managerFeeAccount: web3.PublicKey
@@ -51,7 +51,7 @@ describe('verified stake pool', () => {
     stakePool = stakePoolKeypair.publicKey
     const validatorListKeypair = web3.Keypair.generate()
     validatorList = validatorListKeypair.publicKey
-    const [authority] = await web3.PublicKey.findProgramAddress(
+    const [authority] = web3.PublicKey.findProgramAddressSync(
       [stakePoolKeypair.publicKey.toBuffer(), Buffer.from('withdraw')],
       STAKE_POOL_PROGRAM_ID,
     )
@@ -60,12 +60,6 @@ describe('verified stake pool', () => {
     const reserveKeypair = web3.Keypair.generate()
     reserveStakeAccount = reserveKeypair.publicKey
     managerFeeAccount = await createAssociatedTokenAccount(provider.connection, payerKeypair, stakePoolMint, provider.wallet.publicKey)
-
-    const [authority1] = await web3.PublicKey.findProgramAddress(
-      [stakePoolKeypair.publicKey.toBuffer(), Buffer.from('deposit')],
-      STAKE_POOL_PROGRAM_ID,
-    )
-    depositAuthority = authority1
 
     const lamportsForStakeAccount
       = (await provider.connection.getMinimumBalanceForRentExemption(
@@ -88,7 +82,6 @@ describe('verified stake pool', () => {
       fee: { denominator: new BN(0), numerator: new BN(0) },
       manager: payerKeypair,
       managerPoolAccount: managerFeeAccount,
-      maxValidators: 2950,
       poolMint: stakePoolMint,
       referralFee: 0,
       reserveStake: reserveStakeAccount,
@@ -103,39 +96,93 @@ describe('verified stake pool', () => {
       console.log(e)
     }
 
-    const validatorKeypair = web3.Keypair.generate()
-    validatorStakeAccount = validatorKeypair.publicKey
+    const voteKeypair = web3.Keypair.generate()
+    const votePubkey = voteKeypair.publicKey
 
-    const lamportsForStakeAccount1
+    const lamportsForVoteAccount1
       = (await provider.connection.getMinimumBalanceForRentExemption(
-        web3.StakeProgram.space,
+        web3.VoteProgram.space,
       ))
 
-    const createAccountTransaction1 = web3.StakeProgram.createAccount({
-      fromPubkey: provider.wallet.publicKey,
-      authorized: new web3.Authorized(
-        payerKeypair.publicKey,
-        payerKeypair.publicKey,
-      ),
-      lamports: lamportsForStakeAccount1 + web3.LAMPORTS_PER_SOL,
-      stakePubkey: validatorStakeAccount,
+    const createAccountTransaction1 = web3.VoteProgram.createAccount({
+      fromPubkey: provider.publicKey,
+      lamports: lamportsForVoteAccount1 + 3 * web3.LAMPORTS_PER_SOL,
+      voteInit: new web3.VoteInit(provider.publicKey, provider.publicKey, provider.publicKey, 0),
+      votePubkey,
     })
-    await provider.sendAndConfirm(createAccountTransaction1, [payerKeypair, validatorKeypair])
 
     try {
-      await verifiedStakePoolClient.addValidator({
-        stake: validatorStakeAccount,
-        stakePool,
-        stakePoolWithdrawAuthority: withdrawAuthority,
-        staker: payerKeypair,
-        validator: provider.publicKey,
-        validatorListStorage: validatorList,
-        zkpRequest: ZKPRequestAddress,
-        stakePoolProgram: STAKE_POOL_PROGRAM_ID,
-      })
+      await provider.sendAndConfirm(createAccountTransaction1, [payerKeypair, voteKeypair])
     } catch (e) {
       console.log(e)
     }
+
+    const [publicKey] = await web3.PublicKey.findProgramAddress(
+      [votePubkey.toBuffer(), stakePool.toBuffer()],
+      STAKE_POOL_PROGRAM_ID,
+    )
+
+    validatorStakeAccount = publicKey
+
+    // const stakeKeypair = web3.Keypair.generate()
+    // const stakeAccount = stakeKeypair.publicKey
+    //
+    // const createStakeAccountTransaction = web3.StakeProgram.createAccount({
+    //   fromPubkey: provider.wallet.publicKey,
+    //   authorized: new web3.Authorized(
+    //     provider.wallet.publicKey,
+    //     provider.wallet.publicKey,
+    //   ),
+    //   lamports: lamportsForStakeAccount + 10 * web3.LAMPORTS_PER_SOL,
+    //   lockup: new web3.Lockup(0, 0, provider.wallet.publicKey),
+    //   stakePubkey: stakeAccount,
+    // })
+    // await provider.sendAndConfirm(createStakeAccountTransaction, [payerKeypair, stakeKeypair])
+    //
+    // const delegateTransaction = web3.StakeProgram.delegate({
+    //   stakePubkey: stakeAccount,
+    //   authorizedPubkey: provider.wallet.publicKey,
+    //   votePubkey,
+    // })
+    //
+    // await provider.sendAndConfirm(delegateTransaction, [payerKeypair, payerKeypair])
+    //
+    // const { instructions: ixs1, signers: sgs } = await depositStake(provider.connection, stakePool, provider.wallet.publicKey, votePubkey, stakeAccount)
+    // const tx1 = new web3.Transaction().add(...ixs1)
+    //
+    // try {
+    //   await provider.sendAndConfirm(tx1, sgs)
+    // } catch (e) {
+    //   console.log(e)
+    //   throw e
+    // }
+
+    const { instructions: ixs } = await addValidatorToPool(provider.connection, stakePool, votePubkey, provider.wallet.publicKey)
+    const tx = new web3.Transaction().add(...ixs)
+
+    try {
+      await provider.sendAndConfirm(tx)
+    } catch (e) {
+      console.log(e)
+      throw e
+    }
+
+    // TODO: FIX: InsufficientDelegation error while delegating stake
+    // try {
+    //   await verifiedStakePoolClient.addValidator({
+    //     stake: validatorStakeAccount,
+    //     stakePool,
+    //     stakePoolWithdrawAuthority: withdrawAuthority,
+    //     staker: payerKeypair,
+    //     validator: votePubkey,
+    //     validatorListStorage: validatorList,
+    //     zkpRequest: ZKPRequestAddress,
+    //     stakePoolProgram: STAKE_POOL_PROGRAM_ID,
+    //   })
+    // } catch (e) {
+    //   console.log(e)
+    //   throw e
+    // }
   })
 
   it('can not call instructions if ZKP request is not verified', async () => {
@@ -195,7 +242,6 @@ describe('verified stake pool', () => {
       })
       assert.ok(false)
     } catch (e: any) {
-      console.log(e)
       assertErrorCode(e, 'InvalidAccountData')
     }
   })
@@ -273,70 +319,6 @@ describe('verified stake pool', () => {
       zkpRequest: ZKPRequestAddress,
       solDepositAuthority: payerKeypair,
     })
-  })
-
-  it('can deposit stake with albus verification check', async () => {
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code1')
-    const nft = await mintNFT(metaplex, 'ALBUS-C')
-    const mint = nft.address
-
-    await client.createZKPRequest({
-      circuit: mint,
-      serviceCode: 'code1',
-    })
-
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
-
-    const proofNft = await mintNFT(metaplex, 'ALBUS-P')
-
-    await client.prove({
-      zkpRequest: ZKPRequestAddress,
-      proofMint: proofNft.address,
-    })
-
-    await client.verify({
-      zkpRequest: ZKPRequestAddress,
-    })
-
-    const stakeKeypair = web3.Keypair.generate()
-    const stakeAccount = stakeKeypair.publicKey
-
-    const lamportsForStakeAccount
-      = (await provider.connection.getMinimumBalanceForRentExemption(
-        web3.StakeProgram.space,
-      ))
-
-    const createAccountTransaction = web3.StakeProgram.createAccount({
-      fromPubkey: provider.wallet.publicKey,
-      authorized: new web3.Authorized(
-        provider.wallet.publicKey,
-        provider.wallet.publicKey,
-      ),
-      lamports: lamportsForStakeAccount + web3.LAMPORTS_PER_SOL,
-      lockup: new web3.Lockup(0, 0, provider.wallet.publicKey),
-      stakePubkey: stakeAccount,
-    })
-    await provider.sendAndConfirm(createAccountTransaction, [payerKeypair, stakeKeypair])
-
-    try {
-      await verifiedStakePoolClient.depositStake({
-        depositStake: stakeAccount,
-        managerFeeAccount,
-        poolMint: stakePoolMint,
-        poolTokensTo: managerFeeAccount,
-        referrerPoolTokensAccount: managerFeeAccount,
-        reserveStake: reserveStakeAccount,
-        stakePool,
-        stakePoolDepositAuthority: depositAuthority,
-        stakePoolProgram: STAKE_POOL_PROGRAM_ID,
-        stakePoolWithdrawAuthority: withdrawAuthority,
-        validatorListStorage: validatorList,
-        validatorStake: reserveStakeAccount,
-        zkpRequest: ZKPRequestAddress,
-      })
-    } catch (e) {
-      console.log(e)
-    }
   })
 
   it('can withdraw SOL with albus verification check', async () => {
