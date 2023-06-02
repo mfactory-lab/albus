@@ -1,7 +1,7 @@
 [workspace]
 members = [
   "programs/*",
-  "packages/albus-verifier"
+    "packages/albus-crates"
 ]
 
 [profile.release]
