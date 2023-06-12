@@ -29,7 +29,7 @@
 import type { Command } from 'commander'
 import { program as cli } from 'commander'
 import log from 'loglevel'
-import pkg from '../package.json'
+import pkg from '../package.json' assert { type: 'json' }
 import { initContext } from './context'
 import * as actions from './actions'
 

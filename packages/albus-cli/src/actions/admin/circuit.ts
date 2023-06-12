@@ -41,8 +41,8 @@ import {
 import chalk from 'chalk'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
-import { utils } from '@albus/core'
 import { useContext } from '../../context'
+import { downloadFile } from '../../utils'
 
 interface Opts {}
 
@@ -105,7 +105,7 @@ export async function create(circuitId: string, _opts: Opts) {
   // Download PowersOfTau from Hermez
   if (!fs.existsSync(`${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`)) {
     log.info(`Downloading powersOfTau with power ${power} from Hermez`)
-    await utils.downloadFile(
+    await downloadFile(
       `https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${power}.ptau`,
       `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
     )

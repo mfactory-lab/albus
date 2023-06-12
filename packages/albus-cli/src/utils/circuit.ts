@@ -29,7 +29,7 @@
 import fs from 'node:fs'
 import log from 'loglevel'
 import snarkjs from 'snarkjs'
-import { downloadFile } from './utils'
+import { downloadFile } from './http'
 
 type CircuitId = string
 

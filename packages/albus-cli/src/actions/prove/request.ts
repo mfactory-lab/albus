@@ -60,7 +60,7 @@ export async function createForRequest(addr: string, opts: Opts) {
   const cred = await client.loadCredential(opts.vc)
 
   log.debug('Verifying credential...')
-  const { data } = await vc.verify(cred.payload, {
+  const { verifiableCredential } = await vc.verifyCredential(cred.payload, {
     decryptionKey: keypair.secretKey,
     audience: config.issuerDid,
   })
@@ -69,7 +69,7 @@ export async function createForRequest(addr: string, opts: Opts) {
   const { proof, publicSignals } = await snark.generateProof({
     wasmUrl: circuit.wasmUrl,
     zkeyUrl: circuit.zkeyUrl,
-    input: prepareCircuitInput(circuit.id, data),
+    input: prepareCircuitInput(circuit.id, verifiableCredential.credentialSubject),
   })
 
   log.debug('Done')

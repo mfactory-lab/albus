@@ -2,20 +2,27 @@
   "name": "@albus/cli",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "main": "src/index.ts",
-  "sideEffects": false,
+  "module": "src/index.ts",
   "scripts": {
-    "cli": "ts-node ./src/index.ts"
+    "cli": "NODE_NO_WARNINGS=1 ts-node-esm ./src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/albus-cli"
   },
   "dependencies": {
     "@albus/core": "workspace:*",
     "@faker-js/faker": "^7.6",
-    "@metaplex-foundation/js": "^0.18",
+    "@metaplex-foundation/js": "^0.19.4",
     "@solana/spl-token": "^0.3",
-    "@solana/web3.js": "^1.73",
-    "snarkjs": "^0.6.9",
+    "@solana/web3.js": "^1.77",
+    "axios": "^1.4.0",
     "commander": "^10.0.0",
     "chalk": "^4.1.2",
-    "loglevel": "^1.8.0"
+    "loglevel": "^1.8.1",
+    "snarkjs": "^0.7.0"
   }
 }

@@ -67,7 +67,7 @@ export async function showAll() {
   for (const metadata of metadataAccounts) {
     const json = await metaplex.storage().downloadJson<JsonMetadata>(metadata.uri)
 
-    const { verifiableCredential, data } = await vc.verify(json.vc as string, {
+    const { verifiableCredential } = await vc.verifyCredential(json.vc as string, {
       decryptionKey: keypair.secretKey,
       audience: config.issuerDid,
     })
@@ -77,7 +77,7 @@ export async function showAll() {
     log.info('Issuer:', verifiableCredential.issuer)
     log.info('IssuanceDate:', verifiableCredential.issuanceDate)
     log.info('ExpirationDate:', verifiableCredential.expirationDate)
-    log.info('VerifiableCredential:', data)
+    log.info('CredentialSubject:', verifiableCredential.credentialSubject)
 
     log.info('--------------------------------------------------------------------------')
   }

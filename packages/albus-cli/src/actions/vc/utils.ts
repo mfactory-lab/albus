@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { vc } from '@albus/core'
 import { faker } from '@faker-js/faker'
 import { toBigNumber } from '@metaplex-foundation/js'
 import { Keypair } from '@solana/web3.js'
@@ -35,9 +34,8 @@ import { useContext } from '../../context'
 
 /**
  * Generates a credential subject with fake data.
- * @returns {CredentialSubject}
  */
-export function generateCredentialSubject(): vc.CredentialSubject {
+export function generateCredentialSubject() {
   const data = generateFakeSumSubData()
 
   return {

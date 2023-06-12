@@ -46,8 +46,8 @@ export async function issue(opts: Opts) {
   const claims = generateCredentialSubject()
 
   // Issue new Verifiable Credential
-  const res = await vc.create(claims, {
-    issuerSecretKey: config.issuerSecretKey,
+  const res = await vc.createVerifiableCredential(claims, {
+    signerSecretKey: config.issuerSecretKey,
     encrypt: opts.encrypt,
     holder: keypair.publicKey,
     aud: [config.issuerDid],
