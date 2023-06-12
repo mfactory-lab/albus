@@ -33,7 +33,7 @@ import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3
 import { PublicKey, Transaction } from '@solana/web3.js'
 import type { PublicSignals, SnarkjsProof, VK } from 'snarkjs'
 import * as snarkjs from 'snarkjs'
-import idl from '../idl/albus.json'
+import idl from '../idl/albus.json' assert { type: 'json' }
 import { SERVICE_PROVIDER_SEED_PREFIX, ZKP_REQUEST_SEED_PREFIX } from './constants'
 import {
   PROGRAM_ID,
