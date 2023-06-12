@@ -41,7 +41,7 @@ import { xc20p } from './crypto'
 
 export type CredentialSubject = Record<string, any>
 
-export interface IssueOpts {
+export interface CreateOpts {
   encrypt?: boolean
   nbf?: number
   exp?: number
@@ -53,7 +53,7 @@ export interface IssueOpts {
 /**
  * Issue new verifiable credential
  */
-export async function create(credentialSubject: CredentialSubject, opts: IssueOpts) {
+export async function create(credentialSubject: CredentialSubject, opts: CreateOpts) {
   if (opts?.encrypt) {
     credentialSubject = {
       encrypted: await xc20p.encrypt(JSON.stringify(credentialSubject), opts.holder),

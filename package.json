@@ -3,11 +3,8 @@
   "packageManager": "pnpm@7.13.0",
   "scripts": {
     "api:gen": "pnpm --filter=sdk run api:gen && eslint --fix --ext .ts packages/albus-sdk/src/**",
-    "ui:dev": "pnpm --filter=ui run dev",
-    "cli": "pnpm --filter=cli run cli",
+    "cli": "pnpm --filter=@albus/cli run cli",
     "lint:fix": "eslint --cache --fix --ext .js,.vue,.ts ./packages/**",
-    "amman:start": "CI=1 DEBUG='amman:(error|info|debug)*' amman start",
-    "amman:stop": "amman stop",
     "test": "CI=1 ts-node-esm tests/albus.ts"
   },
   "devDependencies": {
