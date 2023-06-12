@@ -509,6 +509,21 @@ export class AlbusClient {
   }
 
   /**
+   * Search zkp requests
+   */
+  async fetchZKPRequests() {
+    const builder = ZKPRequest.gpaBuilder()
+      .addFilter('accountDiscriminator', zKPRequestDiscriminator)
+
+    return (await builder.run(this.provider.connection)).map((acc) => {
+      return {
+        pubkey: acc.pubkey,
+        data: ZKPRequest.fromAccountInfo(acc.account)[0],
+      }
+    })
+  }
+
+  /**
    * Load zkp request by {@link addr}
    */
   async loadZKPRequest(addr: PublicKeyInitData, commitment?: Commitment) {
