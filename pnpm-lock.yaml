@@ -127,7 +127,7 @@ importers:
     devDependencies:
       '@metaplex-foundation/solita': 0.19.4
 
-  packages/albus-verifier:
+  packages/albus-verifie:
     specifiers:
       '@nestjs/cli': ^9.0.0
       '@nestjs/common': ^9.0.0
