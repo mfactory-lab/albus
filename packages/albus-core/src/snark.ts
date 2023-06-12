@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import axios from 'axios'
 import log from 'loglevel'
-import fetch from 'node-fetch'
 import * as snarkjs from 'snarkjs'
 
 interface GenerateProofProps {
@@ -55,6 +55,6 @@ export async function generateProof(props: GenerateProofProps) {
  */
 async function fetchBytes(url: string) {
   log.debug(`Loading file ${url}...`)
-  const resp = await fetch(url)
-  return new Uint8Array(await resp.arrayBuffer())
+  const { data } = await axios<ArrayBuffer>({ method: 'get', url, responseType: 'arraybuffer' })
+  return new Uint8Array(data)
 }

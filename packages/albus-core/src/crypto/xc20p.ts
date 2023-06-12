@@ -28,13 +28,13 @@
 
 import { Buffer } from 'node:buffer'
 import { randomBytes } from '@stablelib/random'
-import { generateKeyPair, sharedKey } from '@stablelib/x25519'
+import { generateKeyPair, scalarMultBase, sharedKey } from '@stablelib/x25519'
+import { convertPublicKeyToX25519, convertSecretKeyToX25519 } from '@stablelib/ed25519'
 import { NONCE_LENGTH, TAG_LENGTH, XChaCha20Poly1305 } from '@stablelib/xchacha20poly1305'
 import * as u8a from 'uint8arrays'
-import { convertPublicKey, convertSecretKey } from 'ed2curve-esm'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-
+import type { KeyPair } from '@stablelib/x25519'
 import {
   base58ToBytes,
   base64ToBytes,
@@ -110,12 +110,18 @@ function xc20pDecrypter(key: Uint8Array): Decrypter {
   ): Uint8Array | null => cipher.open(iv, u8a.concat([ciphertext, tag]), aad)
 }
 
+function convertSecretKeyToX25519Keypair(privateKey: PrivateKey): KeyPair {
+  const secretKey = convertSecretKeyToX25519(makeKeypair(privateKey).secretKey)
+  const publicKey = scalarMultBase(secretKey)
+  return { secretKey, publicKey }
+}
+
 /**
  * Encrypt a message with a `PublicKey`
  */
-export async function encrypt(message: string, pubKey: PublicKey): Promise<string> {
-  const epk = generateKeyPair()
-  const sharedSecret = sharedKey(epk.secretKey, convertPublicKey(pubKey.toBytes()))
+export async function encrypt(message: string, pubKey: PublicKey, otherPk?: PrivateKey): Promise<string> {
+  const epk = otherPk ? convertSecretKeyToX25519Keypair(otherPk) : generateKeyPair()
+  const sharedSecret = sharedKey(epk.secretKey, convertPublicKeyToX25519(pubKey.toBytes()))
   const kek = concatKDF(
     sharedSecret,
     ECDH_ES_XC20PKW_KEYLEN,
@@ -146,7 +152,7 @@ export async function decrypt(encryptedMessage: string, privateKey: PrivateKey):
   // normalise the key into an uint array
   const ed25519Key = makeKeypair(privateKey).secretKey
   // convert ed25519Key to x25519Key
-  const curve25519Key = convertSecretKey(ed25519Key)
+  const curve25519Key = convertSecretKeyToX25519(ed25519Key)
 
   const sharedSecret = sharedKey(curve25519Key, epkPub)
   // Key Encryption Key
