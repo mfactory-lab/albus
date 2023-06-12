@@ -165,6 +165,10 @@ circuit.command('create')
   .argument('name', 'Circuit name')
   .action(actions.admin.circuit.create)
 
+circuit.command('all')
+  .description('Show all circuits')
+  .action(actions.admin.circuit.showAll)
+
 const sp = admin.command('sp')
   .description('Service Provider Management')
 

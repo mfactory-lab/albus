@@ -28,7 +28,16 @@
 
 import fs from 'node:fs'
 import { Keypair } from '@solana/web3.js'
-import { toBigNumber, toMetaplexFile } from '@metaplex-foundation/js'
+import type {
+  JsonMetadata,
+  Metadata,
+} from '@metaplex-foundation/js'
+import {
+  MetadataV1GpaBuilder,
+  toBigNumber,
+  toMetadata, toMetadataAccount,
+  toMetaplexFile,
+} from '@metaplex-foundation/js'
 import chalk from 'chalk'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
@@ -36,6 +45,47 @@ import { utils } from '@albus/core'
 import { useContext } from '../../context'
 
 interface Opts {}
+
+export async function showAll() {
+  const { metaplex, config } = useContext()
+
+  const albusKeypair = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
+
+  const gpaBuilder = new MetadataV1GpaBuilder(metaplex)
+
+  log.info('Loading all circuits...')
+
+  const accounts = await gpaBuilder
+    .whereSymbol(`${config.nftSymbol}-C`)
+    .whereUpdateAuthority(albusKeypair.publicKey)
+    .get()
+
+  const metadataAccounts = accounts
+    .map<Metadata | null>((account) => {
+      if (account == null) {
+        return null
+      }
+      try {
+        return toMetadata(toMetadataAccount(account))
+      } catch (error) {
+        return null
+      }
+    })
+    .filter((nft): nft is Metadata => nft !== null)
+
+  log.debug('Circuits...')
+
+  log.info('--------------------------------------------------------------------------')
+
+  for (const metadata of metadataAccounts) {
+    const json = await metaplex.storage().downloadJson<JsonMetadata>(metadata.uri)
+
+    log.info('MintAddress:', metadata.mintAddress.toString())
+    log.info('Metadata', json)
+
+    log.info('--------------------------------------------------------------------------')
+  }
+}
 
 /**
  * Generate new circuit NFT
