@@ -26,4 +26,32 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './nft'
+import { Buffer } from 'node:buffer'
+import type { FindNftByMetadataOutput } from '@metaplex-foundation/js'
+import { PublicKey } from '@solana/web3.js'
+import { NFT_AUTHORITY, NFT_SYMBOL_PREFIX } from '../constants'
+
+const METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')
+
+export function getMetadataPDA(mint: PublicKey): PublicKey {
+  const [publicKey] = PublicKey.findProgramAddressSync(
+    [Buffer.from('metadata'), METADATA_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+    METADATA_PROGRAM_ID,
+  )
+  return publicKey
+}
+
+export function validateNft(nft: FindNftByMetadataOutput, props: { code?: string } = {}) {
+  if (nft.updateAuthorityAddress.toString() !== NFT_AUTHORITY) {
+    throw new Error('Unauthorized NFT.')
+  }
+
+  // check creators ?
+
+  if (props.code) {
+    const symbol = `${NFT_SYMBOL_PREFIX}-${props.code}`
+    if (nft.symbol !== symbol) {
+      throw new Error(`Invalid NFT Symbol. Expected: ${symbol}`)
+    }
+  }
+}

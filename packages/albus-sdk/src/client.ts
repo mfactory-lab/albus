@@ -28,13 +28,14 @@
 
 import { Buffer } from 'node:buffer'
 import { Metaplex } from '@metaplex-foundation/js'
-import type { Address, AnchorProvider } from '@project-serum/anchor'
+import type { AnchorProvider } from '@project-serum/anchor'
 import { BorshCoder, EventManager } from '@project-serum/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import type { PublicSignals, SnarkjsProof, VK } from 'snarkjs'
 import * as snarkjs from 'snarkjs'
 import idl from '../idl/albus.json'
+import { SERVICE_PROVIDER_SEED_PREFIX, ZKP_REQUEST_SEED_PREFIX } from './constants'
 import {
   PROGRAM_ID,
   ServiceProvider,
@@ -50,15 +51,8 @@ import {
   serviceProviderDiscriminator,
   zKPRequestDiscriminator,
 } from './generated'
-import { getMetadataPDA } from './utils'
-
-const SERVICE_PROVIDER_SEED_PREFIX = 'service-provider'
-const ZKP_REQUEST_SEED_PREFIX = 'zkp-request'
-const NFT_SYMBOL_PREFIX = 'ALBUS'
-const PROOF_SYMBOL_CODE = 'P'
-const CIRCUIT_SYMBOL_CODE = 'C'
-const VC_SYMBOL_CODE = 'VC'
-// const IDENTITY_SYMBOL_CODE = 'ID'
+import { AlbusNftCode } from './types'
+import { getMetadataPDA, validateNft } from './utils'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -202,9 +196,7 @@ export class AlbusClient {
       loadJsonMetadata: true,
     })
 
-    if (nft.symbol !== `${NFT_SYMBOL_PREFIX}-${CIRCUIT_SYMBOL_CODE}`) {
-      throw new Error('Invalid circuit! Bad symbol.')
-    }
+    validateNft(nft, { code: AlbusNftCode.Circuit })
 
     if (!nft.json?.circuit_id) {
       throw new Error('Invalid circuit! Metadata does not contain `circuit_id`.')
@@ -225,9 +217,9 @@ export class AlbusClient {
     return {
       address: nft.address,
       id: String(nft.json.circuit_id),
-      vk: nft.json.vk as VK,
       wasmUrl: String(nft.json.wasm_url),
       zkeyUrl: String(nft.json.zkey_url),
+      vk: nft.json.vk as VK,
     }
   }
 
@@ -240,9 +232,7 @@ export class AlbusClient {
       loadJsonMetadata: true,
     })
 
-    if (nft.symbol !== `${NFT_SYMBOL_PREFIX}-${PROOF_SYMBOL_CODE}`) {
-      throw new Error('Invalid proof! Bad symbol.')
-    }
+    validateNft(nft, { code: AlbusNftCode.Proof })
 
     if (!nft.json?.proof) {
       throw new Error('Invalid proof! Metadata does not contain `proof` payload.')
@@ -261,7 +251,7 @@ export class AlbusClient {
   }
 
   /**
-   * Load and validate Verifiable Credential NFT
+   * Load and validate Verifiable Credential
    */
   async loadCredential(addr: PublicKeyInitData) {
     const nft = await this.metaplex.nfts().findByMint({
@@ -269,9 +259,7 @@ export class AlbusClient {
       loadJsonMetadata: true,
     })
 
-    if (nft.symbol !== `${NFT_SYMBOL_PREFIX}-${VC_SYMBOL_CODE}`) {
-      throw new Error('Invalid credential! Bad symbol.')
-    }
+    validateNft(nft, { code: AlbusNftCode.VerifiableCredential })
 
     if (!nft.json?.vc) {
       throw new Error('Invalid credential! Metadata does not contain `vc` payload.')
@@ -280,6 +268,24 @@ export class AlbusClient {
     return {
       address: nft.address,
       payload: nft.json.vc as string,
+    }
+  }
+
+  /**
+   * Load and validate Verifiable Presentation
+   */
+  async loadPresentation(addr: PublicKeyInitData) {
+    const nft = await this.metaplex.nfts().findByMint({
+      mintAddress: new PublicKey(addr),
+      loadJsonMetadata: true,
+    })
+
+    validateNft(nft, { code: AlbusNftCode.VerifiablePresentation })
+
+    // TODO:
+
+    return {
+      address: nft.address,
     }
   }
 
@@ -307,6 +313,7 @@ export class AlbusClient {
 
   /**
    * Verify {@link ZKPRequest}
+   * Required admin authority
    */
   async verify(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
@@ -332,6 +339,7 @@ export class AlbusClient {
 
   /**
    * Reject existing {@link ZKPRequest}
+   * Required admin authority
    */
   async reject(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
@@ -411,6 +419,7 @@ export class AlbusClient {
 
   /**
    * Add new {@link ServiceProvider}
+   * Required admin authority
    */
   async addServiceProvider(props: AddServiceProviderProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -436,6 +445,7 @@ export class AlbusClient {
 
   /**
    * Delete a {@link ServiceProvider}
+   * Required admin authority
    */
   async deleteServiceProvider(props: DeleteServiceProviderProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -457,7 +467,7 @@ export class AlbusClient {
   /**
    * Load all {@link ServiceProvider}'s
    */
-  async loadAllServiceProviders(filter: { authority?: Address } = {}) {
+  async loadAllServiceProviders(filter: { authority?: PublicKeyInitData } = {}) {
     const builder = ServiceProvider.gpaBuilder()
       .addFilter('accountDiscriminator', serviceProviderDiscriminator)
 
@@ -481,9 +491,9 @@ export class AlbusClient {
   }
 
   /**
-   * Search zkp requests
+   * Find zkp requests
    */
-  async searchZKPRequests(filter: { user?: Address; serviceProvider?: Address; circuit?: Address; proof?: Address } = {}) {
+  async findZKPRequests(filter: FindZKPRequestProps = {}) {
     const builder = ZKPRequest.gpaBuilder()
       .addFilter('accountDiscriminator', zKPRequestDiscriminator)
       .addFilter('owner', new PublicKey(filter.user ?? this.provider.publicKey))
@@ -536,6 +546,13 @@ export class AlbusClient {
       Buffer.from(code),
     ], this.programId)
   }
+}
+
+export interface FindZKPRequestProps {
+  user?: PublicKeyInitData
+  serviceProvider?: PublicKeyInitData
+  circuit?: PublicKeyInitData
+  proof?: PublicKeyInitData
 }
 
 export interface CreateZKPRequestProps {
