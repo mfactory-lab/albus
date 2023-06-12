@@ -27,7 +27,6 @@
  */
 
 import { Buffer } from 'node:buffer'
-import { Metaplex } from '@metaplex-foundation/js'
 import type { AnchorProvider } from '@project-serum/anchor'
 import { BorshCoder, EventManager } from '@project-serum/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
@@ -52,7 +51,7 @@ import {
   zKPRequestDiscriminator,
 } from './generated'
 import { AlbusNftCode } from './types'
-import { getMetadataPDA, validateNft } from './utils'
+import { getMetadataByMint, getMetadataPDA, validateNft } from './utils'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -69,10 +68,6 @@ export class AlbusClient {
 
   get connection() {
     return this.provider.connection
-  }
-
-  get metaplex() {
-    return Metaplex.make(this.connection)
   }
 
   /**
@@ -191,10 +186,11 @@ export class AlbusClient {
    * Load and validate Circuit NFT
    */
   async loadCircuit(addr: PublicKeyInitData) {
-    const nft = await this.metaplex.nfts().findByMint({
-      mintAddress: new PublicKey(addr),
-      loadJsonMetadata: true,
-    })
+    const nft = await getMetadataByMint(this.connection, addr, true)
+
+    if (!nft) {
+      throw new Error('Failed to load Circuit NFT')
+    }
 
     validateNft(nft, { code: AlbusNftCode.Circuit })
 
@@ -215,7 +211,7 @@ export class AlbusClient {
     }
 
     return {
-      address: nft.address,
+      address: new PublicKey(addr),
       id: String(nft.json.circuit_id),
       wasmUrl: String(nft.json.wasm_url),
       zkeyUrl: String(nft.json.zkey_url),
@@ -227,10 +223,11 @@ export class AlbusClient {
    * Load and validate Proof NFT
    */
   async loadProof(addr: PublicKeyInitData) {
-    const nft = await this.metaplex.nfts().findByMint({
-      mintAddress: new PublicKey(addr),
-      loadJsonMetadata: true,
-    })
+    const nft = await getMetadataByMint(this.connection, addr, true)
+
+    if (!nft) {
+      throw new Error('Failed to load Proof NFT')
+    }
 
     validateNft(nft, { code: AlbusNftCode.Proof })
 
@@ -243,7 +240,7 @@ export class AlbusClient {
     }
 
     return {
-      address: nft.address,
+      address: new PublicKey(addr),
       circuit: new PublicKey(nft.json.circuit),
       payload: nft.json.proof as SnarkjsProof,
       publicInput: (nft.json.public_input ?? []) as PublicSignals,
@@ -254,10 +251,11 @@ export class AlbusClient {
    * Load and validate Verifiable Credential
    */
   async loadCredential(addr: PublicKeyInitData) {
-    const nft = await this.metaplex.nfts().findByMint({
-      mintAddress: new PublicKey(addr),
-      loadJsonMetadata: true,
-    })
+    const nft = await getMetadataByMint(this.connection, addr, true)
+
+    if (!nft) {
+      throw new Error('Failed to load Credential NFT')
+    }
 
     validateNft(nft, { code: AlbusNftCode.VerifiableCredential })
 
@@ -266,7 +264,7 @@ export class AlbusClient {
     }
 
     return {
-      address: nft.address,
+      address: new PublicKey(addr),
       payload: nft.json.vc as string,
     }
   }
@@ -275,17 +273,18 @@ export class AlbusClient {
    * Load and validate Verifiable Presentation
    */
   async loadPresentation(addr: PublicKeyInitData) {
-    const nft = await this.metaplex.nfts().findByMint({
-      mintAddress: new PublicKey(addr),
-      loadJsonMetadata: true,
-    })
+    const nft = await getMetadataByMint(this.connection, addr, true)
+
+    if (!nft) {
+      throw new Error('Failed to load Presentation NFT')
+    }
 
     validateNft(nft, { code: AlbusNftCode.VerifiablePresentation })
 
     // TODO:
 
     return {
-      address: nft.address,
+      address: new PublicKey(addr),
     }
   }
 
