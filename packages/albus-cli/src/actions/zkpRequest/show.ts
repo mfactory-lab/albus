@@ -77,7 +77,7 @@ interface ShowAllOpts {
 export async function showAll(opts: ShowAllOpts) {
   const { client } = useContext()
 
-  const items = await client.searchZKPRequests({
+  const items = await client.findZKPRequests({
     serviceProvider: opts.sp,
     circuit: opts.circuit,
     proof: opts.proof,

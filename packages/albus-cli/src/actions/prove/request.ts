@@ -53,6 +53,9 @@ export async function createForRequest(addr: string, opts: Opts) {
     throw new Error('Proof already exists')
   }
 
+  log.debug('Loading circuit info...')
+  const circuit = await client.loadCircuit(req.circuit)
+
   log.debug(`Loading credential ${opts.vc}...`)
   const cred = await client.loadCredential(opts.vc)
 
@@ -63,8 +66,6 @@ export async function createForRequest(addr: string, opts: Opts) {
   })
 
   log.debug('Generating proof...')
-  const circuit = await client.loadCircuit(req.circuit)
-
   const { proof, publicSignals } = await snark.generateProof({
     wasmUrl: circuit.wasmUrl,
     zkeyUrl: circuit.zkeyUrl,

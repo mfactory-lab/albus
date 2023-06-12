@@ -43,10 +43,10 @@ interface Opts {
 export async function issue(opts: Opts) {
   const { keypair, config } = useContext()
 
-  const creds = generateCredentialSubject()
+  const claims = generateCredentialSubject()
 
   // Issue new Verifiable Credential
-  const res = await vc.create(creds, {
+  const res = await vc.create(claims, {
     issuerSecretKey: config.issuerSecretKey,
     encrypt: opts.encrypt,
     holder: keypair.publicKey,
