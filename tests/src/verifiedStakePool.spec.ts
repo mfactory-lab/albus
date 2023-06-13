@@ -89,10 +89,9 @@ describe('verified stake pool', () => {
     reserveStakeAccount = reserveKeypair.publicKey
     managerFeeAccount = await createAssociatedTokenAccount(provider.connection, payerKeypair, stakePoolMint, provider.wallet.publicKey)
 
-    const lamportsForStakeAccount
-      = (await provider.connection.getMinimumBalanceForRentExemption(
-        web3.StakeProgram.space,
-      ))
+    const lamportsForStakeAccount = (await provider.connection.getMinimumBalanceForRentExemption(
+      web3.StakeProgram.space,
+    ))
 
     const createAccountTransaction = web3.StakeProgram.createAccount({
       fromPubkey: provider.wallet.publicKey,

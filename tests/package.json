@@ -1,20 +1,21 @@
 {
   "name": "@albus/tests",
   "scripts": {
-    "test": "vitest --no-threads --no-isolate",
+    "test": "vitest --no-threads --ui",
     "test:debug": "DEBUG=vite-node:* vitest --no-threads"
   },
   "devDependencies": {
     "@albus/sdk": "workspace:",
-    "@albus/verified-transfer-sdk": "workspace:",
     "@albus/verified-stake-pool-sdk": "workspace:",
+    "@albus/verified-transfer-sdk": "workspace:",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/js": "^0.19.4",
     "@solana/spl-stake-pool": "mfactory-lab/jfactory-stake-pool",
     "@solana/spl-token": "^0.3.8",
     "@types/bn.js": "^5.1.1",
     "@types/bs58": "^4.0.1",
-    "vitest": "^0.32.0",
-    "vite": "^4.3.9"
+    "@vitest/ui": "^0.32.0",
+    "vite": "^4.3.9",
+    "vitest": "^0.32.0"
   }
 }
