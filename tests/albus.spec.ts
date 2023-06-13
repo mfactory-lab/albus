@@ -27,8 +27,9 @@
  */
 
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
-import { web3 } from '@project-serum/anchor'
-import { assert } from 'chai'
+import { Keypair } from '@solana/web3.js'
+import type { PublicKey } from '@solana/web3.js'
+import { assert, beforeAll, describe, it } from 'vitest'
 import { AlbusClient, ZKPRequestStatus } from '@albus/sdk'
 import { airdrop, assertErrorCode, mintNFT, newProvider, payerKeypair, provider } from './utils'
 
@@ -36,9 +37,9 @@ describe('albus', () => {
   const client = new AlbusClient(provider)
   const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(payerKeypair))
 
-  let mint: web3.PublicKey
+  let mint: PublicKey
 
-  before(async () => {
+  beforeAll(async () => {
     await airdrop(payerKeypair.publicKey)
   })
 
@@ -53,7 +54,7 @@ describe('albus', () => {
   })
 
   it('can not create ZKP request with unauthorized update authority of circuit NFT metadata', async () => {
-    const newPayerKeypair = web3.Keypair.generate()
+    const newPayerKeypair = Keypair.generate()
     const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
     await airdrop(newPayerKeypair.publicKey)
     const nft = await mintNFT(metaplex, 'ALBUS-C')
@@ -98,7 +99,7 @@ describe('albus', () => {
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
-    const newPayerKeypair = web3.Keypair.generate()
+    const newPayerKeypair = Keypair.generate()
     const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
     await airdrop(newPayerKeypair.publicKey)
     const proofNft = await mintNFT(metaplex, 'ALBUS-P')
@@ -138,7 +139,7 @@ describe('albus', () => {
     const [serviceProviderAddress] = client.getServiceProviderPDA('code')
     const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
 
-    const newPayerKeypair = web3.Keypair.generate()
+    const newPayerKeypair = Keypair.generate()
     const provider = newProvider(newPayerKeypair)
     const newClient = new AlbusClient(provider)
     await airdrop(newPayerKeypair.publicKey)

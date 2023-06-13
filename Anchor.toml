@@ -6,7 +6,7 @@ skip-lint = false
 url = "https://api.apr.dev"
 
 [scripts]
-test = "pnpm ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "pnpm test"
 
 [provider]
 cluster = "localnet"

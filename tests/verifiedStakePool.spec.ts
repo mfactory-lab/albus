@@ -1,12 +1,12 @@
 import { Buffer } from 'node:buffer'
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
-import { BN } from '@project-serum/anchor'
+import { BN } from '@coral-xyz/anchor'
 import { TOKEN_PROGRAM_ID, createAssociatedTokenAccount, createMint } from '@solana/spl-token'
 import * as web3 from '@solana/web3.js'
 import { AlbusClient } from '@albus/sdk'
-import { VerifiedStakePoolClient } from '@verified-stake-pool/sdk'
-import { STAKE_POOL_PROGRAM_ID, addValidatorToPool, initialize, depositStake } from '@solana/spl-stake-pool'
-import { assert } from 'chai'
+import { VerifiedStakePoolClient } from '@albus/verified-stake-pool-sdk'
+import { STAKE_POOL_PROGRAM_ID, addValidatorToPool, initialize } from '@solana/spl-stake-pool'
+import { assert, describe, it } from 'vitest'
 import { assertErrorCode, mintNFT, payerKeypair, provider } from './utils'
 
 describe('verified stake pool', () => {

@@ -27,12 +27,12 @@
  */
 
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
-import { BN } from '@project-serum/anchor'
+import { BN } from '@coral-xyz/anchor'
 import { TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import * as web3 from '@solana/web3.js'
-import { assert } from 'chai'
 import { AlbusClient } from '@albus/sdk'
-import { VerifiedTransferClient } from '@verified-transfer/sdk'
+import { VerifiedTransferClient } from '@albus/verified-transfer-sdk'
+import { assert, describe, it } from 'vitest'
 import { assertErrorCode, mintNFT, payerKeypair, provider } from './utils'
 
 describe('verified transfer', () => {
