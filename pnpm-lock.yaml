@@ -4,36 +4,9 @@ importers:
 
   .:
     devDependencies:
-      '@albus/sdk':
-        specifier: 'workspace:'
-        version: link:packages/albus-sdk
-      '@albus/verified-stake-pool-sdk':
-        specifier: 'workspace:'
-        version: link:packages/verified-stake-pool-sdk
-      '@albus/verified-transfer-sdk':
-        specifier: 'workspace:'
-        version: link:packages/verified-transfer-sdk
       '@antfu/eslint-config':
         specifier: ^0.39.5
         version: 0.39.5(eslint@8.42.0)(typescript@4.9.5)
-      '@coral-xyz/anchor':
-        specifier: ^0.28.0
-        version: 0.28.0
-      '@metaplex-foundation/js':
-        specifier: ^0.19.4
-        version: 0.19.4
-      '@solana/spl-stake-pool':
-        specifier: mfactory-lab/jfactory-stake-pool
-        version: github.com/mfactory-lab/jfactory-stake-pool/e0e38ca877c4f9d1ca3178affd502f6429a969a0
-      '@solana/spl-token':
-        specifier: ^0.3.6
-        version: 0.3.6(@solana/web3.js@1.77.3)
-      '@types/bn.js':
-        specifier: ^5.1.1
-        version: 5.1.1
-      '@types/bs58':
-        specifier: ^4.0.1
-        version: 4.0.1
       '@types/node':
         specifier: ^18.16.3
         version: 18.16.3
@@ -43,12 +16,6 @@ importers:
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
-      vite:
-        specifier: ^4.3.9
-        version: 4.3.9(@types/node@18.16.3)
-      vitest:
-        specifier: ^0.32.0
-        version: 0.32.0
 
   packages/albus-cli:
     dependencies:
@@ -86,6 +53,9 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
     devDependencies:
+      vite:
+        specifier: ^4.3.9
+        version: 4.3.9(@types/node@18.16.3)
       vite-node:
         specifier: ^0.32.0
         version: 0.32.0(@types/node@18.16.3)
@@ -204,24 +174,33 @@ importers:
 
   packages/verified-stake-pool-sdk:
     dependencies:
-      '@metaplex-foundation/js':
-        specifier: ^0.18
-        version: 0.18.3
+      '@coral-xyz/anchor':
+        specifier: ^0.28.0
+        version: 0.28.0
+      '@metaplex-foundation/beet':
+        specifier: ^0.7.1
+        version: 0.7.1
       '@solana/spl-token':
-        specifier: ^0.3
-        version: 0.3.6(@solana/web3.js@1.77.3)
+        specifier: ^0.3.8
+        version: 0.3.8(@solana/web3.js@1.77.3)
       '@solana/web3.js':
-        specifier: ^1.73
+        specifier: ^1.77.3
         version: 1.77.3
     devDependencies:
       '@metaplex-foundation/solita':
-        specifier: ^0.19
-        version: 0.19.0
+        specifier: ^0.19.4
+        version: 0.19.4
 
   packages/verified-stake-sdk:
     dependencies:
+      '@coral-xyz/anchor':
+        specifier: ^0.28.0
+        version: 0.28.0
+      '@metaplex-foundation/beet':
+        specifier: ^0.7.1
+        version: 0.7.1
       '@solana/web3.js':
-        specifier: ^1.73
+        specifier: ^1.77.3
         version: 1.77.3
     devDependencies:
       '@metaplex-foundation/solita':
@@ -230,29 +209,74 @@ importers:
 
   packages/verified-swap-sdk:
     dependencies:
+      '@coral-xyz/anchor':
+        specifier: ^0.28.0
+        version: 0.28.0
+      '@metaplex-foundation/beet':
+        specifier: ^0.7.1
+        version: 0.7.1
       '@solana/web3.js':
-        specifier: ^1.73
+        specifier: ^1.77.3
         version: 1.77.3
     devDependencies:
       '@metaplex-foundation/solita':
-        specifier: ^0.19
-        version: 0.19.0
+        specifier: ^0.19.4
+        version: 0.19.4
 
   packages/verified-transfer-sdk:
     dependencies:
-      '@metaplex-foundation/js':
-        specifier: ^0.18
-        version: 0.18.3
+      '@coral-xyz/anchor':
+        specifier: ^0.28.0
+        version: 0.28.0
+      '@metaplex-foundation/beet':
+        specifier: ^0.7.1
+        version: 0.7.1
       '@solana/spl-token':
-        specifier: ^0.3
-        version: 0.3.6(@solana/web3.js@1.77.3)
+        specifier: ^0.3.8
+        version: 0.3.8(@solana/web3.js@1.77.3)
       '@solana/web3.js':
-        specifier: ^1.73
+        specifier: ^1.77.3
         version: 1.77.3
     devDependencies:
       '@metaplex-foundation/solita':
-        specifier: ^0.19
-        version: 0.19.0
+        specifier: ^0.19.4
+        version: 0.19.4
+
+  tests:
+    devDependencies:
+      '@albus/sdk':
+        specifier: 'workspace:'
+        version: link:../packages/albus-sdk
+      '@albus/verified-stake-pool-sdk':
+        specifier: 'workspace:'
+        version: link:../packages/verified-stake-pool-sdk
+      '@albus/verified-transfer-sdk':
+        specifier: 'workspace:'
+        version: link:../packages/verified-transfer-sdk
+      '@coral-xyz/anchor':
+        specifier: ^0.28.0
+        version: 0.28.0
+      '@metaplex-foundation/js':
+        specifier: ^0.19.4
+        version: 0.19.4
+      '@solana/spl-stake-pool':
+        specifier: mfactory-lab/jfactory-stake-pool
+        version: github.com/mfactory-lab/jfactory-stake-pool/e0e38ca877c4f9d1ca3178affd502f6429a969a0
+      '@solana/spl-token':
+        specifier: ^0.3.8
+        version: 0.3.8(@solana/web3.js@1.77.3)
+      '@types/bn.js':
+        specifier: ^5.1.1
+        version: 5.1.1
+      '@types/bs58':
+        specifier: ^4.0.1
+        version: 4.0.1
+      vite:
+        specifier: ^4.3.9
+        version: 4.3.9(@types/node@18.16.3)
+      vitest:
+        specifier: ^0.32.0
+        version: 0.32.0
 
 packages:
 
@@ -1075,38 +1099,6 @@ packages:
   /@metaplex-foundation/cusper@0.0.2:
     resolution: {integrity: sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==}
 
-  /@metaplex-foundation/js@0.18.3:
-    resolution: {integrity: sha512-rqI8vI+V5Bt3pgrv8E7leqR8gxxdw6Q/pbWg4EznbuYSmpNGRQkjMaZE0C+rQrmtQbMqUD9rUsUuYOoppSlI4A==}
-    dependencies:
-      '@bundlr-network/client': 0.8.9(debug@4.3.4)
-      '@metaplex-foundation/beet': 0.7.1
-      '@metaplex-foundation/mpl-auction-house': 2.5.1
-      '@metaplex-foundation/mpl-candy-guard': 0.3.2
-      '@metaplex-foundation/mpl-candy-machine': 5.1.0
-      '@metaplex-foundation/mpl-candy-machine-core': 0.1.2
-      '@metaplex-foundation/mpl-token-metadata': 2.12.0
-      '@noble/ed25519': 1.7.3
-      '@noble/hashes': 1.3.1
-      '@solana/spl-token': 0.3.8(@solana/web3.js@1.77.3)
-      '@solana/web3.js': 1.77.3
-      bignumber.js: 9.1.1
-      bn.js: 5.2.1
-      bs58: 5.0.0
-      buffer: 6.0.3
-      debug: 4.3.4
-      eventemitter3: 4.0.7
-      lodash.clonedeep: 4.5.0
-      lodash.isequal: 4.5.0
-      merkletreejs: 0.2.32
-      mime: 3.0.0
-      node-fetch: 2.6.11
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
-
   /@metaplex-foundation/js@0.19.4:
     resolution: {integrity: sha512-fiAaMl4p7v1tcU7ZoEr1lCzE6JR2gEWGeHOBarLTpiCjMe8ni3E+cukJQC6p0Ik+Z6IIFtEVNNy5OnMS3LLS4A==}
     dependencies:
@@ -1146,7 +1138,7 @@ packages:
       '@metaplex-foundation/beet': 0.6.1
       '@metaplex-foundation/beet-solana': 0.3.1
       '@metaplex-foundation/cusper': 0.0.2
-      '@solana/spl-token': 0.3.6(@solana/web3.js@1.77.3)
+      '@solana/spl-token': 0.3.8(@solana/web3.js@1.77.3)
       '@solana/web3.js': 1.77.3
       bn.js: 5.2.1
     transitivePeerDependencies:
@@ -1207,7 +1199,7 @@ packages:
       '@metaplex-foundation/beet': 0.7.1
       '@metaplex-foundation/beet-solana': 0.4.0
       '@metaplex-foundation/cusper': 0.0.2
-      '@solana/spl-token': 0.3.6(@solana/web3.js@1.77.3)
+      '@solana/spl-token': 0.3.8(@solana/web3.js@1.77.3)
       '@solana/web3.js': 1.77.3
     transitivePeerDependencies:
       - bufferutil
@@ -1244,6 +1236,28 @@ packages:
 
   /@metaplex-foundation/solita@0.19.0:
     resolution: {integrity: sha512-dcQixKM/oEvfuQolH06wNhdUvtRzxB+yeTGJDEIEizylMetdRnbYvRzac+1shUTB6KnvmvVsRrDUhTQ/PpaSPQ==}
+    hasBin: true
+    dependencies:
+      '@metaplex-foundation/beet': 0.7.1
+      '@metaplex-foundation/beet-solana': 0.3.1
+      '@metaplex-foundation/rustbin': 0.3.1
+      '@solana/web3.js': 1.77.3
+      ansi-colors: 4.1.3
+      camelcase: 6.3.0
+      debug: 4.3.4
+      js-sha256: 0.9.0
+      prettier: 2.8.8
+      snake-case: 3.0.4
+      spok: 1.5.5
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+    dev: true
+
+  /@metaplex-foundation/solita@0.19.4:
+    resolution: {integrity: sha512-5j7F2qKDc7Po6ye7fm/JsUcYMxPK5QkkGBJJfgY7dGhF5YQw8YPwqw95F7rSavuDrXOK9mhq/L8s+3ilvEk6CA==}
     hasBin: true
     dependencies:
       '@metaplex-foundation/beet': 0.7.1
@@ -1388,6 +1402,7 @@ packages:
       - encoding
       - supports-color
       - utf-8-validate
+    dev: false
 
   /@solana/spl-token@0.3.8(@solana/web3.js@1.77.3):
     resolution: {integrity: sha512-ogwGDcunP9Lkj+9CODOWMiVJEdRtqHAtX2rWF62KxnnSWtMZtV9rDhTrZFshiyJmxDnRL/1nKE1yJHg4jjs3gg==}

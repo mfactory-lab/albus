@@ -1,29 +1,16 @@
 {
   "name": "@albus/monorepo",
   "packageManager": "pnpm@8.6.0",
-  "type": "module",
   "scripts": {
     "api:gen": "pnpm --filter=sdk run api:gen && eslint --fix --ext .ts packages/albus-sdk/src/**",
     "cli": "pnpm --filter=@albus/cli run cli",
     "lint:fix": "eslint --cache --fix --ext .js,.vue,.ts ./packages/**",
-    "test": "vitest --no-threads --no-isolate",
-    "test:debug": "DEBUG=vite-node:* vitest --no-threads"
+    "test": "pnpm --filter=@albus/tests run test"
   },
   "devDependencies": {
-    "@albus/sdk": "workspace:",
-    "@albus/verified-transfer-sdk": "workspace:",
-    "@albus/verified-stake-pool-sdk": "workspace:",
-    "@coral-xyz/anchor": "^0.28.0",
-    "@solana/spl-stake-pool": "mfactory-lab/jfactory-stake-pool",
     "@antfu/eslint-config": "^0.39.5",
-    "@metaplex-foundation/js": "^0.19.4",
-    "@solana/spl-token": "^0.3.6",
-    "@types/bn.js": "^5.1.1",
-    "@types/bs58": "^4.0.1",
-    "@types/node": "^18.16.3",
     "eslint": "^8.42.0",
     "typescript": "^4.9.5",
-    "vitest": "^0.32.0",
-    "vite": "^4.3.9"
+    "@types/node": "^18.16.3"
   }
 }

@@ -8,11 +8,12 @@
     "api:gen": "DEBUG='(solita|rustbin):(info|error)' solita"
   },
   "dependencies": {
-    "@metaplex-foundation/js": "^0.18",
-    "@solana/spl-token": "^0.3",
-    "@solana/web3.js": "^1.73"
+    "@coral-xyz/anchor": "^0.28.0",
+    "@metaplex-foundation/beet": "^0.7.1",
+    "@solana/spl-token": "^0.3.8",
+    "@solana/web3.js": "^1.77.3"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.19"
+    "@metaplex-foundation/solita": "^0.19.4"
   }
 }

@@ -27,6 +27,7 @@
     "snarkjs": "^0.7.0"
   },
   "devDependencies": {
+    "vite": "^4.3.9",
     "vite-node": "^0.32.0"
   }
 }
