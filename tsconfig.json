@@ -7,18 +7,16 @@
     "esModuleInterop": true,
     "strict": true,
     "strictNullChecks": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
     "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "declaration": true,
     "inlineSourceMap": true,
-    "types": ["node", "mocha"],
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "sourceMap": true,
-    "incremental": true,
-    "allowJs": true,
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true
   },
@@ -26,9 +24,5 @@
     "packages/**/*.ts",
     "tests/**/*.ts"
   ],
-  "exclude": ["packages/*/dist"],
-  "ts-node": {
-    "swc": true,
-    "experimentalSpecifierResolution": "node"
-  }
+  "exclude": ["packages/*/dist"]
 }
