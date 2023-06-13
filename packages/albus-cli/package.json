@@ -14,12 +14,12 @@
     "directory": "packages/albus-cli"
   },
   "dependencies": {
-    "@albus/core": "workspace:*",
+    "@albus/core": "workspace:",
+    "@albus/sdk": "workspace:",
     "@faker-js/faker": "^7.6",
     "@metaplex-foundation/js": "^0.19.4",
     "@coral-xyz/anchor": "^0.28.0",
-    "@solana/spl-token": "^0.3",
-    "@solana/web3.js": "^1.77",
+    "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
     "commander": "^10.0.0",
     "chalk": "^4.1.2",

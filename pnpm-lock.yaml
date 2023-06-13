@@ -20,8 +20,11 @@ importers:
   packages/albus-cli:
     dependencies:
       '@albus/core':
-        specifier: workspace:*
+        specifier: 'workspace:'
         version: link:../albus-core
+      '@albus/sdk':
+        specifier: 'workspace:'
+        version: link:../albus-sdk
       '@coral-xyz/anchor':
         specifier: ^0.28.0
         version: 0.28.0
@@ -31,11 +34,8 @@ importers:
       '@metaplex-foundation/js':
         specifier: ^0.19.4
         version: 0.19.4
-      '@solana/spl-token':
-        specifier: ^0.3
-        version: 0.3.6(@solana/web3.js@1.77.3)
       '@solana/web3.js':
-        specifier: ^1.77
+        specifier: ^1.77.3
         version: 1.77.3
       axios:
         specifier: ^1.4.0
@@ -1386,23 +1386,6 @@ packages:
       - encoding
       - supports-color
       - utf-8-validate
-
-  /@solana/spl-token@0.3.6(@solana/web3.js@1.77.3):
-    resolution: {integrity: sha512-P9pTXjDIRvVbjr3J0mCnSamYqLnICeds7IoH1/Ro2R9OBuOHdp5pqKZoscfZ3UYrgnCWUc1bc9M2m/YPHjw+1g==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      '@solana/web3.js': ^1.47.4
-    dependencies:
-      '@solana/buffer-layout': 4.0.1
-      '@solana/buffer-layout-utils': 0.2.0
-      '@solana/web3.js': 1.77.3
-      buffer: 6.0.3
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
 
   /@solana/spl-token@0.3.8(@solana/web3.js@1.77.3):
     resolution: {integrity: sha512-ogwGDcunP9Lkj+9CODOWMiVJEdRtqHAtX2rWF62KxnnSWtMZtV9rDhTrZFshiyJmxDnRL/1nKE1yJHg4jjs3gg==}

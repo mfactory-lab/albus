@@ -2,10 +2,10 @@
   "name": "@albus/monorepo",
   "packageManager": "pnpm@8.6.0",
   "scripts": {
-    "api:gen": "pnpm --filter=sdk run api:gen && eslint --fix --ext .ts packages/albus-sdk/src/**",
+    "api:gen": "pnpm --filter=@albus/sdk run api:gen && eslint --fix --ext .ts packages/albus-sdk/src/**",
     "cli": "pnpm --filter=@albus/cli run cli",
-    "lint:fix": "eslint --cache --fix --ext .js,.vue,.ts ./packages/**",
-    "test": "pnpm --filter=@albus/tests run test"
+    "test": "pnpm --filter=@albus/tests run test",
+    "lint:fix": "eslint --cache --fix --ext .js,.vue,.ts ./packages/**"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.5",
