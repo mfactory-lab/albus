@@ -26,45 +26,19 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
-import axios from 'axios'
-import { PROGRAM_ID as METADATA_PROGRAM_ID, Metadata } from '@metaplex-foundation/mpl-token-metadata'
-import type { Connection, PublicKeyInitData } from '@solana/web3.js'
-import { PublicKey } from '@solana/web3.js'
+import type { Creator, Metadata } from '@metaplex-foundation/mpl-token-metadata'
+import type { AlbusNftCode } from '../types'
 import { NFT_AUTHORITY, NFT_SYMBOL_PREFIX } from '../constants'
 
-type ExtendedMetadata = Metadata & { json: Record<string, any> }
-
-export function getMetadataPDA(mint: PublicKeyInitData): PublicKey {
-  const [publicKey] = PublicKey.findProgramAddressSync(
-    [Buffer.from('metadata'), METADATA_PROGRAM_ID.toBuffer(), new PublicKey(mint).toBuffer()],
-    METADATA_PROGRAM_ID,
-  )
-  return publicKey
+export interface ValidateNftProps {
+  code?: AlbusNftCode
+  creators?: Creator[]
 }
 
-export async function getMetadataByMint(connection: Connection, mint: PublicKeyInitData, loadJson = false) {
-  const accountInfo = await connection.getAccountInfo(getMetadataPDA(mint))
-  if (accountInfo) {
-    const metadata = sanitizeMetadata(Metadata.fromAccountInfo(accountInfo)[0]) as ExtendedMetadata
-    if (loadJson) {
-      try {
-        metadata.json = (await axios.get(metadata.data.uri)).data
-      } catch (e) {
-        console.log('Error: Failed to load nft metadata')
-        metadata.json = {}
-      }
-    }
-    return metadata
-  }
-}
-
-export function validateNft(nft: Metadata, props: { code?: string } = {}) {
+export function validateNft(nft: Metadata, props: ValidateNftProps = {}) {
   if (nft.updateAuthority.toString() !== NFT_AUTHORITY) {
     throw new Error('Unauthorized NFT.')
   }
-
-  // check creators ?
 
   if (props.code) {
     const symbol = `${NFT_SYMBOL_PREFIX}-${props.code}`
@@ -72,21 +46,8 @@ export function validateNft(nft: Metadata, props: { code?: string } = {}) {
       throw new Error(`Invalid NFT Symbol. Expected: ${symbol}`)
     }
   }
-}
 
-// Remove all empty space, new line, etc. symbols
-// In some reason such symbols parsed back from Buffer looks weird
-// like "\x0000" instead of usual spaces.
-export const sanitizeString = (str: string) => str.replace(/\0/g, '')
-
-function sanitizeMetadata(tokenData: Metadata) {
-  return ({
-    ...tokenData,
-    data: {
-      ...tokenData?.data,
-      name: sanitizeString(tokenData?.data?.name),
-      symbol: sanitizeString(tokenData?.data?.symbol),
-      uri: sanitizeString(tokenData?.data?.uri),
-    },
-  }) as Metadata
+  if (props.creators && !props.creators.every(c => (nft.data.creators ?? []).includes(c))) {
+    throw new Error('Invalid NFT creator')
+  }
 }

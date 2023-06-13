@@ -27,13 +27,13 @@
  */
 
 import { Buffer } from 'node:buffer'
-import type { AnchorProvider } from '@project-serum/anchor'
-import { BorshCoder, EventManager } from '@project-serum/anchor'
+import * as albus from '@albus/core'
+import type { AnchorProvider } from '@coral-xyz/anchor'
+import { BorshCoder, EventManager } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import type { PublicSignals, SnarkjsProof, VK } from 'snarkjs'
-import * as snarkjs from 'snarkjs'
-import idl from '../idl/albus.json' assert { type: 'json' }
+import idl from '../idl/albus.json'
 import { SERVICE_PROVIDER_SEED_PREFIX, ZKP_REQUEST_SEED_PREFIX } from './constants'
 import {
   PROGRAM_ID,
@@ -51,7 +51,11 @@ import {
   zKPRequestDiscriminator,
 } from './generated'
 import { AlbusNftCode } from './types'
-import { getMetadataByMint, getMetadataPDA, validateNft } from './utils'
+import type { ValidateNftProps } from './utils'
+import { validateNft } from './utils'
+
+const { verifyProof } = albus.zkp
+const { getMetadataByMint, getMetadataPDA } = albus.utils
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -128,7 +132,11 @@ export class AlbusClient {
     const proof = await this.loadProof(addr)
     const circuit = await this.loadCircuit(proof.circuit)
 
-    return snarkjs.groth16.verify(circuit.vk, proof.publicInput, proof.payload)
+    return verifyProof({
+      vk: circuit.vk,
+      publicInput: proof.publicInput,
+      proof: proof.payload,
+    })
   }
 
   /**
@@ -186,13 +194,7 @@ export class AlbusClient {
    * Load and validate Circuit NFT
    */
   async loadCircuit(addr: PublicKeyInitData) {
-    const nft = await getMetadataByMint(this.connection, addr, true)
-
-    if (!nft) {
-      throw new Error('Failed to load Circuit NFT')
-    }
-
-    validateNft(nft, { code: AlbusNftCode.Circuit })
+    const nft = await this.loadNft(addr, { code: AlbusNftCode.Circuit })
 
     if (!nft.json?.circuit_id) {
       throw new Error('Invalid circuit! Metadata does not contain `circuit_id`.')
@@ -223,13 +225,7 @@ export class AlbusClient {
    * Load and validate Proof NFT
    */
   async loadProof(addr: PublicKeyInitData) {
-    const nft = await getMetadataByMint(this.connection, addr, true)
-
-    if (!nft) {
-      throw new Error('Failed to load Proof NFT')
-    }
-
-    validateNft(nft, { code: AlbusNftCode.Proof })
+    const nft = await this.loadNft(addr, { code: AlbusNftCode.Proof })
 
     if (!nft.json?.proof) {
       throw new Error('Invalid proof! Metadata does not contain `proof` payload.')
@@ -251,13 +247,7 @@ export class AlbusClient {
    * Load and validate Verifiable Credential
    */
   async loadCredential(addr: PublicKeyInitData) {
-    const nft = await getMetadataByMint(this.connection, addr, true)
-
-    if (!nft) {
-      throw new Error('Failed to load Credential NFT')
-    }
-
-    validateNft(nft, { code: AlbusNftCode.VerifiableCredential })
+    const nft = await this.loadNft(addr, { code: AlbusNftCode.VerifiableCredential })
 
     if (!nft.json?.vc) {
       throw new Error('Invalid credential! Metadata does not contain `vc` payload.')
@@ -273,13 +263,7 @@ export class AlbusClient {
    * Load and validate Verifiable Presentation
    */
   async loadPresentation(addr: PublicKeyInitData) {
-    const nft = await getMetadataByMint(this.connection, addr, true)
-
-    if (!nft) {
-      throw new Error('Failed to load Presentation NFT')
-    }
-
-    validateNft(nft, { code: AlbusNftCode.VerifiablePresentation })
+    const _nft = await this.loadNft(addr, { code: AlbusNftCode.VerifiablePresentation })
 
     // TODO:
 
@@ -544,6 +528,22 @@ export class AlbusClient {
       Buffer.from(SERVICE_PROVIDER_SEED_PREFIX),
       Buffer.from(code),
     ], this.programId)
+  }
+
+  /**
+   * Load and validate NFT Metadata
+   * @private
+   */
+  private async loadNft(addr: PublicKeyInitData, validate?: ValidateNftProps) {
+    const metadata = await getMetadataByMint(this.connection, addr, true)
+
+    if (!metadata) {
+      throw new Error(`Unable to find Metadata account at ${addr}`)
+    }
+
+    validateNft(metadata, validate)
+
+    return metadata
   }
 }
 
