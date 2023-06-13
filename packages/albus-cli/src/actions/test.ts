@@ -70,16 +70,16 @@ export async function encryption(_opts: Opts) {
 
   console.log(msg)
 
-  const enc = crypto.poseidonEncrypt(msg, sk)
-  const dec = crypto.poseidonDecrypt(enc, sk, msg.length)
-
-  const b: number[] = []
-  for (const d of dec) {
-    b.push(...bigIntToArray(d, chunkSize))
-  }
-  console.log(dec)
-  console.log(toUTF8String(Uint8Array.from(b)))
-  process.exit(0)
+  // const enc = crypto.poseidonEncrypt(msg, sk)
+  // const dec = crypto.poseidonDecrypt(enc, sk, msg.length)
+  //
+  // const b: number[] = []
+  // for (const d of dec) {
+  //   b.push(...bigIntToArray(d, chunkSize))
+  // }
+  // console.log(dec)
+  // console.log(toUTF8String(Uint8Array.from(b)))
+  // process.exit(0)
 }
 
 function sliceIntoChunks(arr, chunkSize) {

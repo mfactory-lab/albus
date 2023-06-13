@@ -6,7 +6,7 @@
   "main": "src/index.ts",
   "module": "src/index.ts",
   "scripts": {
-    "cli": "NODE_NO_WARNINGS=1 ts-node-esm ./src/index.ts"
+    "cli": "vite-node ./src/index.ts --"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
     "@albus/core": "workspace:*",
     "@faker-js/faker": "^7.6",
     "@metaplex-foundation/js": "^0.19.4",
+    "@coral-xyz/anchor": "^0.28.0",
     "@solana/spl-token": "^0.3",
     "@solana/web3.js": "^1.77",
     "axios": "^1.4.0",
@@ -24,5 +25,8 @@
     "chalk": "^4.1.2",
     "loglevel": "^1.8.1",
     "snarkjs": "^0.7.0"
+  },
+  "devDependencies": {
+    "vite-node": "^0.32.0"
   }
 }

@@ -26,45 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import fs from 'node:fs'
-import { PublicKey } from '@solana/web3.js'
-import log from 'loglevel'
-import { zkp } from '@albus/core'
-import { useContext } from '../../context'
-import { exploreAddress } from '../../utils'
-import { mintProofNFT } from './utils'
+import { defineConfig } from 'vite'
 
-const { generateProof } = zkp
-
-interface Opts {
-  // Circuit NFT address
-  circuit: string | PublicKey
-  // Input signals. Can be path to the file or Map
-  input?: string
-}
-
-export async function create(opts: Opts) {
-  const { client } = useContext()
-
-  log.debug('Circuit loading...')
-  const circuit = await client.loadCircuit(opts.circuit)
-
-  const input = opts.input ? JSON.parse(fs.readFileSync(opts.input).toString()) : undefined
-
-  log.debug('Generating proof...')
-  const { proof, publicSignals } = await generateProof({
-    wasmUrl: circuit.wasmUrl,
-    zkeyUrl: circuit.zkeyUrl,
-    input,
-  })
-
-  log.info('Done')
-  log.info({ proof, publicSignals })
-
-  log.debug('Minting nft...')
-  const nft = await mintProofNFT(new PublicKey(opts.circuit), proof, publicSignals)
-
-  log.info('Done')
-  log.info(`Mint: ${nft.address}`)
-  log.info(exploreAddress(nft.address))
-}
+export default defineConfig({
+  resolve: {
+    // by default Vite resolves `module` field, which not always a native ESM module
+    // setting this option can bypass that and fallback to cjs version
+    mainFields: [],
+  },
+})

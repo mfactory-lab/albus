@@ -29,7 +29,7 @@
 import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
 import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
-import { AnchorProvider, Wallet, web3 } from '@project-serum/anchor'
+import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import { AlbusClient } from '@albus/sdk'

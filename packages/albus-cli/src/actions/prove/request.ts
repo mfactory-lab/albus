@@ -28,10 +28,13 @@
 
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import { snark, vc } from '@albus/core'
+import * as albus from '@albus/core'
 import { useContext } from '../../context'
 import { exploreAddress } from '../../utils'
 import { mintProofNFT } from './utils'
+
+const { generateProof } = albus.zkp
+const { verifyCredential } = albus.vc
 
 interface Opts {
   // Verifiable Credential Address
@@ -60,13 +63,13 @@ export async function createForRequest(addr: string, opts: Opts) {
   const cred = await client.loadCredential(opts.vc)
 
   log.debug('Verifying credential...')
-  const { verifiableCredential } = await vc.verifyCredential(cred.payload, {
+  const { verifiableCredential } = await verifyCredential(cred.payload, {
     decryptionKey: keypair.secretKey,
     audience: config.issuerDid,
   })
 
   log.debug('Generating proof...')
-  const { proof, publicSignals } = await snark.generateProof({
+  const { proof, publicSignals } = await generateProof({
     wasmUrl: circuit.wasmUrl,
     zkeyUrl: circuit.zkeyUrl,
     input: prepareCircuitInput(circuit.id, verifiableCredential.credentialSubject),
