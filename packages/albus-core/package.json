@@ -11,6 +11,7 @@
     "directory": "packages/albus-core"
   },
   "dependencies": {
+    "@metaplex-foundation/mpl-token-metadata": "^2.12.0",
     "@stablelib/random": "^1.0.2",
     "@stablelib/sha256": "^1.0.1",
     "@stablelib/x25519": "^1.0.3",
@@ -24,12 +25,10 @@
     "did-resolver": "^4.1.0",
     "key-did-resolver": "^3.0.0",
     "web-did-resolver": "^2.0.24",
-    "elliptic": "^6.5.4",
     "jsonld-signatures": "^11.2.1",
     "circomlib": "^2.0.5",
     "circomlibjs": "^0.1.7",
     "snarkjs": "^0.7.0",
-    "loglevel": "^1.8.1",
     "poseidon-encryption": "^1.0.2",
     "uint8arrays": "^4.0.4"
   }

@@ -27,8 +27,8 @@
  */
 
 import axios from 'axios'
-import log from 'loglevel'
-import * as snarkjs from 'snarkjs'
+import type { PublicSignals, SnarkjsProof, VK } from 'snarkjs'
+import { groth16 } from 'snarkjs'
 
 interface GenerateProofProps {
   wasmUrl: string
@@ -41,7 +41,7 @@ interface GenerateProofProps {
  * @returns {Promise<SNARK>}
  */
 export async function generateProof(props: GenerateProofProps) {
-  return snarkjs.groth16.fullProve(props.input ?? {}, {
+  return groth16.fullProve(props.input ?? {}, {
     type: 'mem',
     data: await fetchBytes(props.wasmUrl),
   }, {
@@ -50,11 +50,23 @@ export async function generateProof(props: GenerateProofProps) {
   })
 }
 
+interface VerifyProofProps {
+  vk: VK
+  publicInput?: PublicSignals
+  proof: SnarkjsProof
+}
+
+/**
+ * Verify ZKP Proof
+ */
+export async function verifyProof(props: VerifyProofProps) {
+  return groth16.verify(props.vk, props.publicInput ?? [], props.proof)
+}
+
 /**
  * Fetches bytes from the specified URL using the fetch API.
  */
 async function fetchBytes(url: string) {
-  log.debug(`Loading file ${url}...`)
   const { data } = await axios<ArrayBuffer>({ method: 'get', url, responseType: 'arraybuffer' })
   return new Uint8Array(data)
 }

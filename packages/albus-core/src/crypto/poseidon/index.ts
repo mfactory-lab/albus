@@ -29,7 +29,7 @@
 import assert from 'node:assert'
 import * as crypto from 'node:crypto'
 import * as ff from 'ffjavascript'
-import constants from './poseidon_constants.json' assert { type: 'json' }
+import constants from './poseidon_constants.json'
 
 const Scalar = ff.Scalar
 const ZqField = ff.ZqField

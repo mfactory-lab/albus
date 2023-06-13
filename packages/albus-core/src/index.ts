@@ -27,6 +27,6 @@
  */
 
 export * as crypto from './crypto'
-export * as snark from './snark'
+export * as zkp from './zkp'
 export * as vc from './vc'
 export * as utils from './utils'
