@@ -48,7 +48,7 @@ pnpm add @albus/sdk
 
 Example client initialization
 ```typescript
-import { AnchorProvider, Wallet, web3 } from '@project-serum/anchor'
+import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import { AlbusClient } from '@albus/sdk'
 
 // Initialize anchor provider

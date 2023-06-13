@@ -27,7 +27,7 @@
  */
 
 import { PublicKey } from '@solana/web3.js'
-import { BN } from '@project-serum/anchor'
+import { BN } from '@coral-xyz/anchor'
 import log from 'loglevel'
 import { getOrCreateAssociatedTokenAccount } from '@solana/spl-token'
 import { useContext } from '../../context'

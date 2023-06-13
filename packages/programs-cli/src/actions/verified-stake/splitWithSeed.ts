@@ -29,7 +29,7 @@
 import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
 import { Keypair, PublicKey } from '@solana/web3.js'
-import { BN } from '@project-serum/anchor'
+import { BN } from '@coral-xyz/anchor'
 import log from 'loglevel'
 import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'

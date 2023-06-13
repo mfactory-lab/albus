@@ -28,7 +28,7 @@
 
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import { BN } from '@project-serum/anchor'
+import { BN } from '@coral-xyz/anchor'
 import { STAKE_POOL_PROGRAM_ID, stakePoolInfo } from '@solana/spl-stake-pool'
 import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'

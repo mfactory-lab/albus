@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { BN } from '@project-serum/anchor'
+import { BN } from '@coral-xyz/anchor'
 import { getOrCreateAssociatedTokenAccount } from '@solana/spl-token'
 import { Account, PublicKey } from '@solana/web3.js'
 import log from 'loglevel'

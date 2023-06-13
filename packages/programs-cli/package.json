@@ -8,10 +8,10 @@
     "cli": "ts-node ./src/index.ts"
   },
   "dependencies": {
-    "@verified-stake-pool/sdk": "workspace:*",
-    "@verified-stake/sdk": "workspace:*",
-    "@verified-swap/sdk": "workspace:*",
-    "@verified-transfer/sdk": "workspace:*",
+    "@albus/verified-stake-pool-sdk": "workspace:*",
+    "@albus/verified-stake-sdk": "workspace:*",
+    "@albus/verified-swap-sdk": "workspace:*",
+    "@albus/verified-transfer-sdk": "workspace:*",
     "@solana/spl-token-swap": "^0.2.2",
     "commander": "^10.0.0",
     "chalk": "^4.1.2",

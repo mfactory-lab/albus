@@ -1,5 +1,5 @@
-import type { AnchorProvider, BN } from '@project-serum/anchor'
-import { web3 } from '@project-serum/anchor'
+import type { AnchorProvider, BN } from '@coral-xyz/anchor'
+import { web3 } from '@coral-xyz/anchor'
 import type { ConfirmOptions, PublicKey } from '@solana/web3.js'
 import { Transaction } from '@solana/web3.js'
 import {

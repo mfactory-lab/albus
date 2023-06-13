@@ -1,4 +1,4 @@
-import type { AnchorProvider, BN } from '@project-serum/anchor'
+import type { AnchorProvider, BN } from '@coral-xyz/anchor'
 import type {
   ConfirmOptions, Keypair,
   PublicKey,

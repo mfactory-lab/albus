@@ -27,7 +27,7 @@
  */
 
 import { PublicKey } from '@solana/web3.js'
-import { StakeAuthorize } from '@verified-stake/sdk/src/generated'
+import { StakeAuthorize } from '@albus/verified-stake-sdk/src/generated'
 import log from 'loglevel'
 import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'

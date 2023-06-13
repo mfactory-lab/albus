@@ -1,5 +1,5 @@
 {
-  "name": "@verified-stake/sdk",
+  "name": "@albus/verified-stake-sdk",
   "version": "0.0.1",
   "private": true,
   "main": "src/index.ts",
