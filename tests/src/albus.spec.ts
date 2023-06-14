@@ -30,194 +30,123 @@ import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
 import { Keypair } from '@solana/web3.js'
 import type { PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it } from 'vitest'
-import { AlbusClient, ZKPRequestStatus } from '@albus/sdk'
-import { airdrop, assertErrorCode, mintNFT, newProvider, payerKeypair, provider } from './utils'
+import { AlbusClient, ProofRequestStatus } from '@albus/sdk'
+import { airdrop, assertErrorCode, getProofMock, mintNFT, newProvider, payerKeypair, provider } from './utils'
 
 describe('albus', () => {
   const client = new AlbusClient(provider)
   const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(payerKeypair))
 
-  let mint: PublicKey
+  const serviceCode = 'code'
+  const circuits: Record<'a' | 'b' | 'c' | string, PublicKey> = {}
 
   beforeAll(async () => {
     await airdrop(payerKeypair.publicKey)
+    circuits.a = (await mintNFT(metaplex, 'ALBUS-C')).address
+    circuits.b = (await mintNFT(metaplex, 'ALBUS-C')).address
+    // circuits.c = (await mintNFT(metaplex, 'ALBUS-C')).address
   })
 
   it('can add service provider', async () => {
-    await client.addServiceProvider({ code: 'code', name: 'name' })
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const serviceProviderData = await client.loadServiceProvider(serviceProviderAddress)
-    assert.equal(serviceProviderData.authority.equals(payerKeypair.publicKey), true)
-    assert.equal(serviceProviderData.code, 'code')
-    assert.equal(serviceProviderData.name, 'name')
-    assert.equal(serviceProviderData.zkpRequestCount, 0)
-  })
-
-  it('can not create ZKP request with unauthorized update authority of circuit NFT metadata', async () => {
-    const newPayerKeypair = Keypair.generate()
-    const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
-    await airdrop(newPayerKeypair.publicKey)
-    const nft = await mintNFT(metaplex, 'ALBUS-C')
-    const mint = nft.address
     try {
-      await client.createZKPRequest({
-        circuit: mint,
-        serviceCode: 'code',
-      })
-      assert.ok(false)
-    } catch (e: any) {
-      assertErrorCode(e, 'Unauthorized')
-    }
-  })
-
-  it('can create ZKP request', async () => {
-    const nft = await mintNFT(metaplex, 'ALBUS-C')
-    mint = nft.address
-
-    try {
-      await client.createZKPRequest({
-        circuit: mint,
-        serviceCode: 'code',
-      })
+      const data = { code: serviceCode, name: 'name' }
+      const { address } = await client.addServiceProvider(data)
+      const serviceProvider = await client.loadServiceProvider(address)
+      assert.equal(serviceProvider.authority.toString(), payerKeypair.publicKey.toString())
+      assert.equal(serviceProvider.code, data.code)
+      assert.equal(serviceProvider.name, data.name)
     } catch (e) {
       console.log(e)
+      assert.ok(false)
     }
-
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
-    const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
-    const serviceProviderData = await client.loadServiceProvider(serviceProviderAddress)
-    assert.equal(ZKPRequestData.serviceProvider.equals(serviceProviderAddress), true)
-    assert.equal(ZKPRequestData.circuit.equals(mint), true)
-    assert.equal(ZKPRequestData.owner.equals(payerKeypair.publicKey), true)
-    assert.equal(ZKPRequestData.proof, null)
-    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Pending)
-    assert.equal(serviceProviderData.zkpRequestCount, 1)
   })
 
-  it('can not prove ZKP request with unauthorized update authority of proof NFT metadata', async () => {
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
-
+  it('can not create proof request with unauthorized update authority of circuit NFT metadata', async () => {
     const newPayerKeypair = Keypair.generate()
+    await airdrop(newPayerKeypair.publicKey)
+
     const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
-    await airdrop(newPayerKeypair.publicKey)
-    const proofNft = await mintNFT(metaplex, 'ALBUS-P')
+    const circuit = await mintNFT(metaplex, 'ALBUS-C')
 
     try {
-      await client.prove({
-        proofMint: proofNft.address,
-        zkpRequest: ZKPRequestAddress,
-      })
+      await client.createProofRequest({ circuit: circuit.address, serviceCode })
       assert.ok(false)
     } catch (e: any) {
       assertErrorCode(e, 'Unauthorized')
     }
   })
 
-  it('can prove ZKP request', async () => {
-    const nft = await mintNFT(metaplex, 'ALBUS-P')
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
-
-    await client.prove({
-      proofMint: nft.address,
-      zkpRequest: ZKPRequestAddress,
-    })
-
-    const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
-    const serviceProviderData = await client.loadServiceProvider(serviceProviderAddress)
-    assert.equal((ZKPRequestData.proof !== undefined), true)
-    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Proved)
-    if (ZKPRequestData.proof) {
-      assert.equal(ZKPRequestData.proof.equals(nft.address), true)
-    }
-    assert.equal(serviceProviderData.zkpRequestCount, 1)
+  it('can create proof request', async () => {
+    const { address } = await client.createProofRequest({ circuit: circuits.a, serviceCode })
+    const proofRequest = await client.loadProofRequest(address)
+    assert.equal(proofRequest.circuit.toString(), circuits.a.toString())
+    assert.equal(proofRequest.owner.toString(), provider.publicKey.toString())
+    assert.equal(proofRequest.status, ProofRequestStatus.Pending)
+    assert.equal(proofRequest.proof, null)
   })
 
-  it('can not verify ZKP request with unauthorized authority', async () => {
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+  it('can prove proof request', async () => {
+    const { address } = await client.createProofRequest({ circuit: circuits.b, serviceCode })
+    const proof = getProofMock()
+    await client.prove({ proofRequest: address, proof })
+    const proofRequest = await client.loadProofRequest(address)
+    assert.equal(proofRequest.status, ProofRequestStatus.Proved)
+    assert.deepEqual(proofRequest.proof, proof)
+  })
+
+  it('can not verify proof request with unauthorized authority', async () => {
+    const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
+    const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.b, payerKeypair.publicKey)
 
     const newPayerKeypair = Keypair.generate()
-    const provider = newProvider(newPayerKeypair)
-    const newClient = new AlbusClient(provider)
+    const newClient = new AlbusClient(newProvider(newPayerKeypair))
     await airdrop(newPayerKeypair.publicKey)
 
     try {
-      await newClient.verify({
-        zkpRequest: ZKPRequestAddress,
-      })
+      await newClient.verify({ proofRequest: proofRequestAddr })
       assert.ok(false)
     } catch (e: any) {
       assertErrorCode(e, 'Unauthorized')
     }
   })
 
-  it('can not verify unproved ZKP request', async () => {
-    const nft = await mintNFT(metaplex, 'ALBUS-C')
-    const mint = nft.address
-
-    await client.createZKPRequest({
-      circuit: mint,
-      serviceCode: 'code',
-    })
-
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
+  it('can not verify unproved proof request', async () => {
+    const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
+    const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
 
     try {
-      await client.verify({
-        zkpRequest: ZKPRequestAddress,
-      })
+      await client.verify({ proofRequest: proofRequestAddr })
       assert.ok(false)
     } catch (e: any) {
+      console.log(e)
       assertErrorCode(e, 'Unproved')
     }
   })
 
-  it('can verify ZKP request', async () => {
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
-
-    await client.verify({
-      zkpRequest: ZKPRequestAddress,
-    })
-
-    const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
-    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Verified)
+  it('can verify proof request', async () => {
+    const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
+    const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.b, payerKeypair.publicKey)
+    await client.verify({ proofRequest: proofRequestAddr })
+    const proofRequest = await client.loadProofRequest(proofRequestAddr)
+    assert.equal(proofRequest.status, ProofRequestStatus.Verified)
   })
 
-  it('can deny ZKP request', async () => {
-    const nft = await mintNFT(metaplex, 'ALBUS-P')
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
-
-    await client.prove({
-      proofMint: nft.address,
-      zkpRequest: ZKPRequestAddress,
-    })
-
-    await client.reject({
-      zkpRequest: ZKPRequestAddress,
-    })
-
-    const ZKPRequestData = await client.loadZKPRequest(ZKPRequestAddress)
-    assert.equal(ZKPRequestData.status, ZKPRequestStatus.Rejected)
+  it('can reject proof request', async () => {
+    const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
+    const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
+    await client.prove({ proofRequest: proofRequestAddr, proof: getProofMock() })
+    await client.reject({ proofRequest: proofRequestAddr })
+    const proofRequest = await client.loadProofRequest(proofRequestAddr)
+    assert.equal(proofRequest.status, ProofRequestStatus.Rejected)
   })
 
-  it('can delete ZKP request', async () => {
-    const [serviceProviderAddress] = client.getServiceProviderPDA('code')
-    const [ZKPRequestAddress] = client.getZKPRequestPDA(serviceProviderAddress, mint, payerKeypair.publicKey)
-
-    await client.deleteZKPRequest({
-      zkpRequest: ZKPRequestAddress,
-    })
+  it('can delete proof request', async () => {
+    const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
+    const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
+    await client.deleteProofRequest({ proofRequest: proofRequestAddr })
   })
 
   it('can delete service provider', async () => {
-    await client.deleteServiceProvider({
-      code: 'code',
-    })
+    await client.deleteServiceProvider({ code: serviceCode })
   })
 })

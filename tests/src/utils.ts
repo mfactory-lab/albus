@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import type { Proof } from '@albus/sdk'
 import type { Metaplex } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
 import type { PublicKeyInitData } from '@solana/web3.js'
@@ -63,4 +64,15 @@ export async function airdrop(addr: PublicKeyInitData, amount = 10) {
 
 export function assertErrorCode(error: { logs?: string[] }, code: string) {
   assert.ok(String((error?.logs ?? []).join('')).includes(`Error Code: ${code}`))
+}
+
+export function getProofMock(): Proof {
+  return {
+    piA: ['4688465976390849813258766614874268793015562393908521426678896850698555295377', '5203302727358091972134489987774942965622107014647584381609747750500688800419', '1'],
+    piB: [['19100277836905026624939775520998807986886756133116001533707896920384169794537', '20845943990358232545602432281011291671960605406348147106935789163866131884190'], ['9550979632776995462322201809577428314107186866427252237457450171793417063766', '12473350078107351578656027664820450318597805912302701634643037322816555142082'], ['1', '0']],
+    piC: ['3368898346418249388382544753485388607144585282610758032560453819156280723300', '4321128949903528883011131762909256214873510011327154174450532321111046247789', '1'],
+    protocol: 'groth16',
+    curve: 'bn128',
+    publicInputs: ['2023', '6', '13', '18', '120'],
+  }
 }
