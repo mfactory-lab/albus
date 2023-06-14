@@ -39,7 +39,7 @@ use crate::{
     AlbusError,
 };
 
-const PROOF_SYMBOL_CODE: &str = "P";
+// const PROOF_SYMBOL_CODE: &str = "P";
 const CIRCUIT_SYMBOL_CODE: &str = "C";
 
 /// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`
@@ -64,13 +64,13 @@ fn is_valid_symbol(symbol: &str, code: &str) -> bool {
     symbol.starts_with(&format!("{}-{}", NFT_SYMBOL_PREFIX, code))
 }
 
-pub fn assert_valid_proof(account: &AccountInfo) -> Result<Metadata> {
-    let metadata = assert_valid_metadata(account, None, None)?;
-    if !is_valid_symbol(&metadata.data.symbol, PROOF_SYMBOL_CODE) {
-        return Err(AlbusError::InvalidMetadata.into());
-    }
-    Ok(metadata)
-}
+// pub fn assert_valid_proof(account: &AccountInfo) -> Result<Metadata> {
+//     let metadata = assert_valid_metadata(account, None, None)?;
+//     if !is_valid_symbol(&metadata.data.symbol, PROOF_SYMBOL_CODE) {
+//         return Err(AlbusError::InvalidMetadata.into());
+//     }
+//     Ok(metadata)
+// }
 
 pub fn assert_valid_circuit(account: &AccountInfo) -> Result<Metadata> {
     let metadata = assert_valid_metadata(account, None, None)?;

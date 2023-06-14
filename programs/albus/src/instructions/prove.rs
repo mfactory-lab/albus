@@ -28,17 +28,18 @@
 
 use anchor_lang::prelude::*;
 
+use crate::state::Proof;
 use crate::{
     events::ProveEvent,
-    state::{ZKPRequest, ZKPRequestStatus},
-    utils::{assert_valid_proof, cmp_pubkeys},
+    state::{ProofRequest, ProofRequestStatus},
+    utils::cmp_pubkeys,
     AlbusError,
 };
 
-/// Proves the [ZKPRequest] by validating the proof metadata and updating its status to `Proved`.
+/// Proves the [ProofRequest] by validating the proof metadata and updating its status to `Proved`.
 /// Returns an error if the request has expired or if the proof metadata is invalid.
-pub fn handler(ctx: Context<Prove>) -> Result<()> {
-    let req = &mut ctx.accounts.zkp_request;
+pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
+    let req = &mut ctx.accounts.proof_request;
 
     if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
         msg!("Error: Only request owner can prove it!");
@@ -51,18 +52,16 @@ pub fn handler(ctx: Context<Prove>) -> Result<()> {
         return Err(AlbusError::Expired.into());
     }
 
-    let proof_metadata = assert_valid_proof(&ctx.accounts.proof_metadata)?;
-
-    req.status = ZKPRequestStatus::Proved;
-    req.proof = Some(proof_metadata.mint);
+    req.status = ProofRequestStatus::Proved;
+    req.proof = Some(data.proof.to_owned());
     req.proved_at = timestamp;
     req.verified_at = 0;
 
     emit!(ProveEvent {
-        zkp_request: req.key(),
+        proof_request: req.key(),
         service_provider: req.service_provider,
         circuit: req.circuit,
-        proof: proof_metadata.mint,
+        proof: data.proof,
         owner: req.owner,
         timestamp,
     });
@@ -72,13 +71,16 @@ pub fn handler(ctx: Context<Prove>) -> Result<()> {
     Ok(())
 }
 
-#[derive(Accounts)]
-pub struct Prove<'info> {
-    #[account(mut)]
-    pub zkp_request: Box<Account<'info, ZKPRequest>>,
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct ProveData {
+    pub proof: Proof,
+}
 
-    /// CHECK: checked inside
-    pub proof_metadata: UncheckedAccount<'info>,
+#[derive(Accounts)]
+#[instruction(data: ProveData)]
+pub struct Prove<'info> {
+    #[account(mut, realloc = ProofRequest::space() + data.proof.space(), realloc::payer = authority, realloc::zero = false)]
+    pub proof_request: Box<Account<'info, ProofRequest>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

@@ -28,10 +28,10 @@
 
 use anchor_lang::prelude::*;
 
-use crate::{events::DeleteZKPRequestEvent, state::ZKPRequest, utils::cmp_pubkeys, AlbusError};
+use crate::{events::DeleteProofRequestEvent, state::ProofRequest, utils::cmp_pubkeys, AlbusError};
 
-pub fn handler(ctx: Context<DeleteZKPRequest>) -> Result<()> {
-    let req = &mut ctx.accounts.zkp_request;
+pub fn handler(ctx: Context<DeleteProofRequest>) -> Result<()> {
+    let req = &mut ctx.accounts.proof_request;
 
     if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
         msg!("Error: Only request owner can delete it!");
@@ -40,8 +40,8 @@ pub fn handler(ctx: Context<DeleteZKPRequest>) -> Result<()> {
 
     let timestamp = Clock::get()?.unix_timestamp;
 
-    emit!(DeleteZKPRequestEvent {
-        zkp_request: req.key(),
+    emit!(DeleteProofRequestEvent {
+        proof_request: req.key(),
         owner: req.owner,
         timestamp,
     });
@@ -50,9 +50,9 @@ pub fn handler(ctx: Context<DeleteZKPRequest>) -> Result<()> {
 }
 
 #[derive(Accounts)]
-pub struct DeleteZKPRequest<'info> {
+pub struct DeleteProofRequest<'info> {
     #[account(mut, close = authority)]
-    pub zkp_request: Box<Account<'info, ZKPRequest>>,
+    pub proof_request: Box<Account<'info, ProofRequest>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

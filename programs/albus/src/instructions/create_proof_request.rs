@@ -30,35 +30,34 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 
 use crate::{
-    events::CreateZKPRequestEvent,
-    state::{ServiceProvider, ZKPRequest, ZKPRequestStatus},
+    events::CreateProofRequestEvent,
+    state::{ProofRequest, ProofRequestStatus, ServiceProvider},
     utils::assert_valid_circuit,
 };
 
-pub fn handler(ctx: Context<CreateZKPRequest>, data: CreateZKPRequestData) -> Result<()> {
+pub fn handler(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -> Result<()> {
     let circuit_metadata = assert_valid_circuit(&ctx.accounts.circuit_metadata)?;
 
     let timestamp = Clock::get()?.unix_timestamp;
 
-    let req = &mut ctx.accounts.zkp_request;
+    let req = &mut ctx.accounts.proof_request;
     req.service_provider = ctx.accounts.service_provider.key();
     req.owner = ctx.accounts.authority.key();
     req.circuit = circuit_metadata.mint;
-    req.proof = None;
     req.proved_at = 0;
     req.verified_at = 0;
     req.created_at = timestamp;
-    req.status = ZKPRequestStatus::Pending;
-    req.bump = ctx.bumps["zkp_request"];
+    req.status = ProofRequestStatus::Pending;
+    req.bump = ctx.bumps["proof_request"];
 
     if data.expires_in > 0 {
         req.expired_at = timestamp.saturating_add(data.expires_in as i64);
     }
 
     let sp = &mut ctx.accounts.service_provider;
-    sp.zkp_request_count += 1;
+    sp.proof_request_count += 1;
 
-    emit!(CreateZKPRequestEvent {
+    emit!(CreateProofRequestEvent {
         service_provider: req.service_provider,
         circuit: req.circuit,
         owner: req.owner,
@@ -68,31 +67,31 @@ pub fn handler(ctx: Context<CreateZKPRequest>, data: CreateZKPRequestData) -> Re
     Ok(())
 }
 
-/// Data required to create a new ZKP request
+/// Data required to create a new proof request
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateZKPRequestData {
+pub struct CreateProofRequestData {
     /// Time in seconds until the request expires
     pub expires_in: u32,
 }
 
 #[derive(Accounts)]
-pub struct CreateZKPRequest<'info> {
+pub struct CreateProofRequest<'info> {
     #[account(mut)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 
     #[account(
         init_if_needed,
         seeds = [
-            ZKPRequest::SEED,
+            ProofRequest::SEED,
             service_provider.key().as_ref(),
             circuit_mint.key().as_ref(),
             authority.key().as_ref(),
         ],
         bump,
         payer = authority,
-        space = ZKPRequest::space()
+        space = ProofRequest::space()
     )]
-    pub zkp_request: Box<Account<'info, ZKPRequest>>,
+    pub proof_request: Box<Account<'info, ProofRequest>>,
 
     #[account(
         constraint = circuit_mint.supply == 1,

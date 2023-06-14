@@ -26,10 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+use crate::state::Proof;
 use crate::*;
 
 #[event]
-pub struct CreateZKPRequestEvent {
+pub struct CreateProofRequestEvent {
     #[index]
     pub service_provider: Pubkey,
     pub circuit: Pubkey,
@@ -38,9 +39,9 @@ pub struct CreateZKPRequestEvent {
 }
 
 #[event]
-pub struct DeleteZKPRequestEvent {
+pub struct DeleteProofRequestEvent {
     #[index]
-    pub zkp_request: Pubkey,
+    pub proof_request: Pubkey,
     pub owner: Pubkey,
     pub timestamp: i64,
 }
@@ -48,11 +49,11 @@ pub struct DeleteZKPRequestEvent {
 #[event]
 pub struct ProveEvent {
     #[index]
-    pub zkp_request: Pubkey,
+    pub proof_request: Pubkey,
     #[index]
     pub service_provider: Pubkey,
     pub circuit: Pubkey,
-    pub proof: Pubkey,
+    pub proof: Proof,
     pub owner: Pubkey,
     pub timestamp: i64,
 }
@@ -60,7 +61,7 @@ pub struct ProveEvent {
 #[event]
 pub struct VerifyEvent {
     #[index]
-    pub zkp_request: Pubkey,
+    pub proof_request: Pubkey,
     #[index]
     pub service_provider: Pubkey,
     pub circuit: Pubkey,
@@ -71,7 +72,7 @@ pub struct VerifyEvent {
 #[event]
 pub struct RejectEvent {
     #[index]
-    pub zkp_request: Pubkey,
+    pub proof_request: Pubkey,
     #[index]
     pub service_provider: Pubkey,
     pub circuit: Pubkey,

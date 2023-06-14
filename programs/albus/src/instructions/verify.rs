@@ -30,26 +30,26 @@ use anchor_lang::prelude::*;
 
 use crate::{
     events::{RejectEvent, VerifyEvent},
-    state::{ZKPRequest, ZKPRequestStatus},
+    state::{ProofRequest, ProofRequestStatus},
     utils::assert_authorized,
     AlbusError,
 };
 
-/// Verifies the [ZKPRequest] and updates its status accordingly.
+/// Verifies the [ProofRequest] and updates its status accordingly.
 /// Returns an error if the authority is not authorized, the request has not been proved,
 /// the request has expired or the status is not valid.
 pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
-    let req = &mut ctx.accounts.zkp_request;
+    let req = &mut ctx.accounts.proof_request;
 
     // Check that the authority is authorized to perform this action
     assert_authorized(&ctx.accounts.authority.key())?;
 
-    // Check that the ZKP request has already been proved
-    if req.status != ZKPRequestStatus::Proved {
+    // Check that the request has already been proved
+    if req.status != ProofRequestStatus::Proved {
         return Err(AlbusError::Unproved.into());
     }
 
-    // Check that the ZKP request has not yet expired
+    // Check that the request has not yet expired
     let timestamp = Clock::get()?.unix_timestamp;
     if req.expired_at > 0 && req.expired_at < timestamp {
         return Err(AlbusError::Expired.into());
@@ -59,9 +59,9 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
     req.verified_at = timestamp;
 
     match req.status {
-        ZKPRequestStatus::Verified => {
+        ProofRequestStatus::Verified => {
             emit!(VerifyEvent {
-                zkp_request: req.key(),
+                proof_request: req.key(),
                 service_provider: req.service_provider,
                 circuit: req.circuit,
                 owner: req.owner,
@@ -69,9 +69,9 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
             });
             msg!("Verified!");
         }
-        ZKPRequestStatus::Rejected => {
+        ProofRequestStatus::Rejected => {
             emit!(RejectEvent {
-                zkp_request: req.key(),
+                proof_request: req.key(),
                 service_provider: req.service_provider,
                 circuit: req.circuit,
                 owner: req.owner,
@@ -90,13 +90,13 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct VerifyData {
-    pub status: ZKPRequestStatus,
+    pub status: ProofRequestStatus,
 }
 
 #[derive(Accounts)]
 pub struct Verify<'info> {
     #[account(mut)]
-    pub zkp_request: Box<Account<'info, ZKPRequest>>,
+    pub proof_request: Box<Account<'info, ProofRequest>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

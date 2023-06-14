@@ -53,19 +53,19 @@ pub mod albus {
         delete_service_provider::handler(ctx)
     }
 
-    pub fn create_zkp_request(
-        ctx: Context<CreateZKPRequest>,
-        data: CreateZKPRequestData,
+    pub fn create_proof_request(
+        ctx: Context<CreateProofRequest>,
+        data: CreateProofRequestData,
     ) -> Result<()> {
-        create_zkp_request::handler(ctx, data)
+        create_proof_request::handler(ctx, data)
     }
 
-    pub fn delete_zkp_request(ctx: Context<DeleteZKPRequest>) -> Result<()> {
-        delete_zkp_request::handler(ctx)
+    pub fn delete_proof_request(ctx: Context<DeleteProofRequest>) -> Result<()> {
+        delete_proof_request::handler(ctx)
     }
 
-    pub fn prove(ctx: Context<Prove>) -> Result<()> {
-        prove::handler(ctx)
+    pub fn prove(ctx: Context<Prove>, data: ProveData) -> Result<()> {
+        prove::handler(ctx, data)
     }
 
     pub fn verify(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
