@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category DepositAllTokenTypes
  * @category generated
  */
-export type DepositAllTokenTypesInstructionArgs = {
+export interface DepositAllTokenTypesInstructionArgs {
   poolTokenAmount: beet.bignum
   maximumTokenAAmount: beet.bignum
   maximumTokenBAmount: beet.bignum
@@ -35,7 +35,7 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
     ['maximumTokenAAmount', beet.u64],
     ['maximumTokenBAmount', beet.u64],
   ],
-  'DepositAllTokenTypesInstructionArgs'
+  'DepositAllTokenTypesInstructionArgs',
 )
 /**
  * Accounts required by the _depositAllTokenTypes_ instruction
@@ -55,7 +55,7 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
  * @category DepositAllTokenTypes
  * @category generated
  */
-export type DepositAllTokenTypesInstructionAccounts = {
+export interface DepositAllTokenTypesInstructionAccounts {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -88,7 +88,7 @@ export const depositAllTokenTypesInstructionDiscriminator = [
 export function createDepositAllTokenTypesInstruction(
   accounts: DepositAllTokenTypesInstructionAccounts,
   args: DepositAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
 ) {
   const [data] = depositAllTokenTypesStruct.serialize({
     instructionDiscriminator: depositAllTokenTypesInstructionDiscriminator,

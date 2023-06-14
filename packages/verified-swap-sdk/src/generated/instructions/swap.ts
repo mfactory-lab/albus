@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category Swap
  * @category generated
  */
-export type SwapInstructionArgs = {
+export interface SwapInstructionArgs {
   amountIn: beet.bignum
   minimumAmountOut: beet.bignum
 }
@@ -33,7 +33,7 @@ export const swapStruct = new beet.BeetArgsStruct<
     ['amountIn', beet.u64],
     ['minimumAmountOut', beet.u64],
   ],
-  'SwapInstructionArgs'
+  'SwapInstructionArgs',
 )
 /**
  * Accounts required by the _swap_ instruction
@@ -53,7 +53,7 @@ export const swapStruct = new beet.BeetArgsStruct<
  * @category Swap
  * @category generated
  */
-export type SwapInstructionAccounts = {
+export interface SwapInstructionAccounts {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -86,7 +86,7 @@ export const swapInstructionDiscriminator = [
 export function createSwapInstruction(
   accounts: SwapInstructionAccounts,
   args: SwapInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
 ) {
   const [data] = swapStruct.serialize({
     instructionDiscriminator: swapInstructionDiscriminator,

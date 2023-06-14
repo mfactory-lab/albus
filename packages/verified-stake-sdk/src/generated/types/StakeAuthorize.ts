@@ -6,6 +6,7 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
+
 /**
  * @category enums
  * @category generated
@@ -20,5 +21,5 @@ export enum StakeAuthorize {
  * @category generated
  */
 export const stakeAuthorizeBeet = beet.fixedScalarEnum(
-  StakeAuthorize
+  StakeAuthorize,
 ) as beet.FixedSizeBeet<StakeAuthorize, StakeAuthorize>

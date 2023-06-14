@@ -17,7 +17,7 @@ export const redelegateStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'RedelegateInstructionArgs'
+  'RedelegateInstructionArgs',
 )
 /**
  * Accounts required by the _redelegate_ instruction
@@ -33,7 +33,7 @@ export const redelegateStruct = new beet.BeetArgsStruct<{
  * @category Redelegate
  * @category generated
  */
-export type RedelegateInstructionAccounts = {
+export interface RedelegateInstructionAccounts {
   uninitializedStake: web3.PublicKey
   stake: web3.PublicKey
   vote: web3.PublicKey
@@ -59,7 +59,7 @@ export const redelegateInstructionDiscriminator = [
  */
 export function createRedelegateInstruction(
   accounts: RedelegateInstructionAccounts,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
 ) {
   const [data] = redelegateStruct.serialize({
     instructionDiscriminator: redelegateInstructionDiscriminator,
