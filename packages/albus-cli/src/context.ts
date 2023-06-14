@@ -60,13 +60,16 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
       timeout: 60000,
     }))
 
-  return context = { keypair: wallet.payer, provider, client, cluster, config, metaplex }
+  const issuerKeypair = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
+
+  return context = { keypair: wallet.payer, issuerKeypair, provider, client, cluster, config, metaplex }
 }
 
 export interface Context {
   cluster: Cluster
   provider: AnchorProvider
   keypair: Keypair
+  issuerKeypair: Keypair
   metaplex: Metaplex
   client: AlbusClient
   config: typeof config

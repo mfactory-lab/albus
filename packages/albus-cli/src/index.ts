@@ -69,7 +69,7 @@ id.command('new')
 
 const vc = cli.command('vc')
 
-vc.command('all')
+vc.command('all', { isDefault: true })
   .description('Show all issued VC`s')
   .action(actions.vc.showAll)
 
