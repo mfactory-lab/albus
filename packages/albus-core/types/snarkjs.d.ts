@@ -32,6 +32,7 @@ declare module 'snarkjs' {
     readonly pi_b: readonly (readonly (string | bigint)[])[];
     readonly pi_c: readonly (string | bigint)[];
     readonly protocol: string;
+    readonly curve: string;
   };
 
   type PublicSignals = readonly (string | bigint)[];

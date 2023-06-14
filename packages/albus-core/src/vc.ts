@@ -147,7 +147,11 @@ export async function verifyCredential(payload: string, opts: VerifyOpts) {
   let data = vc.verifiableCredential.credentialSubject
 
   if (data.encrypted && opts.decryptionKey) {
-    data = JSON.parse(await xc20p.decrypt(data.encrypted, opts.decryptionKey))
+    try {
+      data = JSON.parse(await xc20p.decrypt(data.encrypted, opts.decryptionKey))
+    } catch (e) {
+      //
+    }
   }
 
   vc.verifiableCredential = {

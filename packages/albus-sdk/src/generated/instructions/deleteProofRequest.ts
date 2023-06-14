@@ -10,53 +10,53 @@ import * as web3 from '@solana/web3.js'
 
 /**
  * @category Instructions
- * @category DeleteServiceProvider
+ * @category DeleteProofRequest
  * @category generated
  */
-export const deleteServiceProviderStruct = new beet.BeetArgsStruct<{
+export const deleteProofRequestStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'DeleteServiceProviderInstructionArgs',
+  'DeleteProofRequestInstructionArgs',
 )
 /**
- * Accounts required by the _deleteServiceProvider_ instruction
+ * Accounts required by the _deleteProofRequest_ instruction
  *
- * @property [_writable_] serviceProvider
+ * @property [_writable_] proofRequest
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category DeleteServiceProvider
+ * @category DeleteProofRequest
  * @category generated
  */
-export interface DeleteServiceProviderInstructionAccounts {
-  serviceProvider: web3.PublicKey
+export interface DeleteProofRequestInstructionAccounts {
+  proofRequest: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const deleteServiceProviderInstructionDiscriminator = [
-  186, 177, 156, 65, 168, 2, 56, 128,
+export const deleteProofRequestInstructionDiscriminator = [
+  34, 9, 125, 78, 113, 197, 126, 34,
 ]
 
 /**
- * Creates a _DeleteServiceProvider_ instruction.
+ * Creates a _DeleteProofRequest_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @category Instructions
- * @category DeleteServiceProvider
+ * @category DeleteProofRequest
  * @category generated
  */
-export function createDeleteServiceProviderInstruction(
-  accounts: DeleteServiceProviderInstructionAccounts,
+export function createDeleteProofRequestInstruction(
+  accounts: DeleteProofRequestInstructionAccounts,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = deleteServiceProviderStruct.serialize({
-    instructionDiscriminator: deleteServiceProviderInstructionDiscriminator,
+  const [data] = deleteProofRequestStruct.serialize({
+    instructionDiscriminator: deleteProofRequestInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.serviceProvider,
+      pubkey: accounts.proofRequest,
       isWritable: true,
       isSigner: false,
     },

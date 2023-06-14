@@ -6,20 +6,22 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-import type { ProofRequestStatus } from './ProofRequestStatus'
-import {
-  proofRequestStatusBeet,
-} from './ProofRequestStatus'
 
-export interface VerifyData {
-  status: ProofRequestStatus
+/**
+ * @category enums
+ * @category generated
+ */
+export enum ProofRequestStatus {
+  Pending,
+  Proved,
+  Verified,
+  Rejected,
 }
 
 /**
  * @category userTypes
  * @category generated
  */
-export const verifyDataBeet = new beet.BeetArgsStruct<VerifyData>(
-  [['status', proofRequestStatusBeet]],
-  'VerifyData',
-)
+export const proofRequestStatusBeet = beet.fixedScalarEnum(
+  ProofRequestStatus,
+) as beet.FixedSizeBeet<ProofRequestStatus, ProofRequestStatus>

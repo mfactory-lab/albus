@@ -6,20 +6,17 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-import type { ProofRequestStatus } from './ProofRequestStatus'
-import {
-  proofRequestStatusBeet,
-} from './ProofRequestStatus'
 
-export interface VerifyData {
-  status: ProofRequestStatus
+export interface CreateProofRequestData {
+  expiresIn: number
 }
 
 /**
  * @category userTypes
  * @category generated
  */
-export const verifyDataBeet = new beet.BeetArgsStruct<VerifyData>(
-  [['status', proofRequestStatusBeet]],
-  'VerifyData',
-)
+export const createProofRequestDataBeet
+  = new beet.BeetArgsStruct<CreateProofRequestData>(
+    [['expiresIn', beet.u32]],
+    'CreateProofRequestData',
+  )

@@ -7,78 +7,99 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { AddServiceProviderData } from '../types/AddServiceProviderData'
+import type { CreateProofRequestData } from '../types/CreateProofRequestData'
 import {
-  addServiceProviderDataBeet,
-} from '../types/AddServiceProviderData'
+  createProofRequestDataBeet,
+} from '../types/CreateProofRequestData'
 
 /**
  * @category Instructions
- * @category AddServiceProvider
+ * @category CreateProofRequest
  * @category generated
  */
-export interface AddServiceProviderInstructionArgs {
-  data: AddServiceProviderData
+export interface CreateProofRequestInstructionArgs {
+  data: CreateProofRequestData
 }
 /**
  * @category Instructions
- * @category AddServiceProvider
+ * @category CreateProofRequest
  * @category generated
  */
-export const addServiceProviderStruct = new beet.FixableBeetArgsStruct<
-  AddServiceProviderInstructionArgs & {
+export const createProofRequestStruct = new beet.BeetArgsStruct<
+  CreateProofRequestInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', addServiceProviderDataBeet],
+    ['data', createProofRequestDataBeet],
   ],
-  'AddServiceProviderInstructionArgs',
+  'CreateProofRequestInstructionArgs',
 )
 /**
- * Accounts required by the _addServiceProvider_ instruction
+ * Accounts required by the _createProofRequest_ instruction
  *
  * @property [_writable_] serviceProvider
+ * @property [_writable_] proofRequest
+ * @property [] circuitMint
+ * @property [] circuitMetadata
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category AddServiceProvider
+ * @category CreateProofRequest
  * @category generated
  */
-export interface AddServiceProviderInstructionAccounts {
+export interface CreateProofRequestInstructionAccounts {
   serviceProvider: web3.PublicKey
+  proofRequest: web3.PublicKey
+  circuitMint: web3.PublicKey
+  circuitMetadata: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const addServiceProviderInstructionDiscriminator = [
-  122, 238, 46, 138, 102, 109, 197, 177,
+export const createProofRequestInstructionDiscriminator = [
+  18, 176, 14, 175, 218, 24, 32, 130,
 ]
 
 /**
- * Creates a _AddServiceProvider_ instruction.
+ * Creates a _CreateProofRequest_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category AddServiceProvider
+ * @category CreateProofRequest
  * @category generated
  */
-export function createAddServiceProviderInstruction(
-  accounts: AddServiceProviderInstructionAccounts,
-  args: AddServiceProviderInstructionArgs,
+export function createCreateProofRequestInstruction(
+  accounts: CreateProofRequestInstructionAccounts,
+  args: CreateProofRequestInstructionArgs,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = addServiceProviderStruct.serialize({
-    instructionDiscriminator: addServiceProviderInstructionDiscriminator,
+  const [data] = createProofRequestStruct.serialize({
+    instructionDiscriminator: createProofRequestInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: accounts.serviceProvider,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.proofRequest,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.circuitMint,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.circuitMetadata,
+      isWritable: false,
       isSigner: false,
     },
     {

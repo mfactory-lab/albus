@@ -30,40 +30,21 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const { programId, programName } = parseAnchorToml()
+const programName = 'albus'
+const programId = 'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'
 
-if (!programId) {
-  throw new Error('Invalid `Anchor.toml`')
-}
-
-const programDir = path.join(__dirname, '..', '..', 'programs', programName);
-const idlDir = path.join(__dirname, 'idl');
-const sdkDir = path.join(__dirname, 'src', 'generated');
-const binaryInstallDir = path.join(os.homedir(), '.cargo');
-// const binaryInstallDir = path.join(__dirname, '.crates');
+const programDir = path.join(__dirname, '..', '..', 'programs', programName)
+const idlGenerator = 'anchor'
+const idlDir = path.join(__dirname, 'idl')
+const sdkDir = path.join(__dirname, 'src', 'generated')
+const binaryInstallDir = path.join(os.homedir(), '.cargo')
 
 module.exports = {
-  idlGenerator: 'anchor',
-  programName,
   programId,
+  programName,
+  programDir,
+  idlGenerator,
   idlDir,
   sdkDir,
-  binaryInstallDir,
-  programDir,
-};
-
-function parseAnchorToml() {
-  const anchor = fs.readFileSync(path.join(__dirname, '..', '..', 'Anchor.toml'))
-  const reg_pattern = /\[programs.+\]\n(.+) = \"(.+)\"/i
-  const matches = reg_pattern.exec(anchor.toString())
-  if (matches) {
-    return {
-      programName: matches[1],
-      programId: matches[2],
-    }
-  }
-  return {
-    programName: undefined,
-    programId: undefined,
-  }
+  binaryInstallDir
 }
