@@ -8,7 +8,10 @@ test-ledger
 .eslintcache
 /tmp
 /.secrets/
+
 /circuits/*.ptau
 /circuits/*.r1cs
 /circuits/*.wasm
 /circuits/*.sym
+
+*.local

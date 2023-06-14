@@ -17,6 +17,11 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
+    "types": [
+      "node",
+      "vitest",
+      "vite/client"
+    ],
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true
   },
