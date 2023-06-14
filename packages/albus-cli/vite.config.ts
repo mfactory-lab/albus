@@ -27,11 +27,22 @@
  */
 
 import { defineConfig } from 'vite'
+import { version } from './package.json'
 
-export default defineConfig({
-  resolve: {
-    // by default Vite resolves `module` field, which not always a native ESM module
-    // setting this option can bypass that and fallback to cjs version
-    mainFields: [],
-  },
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  return {
+    envPrefix: 'CLI_',
+    define: {
+      'import.meta.env.VERSION': JSON.stringify(version),
+    },
+    resolve: {
+      // by default Vite resolves `module` field, which not always a native ESM module
+      // setting this option can bypass that and fallback to cjs version
+      mainFields: [],
+    },
+    optimizeDeps: {
+      include: ['@coral-xyz/anchor', '@solana/web3.js', '@faker-js/faker'],
+    },
+  }
 })

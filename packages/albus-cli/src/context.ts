@@ -36,6 +36,33 @@ import { AlbusClient } from '@albus/sdk'
 import { clusterUrl } from './utils'
 import config from './config'
 
+let context: Context
+
+export function useContext() {
+  return context
+}
+
+export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: string }) {
+  const opts = AnchorProvider.defaultOptions()
+  const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
+  const connection = new web3.Connection(endpoint, opts.commitment)
+
+  const wallet = new Wallet(Keypair.fromSecretKey(Buffer.from(JSON.parse(
+    keypair.startsWith('[') && keypair.endsWith(']') ? keypair : fs.readFileSync(keypair).toString(),
+  ))))
+  const provider = new AnchorProvider(connection, wallet, opts)
+  const client = new AlbusClient(provider)
+  const metaplex = Metaplex.make(provider.connection)
+    .use(keypairIdentity(wallet.payer))
+    .use(bundlrStorage({
+      address: 'https://devnet.bundlr.network',
+      providerUrl: connection.rpcEndpoint,
+      timeout: 60000,
+    }))
+
+  return context = { keypair: wallet.payer, provider, client, cluster, config, metaplex }
+}
+
 export interface Context {
   cluster: Cluster
   provider: AnchorProvider
@@ -43,41 +70,4 @@ export interface Context {
   metaplex: Metaplex
   client: AlbusClient
   config: typeof config
-}
-
-const context: Context = {
-  cluster: 'devnet',
-  // @ts-expect-error ...
-  provider: undefined,
-  // @ts-expect-error ...
-  metaplex: undefined,
-}
-
-export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: string }) {
-  const opts = AnchorProvider.defaultOptions()
-  const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
-  const connection = new web3.Connection(endpoint, opts.commitment)
-  const walletKeypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(fs.readFileSync(keypair).toString())))
-  const wallet = new Wallet(walletKeypair)
-
-  context.config = config
-  context.cluster = cluster
-  context.provider = new AnchorProvider(connection, wallet, opts)
-  context.keypair = walletKeypair
-
-  context.metaplex = Metaplex.make(context.provider.connection)
-    .use(keypairIdentity(context.keypair))
-    .use(bundlrStorage({
-      address: 'https://devnet.bundlr.network',
-      providerUrl: context.provider.connection.rpcEndpoint,
-      timeout: 60000,
-    }))
-
-  context.client = new AlbusClient(context.provider)
-
-  return context
-}
-
-export function useContext() {
-  return context
 }

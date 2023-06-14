@@ -29,25 +29,26 @@
 import type { Command } from 'commander'
 import { program as cli } from 'commander'
 import log from 'loglevel'
-import pkg from '../package.json' assert { type: 'json' }
 import { initContext } from './context'
 import * as actions from './actions'
 
-const DEFAULT_LOG_LEVEL = 'info'
-const DEFAULT_CLUSTER = 'devnet' // 'https://devnet.rpcpool.com'
-const DEFAULT_KEYPAIR = `${process.env.HOME}/.config/solana/id.json`
+const VERSION = import.meta.env.VERSION
+const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
+const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet' // 'https://devnet.rpcpool.com'
+const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
 
 cli
-  .version(pkg.version)
+  .name('cli')
+  .version(VERSION)
   .allowExcessArguments(false)
-  .option('-c, --cluster <CLUSTER>', 'Solana cluster', DEFAULT_CLUSTER)
-  .option('-k, --keypair <KEYPAIR>', 'Filepath or URL to a keypair', DEFAULT_KEYPAIR)
-  .option('-l, --log-level <LEVEL>', 'Log level', (l: any) => l && log.setLevel(l), DEFAULT_LOG_LEVEL)
+  .option('-c, --cluster <CLUSTER>', 'solana cluster', DEFAULT_CLUSTER)
+  .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair', DEFAULT_KEYPAIR)
+  .option('-l, --log-level <LEVEL>', 'log level', (l: any) => l && log.setLevel(l), DEFAULT_LOG_LEVEL)
   .hook('preAction', async (command: Command) => {
     const opts = command.opts() as any
     log.setLevel(opts.logLevel)
     const { provider, cluster } = initContext(opts)
-    log.info(`# CLI version: ${pkg.version}`)
+    log.info(`# Version: ${VERSION}`)
     log.info(`# Keypair: ${provider.wallet.publicKey}`)
     log.info(`# Cluster: ${cluster}\n`)
   })
@@ -193,9 +194,9 @@ sp.command('all')
   .option('--authority', 'Filter by authority')
   .action(actions.admin.sp.showAll)
 
-cli.parseAsync(process.argv).then(
-  () => {},
-  (e: unknown) => {
-    throw e
-  },
-)
+cli.command('*', { isDefault: true, hidden: true })
+  .action(() => {
+    cli.help()
+  })
+
+cli.parse()
