@@ -1,12 +1,11 @@
 {
   "name": "@albus/sdk",
-  "version": "0.0.3",
-  "type": "module",
+  "version": "0.0.4",
   "sideEffects": false,
   "main": "src/index.ts",
   "module": "src/index.ts",
   "scripts": {
-    "api:gen": "DEBUG='(solita|rustbin):(info|error)' solita"
+    "generate": "DEBUG='(solita|rustbin):(info|error)' solita"
   },
   "repository": {
     "type": "git",
@@ -21,6 +20,6 @@
     "@solana/web3.js": "^1.77.3"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.19"
+    "@metaplex-foundation/solita": "^0.19.4"
   }
 }
