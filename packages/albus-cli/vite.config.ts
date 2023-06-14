@@ -26,11 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import { version } from './package.json'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   return {
     envPrefix: 'CLI_',
     define: {
@@ -40,6 +41,9 @@ export default defineConfig(({ mode }) => {
       // by default Vite resolves `module` field, which not always a native ESM module
       // setting this option can bypass that and fallback to cjs version
       mainFields: [],
+      alias: {
+        '@/': `${resolve(__dirname, 'src')}/`,
+      },
     },
     optimizeDeps: {
       include: ['@coral-xyz/anchor', '@solana/web3.js', '@faker-js/faker'],

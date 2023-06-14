@@ -29,9 +29,7 @@
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import * as albus from '@albus/core'
-import { useContext } from '../../context'
-import { exploreAddress } from '../../utils'
-import { mintProofNFT } from './utils'
+import { useContext } from '@/context'
 
 const { generateProof } = albus.zkp
 const { verifyCredential } = albus.vc
@@ -44,49 +42,53 @@ interface Opts {
 }
 
 /**
- * Create proof for ZKP request
+ * Create a proof for Proof Request with {@link addr}
  */
-export async function createForRequest(addr: string, opts: Opts) {
+export async function proveRequest(addr: string, opts: Opts) {
   const { keypair, client, config } = useContext()
 
   const reqAddr = new PublicKey(addr)
-  const req = await client.loadZKPRequest(reqAddr)
+  const req = await client.loadProofRequest(reqAddr)
 
   if (req.proof && opts.force !== true) {
     throw new Error('Proof already exists')
   }
 
-  log.debug('Loading circuit info...')
+  log.info('Loading circuit...')
   const circuit = await client.loadCircuit(req.circuit)
 
-  log.debug(`Loading credential ${opts.vc}...`)
+  log.info(`Loading credential ${opts.vc}...`)
   const cred = await client.loadCredential(opts.vc)
 
-  log.debug('Verifying credential...')
+  log.info('Verifying and decrypting credential...')
   const { verifiableCredential } = await verifyCredential(cred.payload, {
     decryptionKey: keypair.secretKey,
     audience: config.issuerDid,
   })
 
-  log.debug('Generating proof...')
+  log.info('Generating proof...')
   const { proof, publicSignals } = await generateProof({
     wasmUrl: circuit.wasmUrl,
     zkeyUrl: circuit.zkeyUrl,
     input: prepareCircuitInput(circuit.id, verifiableCredential.credentialSubject),
   })
 
-  log.debug('Done')
+  log.info('Done')
   log.info({ publicSignals })
 
-  log.debug('Minting nft...')
-  const nft = await mintProofNFT(req.circuit, proof, publicSignals)
+  const { signature } = await client.prove({
+    proofRequest: reqAddr,
+    proof: {
+      protocol: proof.protocol,
+      curve: proof.curve,
+      piA: proof.pi_a.map(String),
+      piB: proof.pi_b.map(p => p.map(String)),
+      piC: proof.pi_c.map(String),
+      publicInputs: publicSignals.map(String),
+    },
+  })
 
-  log.debug('Done')
-  log.info(`Mint: ${nft.address}`)
-  log.info(exploreAddress(nft.address))
-
-  // Mark zkp-request as proved
-  await client.prove({ zkpRequest: reqAddr, proofMint: nft.mint })
+  log.info(`Signature: ${signature}`)
 }
 
 /**

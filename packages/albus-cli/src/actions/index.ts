@@ -27,9 +27,7 @@
  */
 
 export * as admin from './admin'
-export * as prove from './prove'
-export * as verify from './verify'
 export * as identity from './identity'
 export * as test from './test'
 export * as vc from './vc'
-export * as request from './zkpRequest'
+export * as request from './request'

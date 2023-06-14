@@ -41,8 +41,8 @@ import {
 import chalk from 'chalk'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
-import { useContext } from '../../context'
-import { downloadFile } from '../../utils'
+import { useContext } from '@/context'
+import { downloadFile } from '@/utils'
 
 interface Opts {}
 

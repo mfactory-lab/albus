@@ -27,4 +27,5 @@
  */
 
 export * as circuit from './circuit'
+export * as request from './request'
 export * as sp from './sp'

@@ -26,32 +26,33 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { ZKPRequestStatus } from '@albus/sdk'
+import { ProofRequestStatus } from '@albus/sdk'
+import Table from 'cli-table3'
 import log from 'loglevel'
-import { useContext } from '../../context'
-import { exploreAddress } from '../../utils'
+import { useContext } from '@/context'
+import { exploreAddress } from '@/utils'
 
 export async function show(addr: string) {
   const { client } = useContext()
 
-  const zkpRequest = await client.loadZKPRequest(addr)
+  const proofRequest = await client.loadProofRequest(addr)
 
   log.info('--------------------------------------------------------------------------')
   log.info(`Address: ${addr}`)
-  log.info(`Service provider: ${zkpRequest.serviceProvider}`)
-  log.info(`Circuit: ${zkpRequest.circuit}`)
-  log.info(exploreAddress(zkpRequest.circuit))
-  log.info(`Owner: ${zkpRequest.owner}`)
-  log.info(exploreAddress(zkpRequest.owner))
-  log.info(`Proof: ${zkpRequest.proof}`)
-  if (zkpRequest.proof) {
-    log.info(exploreAddress(zkpRequest.proof))
-  }
-  log.info(`Created at: ${zkpRequest.createdAt}`)
-  log.info(`Expired at: ${zkpRequest.expiredAt}`)
-  log.info(`Proved at: ${zkpRequest.provedAt}`)
-  log.info(`Verification date: ${zkpRequest.verifiedAt}`)
-  log.info(`Status: ${ZKPRequestStatus[zkpRequest.status]}`)
+  log.info(`Service provider: ${proofRequest.serviceProvider}`)
+  log.info(`Circuit: ${proofRequest.circuit}`)
+  log.info(exploreAddress(proofRequest.circuit))
+  log.info(`Owner: ${proofRequest.owner}`)
+  log.info(exploreAddress(proofRequest.owner))
+  log.info('Proof', JSON.stringify(proofRequest.proof))
+  // if (zkpRequest.proof) {
+  //   log.info(exploreAddress(zkpRequest.proof))
+  // }
+  log.info(`Created at: ${proofRequest.createdAt}`)
+  log.info(`Expired at: ${proofRequest.expiredAt}`)
+  log.info(`Proved at: ${proofRequest.provedAt}`)
+  log.info(`Verification date: ${proofRequest.verifiedAt}`)
+  log.info(`Status: ${ProofRequestStatus[proofRequest.status]}`)
   log.info('--------------------------------------------------------------------------')
 }
 
@@ -64,7 +65,7 @@ interface SearchOpts {
 export async function find(opts: SearchOpts) {
   const { client } = useContext()
   const [serviceProviderAddr] = client.getServiceProviderPDA(opts.sp)
-  const [zkpRequestAddr] = client.getZKPRequestPDA(serviceProviderAddr, opts.circuit, opts.requester)
+  const [zkpRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, opts.circuit, opts.requester)
   await show(zkpRequestAddr.toString())
 }
 
@@ -77,18 +78,23 @@ interface ShowAllOpts {
 export async function showAll(opts: ShowAllOpts) {
   const { client } = useContext()
 
-  const items = await client.findZKPRequests({
+  const items = await client.findProofRequests({
     serviceProvider: opts.sp,
     circuit: opts.circuit,
     proof: opts.proof,
   })
 
-  log.info('--------------------------------------------------------------------------')
-  log.info('Address | Circuit | Service Provider | Proof | Requester')
-  log.info('--------------------------------------------------------------------------')
+  const table = new Table({
+    head: ['Address', 'Circuit', 'Service Provider', 'Proof', 'Requester'],
+  })
 
   for (const item of items) {
-    log.info(`${item.pubkey} | ${item.data.circuit} | ${item.data.serviceProvider} | ${item.data.proof} | ${item.data.owner}`)
-    log.info('--------------------------------------------------------------------------')
+    table.push([
+      String(item.pubkey),
+      String(item.data.circuit),
+      String(item.data.serviceProvider),
+      String(item.data.proof),
+      String(item.data.owner),
+    ])
   }
 }

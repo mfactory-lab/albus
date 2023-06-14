@@ -27,8 +27,8 @@
  */
 
 import log from 'loglevel'
-import { useContext } from '../../../context'
 import { show } from './show'
+import { useContext } from '@/context'
 
 interface Opts {
   code: string

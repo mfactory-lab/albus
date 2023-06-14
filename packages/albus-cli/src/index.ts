@@ -80,116 +80,100 @@ vc.command('issue')
   .action(actions.vc.issue)
 
 // ------------------------------------------
-// Proving
-// ------------------------------------------
-
-const prove = cli.command('prove')
-
-prove.command('create')
-  .description('Create new proof')
-  .requiredOption('--circuit <ADDR>', 'Circuit mint address')
-  .option('--input <PATH>', 'Input file path')
-  .action(actions.prove.create)
-
-prove.command('request')
-  .description('Create prove for ZKP Request')
-  .argument('req', 'ZKP Request address')
-  .requiredOption('--vc <ADDR>', 'VC address')
-  .option('--force', 'Override existing prove')
-  .action(actions.prove.createForRequest)
-
-// ------------------------------------------
-// Verification
-// ------------------------------------------
-
-const verify = cli.command('verify')
-
-verify.command('proof')
-  .description('Verify proof')
-  .requiredOption('--circuit <ADDR>', 'Circuit mint address')
-  .requiredOption('--proof <ADDR>', 'Proof mint address')
-  .action(actions.verify.verifyProof)
-
-verify.command('request')
-  .description('Verify ZKP Request')
-  .argument('req', 'ZKP Request address')
-  .action(actions.verify.verifyRequest)
-
-// ------------------------------------------
-// ZKP request
+// Proof Requests
 // ------------------------------------------
 
 const request = cli.command('request')
 
 request.command('create')
-  .description('Create ZKP request')
+  .description('Create proof request')
   .requiredOption('--sp <CODE>', 'Service provider`s unique code')
   .requiredOption('--circuit <ADDR>', 'Circuit`s mint')
   .option('--expires-in <SECONDS>', 'Expires in some time duration')
   .action(actions.request.create)
 
 request.command('remove')
-  .description('Remove ZKP request')
-  .argument('addr', 'ZKP Request address')
+  .description('Remove proof request')
+  .argument('addr', 'Proof Request address')
   .action(actions.request.remove)
 
 request.command('show')
-  .description('Show ZKP request`s info')
-  .argument('<ADDRESS>', 'ZKP Request address')
+  .description('Show proof request`s info')
+  .argument('<ADDRESS>', 'Proof Request address')
   .action(actions.request.show)
 
 request.command('find')
-  .description('Find ZKP Request')
+  .description('Find proof request')
   .requiredOption('--sp <CODE>', 'Service provider address')
   .requiredOption('--owner <ADDR>', 'Request creator')
   .requiredOption('--circuit <ADDR>', 'Circuit`s mint')
   .action(actions.request.find)
 
 request.command('all')
-  .description('Show all ZKP requests')
+  .description('Show all proof requests')
   .option('--sp <CODE>', 'Filter by Service provider')
   .option('--circuit <ADDR>', 'Filter by Circuit mint')
   .option('--proof <ADDR>', 'Filter by Proof mint')
   .action(actions.request.showAll)
 
+request.command('prove')
+  .description('Create a zkp proof for selected proof proof')
+  .argument('addr', 'Proof Request address')
+  .requiredOption('--vc <ADDR>', 'VC address')
+  .option('--force', 'Override existing prove')
+  .action(actions.request.proveRequest)
+
+request.command('verify')
+  .description('Verify Proof Request')
+  .argument('addr', 'Proof Request address')
+  .action(actions.request.verifyRequest)
+
 // ------------------------------------------
-// Admin
+// Admin Management
 // ------------------------------------------
 
 const admin = cli.command('admin')
 
-const circuit = admin.command('circuit')
+const adminCircuit = admin.command('circuit')
   .description('Circuit Management')
 
-circuit.command('create')
+adminCircuit.command('all', { isDefault: true })
+  .description('Show all circuits')
+  .action(actions.admin.circuit.showAll)
+
+adminCircuit.command('create')
   .description('Create new circuit NFT')
   .argument('name', 'Circuit name')
   .action(actions.admin.circuit.create)
 
-circuit.command('all')
-  .description('Show all circuits')
-  .action(actions.admin.circuit.showAll)
+const adminRequest = admin.command('request')
+  .description('Request Management')
 
-const sp = admin.command('sp')
+adminRequest.command('verify')
+  .description('Verify Proof Request')
+  .argument('addr', 'Proof Request address')
+  .action(actions.admin.request.verifyRequest)
+
+const adminSp = admin.command('sp')
   .description('Service Provider Management')
 
-sp.command('add')
+adminSp.command('add')
   .description('Add service provider')
   .requiredOption('--code <CODE>', 'Service provider`s unique code')
   .requiredOption('--name <NAME>', 'Service provider`s name')
   .action(actions.admin.sp.add)
 
-sp.command('remove')
+adminSp.command('remove')
   .description('Remove service provider')
   .argument('code', 'Service provider`s unique code')
   .action(actions.admin.sp.remove)
 
-sp.command('show')
+adminSp.command('show')
   .description('Show service provider`s info')
   .argument('addr', 'Service provider PDA`s address')
   .action(actions.admin.sp.show)
 
-sp.command('all')
+adminSp.command('all')
   .description('Show all service providers')
   .option('--authority', 'Filter by authority')
   .action(actions.admin.sp.showAll)

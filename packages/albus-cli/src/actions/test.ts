@@ -27,10 +27,10 @@
  */
 
 import { Buffer } from 'node:buffer'
-import fs from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { toMetaplexFile } from '@metaplex-foundation/js'
 import { crypto } from '@albus/core'
-import { useContext } from '../context'
+import { useContext } from '@/context'
 
 interface Opts {}
 
@@ -40,7 +40,7 @@ export async function encryption(_opts: Opts) {
   const { metaplex, keypair } = useContext()
 
   const logoUri = await metaplex.storage().upload(
-    toMetaplexFile(fs.readFileSync('./assets/logo.svg'), 'logo.svg'),
+    toMetaplexFile(readFileSync('./assets/logo.svg'), 'logo.svg'),
   )
 
   console.log(logoUri)

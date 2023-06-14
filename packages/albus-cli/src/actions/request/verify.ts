@@ -27,37 +27,17 @@
  */
 
 import log from 'loglevel'
-import { useContext } from '../../context'
+import { useContext } from '@/context'
 
-interface Opts {
-  // Proof NFT address
-  proof: string
-}
+interface Opts {}
 
 /**
- * Verify the proof
+ * Verify Proof Request
  */
-export async function verifyProof(opts: Opts) {
+export async function verifyRequest(addr: string, _opts: Opts) {
   const { client } = useContext()
 
-  const proof = await client.loadProof(opts.proof)
-  const circuit = await client.loadCircuit(proof.circuit)
-
-  log.debug('Circuit:', circuit.id)
-  log.debug('CircuitAddress:', circuit.address)
-  log.debug('VK:', circuit.vk)
-  log.debug('Proof:', proof.payload)
-  log.debug('PublicSignals:', proof.publicInput)
-
-  log.debug('Verifying proof...')
-
-  const isVerified = await client.verifyProof(proof)
-
-  if (isVerified) {
-    log.debug('Verified!')
-  } else {
-    log.debug('Rejected!')
-  }
-
-  process.exit(0)
+  log.info('Verifying proof...')
+  const isVerified = await client.verifyProofRequest(addr)
+  log.info('Status:', isVerified)
 }

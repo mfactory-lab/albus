@@ -27,7 +27,7 @@
  */
 
 import { Buffer } from 'node:buffer'
-import fs from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
@@ -48,7 +48,7 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
   const connection = new web3.Connection(endpoint, opts.commitment)
 
   const wallet = new Wallet(Keypair.fromSecretKey(Buffer.from(JSON.parse(
-    keypair.startsWith('[') && keypair.endsWith(']') ? keypair : fs.readFileSync(keypair).toString(),
+    keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
   ))))
   const provider = new AnchorProvider(connection, wallet, opts)
   const client = new AlbusClient(provider)

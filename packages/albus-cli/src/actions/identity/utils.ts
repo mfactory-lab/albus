@@ -29,7 +29,7 @@
 import type { Keypair, PublicKey } from '@solana/web3.js'
 import type { SMT } from 'circomlibjs'
 import { buildPoseidon, newMemEmptyTrie } from 'circomlibjs'
-import { crypto } from '../../../../albus-core'
+import { crypto } from '@albus/core'
 
 const { hash, edBabyJubJub } = crypto
 const { arrayToBigInt } = crypto.utils
