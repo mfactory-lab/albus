@@ -83,6 +83,32 @@ pub struct ZKPRequest {
     pub bump: u8,
 }
 
+impl ZKPRequest {
+    pub const SEED: &'static [u8] = b"zkp-request";
+
+    pub fn space() -> usize {
+        8 + 32 + 32 + 32 + (1 + 32) + 8 + 8 + 8 + 8 + 1 + 1
+    }
+}
+
+type G1Affine = Vec<String>; // [u32; 3];
+type G2Affine = Vec<Vec<String>>; // [[u32; 2]; 3];
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub enum ZKProof {
+    V1(ZKProofV1),
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct ZKProofV1 {
+    pub protocol: String,
+    pub curve: String,
+    pub pi_a: G1Affine,
+    pub pi_b: G2Affine,
+    pub pi_c: G1Affine,
+    pub public_inputs: G1Affine,
+}
+
 #[repr(u8)]
 #[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone)]
 pub enum ZKPRequestStatus {
@@ -91,12 +117,4 @@ pub enum ZKPRequestStatus {
     Proved,
     Verified,
     Rejected,
-}
-
-impl ZKPRequest {
-    pub const SEED: &'static [u8] = b"zkp-request";
-
-    pub fn space() -> usize {
-        8 + 32 + 32 + 32 + (1 + 32) + 8 + 8 + 8 + 8 + 1 + 1
-    }
 }

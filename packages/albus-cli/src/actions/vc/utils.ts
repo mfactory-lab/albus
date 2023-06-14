@@ -56,24 +56,24 @@ export function generateCredentialSubject() {
  * SumSub Fake Data
  */
 export function generateFakeSumSubData() {
-  const countryCode = faker.address.countryCode('alpha-3')
+  const countryCode = faker.location.countryCode('alpha-3')
 
   return {
-    id: faker.random.alpha(32),
+    id: faker.string.alpha(32),
     createdAt: faker.date.past(),
     key: 'VVGPPFGUNZZBHF',
     clientId: 'jfactory.ch_58404',
-    inspectionId: faker.random.alpha(32),
-    externalUserId: `dash-${faker.datatype.uuid()}`,
+    inspectionId: faker.string.alpha(32),
+    externalUserId: `dash-${faker.string.uuid()}`,
     info: {
-      firstName: faker.name.firstName(),
-      firstNameEn: faker.name.firstName(),
-      lastName: faker.name.lastName(),
-      lastNameEn: faker.name.lastName(),
+      firstName: faker.person.firstName(),
+      firstNameEn: faker.person.firstName(),
+      lastName: faker.person.lastName(),
+      lastNameEn: faker.person.lastName(),
       dob: faker.date.birthdate().toISOString().substring(0, 10),
-      gender: faker.name.sex() === 'male' ? 'M' : 'F',
-      placeOfBirth: faker.address.city(),
-      placeOfBirthEn: faker.address.city(),
+      gender: faker.person.sex() === 'male' ? 'M' : 'F',
+      placeOfBirth: faker.location.city(),
+      placeOfBirthEn: faker.location.city(),
       country: countryCode,
       nationality: countryCode,
       countryOfBirth: countryCode,
