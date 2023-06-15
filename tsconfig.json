@@ -13,14 +13,11 @@
     "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "inlineSourceMap": true,
     "typeRoots": [
       "./node_modules/@types"
     ],
     "types": [
-      "node",
-      "vitest",
-      "vite/client"
+      "node"
     ],
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true

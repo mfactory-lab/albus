@@ -1,17 +1,27 @@
+node_modules
+dist
+
+# Logs
+*.log
+
+# Local env
+.env.local
+
+# Temp directories
+.temp
+.tmp
+.cache
+
 .anchor
 .DS_Store
 target
 **/*.rs.bk
-**/node_modules
 test-ledger
 .idea
 .eslintcache
-/tmp
-/.secrets/
+/.secrets
 
 /circuits/*.ptau
 /circuits/*.r1cs
 /circuits/*.wasm
 /circuits/*.sym
-
-*.local

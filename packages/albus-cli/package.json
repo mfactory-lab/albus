@@ -14,8 +14,8 @@
     "directory": "packages/albus-cli"
   },
   "dependencies": {
-    "@albus/core": "workspace:",
-    "@albus/sdk": "workspace:",
+    "@albus/core": "workspace:*",
+    "@albus/sdk": "workspace:*",
     "@faker-js/faker": "^8.0.2",
     "@metaplex-foundation/js": "^0.19.4",
     "@coral-xyz/anchor": "^0.28.0",

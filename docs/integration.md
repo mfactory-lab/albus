@@ -78,10 +78,10 @@ const full = false
 await client.checkCompliance({ serviceCode: '...', circuit, user, full })
 ```
 
-Verify ZKP request by address
+Verify proof request by address
 
 ```typescript
-await client.verifyZKPRequest("<ZKP_REQUEST_ADDRESS>")
+await client.verifyProofRequest("<PROOF_REQUEST_ADDRESS>")
 ```
 
 Verify ZKP request for the specified service code and circuit.
@@ -90,27 +90,17 @@ Verify ZKP request for the specified service code and circuit.
 await client.verifySpecific("<SERVICE_CODE>", "<CIRCUIT_ADDRESS>", "<OPTIONAL_USER_ADDRESS>")
 ```
 
-Verify proof by specified address
+Prove the request that was created earlier
 
 ```typescript
-await client.verifyProof("<ADDRESS>")
-```
-
-Prove the ZKP request that was created earlier
-
-```typescript
-// ZKP Reqeust address
-const zkpRequest = new Pubkey("...")
-/// Proof NFT address
-const proofMint = new Pubkey("...")
-// Prove ZKP request
-await client.prove({ zkpRequest, proofMint })
+// Prove the request
+await client.prove({ proofRequest: "...", proof: {} })
 ```
 
 Create new ZKP request
 
 ```typescript
-const { signature } = await client.createZKPRequest({
+const { address, signature } = await client.createProofRequest({
   serviceCode: "<SERVICE_CODE>",
   circuit: "<CIRCUIT_ADDRESS>",
   // (optional) expiration in seconds
@@ -127,17 +117,17 @@ const service = client.getServiceProviderPDA('<SERVICE_CODE>')
 const circuit = new Pubkey("...")
 // User wallet
 const user = new Pubkey("...")
-// Find ZKP reqeust address
-const zkpRequestAddr = client.getZKPRequestPDA(service, circuit, user)
+// Find proof reqeust address
+const proofRequestAddr = client.getProofRequestPDA(service, circuit, user)
 ```
 
 Load ZKP request by address
 
 ```typescript
-const zkpRequest = await client.loadZKPRequest("<ZKP_REQUEST_ADDRESS>")
+const proofRequest = await client.loadProofRequest("<PROOF_REQUEST_ADDRESS>")
 ```
 
-Search ZKP requests for user
+Search proof requests for user
 
 ```typescript
 const user = "<USER_ADDRESS>"
@@ -145,12 +135,12 @@ const user = "<USER_ADDRESS>"
 const circuit = undefined
 // (optional) filter by service
 const serviceProvider = undefined
-// Find all ZKP requests
-const data = await client.searchZKPRequests({ user, circuit })
+// Find proof requests with specified filters
+const data = await client.findProofRequests({ user, circuit })
 ```
 
-Delete ZKP request
+Delete proof request
 
 ```typescript
-const { signature } = await client.deleteZKPRequest({ zkpRequest: "<ZKP_REQUEST_ADDRESS>" })
+const { signature } = await client.deleteProofRequest({ proofRequest: "<PROOF_REQUEST_ADDRESS>" })
 ```
