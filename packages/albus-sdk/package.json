@@ -1,10 +1,24 @@
 {
   "name": "@albus/sdk",
   "version": "0.0.4",
+  "description": "Albus Protocol SDK",
   "sideEffects": false,
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "unbuild",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita"
   },
   "repository": {
@@ -13,7 +27,7 @@
     "directory": "packages/albus-sdk"
   },
   "dependencies": {
-    "@albus/core": "workspace:",
+    "@albus/core": "workspace:*",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
@@ -21,5 +35,8 @@
   },
   "devDependencies": {
     "@metaplex-foundation/solita": "^0.19.4"
+  },
+  "peerDependencies": {
+    "snarkjs": "*"
   }
 }

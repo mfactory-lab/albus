@@ -184,13 +184,13 @@ export class AlbusClient {
    * @throws An error with a message indicating why the request is invalid.
    */
   validateProofRequest(req: ProofRequest) {
-    if (req.expiredAt > 0 && req.expiredAt < Date.now()) {
+    if (Number(req.expiredAt) > 0 && Number(req.expiredAt) < Date.now()) {
       throw new Error('Proof request is expired')
     }
     if (!req.proof) {
       throw new Error('Proof request is not proved yet')
     }
-    if (req.verifiedAt <= 0) {
+    if (Number(req.verifiedAt) <= 0) {
       throw new Error('Proof request is not verified')
     }
   }
