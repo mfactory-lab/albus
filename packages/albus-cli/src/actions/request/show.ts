@@ -85,7 +85,7 @@ export async function showAll(opts: ShowAllOpts) {
   })
 
   const table = new Table({
-    head: ['Address', 'Circuit', 'Service Provider', 'Proof', 'Requester'],
+    head: ['Address', 'Circuit', 'Service Provider', 'Requester', 'Proof'],
   })
 
   for (const item of items) {
@@ -93,8 +93,8 @@ export async function showAll(opts: ShowAllOpts) {
       String(item.pubkey),
       String(item.data.circuit),
       String(item.data.serviceProvider),
-      String(item.data.proof),
       String(item.data.owner),
+      String(item.data.proof),
     ])
   }
 }

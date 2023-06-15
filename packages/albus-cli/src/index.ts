@@ -149,6 +149,13 @@ adminCircuit.command('create')
 const adminRequest = admin.command('request')
   .description('Request Management')
 
+adminRequest.command('find')
+  .description('Find user proof requests')
+  .argument('userAddr', 'User address')
+  .option('--sp <SP_CODE>', 'Service provider code')
+  .option('--circuit <CIRCUIT_ADDR>', 'Circuit address')
+  .action(actions.admin.request.showAll)
+
 adminRequest.command('verify')
   .description('Verify Proof Request')
   .argument('addr', 'Proof Request address')

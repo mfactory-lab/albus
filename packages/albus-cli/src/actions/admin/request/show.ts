@@ -26,5 +26,36 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './show'
-export * from './verify'
+import { PublicKey } from '@solana/web3.js'
+import Table from 'cli-table3'
+import { useContext } from '@/context'
+
+interface Opts {
+  sp?: string
+  circuit?: string
+}
+
+export async function showAll(userAddr: string, opts: Opts) {
+  const { client } = useContext()
+
+  const items = await client.findProofRequests({
+    user: new PublicKey(userAddr),
+    serviceProvider: opts.sp,
+    circuit: opts.circuit,
+  })
+
+  const table = new Table({
+    head: ['Address', 'Circuit', 'Service Provider', 'Requester', 'Proof'],
+  })
+
+  for (const item of items) {
+    table.push([
+      String(item.pubkey),
+      String(item.data.circuit),
+      String(item.data.serviceProvider),
+      String(item.data.owner),
+      String(item.data.proof),
+    ])
+  }
+  process.exit(0)
+}
