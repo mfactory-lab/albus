@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import fs from 'node:fs'
+import { readFileSync } from 'node:fs'
 
 /**
  * Read circom `sym` file
@@ -37,7 +37,7 @@ export function readSymbols(path: string) {
   const symbols: any = {}
   const signals: any = {}
 
-  const symsStr = fs.readFileSync(path).toString()
+  const symsStr = readFileSync(path).toString()
   const lines = symsStr.split('\n')
   for (let i = 0; i < lines.length; i++) {
     const arr = lines[i].split(',')

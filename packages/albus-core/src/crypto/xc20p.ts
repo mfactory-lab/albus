@@ -32,8 +32,8 @@ import { generateKeyPair, scalarMultBase, sharedKey } from '@stablelib/x25519'
 import { convertPublicKeyToX25519, convertSecretKeyToX25519 } from '@stablelib/ed25519'
 import { NONCE_LENGTH, TAG_LENGTH, XChaCha20Poly1305 } from '@stablelib/xchacha20poly1305'
 import * as u8a from 'uint8arrays'
-import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
+import type { PublicKey } from '@solana/web3.js'
 import type { KeyPair } from '@stablelib/x25519'
 import {
   base58ToBytes,
@@ -117,7 +117,8 @@ function convertSecretKeyToX25519Keypair(privateKey: PrivateKey): KeyPair {
 }
 
 /**
- * Encrypt a message with a `PublicKey`
+ * Encrypt a message with a {@link pubKey}
+ * If {@link otherPk} is not set, ephemeral key will be used
  */
 export async function encrypt(message: string, pubKey: PublicKey, otherPk?: PrivateKey): Promise<string> {
   const epk = otherPk ? convertSecretKeyToX25519Keypair(otherPk) : generateKeyPair()
@@ -140,7 +141,7 @@ export async function encrypt(message: string, pubKey: PublicKey, otherPk?: Priv
 }
 
 /**
- * Decrypt an encrypted message with the key that was used to encrypt it
+ * Decrypt an encrypted message with the {@link privateKey} that was used to encrypt it
  */
 export async function decrypt(encryptedMessage: string, privateKey: PrivateKey): Promise<string> {
   const encMessage = base64ToBytes(encryptedMessage)
