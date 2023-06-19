@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { readFileSync } from 'node:fs'
 import type { Proof } from '@albus/sdk'
 import type { Metaplex } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
@@ -64,6 +65,10 @@ export async function airdrop(addr: PublicKeyInitData, amount = 10) {
 
 export function assertErrorCode(error: { logs?: string[] }, code: string) {
   assert.ok(String((error?.logs ?? []).join('')).includes(`Error Code: ${code}`))
+}
+
+export function loadFixture(name: string) {
+  return readFileSync(`./fixtures/${name}`)
 }
 
 export function getProofMock(): Proof {

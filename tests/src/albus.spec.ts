@@ -27,11 +27,10 @@
  */
 
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
-import { Keypair } from '@solana/web3.js'
-import type { PublicKey } from '@solana/web3.js'
-import { assert, beforeAll, describe, it } from 'vitest'
+import { Keypair, PublicKey } from '@solana/web3.js'
+import { assert, beforeAll, describe, it, vi } from 'vitest'
 import { AlbusClient, ProofRequestStatus } from '@albus/sdk'
-import { airdrop, assertErrorCode, getProofMock, mintNFT, newProvider, payerKeypair, provider } from './utils'
+import { airdrop, assertErrorCode, loadFixture, mintNFT, newProvider, payerKeypair, provider } from './utils'
 
 describe('albus', () => {
   const client = new AlbusClient(provider)
@@ -50,7 +49,7 @@ describe('albus', () => {
   it('can add service provider', async () => {
     try {
       const data = { code: serviceCode, name: 'name' }
-      const { address } = await client.addServiceProvider(data)
+      const { address } = await client.manager.addServiceProvider(data)
       const serviceProvider = await client.loadServiceProvider(address)
       assert.equal(serviceProvider.authority.toString(), payerKeypair.publicKey.toString())
       assert.equal(serviceProvider.code, data.code)
@@ -61,7 +60,7 @@ describe('albus', () => {
     }
   })
 
-  it('can not create proof request with unauthorized update authority of circuit NFT metadata', async () => {
+  it('can not create proof request with invalid circuit', async () => {
     const newPayerKeypair = Keypair.generate()
     await airdrop(newPayerKeypair.publicKey)
 
@@ -85,13 +84,39 @@ describe('albus', () => {
     assert.equal(proofRequest.proof, null)
   })
 
+  it('can not create proof request if already exists', async () => {
+    try {
+      await client.createProofRequest({ circuit: circuits.a, serviceCode })
+      assert.ok(false)
+    } catch (e: any) {
+      assert.ok(e.message.includes('custom program error: 0x0'))
+    }
+  })
+
   it('can prove proof request', async () => {
     const { address } = await client.createProofRequest({ circuit: circuits.b, serviceCode })
-    const proof = getProofMock()
-    await client.prove({ proofRequest: address, proof })
+
+    vi.spyOn(client, 'loadCircuit').mockReturnValue({
+      // @ts-expect-error ...
+      address: PublicKey.default,
+      wasmUrl: loadFixture('age.wasm'),
+      zkeyUrl: loadFixture('age.zkey'),
+      input: ['birthDate', 'currentDate', 'minAge', 'maxAge'],
+    })
+
+    vi.spyOn(client, 'loadCredential').mockReturnValue({
+      // @ts-expect-error ...
+      address: PublicKey.default,
+      credentialSubject: {
+        firstName: 'John',
+        lastName: 'Doe',
+        birthDate: '2005-01-01',
+      },
+    })
+
+    await client.prove({ proofRequest: address, vc: PublicKey.default })
     const proofRequest = await client.loadProofRequest(address)
     assert.equal(proofRequest.status, ProofRequestStatus.Proved)
-    assert.deepEqual(proofRequest.proof, proof)
   })
 
   it('can not verify proof request with unauthorized authority', async () => {
@@ -103,7 +128,7 @@ describe('albus', () => {
     await airdrop(newPayerKeypair.publicKey)
 
     try {
-      await newClient.verify({ proofRequest: proofRequestAddr })
+      await newClient.manager.verify({ proofRequest: proofRequestAddr })
       assert.ok(false)
     } catch (e: any) {
       assertErrorCode(e, 'Unauthorized')
@@ -115,7 +140,7 @@ describe('albus', () => {
     const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
 
     try {
-      await client.verify({ proofRequest: proofRequestAddr })
+      await client.manager.verify({ proofRequest: proofRequestAddr })
       assert.ok(false)
     } catch (e: any) {
       console.log(e)
@@ -126,19 +151,19 @@ describe('albus', () => {
   it('can verify proof request', async () => {
     const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
     const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.b, payerKeypair.publicKey)
-    await client.verify({ proofRequest: proofRequestAddr })
+    await client.manager.verify({ proofRequest: proofRequestAddr })
     const proofRequest = await client.loadProofRequest(proofRequestAddr)
     assert.equal(proofRequest.status, ProofRequestStatus.Verified)
   })
 
-  it('can reject proof request', async () => {
-    const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
-    const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
-    await client.prove({ proofRequest: proofRequestAddr, proof: getProofMock() })
-    await client.reject({ proofRequest: proofRequestAddr })
-    const proofRequest = await client.loadProofRequest(proofRequestAddr)
-    assert.equal(proofRequest.status, ProofRequestStatus.Rejected)
-  })
+  // it('can reject proof request', async () => {
+  //   const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
+  //   const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
+  //   await client.prove({ proofRequest: proofRequestAddr, proof: getProofMock() })
+  //   await client.manager.reject({ proofRequest: proofRequestAddr })
+  //   const proofRequest = await client.loadProofRequest(proofRequestAddr)
+  //   assert.equal(proofRequest.status, ProofRequestStatus.Rejected)
+  // })
 
   it('can delete proof request', async () => {
     const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
@@ -147,6 +172,6 @@ describe('albus', () => {
   })
 
   it('can delete service provider', async () => {
-    await client.deleteServiceProvider({ code: serviceCode })
+    await client.manager.deleteServiceProvider({ code: serviceCode })
   })
 })

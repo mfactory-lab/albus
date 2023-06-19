@@ -1,7 +1,8 @@
 {
   "name": "@albus/tests",
   "scripts": {
-    "test": "vitest --no-threads --ui",
+    "test": "vitest --no-threads",
+    "test:ui": "vitest --no-threads --ui",
     "test:debug": "DEBUG=vite-node:* vitest --no-threads"
   },
   "devDependencies": {
