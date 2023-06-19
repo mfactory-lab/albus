@@ -1,14 +1,16 @@
 {
   "name": "@albus/core",
-  "version": "0.0.2",
-  "type": "module",
+  "version": "0.0.3",
   "sideEffects": false,
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "main": "./src/index",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-core"
+  },
+  "scripts": {
+    "build": "unbuild",
+    "_prepare": "pnpm run build"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-token-metadata": "^2.12.0",
