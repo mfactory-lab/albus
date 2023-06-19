@@ -80,7 +80,7 @@ pub struct CreateProofRequest<'info> {
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 
     #[account(
-        init_if_needed,
+        init,
         seeds = [
             ProofRequest::SEED,
             service_provider.key().as_ref(),
@@ -99,7 +99,7 @@ pub struct CreateProofRequest<'info> {
     )]
     pub circuit_mint: Box<Account<'info, Mint>>,
 
-    /// CHECK: checked in metaplex
+    /// CHECK: checked internal
     pub circuit_metadata: UncheckedAccount<'info>,
 
     #[account(mut)]

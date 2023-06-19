@@ -47,6 +47,9 @@ pub struct ServiceProvider {
     // pub status: u8,
     /// Bump seed used to derive program-derived account seeds
     pub bump: u8,
+    // /// Predefined input for circuits
+    // /// {"age": {"minAge": 18, "maxAge": 100"}}
+    // pub rules: HashMap<Pubkey, HashMap<String, Vec<u8>>>,
 }
 
 impl ServiceProvider {

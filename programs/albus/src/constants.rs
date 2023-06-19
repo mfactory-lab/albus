@@ -27,6 +27,7 @@
  */
 
 pub const AUTHORIZED_AUTHORITY: &[&str] = &[
+    // test payer
     "4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i",
     "5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH",
 ];
