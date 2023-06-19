@@ -38,7 +38,7 @@ interface Opts {
 export async function add(opts: Opts) {
   const { client } = useContext()
 
-  const { signature } = await client.addServiceProvider({
+  const { signature } = await client.manager.addServiceProvider({
     code: opts.code,
     name: opts.name,
   })

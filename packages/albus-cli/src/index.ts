@@ -29,12 +29,12 @@
 import type { Command } from 'commander'
 import { program as cli } from 'commander'
 import log from 'loglevel'
-import { initContext } from './context'
-import * as actions from './actions'
+import { initContext } from '@/context'
+import * as actions from '@/actions'
 
 const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
-const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet' // 'https://devnet.rpcpool.com'
+const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet'
 const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
 
 cli
@@ -51,6 +51,9 @@ cli
     log.info(`# Version: ${VERSION}`)
     log.info(`# Keypair: ${provider.wallet.publicKey}`)
     log.info(`# Cluster: ${cluster}\n`)
+  })
+  .hook('postAction', (_command: Command) => {
+    process.exit()
   })
 
 // ------------------------------------------
@@ -87,13 +90,13 @@ const request = cli.command('request')
 
 request.command('create')
   .description('Create proof request')
-  .requiredOption('--sp <CODE>', 'Service provider`s unique code')
+  .requiredOption('--service <CODE>', 'Service provider`s unique code')
   .requiredOption('--circuit <ADDR>', 'Circuit`s mint')
   .option('--expires-in <SECONDS>', 'Expires in some time duration')
   .action(actions.request.create)
 
-request.command('remove')
-  .description('Remove proof request')
+request.command('delete')
+  .description('Delete proof request')
   .argument('addr', 'Proof Request address')
   .action(actions.request.remove)
 
@@ -104,16 +107,16 @@ request.command('show')
 
 request.command('find')
   .description('Find proof request')
-  .requiredOption('--sp <CODE>', 'Service provider address')
+  .requiredOption('--service <CODE>', 'Service provider code')
   .requiredOption('--owner <ADDR>', 'Request creator')
   .requiredOption('--circuit <ADDR>', 'Circuit`s mint')
   .action(actions.request.find)
 
 request.command('all')
   .description('Show all proof requests')
-  .option('--sp <CODE>', 'Filter by Service provider')
+  .option('--service <CODE>', 'Filter by Service provider')
   .option('--circuit <ADDR>', 'Filter by Circuit mint')
-  .option('--proof <ADDR>', 'Filter by Proof mint')
+  .option('--status <STATUS>', 'Filter by Status')
   .action(actions.request.showAll)
 
 request.command('prove')
@@ -146,6 +149,11 @@ adminCircuit.command('create')
   .argument('name', 'Circuit name')
   .action(actions.admin.circuit.create)
 
+adminCircuit.command('delete')
+  .description('Delete circuit')
+  .argument('addr', 'Circuit address')
+  .action(actions.admin.circuit.remove)
+
 const adminRequest = admin.command('request')
   .description('Request Management')
 
@@ -170,8 +178,8 @@ adminSp.command('add')
   .requiredOption('--name <NAME>', 'Service provider`s name')
   .action(actions.admin.sp.add)
 
-adminSp.command('remove')
-  .description('Remove service provider')
+adminSp.command('delete')
+  .description('Delete service provider')
   .argument('code', 'Service provider`s unique code')
   .action(actions.admin.sp.remove)
 

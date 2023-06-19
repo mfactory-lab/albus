@@ -26,11 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import type { ServiceProvider } from '@albus/sdk'
 import { ProofRequestStatus } from '@albus/sdk'
 import Table from 'cli-table3'
 import log from 'loglevel'
-import { useContext } from '@/context'
 import { exploreAddress } from '@/utils'
+import { useContext } from '@/context'
 
 export async function show(addr: string) {
   const { client } = useContext()
@@ -57,44 +58,52 @@ export async function show(addr: string) {
 }
 
 interface SearchOpts {
-  sp: string
+  service: string
   circuit: string
   requester: string
 }
 
 export async function find(opts: SearchOpts) {
   const { client } = useContext()
-  const [serviceProviderAddr] = client.getServiceProviderPDA(opts.sp)
+  const [serviceProviderAddr] = client.getServiceProviderPDA(opts.service)
   const [zkpRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, opts.circuit, opts.requester)
   await show(zkpRequestAddr.toString())
 }
 
 interface ShowAllOpts {
-  sp?: string
+  service?: string
   circuit?: string
-  proof?: string
+  status?: string
 }
 
 export async function showAll(opts: ShowAllOpts) {
   const { client } = useContext()
 
+  const services = (await client.findServiceProviders())
+    .reduce((a, { pubkey, data }) => {
+      a.set(pubkey.toString(), data)
+      return a
+    }, new Map<string, ServiceProvider>())
+
   const items = await client.findProofRequests({
-    serviceProvider: opts.sp,
+    serviceProvider: opts.service,
     circuit: opts.circuit,
-    proof: opts.proof,
+    status: opts.status ? ProofRequestStatus[opts.status] : undefined,
   })
 
   const table = new Table({
-    head: ['Address', 'Circuit', 'Service Provider', 'Requester', 'Proof'],
+    head: ['Address', 'Status', 'Service Provider', 'Circuit'],
   })
 
   for (const item of items) {
     table.push([
       String(item.pubkey),
+      String(ProofRequestStatus[item.data.status]),
+      String(services.get(item.data.serviceProvider.toString())?.code),
       String(item.data.circuit),
-      String(item.data.serviceProvider),
-      String(item.data.owner),
-      String(item.data.proof),
+      // String(item.data.proof),
     ])
   }
+
+  console.log(table.toString())
 }

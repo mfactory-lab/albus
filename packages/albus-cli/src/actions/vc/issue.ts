@@ -28,9 +28,9 @@
 
 import { vc } from '@albus/core'
 import log from 'loglevel'
-import { useContext } from '../../context'
-import { exploreAddress } from '../../utils'
 import { generateCredentialSubject, mintVerifiableCredentialNFT } from './utils'
+import { useContext } from '@/context'
+import { exploreAddress } from '@/utils'
 
 interface Opts {
   // provider: string
@@ -54,7 +54,10 @@ export async function issue(opts: Opts) {
   })
 
   // Generate new VC-NFT
-  const nft = await mintVerifiableCredentialNFT(res)
+  const nft = await mintVerifiableCredentialNFT({
+    credentialRoot: res.credentialRoot,
+    vc: res.payload,
+  })
 
   log.info('Done')
   log.info(`Mint: ${nft.address}`)

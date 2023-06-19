@@ -28,19 +28,27 @@
 
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import { exploreTransaction } from '@/utils'
 import { useContext } from '@/context'
 
-interface Opts {}
+export async function remove(addr: string) {
+  const { metaplex, keypair } = useContext()
 
-export async function remove(addr: string, _opts: Opts) {
-  const { client } = useContext()
+  // const updateAuthority = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
 
-  const { signature } = await client.deleteProofRequest({
-    proofRequest: new PublicKey(addr),
+  const mintAddress = new PublicKey(addr)
+
+  const ownerTokenAccount = metaplex.tokens().pdas().associatedTokenAccount({
+    mint: mintAddress,
+    owner: keypair.publicKey,
   })
 
-  log.info(`Signature: ${signature}`)
-  log.info(exploreTransaction(signature))
-  log.info('OK')
+  const res = await metaplex
+    .nfts()
+    .delete({
+      mintAddress,
+      // authority: updateAuthority,
+      ownerTokenAccount,
+    })
+
+  log.info(`Signature: ${res.response.signature}`)
 }

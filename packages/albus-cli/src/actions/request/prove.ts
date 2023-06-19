@@ -26,13 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import * as albus from '@albus/core'
 import { useContext } from '@/context'
-
-const { generateProof } = albus.zkp
-const { verifyCredential } = albus.vc
 
 interface Opts {
   // Verifiable Credential Address
@@ -45,79 +40,14 @@ interface Opts {
  * Create a proof for Proof Request with {@link addr}
  */
 export async function proveRequest(addr: string, opts: Opts) {
-  const { keypair, client, config } = useContext()
-
-  const reqAddr = new PublicKey(addr)
-  const req = await client.loadProofRequest(reqAddr)
-
-  if (req.proof && opts.force !== true) {
-    throw new Error('Proof already exists')
-  }
-
-  log.info('Loading circuit...')
-  const circuit = await client.loadCircuit(req.circuit)
-
-  log.info(`Loading credential ${opts.vc}...`)
-  const cred = await client.loadCredential(opts.vc)
-
-  log.info('Verifying and decrypting credential...')
-  const { verifiableCredential } = await verifyCredential(cred.payload, {
-    decryptionKey: keypair.secretKey,
-    audience: config.issuerDid,
-  })
-
-  log.info('Generating proof...')
-  const { proof, publicSignals } = await generateProof({
-    wasmUrl: circuit.wasmUrl,
-    zkeyUrl: circuit.zkeyUrl,
-    input: prepareCircuitInput(circuit.id, verifiableCredential.credentialSubject),
-  })
-
-  log.info('Done')
-  log.info({ publicSignals })
+  const { client, keypair } = useContext()
 
   const { signature } = await client.prove({
-    proofRequest: reqAddr,
-    proof: {
-      protocol: proof.protocol,
-      curve: proof.curve,
-      piA: proof.pi_a.map(String),
-      piB: proof.pi_b.map(p => p.map(String)),
-      piC: proof.pi_c.map(String),
-      publicInputs: publicSignals.map(String),
-    },
+    proofRequest: addr,
+    vc: opts.vc,
+    decryptionKey: keypair.secretKey,
+    force: opts.force,
   })
 
   log.info(`Signature: ${signature}`)
-}
-
-/**
- * Generate input signals for selected circuit
- * TODO: refactory
- */
-function prepareCircuitInput(circuitId: string, payload: Record<string, any>): Record<string, any> {
-  switch (circuitId) {
-    case 'age': {
-      const birthDate = String(payload.birthDate).split('-')
-      if (birthDate.length !== 3) {
-        throw new Error('Invalid `birthDate` attribute')
-      }
-      const date = new Date()
-      return {
-        birthDate,
-        currentDate: [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()],
-        minAge: 18,
-        maxAge: 120,
-      }
-    }
-    case 'europe':
-      if (payload.country) {
-        throw new Error('Invalid `country` attribute')
-      }
-      // TODO: convert `payload.country` to country number code
-      return {
-        country: 123,
-      }
-  }
-  throw new Error(`Invalid circuit ${circuitId}`)
 }

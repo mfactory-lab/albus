@@ -29,7 +29,7 @@
 import { LAMPORTS_PER_SOL, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import type { Cluster, PublicKeyInitData, Transaction } from '@solana/web3.js'
 import * as anchor from '@coral-xyz/anchor'
-import { useContext } from '../context'
+import { useContext } from '@/context'
 
 export function clusterUrl(c: Cluster) {
   switch (c) {
@@ -42,7 +42,15 @@ export function clusterUrl(c: Cluster) {
 }
 
 function exploreLink(id: string, opts: { type: 'tx' | 'address'; cluster?: Cluster }) {
-  return `https://explorer.solana.com/${opts.type}/${id}?cluster=${opts.cluster ?? 'mainnet-beta'}`
+  let cluster: Cluster = opts.cluster ?? 'mainnet-beta'
+  if (cluster.startsWith('http')) {
+    if (cluster.includes('devnet')) {
+      cluster = 'devnet'
+    } else if (cluster.includes('testnet')) {
+      cluster = 'testnet'
+    }
+  }
+  return `https://explorer.solana.com/${opts.type}/${id}?cluster=${cluster}`
 }
 
 export function exploreAddress(addr: PublicKeyInitData) {
@@ -81,11 +89,11 @@ export function lamportsToSol(lamports: number | anchor.BN): number {
   const lamportsString = absLamports.toString(10).padStart(10, '0')
   const splitIndex = lamportsString.length - 9
   const solString = `${lamportsString.slice(0, splitIndex)}.${lamportsString.slice(splitIndex)}`
-  return signMultiplier * parseFloat(solString)
+  return signMultiplier * Number.parseFloat(solString)
 }
 
 export function solToLamports(amount: number): number {
-  if (isNaN(amount)) {
+  if (Number.isNaN(amount)) {
     return Number(0)
   }
   return new anchor.BN(amount.toFixed(9).replace('.', '')).toNumber()

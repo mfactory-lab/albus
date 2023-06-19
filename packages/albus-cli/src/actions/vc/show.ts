@@ -31,7 +31,7 @@ import type { JsonMetadata, Metadata } from '@metaplex-foundation/js'
 import { MetadataV1GpaBuilder, TokenGpaBuilder, toMetadata, toMetadataAccount } from '@metaplex-foundation/js'
 import type { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import { useContext } from '../../context'
+import { useContext } from '@/context'
 
 export async function showAll() {
   const { metaplex, issuerKeypair, config } = useContext()

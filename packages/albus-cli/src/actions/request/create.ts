@@ -34,7 +34,7 @@ import { exploreTransaction } from '@/utils'
 
 interface Opts {
   // Service provider code
-  sp: string
+  service: string
   // Circuit mint address
   circuit: string
   // Expires in seconds
@@ -46,16 +46,16 @@ export async function create(opts: Opts) {
 
   try {
     const { signature } = await client.createProofRequest({
-      serviceCode: opts.sp,
+      serviceCode: opts.service,
       circuit: new PublicKey(opts.circuit),
-      // expiresIn: opts.expiresIn,
-    })
+      expiresIn: opts.expiresIn,
+    }, { commitment: 'confirmed' })
 
     log.info(`Signature: ${signature}`)
     log.info(exploreTransaction(signature))
 
     await find({
-      sp: opts.sp,
+      service: opts.service,
       circuit: opts.circuit,
       requester: provider.wallet.publicKey.toString(),
     })

@@ -28,16 +28,7 @@
 
 import fs from 'node:fs'
 import { Keypair } from '@solana/web3.js'
-import type {
-  JsonMetadata,
-  Metadata,
-} from '@metaplex-foundation/js'
-import {
-  MetadataV1GpaBuilder,
-  toBigNumber,
-  toMetadata, toMetadataAccount,
-  toMetaplexFile,
-} from '@metaplex-foundation/js'
+import { toBigNumber, toMetaplexFile } from '@metaplex-foundation/js'
 import chalk from 'chalk'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
@@ -45,47 +36,6 @@ import { useContext } from '@/context'
 import { downloadFile } from '@/utils'
 
 interface Opts {}
-
-export async function showAll() {
-  const { metaplex, config } = useContext()
-
-  const albusKeypair = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
-
-  const gpaBuilder = new MetadataV1GpaBuilder(metaplex)
-
-  log.info('Loading all circuits...')
-
-  const accounts = await gpaBuilder
-    .whereSymbol(`${config.nftSymbol}-C`)
-    .whereUpdateAuthority(albusKeypair.publicKey)
-    .get()
-
-  const metadataAccounts = accounts
-    .map<Metadata | null>((account) => {
-      if (account == null) {
-        return null
-      }
-      try {
-        return toMetadata(toMetadataAccount(account))
-      } catch (error) {
-        return null
-      }
-    })
-    .filter((nft): nft is Metadata => nft !== null)
-
-  log.debug('Circuits...')
-
-  log.info('--------------------------------------------------------------------------')
-
-  for (const metadata of metadataAccounts) {
-    const json = await metaplex.storage().downloadJson<JsonMetadata>(metadata.uri)
-
-    log.info('MintAddress:', metadata.mintAddress.toString())
-    log.info('Metadata', json)
-
-    log.info('--------------------------------------------------------------------------')
-  }
-}
 
 /**
  * Generate new circuit NFT
@@ -100,6 +50,7 @@ export async function create(circuitId: string, _opts: Opts) {
   }
 
   const r1csInfo = await snarkjs.r1cs.info(`${config.circuitPath}/${circuitId}.r1cs`)
+
   const power = Math.ceil(Math.log2(r1csInfo.nVars)).toString().padStart(2, '0')
 
   // Download PowersOfTau from Hermez
@@ -140,8 +91,19 @@ export async function create(circuitId: string, _opts: Opts) {
   log.info('Done')
   log.info(`Uri: ${wasmUrl}`)
 
-  // Mint new Circuit NFT
-  await mintNft({ name: 'ALBUS Circuit', code: circuitId, vk, zkeyUrl, wasmUrl })
+  let inputFields: string[] = []
+
+  // TODO: parse from circom or wasm file?
+  switch (circuitId) {
+    case 'age':
+      inputFields = ['birthDate', 'currentDate', 'minAge', 'maxAge']
+      break
+    case 'europe':
+      inputFields = ['country']
+      break
+  }
+
+  await mintNft({ name: 'ALBUS Circuit', code: circuitId, vk, zkeyUrl, wasmUrl, inputFields })
 
   process.exit(0)
 }
@@ -151,6 +113,7 @@ interface MintProps {
   name: string
   zkeyUrl: string
   wasmUrl: string
+  inputFields: string[]
   vk: snarkjs.VK
 }
 
@@ -169,12 +132,14 @@ async function mintNft(props: MintProps) {
       name: props.name,
       image: config.logoUrl,
       external_url: config.nftExternalUrl,
-      circuit_id: props.code,
+      code: props.code,
+      input: props.inputFields,
       wasm_url: props.wasmUrl,
       zkey_url: props.zkeyUrl,
       vk: props.vk,
       attributes: [
         { trait_type: 'code', value: props.code },
+        { trait_type: 'input', value: props.inputFields.join(', ') },
       ],
     })
   log.info('Done')
@@ -191,7 +156,8 @@ async function mintNft(props: MintProps) {
       creators: config.nftCreators,
       isMutable: true,
       updateAuthority,
-      maxSupply: toBigNumber(1),
+      tokenOwner: updateAuthority.publicKey,
+      maxSupply: toBigNumber(0),
     })
 
   log.info('Done')

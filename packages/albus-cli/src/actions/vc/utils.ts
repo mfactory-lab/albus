@@ -30,7 +30,7 @@ import { faker } from '@faker-js/faker'
 import { toBigNumber } from '@metaplex-foundation/js'
 import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
-import { useContext } from '../../context'
+import { useContext } from '@/context'
 
 /**
  * Generates a credential subject with fake data.
@@ -130,7 +130,7 @@ export function generateFakeSumSubData() {
 /**
  * Mint `VerifiableCredential` NFT
  */
-export async function mintVerifiableCredentialNFT(vc: string) {
+export async function mintVerifiableCredentialNFT(payload: { [key: string]: any }) {
   const { metaplex, config } = useContext()
   log.info('Uploading NFT metadata...')
 
@@ -142,7 +142,7 @@ export async function mintVerifiableCredentialNFT(vc: string) {
       name,
       image: config.logoUrl,
       external_url: config.nftExternalUrl,
-      vc,
+      ...payload,
     })
   log.info('Done')
   log.info(`Metadata uri: ${metadataUri}`)
