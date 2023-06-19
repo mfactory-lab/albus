@@ -28,6 +28,7 @@
 
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
+import { buildPoseidonOpt, newMemEmptyTrie } from 'circomlibjs'
 import { EdDSASigner } from 'did-jwt'
 import {
   createVerifiableCredentialJwt,
@@ -39,12 +40,14 @@ import type {
   Issuer,
   JwtCredentialPayload,
   JwtPresentationPayload,
+  VerifiedCredential as VerifiedCredentialBase,
 } from 'did-jwt-vc'
 import type { JWTVerifyOptions } from 'did-jwt'
 import type { ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
+import { arrayToHexString, stringToBytes } from './crypto/utils'
 import { encodeDidKey } from './utils'
 import { xc20p } from './crypto'
 
@@ -52,7 +55,10 @@ export const DEFAULT_CONTEXT = 'https://www.w3.org/2018/credentials/v1'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 
-export interface CreateOpts {
+export type VerifiedCredential = VerifiedCredentialBase
+export type Claims = Record<string, any>
+
+export interface CreateCredentialOpts {
   holder: PublicKey
   signerSecretKey: number[] | Uint8Array
   encryptionKey?: xc20p.PrivateKey
@@ -65,11 +71,18 @@ export interface CreateOpts {
 /**
  * Create new verifiable credential
  */
-export async function createVerifiableCredential(credentialSubject: Record<string, any>, opts: CreateOpts) {
+export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts) {
+  let credentialSubject: Claims = {}
+
   if (opts?.encrypt) {
-    credentialSubject = {
-      encrypted: await xc20p.encrypt(JSON.stringify(credentialSubject), opts.holder, opts.encryptionKey),
-    }
+    // credentialSubject.encrypted = true
+    // for (const key of Object.keys(claims)) {
+    //   const value = claims[key]
+    //   credentialSubject[key] = await xc20p.encrypt(JSON.stringify(value), opts.holder, opts.encryptionKey)
+    // }
+    credentialSubject.encrypted = await xc20p.encrypt(JSON.stringify(claims), opts.holder, opts.encryptionKey)
+  } else {
+    credentialSubject = { ...claims }
   }
 
   const signerKeypair = Keypair.fromSecretKey(Uint8Array.from(opts.signerSecretKey))
@@ -100,7 +113,12 @@ export async function createVerifiableCredential(credentialSubject: Record<strin
     payload.nbf = opts.nbf
   }
 
-  return createVerifiableCredentialJwt(payload, issuer)
+  const tree = await claimsTree(claims)
+
+  return {
+    payload: await createVerifiableCredentialJwt(payload, issuer),
+    credentialRoot: arrayToHexString(tree.root),
+  }
 }
 
 export async function createVerifiablePresentation() {
@@ -129,14 +147,14 @@ export async function createVerifiablePresentation() {
   return createVerifiablePresentationJwt(payload, holder, opts)
 }
 
-export interface VerifyOpts extends JWTVerifyOptions {
+export interface VerifyCredentialOpts extends JWTVerifyOptions {
   decryptionKey?: xc20p.PrivateKey
 }
 
 /**
  * Verify credential
  */
-export async function verifyCredential(payload: string, opts: VerifyOpts) {
+export async function verifyCredential(payload: string, opts: VerifyCredentialOpts): Promise<VerifiedCredential> {
   const resolver = new Resolver({
     ...WebDidResolver.getResolver(),
     ...KeyDidResolver.getResolver(),
@@ -160,4 +178,22 @@ export async function verifyCredential(payload: string, opts: VerifyOpts) {
   }
 
   return vc
+}
+
+const poseidonPromise = buildPoseidonOpt()
+
+export async function claimsTree(claims: Claims) {
+  const tree = await newMemEmptyTrie()
+  const poseidon = await poseidonPromise
+  const encode = (s: any) => poseidon([stringToBytes(s)])
+  for (const [key, val] of Object.entries(claims)) {
+    await tree.insert(encode(key), encode(val))
+  }
+  return {
+    root: tree.root as Uint8Array,
+    find: (key: string) => tree.find(encode(key)),
+    insert: (key: string, val: any) => tree.insert(encode(key), encode(val)),
+    update: (key: string, val: any) => tree.update(encode(key), encode(val)),
+    delete: (key: string) => tree.delete(encode(key)),
+  }
 }

@@ -26,14 +26,18 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { Buffer } from 'node:buffer'
 import axios from 'axios'
 import type { PublicSignals, SnarkjsProof, VK } from 'snarkjs'
 import { groth16 } from 'snarkjs'
 
+type Input = Parameters<typeof groth16.fullProve>[0]
+
 interface GenerateProofProps {
-  wasmUrl: string
-  zkeyUrl: string
-  input?: { [key: string]: number }
+  wasmFile: string | Buffer
+  zkeyFile: string | Buffer
+  input?: Input
+  logger?: unknown
 }
 
 /**
@@ -41,26 +45,28 @@ interface GenerateProofProps {
  * @returns {Promise<SNARK>}
  */
 export async function generateProof(props: GenerateProofProps) {
-  return groth16.fullProve(props.input ?? {}, {
-    type: 'mem',
-    data: await fetchBytes(props.wasmUrl),
-  }, {
-    type: 'mem',
-    data: await fetchBytes(props.zkeyUrl),
-  })
+  const wasmFile = Buffer.isBuffer(props.wasmFile) ? Uint8Array.from(props.wasmFile) : await fetchBytes(props.wasmFile)
+  const zkeyFile = Buffer.isBuffer(props.zkeyFile) ? Uint8Array.from(props.zkeyFile) : await fetchBytes(props.zkeyFile)
+  return groth16.fullProve(
+    props.input ?? {},
+    { type: 'mem', data: wasmFile },
+    { type: 'mem', data: zkeyFile },
+    props.logger,
+  )
 }
 
 interface VerifyProofProps {
   vk: VK
   publicInput?: PublicSignals
   proof: SnarkjsProof
+  logger?: unknown
 }
 
 /**
  * Verify ZKP Proof
  */
 export async function verifyProof(props: VerifyProofProps) {
-  return groth16.verify(props.vk, props.publicInput ?? [], props.proof)
+  return groth16.verify(props.vk, props.publicInput ?? [], props.proof, props.logger)
 }
 
 /**

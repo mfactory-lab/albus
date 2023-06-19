@@ -118,10 +118,9 @@ function convertSecretKeyToX25519Keypair(privateKey: PrivateKey): KeyPair {
 
 /**
  * Encrypt a message with a {@link pubKey}
- * If {@link otherPk} is not set, ephemeral key will be used
  */
-export async function encrypt(message: string, pubKey: PublicKey, otherPk?: PrivateKey): Promise<string> {
-  const epk = otherPk ? convertSecretKeyToX25519Keypair(otherPk) : generateKeyPair()
+export async function encrypt(message: string, pubKey: PublicKey, ephemeralKey?: PrivateKey): Promise<string> {
+  const epk = ephemeralKey ? convertSecretKeyToX25519Keypair(ephemeralKey) : generateKeyPair()
   const sharedSecret = sharedKey(epk.secretKey, convertPublicKeyToX25519(pubKey.toBytes()))
   const kek = concatKDF(
     sharedSecret,

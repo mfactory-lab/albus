@@ -87,7 +87,7 @@ export function bigIntToArray(bn: bigint, length: number): Uint8Array {
   const hexArray = hex.match(/.{2}/g) ?? []
 
   // Convert hex array to uint8 byte array
-  const byteArray = new Uint8Array(hexArray.map(byte => parseInt(byte, 16)))
+  const byteArray = new Uint8Array(hexArray.map(byte => Number.parseInt(byte, 16)))
 
   return arrayToByteLength(byteArray, length)
 }
@@ -99,7 +99,7 @@ export function bigIntToArray(bn: bigint, length: number): Uint8Array {
  * @param prefix - prefix with 0x
  * @returns hex string
  */
-export function arrayToHexString(array: Uint8Array, prefix: boolean) {
+export function arrayToHexString(array: Uint8Array, prefix?: boolean) {
   // Create empty hex string
   let hexString = ''
 
@@ -135,7 +135,7 @@ export function hexStringToArray(hexString: string) {
   // Fetch matching byte index from hex string and parse to integer
   array.map(
     (element, index) =>
-      (array[index] = parseInt(hexStringFormatted.substring(index * 2, index * 2 + 2), 16)),
+      (array[index] = Number.parseInt(hexStringFormatted.substring(index * 2, index * 2 + 2), 16)),
   )
 
   return array
