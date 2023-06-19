@@ -1,11 +1,13 @@
 {
   "name": "@albus/monorepo",
-  "packageManager": "pnpm@8.6.2",
+  "version": "0.0.0",
   "license": "AGPL-3.0",
+  "packageManager": "pnpm@8.6.2",
+  "private": true,
   "scripts": {
-    "sdk:gen": "pnpm --filter=@albus/sdk run generate && pnpm run lint:fix",
-    "cli": "pnpm --filter=@albus/cli run cli",
-    "test": "pnpm --filter=@albus/tests run test",
+    "sdk:gen": "pnpm -F @albus/sdk run generate && pnpm run lint:fix",
+    "cli": "pnpm -F @albus/cli run cli",
+    "test": "pnpm -F @albus/tests run test",
     "lint:fix": "eslint --fix --ext .js,.vue,.ts ./packages"
   },
   "devDependencies": {
@@ -13,6 +15,22 @@
     "@types/node": "^18.16.3",
     "eslint": "^8.42.0",
     "typescript": "^4.9.5",
+    "vite": "^4.3.9",
     "unbuild": "^1.2.1"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@solana/web3.js"
+      ]
+    }
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,vue,md}": [
+      "eslint --cache --fix"
+    ]
   }
 }

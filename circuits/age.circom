@@ -10,6 +10,18 @@ template VerifyAge() {
 
   assert(birthDate[0] > 1900);
 
+  // Data integrity check
+  // component smt=SMTVerifier(10);
+  // smt.enabled<==1;
+  // smt.root<==credentialRoot;
+  // smt.siblings<==siblings;
+  // smt.key<==key;
+  // smt.oldKey<==0;
+  // smt.oldValue<==0;
+  // smt.isOld0<==0;
+  // smt.value<==attributes[1];
+  // smt.fnc<==0;
+
   component date = calculateAge();
   date.currentDate <== currentDate;
   date.birthDate <== birthDate;

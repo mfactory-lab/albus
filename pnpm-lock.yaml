@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: false
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -19,6 +23,9 @@ importers:
       unbuild:
         specifier: ^1.2.1
         version: 1.2.1
+      vite:
+        specifier: ^4.3.9
+        version: 4.3.9(@types/node@18.16.3)
 
   packages/albus-cli:
     dependencies:
@@ -59,9 +66,6 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0
     devDependencies:
-      vite:
-        specifier: ^4.3.9
-        version: 4.3.9(@types/node@18.16.3)
       vite-node:
         specifier: ^0.32.0
         version: 0.32.0(@types/node@18.16.3)
@@ -666,6 +670,9 @@ packages:
     engines: {node: '>=10'}
     peerDependencies:
       '@solana/web3.js': ^1.68.0
+    peerDependenciesMeta:
+      '@solana/web3.js':
+        optional: true
     dependencies:
       '@solana/web3.js': 1.77.3
       bn.js: 5.2.1
@@ -1672,6 +1679,9 @@ packages:
     engines: {node: '>=16'}
     peerDependencies:
       '@solana/web3.js': ^1.50.1
+    peerDependenciesMeta:
+      '@solana/web3.js':
+        optional: true
     dependencies:
       '@metaplex-foundation/beet': 0.7.1
       '@metaplex-foundation/beet-solana': 0.4.0
@@ -1720,6 +1730,9 @@ packages:
     engines: {node: '>=16'}
     peerDependencies:
       '@solana/web3.js': ^1.47.4
+    peerDependenciesMeta:
+      '@solana/web3.js':
+        optional: true
     dependencies:
       '@solana/buffer-layout': 4.0.1
       '@solana/buffer-layout-utils': 0.2.0
@@ -1736,6 +1749,9 @@ packages:
     engines: {node: '>=16'}
     peerDependencies:
       '@solana/web3.js': ^1.58.0
+    peerDependenciesMeta:
+      '@solana/web3.js':
+        optional: true
     dependencies:
       '@solana/wallet-standard-features': 1.0.1
       '@solana/web3.js': 1.77.3
