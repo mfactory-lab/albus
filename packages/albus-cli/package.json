@@ -1,10 +1,10 @@
 {
   "name": "@albus/cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "type": "module",
-  "main": "src/index.ts",
-  "module": "src/index.ts",
+  "main": "src/index",
+  "module": "src/index",
   "scripts": {
     "cli": "vite-node ./src/index.ts --"
   },
@@ -28,7 +28,6 @@
     "snarkjs": "^0.7.0"
   },
   "devDependencies": {
-    "vite": "^4.3.9",
     "vite-node": "^0.32.0"
   }
 }
