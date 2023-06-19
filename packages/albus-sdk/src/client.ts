@@ -52,23 +52,18 @@ import {
 } from './generated'
 import { AlbusNftCode } from './types'
 import type { ValidateNftProps } from './utils'
-import { validateNft } from './utils'
+import { prepareProofInput, validateNft } from './utils'
 
-const { verifyProof } = albus.zkp
+const { generateProof, verifyProof } = albus.zkp
+const { verifyCredential } = albus.vc
 const { getMetadataByMint, getMetadataPDA } = albus.utils
 
 export class AlbusClient {
   programId = PROGRAM_ID
 
-  _coder: BorshCoder
-  _events: EventManager
-
   constructor(
-    private readonly provider: AnchorProvider,
-  ) {
-    this._coder = new BorshCoder(idl as any)
-    this._events = new EventManager(this.programId, provider, this._coder)
-  }
+    readonly provider: AnchorProvider,
+  ) {}
 
   static factory(connection: Connection, wallet?: Wallet, opts: ConfirmOptions = {}) {
     wallet = wallet ?? { publicKey: PublicKey.default } as unknown as Wallet
@@ -79,30 +74,12 @@ export class AlbusClient {
     return this.provider.connection
   }
 
-  /**
-   * Invokes the given callback every time the given event is emitted.
-   *
-   * @param eventName The PascalCase name of the event, provided by the IDL.
-   * @param callback  The function to invoke whenever the event is emitted from
-   *                  program logs.
-   */
-  public addEventListener(
-    eventName: string,
-    callback: (event: any, slot: number, signature: string) => void,
-  ): number {
-    return this._events.addEventListener(eventName, (event: any, slot: number, signature: string) => {
-      // skip simulation signature
-      if (signature !== '1111111111111111111111111111111111111111111111111111111111111111') {
-        callback(event, slot, signature)
-      }
-    })
+  get eventManager() {
+    return new _EventManager(this)
   }
 
-  /**
-   * Unsubscribes from the given listener.
-   */
-  public async removeEventListener(listener: number): Promise<void> {
-    return await this._events.removeEventListener(listener)
+  get manager() {
+    return new ManagerClient(this)
   }
 
   /**
@@ -201,8 +178,8 @@ export class AlbusClient {
   async loadCircuit(addr: PublicKeyInitData) {
     const nft = await this.loadNft(addr, { code: AlbusNftCode.Circuit })
 
-    if (!nft.json?.circuit_id) {
-      throw new Error('Invalid circuit! Metadata does not contain `circuit_id`.')
+    if (!nft.json?.code) {
+      throw new Error('Invalid circuit! Metadata does not contain `code`.')
     }
 
     if (!nft.json?.zkey_url) {
@@ -219,7 +196,8 @@ export class AlbusClient {
 
     return {
       address: new PublicKey(addr),
-      id: String(nft.json.circuit_id),
+      code: String(nft.json.code),
+      input: (nft.json.input ?? []) as string[],
       wasmUrl: String(nft.json.wasm_url),
       zkeyUrl: String(nft.json.zkey_url),
       vk: nft.json.vk as VK,
@@ -229,24 +207,35 @@ export class AlbusClient {
   /**
    * Load and validate Verifiable Credential
    */
-  async loadCredential(addr: PublicKeyInitData) {
+  async loadCredential(addr: PublicKeyInitData, opts: { decryptionKey?: PrivateKey } = {}) {
     const nft = await this.loadNft(addr, { code: AlbusNftCode.VerifiableCredential })
 
     if (!nft.json?.vc) {
-      throw new Error('Invalid credential! Metadata does not contain `vc` payload.')
+      throw new Error('Invalid credential! Metadata does not contain `vc` attribute.')
     }
+
+    const vc = await verifyCredential(nft.json.vc, {
+      audience: 'did:web:albus.finance',
+      decryptionKey: opts.decryptionKey,
+    })
 
     return {
       address: new PublicKey(addr),
-      payload: nft.json.vc as string,
+      credentialSubject: vc.verifiableCredential.credentialSubject,
+      credentialRoot: nft.json.credentialRoot,
+      verified: vc.verified,
     }
   }
 
   /**
    * Load and validate Verifiable Presentation
    */
-  async loadPresentation(addr: PublicKeyInitData) {
-    const _nft = await this.loadNft(addr, { code: AlbusNftCode.VerifiablePresentation })
+  async loadPresentation(addr: PublicKeyInitData, _opts: { decryptionKey?: PrivateKey } = {}) {
+    const nft = await this.loadNft(addr, { code: AlbusNftCode.VerifiablePresentation })
+
+    if (!nft.json?.vp) {
+      throw new Error('Invalid presentation! Metadata does not contain `vp` attribute.')
+    }
 
     // TODO:
 
@@ -256,9 +245,56 @@ export class AlbusClient {
   }
 
   /**
-   * Prove {@link ProofRequest}
+   * Prove the request
    */
-  async prove(props: ProveProps, opts?: ConfirmOptions) {
+  async prove(props: ProveProps) {
+    const proofRequest = await this.loadProofRequest(props.proofRequest)
+
+    if (proofRequest.proof && !props.force) {
+      throw new Error('Proof request already proved')
+    }
+
+    const circuit = await this.loadCircuit(proofRequest.circuit)
+
+    // TODO: use presentation
+    const vc = await this.loadCredential(props.vc, { decryptionKey: props.decryptionKey })
+
+    const input = prepareProofInput({
+      requiredFields: circuit.input,
+      claims: vc.credentialSubject,
+      // TODO: get from service provider rules
+      definitions: { minAge: 18, maxAge: 100 },
+    })
+
+    try {
+      const { proof, publicSignals } = await generateProof({
+        wasmFile: circuit.wasmUrl,
+        zkeyFile: circuit.zkeyUrl,
+        input,
+      })
+
+      const { signature } = await this.proveOnChain({
+        proofRequest: props.proofRequest,
+        proof: {
+          protocol: proof.protocol,
+          curve: proof.curve,
+          piA: proof.pi_a.map(String),
+          piB: proof.pi_b.map(p => p.map(String)),
+          piC: proof.pi_c.map(String),
+          publicInputs: publicSignals.map(String),
+        },
+      })
+
+      return { signature, proof, publicSignals }
+    } catch (e: any) {
+      throw new Error(`Circuit constraint violation (${e.message})`)
+    }
+  }
+
+  /**
+   * Save proof for provided proof request
+   */
+  private async proveOnChain(props: ProveOnChainProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const instruction = createProveInstruction(
       {
@@ -282,58 +318,6 @@ export class AlbusClient {
   }
 
   /**
-   * Verify {@link ProofRequest}
-   * Required admin authority
-   */
-  async verify(props: VerifyProps, opts?: ConfirmOptions) {
-    const instruction = createVerifyInstruction(
-      {
-        proofRequest: new PublicKey(props.proofRequest),
-        authority: this.provider.publicKey,
-      },
-      {
-        data: {
-          status: ProofRequestStatus.Verified,
-        },
-      },
-    )
-
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
-  }
-
-  /**
-   * Reject existing {@link ProofRequest}
-   * Required admin authority
-   */
-  async reject(props: VerifyProps, opts?: ConfirmOptions) {
-    const instruction = createVerifyInstruction(
-      {
-        proofRequest: new PublicKey(props.proofRequest),
-        authority: this.provider.publicKey,
-      },
-      {
-        data: {
-          status: ProofRequestStatus.Rejected,
-        },
-      },
-    )
-
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
-  }
-
-  /**
    * Create new {@link ProofRequest}
    */
   async createProofRequest(props: CreateProofRequestProps, opts?: ConfirmOptions) {
@@ -343,6 +327,11 @@ export class AlbusClient {
 
     const circuitMint = new PublicKey(props.circuit)
     const circuitMetadata = getMetadataPDA(circuitMint)
+
+    const prAccountInfo = await this.connection.getAccountInfo(proofRequestAddr)
+    if (prAccountInfo != null) {
+      throw new Error(`Proof request for service:${props.serviceCode} and circuit:${circuitMint} already exists...`)
+    }
 
     const instruction = createCreateProofRequestInstruction(
       {
@@ -375,53 +364,6 @@ export class AlbusClient {
     const authority = this.provider.publicKey
     const instruction = createDeleteProofRequestInstruction({
       proofRequest: new PublicKey(props.proofRequest),
-      authority,
-    })
-
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
-  }
-
-  /**
-   * Add new {@link ServiceProvider}
-   * Required admin authority
-   */
-  async addServiceProvider(props: AddServiceProviderProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
-    const [serviceProvider] = this.getServiceProviderPDA(props.code)
-    const instruction = createAddServiceProviderInstruction({
-      serviceProvider,
-      authority,
-    }, {
-      data: {
-        code: props.code,
-        name: props.name,
-      },
-    })
-
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { address: serviceProvider, signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
-  }
-
-  /**
-   * Delete a {@link ServiceProvider}
-   * Required admin authority
-   */
-  async deleteServiceProvider(props: DeleteServiceProviderProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
-    const [serviceProvider] = this.getServiceProviderPDA(props.code)
-    const instruction = createDeleteServiceProviderInstruction({
-      serviceProvider,
       authority,
     })
 
@@ -476,8 +418,8 @@ export class AlbusClient {
       builder.addFilter('circuit', new PublicKey(filter.circuit))
     }
 
-    if (filter.proof) {
-      builder.addFilter('proof', new PublicKey(filter.proof))
+    if (filter.status) {
+      builder.addFilter('status', filter.status)
     }
 
     return (await builder.run(this.provider.connection)).map((acc) => {
@@ -534,11 +476,157 @@ export class AlbusClient {
   }
 }
 
+class _EventManager {
+  _coder: BorshCoder
+  _events: EventManager
+
+  constructor(readonly client: AlbusClient) {
+    this._coder = new BorshCoder(idl as any)
+    this._events = new EventManager(client.programId, client.provider, this._coder)
+  }
+
+  /**
+   * Invokes the given callback every time the given event is emitted.
+   *
+   * @param eventName The PascalCase name of the event, provided by the IDL.
+   * @param callback  The function to invoke whenever the event is emitted from
+   *                  program logs.
+   */
+  public addEventListener(
+    eventName: string,
+    callback: (event: any, slot: number, signature: string) => void,
+  ): number {
+    return this._events.addEventListener(eventName, (event: any, slot: number, signature: string) => {
+      // skip simulation signature
+      if (signature !== '1111111111111111111111111111111111111111111111111111111111111111') {
+        callback(event, slot, signature)
+      }
+    })
+  }
+
+  /**
+   * Unsubscribes from the given listener.
+   */
+  public async removeEventListener(listener: number): Promise<void> {
+    return await this._events.removeEventListener(listener)
+  }
+}
+
+class ManagerClient {
+  constructor(readonly client: AlbusClient) {
+  }
+
+  get provider() {
+    return this.client.provider
+  }
+
+  /**
+   * Verify the {@link ProofRequest}
+   * Required admin authority
+   */
+  async verify(props: VerifyProps, opts?: ConfirmOptions) {
+    const instruction = createVerifyInstruction(
+      {
+        proofRequest: new PublicKey(props.proofRequest),
+        authority: this.provider.publicKey,
+      },
+      {
+        data: {
+          status: ProofRequestStatus.Verified,
+        },
+      },
+    )
+
+    try {
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  /**
+   * Reject existing {@link ProofRequest}
+   * Required admin authority
+   */
+  async reject(props: VerifyProps, opts?: ConfirmOptions) {
+    const instruction = createVerifyInstruction(
+      {
+        proofRequest: new PublicKey(props.proofRequest),
+        authority: this.provider.publicKey,
+      },
+      {
+        data: {
+          status: ProofRequestStatus.Rejected,
+        },
+      },
+    )
+
+    try {
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  /**
+   * Add new {@link ServiceProvider}
+   * Required admin authority
+   */
+  async addServiceProvider(props: AddServiceProviderProps, opts?: ConfirmOptions) {
+    const authority = this.provider.publicKey
+    const [serviceProvider] = this.client.getServiceProviderPDA(props.code)
+    const instruction = createAddServiceProviderInstruction({
+      serviceProvider,
+      authority,
+    }, {
+      data: {
+        code: props.code,
+        name: props.name,
+      },
+    })
+
+    try {
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { address: serviceProvider, signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  /**
+   * Delete a {@link ServiceProvider}
+   * Required admin authority
+   */
+  async deleteServiceProvider(props: DeleteServiceProviderProps, opts?: ConfirmOptions) {
+    const authority = this.provider.publicKey
+    const [serviceProvider] = this.client.getServiceProviderPDA(props.code)
+    const instruction = createDeleteServiceProviderInstruction({
+      serviceProvider,
+      authority,
+    })
+
+    try {
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+}
+
+export type PrivateKey = number[] | string | Buffer | Uint8Array
+
 export interface FindProofRequestProps {
   user?: PublicKeyInitData
   serviceProvider?: PublicKeyInitData
   circuit?: PublicKeyInitData
-  proof?: PublicKeyInitData
+  status?: ProofRequestStatus
 }
 
 export interface CreateProofRequestProps {
@@ -561,6 +649,13 @@ export interface DeleteServiceProviderProps {
 }
 
 export interface ProveProps {
+  proofRequest: PublicKeyInitData
+  vc: PublicKeyInitData
+  decryptionKey?: PrivateKey
+  force?: boolean
+}
+
+export interface ProveOnChainProps {
   proofRequest: PublicKeyInitData
   proof: Proof
 }

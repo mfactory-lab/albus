@@ -26,24 +26,15 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-const os = require('os');
-const path = require('path');
+import { defineBuildConfig } from 'unbuild'
 
-const programName = 'albus'
-const programId = 'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'
-
-const programDir = path.join(__dirname, '..', '..', 'programs', programName)
-const idlGenerator = 'anchor'
-const idlDir = path.join(__dirname, 'idl')
-const sdkDir = path.join(__dirname, 'src', 'generated')
-const binaryInstallDir = path.join(os.homedir(), '.cargo')
-
-module.exports = {
-  programId,
-  programName,
-  programDir,
-  idlGenerator,
-  idlDir,
-  sdkDir,
-  binaryInstallDir
-}
+export default defineBuildConfig({
+  entries: ['src/index'],
+  declaration: true,
+  clean: true,
+  rollup: {
+    emitCJS: true,
+  },
+  externals: ['axios'],
+  // failOnWarn: false,
+})

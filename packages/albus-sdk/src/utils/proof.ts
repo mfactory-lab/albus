@@ -26,24 +26,46 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-const os = require('os');
-const path = require('path');
+const NOW_FIELD = 'currentDate'
 
-const programName = 'albus'
-const programId = 'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'
+interface PrepareProofInputProps {
+  claims: Record<string, any>
+  definitions: Record<string, any>
+  requiredFields: string[]
+}
 
-const programDir = path.join(__dirname, '..', '..', 'programs', programName)
-const idlGenerator = 'anchor'
-const idlDir = path.join(__dirname, 'idl')
-const sdkDir = path.join(__dirname, 'src', 'generated')
-const binaryInstallDir = path.join(os.homedir(), '.cargo')
+export function prepareProofInput({ claims, requiredFields, definitions }: PrepareProofInputProps) {
+  const input = {}
 
-module.exports = {
-  programId,
-  programName,
-  programDir,
-  idlGenerator,
-  idlDir,
-  sdkDir,
-  binaryInstallDir
+  for (const field of requiredFields) {
+    if (field === NOW_FIELD) {
+      const date = new Date()
+      input[field] = [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()]
+      continue
+    }
+
+    if (definitions && definitions[field]) {
+      input[field] = definitions[field]
+      continue
+    }
+
+    input[field] = formatField(field, claims[field])
+  }
+
+  return input
+}
+
+function formatField(name: string, value: string) {
+  if (name === 'country') {
+    // TODO: get country number code (https://www.iban.com/country-codes) by iso code
+  }
+  if (name.endsWith('Date')) {
+    const date = String(value).split('-', 3)
+    if (date.length < 3) {
+      throw new Error(`The \`${name}\` attribute is not a valid date`)
+    }
+    // TODO: better validation
+    return date
+  }
+  return value
 }

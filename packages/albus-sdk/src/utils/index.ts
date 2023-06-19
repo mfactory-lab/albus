@@ -27,3 +27,4 @@
  */
 
 export * from './nft'
+export * from './proof'
