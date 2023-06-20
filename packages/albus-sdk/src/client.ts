@@ -27,13 +27,14 @@
  */
 
 import { Buffer } from 'node:buffer'
-import * as albus from '@albus/core'
 import type { Wallet } from '@coral-xyz/anchor'
-import { AnchorProvider, BorshCoder, EventManager } from '@coral-xyz/anchor'
+import { EventManager as AnchorEventManager, AnchorProvider, BorshCoder } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, Connection, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import type { VK } from 'snarkjs'
+import * as albus from '../../albus-core'
 import idl from '../idl/albus.json'
+import { ALBUS_DID } from './constants'
 import type { Proof } from './generated'
 import {
   PROGRAM_ID,
@@ -74,12 +75,12 @@ export class AlbusClient {
     return this.provider.connection
   }
 
-  get eventManager() {
-    return new _EventManager(this)
-  }
-
   get manager() {
     return new ManagerClient(this)
+  }
+
+  get eventManager() {
+    return new EventManager(this)
   }
 
   /**
@@ -97,7 +98,7 @@ export class AlbusClient {
     const [proofRequestAddr] = this.getProofRequestPDA(service, props.circuit, user)
 
     const proofRequest = await this.loadProofRequest(proofRequestAddr)
-    this.validateProofRequest(proofRequest)
+    await this.validateProofRequest(proofRequest)
 
     // full ZK proof verification
     if (props.full) {
@@ -160,8 +161,13 @@ export class AlbusClient {
    * @param {ProofRequest} req The proof request object to validate.
    * @throws An error with a message indicating why the request is invalid.
    */
-  validateProofRequest(req: ProofRequest) {
-    if (Number(req.expiredAt) > 0 && Number(req.expiredAt) < Date.now()) {
+  async validateProofRequest(req: ProofRequest) {
+    const slot = await this.connection.getSlot()
+    const timestamp = await this.connection.getBlockTime(slot)
+    if (!timestamp) {
+      throw new Error('Failed to get solana block time')
+    }
+    if (Number(req.expiredAt) > 0 && Number(req.expiredAt) < timestamp) {
       throw new Error('Proof request is expired')
     }
     if (!req.proof) {
@@ -215,7 +221,7 @@ export class AlbusClient {
     }
 
     const vc = await verifyCredential(nft.json.vc, {
-      audience: 'did:web:albus.finance',
+      audience: ALBUS_DID,
       decryptionKey: opts.decryptionKey,
     })
 
@@ -476,13 +482,13 @@ export class AlbusClient {
   }
 }
 
-class _EventManager {
+class EventManager {
   _coder: BorshCoder
-  _events: EventManager
+  _events: AnchorEventManager
 
   constructor(readonly client: AlbusClient) {
     this._coder = new BorshCoder(idl as any)
-    this._events = new EventManager(client.programId, client.provider, this._coder)
+    this._events = new AnchorEventManager(client.programId, client.provider, this._coder)
   }
 
   /**
@@ -513,8 +519,7 @@ class _EventManager {
 }
 
 class ManagerClient {
-  constructor(readonly client: AlbusClient) {
-  }
+  constructor(private readonly client: AlbusClient) {}
 
   get provider() {
     return this.client.provider
@@ -524,7 +529,7 @@ class ManagerClient {
    * Verify the {@link ProofRequest}
    * Required admin authority
    */
-  async verify(props: VerifyProps, opts?: ConfirmOptions) {
+  async verifyProofRequest(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
       {
         proofRequest: new PublicKey(props.proofRequest),
@@ -550,7 +555,7 @@ class ManagerClient {
    * Reject existing {@link ProofRequest}
    * Required admin authority
    */
-  async reject(props: VerifyProps, opts?: ConfirmOptions) {
+  async rejectProofRequest(props: VerifyProps, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
       {
         proofRequest: new PublicKey(props.proofRequest),

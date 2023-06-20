@@ -128,7 +128,7 @@ describe('albus', () => {
     await airdrop(newPayerKeypair.publicKey)
 
     try {
-      await newClient.manager.verify({ proofRequest: proofRequestAddr })
+      await newClient.manager.verifyProofRequest({ proofRequest: proofRequestAddr })
       assert.ok(false)
     } catch (e: any) {
       assertErrorCode(e, 'Unauthorized')
@@ -140,7 +140,7 @@ describe('albus', () => {
     const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
 
     try {
-      await client.manager.verify({ proofRequest: proofRequestAddr })
+      await client.manager.verifyProofRequest({ proofRequest: proofRequestAddr })
       assert.ok(false)
     } catch (e: any) {
       console.log(e)
@@ -151,7 +151,7 @@ describe('albus', () => {
   it('can verify proof request', async () => {
     const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
     const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.b, payerKeypair.publicKey)
-    await client.manager.verify({ proofRequest: proofRequestAddr })
+    await client.manager.verifyProofRequest({ proofRequest: proofRequestAddr })
     const proofRequest = await client.loadProofRequest(proofRequestAddr)
     assert.equal(proofRequest.status, ProofRequestStatus.Verified)
   })
