@@ -25,7 +25,7 @@
     "tsc": "tsc --noEmit && echo",
     "build": "tsc --emitDeclarationOnly && vite build",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
-    "prepare": "pnpm run build",
+    "_prepare": "pnpm run build",
     "test": "vitest",
     "_build": "unbuild"
   },
