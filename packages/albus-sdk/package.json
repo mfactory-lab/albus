@@ -1,6 +1,6 @@
 {
   "name": "@albus/sdk",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Albus Protocol SDK",
   "repository": {
     "type": "git",
@@ -25,8 +25,9 @@
     "tsc": "tsc --noEmit && echo",
     "build": "tsc --emitDeclarationOnly && vite build",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
-    "_prepare": "pnpm run build",
+    "publish:git": "gitpkg publish",
     "test": "vitest",
+    "_prepare": "pnpm run build",
     "_build": "unbuild"
   },
   "dependencies": {

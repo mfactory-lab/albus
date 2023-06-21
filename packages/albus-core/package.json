@@ -1,6 +1,6 @@
 {
   "name": "@albus/core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "repository": {
     "type": "git",
@@ -18,6 +18,7 @@
     "dev": "vite build --watch",
     "tsc": "tsc --noEmit && echo",
     "build": "tsc --emitDeclarationOnly && vite build",
+    "publish:git": "gitpkg publish",
     "_prepare": "pnpm run build",
     "test": "vitest"
   },
