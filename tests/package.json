@@ -1,5 +1,6 @@
 {
   "name": "@albus/tests",
+  "private": true,
   "scripts": {
     "test": "vitest --no-threads",
     "test:ui": "vitest --no-threads --ui",
@@ -14,9 +15,6 @@
     "@solana/spl-stake-pool": "mfactory-lab/jfactory-stake-pool",
     "@solana/spl-token": "^0.3.8",
     "@types/bn.js": "^5.1.1",
-    "@types/bs58": "^4.0.1",
-    "@vitest/ui": "^0.32.0",
-    "vite": "^4.3.9",
-    "vitest": "^0.32.0"
+    "@types/bs58": "^4.0.1"
   }
 }

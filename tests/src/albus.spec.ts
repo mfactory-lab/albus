@@ -27,23 +27,24 @@
  */
 
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js'
-import { Keypair, PublicKey } from '@solana/web3.js'
-import { assert, beforeAll, describe, it, vi } from 'vitest'
+import type { PublicKey } from '@solana/web3.js'
+import { Keypair } from '@solana/web3.js'
+import { assert, beforeAll, describe, it } from 'vitest'
 import { AlbusClient, ProofRequestStatus } from '@albus/sdk'
-import { airdrop, assertErrorCode, loadFixture, mintNFT, newProvider, payerKeypair, provider } from './utils'
+import { airdrop, assertErrorCode, mintNFT, mockedProve, newProvider, payerKeypair, provider } from './utils'
 
 describe('albus', () => {
   const client = new AlbusClient(provider)
   const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(payerKeypair))
 
   const serviceCode = 'code'
-  const circuits: Record<'a' | 'b' | 'c' | string, PublicKey> = {}
+  const circuits = {} as Record<'a' | 'b' | 'c', PublicKey>
 
   beforeAll(async () => {
     await airdrop(payerKeypair.publicKey)
     circuits.a = (await mintNFT(metaplex, 'ALBUS-C')).address
     circuits.b = (await mintNFT(metaplex, 'ALBUS-C')).address
-    // circuits.c = (await mintNFT(metaplex, 'ALBUS-C')).address
+    circuits.c = (await mintNFT(metaplex, 'ALBUS-C')).address
   })
 
   it('can add service provider', async () => {
@@ -78,7 +79,7 @@ describe('albus', () => {
   it('can create proof request', async () => {
     const { address } = await client.createProofRequest({ circuit: circuits.a, serviceCode })
     const proofRequest = await client.loadProofRequest(address)
-    assert.equal(proofRequest.circuit.toString(), circuits.a.toString())
+    assert.equal(proofRequest.circuit.toString(), circuits.a?.toString())
     assert.equal(proofRequest.owner.toString(), provider.publicKey.toString())
     assert.equal(proofRequest.status, ProofRequestStatus.Pending)
     assert.equal(proofRequest.proof, null)
@@ -95,26 +96,7 @@ describe('albus', () => {
 
   it('can prove proof request', async () => {
     const { address } = await client.createProofRequest({ circuit: circuits.b, serviceCode })
-
-    vi.spyOn(client, 'loadCircuit').mockReturnValue({
-      // @ts-expect-error ...
-      address: PublicKey.default,
-      wasmUrl: loadFixture('age.wasm'),
-      zkeyUrl: loadFixture('age.zkey'),
-      input: ['birthDate', 'currentDate', 'minAge', 'maxAge'],
-    })
-
-    vi.spyOn(client, 'loadCredential').mockReturnValue({
-      // @ts-expect-error ...
-      address: PublicKey.default,
-      credentialSubject: {
-        firstName: 'John',
-        lastName: 'Doe',
-        birthDate: '2005-01-01',
-      },
-    })
-
-    await client.prove({ proofRequest: address, vc: PublicKey.default })
+    await mockedProve(client, address)
     const proofRequest = await client.loadProofRequest(address)
     assert.equal(proofRequest.status, ProofRequestStatus.Proved)
   })
@@ -156,14 +138,15 @@ describe('albus', () => {
     assert.equal(proofRequest.status, ProofRequestStatus.Verified)
   })
 
-  // it('can reject proof request', async () => {
-  //   const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
-  //   const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
-  //   await client.prove({ proofRequest: proofRequestAddr, proof: getProofMock() })
-  //   await client.manager.reject({ proofRequest: proofRequestAddr })
-  //   const proofRequest = await client.loadProofRequest(proofRequestAddr)
-  //   assert.equal(proofRequest.status, ProofRequestStatus.Rejected)
-  // })
+  it('can reject proof request', async () => {
+    const { address } = await client.createProofRequest({ circuit: circuits.c, serviceCode })
+    const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
+    const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
+    await mockedProve(client, address)
+    await client.manager.rejectProofRequest({ proofRequest: proofRequestAddr })
+    const proofRequest = await client.loadProofRequest(proofRequestAddr)
+    assert.equal(proofRequest.status, ProofRequestStatus.Rejected)
+  })
 
   it('can delete proof request', async () => {
     const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
