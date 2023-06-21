@@ -19,12 +19,9 @@
     "release": "changeset publish",
     "commit": "git-cz"
   },
-  "resolutions": {
-    "@albus/core": "file:packages/albus-core",
-    "@albus/sdk": "file:packages/albus-sdk"
-  },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.5",
+    "@changesets/cli": "^2.26.0",
     "@rollup/plugin-inject": "^5.0.3",
     "@types/node": "^18.0.0",
     "@vitest/ui": "^0.32.0",
