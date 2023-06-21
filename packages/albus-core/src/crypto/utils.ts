@@ -133,9 +133,8 @@ export function hexStringToArray(hexString: string) {
   const array = new Uint8Array(hexStringFormatted.length / 2)
 
   // Fetch matching byte index from hex string and parse to integer
-  array.map(
-    (element, index) =>
-      (array[index] = Number.parseInt(hexStringFormatted.substring(index * 2, index * 2 + 2), 16)),
+  array.map((_element, index) =>
+    (array[index] = Number.parseInt(hexStringFormatted.substring(index * 2, index * 2 + 2), 16)),
   )
 
   return array

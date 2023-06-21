@@ -1,16 +1,25 @@
 {
   "name": "@albus/core",
   "version": "0.0.3",
-  "sideEffects": false,
-  "main": "./src/index",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-core"
   },
+  "sideEffects": false,
+  "main": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
-    "build": "unbuild",
-    "_prepare": "pnpm run build"
+    "dev": "vite build --watch",
+    "tsc": "tsc --noEmit && echo",
+    "build": "tsc --emitDeclarationOnly && vite build",
+    "prepare": "pnpm run build",
+    "test": "vitest"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-token-metadata": "^2.12.0",
@@ -21,6 +30,7 @@
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
+    "crypto-browserify": "^3.12.0",
     "ffjavascript": "^0.2.59",
     "did-jwt-vc": "^3.2.2",
     "did-jwt": "^7.2.2",

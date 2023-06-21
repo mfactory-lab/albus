@@ -31,9 +31,8 @@ import type { Wallet } from '@coral-xyz/anchor'
 import { EventManager as AnchorEventManager, AnchorProvider, BorshCoder } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, Connection, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
-import type { VK } from 'snarkjs'
-import * as albus from '../../albus-core'
-import idl from '../idl/albus.json'
+import * as albus from '@albus/core'
+import idl from './idl/albus.json'
 import { ALBUS_DID } from './constants'
 import type { Proof } from './generated'
 import {
@@ -206,7 +205,7 @@ export class AlbusClient {
       input: (nft.json.input ?? []) as string[],
       wasmUrl: String(nft.json.wasm_url),
       zkeyUrl: String(nft.json.zkey_url),
-      vk: nft.json.vk as VK,
+      vk: nft.json.vk, //  as VK,
     }
   }
 
@@ -285,7 +284,7 @@ export class AlbusClient {
           protocol: proof.protocol,
           curve: proof.curve,
           piA: proof.pi_a.map(String),
-          piB: proof.pi_b.map(p => p.map(String)),
+          piB: proof.pi_b.map((p: any) => p.map(String)),
           piC: proof.pi_c.map(String),
           publicInputs: publicSignals.map(String),
         },

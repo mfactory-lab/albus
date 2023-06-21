@@ -40,11 +40,14 @@ export function readSymbols(path: string) {
   const symsStr = readFileSync(path).toString()
   const lines = symsStr.split('\n')
   for (let i = 0; i < lines.length; i++) {
-    const arr = lines[i].split(',')
+    const arr = lines[i]?.split(',') ?? []
     if (arr.length !== 4) {
       continue
     }
     const symbol = arr[3]
+    if (!symbol) {
+      continue
+    }
     const labelIdx = Number(arr[0])
     const varIdx = Number(arr[1])
     const componentIdx = Number(arr[2])

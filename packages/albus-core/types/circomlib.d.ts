@@ -27,15 +27,15 @@
  */
 
 declare module 'circomlibjs' {
-  declare type FromMontgomery = (Uint8Array) => Uint8Array;
-  declare type ToMontgomery = (Uint8Array) => Uint8Array;
+  type FromMontgomery = (p: Uint8Array) => Uint8Array;
+  type ToMontgomery = (p: Uint8Array) => Uint8Array;
 
   export interface CircomlibSignature {
     R8: [Uint8Array, Uint8Array];
     S: bigint;
   }
 
-  declare interface EdDSA {
+  interface EdDSA {
     verifyPoseidon(msg: Uint8Array, sig: CircomlibSignature, A: Uint8Array[]): boolean;
 
     signPoseidon(prv: Uint8Array, msg: Uint8Array): CircomlibSignature;
@@ -49,11 +49,11 @@ declare module 'circomlibjs' {
     };
   }
 
-  declare function buildEddsa(): Promise<EdDSA>;
+  function buildEddsa(): Promise<EdDSA>;
 
   // BabyJup
 
-  declare interface BabyJup {
+  interface BabyJup {
     unpackPoint(buf: Uint8Array): [Uint8Array, Uint8Array]
     D: bigint
     p: any // Scalar
@@ -64,22 +64,23 @@ declare module 'circomlibjs' {
     };
   }
 
-  declare function buildBabyjub(): Promise<BabyJup>;
+  function buildBabyjub(): Promise<BabyJup>;
 
   // SMT
 
-  declare function buildSMT(db: any, root: SmtInternalValue): Promise<SMT>;
-  declare function newMemEmptyTrie(): Promise<SMT>;
+  function buildSMT(db: any, root: SmtInternalValue): Promise<SMT>;
+  function newMemEmptyTrie(): Promise<SMT>;
 
+  export type SmtRoot = any; // TODO: Uint8Array(32)
   export type SmtKey = any; // TODO: Uint8Array(32)
   export type SmtLeafValue = any; // TODO: Uint8Array(32)
   export type SmtInternalValue = any; // TODO: Uint8Array(32)
 
   export interface SMT {
+    F: any;
     root: SmtInternalValue;
     hash0(): SmtInternalValue;
     hash1(): SmtInternalValue;
-    F: any;
     insert(key: SmtKey, value: SmtLeafValue): Promise<InsertIntoSmtResponse>;
     update(key: SmtKey, newValue: SmtLeafValue): Promise<UpdateSmtResponse>;
     delete(key: SmtKey): Promise<DeleteFromSmtResponse>;
@@ -94,6 +95,7 @@ declare module 'circomlibjs' {
     newRoot: SmtRoot;
     isOld0: boolean;
   };
+
   export type UpdateSmtResponse = {
     oldRoot: SmtInternalValue;
     oldKey: SmtKey;
@@ -103,6 +105,7 @@ declare module 'circomlibjs' {
     siblings: SmtInternalValue[];
     newRoot: SmtRoot;
   };
+
   export type DeleteFromSmtResponse = {
     oldRoot: SmtInternalValue;
     oldKey: SmtKey;
@@ -113,6 +116,7 @@ declare module 'circomlibjs' {
     newRoot: SmtRoot;
     isOld0: boolean;
   };
+
   export type FindFromSmtResponse =
     | {
     found: true;
@@ -129,7 +133,7 @@ declare module 'circomlibjs' {
 
   // poseidon
 
-  declare interface PoseidonFunction {
+  interface PoseidonFunction {
     (inputs: Uint8Array[]): Uint8Array;
 
     F: {
@@ -138,9 +142,9 @@ declare module 'circomlibjs' {
     };
   }
 
-  declare function buildPoseidon(): Promise<PoseidonFunction>;
+  function buildPoseidon(): Promise<PoseidonFunction>;
 
-  declare function buildPoseidonOpt(): Promise<PoseidonFunction>;
+  function buildPoseidonOpt(): Promise<PoseidonFunction>;
 
   namespace poseidonContract {
     export function createCode(size: number): string;

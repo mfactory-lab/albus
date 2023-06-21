@@ -26,6 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import assert from 'node:assert'
 import * as crypto from 'node:crypto'
 import * as ff from 'ffjavascript'
@@ -53,17 +56,17 @@ const { C, M } = unstringifyBigInts(constants)
 const N_ROUNDS_F = 8
 const N_ROUNDS_P = [56, 57, 56, 60, 60, 63, 64, 63]
 
-function pow5(a) {
+function pow5(a: any) {
   return F.mul(a, F.square(F.square(a, a)))
 }
 
-function poseidonStrategy(state) {
+function poseidonStrategy(state: any) {
   assert(state.length > 0)
   assert(state.length < N_ROUNDS_P.length)
 
   const t = state.length
   const nRoundsF = N_ROUNDS_F
-  const nRoundsP = N_ROUNDS_P[t - 2]
+  const nRoundsP = N_ROUNDS_P[t - 2] as number
 
   state = state.map(x => F.e(x))
   for (let r = 0; r < nRoundsF + nRoundsP; r++) {

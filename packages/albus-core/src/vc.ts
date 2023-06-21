@@ -31,8 +31,7 @@ import { Keypair } from '@solana/web3.js'
 import { buildPoseidonOpt, newMemEmptyTrie } from 'circomlibjs'
 import { EdDSASigner } from 'did-jwt'
 import {
-  createVerifiableCredentialJwt,
-  createVerifiablePresentationJwt,
+  createVerifiableCredentialJwt, createVerifiablePresentationJwt,
   verifyCredential as verifyCredentialBase,
 } from 'did-jwt-vc'
 import type {
@@ -40,6 +39,8 @@ import type {
   Issuer,
   JwtCredentialPayload,
   JwtPresentationPayload,
+  VerifiableCredential,
+
   VerifiedCredential as VerifiedCredentialBase,
 } from 'did-jwt-vc'
 import type { JWTVerifyOptions } from 'did-jwt'
@@ -121,26 +122,21 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
   }
 }
 
-export async function createVerifiablePresentation() {
+export async function createVerifiablePresentation(credentials: VerifiableCredential[], opts?: CreatePresentationOptions) {
   const signerKeypair = Keypair.generate()
   const signer = EdDSASigner(signerKeypair.secretKey)
 
   const holder: Issuer = {
-    // did: 'did:web:albus.finance',
     did: encodeDidKey(signerKeypair.publicKey.toBytes()),
     signer,
     alg: 'EdDSA',
   }
 
-  const opts: CreatePresentationOptions = {}
-
   const payload: JwtPresentationPayload = {
     vp: {
       '@context': [DEFAULT_CONTEXT],
       'type': [DEFAULT_VP_TYPE],
-      'credentialSubject': {
-        // TODO
-      },
+      'verifiableCredential': credentials,
     },
   }
 

@@ -4,33 +4,52 @@
   "license": "AGPL-3.0",
   "packageManager": "pnpm@8.6.2",
   "private": true,
+  "engines": {
+    "node": ">=16",
+    "pnpm": ">=8"
+  },
   "scripts": {
-    "sdk:gen": "pnpm -F @albus/sdk run generate && pnpm run lint:fix",
+    "sdk:gen": "pnpm -F @albus/sdk generate && pnpm run lint:fix",
     "cli": "pnpm -F @albus/cli run cli",
-    "test": "pnpm -F @albus/tests run test",
-    "lint:fix": "eslint --fix --ext .js,.vue,.ts ./packages"
+    "dev": "pnpm --parallel run dev",
+    "test:unit": "vitest",
+    "test:e2e": "pnpm -F @albus/tests run test",
+    "lint:fix": "eslint --fix --ext .js,.vue,.ts ./packages",
+    "changeset": "changeset",
+    "release": "changeset publish",
+    "commit": "git-cz"
+  },
+  "resolutions": {
+    "@albus/core": "file:packages/albus-core",
+    "@albus/sdk": "file:packages/albus-sdk"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.5",
-    "@types/node": "^18.16.3",
-    "eslint": "^8.42.0",
+    "@rollup/plugin-inject": "^5.0.3",
+    "@types/node": "^18.0.0",
+    "@vitest/ui": "^0.32.0",
+    "eslint": "^8.43.0",
     "typescript": "^4.9.5",
     "vite": "^4.3.9",
+    "vitest": "^0.32.0",
     "unbuild": "^1.2.1"
   },
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
-        "@solana/web3.js"
-      ]
+        "@solana/web3.js",
+        "@babel/core",
+        "rollup",
+        "babel-runtime",
+        "cypress",
+        "snarkjs",
+        "jest",
+        "vue",
+        "vite"
+      ],
+      "allowedVersions": {
+        "typescript": "5"
+      }
     }
-  },
-  "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,ts,tsx,vue,md}": [
-      "eslint --cache --fix"
-    ]
   }
 }

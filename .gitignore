@@ -1,11 +1,25 @@
 node_modules
+.DS_Store
+.idea
+.vscode
+
+lib
 dist
+dist-ssr
+docs
 
-# Logs
-*.log
+coverage
+test-results
+.pnpm-store
+.npmrc
+tsconfig.tsbuildinfo
 
-# Local env
-.env.local
+.env
+nx-cloud.env
+*.local
+*.cache
+*error.log
+*debug.log
 
 # Temp directories
 .temp
@@ -13,11 +27,9 @@ dist
 .cache
 
 .anchor
-.DS_Store
 target
 **/*.rs.bk
 test-ledger
-.idea
 .eslintcache
 /.secrets
 

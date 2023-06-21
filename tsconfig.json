@@ -1,33 +1,8 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "lib": ["esnext"],
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "noUnusedLocals": true,
-    "isolatedModules": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "allowSyntheticDefaultImports": true,
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
-    "types": [
-      "vite/client",
-      "node"
-    ]
+    "emitDeclarationOnly": false,
+    "noEmit": true
   },
-  "include": [
-    "packages/**/*.ts",
-    "tests/**/*.ts"
-  ],
-  "exclude": ["**/dist/**/*", "**/node_modules/**/*"]
+  "exclude": ["node_modules", "lib"]
 }

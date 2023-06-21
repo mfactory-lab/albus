@@ -35,7 +35,7 @@ interface PrepareProofInputProps {
 }
 
 export function prepareProofInput({ claims, requiredFields, definitions }: PrepareProofInputProps) {
-  const input = {}
+  const input: { [key: string]: any } = {}
 
   for (const field of requiredFields) {
     if (field === NOW_FIELD) {

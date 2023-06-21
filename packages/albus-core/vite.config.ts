@@ -26,15 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { defineBuildConfig } from 'unbuild'
+import { pluginViteConfig } from '../../vite.config'
 
-export default defineBuildConfig({
-  entries: ['src/index'],
-  declaration: true,
-  clean: true,
-  rollup: {
-    emitCJS: true,
-  },
-  externals: ['axios'],
-  // failOnWarn: false,
-})
+export default pluginViteConfig(import.meta.url)

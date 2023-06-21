@@ -34,7 +34,7 @@ const programId = 'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'
 
 const programDir = path.join(__dirname, '..', '..', 'programs', programName)
 const idlGenerator = 'anchor'
-const idlDir = path.join(__dirname, 'idl')
+const idlDir = path.join(__dirname, 'src/idl')
 const sdkDir = path.join(__dirname, 'src', 'generated')
 const binaryInstallDir = path.join(os.homedir(), '.cargo')
 

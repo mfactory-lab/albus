@@ -2,39 +2,35 @@
   "name": "@albus/sdk",
   "version": "0.0.6",
   "description": "Albus Protocol SDK",
-  "sideEffects": false,
-  "type": "module",
-  "main": "./src/index",
-  "_prod": {
-    "main": "./dist/index.cjs",
-    "module": "./dist/index.mjs",
-    "types": "./dist/index.d.ts",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.mjs",
-        "require": "./dist/index.cjs"
-      }
-    },
-    "files": [
-      "dist"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-sdk"
   },
-  "engines": {
-    "node": ">=16"
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    }
   },
+  "main": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
   "scripts": {
-    "build": "unbuild",
+    "dev": "vite build --watch",
+    "tsc": "tsc --noEmit && echo",
+    "build": "tsc --emitDeclarationOnly && vite build",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
-    "_prepare": "pnpm run build"
+    "prepare": "pnpm run build",
+    "test": "vitest",
+    "_build": "unbuild"
   },
   "dependencies": {
-    "@albus/core": "workspace:*",
+    "@albus/core": "*",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
