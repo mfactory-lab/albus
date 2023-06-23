@@ -40,7 +40,7 @@ use solana_program::{
 };
 
 pub const ALBUS_PROGRAM_ID: &str = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz";
-pub const ZKP_REQUEST_DISCRIMINATOR: &[u8] = &[196, 177, 30, 25, 231, 233, 97, 178];
+pub const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
 /// Returns the address of the Albus program.
 pub fn program_id() -> Pubkey {
@@ -48,14 +48,14 @@ pub fn program_id() -> Pubkey {
 }
 
 #[repr(u8)]
-pub enum ZKPRequestStatus {
+pub enum PrrofRequestStatus {
     Pending,
     Proved,
     Verified,
     Rejected,
 }
 
-impl TryFrom<u8> for ZKPRequestStatus {
+impl TryFrom<u8> for PrrofRequestStatus {
     type Error = ProgramError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -70,10 +70,10 @@ impl TryFrom<u8> for ZKPRequestStatus {
 }
 
 pub fn check_compliant(
-    zkp_request: &AccountInfo,
-    zkp_request_owner: Option<Pubkey>,
+    proof_request: &AccountInfo,
+    proof_request_owner: Option<Pubkey>,
 ) -> Result<(), ProgramError> {
-    let data = &zkp_request
+    let data = &proof_request
         .data
         .take()
         .try_into()
@@ -84,7 +84,7 @@ pub fn check_compliant(
 
     // Assert the account is owned by albus program
     if sol_memcmp(
-        zkp_request.owner.as_ref(),
+        proof_request.owner.as_ref(),
         albus_program_id.as_ref(),
         PUBKEY_BYTES,
     ) != 0
@@ -92,16 +92,16 @@ pub fn check_compliant(
         return Err(ProgramError::IllegalOwner);
     }
 
-    let (discriminator, _, _, owner, _, _, expired_at, _, _, [status], _) =
-        array_refs![data, 8, 32, 32, 32, 33, 8, 8, 8, 8, 1, 1];
+    let (discriminator, _, _, owner, _, expired_at, _, _, [status], _, _) =
+        array_refs![data, 8, 32, 32, 32, 8, 8, 8, 8, 1, 1, 25];
 
-    if discriminator != ZKP_REQUEST_DISCRIMINATOR {
+    if discriminator != PROOF_REQUEST_DISCRIMINATOR {
         msg!("Error: Invalid account discriminator!");
         return Err(ProgramError::InvalidAccountData);
     }
 
     // Checks if the provided `zkp_request_owner` is equal to zkp request's `owner`.
-    if let Some(key) = zkp_request_owner {
+    if let Some(key) = proof_request_owner {
         if sol_memcmp(key.as_ref(), owner, PUBKEY_BYTES) != 0 {
             msg!("Error: Invalid request owner!");
             return Err(ProgramError::InvalidAccountData);
@@ -109,7 +109,7 @@ pub fn check_compliant(
     }
 
     let expired_at = i64::from_le_bytes(*expired_at);
-    let status = ZKPRequestStatus::try_from(*status)?;
+    let status = PrrofRequestStatus::try_from(*status)?;
     let timestamp = Clock::get()?.unix_timestamp;
 
     if expired_at > 0 && expired_at < timestamp {
@@ -118,19 +118,19 @@ pub fn check_compliant(
     }
 
     match status {
-        ZKPRequestStatus::Verified => {
+        PrrofRequestStatus::Verified => {
             msg!("Verified!");
             Ok(())
         }
-        ZKPRequestStatus::Proved => {
+        PrrofRequestStatus::Proved => {
             msg!("Error: ZKP request is proved");
             Err(ProgramError::Custom(2))
         }
-        ZKPRequestStatus::Pending => {
+        PrrofRequestStatus::Pending => {
             msg!("Error: ZKP request is pending");
             Err(ProgramError::Custom(3))
         }
-        ZKPRequestStatus::Rejected => {
+        PrrofRequestStatus::Rejected => {
             msg!("Error: ZKP request is rejected");
             Err(ProgramError::Custom(4))
         }
@@ -174,7 +174,7 @@ mod test {
         let addr = Pubkey::new_unique();
         let user = Pubkey::new_unique();
         let lamp = &mut 0;
-        let mut data = get_zkp_request(ZKPRequestStatus::Verified, 0, user);
+        let mut data = get_proof_request(PrrofRequestStatus::Verified, 0, user);
 
         let acc = AccountInfo::new(
             &addr,
@@ -197,7 +197,7 @@ mod test {
         let program_id = program_id();
         let addr = Pubkey::new_unique();
         let lamports = &mut 0;
-        let mut data = get_zkp_request(ZKPRequestStatus::Proved, 1, Pubkey::new_unique());
+        let mut data = get_proof_request(PrrofRequestStatus::Proved, 1, Pubkey::new_unique());
 
         let acc = AccountInfo::new(
             &addr,
@@ -221,7 +221,7 @@ mod test {
         let addr = Pubkey::new_unique();
         let owner = Pubkey::new_unique();
         let lamports = &mut 0;
-        let mut data = get_zkp_request(ZKPRequestStatus::Verified, 0, owner);
+        let mut data = get_proof_request(PrrofRequestStatus::Verified, 0, owner);
 
         let acc = AccountInfo::new(
             &addr,
@@ -244,20 +244,19 @@ mod test {
         );
     }
 
-    fn get_zkp_request(status: ZKPRequestStatus, expired_at: i64, owner: Pubkey) -> Vec<u8> {
+    fn get_proof_request(status: PrrofRequestStatus, expired_at: i64, owner: Pubkey) -> Vec<u8> {
         [
-            ZKP_REQUEST_DISCRIMINATOR,
+            PROOF_REQUEST_DISCRIMINATOR,
             &Pubkey::new_unique().to_bytes(),
             &Pubkey::new_unique().to_bytes(),
             &owner.to_bytes(),
-            &[1],
-            &Pubkey::new_unique().to_bytes(),
             &0i64.to_le_bytes(),
             &expired_at.to_le_bytes(),
             &0i64.to_le_bytes(),
             &0i64.to_le_bytes(),
             &(status as u8).to_le_bytes(),
             &0u8.to_le_bytes(),
+            &[0u8; 25],
         ]
         .into_iter()
         .flatten()
