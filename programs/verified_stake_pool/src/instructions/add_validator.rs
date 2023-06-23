@@ -47,7 +47,7 @@ pub fn handle(ctx: Context<VerifiedAddValidator>) -> Result<()> {
 #[derive(Accounts)]
 pub struct VerifiedAddValidator<'info> {
     /// CHECK: Albus ZKP request
-    pub zkp_request: AccountInfo<'info>,
+    pub proof_request: AccountInfo<'info>,
 
     pub staker: Signer<'info>,
 

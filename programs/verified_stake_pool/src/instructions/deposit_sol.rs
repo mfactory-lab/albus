@@ -7,7 +7,7 @@ pub fn handle<'info>(
     amount: u64,
 ) -> Result<()> {
     check_compliant(
-        &ctx.accounts.zkp_request,
+        &ctx.accounts.proof_request,
         Some(ctx.accounts.authority.key()),
     )?;
 
@@ -67,7 +67,7 @@ pub fn handle<'info>(
 #[derive(Accounts)]
 pub struct VerifiedDepositSol<'info> {
     /// CHECK: Albus ZKP request
-    pub zkp_request: AccountInfo<'info>,
+    pub proof_request: AccountInfo<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
