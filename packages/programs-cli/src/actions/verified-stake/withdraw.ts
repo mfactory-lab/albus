@@ -33,7 +33,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stake: string
   amount: string
   destination: string
@@ -47,7 +47,7 @@ export async function withdraw(opts: Opts) {
       destination: new PublicKey(opts.destination),
       lamports: new BN(opts.amount),
       stake: new PublicKey(opts.stake),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

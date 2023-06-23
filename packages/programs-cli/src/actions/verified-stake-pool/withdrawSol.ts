@@ -26,7 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PublicKey } from '@solana/web3.js'
+import { Buffer } from 'node:buffer'
+import fs from 'node:fs'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { BN } from '@coral-xyz/anchor'
 import { STAKE_POOL_PROGRAM_ID, stakePoolInfo } from '@solana/spl-stake-pool'
@@ -34,11 +36,12 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stakePool: string
   source: string
   destination: string
   amount: string
+  keypair?: string
 }
 
 export async function withdrawSol(opts: Opts) {
@@ -47,8 +50,8 @@ export async function withdrawSol(opts: Opts) {
   const stakePool = await stakePoolInfo(stakePoolClient.connection, new PublicKey(opts.stakePool))
 
   let solWithdrawAuthority
-  if (stakePool.solWithdrawAuthority) {
-    solWithdrawAuthority = new PublicKey(stakePool.solWithdrawAuthority)
+  if (stakePool.solWithdrawAuthority && opts.keypair) {
+    solWithdrawAuthority = Keypair.fromSecretKey(Buffer.from(JSON.parse(fs.readFileSync(opts.keypair).toString())))
   }
 
   try {
@@ -62,7 +65,7 @@ export async function withdrawSol(opts: Opts) {
       stakePool: new PublicKey(opts.stakePool),
       stakePoolProgram: STAKE_POOL_PROGRAM_ID,
       stakePoolWithdrawAuthority: new PublicKey(stakePool.poolWithdrawAuthority),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
       solWithdrawAuthority,
     })
 

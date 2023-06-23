@@ -35,7 +35,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   swap: string
   min: string
   tokenIn: string
@@ -78,7 +78,7 @@ export async function swap(opts: Opts) {
       swap: tokenSwap.tokenSwap,
       swapDestination,
       swapSource,
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

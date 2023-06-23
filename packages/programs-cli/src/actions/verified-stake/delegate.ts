@@ -32,7 +32,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stake: string
   vote: string
 }
@@ -44,7 +44,7 @@ export async function delegate(opts: Opts) {
     const signature = await stakeClient.delegate({
       stake: new PublicKey(opts.stake),
       vote: new PublicKey(opts.vote),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

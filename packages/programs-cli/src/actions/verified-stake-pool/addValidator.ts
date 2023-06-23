@@ -35,7 +35,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stakePool: string
   stake: string
   validator: string
@@ -57,7 +57,7 @@ export async function addValidator(opts: Opts) {
       staker: stakerKeypair,
       validator: new PublicKey(opts.validator),
       validatorListStorage: new PublicKey(stakePool.validatorListStorageAccount),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

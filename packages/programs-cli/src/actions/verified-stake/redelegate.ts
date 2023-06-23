@@ -34,7 +34,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stake: string
   vote: string
   newStakePath: string
@@ -50,7 +50,7 @@ export async function redelegate(opts: Opts) {
       stake: new PublicKey(opts.stake),
       uninitializedStake: newStakeKeypair,
       vote: new PublicKey(opts.vote),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

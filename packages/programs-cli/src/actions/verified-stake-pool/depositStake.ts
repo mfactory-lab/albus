@@ -33,7 +33,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stake: string
   stakePool: string
   referrer: string
@@ -60,7 +60,7 @@ export async function depositStake(opts: Opts) {
       stakePoolWithdrawAuthority: new PublicKey(stakePool.poolWithdrawAuthority),
       validatorListStorage: new PublicKey(stakePool.validatorListStorageAccount),
       validatorStake: new PublicKey(opts.validatorStake),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

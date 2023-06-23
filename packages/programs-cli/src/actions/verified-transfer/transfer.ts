@@ -33,7 +33,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   receiver: string
   amount: string
 }
@@ -45,7 +45,7 @@ export async function transfer(opts: Opts) {
     const signature = await transferClient.transfer({
       amount: new BN(opts.amount),
       receiver: new PublicKey(opts.receiver),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

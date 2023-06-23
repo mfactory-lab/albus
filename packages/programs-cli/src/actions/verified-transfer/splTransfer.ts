@@ -34,7 +34,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   receiver: string
   amount: string
   mint: string
@@ -55,7 +55,7 @@ export async function splTransfer(opts: Opts) {
       receiver,
       source: source.address,
       tokenMint,
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

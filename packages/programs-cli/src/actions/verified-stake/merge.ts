@@ -32,7 +32,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   source: string
   destination: string
 }
@@ -44,7 +44,7 @@ export async function merge(opts: Opts) {
     const signature = await stakeClient.merge({
       destinationStake: new PublicKey(opts.source),
       sourceStake: new PublicKey(opts.destination),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)
