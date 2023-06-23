@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawSol
  * @category generated
  */
-export type WithdrawSolInstructionArgs = {
+export interface WithdrawSolInstructionArgs {
   amount: beet.bignum
 }
 /**
@@ -31,7 +31,7 @@ export const withdrawSolStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['amount', beet.u64],
   ],
-  'WithdrawSolInstructionArgs'
+  'WithdrawSolInstructionArgs',
 )
 /**
  * Accounts required by the _withdrawSol_ instruction
@@ -53,7 +53,7 @@ export const withdrawSolStruct = new beet.BeetArgsStruct<
  * @category WithdrawSol
  * @category generated
  */
-export type WithdrawSolInstructionAccounts = {
+export interface WithdrawSolInstructionAccounts {
   proofRequest: web3.PublicKey
   authority: web3.PublicKey
   stakePool: web3.PublicKey
@@ -88,7 +88,7 @@ export const withdrawSolInstructionDiscriminator = [
 export function createWithdrawSolInstruction(
   accounts: WithdrawSolInstructionAccounts,
   args: WithdrawSolInstructionArgs,
-  programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e')
+  programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e'),
 ) {
   const [data] = withdrawSolStruct.serialize({
     instructionDiscriminator: withdrawSolInstructionDiscriminator,

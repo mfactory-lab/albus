@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawAllTokenTypes
  * @category generated
  */
-export type WithdrawAllTokenTypesInstructionArgs = {
+export interface WithdrawAllTokenTypesInstructionArgs {
   poolTokenAmount: beet.bignum
   minimumTokenAAmount: beet.bignum
   minimumTokenBAmount: beet.bignum
@@ -35,7 +35,7 @@ export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
     ['minimumTokenAAmount', beet.u64],
     ['minimumTokenBAmount', beet.u64],
   ],
-  'WithdrawAllTokenTypesInstructionArgs'
+  'WithdrawAllTokenTypesInstructionArgs',
 )
 /**
  * Accounts required by the _withdrawAllTokenTypes_ instruction
@@ -56,7 +56,7 @@ export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
  * @category WithdrawAllTokenTypes
  * @category generated
  */
-export type WithdrawAllTokenTypesInstructionAccounts = {
+export interface WithdrawAllTokenTypesInstructionAccounts {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -90,7 +90,7 @@ export const withdrawAllTokenTypesInstructionDiscriminator = [
 export function createWithdrawAllTokenTypesInstruction(
   accounts: WithdrawAllTokenTypesInstructionAccounts,
   args: WithdrawAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
 ) {
   const [data] = withdrawAllTokenTypesStruct.serialize({
     instructionDiscriminator: withdrawAllTokenTypesInstructionDiscriminator,

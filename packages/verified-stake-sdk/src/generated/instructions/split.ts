@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category Split
  * @category generated
  */
-export type SplitInstructionArgs = {
+export interface SplitInstructionArgs {
   lamports: beet.bignum
 }
 /**
@@ -30,7 +30,7 @@ export const splitStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['lamports', beet.u64],
   ],
-  'SplitInstructionArgs'
+  'SplitInstructionArgs',
 )
 /**
  * Accounts required by the _split_ instruction
@@ -44,7 +44,7 @@ export const splitStruct = new beet.BeetArgsStruct<
  * @category Split
  * @category generated
  */
-export type SplitInstructionAccounts = {
+export interface SplitInstructionAccounts {
   splitStake: web3.PublicKey
   authorized: web3.PublicKey
   stake: web3.PublicKey
@@ -71,7 +71,7 @@ export const splitInstructionDiscriminator = [
 export function createSplitInstruction(
   accounts: SplitInstructionAccounts,
   args: SplitInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
 ) {
   const [data] = splitStruct.serialize({
     instructionDiscriminator: splitInstructionDiscriminator,

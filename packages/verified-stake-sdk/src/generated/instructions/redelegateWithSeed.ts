@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category RedelegateWithSeed
  * @category generated
  */
-export type RedelegateWithSeedInstructionArgs = {
+export interface RedelegateWithSeedInstructionArgs {
   seed: string
 }
 /**
@@ -30,7 +30,7 @@ export const redelegateWithSeedStruct = new beet.FixableBeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['seed', beet.utf8String],
   ],
-  'RedelegateWithSeedInstructionArgs'
+  'RedelegateWithSeedInstructionArgs',
 )
 /**
  * Accounts required by the _redelegateWithSeed_ instruction
@@ -47,7 +47,7 @@ export const redelegateWithSeedStruct = new beet.FixableBeetArgsStruct<
  * @category RedelegateWithSeed
  * @category generated
  */
-export type RedelegateWithSeedInstructionAccounts = {
+export interface RedelegateWithSeedInstructionAccounts {
   uninitializedStake: web3.PublicKey
   stake: web3.PublicKey
   base: web3.PublicKey
@@ -77,7 +77,7 @@ export const redelegateWithSeedInstructionDiscriminator = [
 export function createRedelegateWithSeedInstruction(
   accounts: RedelegateWithSeedInstructionAccounts,
   args: RedelegateWithSeedInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
 ) {
   const [data] = redelegateWithSeedStruct.serialize({
     instructionDiscriminator: redelegateWithSeedInstructionDiscriminator,

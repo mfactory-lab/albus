@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category DepositSingleToken
  * @category generated
  */
-export type DepositSingleTokenInstructionArgs = {
+export interface DepositSingleTokenInstructionArgs {
   sourceTokenAmount: beet.bignum
   minimumPoolTokenAmount: beet.bignum
 }
@@ -33,7 +33,7 @@ export const depositSingleTokenStruct = new beet.BeetArgsStruct<
     ['sourceTokenAmount', beet.u64],
     ['minimumPoolTokenAmount', beet.u64],
   ],
-  'DepositSingleTokenInstructionArgs'
+  'DepositSingleTokenInstructionArgs',
 )
 /**
  * Accounts required by the _depositSingleToken_ instruction
@@ -52,7 +52,7 @@ export const depositSingleTokenStruct = new beet.BeetArgsStruct<
  * @category DepositSingleToken
  * @category generated
  */
-export type DepositSingleTokenInstructionAccounts = {
+export interface DepositSingleTokenInstructionAccounts {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -84,7 +84,7 @@ export const depositSingleTokenInstructionDiscriminator = [
 export function createDepositSingleTokenInstruction(
   accounts: DepositSingleTokenInstructionAccounts,
   args: DepositSingleTokenInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
 ) {
   const [data] = depositSingleTokenStruct.serialize({
     instructionDiscriminator: depositSingleTokenInstructionDiscriminator,

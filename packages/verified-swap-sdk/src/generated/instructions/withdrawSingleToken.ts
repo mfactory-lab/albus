@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawSingleToken
  * @category generated
  */
-export type WithdrawSingleTokenInstructionArgs = {
+export interface WithdrawSingleTokenInstructionArgs {
   destinationTokenAmount: beet.bignum
   maximumPoolTokenAmount: beet.bignum
 }
@@ -33,7 +33,7 @@ export const withdrawSingleTokenStruct = new beet.BeetArgsStruct<
     ['destinationTokenAmount', beet.u64],
     ['maximumPoolTokenAmount', beet.u64],
   ],
-  'WithdrawSingleTokenInstructionArgs'
+  'WithdrawSingleTokenInstructionArgs',
 )
 /**
  * Accounts required by the _withdrawSingleToken_ instruction
@@ -53,7 +53,7 @@ export const withdrawSingleTokenStruct = new beet.BeetArgsStruct<
  * @category WithdrawSingleToken
  * @category generated
  */
-export type WithdrawSingleTokenInstructionAccounts = {
+export interface WithdrawSingleTokenInstructionAccounts {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -86,7 +86,7 @@ export const withdrawSingleTokenInstructionDiscriminator = [
 export function createWithdrawSingleTokenInstruction(
   accounts: WithdrawSingleTokenInstructionAccounts,
   args: WithdrawSingleTokenInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
 ) {
   const [data] = withdrawSingleTokenStruct.serialize({
     instructionDiscriminator: withdrawSingleTokenInstructionDiscriminator,

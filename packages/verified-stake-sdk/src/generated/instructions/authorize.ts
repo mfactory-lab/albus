@@ -8,14 +8,15 @@
 import * as web3 from '@solana/web3.js'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 import * as beet from '@metaplex-foundation/beet'
-import { StakeAuthorize, stakeAuthorizeBeet } from '../types/StakeAuthorize'
+import type { StakeAuthorize } from '../types/StakeAuthorize'
+import { stakeAuthorizeBeet } from '../types/StakeAuthorize'
 
 /**
  * @category Instructions
  * @category Authorize
  * @category generated
  */
-export type AuthorizeInstructionArgs = {
+export interface AuthorizeInstructionArgs {
   newAuthorized: web3.PublicKey
   stakeAuthorize: StakeAuthorize
 }
@@ -34,7 +35,7 @@ export const authorizeStruct = new beet.BeetArgsStruct<
     ['newAuthorized', beetSolana.publicKey],
     ['stakeAuthorize', stakeAuthorizeBeet],
   ],
-  'AuthorizeInstructionArgs'
+  'AuthorizeInstructionArgs',
 )
 /**
  * Accounts required by the _authorize_ instruction
@@ -48,7 +49,7 @@ export const authorizeStruct = new beet.BeetArgsStruct<
  * @category Authorize
  * @category generated
  */
-export type AuthorizeInstructionAccounts = {
+export interface AuthorizeInstructionAccounts {
   stake: web3.PublicKey
   authorized: web3.PublicKey
   proofRequest: web3.PublicKey
@@ -74,7 +75,7 @@ export const authorizeInstructionDiscriminator = [
 export function createAuthorizeInstruction(
   accounts: AuthorizeInstructionAccounts,
   args: AuthorizeInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
 ) {
   const [data] = authorizeStruct.serialize({
     instructionDiscriminator: authorizeInstructionDiscriminator,
