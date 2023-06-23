@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category DepositSol
  * @category generated
  */
-export interface DepositSolInstructionArgs {
+export type DepositSolInstructionArgs = {
   amount: beet.bignum
 }
 /**
@@ -31,12 +31,12 @@ export const depositSolStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['amount', beet.u64],
   ],
-  'DepositSolInstructionArgs',
+  'DepositSolInstructionArgs'
 )
 /**
  * Accounts required by the _depositSol_ instruction
  *
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [_writable_, **signer**] authority
  * @property [_writable_] stakePool
  * @property [] stakePoolWithdrawAuthority
@@ -50,8 +50,8 @@ export const depositSolStruct = new beet.BeetArgsStruct<
  * @category DepositSol
  * @category generated
  */
-export interface DepositSolInstructionAccounts {
-  zkpRequest: web3.PublicKey
+export type DepositSolInstructionAccounts = {
+  proofRequest: web3.PublicKey
   authority: web3.PublicKey
   stakePool: web3.PublicKey
   stakePoolWithdrawAuthority: web3.PublicKey
@@ -83,7 +83,7 @@ export const depositSolInstructionDiscriminator = [
 export function createDepositSolInstruction(
   accounts: DepositSolInstructionAccounts,
   args: DepositSolInstructionArgs,
-  programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e'),
+  programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e')
 ) {
   const [data] = depositSolStruct.serialize({
     instructionDiscriminator: depositSolInstructionDiscriminator,
@@ -91,7 +91,7 @@ export function createDepositSolInstruction(
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

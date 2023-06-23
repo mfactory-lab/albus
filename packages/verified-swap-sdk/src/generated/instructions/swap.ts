@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category Swap
  * @category generated
  */
-export interface SwapInstructionArgs {
+export type SwapInstructionArgs = {
   amountIn: beet.bignum
   minimumAmountOut: beet.bignum
 }
@@ -33,7 +33,7 @@ export const swapStruct = new beet.BeetArgsStruct<
     ['amountIn', beet.u64],
     ['minimumAmountOut', beet.u64],
   ],
-  'SwapInstructionArgs',
+  'SwapInstructionArgs'
 )
 /**
  * Accounts required by the _swap_ instruction
@@ -48,12 +48,12 @@ export const swapStruct = new beet.BeetArgsStruct<
  * @property [_writable_] poolMint
  * @property [_writable_] poolFee
  * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @category Instructions
  * @category Swap
  * @category generated
  */
-export interface SwapInstructionAccounts {
+export type SwapInstructionAccounts = {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -64,7 +64,7 @@ export interface SwapInstructionAccounts {
   poolMint: web3.PublicKey
   poolFee: web3.PublicKey
   splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -86,7 +86,7 @@ export const swapInstructionDiscriminator = [
 export function createSwapInstruction(
   accounts: SwapInstructionAccounts,
   args: SwapInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
 ) {
   const [data] = swapStruct.serialize({
     instructionDiscriminator: swapInstructionDiscriminator,
@@ -144,7 +144,7 @@ export function createSwapInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

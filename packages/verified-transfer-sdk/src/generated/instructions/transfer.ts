@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category Transfer
  * @category generated
  */
-export interface TransferInstructionArgs {
+export type TransferInstructionArgs = {
   amount: beet.bignum
 }
 /**
@@ -30,22 +30,22 @@ export const transferStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['amount', beet.u64],
   ],
-  'TransferInstructionArgs',
+  'TransferInstructionArgs'
 )
 /**
  * Accounts required by the _transfer_ instruction
  *
  * @property [_writable_, **signer**] sender
  * @property [_writable_] receiver
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @category Instructions
  * @category Transfer
  * @category generated
  */
-export interface TransferInstructionAccounts {
+export type TransferInstructionAccounts = {
   sender: web3.PublicKey
   receiver: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -67,7 +67,7 @@ export const transferInstructionDiscriminator = [
 export function createTransferInstruction(
   accounts: TransferInstructionAccounts,
   args: TransferInstructionArgs,
-  programId = new web3.PublicKey('ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2'),
+  programId = new web3.PublicKey('ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2')
 ) {
   const [data] = transferStruct.serialize({
     instructionDiscriminator: transferInstructionDiscriminator,
@@ -85,7 +85,7 @@ export function createTransferInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category SplitWithSeed
  * @category generated
  */
-export interface SplitWithSeedInstructionArgs {
+export type SplitWithSeedInstructionArgs = {
   lamports: beet.bignum
   seed: string
 }
@@ -32,7 +32,7 @@ export const splitWithSeedStruct = new beet.FixableBeetArgsStruct<
     ['lamports', beet.u64],
     ['seed', beet.utf8String],
   ],
-  'SplitWithSeedInstructionArgs',
+  'SplitWithSeedInstructionArgs'
 )
 /**
  * Accounts required by the _splitWithSeed_ instruction
@@ -41,18 +41,18 @@ export const splitWithSeedStruct = new beet.FixableBeetArgsStruct<
  * @property [**signer**] authorized
  * @property [**signer**] base
  * @property [_writable_] stake
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @category Instructions
  * @category SplitWithSeed
  * @category generated
  */
-export interface SplitWithSeedInstructionAccounts {
+export type SplitWithSeedInstructionAccounts = {
   splitStake: web3.PublicKey
   authorized: web3.PublicKey
   base: web3.PublicKey
   stake: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -75,7 +75,7 @@ export const splitWithSeedInstructionDiscriminator = [
 export function createSplitWithSeedInstruction(
   accounts: SplitWithSeedInstructionAccounts,
   args: SplitWithSeedInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
 ) {
   const [data] = splitWithSeedStruct.serialize({
     instructionDiscriminator: splitWithSeedInstructionDiscriminator,
@@ -103,7 +103,7 @@ export function createSplitWithSeedInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

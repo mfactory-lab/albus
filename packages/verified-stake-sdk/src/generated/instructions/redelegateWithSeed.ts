@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category RedelegateWithSeed
  * @category generated
  */
-export interface RedelegateWithSeedInstructionArgs {
+export type RedelegateWithSeedInstructionArgs = {
   seed: string
 }
 /**
@@ -30,7 +30,7 @@ export const redelegateWithSeedStruct = new beet.FixableBeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['seed', beet.utf8String],
   ],
-  'RedelegateWithSeedInstructionArgs',
+  'RedelegateWithSeedInstructionArgs'
 )
 /**
  * Accounts required by the _redelegateWithSeed_ instruction
@@ -40,20 +40,20 @@ export const redelegateWithSeedStruct = new beet.FixableBeetArgsStruct<
  * @property [**signer**] base
  * @property [] vote
  * @property [**signer**] authorized
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] stakeConfig
  * @category Instructions
  * @category RedelegateWithSeed
  * @category generated
  */
-export interface RedelegateWithSeedInstructionAccounts {
+export type RedelegateWithSeedInstructionAccounts = {
   uninitializedStake: web3.PublicKey
   stake: web3.PublicKey
   base: web3.PublicKey
   vote: web3.PublicKey
   authorized: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   systemProgram?: web3.PublicKey
   stakeConfig: web3.PublicKey
@@ -77,7 +77,7 @@ export const redelegateWithSeedInstructionDiscriminator = [
 export function createRedelegateWithSeedInstruction(
   accounts: RedelegateWithSeedInstructionAccounts,
   args: RedelegateWithSeedInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
 ) {
   const [data] = redelegateWithSeedStruct.serialize({
     instructionDiscriminator: redelegateWithSeedInstructionDiscriminator,
@@ -110,7 +110,7 @@ export function createRedelegateWithSeedInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

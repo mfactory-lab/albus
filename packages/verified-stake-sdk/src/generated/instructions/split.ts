@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category Split
  * @category generated
  */
-export interface SplitInstructionArgs {
+export type SplitInstructionArgs = {
   lamports: beet.bignum
 }
 /**
@@ -30,7 +30,7 @@ export const splitStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['lamports', beet.u64],
   ],
-  'SplitInstructionArgs',
+  'SplitInstructionArgs'
 )
 /**
  * Accounts required by the _split_ instruction
@@ -38,17 +38,17 @@ export const splitStruct = new beet.BeetArgsStruct<
  * @property [_writable_, **signer**] splitStake
  * @property [**signer**] authorized
  * @property [_writable_] stake
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @category Instructions
  * @category Split
  * @category generated
  */
-export interface SplitInstructionAccounts {
+export type SplitInstructionAccounts = {
   splitStake: web3.PublicKey
   authorized: web3.PublicKey
   stake: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -71,7 +71,7 @@ export const splitInstructionDiscriminator = [
 export function createSplitInstruction(
   accounts: SplitInstructionAccounts,
   args: SplitInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
 ) {
   const [data] = splitStruct.serialize({
     instructionDiscriminator: splitInstructionDiscriminator,
@@ -94,7 +94,7 @@ export function createSplitInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

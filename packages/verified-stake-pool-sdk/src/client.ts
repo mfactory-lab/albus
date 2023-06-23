@@ -27,8 +27,8 @@ export class VerifiedStakePoolClient {
    * Deposit SOL
    */
   async depositSol(props: DepositSolProps, opts?: ConfirmOptions) {
-    let anchorRemainingAccounts
-    let signers
+    let anchorRemainingAccounts: web3.AccountMeta[]
+    let signers: web3.Signer[]
     if (props.solDepositAuthority) {
       anchorRemainingAccounts = [{
         pubkey: props.solDepositAuthority.publicKey,
@@ -51,7 +51,7 @@ export class VerifiedStakePoolClient {
         reserveStake: props.reserveStake,
         stakePool: props.stakePool,
         stakePoolWithdrawAuthority: props.stakePoolWithdrawAuthority,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
         anchorRemainingAccounts,
         stakePoolProgram: props.stakePoolProgram,
       },
@@ -68,8 +68,8 @@ export class VerifiedStakePoolClient {
    * Deposit stake account
    */
   async depositStake(props: DepositStakeProps, opts?: ConfirmOptions) {
-    let anchorRemainingAccounts
-    let signers
+    let anchorRemainingAccounts: web3.AccountMeta[]
+    let signers: web3.Signer[]
     if (props.stakePoolDepositAuthoritySigner) {
       anchorRemainingAccounts = [{
         pubkey: props.stakePoolDepositAuthoritySigner.publicKey,
@@ -99,7 +99,7 @@ export class VerifiedStakePoolClient {
         stakeProgram: this.stakeProgram,
         validatorListStorage: props.validatorListStorage,
         validatorStake: props.validatorStake,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
         anchorRemainingAccounts,
         stakePoolProgram: props.stakePoolProgram,
       },
@@ -113,8 +113,8 @@ export class VerifiedStakePoolClient {
    * Withdraw SOL
    */
   async withdrawSol(props: WithdrawSolProps, opts?: ConfirmOptions) {
-    let anchorRemainingAccounts
-    let signers
+    let anchorRemainingAccounts: web3.AccountMeta[]
+    let signers: web3.Signer[]
     if (props.solWithdrawAuthority) {
       anchorRemainingAccounts = [{
         pubkey: props.solWithdrawAuthority.publicKey,
@@ -140,7 +140,7 @@ export class VerifiedStakePoolClient {
         stakePool: props.stakePool,
         stakePoolWithdrawAuthority: props.stakePoolWithdrawAuthority,
         stakeProgram: this.stakeProgram,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
         anchorRemainingAccounts,
         stakePoolProgram: props.stakePoolProgram,
       },
@@ -171,7 +171,7 @@ export class VerifiedStakePoolClient {
         stakeToReceive: props.stakeToReceive,
         stakeToSplit: props.stakeToSplit,
         validatorListStorage: props.validatorListStorage,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
         stakePoolProgram: props.stakePoolProgram,
       },
       {
@@ -200,7 +200,7 @@ export class VerifiedStakePoolClient {
         staker: props.staker.publicKey,
         validator: props.validator,
         validatorListStorage: props.validatorListStorage,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
         stakePoolProgram: props.stakePoolProgram,
       },
     )
@@ -211,7 +211,7 @@ export class VerifiedStakePoolClient {
 }
 
 export interface DepositSolProps {
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   managerFeeAccount: PublicKey
   poolMint: PublicKey
   poolTokensTo: PublicKey
@@ -225,7 +225,7 @@ export interface DepositSolProps {
 }
 
 export interface DepositStakeProps {
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   managerFeeAccount: PublicKey
   poolMint: PublicKey
   poolTokensTo: PublicKey
@@ -242,7 +242,7 @@ export interface DepositStakeProps {
 }
 
 export interface WithdrawSolProps {
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   managerFeeAccount: PublicKey
   poolMint: PublicKey
   lamportsTo: PublicKey
@@ -256,7 +256,7 @@ export interface WithdrawSolProps {
 }
 
 export interface WithdrawStakeProps {
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   managerFeeAccount: PublicKey
   poolMint: PublicKey
   stakeToSplit: PublicKey
@@ -271,7 +271,7 @@ export interface WithdrawStakeProps {
 }
 
 export interface AddValidatorProps {
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   stake: PublicKey
   staker: web3.Signer
   stakePool: PublicKey

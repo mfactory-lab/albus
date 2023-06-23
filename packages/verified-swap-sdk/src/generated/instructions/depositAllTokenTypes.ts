@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category DepositAllTokenTypes
  * @category generated
  */
-export interface DepositAllTokenTypesInstructionArgs {
+export type DepositAllTokenTypesInstructionArgs = {
   poolTokenAmount: beet.bignum
   maximumTokenAAmount: beet.bignum
   maximumTokenBAmount: beet.bignum
@@ -35,7 +35,7 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
     ['maximumTokenAAmount', beet.u64],
     ['maximumTokenBAmount', beet.u64],
   ],
-  'DepositAllTokenTypesInstructionArgs',
+  'DepositAllTokenTypesInstructionArgs'
 )
 /**
  * Accounts required by the _depositAllTokenTypes_ instruction
@@ -50,12 +50,12 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
  * @property [_writable_] poolMint
  * @property [_writable_] destination
  * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @category Instructions
  * @category DepositAllTokenTypes
  * @category generated
  */
-export interface DepositAllTokenTypesInstructionAccounts {
+export type DepositAllTokenTypesInstructionAccounts = {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -66,7 +66,7 @@ export interface DepositAllTokenTypesInstructionAccounts {
   poolMint: web3.PublicKey
   destination: web3.PublicKey
   splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -88,7 +88,7 @@ export const depositAllTokenTypesInstructionDiscriminator = [
 export function createDepositAllTokenTypesInstruction(
   accounts: DepositAllTokenTypesInstructionAccounts,
   args: DepositAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
 ) {
   const [data] = depositAllTokenTypesStruct.serialize({
     instructionDiscriminator: depositAllTokenTypesInstructionDiscriminator,
@@ -146,7 +146,7 @@ export function createDepositAllTokenTypesInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

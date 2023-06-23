@@ -20,6 +20,12 @@ verified-swap = "8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR"
 verified-stake = "CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr"
 verified-stake-pool = "HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e"
 
+[programs.devnet]
+verified-transfer = "ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2"
+verified-swap = "8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR"
+verified-stake = "CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr"
+verified-stake-pool = "HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e"
+
 # solana program dump metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s ./target/deploy/metadata.so
 [[test.genesis]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"

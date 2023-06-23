@@ -17,7 +17,7 @@ export const delegateStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'DelegateInstructionArgs',
+  'DelegateInstructionArgs'
 )
 /**
  * Accounts required by the _delegate_ instruction
@@ -25,7 +25,7 @@ export const delegateStruct = new beet.BeetArgsStruct<{
  * @property [_writable_] stake
  * @property [] vote
  * @property [**signer**] authorized
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] clock
  * @property [] stakeHistory
@@ -34,11 +34,11 @@ export const delegateStruct = new beet.BeetArgsStruct<{
  * @category Delegate
  * @category generated
  */
-export interface DelegateInstructionAccounts {
+export type DelegateInstructionAccounts = {
   stake: web3.PublicKey
   vote: web3.PublicKey
   authorized: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   clock: web3.PublicKey
   stakeHistory: web3.PublicKey
@@ -60,7 +60,7 @@ export const delegateInstructionDiscriminator = [
  */
 export function createDelegateInstruction(
   accounts: DelegateInstructionAccounts,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
 ) {
   const [data] = delegateStruct.serialize({
     instructionDiscriminator: delegateInstructionDiscriminator,
@@ -82,7 +82,7 @@ export function createDelegateInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

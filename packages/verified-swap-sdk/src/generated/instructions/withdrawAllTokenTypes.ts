@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawAllTokenTypes
  * @category generated
  */
-export interface WithdrawAllTokenTypesInstructionArgs {
+export type WithdrawAllTokenTypesInstructionArgs = {
   poolTokenAmount: beet.bignum
   minimumTokenAAmount: beet.bignum
   minimumTokenBAmount: beet.bignum
@@ -35,7 +35,7 @@ export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
     ['minimumTokenAAmount', beet.u64],
     ['minimumTokenBAmount', beet.u64],
   ],
-  'WithdrawAllTokenTypesInstructionArgs',
+  'WithdrawAllTokenTypesInstructionArgs'
 )
 /**
  * Accounts required by the _withdrawAllTokenTypes_ instruction
@@ -51,12 +51,12 @@ export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
  * @property [_writable_] source
  * @property [_writable_] feeAccount
  * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @category Instructions
  * @category WithdrawAllTokenTypes
  * @category generated
  */
-export interface WithdrawAllTokenTypesInstructionAccounts {
+export type WithdrawAllTokenTypesInstructionAccounts = {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -68,7 +68,7 @@ export interface WithdrawAllTokenTypesInstructionAccounts {
   source: web3.PublicKey
   feeAccount: web3.PublicKey
   splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -90,7 +90,7 @@ export const withdrawAllTokenTypesInstructionDiscriminator = [
 export function createWithdrawAllTokenTypesInstruction(
   accounts: WithdrawAllTokenTypesInstructionAccounts,
   args: WithdrawAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
 ) {
   const [data] = withdrawAllTokenTypesStruct.serialize({
     instructionDiscriminator: withdrawAllTokenTypesInstructionDiscriminator,
@@ -153,7 +153,7 @@ export function createWithdrawAllTokenTypesInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

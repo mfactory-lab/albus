@@ -7,15 +7,14 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { StakeAuthorize } from '../types/StakeAuthorize'
-import { stakeAuthorizeBeet } from '../types/StakeAuthorize'
+import { StakeAuthorize, stakeAuthorizeBeet } from '../types/StakeAuthorize'
 
 /**
  * @category Instructions
  * @category AuthorizeChecked
  * @category generated
  */
-export interface AuthorizeCheckedInstructionArgs {
+export type AuthorizeCheckedInstructionArgs = {
   stakeAuthorize: StakeAuthorize
 }
 /**
@@ -32,7 +31,7 @@ export const authorizeCheckedStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['stakeAuthorize', stakeAuthorizeBeet],
   ],
-  'AuthorizeCheckedInstructionArgs',
+  'AuthorizeCheckedInstructionArgs'
 )
 /**
  * Accounts required by the _authorizeChecked_ instruction
@@ -40,18 +39,18 @@ export const authorizeCheckedStruct = new beet.BeetArgsStruct<
  * @property [_writable_] stake
  * @property [**signer**] newAuthorized
  * @property [**signer**] authorized
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] clock
  * @category Instructions
  * @category AuthorizeChecked
  * @category generated
  */
-export interface AuthorizeCheckedInstructionAccounts {
+export type AuthorizeCheckedInstructionAccounts = {
   stake: web3.PublicKey
   newAuthorized: web3.PublicKey
   authorized: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   clock: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -74,7 +73,7 @@ export const authorizeCheckedInstructionDiscriminator = [
 export function createAuthorizeCheckedInstruction(
   accounts: AuthorizeCheckedInstructionAccounts,
   args: AuthorizeCheckedInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
 ) {
   const [data] = authorizeCheckedStruct.serialize({
     instructionDiscriminator: authorizeCheckedInstructionDiscriminator,
@@ -97,7 +96,7 @@ export function createAuthorizeCheckedInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

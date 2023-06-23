@@ -47,7 +47,7 @@ export class VerifiedStakeClient {
         splitStake: props.splitStake.publicKey,
         stake: props.stake,
         stakeProgram: this.stakeProgram,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         lamports: props.lamports,
@@ -69,7 +69,7 @@ export class VerifiedStakeClient {
         splitStake: props.splitStake.publicKey,
         stake: props.stake,
         stakeProgram: this.stakeProgram,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         lamports: props.lamports,
@@ -93,7 +93,7 @@ export class VerifiedStakeClient {
         sourceStake: props.sourceStake,
         stakeHistory: this.stakeHistory,
         stakeProgram: this.stakeProgram,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
     )
 
@@ -113,7 +113,7 @@ export class VerifiedStakeClient {
         stakeHistory: this.stakeHistory,
         stakeProgram: this.stakeProgram,
         withdrawer: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         lamports: props.lamports,
@@ -137,7 +137,7 @@ export class VerifiedStakeClient {
         stakeHistory: this.stakeHistory,
         stakeProgram: this.stakeProgram,
         vote: props.vote,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
     )
 
@@ -157,7 +157,7 @@ export class VerifiedStakeClient {
         stakeProgram: this.stakeProgram,
         uninitializedStake: props.uninitializedStake.publicKey,
         vote: props.vote,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
     )
 
@@ -178,7 +178,7 @@ export class VerifiedStakeClient {
         stakeProgram: this.stakeProgram,
         uninitializedStake: props.uninitializedStake,
         vote: props.vote,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         seed: props.seed,
@@ -199,7 +199,7 @@ export class VerifiedStakeClient {
         clock: this.clock,
         stake: props.stake,
         stakeProgram: this.stakeProgram,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         newAuthorized: props.newAuthorized,
@@ -222,7 +222,7 @@ export class VerifiedStakeClient {
         newAuthorized: props.newAuthorized.publicKey,
         stake: props.stake,
         stakeProgram: this.stakeProgram,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         stakeAuthorize: props.stakeAuthorized,
@@ -237,14 +237,14 @@ export class VerifiedStakeClient {
 export interface SplitProps {
   stake: PublicKey
   splitStake: Keypair
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   lamports: BN
 }
 
 export interface SplitWithSeedProps {
   stake: PublicKey
   splitStake: Keypair
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   base: Keypair
   seed: string
   lamports: BN
@@ -253,27 +253,27 @@ export interface SplitWithSeedProps {
 export interface MergeProps {
   destinationStake: PublicKey
   sourceStake: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
 }
 
 export interface WithdrawProps {
   stake: PublicKey
   destination: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   lamports: BN
 }
 
 export interface DelegateProps {
   stake: PublicKey
   vote: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
 }
 
 export interface RedelegateProps {
   stake: PublicKey
   vote: PublicKey
   uninitializedStake: Keypair
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
 }
 
 export interface RedelegateWithSeedProps {
@@ -282,19 +282,19 @@ export interface RedelegateWithSeedProps {
   base: Keypair
   seed: string
   uninitializedStake: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
 }
 
 export interface AuthorizeProps {
   stake: PublicKey
   newAuthorized: PublicKey
   stakeAuthorized: StakeAuthorize
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
 }
 
 export interface AuthorizeCheckedProps {
   stake: PublicKey
   newAuthorized: Keypair
   stakeAuthorized: StakeAuthorize
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
 }

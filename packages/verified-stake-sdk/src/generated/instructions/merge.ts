@@ -17,7 +17,7 @@ export const mergeStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'MergeInstructionArgs',
+  'MergeInstructionArgs'
 )
 /**
  * Accounts required by the _merge_ instruction
@@ -25,7 +25,7 @@ export const mergeStruct = new beet.BeetArgsStruct<{
  * @property [_writable_] destinationStake
  * @property [**signer**] authorized
  * @property [_writable_] sourceStake
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] clock
  * @property [] stakeHistory
@@ -33,11 +33,11 @@ export const mergeStruct = new beet.BeetArgsStruct<{
  * @category Merge
  * @category generated
  */
-export interface MergeInstructionAccounts {
+export type MergeInstructionAccounts = {
   destinationStake: web3.PublicKey
   authorized: web3.PublicKey
   sourceStake: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   clock: web3.PublicKey
   stakeHistory: web3.PublicKey
@@ -58,7 +58,7 @@ export const mergeInstructionDiscriminator = [
  */
 export function createMergeInstruction(
   accounts: MergeInstructionAccounts,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
 ) {
   const [data] = mergeStruct.serialize({
     instructionDiscriminator: mergeInstructionDiscriminator,
@@ -80,7 +80,7 @@ export function createMergeInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

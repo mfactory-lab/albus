@@ -8,15 +8,14 @@
 import * as web3 from '@solana/web3.js'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 import * as beet from '@metaplex-foundation/beet'
-import type { StakeAuthorize } from '../types/StakeAuthorize'
-import { stakeAuthorizeBeet } from '../types/StakeAuthorize'
+import { StakeAuthorize, stakeAuthorizeBeet } from '../types/StakeAuthorize'
 
 /**
  * @category Instructions
  * @category Authorize
  * @category generated
  */
-export interface AuthorizeInstructionArgs {
+export type AuthorizeInstructionArgs = {
   newAuthorized: web3.PublicKey
   stakeAuthorize: StakeAuthorize
 }
@@ -35,24 +34,24 @@ export const authorizeStruct = new beet.BeetArgsStruct<
     ['newAuthorized', beetSolana.publicKey],
     ['stakeAuthorize', stakeAuthorizeBeet],
   ],
-  'AuthorizeInstructionArgs',
+  'AuthorizeInstructionArgs'
 )
 /**
  * Accounts required by the _authorize_ instruction
  *
  * @property [_writable_] stake
  * @property [**signer**] authorized
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] clock
  * @category Instructions
  * @category Authorize
  * @category generated
  */
-export interface AuthorizeInstructionAccounts {
+export type AuthorizeInstructionAccounts = {
   stake: web3.PublicKey
   authorized: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   clock: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -75,7 +74,7 @@ export const authorizeInstructionDiscriminator = [
 export function createAuthorizeInstruction(
   accounts: AuthorizeInstructionAccounts,
   args: AuthorizeInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
 ) {
   const [data] = authorizeStruct.serialize({
     instructionDiscriminator: authorizeInstructionDiscriminator,
@@ -93,7 +92,7 @@ export function createAuthorizeInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

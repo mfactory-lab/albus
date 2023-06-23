@@ -17,12 +17,12 @@ export const addValidatorStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'AddValidatorInstructionArgs',
+  'AddValidatorInstructionArgs'
 )
 /**
  * Accounts required by the _addValidator_ instruction
  *
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [**signer**] staker
  * @property [_writable_, **signer**] funder
  * @property [_writable_] stakePool
@@ -39,8 +39,8 @@ export const addValidatorStruct = new beet.BeetArgsStruct<{
  * @category AddValidator
  * @category generated
  */
-export interface AddValidatorInstructionAccounts {
-  zkpRequest: web3.PublicKey
+export type AddValidatorInstructionAccounts = {
+  proofRequest: web3.PublicKey
   staker: web3.PublicKey
   funder: web3.PublicKey
   stakePool: web3.PublicKey
@@ -72,14 +72,14 @@ export const addValidatorInstructionDiscriminator = [
  */
 export function createAddValidatorInstruction(
   accounts: AddValidatorInstructionAccounts,
-  programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e'),
+  programId = new web3.PublicKey('HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e')
 ) {
   const [data] = addValidatorStruct.serialize({
     instructionDiscriminator: addValidatorInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

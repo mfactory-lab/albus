@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category DepositSingleToken
  * @category generated
  */
-export interface DepositSingleTokenInstructionArgs {
+export type DepositSingleTokenInstructionArgs = {
   sourceTokenAmount: beet.bignum
   minimumPoolTokenAmount: beet.bignum
 }
@@ -33,7 +33,7 @@ export const depositSingleTokenStruct = new beet.BeetArgsStruct<
     ['sourceTokenAmount', beet.u64],
     ['minimumPoolTokenAmount', beet.u64],
   ],
-  'DepositSingleTokenInstructionArgs',
+  'DepositSingleTokenInstructionArgs'
 )
 /**
  * Accounts required by the _depositSingleToken_ instruction
@@ -47,12 +47,12 @@ export const depositSingleTokenStruct = new beet.BeetArgsStruct<
  * @property [_writable_] poolMint
  * @property [_writable_] destination
  * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @category Instructions
  * @category DepositSingleToken
  * @category generated
  */
-export interface DepositSingleTokenInstructionAccounts {
+export type DepositSingleTokenInstructionAccounts = {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -62,7 +62,7 @@ export interface DepositSingleTokenInstructionAccounts {
   poolMint: web3.PublicKey
   destination: web3.PublicKey
   splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -84,7 +84,7 @@ export const depositSingleTokenInstructionDiscriminator = [
 export function createDepositSingleTokenInstruction(
   accounts: DepositSingleTokenInstructionAccounts,
   args: DepositSingleTokenInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
 ) {
   const [data] = depositSingleTokenStruct.serialize({
     instructionDiscriminator: depositSingleTokenInstructionDiscriminator,
@@ -137,7 +137,7 @@ export function createDepositSingleTokenInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

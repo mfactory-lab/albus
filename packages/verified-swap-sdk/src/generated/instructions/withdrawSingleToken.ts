@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawSingleToken
  * @category generated
  */
-export interface WithdrawSingleTokenInstructionArgs {
+export type WithdrawSingleTokenInstructionArgs = {
   destinationTokenAmount: beet.bignum
   maximumPoolTokenAmount: beet.bignum
 }
@@ -33,7 +33,7 @@ export const withdrawSingleTokenStruct = new beet.BeetArgsStruct<
     ['destinationTokenAmount', beet.u64],
     ['maximumPoolTokenAmount', beet.u64],
   ],
-  'WithdrawSingleTokenInstructionArgs',
+  'WithdrawSingleTokenInstructionArgs'
 )
 /**
  * Accounts required by the _withdrawSingleToken_ instruction
@@ -48,12 +48,12 @@ export const withdrawSingleTokenStruct = new beet.BeetArgsStruct<
  * @property [_writable_] destination
  * @property [_writable_] feeAccount
  * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @category Instructions
  * @category WithdrawSingleToken
  * @category generated
  */
-export interface WithdrawSingleTokenInstructionAccounts {
+export type WithdrawSingleTokenInstructionAccounts = {
   swap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -64,7 +64,7 @@ export interface WithdrawSingleTokenInstructionAccounts {
   destination: web3.PublicKey
   feeAccount: web3.PublicKey
   splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -86,7 +86,7 @@ export const withdrawSingleTokenInstructionDiscriminator = [
 export function createWithdrawSingleTokenInstruction(
   accounts: WithdrawSingleTokenInstructionAccounts,
   args: WithdrawSingleTokenInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR')
 ) {
   const [data] = withdrawSingleTokenStruct.serialize({
     instructionDiscriminator: withdrawSingleTokenInstructionDiscriminator,
@@ -144,7 +144,7 @@ export function createWithdrawSingleTokenInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

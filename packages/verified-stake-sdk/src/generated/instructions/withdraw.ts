@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category Withdraw
  * @category generated
  */
-export interface WithdrawInstructionArgs {
+export type WithdrawInstructionArgs = {
   lamports: beet.bignum
 }
 /**
@@ -30,7 +30,7 @@ export const withdrawStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['lamports', beet.u64],
   ],
-  'WithdrawInstructionArgs',
+  'WithdrawInstructionArgs'
 )
 /**
  * Accounts required by the _withdraw_ instruction
@@ -38,7 +38,7 @@ export const withdrawStruct = new beet.BeetArgsStruct<
  * @property [_writable_] stake
  * @property [**signer**] withdrawer
  * @property [_writable_] destination
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] clock
  * @property [] stakeHistory
@@ -46,11 +46,11 @@ export const withdrawStruct = new beet.BeetArgsStruct<
  * @category Withdraw
  * @category generated
  */
-export interface WithdrawInstructionAccounts {
+export type WithdrawInstructionAccounts = {
   stake: web3.PublicKey
   withdrawer: web3.PublicKey
   destination: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   clock: web3.PublicKey
   stakeHistory: web3.PublicKey
@@ -74,7 +74,7 @@ export const withdrawInstructionDiscriminator = [
 export function createWithdrawInstruction(
   accounts: WithdrawInstructionAccounts,
   args: WithdrawInstructionArgs,
-  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr'),
+  programId = new web3.PublicKey('CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr')
 ) {
   const [data] = withdrawStruct.serialize({
     instructionDiscriminator: withdrawInstructionDiscriminator,
@@ -97,7 +97,7 @@ export function createWithdrawInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },
