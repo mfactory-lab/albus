@@ -2617,7 +2617,7 @@ dependencies = [
 name = "verified-stake"
 version = "0.0.1"
 dependencies = [
- "albus-verifier 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "albus-verifier 0.1.1",
  "anchor-lang 0.27.0",
 ]
 

@@ -57,7 +57,7 @@ pub mod verified_stake {
 
     pub fn split(ctx: Context<VerifiedSplit>, lamports: u64) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.authorized.key()),
         )?;
 
@@ -96,7 +96,7 @@ pub mod verified_stake {
         seed: String,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.authorized.key()),
         )?;
 
@@ -133,7 +133,7 @@ pub mod verified_stake {
 
     pub fn merge(ctx: Context<VerifiedMerge>) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.authorized.key()),
         )?;
 
@@ -164,7 +164,7 @@ pub mod verified_stake {
         lamports: u64,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.withdrawer.key()),
         )?;
 
@@ -198,7 +198,7 @@ pub mod verified_stake {
 
     pub fn delegate(ctx: Context<VerifiedDelegate>) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.authorized.key()),
         )?;
 
@@ -224,7 +224,7 @@ pub mod verified_stake {
 
     pub fn redelegate(ctx: Context<VerifiedRedelegate>) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.authorized.key()),
         )?;
 
@@ -264,7 +264,7 @@ pub mod verified_stake {
         seed: String,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.authorized.key()),
         )?;
 
@@ -307,7 +307,7 @@ pub mod verified_stake {
         stake_authorize: StakeAuthorize,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.authorized.key()),
         )?;
 
@@ -342,7 +342,7 @@ pub mod verified_stake {
         stake_authorize: StakeAuthorize,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.authorized.key()),
         )?;
 
@@ -387,7 +387,7 @@ pub mod verified_stake {
         pub stake: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
@@ -412,7 +412,7 @@ pub mod verified_stake {
         pub stake: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
@@ -433,7 +433,7 @@ pub mod verified_stake {
         pub source_stake: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
@@ -455,7 +455,7 @@ pub mod verified_stake {
         pub destination: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
@@ -476,7 +476,7 @@ pub mod verified_stake {
         pub authorized: Signer<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
@@ -504,7 +504,7 @@ pub mod verified_stake {
         pub authorized: Signer<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
@@ -535,7 +535,7 @@ pub mod verified_stake {
         pub authorized: Signer<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
@@ -555,7 +555,7 @@ pub mod verified_stake {
         pub authorized: Signer<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
@@ -576,7 +576,7 @@ pub mod verified_stake {
         pub authorized: Signer<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub stake_program: AccountInfo<'info>,
