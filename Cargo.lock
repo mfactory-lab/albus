@@ -76,16 +76,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "albus-verifier"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a822fb28f07e7329ce1ad3e586306c32b4dcce7de2a47ad7e65ea0826a68b8ae"
-dependencies = [
- "arrayref",
- "solana-program",
-]
-
-[[package]]
 name = "anchor-attribute-access-control"
 version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2617,7 +2607,7 @@ dependencies = [
 name = "verified-stake"
 version = "0.0.1"
 dependencies = [
- "albus-verifier 0.1.1",
+ "albus-verifier",
  "anchor-lang 0.27.0",
 ]
 
@@ -2625,7 +2615,7 @@ dependencies = [
 name = "verified-stake-pool"
 version = "0.0.1"
 dependencies = [
- "albus-verifier 0.1.1",
+ "albus-verifier",
  "anchor-lang 0.27.0",
  "spl-stake-pool",
 ]
@@ -2634,7 +2624,7 @@ dependencies = [
 name = "verified-swap"
 version = "0.0.1"
 dependencies = [
- "albus-verifier 0.1.1",
+ "albus-verifier",
  "anchor-lang 0.27.0",
  "spl-token-swap",
 ]
@@ -2643,7 +2633,7 @@ dependencies = [
 name = "verified-transfer"
 version = "0.0.1"
 dependencies = [
- "albus-verifier 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "albus-verifier",
  "anchor-lang 0.27.0",
  "anchor-spl 0.27.0",
 ]

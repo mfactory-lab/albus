@@ -39,7 +39,7 @@ pub mod verified_transfer {
     use super::*;
 
     pub fn transfer(ctx: Context<VerifiedTransfer>, amount: u64) -> Result<()> {
-        check_compliant(&ctx.accounts.zkp_request, Some(ctx.accounts.sender.key()))?;
+        check_compliant(&ctx.accounts.proof_request, Some(ctx.accounts.sender.key()))?;
 
         system_program::transfer(
             CpiContext::new(
@@ -56,7 +56,7 @@ pub mod verified_transfer {
     }
 
     pub fn spl_transfer(ctx: Context<VerifiedSplTransfer>, amount: u64) -> Result<()> {
-        check_compliant(&ctx.accounts.zkp_request, Some(ctx.accounts.sender.key()))?;
+        check_compliant(&ctx.accounts.proof_request, Some(ctx.accounts.sender.key()))?;
 
         token::transfer(
             CpiContext::new(
@@ -83,7 +83,7 @@ pub mod verified_transfer {
         pub receiver: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         pub system_program: Program<'info, System>,
     }
@@ -115,7 +115,7 @@ pub mod verified_transfer {
         pub destination: Account<'info, token::TokenAccount>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         pub token_program: Program<'info, token::Token>,
 
