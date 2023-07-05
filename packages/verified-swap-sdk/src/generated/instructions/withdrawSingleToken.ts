@@ -48,7 +48,7 @@ export const withdrawSingleTokenStruct = new beet.BeetArgsStruct<
  * @property [_writable_] destination
  * @property [_writable_] feeAccount
  * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @category Instructions
  * @category WithdrawSingleToken
  * @category generated
@@ -64,7 +64,7 @@ export interface WithdrawSingleTokenInstructionAccounts {
   destination: web3.PublicKey
   feeAccount: web3.PublicKey
   splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -144,7 +144,7 @@ export function createWithdrawSingleTokenInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

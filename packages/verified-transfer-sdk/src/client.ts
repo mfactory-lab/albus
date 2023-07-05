@@ -24,7 +24,7 @@ export class VerifiedTransferClient {
       {
         receiver: props.receiver,
         sender: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         amount: props.amount,
@@ -46,7 +46,7 @@ export class VerifiedTransferClient {
         sender: this.provider.publicKey,
         source: props.source,
         tokenMint: props.tokenMint,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         amount: props.amount,
@@ -60,7 +60,7 @@ export class VerifiedTransferClient {
 
 export interface TransferProps {
   receiver: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   amount: BN
 }
 
@@ -68,7 +68,7 @@ export interface SplTransferProps {
   receiver: PublicKey
   source: PublicKey
   destination: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   tokenMint: PublicKey
   amount: BN
 }

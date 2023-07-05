@@ -34,7 +34,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stakePool: string
   source: string
   stakeToReceive: string
@@ -61,7 +61,7 @@ export async function withdrawStake(opts: Opts) {
       stakeToSplit: new PublicKey(opts.splitStake),
       userStakeAuthority: new PublicKey(opts.authority),
       validatorListStorage: new PublicKey(stakePool.validatorListStorageAccount),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

@@ -16,7 +16,7 @@
           "isSigner": false
         },
         {
-          "name": "zkpRequest",
+          "name": "proofRequest",
           "isMut": false,
           "isSigner": false
         },
@@ -62,7 +62,7 @@
           "isSigner": false
         },
         {
-          "name": "zkpRequest",
+          "name": "proofRequest",
           "isMut": false,
           "isSigner": false
         },

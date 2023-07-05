@@ -42,7 +42,7 @@ export const authorizeStruct = new beet.BeetArgsStruct<
  *
  * @property [_writable_] stake
  * @property [**signer**] authorized
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] clock
  * @category Instructions
@@ -52,7 +52,7 @@ export const authorizeStruct = new beet.BeetArgsStruct<
 export interface AuthorizeInstructionAccounts {
   stake: web3.PublicKey
   authorized: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   clock: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -93,7 +93,7 @@ export function createAuthorizeInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

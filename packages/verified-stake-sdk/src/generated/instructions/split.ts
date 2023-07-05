@@ -38,7 +38,7 @@ export const splitStruct = new beet.BeetArgsStruct<
  * @property [_writable_, **signer**] splitStake
  * @property [**signer**] authorized
  * @property [_writable_] stake
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @category Instructions
  * @category Split
@@ -48,7 +48,7 @@ export interface SplitInstructionAccounts {
   splitStake: web3.PublicKey
   authorized: web3.PublicKey
   stake: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -94,7 +94,7 @@ export function createSplitInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

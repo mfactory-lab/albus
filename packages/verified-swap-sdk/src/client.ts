@@ -35,7 +35,7 @@ export class VerifiedSwapClient {
         swapDestination: props.swapDestination,
         swapSource: props.swapSource,
         userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         amountIn: props.amountIn,
@@ -62,7 +62,7 @@ export class VerifiedSwapClient {
         swapTokenA: props.swapTokenA,
         swapTokenB: props.swapTokenB,
         userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         minimumPoolTokenAmount: props.minimumPoolTokenAmount,
@@ -90,7 +90,7 @@ export class VerifiedSwapClient {
         splTokenSwapProgram: props.splTokenSwapProgram,
         swap: props.swap,
         userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         destinationTokenAmount: props.destinationTokenAmount,
@@ -118,7 +118,7 @@ export class VerifiedSwapClient {
         swapTokenA: props.swapTokenA,
         swapTokenB: props.swapTokenB,
         userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         maximumTokenAAmount: props.maximumTokenAAmount,
@@ -148,7 +148,7 @@ export class VerifiedSwapClient {
         swapTokenA: props.swapTokenA,
         swapTokenB: props.swapTokenB,
         userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
+        proofRequest: props.proofRequest,
       },
       {
         minimumTokenAAmount: props.minimumTokenAAmount,
@@ -172,7 +172,7 @@ export interface SwapProps {
   swapDestination: PublicKey
   swapSource: PublicKey
   authority: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   amountIn: BN
   minimumAmountOut: BN
 }
@@ -186,7 +186,7 @@ export interface DepositSingleProps {
   swap: PublicKey
   swapTokenA: PublicKey
   swapTokenB: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   minimumPoolTokenAmount: BN
   sourceTokenAmount: BN
 }
@@ -201,7 +201,7 @@ export interface WithdrawSingleProps {
   swapTokenA: PublicKey
   swapTokenB: PublicKey
   poolTokenSource: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   destinationTokenAmount: BN
   maximumPoolTokenAmount: BN
 }
@@ -216,7 +216,7 @@ export interface DepositAllProps {
   swapTokenA: PublicKey
   swapTokenB: PublicKey
   swap: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   maximumTokenAAmount: BN
   maximumTokenBAmount: BN
   poolTokenAmount: BN
@@ -233,7 +233,7 @@ export interface WithdrawAllProps {
   swapTokenB: PublicKey
   swap: PublicKey
   splTokenSwapProgram: PublicKey
-  zkpRequest: PublicKey
+  proofRequest: PublicKey
   minimumTokenAAmount: BN
   minimumTokenBAmount: BN
   poolTokenAmount: BN

@@ -35,7 +35,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   swap: string
   maxP: string
   token: string
@@ -63,7 +63,7 @@ export async function withdrawSingle(opts: Opts) {
       swap: tokenSwap.tokenSwap,
       swapTokenA: tokenSwap.tokenAccountA,
       swapTokenB: tokenSwap.tokenAccountB,
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

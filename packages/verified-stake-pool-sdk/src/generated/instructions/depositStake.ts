@@ -23,7 +23,7 @@ export const depositStakeStruct = new beet.BeetArgsStruct<{
 /**
  * Accounts required by the _depositStake_ instruction
  *
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [_writable_, **signer**] authority
  * @property [_writable_] stakePool
  * @property [_writable_] validatorListStorage
@@ -45,7 +45,7 @@ export const depositStakeStruct = new beet.BeetArgsStruct<{
  * @category generated
  */
 export interface DepositStakeInstructionAccounts {
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   authority: web3.PublicKey
   stakePool: web3.PublicKey
   validatorListStorage: web3.PublicKey
@@ -87,7 +87,7 @@ export function createDepositStakeInstruction(
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

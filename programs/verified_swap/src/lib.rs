@@ -43,7 +43,7 @@ pub mod verified_swap {
         minimum_amount_out: u64,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.user_transfer_authority.key()),
         )?;
 
@@ -97,7 +97,7 @@ pub mod verified_swap {
         minimum_pool_token_amount: u64,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.user_transfer_authority.key()),
         )?;
 
@@ -141,7 +141,7 @@ pub mod verified_swap {
         maximum_pool_token_amount: u64,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.user_transfer_authority.key()),
         )?;
 
@@ -188,7 +188,7 @@ pub mod verified_swap {
         maximum_token_b_amount: u64,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.user_transfer_authority.key()),
         )?;
 
@@ -236,7 +236,7 @@ pub mod verified_swap {
         minimum_token_b_amount: u64,
     ) -> Result<()> {
         check_compliant(
-            &ctx.accounts.zkp_request,
+            &ctx.accounts.proof_request,
             Some(ctx.accounts.user_transfer_authority.key()),
         )?;
 
@@ -318,7 +318,7 @@ pub mod verified_swap {
         pub spl_token_swap_program: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub token_program: AccountInfo<'info>,
@@ -359,7 +359,7 @@ pub mod verified_swap {
         pub spl_token_swap_program: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub token_program: AccountInfo<'info>,
@@ -404,7 +404,7 @@ pub mod verified_swap {
         pub spl_token_swap_program: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub token_program: AccountInfo<'info>,
@@ -449,7 +449,7 @@ pub mod verified_swap {
         pub spl_token_swap_program: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub token_program: AccountInfo<'info>,
@@ -498,7 +498,7 @@ pub mod verified_swap {
         pub spl_token_swap_program: AccountInfo<'info>,
 
         /// CHECK: Albus ZKP request
-        pub zkp_request: AccountInfo<'info>,
+        pub proof_request: AccountInfo<'info>,
 
         /// CHECK:
         pub token_program: AccountInfo<'info>,

@@ -36,7 +36,7 @@ export const withdrawSolStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _withdrawSol_ instruction
  *
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [_writable_, **signer**] authority
  * @property [_writable_] stakePool
  * @property [] stakePoolWithdrawAuthority
@@ -54,7 +54,7 @@ export const withdrawSolStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export interface WithdrawSolInstructionAccounts {
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   authority: web3.PublicKey
   stakePool: web3.PublicKey
   stakePoolWithdrawAuthority: web3.PublicKey
@@ -96,7 +96,7 @@ export function createWithdrawSolInstruction(
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

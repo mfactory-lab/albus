@@ -47,7 +47,7 @@ export const depositSingleTokenStruct = new beet.BeetArgsStruct<
  * @property [_writable_] poolMint
  * @property [_writable_] destination
  * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @category Instructions
  * @category DepositSingleToken
  * @category generated
@@ -62,7 +62,7 @@ export interface DepositSingleTokenInstructionAccounts {
   poolMint: web3.PublicKey
   destination: web3.PublicKey
   splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -137,7 +137,7 @@ export function createDepositSingleTokenInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

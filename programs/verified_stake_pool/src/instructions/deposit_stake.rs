@@ -4,7 +4,7 @@ use spl_stake_pool::solana_program::program::invoke;
 
 pub fn handle<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedDepositStake<'info>>) -> Result<()> {
     check_compliant(
-        &ctx.accounts.zkp_request,
+        &ctx.accounts.proof_request,
         Some(ctx.accounts.authority.key()),
     )?;
 
@@ -111,7 +111,7 @@ pub fn handle<'info>(ctx: Context<'_, '_, '_, 'info, VerifiedDepositStake<'info>
 #[derive(Accounts)]
 pub struct VerifiedDepositStake<'info> {
     /// CHECK: Albus ZKP request
-    pub zkp_request: AccountInfo<'info>,
+    pub proof_request: AccountInfo<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

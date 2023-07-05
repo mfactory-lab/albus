@@ -35,7 +35,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stake: string
   amount: string
   seed: string
@@ -56,7 +56,7 @@ export async function splitWithSeed(opts: Opts) {
       seed: opts.seed,
       splitStake: splitKeypair,
       stake: new PublicKey(opts.stake),
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

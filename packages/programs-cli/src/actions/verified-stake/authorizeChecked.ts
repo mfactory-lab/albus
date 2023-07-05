@@ -35,7 +35,7 @@ import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
 interface Opts {
-  zkp: string
+  proofRequest: string
   stake: string
   newAuthorizedPath: string
   authorized: string
@@ -57,7 +57,7 @@ export async function authorizeChecked(opts: Opts) {
       newAuthorized: newAuthorizedKeypair,
       stake: new PublicKey(opts.stake),
       stakeAuthorized: authorized,
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.proofRequest),
     })
 
     log.info(`Signature: ${signature}`)

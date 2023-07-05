@@ -22,7 +22,7 @@ export const addValidatorStruct = new beet.BeetArgsStruct<{
 /**
  * Accounts required by the _addValidator_ instruction
  *
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [**signer**] staker
  * @property [_writable_, **signer**] funder
  * @property [_writable_] stakePool
@@ -40,7 +40,7 @@ export const addValidatorStruct = new beet.BeetArgsStruct<{
  * @category generated
  */
 export interface AddValidatorInstructionAccounts {
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   staker: web3.PublicKey
   funder: web3.PublicKey
   stakePool: web3.PublicKey
@@ -79,7 +79,7 @@ export function createAddValidatorInstruction(
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

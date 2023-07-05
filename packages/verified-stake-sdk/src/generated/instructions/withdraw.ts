@@ -38,7 +38,7 @@ export const withdrawStruct = new beet.BeetArgsStruct<
  * @property [_writable_] stake
  * @property [**signer**] withdrawer
  * @property [_writable_] destination
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] clock
  * @property [] stakeHistory
@@ -50,7 +50,7 @@ export interface WithdrawInstructionAccounts {
   stake: web3.PublicKey
   withdrawer: web3.PublicKey
   destination: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   clock: web3.PublicKey
   stakeHistory: web3.PublicKey
@@ -97,7 +97,7 @@ export function createWithdrawInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

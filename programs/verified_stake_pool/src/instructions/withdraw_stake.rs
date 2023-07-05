@@ -4,7 +4,7 @@ use spl_stake_pool::solana_program::program::invoke;
 
 pub fn handle(ctx: Context<VerifiedWithdrawStake>, amount: u64) -> Result<()> {
     check_compliant(
-        &ctx.accounts.zkp_request,
+        &ctx.accounts.proof_request,
         Some(ctx.accounts.authority.key()),
     )?;
 
@@ -48,7 +48,7 @@ pub fn handle(ctx: Context<VerifiedWithdrawStake>, amount: u64) -> Result<()> {
 #[derive(Accounts)]
 pub struct VerifiedWithdrawStake<'info> {
     /// CHECK: Albus ZKP request
-    pub zkp_request: AccountInfo<'info>,
+    pub proof_request: AccountInfo<'info>,
 
     pub authority: Signer<'info>,
 

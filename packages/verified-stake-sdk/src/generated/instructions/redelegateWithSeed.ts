@@ -40,7 +40,7 @@ export const redelegateWithSeedStruct = new beet.FixableBeetArgsStruct<
  * @property [**signer**] base
  * @property [] vote
  * @property [**signer**] authorized
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] stakeConfig
  * @category Instructions
@@ -53,7 +53,7 @@ export interface RedelegateWithSeedInstructionAccounts {
   base: web3.PublicKey
   vote: web3.PublicKey
   authorized: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   systemProgram?: web3.PublicKey
   stakeConfig: web3.PublicKey
@@ -110,7 +110,7 @@ export function createRedelegateWithSeedInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },

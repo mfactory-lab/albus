@@ -25,7 +25,7 @@ export const delegateStruct = new beet.BeetArgsStruct<{
  * @property [_writable_] stake
  * @property [] vote
  * @property [**signer**] authorized
- * @property [] zkpRequest
+ * @property [] proofRequest
  * @property [] stakeProgram
  * @property [] clock
  * @property [] stakeHistory
@@ -38,7 +38,7 @@ export interface DelegateInstructionAccounts {
   stake: web3.PublicKey
   vote: web3.PublicKey
   authorized: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  proofRequest: web3.PublicKey
   stakeProgram: web3.PublicKey
   clock: web3.PublicKey
   stakeHistory: web3.PublicKey
@@ -82,7 +82,7 @@ export function createDelegateInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.proofRequest,
       isWritable: false,
       isSigner: false,
     },
