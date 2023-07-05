@@ -2,7 +2,7 @@
 
 # Introduction
 
-Albus is a Compliance-as-a-Service (CaaS) protocol that verifies compliance of users with predefined policies of decentralized finance (DeFi) services for specific transactions, while preserving user anonymity and privacy. Drawing on technologies such as Zero-Knowledge Proof (ZKP) and Self-Sovereign Identity (SSI), Albus manages personal data of users in a secure and confidential manner.
+The Albus Protocol is an innovative Compliance-as-a-Service (CaaS) solution that verifies user compliance with predefined policies of DeFi Protocols. Leveraging an adapted Self-Sovereign Identity (SSI) framework, the Albus Protocol harnesses the power of blockchain and Zero-Knowledge Proof (ZKP) technologies to conduct compliance verification in a secure and confidential manner, striking a critical balance between privacy, control, and regulatory compliance in the DeFi landscape.
 
 # Website and litepaper
 
@@ -16,9 +16,11 @@ Albus is a Compliance-as-a-Service (CaaS) protocol that verifies compliance of u
   - [Self-Sovereign Identity (SSI)](https://github.com/mfactory-lab/albus/wiki#self-sovereign-identity-ssi)
   - [Threshold encryption](https://github.com/mfactory-lab/albus/wiki#self-sovereign-identity-ssi)
   - [Zero-Knowledge Proofs (ZKP)](https://github.com/mfactory-lab/albus/wiki#zero-knowledge-proofs-zkp)
-- [Albus workflow overview](https://github.com/mfactory-lab/albus/wiki/Albus-workflow)
-  - [Workflow overview](https://github.com/mfactory-lab/albus/wiki/Albus-workflow#workflow-overview)
-  - [Workflow diagram](https://github.com/mfactory-lab/albus/wiki/Albus-workflow#worflow-diagram)
+- [Albus diagrams](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams)
+  - [Workflow overview](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-overview)
+  - [Workflow diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-diagram)
+  - [Architecture diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#architecture-diagram)
+  - [Legal request for access to PII](https://github.com/mfactory-lab/albus/wiki/legal-request-for-access-to-pii)
 - [Glossary](https://github.com/mfactory-lab/albus/wiki/Glossary)
   - [Entities and modules](https://github.com/mfactory-lab/albus/wiki/Glossary#entities-and-modules)
   - [General terms](https://github.com/mfactory-lab/albus/wiki/Glossary#general-terms)
@@ -30,8 +32,8 @@ Albus is a Compliance-as-a-Service (CaaS) protocol that verifies compliance of u
     - [Proving](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#proving)
     - [Verification](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#verification)
     - [Circuit management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#circuit-management)
-    - [DeFi service management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#defi-service-management)
-    - [ZKP request management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#zkp-request-management)
+    - [DeFi Protocol management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#defi-service-management)
+    - [Certificate Request management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#zkp-request-management)
 - [Integration](https://github.com/mfactory-lab/albus/wiki/Integration)
 - [Reference list](https://github.com/mfactory-lab/albus/wiki/Reference-list)
 
