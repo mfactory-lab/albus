@@ -1,14 +1,37 @@
 pragma circom 2.1.4;
 
 include "circomlib/circuits/comparators.circom";
+include "MerkleProof.circom";
 
 // Country numbers
 // https://www.iban.com/country-codes
 
-template IsEuropeCountry() {
+template CountryPolicy(credentialDepth) {
   signal input country;
+  signal input countryProof[credentialDepth];
+  signal input countryKey;
 
-  assert(country > 0);
+  signal input credentialRoot;
+
+  signal input issuerPk[2]; // [Ax, Ay]
+  signal input issuerSignature[3]; // [R8x, R8y, S]
+
+  // Data integrity check
+  component smt=MerkleProof(credentialDepth);
+  smt.root<==credentialRoot;
+  smt.siblings<==countryProof;
+  smt.key<==countryKey;
+  smt.value<==country;
+
+  // Issuer signature check
+  component eddsa=EdDSAPoseidonVerifier();
+  eddsa.enabled<==1;
+  eddsa.M<==credentialRoot;
+  eddsa.Ax<==issuerPk[0];
+  eddsa.Ay<==issuerPk[1];
+  eddsa.R8x<==issuerSignature[0];
+  eddsa.R8y<==issuerSignature[1];
+  eddsa.S<==issuerSignature[2];
 
   var country_count = 36;
 
@@ -47,7 +70,7 @@ template IN (n) {
   out <== gt.out; // 1 - if in signal in the list, 0 - if it is not
 }
 
-component main = IsEuropeCountry();
+component main = CountryPolicy(6);
 
 /* INPUT = {
   "country": 876
