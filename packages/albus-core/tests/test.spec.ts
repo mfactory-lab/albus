@@ -1,0 +1,47 @@
+/*
+ * This file is part of Albus code.
+ *
+ * Copyright (c) 2023, mFactory GmbH
+ *
+ * Albus is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * Albus is distributed in the hope that it
+ * will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.
+ * If not, see <https://www.gnu.org/licenses/agpl-3.0.html>.
+ *
+ * You can be released from the requirements of the Affero GNU General Public License
+ * by purchasing a commercial license. The purchase of such a license is
+ * mandatory as soon as you develop commercial activities using the
+ * Albus code without disclosing the source code of
+ * your own applications.
+ *
+ * The developer of this program can be contacted at <info@albus.finance>.
+ */
+
+import { Buffer } from 'node:buffer'
+import { describe, it } from 'vitest'
+
+describe('test', () => {
+  const encodeVal = (s: any) => {
+    try {
+      return BigInt(s)
+    } catch (e) {
+      return `0x${Buffer.from(String(s)).toString('hex')}`
+    }
+  }
+  it('#1', async () => {
+    console.log(encodeVal('123'))
+    console.log(encodeVal('asdads'))
+    console.log(encodeVal('test'))
+    console.log(encodeVal(123))
+    console.log(encodeVal(11.22))
+  })
+})
