@@ -15,11 +15,11 @@
     "src"
   ],
   "scripts": {
-    "dev": "vite build --watch",
+    "dev": "tsc --emitDeclarationOnly && vite build --watch",
     "tsc": "tsc --noEmit && echo",
     "build": "tsc --emitDeclarationOnly && vite build",
     "publish:git": "gitpkg publish",
-    "_prepare": "pnpm run build",
+    "_prepare": "pnpm build",
     "test": "vitest"
   },
   "dependencies": {
@@ -44,5 +44,8 @@
     "snarkjs": "^0.7.0",
     "poseidon-encryption": "^1.0.2",
     "uint8arrays": "^4.0.4"
+  },
+  "devDependencies": {
+    "circom_tester": "^0.0.19"
   }
 }

@@ -30,15 +30,15 @@ declare module 'circomlibjs' {
   type FromMontgomery = (p: Uint8Array) => Uint8Array;
   type ToMontgomery = (p: Uint8Array) => Uint8Array;
 
-  export interface CircomlibSignature {
+  export interface BJJSignature {
     R8: [Uint8Array, Uint8Array];
     S: bigint;
   }
 
   interface EdDSA {
-    verifyPoseidon(msg: Uint8Array, sig: CircomlibSignature, A: Uint8Array[]): boolean;
+    verifyPoseidon(msg: Uint8Array, sig: BJJSignature, A: Uint8Array[]): boolean;
 
-    signPoseidon(prv: Uint8Array, msg: Uint8Array): CircomlibSignature;
+    signPoseidon(prv: Uint8Array, msg: Uint8Array | any): BJJSignature;
 
     prv2pub(prv: Uint8Array): [Uint8Array, Uint8Array];
 
@@ -51,39 +51,56 @@ declare module 'circomlibjs' {
 
   function buildEddsa(): Promise<EdDSA>;
 
-  // BabyJup
+  // BabyJubJub
 
-  interface BabyJup {
-    unpackPoint(buf: Uint8Array): [Uint8Array, Uint8Array]
-    D: bigint
-    p: any // Scalar
+  interface BabyJub {
+    inCurve(p: Uint8Array[]): boolean;
+
+    packPoint(buf: Uint8Array[]): Uint8Array;
+
+    unpackPoint(buf: Uint8Array): [Uint8Array, Uint8Array];
+
+    D: bigint;
+    p: any; // Scalar
     F: {
-      fromMontgomery: FromMontgomery;
-      toMontgomery: ToMontgomery;
-      p: bigint;
+      fromMontgomery: FromMontgomery
+      toMontgomery: ToMontgomery
+      toObject: (n: Uint8Array | any) => bigint
+      toString: (n: Uint8Array | any) => string
+      e: (n: string | bigint) => Uint8Array
+      p: bigint
     };
   }
 
-  function buildBabyjub(): Promise<BabyJup>;
+  function buildBabyjub(): Promise<BabyJub>;
 
   // SMT
 
   function buildSMT(db: any, root: SmtInternalValue): Promise<SMT>;
+
   function newMemEmptyTrie(): Promise<SMT>;
 
   export type SmtRoot = any; // TODO: Uint8Array(32)
   export type SmtKey = any; // TODO: Uint8Array(32)
   export type SmtLeafValue = any; // TODO: Uint8Array(32)
-  export type SmtInternalValue = any; // TODO: Uint8Array(32)
+  export type SmtInternalValue = Uint8Array; // TODO: Uint8Array(32)
 
   export interface SMT {
-    F: any;
+    F: {
+      toString(s: any): string
+    };
     root: SmtInternalValue;
+
     hash0(): SmtInternalValue;
+
     hash1(): SmtInternalValue;
+
     insert(key: SmtKey, value: SmtLeafValue): Promise<InsertIntoSmtResponse>;
+
     update(key: SmtKey, newValue: SmtLeafValue): Promise<UpdateSmtResponse>;
+
     delete(key: SmtKey): Promise<DeleteFromSmtResponse>;
+
     find(key: SmtKey): Promise<FindFromSmtResponse>;
   }
 
@@ -117,14 +134,12 @@ declare module 'circomlibjs' {
     isOld0: boolean;
   };
 
-  export type FindFromSmtResponse =
-    | {
+  export type FindFromSmtResponse = {
     found: true;
     foundValue: SmtLeafValue;
     siblings: SmtInternalValue[];
     isOld0: boolean;
-  }
-    | {
+  } | {
     found: false;
     notFoundValue: SmtLeafValue;
     siblings: never[];

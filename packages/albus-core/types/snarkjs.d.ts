@@ -27,7 +27,7 @@
  */
 
 declare module 'snarkjs' {
-  type SnarkjsProof = {
+  type ProofData = {
     readonly pi_a: readonly (string | bigint)[];
     readonly pi_b: readonly (readonly (string | bigint)[])[];
     readonly pi_c: readonly (string | bigint)[];
@@ -38,18 +38,18 @@ declare module 'snarkjs' {
   type PublicSignals = readonly (string | bigint)[];
 
   type SNARK = {
-    readonly proof: SnarkjsProof;
+    readonly proof: ProofData;
     readonly publicSignals: PublicSignals;
   };
 
   type VK = {
     readonly nPublic: number;
-    readonly curve: unknown;
-    readonly vk_alpha_1: unknown;
-    readonly vk_beta_2: unknown;
-    readonly vk_gamma_2: unknown;
-    readonly vk_delta_2: unknown;
-    readonly IC: unknown;
+    readonly curve: string;
+    readonly vk_alpha_1: number[];
+    readonly vk_beta_2: number[][];
+    readonly vk_gamma_2: number[][];
+    readonly vk_delta_2: number[][];
+    readonly IC: number[][];
   };
 
   const groth16: {
@@ -72,7 +72,7 @@ declare module 'snarkjs' {
     readonly verify: (
       vkVerifier: VK,
       publicSignals: PublicSignals,
-      proof: SnarkjsProof,
+      proof: ProofData,
       logger?: unknown,
     ) => Promise<boolean>;
   };
@@ -125,5 +125,5 @@ declare module 'snarkjs' {
     verifyFromR1cs: any;
   };
 
-  export { SnarkjsProof, PublicSignals, VK, groth16, plonk, powersOfTau, r1cs, wtns, zKey };
+  export { ProofData, PublicSignals, VK, groth16, plonk, powersOfTau, r1cs, wtns, zKey };
 }
