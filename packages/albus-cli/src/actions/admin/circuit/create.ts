@@ -27,21 +27,25 @@
  */
 
 import fs from 'node:fs'
+import { crypto, zkp } from '@albus/core'
 import { Keypair } from '@solana/web3.js'
 import { toBigNumber, toMetaplexFile } from '@metaplex-foundation/js'
 import chalk from 'chalk'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
-import { useContext } from '@/context'
-import { downloadFile } from '@/utils'
+import { useContext } from '../../../context'
+import { downloadFile } from '../../../utils'
 
 interface Opts {}
+
+const { parseVerifyingKey } = zkp
+const { bigIntToArray } = crypto.utils
 
 /**
  * Generate new circuit NFT
  */
 export async function create(circuitId: string, _opts: Opts) {
-  const { metaplex, config } = useContext()
+  const { metaplex, client, config } = useContext()
 
   if (!fs.existsSync(`${config.circuitPath}/${circuitId}.r1cs`)
     || !fs.existsSync(`${config.circuitPath}/${circuitId}.wasm`)) {
@@ -72,8 +76,14 @@ export async function create(circuitId: string, _opts: Opts) {
     zKeyFile,
   )
 
+  fs.writeFileSync(`${config.circuitPath}/${circuitId}.zkey`, zKeyFile.data)
+
   log.info('Exporting verification Key...')
   const vk = await snarkjs.zKey.exportVerificationKey(zKeyFile)
+
+  fs.writeFileSync(`${config.circuitPath}/${circuitId}.vk.json`, JSON.stringify(vk))
+
+  return
 
   // NFT generation
 

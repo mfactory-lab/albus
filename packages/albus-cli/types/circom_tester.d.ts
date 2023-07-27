@@ -1,3 +1,4 @@
+
 /*
  * This file is part of Albus code.
  *
@@ -26,8 +27,16 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as crypto from './crypto'
-export * as zkp from './zkp'
-export * as credential from './credential'
-export * as utils from './utils'
-export * from './types'
+declare module "circom_tester" {
+  interface WasmTester {
+    symbols: { [key: string]: { labelIdx: number, varIdx: number, componentIdx: number } }
+    calculateWitness<T>(witness: T, sanityCheck?: boolean): Promise<any>
+    checkConstraints<T>(witness: T): Promise<any>
+    assertOut(actualOut: any, expectedOut: unknown): Promise<void>
+    loadConstraints(): Promise<void>
+    loadSymbols(): Promise<void>
+    release(): Promise<void>
+    getDecoratedOutput<T>(witness: T): Promise<string>
+  }
+  function wasm(filename: string, opts?: Object): Promise<WasmTester>
+}

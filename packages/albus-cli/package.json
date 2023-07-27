@@ -5,8 +5,14 @@
   "type": "module",
   "main": "src/index",
   "module": "src/index",
+  "bin": {
+    "albus-cli": "./lib/index.js"
+  },
   "scripts": {
-    "cli": "vite-node ./src/index.ts --"
+    "cli": "vite-node ./src/index.ts --",
+    "build": "tsc --noEmit && echo",
+    "release": "pnpm build & release-it",
+    "prepare": "pnpm build"
   },
   "repository": {
     "type": "git",
@@ -29,5 +35,11 @@
   },
   "devDependencies": {
     "vite-node": "^0.32.0"
+  },
+  "release-it": {
+    "git": {
+      "tag": false,
+      "commitMessage": "release: @albus/cli v${version}"
+    }
   }
 }
