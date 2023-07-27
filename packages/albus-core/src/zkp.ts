@@ -27,16 +27,17 @@
  */
 
 import { Buffer } from 'node:buffer'
+import { utils as ffUtils, getCurveFromName } from 'ffjavascript'
 import axios from 'axios'
-import type { PublicSignals, SnarkjsProof, VK } from 'snarkjs'
+import type { ProofData, PublicSignals, VK } from 'snarkjs'
 import { groth16 } from 'snarkjs'
 
-type Input = Parameters<typeof groth16.fullProve>[0]
+const { leInt2Buff, unstringifyBigInts } = ffUtils
 
 interface GenerateProofProps {
   wasmFile: string | Buffer
   zkeyFile: string | Buffer
-  input?: Input
+  input?: Parameters<typeof groth16.fullProve>[0]
   logger?: unknown
 }
 
@@ -45,8 +46,9 @@ interface GenerateProofProps {
  * @returns {Promise<SNARK>}
  */
 export async function generateProof(props: GenerateProofProps) {
-  const wasmFile = Buffer.isBuffer(props.wasmFile) ? Uint8Array.from(props.wasmFile) : await fetchBytes(props.wasmFile)
-  const zkeyFile = Buffer.isBuffer(props.zkeyFile) ? Uint8Array.from(props.zkeyFile) : await fetchBytes(props.zkeyFile)
+  const wasmFile = await fetchBytes(props.wasmFile)
+  const zkeyFile = await fetchBytes(props.zkeyFile)
+
   return groth16.fullProve(
     props.input ?? {},
     { type: 'mem', data: wasmFile },
@@ -58,7 +60,7 @@ export async function generateProof(props: GenerateProofProps) {
 interface VerifyProofProps {
   vk: VK
   publicInput?: PublicSignals
-  proof: SnarkjsProof
+  proof: ProofData
   logger?: unknown
 }
 
@@ -70,9 +72,77 @@ export async function verifyProof(props: VerifyProofProps) {
 }
 
 /**
- * Fetches bytes from the specified URL using the fetch API.
+ * Fetches bytes from the specified URL
  */
-async function fetchBytes(url: string) {
-  const { data } = await axios<ArrayBuffer>({ method: 'get', url, responseType: 'arraybuffer' })
-  return new Uint8Array(data)
+async function fetchBytes(url: string | Buffer | Uint8Array) {
+  if (typeof url === 'string') {
+    const { data } = await axios<ArrayBuffer>({ method: 'get', url, responseType: 'arraybuffer' })
+    return new Uint8Array(data)
+  }
+  return Uint8Array.from(url)
+}
+
+export function parseFiniteNumber(n: string | number | bigint) {
+  return Array.from<number>(leInt2Buff(unstringifyBigInts(BigInt(n)), 32))
+}
+
+export function parseProofToBytesArray(payload: any) {
+  for (const i in payload) {
+    if (i === 'pi_a' || i === 'pi_c') {
+      for (const j in payload[i]) {
+        payload[i][j] = parseFiniteNumber(payload[i][j]).reverse()
+      }
+    } else if (i === 'pi_b') {
+      for (const j in payload[i]) {
+        for (const z in payload[i][j]) {
+          payload[i][j][z] = parseFiniteNumber(payload[i][j][z])
+        }
+      }
+    }
+  }
+
+  return {
+    a: [payload.pi_a[0], payload.pi_a[1]].flat(),
+    b: [
+      payload.pi_b[0].flat().reverse(),
+      payload.pi_b[1].flat().reverse(),
+    ].flat(),
+    c: [payload.pi_c[0], payload.pi_c[1]].flat(),
+  }
+}
+
+export function parseToBytesArray(publicSignals: Array<string | number | bigint>) {
+  const publicInputsBytes = new Array<Array<number>>()
+  for (const i in publicSignals) {
+    publicInputsBytes.push(parseFiniteNumber(publicSignals[i]!).reverse())
+  }
+  return publicInputsBytes
+}
+
+export function parseVerifyingKey(data: VK) {
+  const g1 = (p: number[]) => p
+    .reduce((a, b) =>
+      a.concat(parseFiniteNumber(b).reverse()), [] as number[],
+    ).slice(0, 64)
+
+  const g2 = (p: number[][]) => p
+    .reduce((a, b) =>
+      a.concat(parseFiniteNumber(b[0]!).concat(parseFiniteNumber(b[1]!)).reverse()), [] as number[],
+    ).slice(0, 128)
+
+  return {
+    curve: data.curve,
+    nPublic: data.nPublic,
+    alpha: g1(data.vk_alpha_1),
+    beta: g2(data.vk_beta_2),
+    gamma: g2(data.vk_gamma_2),
+    delta: g2(data.vk_delta_2),
+    ic: data.IC.map(g1),
+  }
+}
+
+export async function altBn128G1Neg(input: number[]) {
+  const bn128 = await getCurveFromName('bn128', true)
+  const changeEndianness = (b: number[]) => [...b.slice(0, 32).reverse(), ...b.slice(32).reverse()]
+  return changeEndianness(bn128.G1.neg(Buffer.from(changeEndianness(input))))
 }
