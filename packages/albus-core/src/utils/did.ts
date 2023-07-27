@@ -26,7 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import type { Keypair } from '@solana/web3.js'
+import { buildBabyjub, buildEddsa } from 'circomlibjs'
 import * as u8a from 'uint8arrays'
+import { bytesToBase58 } from '../crypto/utils'
+
+const ALBUS_DID = 'did:web:albus.finance'
 
 export function encodeDidKey(publicKey: Uint8Array): string {
   const bytes = new Uint8Array(publicKey.length + 2)
@@ -36,4 +41,62 @@ export function encodeDidKey(publicKey: Uint8Array): string {
   bytes[1] = 0x01
   bytes.set(publicKey, 2)
   return `did:key:z${u8a.toString(bytes, 'base58btc')}`
+}
+
+export function decodeDidKey(did: string): Uint8Array {
+  if (!did.startsWith('did:key:z')) {
+    throw new Error('did:key invalid format')
+  }
+  const bytes = u8a.fromString(did.slice(9), 'base58btc')
+  if (bytes[0] !== 0xED || bytes[1] !== 0x01) {
+    throw new Error('did:key is not valid ed25519 key')
+  }
+  return bytes.slice(2)
+}
+
+export async function generateDid(keypair: Keypair) {
+  const id = ALBUS_DID
+  const eddsa = await buildEddsa()
+  const babyJub = await buildBabyjub()
+  const pubkey = babyJub.packPoint(eddsa.prv2pub(keypair.secretKey))
+
+  const verificationMethod = [
+    {
+      id: '#keys-0',
+      type: 'EddsaBJJVerificationKey',
+      controller: id,
+      publicKeyBase58: bytesToBase58(pubkey),
+    },
+    {
+      id: '#keys-1',
+      type: 'Ed25519VerificationKey2018',
+      controller: id,
+      publicKeyBase58: keypair.publicKey.toBase58(),
+    },
+    {
+      id: '#keys-2',
+      type: 'Ed25519VerificationKey2018',
+      controller: encodeDidKey(keypair.publicKey.toBytes()),
+      publicKeyBase58: keypair.publicKey.toBase58(),
+    },
+  ]
+
+  return {
+    '@context': 'https://www.w3.org/ns/did/v1',
+    'id': id,
+    'verificationMethod': verificationMethod,
+    'authentication': verificationMethod.map(m => m.id),
+    'assertionMethod': verificationMethod.map(m => m.id),
+    'service': [
+      {
+        id: '#linkeddomains',
+        type: 'LinkedDomains',
+        serviceEndpoint: {
+          origins: [
+            'https://albus.finance/',
+          ],
+        },
+      },
+    ],
+  }
 }

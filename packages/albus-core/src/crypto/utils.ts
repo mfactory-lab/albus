@@ -74,7 +74,7 @@ export function arrayToBigInt(array: Uint8Array): bigint {
  * @param length - length of resulting byte array, 0 to return byte length of integer
  * @returns byte array
  */
-export function bigIntToArray(bn: bigint, length: number): Uint8Array {
+export function bigIntToArray(bn: bigint | boolean | number | string, length: number): Uint8Array {
   // Convert bigint to hex string
   let hex = BigInt(bn).toString(16)
 
