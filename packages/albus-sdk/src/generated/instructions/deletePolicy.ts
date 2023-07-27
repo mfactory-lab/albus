@@ -7,90 +7,64 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { ProveData } from '../types/ProveData'
-import { proveDataBeet } from '../types/ProveData'
 
 /**
  * @category Instructions
- * @category Prove
+ * @category DeletePolicy
  * @category generated
  */
-export interface ProveInstructionArgs {
-  data: ProveData
-}
-/**
- * @category Instructions
- * @category Prove
- * @category generated
- */
-export const proveStruct = new beet.FixableBeetArgsStruct<
-  ProveInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */
-  }
->(
-  [
-    ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', proveDataBeet],
-  ],
-  'ProveInstructionArgs',
+export const deletePolicyStruct = new beet.BeetArgsStruct<{
+  instructionDiscriminator: number[] /* size: 8 */
+}>(
+  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
+  'DeletePolicyInstructionArgs',
 )
 /**
- * Accounts required by the _prove_ instruction
+ * Accounts required by the _deletePolicy_ instruction
  *
- * @property [_writable_] proofRequest
- * @property [] circuit
- * @property [] policy
+ * @property [_writable_] serviceProvider
+ * @property [_writable_] policy
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category Prove
+ * @category DeletePolicy
  * @category generated
  */
-export interface ProveInstructionAccounts {
-  proofRequest: web3.PublicKey
-  circuit: web3.PublicKey
+export interface DeletePolicyInstructionAccounts {
+  serviceProvider: web3.PublicKey
   policy: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const proveInstructionDiscriminator = [
-  52, 246, 26, 161, 211, 170, 86, 215,
+export const deletePolicyInstructionDiscriminator = [
+  15, 80, 151, 21, 231, 64, 246, 198,
 ]
 
 /**
- * Creates a _Prove_ instruction.
+ * Creates a _DeletePolicy_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
- * @param args to provide as instruction data to the program
- *
  * @category Instructions
- * @category Prove
+ * @category DeletePolicy
  * @category generated
  */
-export function createProveInstruction(
-  accounts: ProveInstructionAccounts,
-  args: ProveInstructionArgs,
+export function createDeletePolicyInstruction(
+  accounts: DeletePolicyInstructionAccounts,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = proveStruct.serialize({
-    instructionDiscriminator: proveInstructionDiscriminator,
-    ...args,
+  const [data] = deletePolicyStruct.serialize({
+    instructionDiscriminator: deletePolicyInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.proofRequest,
+      pubkey: accounts.serviceProvider,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.circuit,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
       pubkey: accounts.policy,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {

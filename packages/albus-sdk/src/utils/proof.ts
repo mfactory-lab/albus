@@ -34,6 +34,18 @@ interface PrepareProofInputProps {
   requiredFields: string[]
 }
 
+/**
+ * Format {@link date} in circuit format `20230101`
+ */
+export function formatCircuitDate(date?: Date) {
+  const d = date ?? new Date()
+  return [
+    String(d.getUTCFullYear()),
+    String(d.getUTCMonth() + 1).padStart(2, '0'),
+    String(d.getUTCDate()).padStart(2, '0'),
+  ].join('')
+}
+
 export function prepareProofInput({ claims, requiredFields, definitions }: PrepareProofInputProps) {
   const input: { [key: string]: any } = {}
 

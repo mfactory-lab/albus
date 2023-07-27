@@ -26,19 +26,42 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export enum AlbusNftCode {
-  Circuit = 'C',
-  Proof = 'P',
-  Identity = 'ID',
-  VerifiableCredential = 'VC',
-  VerifiablePresentation = 'VP',
-}
+import { Buffer } from 'node:buffer'
+import type { PublicKeyInitData } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 
-export enum KnownSignals {
-  CurrentDate = 'currentDate',
-  CredentialRoot = 'credentialRoot',
-  CredentialProof = 'credentialProof',
-  CredentialKey = 'credentialKey',
-  IssuerPk = 'issuerPk[2]',
-  IssuerSignature = 'issuerSignature[3]',
+import { PROGRAM_ID } from './generated'
+
+export class PdaManager {
+  programId = PROGRAM_ID
+
+  circuit(code: string) {
+    return PublicKey.findProgramAddressSync([
+      Buffer.from('circuit'),
+      Buffer.from(code),
+    ], this.programId)
+  }
+
+  serviceProvider(code: string) {
+    return PublicKey.findProgramAddressSync([
+      Buffer.from('service-provider'),
+      Buffer.from(code),
+    ], this.programId)
+  }
+
+  policy(circuit: PublicKeyInitData, service: PublicKeyInitData) {
+    return PublicKey.findProgramAddressSync([
+      Buffer.from('policy'),
+      new PublicKey(circuit).toBuffer(),
+      new PublicKey(service).toBuffer(),
+    ], this.programId)
+  }
+
+  proofRequest(policy: PublicKeyInitData, user: PublicKeyInitData) {
+    return PublicKey.findProgramAddressSync([
+      Buffer.from('proof-request'),
+      new PublicKey(policy).toBuffer(),
+      new PublicKey(user).toBuffer(),
+    ], this.programId)
+  }
 }

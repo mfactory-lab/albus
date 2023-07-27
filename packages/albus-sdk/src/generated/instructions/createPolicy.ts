@@ -7,77 +7,91 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { AddServiceProviderData } from '../types/AddServiceProviderData'
+import type { CreatePolicyData } from '../types/CreatePolicyData'
 import {
-  addServiceProviderDataBeet,
-} from '../types/AddServiceProviderData'
+  createPolicyDataBeet,
+} from '../types/CreatePolicyData'
 
 /**
  * @category Instructions
- * @category AddServiceProvider
+ * @category CreatePolicy
  * @category generated
  */
-export interface AddServiceProviderInstructionArgs {
-  data: AddServiceProviderData
+export interface CreatePolicyInstructionArgs {
+  data: CreatePolicyData
 }
 /**
  * @category Instructions
- * @category AddServiceProvider
+ * @category CreatePolicy
  * @category generated
  */
-export const addServiceProviderStruct = new beet.FixableBeetArgsStruct<
-  AddServiceProviderInstructionArgs & {
+export const createPolicyStruct = new beet.FixableBeetArgsStruct<
+  CreatePolicyInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', addServiceProviderDataBeet],
+    ['data', createPolicyDataBeet],
   ],
-  'AddServiceProviderInstructionArgs',
+  'CreatePolicyInstructionArgs',
 )
 /**
- * Accounts required by the _addServiceProvider_ instruction
+ * Accounts required by the _createPolicy_ instruction
  *
  * @property [_writable_] serviceProvider
+ * @property [] circuit
+ * @property [_writable_] policy
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category AddServiceProvider
+ * @category CreatePolicy
  * @category generated
  */
-export interface AddServiceProviderInstructionAccounts {
+export interface CreatePolicyInstructionAccounts {
   serviceProvider: web3.PublicKey
+  circuit: web3.PublicKey
+  policy: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const addServiceProviderInstructionDiscriminator = [
-  122, 238, 46, 138, 102, 109, 197, 177,
+export const createPolicyInstructionDiscriminator = [
+  27, 81, 33, 27, 196, 103, 246, 53,
 ]
 
 /**
- * Creates a _AddServiceProvider_ instruction.
+ * Creates a _CreatePolicy_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category AddServiceProvider
+ * @category CreatePolicy
  * @category generated
  */
-export function createAddServiceProviderInstruction(
-  accounts: AddServiceProviderInstructionAccounts,
-  args: AddServiceProviderInstructionArgs,
+export function createCreatePolicyInstruction(
+  accounts: CreatePolicyInstructionAccounts,
+  args: CreatePolicyInstructionArgs,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = addServiceProviderStruct.serialize({
-    instructionDiscriminator: addServiceProviderInstructionDiscriminator,
+  const [data] = createPolicyStruct.serialize({
+    instructionDiscriminator: createPolicyInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
     {
       pubkey: accounts.serviceProvider,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.circuit,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.policy,
       isWritable: true,
       isSigner: false,
     },

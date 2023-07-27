@@ -3,7 +3,84 @@
   "name": "albus",
   "instructions": [
     {
-      "name": "addServiceProvider",
+      "name": "createCircuit",
+      "accounts": [
+        {
+          "name": "circuit",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateCircuitData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateCircuitVk",
+      "accounts": [
+        {
+          "name": "circuit",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdateCircuitVkData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteCircuit",
+      "accounts": [
+        {
+          "name": "circuit",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createServiceProvider",
       "accounts": [
         {
           "name": "serviceProvider",
@@ -25,7 +102,7 @@
         {
           "name": "data",
           "type": {
-            "defined": "AddServiceProviderData"
+            "defined": "CreateServiceProviderData"
           }
         }
       ]
@@ -52,6 +129,70 @@
       "args": []
     },
     {
+      "name": "createPolicy",
+      "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "circuit",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "policy",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreatePolicyData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deletePolicy",
+      "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "policy",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createProofRequest",
       "accounts": [
         {
@@ -60,18 +201,13 @@
           "isSigner": false
         },
         {
-          "name": "proofRequest",
+          "name": "policy",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "circuitMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "circuitMetadata",
-          "isMut": false,
+          "name": "proofRequest",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -121,6 +257,16 @@
         {
           "name": "proofRequest",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "circuit",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "policy",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -174,6 +320,153 @@
   ],
   "accounts": [
     {
+      "name": "Circuit",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "docs": [
+              "Uniq code of the circuit"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Name of the circuit"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "docs": [
+              "Short description"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "wasmUri",
+            "type": "string"
+          },
+          {
+            "name": "zkeyUri",
+            "type": "string"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "vk",
+            "docs": [
+              "Verification key"
+            ],
+            "type": {
+              "defined": "VerificationKey"
+            }
+          },
+          {
+            "name": "privateSignals",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "publicSignals",
+            "type": {
+              "vec": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Policy",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "serviceProvider",
+            "docs": [
+              "The service provider this belongs to."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "circuit",
+            "docs": [
+              "The circuit associated with this policy"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Name of the policy"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "docs": [
+              "Short description"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "proofExpiresIn",
+            "docs": [
+              "The proof expiration time (seconds)"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "proofRequestCount",
+            "docs": [
+              "Total number of proof requests"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "rules",
+            "docs": [
+              "Policy rules"
+            ],
+            "type": {
+              "vec": {
+                "defined": "PolicyRule"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "ServiceProvider",
       "type": {
         "kind": "struct",
@@ -207,6 +500,13 @@
             "type": "u64"
           },
           {
+            "name": "policyCount",
+            "docs": [
+              "Total number of policies"
+            ],
+            "type": "u64"
+          },
+          {
             "name": "createdAt",
             "docs": [
               "Timestamp for when the service was created"
@@ -216,7 +516,7 @@
           {
             "name": "bump",
             "docs": [
-              "Bump seed used to derive program-derived account seeds"
+              "PDA bump."
             ],
             "type": "u8"
           }
@@ -231,14 +531,21 @@
           {
             "name": "serviceProvider",
             "docs": [
-              "Address of the [ServiceProvider] associated with this request"
+              "The [ServiceProvider] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "policy",
+            "docs": [
+              "The [Policy] associated with this request"
             ],
             "type": "publicKey"
           },
           {
             "name": "circuit",
             "docs": [
-              "Address of the circuit associated with this request"
+              "TODO: remove"
             ],
             "type": "publicKey"
           },
@@ -248,6 +555,20 @@
               "Address of the request initiator"
             ],
             "type": "publicKey"
+          },
+          {
+            "name": "vpUri",
+            "docs": [
+              "Address of the Verifiable Presentation (VP)"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "identifier",
+            "docs": [
+              "Auto-increment service specific identifier"
+            ],
+            "type": "u64"
           },
           {
             "name": "createdAt",
@@ -289,20 +610,10 @@
           {
             "name": "bump",
             "docs": [
-              "Bump seed used to derive program-derived account seeds"
+              "",
+              "PDA bump."
             ],
             "type": "u8"
-          },
-          {
-            "name": "proof",
-            "docs": [
-              "Proof itself"
-            ],
-            "type": {
-              "option": {
-                "defined": "Proof"
-              }
-            }
           }
         ]
       }
@@ -310,7 +621,7 @@
   ],
   "types": [
     {
-      "name": "AddServiceProviderData",
+      "name": "CreateServiceProviderData",
       "docs": [
         "Data required to add a new service provider"
       ],
@@ -330,6 +641,77 @@
               "The name of the service"
             ],
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateCircuitData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "wasmUri",
+            "type": "string"
+          },
+          {
+            "name": "zkeyUri",
+            "type": "string"
+          },
+          {
+            "name": "privateSignals",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "publicSignals",
+            "type": {
+              "vec": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreatePolicyData",
+      "docs": [
+        "Data required to create a new proof request"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "expiresIn",
+            "type": "u32"
+          },
+          {
+            "name": "rules",
+            "type": {
+              "vec": {
+                "defined": "PolicyRule"
+              }
+            }
           }
         ]
       }
@@ -358,10 +740,94 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "uri",
+            "type": "string"
+          },
+          {
             "name": "proof",
             "type": {
-              "defined": "Proof"
+              "defined": "ProofData"
             }
+          },
+          {
+            "name": "publicInputs",
+            "type": {
+              "vec": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateCircuitVkData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "alpha",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  64
+                ]
+              }
+            }
+          },
+          {
+            "name": "beta",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  128
+                ]
+              }
+            }
+          },
+          {
+            "name": "gamma",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  128
+                ]
+              }
+            }
+          },
+          {
+            "name": "delta",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  128
+                ]
+              }
+            }
+          },
+          {
+            "name": "ic",
+            "type": {
+              "option": {
+                "vec": {
+                  "array": [
+                    "u8",
+                    64
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "extendIc",
+            "type": "bool"
           }
         ]
       }
@@ -381,42 +847,111 @@
       }
     },
     {
-      "name": "Proof",
+      "name": "ProofData",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "protocol",
-            "type": "string"
-          },
-          {
-            "name": "curve",
-            "type": "string"
-          },
-          {
-            "name": "piA",
+            "name": "a",
             "type": {
-              "vec": "string"
+              "array": [
+                "u8",
+                64
+              ]
             }
           },
           {
-            "name": "piB",
+            "name": "b",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "c",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerificationKey",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "alpha",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "beta",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "gamma",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "delta",
+            "type": {
+              "array": [
+                "u8",
+                128
+              ]
+            }
+          },
+          {
+            "name": "ic",
             "type": {
               "vec": {
-                "vec": "string"
+                "array": [
+                  "u8",
+                  64
+                ]
               }
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PolicyRule",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
           },
           {
-            "name": "piC",
+            "name": "value",
             "type": {
-              "vec": "string"
-            }
-          },
-          {
-            "name": "publicInputs",
-            "type": {
-              "vec": "string"
+              "array": [
+                "u8",
+                32
+              ]
             }
           }
         ]
@@ -453,7 +988,7 @@
           "index": true
         },
         {
-          "name": "circuit",
+          "name": "policy",
           "type": "publicKey",
           "index": false
         },
@@ -508,15 +1043,13 @@
           "index": false
         },
         {
-          "name": "proof",
-          "type": {
-            "defined": "Proof"
-          },
+          "name": "owner",
+          "type": "publicKey",
           "index": false
         },
         {
-          "name": "owner",
-          "type": "publicKey",
+          "name": "vpUrl",
+          "type": "string",
           "index": false
         },
         {

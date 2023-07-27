@@ -6,11 +6,13 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-import type { Proof } from './Proof'
-import { proofBeet } from './Proof'
+import type { ProofData } from './ProofData'
+import { proofDataBeet } from './ProofData'
 
 export interface ProveData {
-  proof: Proof
+  uri: string
+  proof: ProofData
+  publicInputs: number[] /* size: 32 */[]
 }
 
 /**
@@ -18,6 +20,10 @@ export interface ProveData {
  * @category generated
  */
 export const proveDataBeet = new beet.FixableBeetArgsStruct<ProveData>(
-  [['proof', proofBeet]],
+  [
+    ['uri', beet.utf8String],
+    ['proof', proofDataBeet],
+    ['publicInputs', beet.array(beet.uniformFixedSizeArray(beet.u8, 32))],
+  ],
   'ProveData',
 )

@@ -8,89 +8,78 @@
 import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
-import {
-  ProofRequestStatus,
-  proofRequestStatusBeet,
-} from '../types/ProofRequestStatus'
+import type { PolicyRule } from '../types/PolicyRule'
+import { policyRuleBeet } from '../types/PolicyRule'
 
 /**
- * Arguments used to create {@link ProofRequest}
+ * Arguments used to create {@link Policy}
  * @category Accounts
  * @category generated
  */
-export interface ProofRequestArgs {
+export interface PolicyArgs {
   serviceProvider: web3.PublicKey
-  policy: web3.PublicKey
   circuit: web3.PublicKey
-  owner: web3.PublicKey
-  vpUri: string
-  identifier: beet.bignum
+  name: string
+  description: string
   createdAt: beet.bignum
-  expiredAt: beet.bignum
-  verifiedAt: beet.bignum
-  provedAt: beet.bignum
-  status: ProofRequestStatus
+  proofExpiresIn: number
+  proofRequestCount: beet.bignum
   bump: number
+  rules: PolicyRule[]
 }
 
-export const proofRequestDiscriminator = [78, 10, 176, 254, 231, 33, 111, 224]
+export const policyDiscriminator = [222, 135, 7, 163, 235, 177, 33, 68]
 /**
- * Holds the data for the {@link ProofRequest} Account and provides de/serialization
+ * Holds the data for the {@link Policy} Account and provides de/serialization
  * functionality for that data
  *
  * @category Accounts
  * @category generated
  */
-export class ProofRequest implements ProofRequestArgs {
+export class Policy implements PolicyArgs {
   private constructor(
     readonly serviceProvider: web3.PublicKey,
-    readonly policy: web3.PublicKey,
     readonly circuit: web3.PublicKey,
-    readonly owner: web3.PublicKey,
-    readonly vpUri: string,
-    readonly identifier: beet.bignum,
+    readonly name: string,
+    readonly description: string,
     readonly createdAt: beet.bignum,
-    readonly expiredAt: beet.bignum,
-    readonly verifiedAt: beet.bignum,
-    readonly provedAt: beet.bignum,
-    readonly status: ProofRequestStatus,
+    readonly proofExpiresIn: number,
+    readonly proofRequestCount: beet.bignum,
     readonly bump: number,
+    readonly rules: PolicyRule[],
   ) {}
 
   /**
-   * Creates a {@link ProofRequest} instance from the provided args.
+   * Creates a {@link Policy} instance from the provided args.
    */
-  static fromArgs(args: ProofRequestArgs) {
-    return new ProofRequest(
+  static fromArgs(args: PolicyArgs) {
+    return new Policy(
       args.serviceProvider,
-      args.policy,
       args.circuit,
-      args.owner,
-      args.vpUri,
-      args.identifier,
+      args.name,
+      args.description,
       args.createdAt,
-      args.expiredAt,
-      args.verifiedAt,
-      args.provedAt,
-      args.status,
+      args.proofExpiresIn,
+      args.proofRequestCount,
       args.bump,
+      args.rules,
     )
   }
 
   /**
-   * Deserializes the {@link ProofRequest} from the data of the provided {@link web3.AccountInfo}.
+   * Deserializes the {@link Policy} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
     offset = 0,
-  ): [ProofRequest, number] {
-    return ProofRequest.deserialize(accountInfo.data, offset)
+  ): [Policy, number] {
+    return Policy.deserialize(accountInfo.data, offset)
   }
 
   /**
    * Retrieves the account info from the provided address and deserializes
-   * the {@link ProofRequest} from its data.
+   * the {@link Policy} from its data.
    *
    * @throws Error if no account info is found at the address or if deserialization fails
    */
@@ -98,15 +87,15 @@ export class ProofRequest implements ProofRequestArgs {
     connection: web3.Connection,
     address: web3.PublicKey,
     commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
-  ): Promise<ProofRequest> {
+  ): Promise<Policy> {
     const accountInfo = await connection.getAccountInfo(
       address,
       commitmentOrConfig,
     )
     if (accountInfo == null) {
-      throw new Error(`Unable to find ProofRequest account at ${address}`)
+      throw new Error(`Unable to find Policy account at ${address}`)
     }
-    return ProofRequest.fromAccountInfo(accountInfo, 0)[0]
+    return Policy.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -120,84 +109,72 @@ export class ProofRequest implements ProofRequestArgs {
       'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz',
     ),
   ) {
-    return beetSolana.GpaBuilder.fromStruct(programId, proofRequestBeet)
+    return beetSolana.GpaBuilder.fromStruct(programId, policyBeet)
   }
 
   /**
-   * Deserializes the {@link ProofRequest} from the provided data Buffer.
+   * Deserializes the {@link Policy} from the provided data Buffer.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static deserialize(buf: Buffer, offset = 0): [ProofRequest, number] {
-    return proofRequestBeet.deserialize(buf, offset)
+  static deserialize(buf: Buffer, offset = 0): [Policy, number] {
+    return policyBeet.deserialize(buf, offset)
   }
 
   /**
-   * Serializes the {@link ProofRequest} into a Buffer.
+   * Serializes the {@link Policy} into a Buffer.
    * @returns a tuple of the created Buffer and the offset up to which the buffer was written to store it.
    */
   serialize(): [Buffer, number] {
-    return proofRequestBeet.serialize({
-      accountDiscriminator: proofRequestDiscriminator,
+    return policyBeet.serialize({
+      accountDiscriminator: policyDiscriminator,
       ...this,
     })
   }
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link ProofRequest} for the provided args.
+   * {@link Policy} for the provided args.
    *
    * @param args need to be provided since the byte size for this account
    * depends on them
    */
-  static byteSize(args: ProofRequestArgs) {
-    const instance = ProofRequest.fromArgs(args)
-    return proofRequestBeet.toFixedFromValue({
-      accountDiscriminator: proofRequestDiscriminator,
+  static byteSize(args: PolicyArgs) {
+    const instance = Policy.fromArgs(args)
+    return policyBeet.toFixedFromValue({
+      accountDiscriminator: policyDiscriminator,
       ...instance,
     }).byteSize
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
-   * {@link ProofRequest} data from rent
+   * {@link Policy} data from rent
    *
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
    */
   static async getMinimumBalanceForRentExemption(
-    args: ProofRequestArgs,
+    args: PolicyArgs,
     connection: web3.Connection,
     commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
-      ProofRequest.byteSize(args),
+      Policy.byteSize(args),
       commitment,
     )
   }
 
   /**
-   * Returns a readable version of {@link ProofRequest} properties
+   * Returns a readable version of {@link Policy} properties
    * and can be used to convert to JSON and/or logging
    */
   pretty() {
     return {
       serviceProvider: this.serviceProvider.toBase58(),
-      policy: this.policy.toBase58(),
       circuit: this.circuit.toBase58(),
-      owner: this.owner.toBase58(),
-      vpUri: this.vpUri,
-      identifier: (() => {
-        const x = <{ toNumber: () => number }> this.identifier
-        if (typeof x.toNumber === 'function') {
-          try {
-            return x.toNumber()
-          } catch (_) {
-            return x
-          }
-        }
-        return x
-      })(),
+      name: this.name,
+      description: this.description,
       createdAt: (() => {
         const x = <{ toNumber: () => number }> this.createdAt
         if (typeof x.toNumber === 'function') {
@@ -209,8 +186,9 @@ export class ProofRequest implements ProofRequestArgs {
         }
         return x
       })(),
-      expiredAt: (() => {
-        const x = <{ toNumber: () => number }> this.expiredAt
+      proofExpiresIn: this.proofExpiresIn,
+      proofRequestCount: (() => {
+        const x = <{ toNumber: () => number }> this.proofRequestCount
         if (typeof x.toNumber === 'function') {
           try {
             return x.toNumber()
@@ -220,30 +198,8 @@ export class ProofRequest implements ProofRequestArgs {
         }
         return x
       })(),
-      verifiedAt: (() => {
-        const x = <{ toNumber: () => number }> this.verifiedAt
-        if (typeof x.toNumber === 'function') {
-          try {
-            return x.toNumber()
-          } catch (_) {
-            return x
-          }
-        }
-        return x
-      })(),
-      provedAt: (() => {
-        const x = <{ toNumber: () => number }> this.provedAt
-        if (typeof x.toNumber === 'function') {
-          try {
-            return x.toNumber()
-          } catch (_) {
-            return x
-          }
-        }
-        return x
-      })(),
-      status: `ProofRequestStatus.${ProofRequestStatus[this.status]}`,
       bump: this.bump,
+      rules: this.rules,
     }
   }
 }
@@ -252,27 +208,24 @@ export class ProofRequest implements ProofRequestArgs {
  * @category Accounts
  * @category generated
  */
-export const proofRequestBeet = new beet.FixableBeetStruct<
-  ProofRequest,
-  ProofRequestArgs & {
+export const policyBeet = new beet.FixableBeetStruct<
+  Policy,
+  PolicyArgs & {
     accountDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['serviceProvider', beetSolana.publicKey],
-    ['policy', beetSolana.publicKey],
     ['circuit', beetSolana.publicKey],
-    ['owner', beetSolana.publicKey],
-    ['vpUri', beet.utf8String],
-    ['identifier', beet.u64],
+    ['name', beet.utf8String],
+    ['description', beet.utf8String],
     ['createdAt', beet.i64],
-    ['expiredAt', beet.i64],
-    ['verifiedAt', beet.i64],
-    ['provedAt', beet.i64],
-    ['status', proofRequestStatusBeet],
+    ['proofExpiresIn', beet.u32],
+    ['proofRequestCount', beet.u64],
     ['bump', beet.u8],
+    ['rules', beet.array(policyRuleBeet)],
   ],
-  ProofRequest.fromArgs,
-  'ProofRequest',
+  Policy.fromArgs,
+  'Policy',
 )

@@ -1,6 +1,6 @@
 {
   "name": "@albus/sdk",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Albus Protocol SDK",
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "dev": "vite build --watch",
+    "dev": "tsc --emitDeclarationOnly && vite build --watch",
     "tsc": "tsc --noEmit && echo",
     "build": "tsc --emitDeclarationOnly && vite build",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@albus/core": "*",
+    "@bundlr-network/client": "^0.11.9",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",

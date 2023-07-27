@@ -7,90 +7,78 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { ProveData } from '../types/ProveData'
-import { proveDataBeet } from '../types/ProveData'
+import type { CreateCircuitData } from '../types/CreateCircuitData'
+import {
+  createCircuitDataBeet,
+} from '../types/CreateCircuitData'
 
 /**
  * @category Instructions
- * @category Prove
+ * @category CreateCircuit
  * @category generated
  */
-export interface ProveInstructionArgs {
-  data: ProveData
+export interface CreateCircuitInstructionArgs {
+  data: CreateCircuitData
 }
 /**
  * @category Instructions
- * @category Prove
+ * @category CreateCircuit
  * @category generated
  */
-export const proveStruct = new beet.FixableBeetArgsStruct<
-  ProveInstructionArgs & {
+export const createCircuitStruct = new beet.FixableBeetArgsStruct<
+  CreateCircuitInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', proveDataBeet],
+    ['data', createCircuitDataBeet],
   ],
-  'ProveInstructionArgs',
+  'CreateCircuitInstructionArgs',
 )
 /**
- * Accounts required by the _prove_ instruction
+ * Accounts required by the _createCircuit_ instruction
  *
- * @property [_writable_] proofRequest
- * @property [] circuit
- * @property [] policy
+ * @property [_writable_] circuit
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category Prove
+ * @category CreateCircuit
  * @category generated
  */
-export interface ProveInstructionAccounts {
-  proofRequest: web3.PublicKey
+export interface CreateCircuitInstructionAccounts {
   circuit: web3.PublicKey
-  policy: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const proveInstructionDiscriminator = [
-  52, 246, 26, 161, 211, 170, 86, 215,
+export const createCircuitInstructionDiscriminator = [
+  35, 7, 152, 132, 75, 65, 176, 162,
 ]
 
 /**
- * Creates a _Prove_ instruction.
+ * Creates a _CreateCircuit_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category Prove
+ * @category CreateCircuit
  * @category generated
  */
-export function createProveInstruction(
-  accounts: ProveInstructionAccounts,
-  args: ProveInstructionArgs,
+export function createCreateCircuitInstruction(
+  accounts: CreateCircuitInstructionAccounts,
+  args: CreateCircuitInstructionArgs,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = proveStruct.serialize({
-    instructionDiscriminator: proveInstructionDiscriminator,
+  const [data] = createCircuitStruct.serialize({
+    instructionDiscriminator: createCircuitInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.proofRequest,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
       pubkey: accounts.circuit,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.policy,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {

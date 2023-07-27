@@ -26,7 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import * as Albus from '@albus/core'
 import type { Creator, Metadata } from '@metaplex-foundation/mpl-token-metadata'
+import type { Connection, PublicKeyInitData } from '@solana/web3.js'
 import type { AlbusNftCode } from '../types'
 import { NFT_AUTHORITY, NFT_SYMBOL_PREFIX } from '../constants'
 
@@ -50,4 +52,20 @@ export function validateNft(nft: Metadata, props: ValidateNftProps = {}) {
   if (props.creators && !props.creators.every(c => (nft.data.creators ?? []).includes(c))) {
     throw new Error('Invalid NFT creator')
   }
+}
+
+/**
+ * Load and validate NFT Metadata
+ * @private
+ */
+export async function loadNft(connection: Connection, addr: PublicKeyInitData, validate?: ValidateNftProps) {
+  const metadata = await Albus.utils.getMetadataByMint(connection, addr, true)
+
+  if (!metadata) {
+    throw new Error(`Unable to find Metadata account at ${addr}`)
+  }
+
+  validateNft(metadata, validate)
+
+  return metadata
 }

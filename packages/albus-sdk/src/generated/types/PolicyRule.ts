@@ -7,20 +7,19 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface AddServiceProviderData {
-  code: string
-  name: string
+export interface PolicyRule {
+  index: number
+  value: number[] /* size: 32 */
 }
 
 /**
  * @category userTypes
  * @category generated
  */
-export const addServiceProviderDataBeet
-  = new beet.FixableBeetArgsStruct<AddServiceProviderData>(
-    [
-      ['code', beet.utf8String],
-      ['name', beet.utf8String],
-    ],
-    'AddServiceProviderData',
-  )
+export const policyRuleBeet = new beet.BeetArgsStruct<PolicyRule>(
+  [
+    ['index', beet.u8],
+    ['value', beet.uniformFixedSizeArray(beet.u8, 32)],
+  ],
+  'PolicyRule',
+)

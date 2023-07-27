@@ -5,73 +5,84 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
+import * as web3 from '@solana/web3.js'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
+import type { VerificationKey } from '../types/VerificationKey'
+import { verificationKeyBeet } from '../types/VerificationKey'
 
 /**
- * Arguments used to create {@link ServiceProvider}
+ * Arguments used to create {@link Circuit}
  * @category Accounts
  * @category generated
  */
-export interface ServiceProviderArgs {
-  authority: web3.PublicKey
+export interface CircuitArgs {
   code: string
   name: string
-  proofRequestCount: beet.bignum
-  policyCount: beet.bignum
+  description: string
+  wasmUri: string
+  zkeyUri: string
   createdAt: beet.bignum
   bump: number
+  vk: VerificationKey
+  privateSignals: string[]
+  publicSignals: string[]
 }
 
-export const serviceProviderDiscriminator = [14, 72, 40, 52, 66, 51, 252, 108]
+export const circuitDiscriminator = [113, 209, 5, 225, 233, 216, 248, 61]
 /**
- * Holds the data for the {@link ServiceProvider} Account and provides de/serialization
+ * Holds the data for the {@link Circuit} Account and provides de/serialization
  * functionality for that data
  *
  * @category Accounts
  * @category generated
  */
-export class ServiceProvider implements ServiceProviderArgs {
+export class Circuit implements CircuitArgs {
   private constructor(
-    readonly authority: web3.PublicKey,
     readonly code: string,
     readonly name: string,
-    readonly proofRequestCount: beet.bignum,
-    readonly policyCount: beet.bignum,
+    readonly description: string,
+    readonly wasmUri: string,
+    readonly zkeyUri: string,
     readonly createdAt: beet.bignum,
     readonly bump: number,
+    readonly vk: VerificationKey,
+    readonly privateSignals: string[],
+    readonly publicSignals: string[],
   ) {}
 
   /**
-   * Creates a {@link ServiceProvider} instance from the provided args.
+   * Creates a {@link Circuit} instance from the provided args.
    */
-  static fromArgs(args: ServiceProviderArgs) {
-    return new ServiceProvider(
-      args.authority,
+  static fromArgs(args: CircuitArgs) {
+    return new Circuit(
       args.code,
       args.name,
-      args.proofRequestCount,
-      args.policyCount,
+      args.description,
+      args.wasmUri,
+      args.zkeyUri,
       args.createdAt,
       args.bump,
+      args.vk,
+      args.privateSignals,
+      args.publicSignals,
     )
   }
 
   /**
-   * Deserializes the {@link ServiceProvider} from the data of the provided {@link web3.AccountInfo}.
+   * Deserializes the {@link Circuit} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
     offset = 0,
-  ): [ServiceProvider, number] {
-    return ServiceProvider.deserialize(accountInfo.data, offset)
+  ): [Circuit, number] {
+    return Circuit.deserialize(accountInfo.data, offset)
   }
 
   /**
    * Retrieves the account info from the provided address and deserializes
-   * the {@link ServiceProvider} from its data.
+   * the {@link Circuit} from its data.
    *
    * @throws Error if no account info is found at the address or if deserialization fails
    */
@@ -79,15 +90,15 @@ export class ServiceProvider implements ServiceProviderArgs {
     connection: web3.Connection,
     address: web3.PublicKey,
     commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
-  ): Promise<ServiceProvider> {
+  ): Promise<Circuit> {
     const accountInfo = await connection.getAccountInfo(
       address,
       commitmentOrConfig,
     )
     if (accountInfo == null) {
-      throw new Error(`Unable to find ServiceProvider account at ${address}`)
+      throw new Error(`Unable to find Circuit account at ${address}`)
     }
-    return ServiceProvider.fromAccountInfo(accountInfo, 0)[0]
+    return Circuit.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -101,93 +112,73 @@ export class ServiceProvider implements ServiceProviderArgs {
       'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz',
     ),
   ) {
-    return beetSolana.GpaBuilder.fromStruct(programId, serviceProviderBeet)
+    return beetSolana.GpaBuilder.fromStruct(programId, circuitBeet)
   }
 
   /**
-   * Deserializes the {@link ServiceProvider} from the provided data Buffer.
+   * Deserializes the {@link Circuit} from the provided data Buffer.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static deserialize(buf: Buffer, offset = 0): [ServiceProvider, number] {
-    return serviceProviderBeet.deserialize(buf, offset)
+  static deserialize(buf: Buffer, offset = 0): [Circuit, number] {
+    return circuitBeet.deserialize(buf, offset)
   }
 
   /**
-   * Serializes the {@link ServiceProvider} into a Buffer.
+   * Serializes the {@link Circuit} into a Buffer.
    * @returns a tuple of the created Buffer and the offset up to which the buffer was written to store it.
    */
   serialize(): [Buffer, number] {
-    return serviceProviderBeet.serialize({
-      accountDiscriminator: serviceProviderDiscriminator,
+    return circuitBeet.serialize({
+      accountDiscriminator: circuitDiscriminator,
       ...this,
     })
   }
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link ServiceProvider} for the provided args.
+   * {@link Circuit} for the provided args.
    *
    * @param args need to be provided since the byte size for this account
    * depends on them
    */
-  static byteSize(args: ServiceProviderArgs) {
-    const instance = ServiceProvider.fromArgs(args)
-    return serviceProviderBeet.toFixedFromValue({
-      accountDiscriminator: serviceProviderDiscriminator,
+  static byteSize(args: CircuitArgs) {
+    const instance = Circuit.fromArgs(args)
+    return circuitBeet.toFixedFromValue({
+      accountDiscriminator: circuitDiscriminator,
       ...instance,
     }).byteSize
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
-   * {@link ServiceProvider} data from rent
+   * {@link Circuit} data from rent
    *
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
    */
   static async getMinimumBalanceForRentExemption(
-    args: ServiceProviderArgs,
+    args: CircuitArgs,
     connection: web3.Connection,
     commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
-      ServiceProvider.byteSize(args),
+      Circuit.byteSize(args),
       commitment,
     )
   }
 
   /**
-   * Returns a readable version of {@link ServiceProvider} properties
+   * Returns a readable version of {@link Circuit} properties
    * and can be used to convert to JSON and/or logging
    */
   pretty() {
     return {
-      authority: this.authority.toBase58(),
       code: this.code,
       name: this.name,
-      proofRequestCount: (() => {
-        const x = <{ toNumber: () => number }> this.proofRequestCount
-        if (typeof x.toNumber === 'function') {
-          try {
-            return x.toNumber()
-          } catch (_) {
-            return x
-          }
-        }
-        return x
-      })(),
-      policyCount: (() => {
-        const x = <{ toNumber: () => number }> this.policyCount
-        if (typeof x.toNumber === 'function') {
-          try {
-            return x.toNumber()
-          } catch (_) {
-            return x
-          }
-        }
-        return x
-      })(),
+      description: this.description,
+      wasmUri: this.wasmUri,
+      zkeyUri: this.zkeyUri,
       createdAt: (() => {
         const x = <{ toNumber: () => number }> this.createdAt
         if (typeof x.toNumber === 'function') {
@@ -200,6 +191,9 @@ export class ServiceProvider implements ServiceProviderArgs {
         return x
       })(),
       bump: this.bump,
+      vk: this.vk,
+      privateSignals: this.privateSignals,
+      publicSignals: this.publicSignals,
     }
   }
 }
@@ -208,22 +202,25 @@ export class ServiceProvider implements ServiceProviderArgs {
  * @category Accounts
  * @category generated
  */
-export const serviceProviderBeet = new beet.FixableBeetStruct<
-  ServiceProvider,
-  ServiceProviderArgs & {
+export const circuitBeet = new beet.FixableBeetStruct<
+  Circuit,
+  CircuitArgs & {
     accountDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['authority', beetSolana.publicKey],
     ['code', beet.utf8String],
     ['name', beet.utf8String],
-    ['proofRequestCount', beet.u64],
-    ['policyCount', beet.u64],
+    ['description', beet.utf8String],
+    ['wasmUri', beet.utf8String],
+    ['zkeyUri', beet.utf8String],
     ['createdAt', beet.i64],
     ['bump', beet.u8],
+    ['vk', verificationKeyBeet],
+    ['privateSignals', beet.array(beet.utf8String)],
+    ['publicSignals', beet.array(beet.utf8String)],
   ],
-  ServiceProvider.fromArgs,
-  'ServiceProvider',
+  Circuit.fromArgs,
+  'Circuit',
 )
