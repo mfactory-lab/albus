@@ -12,7 +12,7 @@
     "sdk:gen": "pnpm -F @albus/sdk generate && pnpm run lint:fix",
     "cli": "pnpm -F @albus/cli run cli",
     "dev": "pnpm --parallel run dev",
-    "test:unit": "vitest",
+    "test:unit": "vitest --dir ./packages",
     "test:e2e": "pnpm -F @albus/tests run test",
     "lint:fix": "eslint --fix --ext .js,.vue,.ts ./packages",
     "changeset": "changeset",
@@ -35,18 +35,12 @@
     "peerDependencyRules": {
       "ignoreMissing": [
         "@solana/web3.js",
-        "@babel/core",
         "rollup",
-        "babel-runtime",
-        "cypress",
         "snarkjs",
         "jest",
         "vue",
         "vite"
-      ],
-      "allowedVersions": {
-        "typescript": "5"
-      }
+      ]
     }
   }
 }

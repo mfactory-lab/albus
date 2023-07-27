@@ -1,7 +1,10 @@
 [workspace]
 members = [
-  "programs/*",
-  "packages/albus-verifier"
+#  "programs/*",
+  "programs/albus",
+  # "packages/groth16",
+  "packages/groth16-solana",
+#  "packages/albus-verifier"
 ]
 
 [profile.release]

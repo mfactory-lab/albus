@@ -15,17 +15,17 @@ wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
 albus = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz"
-verified-transfer = "ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2"
-verified-swap = "8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR"
-verified-stake = "CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr"
-verified-stake-pool = "HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e"
+#verified-transfer = "ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2"
+#verified-swap = "8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR"
+#verified-stake = "CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr"
+#verified-stake-pool = "HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e"
 
 # solana program dump metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s ./target/deploy/metadata.so
-[[test.genesis]]
-address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-program = "target/deploy/metadata.so"
+#[[test.genesis]]
+#address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+#program = "target/deploy/metadata.so"
 
 # solana program dump SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy ./target/deploy/stake_pool.so
-[[test.genesis]]
-address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"
-program = "target/deploy/stake_pool.so"
+#[[test.genesis]]
+#address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"
+#program = "target/deploy/stake_pool.so"

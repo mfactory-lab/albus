@@ -16,7 +16,8 @@ args := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 
 .PHONY: circom
 circom: ## Build circom
-	circom ./circuits/$(args).circom -l node_modules --r1cs --wasm --sym -o ./tmp
+	circom ./circuits/$(args).circom -p bn128 -l node_modules --r1cs --wasm --sym -o ./circuits && \
+	mv ./circuits/$(args)_js/$(args).wasm ./circuits/ && rm -rf ./circuits/$(args)_js
 
 .PHONY: bump
 bump: ## Bump albus program version
