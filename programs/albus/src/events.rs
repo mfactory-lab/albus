@@ -26,14 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::state::Proof;
 use crate::*;
 
 #[event]
 pub struct CreateProofRequestEvent {
     #[index]
     pub service_provider: Pubkey,
-    pub circuit: Pubkey,
+    pub policy: Pubkey,
     pub owner: Pubkey,
     pub timestamp: i64,
 }
@@ -53,8 +52,8 @@ pub struct ProveEvent {
     #[index]
     pub service_provider: Pubkey,
     pub circuit: Pubkey,
-    pub proof: Proof,
     pub owner: Pubkey,
+    pub vp_url: String,
     pub timestamp: i64,
 }
 

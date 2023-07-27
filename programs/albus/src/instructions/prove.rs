@@ -27,8 +27,9 @@
  */
 
 use anchor_lang::prelude::*;
+use groth16_solana::Groth16Verifier;
 
-use crate::state::Proof;
+use crate::state::{Circuit, Policy, ProofData};
 use crate::{
     events::ProveEvent,
     state::{ProofRequest, ProofRequestStatus},
@@ -39,6 +40,20 @@ use crate::{
 /// Proves the [ProofRequest] by validating the proof metadata and updating its status to `Proved`.
 /// Returns an error if the request has expired or if the proof metadata is invalid.
 pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
+    let circuit = &ctx.accounts.circuit;
+    let policy = &ctx.accounts.policy;
+
+    let mut public_inputs = data.public_inputs;
+    policy.prepare_input(&mut public_inputs);
+
+    // TODO: modify `public_inputs` (current date, signer address, etc)
+
+    let verifier =
+        Groth16Verifier::new(data.proof.into(), public_inputs, circuit.vk.clone().into())
+            .expect("Invalid public inputs");
+
+    verifier.verify().unwrap();
+
     let req = &mut ctx.accounts.proof_request;
 
     if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
@@ -53,15 +68,15 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     }
 
     req.status = ProofRequestStatus::Proved;
-    req.proof = Some(data.proof.to_owned());
+    req.vp_uri = data.uri.to_owned();
     req.proved_at = timestamp;
-    req.verified_at = 0;
+    req.verified_at = timestamp;
 
     emit!(ProveEvent {
         proof_request: req.key(),
         service_provider: req.service_provider,
-        circuit: req.circuit,
-        proof: data.proof,
+        circuit: circuit.key(),
+        vp_url: data.uri,
         owner: req.owner,
         timestamp,
     });
@@ -73,14 +88,19 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct ProveData {
-    pub proof: Proof,
+    pub uri: String,
+    pub proof: ProofData,
+    pub public_inputs: Vec<[u8; 32]>,
 }
 
 #[derive(Accounts)]
 #[instruction(data: ProveData)]
 pub struct Prove<'info> {
-    #[account(mut, realloc = ProofRequest::space() + data.proof.space(), realloc::payer = authority, realloc::zero = false)]
+    #[account(mut, has_one = policy, has_one = circuit)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
+
+    pub circuit: Account<'info, Circuit>,
+    pub policy: Account<'info, Policy>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

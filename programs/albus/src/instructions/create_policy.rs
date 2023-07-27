@@ -28,45 +28,59 @@
 
 use anchor_lang::prelude::*;
 
-use crate::{state::ServiceProvider, utils::assert_authorized};
+use crate::state::{Circuit, ServiceProvider};
+use crate::state::{Policy, PolicyRule};
 
-pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
-    assert_authorized(&ctx.accounts.authority.key())?;
+pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()> {
+    // let circuit_metadata = assert_valid_circuit(&ctx.accounts.circuit_metadata)?;
 
     let timestamp = Clock::get()?.unix_timestamp;
 
-    let sp = &mut ctx.accounts.service_provider;
-    sp.code = data.code;
-    sp.name = data.name;
-    sp.authority = ctx.accounts.authority.key();
-    sp.proof_request_count = 0;
-    sp.created_at = timestamp;
-    sp.bump = ctx.bumps["service_provider"];
+    let policy = &mut ctx.accounts.policy;
+    policy.service_provider = ctx.accounts.service_provider.key();
+    policy.circuit = ctx.accounts.circuit.key();
+    policy.name = data.name;
+    policy.description = data.description;
+    policy.rules = data.rules;
+    policy.proof_expires_in = data.expires_in;
+    policy.created_at = timestamp;
+    policy.bump = ctx.bumps["policy"];
 
     Ok(())
 }
 
-/// Data required to add a new service provider
+/// Data required to create a new proof request
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateServiceProviderData {
-    /// The unique code representing the service
-    pub code: String,
-    /// The name of the service
+pub struct CreatePolicyData {
     pub name: String,
+    pub description: String,
+    pub expires_in: u32,
+    pub rules: Vec<PolicyRule>,
 }
 
 #[derive(Accounts)]
-#[instruction(data: CreateServiceProviderData)]
-pub struct CreateServiceProvider<'info> {
-    #[account(
-        init,
-        seeds = [ServiceProvider::SEED, data.code.as_bytes()],
-        bump,
-        payer = authority,
-        space = ServiceProvider::space()
-    )]
+#[instruction(data: CreatePolicyData)]
+pub struct CreatePolicy<'info> {
+    #[account(mut)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 
+    pub circuit: Box<Account<'info, Circuit>>,
+
+    #[account(
+        init,
+        seeds = [
+            Policy::SEED,
+            circuit.key().as_ref(),
+            service_provider.key().as_ref(),
+        ],
+        bump,
+        payer = authority,
+        space = Policy::space(data.rules.len())
+    )]
+    pub policy: Box<Account<'info, Policy>>,
+
+    // /// CHECK: checked internal
+    // pub circuit_metadata: UncheckedAccount<'info>,
     #[account(mut)]
     pub authority: Signer<'info>,
 

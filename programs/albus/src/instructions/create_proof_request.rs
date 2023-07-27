@@ -27,23 +27,28 @@
  */
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
 
+use crate::state::Policy;
 use crate::{
     events::CreateProofRequestEvent,
     state::{ProofRequest, ProofRequestStatus, ServiceProvider},
-    utils::assert_valid_circuit,
 };
 
 pub fn handler(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -> Result<()> {
-    let circuit_metadata = assert_valid_circuit(&ctx.accounts.circuit_metadata)?;
-
     let timestamp = Clock::get()?.unix_timestamp;
 
+    let policy = &mut ctx.accounts.policy;
+    policy.proof_request_count += 1;
+
+    let service_provider = &mut ctx.accounts.service_provider;
+    service_provider.proof_request_count += 1;
+
     let req = &mut ctx.accounts.proof_request;
-    req.service_provider = ctx.accounts.service_provider.key();
+    req.service_provider = service_provider.key();
+    req.policy = policy.key();
+    req.circuit = policy.circuit;
     req.owner = ctx.accounts.authority.key();
-    req.circuit = circuit_metadata.mint;
+    req.identifier = service_provider.proof_request_count;
     req.proved_at = 0;
     req.verified_at = 0;
     req.created_at = timestamp;
@@ -52,14 +57,13 @@ pub fn handler(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -
 
     if data.expires_in > 0 {
         req.expired_at = timestamp.saturating_add(data.expires_in as i64);
+    } else if policy.proof_expires_in > 0 {
+        req.expired_at = timestamp.saturating_add(policy.proof_expires_in as i64);
     }
-
-    let sp = &mut ctx.accounts.service_provider;
-    sp.proof_request_count += 1;
 
     emit!(CreateProofRequestEvent {
         service_provider: req.service_provider,
-        circuit: req.circuit,
+        policy: req.policy,
         owner: req.owner,
         timestamp,
     });
@@ -79,12 +83,14 @@ pub struct CreateProofRequest<'info> {
     #[account(mut)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 
+    #[account(mut, has_one = service_provider)]
+    pub policy: Box<Account<'info, Policy>>,
+
     #[account(
-        init,
+        init_if_needed,
         seeds = [
             ProofRequest::SEED,
-            service_provider.key().as_ref(),
-            circuit_mint.key().as_ref(),
+            policy.key().as_ref(),
             authority.key().as_ref(),
         ],
         bump,
@@ -92,15 +98,6 @@ pub struct CreateProofRequest<'info> {
         space = ProofRequest::space()
     )]
     pub proof_request: Box<Account<'info, ProofRequest>>,
-
-    #[account(
-        constraint = circuit_mint.supply == 1,
-        constraint = circuit_mint.decimals == 0,
-    )]
-    pub circuit_mint: Box<Account<'info, Mint>>,
-
-    /// CHECK: checked internal
-    pub circuit_metadata: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

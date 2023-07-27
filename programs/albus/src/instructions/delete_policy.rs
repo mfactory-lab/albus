@@ -28,44 +28,20 @@
 
 use anchor_lang::prelude::*;
 
-use crate::{state::ServiceProvider, utils::assert_authorized};
+use crate::state::Policy;
+use crate::state::ServiceProvider;
 
-pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
-    assert_authorized(&ctx.accounts.authority.key())?;
-
-    let timestamp = Clock::get()?.unix_timestamp;
-
-    let sp = &mut ctx.accounts.service_provider;
-    sp.code = data.code;
-    sp.name = data.name;
-    sp.authority = ctx.accounts.authority.key();
-    sp.proof_request_count = 0;
-    sp.created_at = timestamp;
-    sp.bump = ctx.bumps["service_provider"];
-
+pub fn handler(_ctx: Context<DeletePolicy>) -> Result<()> {
     Ok(())
 }
 
-/// Data required to add a new service provider
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateServiceProviderData {
-    /// The unique code representing the service
-    pub code: String,
-    /// The name of the service
-    pub name: String,
-}
-
 #[derive(Accounts)]
-#[instruction(data: CreateServiceProviderData)]
-pub struct CreateServiceProvider<'info> {
-    #[account(
-        init,
-        seeds = [ServiceProvider::SEED, data.code.as_bytes()],
-        bump,
-        payer = authority,
-        space = ServiceProvider::space()
-    )]
+pub struct DeletePolicy<'info> {
+    #[account(mut, has_one = authority)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
+
+    #[account(mut, has_one = service_provider, close = authority)]
+    pub policy: Box<Account<'info, Policy>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

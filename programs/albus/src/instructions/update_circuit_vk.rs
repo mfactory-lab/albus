@@ -28,44 +28,55 @@
 
 use anchor_lang::prelude::*;
 
-use crate::{state::ServiceProvider, utils::assert_authorized};
+use crate::state::Circuit;
+use crate::utils::assert_authorized;
 
-pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
+pub fn handler(ctx: Context<UpdateCircuitVk>, data: UpdateCircuitVkData) -> Result<()> {
     assert_authorized(&ctx.accounts.authority.key())?;
 
-    let timestamp = Clock::get()?.unix_timestamp;
+    let circuit = &mut ctx.accounts.circuit;
 
-    let sp = &mut ctx.accounts.service_provider;
-    sp.code = data.code;
-    sp.name = data.name;
-    sp.authority = ctx.accounts.authority.key();
-    sp.proof_request_count = 0;
-    sp.created_at = timestamp;
-    sp.bump = ctx.bumps["service_provider"];
+    if let Some(alpha) = data.alpha {
+        circuit.vk.alpha = alpha;
+    }
+
+    if let Some(beta) = data.beta {
+        circuit.vk.beta = beta;
+    }
+
+    if let Some(gamma) = data.gamma {
+        circuit.vk.gamma = gamma;
+    }
+
+    if let Some(delta) = data.delta {
+        circuit.vk.delta = delta;
+    }
+
+    if let Some(ic) = data.ic {
+        if data.extend_ic {
+            circuit.vk.ic.extend(ic);
+        } else {
+            circuit.vk.ic = ic;
+        }
+    }
 
     Ok(())
 }
 
-/// Data required to add a new service provider
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateServiceProviderData {
-    /// The unique code representing the service
-    pub code: String,
-    /// The name of the service
-    pub name: String,
+pub struct UpdateCircuitVkData {
+    pub alpha: Option<[u8; 64]>,
+    pub beta: Option<[u8; 128]>,
+    pub gamma: Option<[u8; 128]>,
+    pub delta: Option<[u8; 128]>,
+    pub ic: Option<Vec<[u8; 64]>>,
+    pub extend_ic: bool,
 }
 
 #[derive(Accounts)]
-#[instruction(data: CreateServiceProviderData)]
-pub struct CreateServiceProvider<'info> {
-    #[account(
-        init,
-        seeds = [ServiceProvider::SEED, data.code.as_bytes()],
-        bump,
-        payer = authority,
-        space = ServiceProvider::space()
-    )]
-    pub service_provider: Box<Account<'info, ServiceProvider>>,
+pub struct UpdateCircuitVk<'info> {
+    #[account(mut)]
+    pub circuit: Box<Account<'info, Circuit>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

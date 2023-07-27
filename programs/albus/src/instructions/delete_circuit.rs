@@ -28,44 +28,19 @@
 
 use anchor_lang::prelude::*;
 
-use crate::{state::ServiceProvider, utils::assert_authorized};
+use crate::state::Circuit;
+use crate::utils::assert_authorized;
 
-pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
+pub fn handler(ctx: Context<DeleteCircuit>) -> Result<()> {
     assert_authorized(&ctx.accounts.authority.key())?;
-
-    let timestamp = Clock::get()?.unix_timestamp;
-
-    let sp = &mut ctx.accounts.service_provider;
-    sp.code = data.code;
-    sp.name = data.name;
-    sp.authority = ctx.accounts.authority.key();
-    sp.proof_request_count = 0;
-    sp.created_at = timestamp;
-    sp.bump = ctx.bumps["service_provider"];
 
     Ok(())
 }
 
-/// Data required to add a new service provider
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateServiceProviderData {
-    /// The unique code representing the service
-    pub code: String,
-    /// The name of the service
-    pub name: String,
-}
-
 #[derive(Accounts)]
-#[instruction(data: CreateServiceProviderData)]
-pub struct CreateServiceProvider<'info> {
-    #[account(
-        init,
-        seeds = [ServiceProvider::SEED, data.code.as_bytes()],
-        bump,
-        payer = authority,
-        space = ServiceProvider::space()
-    )]
-    pub service_provider: Box<Account<'info, ServiceProvider>>,
+pub struct DeleteCircuit<'info> {
+    #[account(mut, close = authority)]
+    pub circuit: Box<Account<'info, Circuit>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

@@ -27,15 +27,27 @@
  */
 
 pub mod add_service_provider;
+pub mod create_circuit;
+pub mod create_policy;
 pub mod create_proof_request;
+pub mod delete_circuit;
+pub mod delete_policy;
 pub mod delete_proof_request;
 pub mod delete_service_provider;
+// pub mod mint_credential;
 pub mod prove;
+pub mod update_circuit_vk;
 pub mod verify;
 
 pub use add_service_provider::*;
+pub use create_circuit::*;
+pub use create_policy::*;
 pub use create_proof_request::*;
+pub use delete_circuit::*;
+pub use delete_policy::*;
 pub use delete_proof_request::*;
 pub use delete_service_provider::*;
+pub use update_circuit_vk::*;
+// pub use mint_credential::*;
 pub use prove::*;
 pub use verify::*;

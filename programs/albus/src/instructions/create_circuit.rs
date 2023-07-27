@@ -28,44 +28,54 @@
 
 use anchor_lang::prelude::*;
 
-use crate::{state::ServiceProvider, utils::assert_authorized};
+use crate::state::Circuit;
+use crate::utils::assert_authorized;
 
-pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
+pub fn handler(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<()> {
     assert_authorized(&ctx.accounts.authority.key())?;
 
     let timestamp = Clock::get()?.unix_timestamp;
 
-    let sp = &mut ctx.accounts.service_provider;
-    sp.code = data.code;
-    sp.name = data.name;
-    sp.authority = ctx.accounts.authority.key();
-    sp.proof_request_count = 0;
-    sp.created_at = timestamp;
-    sp.bump = ctx.bumps["service_provider"];
+    let circuit = &mut ctx.accounts.circuit;
+
+    circuit.code = data.code;
+    circuit.name = data.name;
+    circuit.description = data.description;
+    circuit.wasm_uri = data.wasm_uri;
+    circuit.zkey_uri = data.zkey_uri;
+    circuit.created_at = timestamp;
+    circuit.private_signals = data.private_signals;
+    circuit.public_signals = data.public_signals;
+    circuit.bump = ctx.bumps["circuit"];
 
     Ok(())
 }
 
-/// Data required to add a new service provider
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateServiceProviderData {
-    /// The unique code representing the service
+pub struct CreateCircuitData {
     pub code: String,
-    /// The name of the service
     pub name: String,
+    pub description: String,
+    pub wasm_uri: String,
+    pub zkey_uri: String,
+    pub private_signals: Vec<String>,
+    pub public_signals: Vec<String>,
 }
 
 #[derive(Accounts)]
-#[instruction(data: CreateServiceProviderData)]
-pub struct CreateServiceProvider<'info> {
+#[instruction(data: CreateCircuitData)]
+pub struct CreateCircuit<'info> {
     #[account(
         init,
-        seeds = [ServiceProvider::SEED, data.code.as_bytes()],
+        seeds = [Circuit::SEED, data.code.as_bytes()],
         bump,
         payer = authority,
-        space = ServiceProvider::space()
+        space = Circuit::space(
+            Circuit::get_inputs_len(data.private_signals) +
+            Circuit::get_inputs_len(data.public_signals)
+        )
     )]
-    pub service_provider: Box<Account<'info, ServiceProvider>>,
+    pub circuit: Box<Account<'info, Circuit>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

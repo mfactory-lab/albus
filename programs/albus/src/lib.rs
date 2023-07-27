@@ -42,15 +42,38 @@ pub mod albus {
 
     use super::*;
 
-    pub fn add_service_provider(
-        ctx: Context<AddServiceProvider>,
-        data: AddServiceProviderData,
+    pub fn create_circuit(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<()> {
+        create_circuit::handler(ctx, data)
+    }
+
+    pub fn update_circuit_vk(
+        ctx: Context<UpdateCircuitVk>,
+        data: UpdateCircuitVkData,
+    ) -> Result<()> {
+        update_circuit_vk::handler(ctx, data)
+    }
+
+    pub fn delete_circuit(ctx: Context<DeleteCircuit>) -> Result<()> {
+        delete_circuit::handler(ctx)
+    }
+
+    pub fn create_service_provider(
+        ctx: Context<CreateServiceProvider>,
+        data: CreateServiceProviderData,
     ) -> Result<()> {
         add_service_provider::handler(ctx, data)
     }
 
     pub fn delete_service_provider(ctx: Context<DeleteServiceProvider>) -> Result<()> {
         delete_service_provider::handler(ctx)
+    }
+
+    pub fn create_policy(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()> {
+        create_policy::handler(ctx, data)
+    }
+
+    pub fn delete_policy(ctx: Context<DeletePolicy>) -> Result<()> {
+        delete_policy::handler(ctx)
     }
 
     pub fn create_proof_request(
