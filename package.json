@@ -20,15 +20,15 @@
     "commit": "git-cz"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.39.5",
+    "@antfu/eslint-config": "^0.39.8",
     "@changesets/cli": "^2.26.0",
     "@rollup/plugin-inject": "^5.0.3",
     "@types/node": "^18.0.0",
-    "@vitest/ui": "^0.32.0",
-    "eslint": "^8.43.0",
+    "@vitest/ui": "^0.33.0",
+    "eslint": "^8.45.0",
     "typescript": "^4.9.5",
-    "vite": "^4.3.9",
-    "vitest": "^0.32.0",
+    "vite": "^4.4.7",
+    "vitest": "^0.33.0",
     "unbuild": "^1.2.1"
   },
   "pnpm": {
