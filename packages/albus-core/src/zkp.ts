@@ -32,7 +32,7 @@ import axios from 'axios'
 import type { ProofData, PublicSignals, VK } from 'snarkjs'
 import { groth16 } from 'snarkjs'
 
-const { leInt2Buff, unstringifyBigInts } = ffUtils
+const { leInt2Buff, leBuff2int, unstringifyBigInts, stringifyBigInts } = ffUtils
 
 interface GenerateProofProps {
   wasmFile: string | Buffer
@@ -72,7 +72,7 @@ export async function verifyProof(props: VerifyProofProps) {
 }
 
 /**
- * Fetches bytes from the specified URL
+ * Fetches bytes from the specified {@link url}
  */
 async function fetchBytes(url: string | Buffer | Uint8Array) {
   if (typeof url === 'string') {
@@ -82,20 +82,19 @@ async function fetchBytes(url: string | Buffer | Uint8Array) {
   return Uint8Array.from(url)
 }
 
-export function parseFiniteNumber(n: string | number | bigint) {
-  return Array.from<number>(leInt2Buff(unstringifyBigInts(BigInt(n)), 32))
-}
-
-export function parseProofToBytesArray(payload: any) {
+/**
+ * Convert `snarkjs` proof representation to solana format
+ */
+export function decodeProof(payload: any) {
   for (const i in payload) {
     if (i === 'pi_a' || i === 'pi_c') {
       for (const j in payload[i]) {
-        payload[i][j] = parseFiniteNumber(payload[i][j]).reverse()
+        payload[i][j] = finiteToBytes(payload[i][j]).reverse()
       }
     } else if (i === 'pi_b') {
       for (const j in payload[i]) {
         for (const z in payload[i][j]) {
-          payload[i][j][z] = parseFiniteNumber(payload[i][j][z])
+          payload[i][j][z] = finiteToBytes(payload[i][j][z])
         }
       }
     }
@@ -111,38 +110,98 @@ export function parseProofToBytesArray(payload: any) {
   }
 }
 
-export function parseToBytesArray(publicSignals: Array<string | number | bigint>) {
+/**
+ * Convert `snarkjs` signals representation to solana format
+ */
+export function decodePublicSignals(publicSignals: Array<string | number | bigint>) {
   const publicInputsBytes = new Array<Array<number>>()
   for (const i in publicSignals) {
-    publicInputsBytes.push(parseFiniteNumber(publicSignals[i]!).reverse())
+    publicInputsBytes.push(finiteToBytes(publicSignals[i]!).reverse())
   }
   return publicInputsBytes
 }
 
-export function parseVerifyingKey(data: VK) {
-  const g1 = (p: number[]) => p
-    .reduce((a, b) =>
-      a.concat(parseFiniteNumber(b).reverse()), [] as number[],
-    ).slice(0, 64)
+/**
+ * Convert `snarkjs` VK representation to solana format
+ */
+export function decodeVerifyingKey(data: VK) {
+  const g1 = (p): number[] => p
+    .reduce((a, b) => a.concat(finiteToBytes(b).reverse()), [] as number[]).slice(0, 64)
 
-  const g2 = (p: number[][]) => p
+  const g2 = (p): number[] => p
     .reduce((a, b) =>
-      a.concat(parseFiniteNumber(b[0]!).concat(parseFiniteNumber(b[1]!)).reverse()), [] as number[],
+      a.concat(finiteToBytes(b[0]!).concat(finiteToBytes(b[1]!)).reverse()), [] as number[],
     ).slice(0, 128)
 
   return {
-    curve: data.curve,
-    nPublic: data.nPublic,
+    curve: String(data.curve),
+    nPublic: String(data.nPublic),
     alpha: g1(data.vk_alpha_1),
     beta: g2(data.vk_beta_2),
     gamma: g2(data.vk_gamma_2),
     delta: g2(data.vk_delta_2),
-    ic: data.IC.map(g1),
+    ic: data.IC.map(g1) as number[][],
   }
 }
 
+/**
+ * Convert solana VK representation to `snarkjs` format
+ */
+export function encodeVerifyingKey(data: {
+  alpha: number[]
+  beta: number[]
+  gamma: number[]
+  delta: number[]
+  ic: number[][]
+  curve?: string
+  protocol?: string
+}): VK {
+  const g1 = (bytes: number[]) => {
+    if (bytes.length < 64) {
+      throw new Error('G1 point must be 64 long')
+    }
+    return [bytesToFinite(bytes.slice(0, 32).reverse()), bytesToFinite(bytes.slice(32, 64).reverse()), '1']
+  }
+
+  const g2 = (bytes: number[]) => {
+    if (bytes.length < 128) {
+      throw new Error('G2 point must be 128 long')
+    }
+    const result: (string)[][] = []
+    for (let i = 0; i < bytes.length; i += 64) {
+      const chunk = bytes.slice(i, i + 64).reverse()
+      result.push([bytesToFinite(chunk.slice(0, 32)), bytesToFinite(chunk.slice(32, 64))])
+    }
+    result.push(['1', '0'])
+    return result
+  }
+
+  return {
+    curve: data.curve ?? 'bn128',
+    protocol: data.protocol ?? 'groth16',
+    nPublic: data.ic.length - 1,
+    vk_alpha_1: g1(data.alpha),
+    vk_beta_2: g2(data.beta),
+    vk_gamma_2: g2(data.gamma),
+    vk_delta_2: g2(data.delta),
+    IC: data.ic.map(g1),
+  }
+}
+
+/**
+ * Convert G1 point to negative representation
+ * used for on-chain verify optimization
+ */
 export async function altBn128G1Neg(input: number[]) {
   const bn128 = await getCurveFromName('bn128', true)
   const changeEndianness = (b: number[]) => [...b.slice(0, 32).reverse(), ...b.slice(32).reverse()]
   return changeEndianness(bn128.G1.neg(Buffer.from(changeEndianness(input))))
+}
+
+export function finiteToBytes(n: string | number | bigint) {
+  return Array.from<number>(leInt2Buff(unstringifyBigInts(BigInt(n)), 32))
+}
+
+export function bytesToFinite(bytes: number[] | Uint8Array): string {
+  return stringifyBigInts(leBuff2int(Buffer.from(bytes)))
 }

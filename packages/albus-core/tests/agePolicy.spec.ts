@@ -30,7 +30,7 @@ import { Keypair } from '@solana/web3.js'
 import { buildBabyjub, buildEddsa } from 'circomlibjs'
 import { assert, describe, it } from 'vitest'
 import { createClaimsTree } from '../src/credential'
-import { generateProof, parseProofToBytesArray, verifyProof } from '../src/zkp'
+import { decodeProof, generateProof, verifyProof } from '../src/zkp'
 import { loadFixture, setupCircuit } from './utils'
 
 describe('AgePolicy', async () => {
@@ -147,7 +147,7 @@ describe('Proof', async () => {
 
     console.log('verify', res)
 
-    const p = parseProofToBytesArray(proof)
+    const p = decodeProof(proof)
 
     // console.log(JSON.stringify([...p.a, ...p.b, ...p.c]))
     // console.log(parseToBytesArray(publicSignals as string[]))

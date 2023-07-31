@@ -38,7 +38,7 @@ const Scalar = ff.Scalar
 const ZqField = ff.ZqField
 const { unstringifyBigInts } = ff.utils
 
-type EcdhSharedKey = BigInt[]
+type EcdhSharedKey = bigint[]
 
 const SNARK_FIELD_SIZE = BigInt(
   '0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001',
@@ -87,7 +87,7 @@ function poseidonStrategy(state: any) {
 
 const two128 = F.e('340282366920938463463374607431768211456')
 
-function genRandomNonce(): BigInt {
+function genRandomNonce(): bigint {
   const max = two128
   // Prevent modulo bias
   const lim = F.e('0x10000000000000000000000000000000000000000000000000000000000000000')
@@ -102,7 +102,7 @@ function genRandomNonce(): BigInt {
     }
   }
 
-  const nonce: BigInt = F.mod(F.e(rand), max)
+  const nonce: bigint = F.mod(F.e(rand), max)
   assert(nonce < max)
 
   return nonce
@@ -138,7 +138,7 @@ function poseidonEncrypt(
     ),
   ]
 
-  const ciphertext: BigInt[] = []
+  const ciphertext: bigint[] = []
 
   for (let i = 0; i < cipherLength / 3; i++) {
     // Iterate Poseidon on the state
@@ -165,10 +165,10 @@ function poseidonEncrypt(
 }
 
 function poseidonDecrypt(
-  ciphertext: BigInt[],
+  ciphertext: bigint[],
   sharedKey: EcdhSharedKey,
   length: number,
-  nonce: BigInt = BigInt(0),
+  nonce: bigint = BigInt(0),
 ) {
   assert(nonce < two128)
 

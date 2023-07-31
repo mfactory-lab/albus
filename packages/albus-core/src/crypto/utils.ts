@@ -41,9 +41,10 @@ export function arrayToByteLength(byteArray: Uint8Array, length: number) {
   if (byteArray.length > length) {
     throw new Error('BigInt byte size is larger than length')
   }
-
   // Create Uint8Array of requested length
-  return new Uint8Array(new Array(length - byteArray.length).concat(...byteArray))
+  return new Uint8Array(
+    Array.from<number>({ length: length - byteArray.length }).concat(...byteArray),
+  )
 }
 
 /**

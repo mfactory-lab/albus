@@ -45,11 +45,12 @@ declare module 'snarkjs' {
   type VK = {
     readonly nPublic: number;
     readonly curve: string;
-    readonly vk_alpha_1: number[];
-    readonly vk_beta_2: number[][];
-    readonly vk_gamma_2: number[][];
-    readonly vk_delta_2: number[][];
-    readonly IC: number[][];
+    readonly protocol: string;
+    readonly vk_alpha_1: (string | number | bigint)[];
+    readonly vk_beta_2: (string | number | bigint)[][];
+    readonly vk_gamma_2: (string | number | bigint)[][];
+    readonly vk_delta_2: (string | number | bigint)[][];
+    readonly IC: (string | number | bigint)[][];
   };
 
   const groth16: {
