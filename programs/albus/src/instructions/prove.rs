@@ -29,7 +29,9 @@
 use anchor_lang::prelude::*;
 use groth16_solana::Groth16Verifier;
 
+use crate::constants::{CURRENT_DATE_SIGNAL, ISSUER_PK_SIGNAL};
 use crate::state::{Circuit, Policy, ProofData};
+use crate::utils::format_circuit_date;
 use crate::{
     events::ProveEvent,
     state::{ProofRequest, ProofRequestStatus},
@@ -43,16 +45,29 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     let circuit = &ctx.accounts.circuit;
     let policy = &ctx.accounts.policy;
 
-    let mut public_inputs = data.public_inputs;
-    policy.prepare_input(&mut public_inputs);
+    let timestamp = Clock::get()?.unix_timestamp;
+    let signals = circuit.signals();
 
-    // TODO: modify `public_inputs` (current date, signer address, etc)
+    let mut public_inputs = data.public_inputs;
+
+    // check current date
+    if let Some(s) = signals.get(CURRENT_DATE_SIGNAL) {
+        public_inputs[s.0] = format_circuit_date(timestamp).unwrap();
+    }
+
+    // // check issuer public key
+    // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
+    //     public_inputs[*idx] = [0; 32]; //x
+    //     public_inputs[*idx + 1] = [0; 32]; //y
+    // }
+
+    policy.apply_rules(&mut public_inputs);
 
     let verifier =
         Groth16Verifier::new(data.proof.into(), public_inputs, circuit.vk.clone().into())
             .expect("Invalid public inputs");
 
-    verifier.verify().unwrap();
+    verifier.verify().expect("Proof verification failed");
 
     let req = &mut ctx.accounts.proof_request;
 
@@ -60,8 +75,6 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
         msg!("Error: Only request owner can prove it!");
         return Err(AlbusError::Unauthorized.into());
     }
-
-    let timestamp = Clock::get()?.unix_timestamp;
 
     if req.expired_at > 0 && req.expired_at < timestamp {
         return Err(AlbusError::Expired.into());

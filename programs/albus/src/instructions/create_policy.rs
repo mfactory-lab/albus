@@ -32,8 +32,6 @@ use crate::state::{Circuit, ServiceProvider};
 use crate::state::{Policy, PolicyRule};
 
 pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()> {
-    // let circuit_metadata = assert_valid_circuit(&ctx.accounts.circuit_metadata)?;
-
     let timestamp = Clock::get()?.unix_timestamp;
 
     let policy = &mut ctx.accounts.policy;
@@ -42,7 +40,8 @@ pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()>
     policy.name = data.name;
     policy.description = data.description;
     policy.rules = data.rules;
-    policy.proof_expires_in = data.expires_in;
+    policy.expiration_period = data.expires_in;
+    policy.retention_period = 0; // TODO
     policy.created_at = timestamp;
     policy.bump = ctx.bumps["policy"];
 
@@ -55,6 +54,7 @@ pub struct CreatePolicyData {
     pub name: String,
     pub description: String,
     pub expires_in: u32,
+    // pub retention_period: u32,
     pub rules: Vec<PolicyRule>,
 }
 
@@ -79,8 +79,6 @@ pub struct CreatePolicy<'info> {
     )]
     pub policy: Box<Account<'info, Policy>>,
 
-    // /// CHECK: checked internal
-    // pub circuit_metadata: UncheckedAccount<'info>,
     #[account(mut)]
     pub authority: Signer<'info>,
 

@@ -13,6 +13,7 @@ no-entrypoint = []
 cpi = ["no-entrypoint"]
 
 [dependencies]
+time = "0.3.23"
 anchor-lang = { version = "0.28.0", features = ["init-if-needed"]}
 anchor-spl = { version = "0.28.0" }
 #mpl-token-metadata = { version = "1.13.0", features = ["no-entrypoint"] }

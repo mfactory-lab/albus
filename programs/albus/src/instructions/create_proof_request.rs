@@ -57,8 +57,8 @@ pub fn handler(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -
 
     if data.expires_in > 0 {
         req.expired_at = timestamp.saturating_add(data.expires_in as i64);
-    } else if policy.proof_expires_in > 0 {
-        req.expired_at = timestamp.saturating_add(policy.proof_expires_in as i64);
+    } else if policy.expiration_period > 0 {
+        req.expired_at = timestamp.saturating_add(policy.expiration_period as i64);
     }
 
     emit!(CreateProofRequestEvent {
