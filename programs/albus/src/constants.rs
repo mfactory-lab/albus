@@ -32,6 +32,8 @@ pub const AUTHORIZED_AUTHORITY: &[&str] = &[
     "5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH",
 ];
 
+pub const CURRENT_DATE_SIGNAL: &str = "currentDate";
+pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
+
 // pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
 // pub const VC_SYMBOL_CODE: &str = "VC";
-// pub const CIRCUIT_SYMBOL_CODE: &str = "C";
