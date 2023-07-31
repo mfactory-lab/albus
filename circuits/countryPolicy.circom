@@ -7,7 +7,7 @@ include "MerkleProof.circom";
 // https://www.iban.com/country-codes
 
 template CountryPolicy(credentialDepth) {
-  signal input country;
+  signal input country; // ISO 3166-1 numeric
   signal input countryProof[credentialDepth];
   signal input countryKey;
 
@@ -33,17 +33,19 @@ template CountryPolicy(credentialDepth) {
   eddsa.R8y<==issuerSignature[1];
   eddsa.S<==issuerSignature[2];
 
-  var country_count = 36;
+//  signal input countryCount;
+//  signal input countryCodes[countryCount];
 
-  var europe_country_codes[country_count] = [
+  var countryCount = 36;
+  var countryCodes[countryCount] = [
     40, 56, 100, 191, 203, 208, 233, 246, 348, 352, 372, 428, 440, 442, 470, 498, 528, 578,
     616, 620, 642, 703, 705, 724, 752, 756, 826, 831, 832, 833, 834, 840, 858, 860, 876,
     894
   ];
 
-  component x = IN(country_count);
+  component x = IN(countryCount);
   x.in <== country;
-  x.value <== europe_country_codes;
+  x.value <== countryCodes;
   x.out === 1;
 }
 
