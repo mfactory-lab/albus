@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { basename, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { BuildOptions, UserConfig } from 'vite'
+import type { BuildOptions, PluginOption, UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 import inject from '@rollup/plugin-inject'
 
@@ -11,7 +11,7 @@ const external = [
   'tslib',
   'snarkjs',
   'circomlibjs',
-  '@albus/core',
+  // '@albus/core',
 ]
 
 export const libFileName = (format: string) => `index.${format}.js`
@@ -67,7 +67,7 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
       rollupOptions: {
         external: Array.from(new Set([...Object.keys(deps), ...external])),
         plugins: [
-          inject({ Buffer: ['buffer', 'Buffer'] }),
+          inject({ Buffer: ['buffer', 'Buffer'] }) as PluginOption,
         ],
         output: {
           dir: resolve(dir, 'dist'),
@@ -102,6 +102,8 @@ export function pluginViteConfig(packageDirName: string, options: UserConfig = {
 export default defineConfig({
   test: {
     include: ['packages/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    environment: 'jsdom',
+    environment: 'node',
+    testTimeout: 10000,
+  //   // environment: 'jsdom',
   },
-})
+} as any)
