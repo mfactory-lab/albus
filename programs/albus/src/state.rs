@@ -26,10 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+use crate::utils::{num_to_bytes, Signals};
 use anchor_lang::prelude::*;
 use groth16_solana::{Proof, PublicInputs, VK};
+use std::borrow::Cow;
 
-#[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone)]
+#[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct ProofData {
     pub a: [u8; 64],
     pub b: [u8; 128],
@@ -44,7 +46,7 @@ impl From<ProofData> for Proof {
     }
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone)]
+#[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct VerificationKey {
     // #[max_len(16)]
     // pub protocol: String,
@@ -106,30 +108,26 @@ pub struct Circuit {
 
 impl Circuit {
     pub const SEED: &'_ [u8] = b"circuit";
-    pub const MAX_INPUT_NAME_LEN: usize = 32;
+    pub const MAX_SIGNAL_NAME_LEN: usize = 32;
 
     #[inline]
     pub fn space(signals_len: usize) -> usize {
         8 + Self::INIT_SPACE
             + VerificationKey::space(signals_len)
-            + signals_len * Self::MAX_INPUT_NAME_LEN
+            + signals_len * Self::MAX_SIGNAL_NAME_LEN
     }
 
     #[inline]
-    pub fn get_inputs_len(inputs: Vec<String>) -> usize {
-        inputs.iter().fold(0usize, |acc, input| {
-            let amount = match (input.find('['), input.find(']')) {
-                (Some(open), Some(close)) if open < close => {
-                    if let Ok(number) = input[open + 1..close].parse::<usize>() {
-                        number
-                    } else {
-                        1
-                    }
-                }
-                _ => 1,
-            };
-            acc + amount
-        })
+    pub fn signals_count<'a, T>(signals: impl IntoIterator<Item = T>) -> usize
+    where
+        T: Into<Cow<'a, str>>,
+    {
+        Signals::new(signals).len()
+    }
+
+    #[inline]
+    pub fn signals(&self) -> Signals {
+        Signals::new(&self.public_signals)
     }
 }
 
@@ -146,12 +144,14 @@ pub struct Policy {
     /// Short description
     #[max_len(64)]
     pub description: String,
-    /// Creation date
-    pub created_at: i64,
-    /// The proof expiration time (seconds)
-    pub proof_expires_in: u32,
+    /// Request expiration period in seconds
+    pub expiration_period: u32,
+    /// Request retention period in seconds
+    pub retention_period: u32,
     /// Total number of proof requests
     pub proof_request_count: u64,
+    /// Creation date
+    pub created_at: i64,
     /// PDA bump.
     pub bump: u8,
     /// Policy rules
@@ -167,10 +167,11 @@ impl Policy {
         8 + Self::INIT_SPACE + (rules_len * PolicyRule::INIT_SPACE)
     }
 
-    pub fn prepare_input(&self, public_inputs: &mut PublicInputs) {
+    #[inline]
+    pub fn apply_rules(&self, public_inputs: &mut PublicInputs) {
         for rule in &self.rules {
             if let Some(i) = public_inputs.get_mut(rule.index as usize) {
-                *i = rule.value;
+                *i = num_to_bytes(rule.value);
             }
         }
     }
@@ -179,8 +180,8 @@ impl Policy {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
 pub struct PolicyRule {
     pub index: u8,
-    // TODO: multiple values (for example, multiple country codes)
-    pub value: [u8; 32],
+    pub group: u8,
+    pub value: u32,
 }
 
 #[account]
@@ -198,7 +199,7 @@ pub struct ServiceProvider {
     pub proof_request_count: u64,
     /// Total number of policies
     pub policy_count: u64,
-    /// Timestamp for when the service was created
+    /// Timestamp for when the service was added
     pub created_at: i64,
     /// PDA bump.
     pub bump: u8,
@@ -220,13 +221,10 @@ pub struct ProofRequest {
     pub service_provider: Pubkey,
     /// The [Policy] associated with this request
     pub policy: Pubkey,
-    /// TODO: remove
+    /// The [Circuit] used for proof generation
     pub circuit: Pubkey,
     /// Address of the request initiator
     pub owner: Pubkey,
-    /// Address of the Verifiable Presentation (VP)
-    #[max_len(200)]
-    pub vp_uri: String,
     /// Auto-increment service specific identifier
     pub identifier: u64,
     /// Timestamp for when the request was created
@@ -235,14 +233,17 @@ pub struct ProofRequest {
     pub expired_at: i64,
     /// Timestamp for when the proof was verified
     pub verified_at: i64,
-    /// Timestamp for when the user was added to the proof
+    /// Timestamp for when the user was added the `proof`
     pub proved_at: i64,
-    /// Status of the request
-    pub status: ProofRequestStatus,
-    ///
-    // pub proof:
     /// PDA bump.
     pub bump: u8,
+    /// Status of the request
+    pub status: ProofRequestStatus,
+    /// The address of the presentation used for proof generation
+    #[max_len(200)]
+    pub vp_uri: String,
+    // /// Proof payload
+    // pub proof: Option<ProofData>,
 }
 
 impl ProofRequest {
@@ -262,19 +263,4 @@ pub enum ProofRequestStatus {
     Proved,
     Verified,
     Rejected,
-}
-
-#[test]
-fn test_public_inputs_count() {
-    let n = Circuit::get_inputs_len(vec![
-        "currentDate".to_string(),
-        "minAge".to_string(),
-        "maxAge".to_string(),
-        "credentialRoot".to_string(),
-        "credentialProof[10]".to_string(),
-        "credentialKey".to_string(),
-        "issuerPk[2]".to_string(),
-        "issuerSignature[3]".to_string(),
-    ]);
-    assert_eq!(n, 20);
 }
