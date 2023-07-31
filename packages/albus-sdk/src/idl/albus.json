@@ -1,5 +1,5 @@
 {
-  "version": "0.0.5",
+  "version": "0.0.6",
   "name": "albus",
   "instructions": [
     {
@@ -425,16 +425,16 @@
             "type": "string"
           },
           {
-            "name": "createdAt",
+            "name": "expirationPeriod",
             "docs": [
-              "Creation date"
+              "Request expiration period in seconds"
             ],
-            "type": "i64"
+            "type": "u32"
           },
           {
-            "name": "proofExpiresIn",
+            "name": "retentionPeriod",
             "docs": [
-              "The proof expiration time (seconds)"
+              "Request retention period in seconds"
             ],
             "type": "u32"
           },
@@ -444,6 +444,13 @@
               "Total number of proof requests"
             ],
             "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
           },
           {
             "name": "bump",
@@ -509,7 +516,7 @@
           {
             "name": "createdAt",
             "docs": [
-              "Timestamp for when the service was created"
+              "Timestamp for when the service was added"
             ],
             "type": "i64"
           },
@@ -545,7 +552,7 @@
           {
             "name": "circuit",
             "docs": [
-              "TODO: remove"
+              "The [Circuit] used for proof generation"
             ],
             "type": "publicKey"
           },
@@ -555,13 +562,6 @@
               "Address of the request initiator"
             ],
             "type": "publicKey"
-          },
-          {
-            "name": "vpUri",
-            "docs": [
-              "Address of the Verifiable Presentation (VP)"
-            ],
-            "type": "string"
           },
           {
             "name": "identifier",
@@ -594,9 +594,16 @@
           {
             "name": "provedAt",
             "docs": [
-              "Timestamp for when the user was added to the proof"
+              "Timestamp for when the user was added the `proof`"
             ],
             "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
           },
           {
             "name": "status",
@@ -608,12 +615,11 @@
             }
           },
           {
-            "name": "bump",
+            "name": "vpUri",
             "docs": [
-              "",
-              "PDA bump."
+              "The address of the presentation used for proof generation"
             ],
-            "type": "u8"
+            "type": "string"
           }
         ]
       }
@@ -946,13 +952,12 @@
             "type": "u8"
           },
           {
+            "name": "group",
+            "type": "u8"
+          },
+          {
             "name": "value",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
+            "type": "u32"
           }
         ]
       }

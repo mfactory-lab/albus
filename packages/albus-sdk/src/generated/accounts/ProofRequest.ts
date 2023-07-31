@@ -23,14 +23,14 @@ export interface ProofRequestArgs {
   policy: web3.PublicKey
   circuit: web3.PublicKey
   owner: web3.PublicKey
-  vpUri: string
   identifier: beet.bignum
   createdAt: beet.bignum
   expiredAt: beet.bignum
   verifiedAt: beet.bignum
   provedAt: beet.bignum
-  status: ProofRequestStatus
   bump: number
+  status: ProofRequestStatus
+  vpUri: string
 }
 
 export const proofRequestDiscriminator = [78, 10, 176, 254, 231, 33, 111, 224]
@@ -47,14 +47,14 @@ export class ProofRequest implements ProofRequestArgs {
     readonly policy: web3.PublicKey,
     readonly circuit: web3.PublicKey,
     readonly owner: web3.PublicKey,
-    readonly vpUri: string,
     readonly identifier: beet.bignum,
     readonly createdAt: beet.bignum,
     readonly expiredAt: beet.bignum,
     readonly verifiedAt: beet.bignum,
     readonly provedAt: beet.bignum,
-    readonly status: ProofRequestStatus,
     readonly bump: number,
+    readonly status: ProofRequestStatus,
+    readonly vpUri: string,
   ) {}
 
   /**
@@ -66,14 +66,14 @@ export class ProofRequest implements ProofRequestArgs {
       args.policy,
       args.circuit,
       args.owner,
-      args.vpUri,
       args.identifier,
       args.createdAt,
       args.expiredAt,
       args.verifiedAt,
       args.provedAt,
-      args.status,
       args.bump,
+      args.status,
+      args.vpUri,
     )
   }
 
@@ -186,7 +186,6 @@ export class ProofRequest implements ProofRequestArgs {
       policy: this.policy.toBase58(),
       circuit: this.circuit.toBase58(),
       owner: this.owner.toBase58(),
-      vpUri: this.vpUri,
       identifier: (() => {
         const x = <{ toNumber: () => number }> this.identifier
         if (typeof x.toNumber === 'function') {
@@ -242,8 +241,9 @@ export class ProofRequest implements ProofRequestArgs {
         }
         return x
       })(),
-      status: `ProofRequestStatus.${ProofRequestStatus[this.status]}`,
       bump: this.bump,
+      status: `ProofRequestStatus.${ProofRequestStatus[this.status]}`,
+      vpUri: this.vpUri,
     }
   }
 }
@@ -264,14 +264,14 @@ export const proofRequestBeet = new beet.FixableBeetStruct<
     ['policy', beetSolana.publicKey],
     ['circuit', beetSolana.publicKey],
     ['owner', beetSolana.publicKey],
-    ['vpUri', beet.utf8String],
     ['identifier', beet.u64],
     ['createdAt', beet.i64],
     ['expiredAt', beet.i64],
     ['verifiedAt', beet.i64],
     ['provedAt', beet.i64],
-    ['status', proofRequestStatusBeet],
     ['bump', beet.u8],
+    ['status', proofRequestStatusBeet],
+    ['vpUri', beet.utf8String],
   ],
   ProofRequest.fromArgs,
   'ProofRequest',

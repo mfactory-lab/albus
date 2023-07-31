@@ -9,7 +9,8 @@ import * as beet from '@metaplex-foundation/beet'
 
 export interface PolicyRule {
   index: number
-  value: number[] /* size: 32 */
+  group: number
+  value: number
 }
 
 /**
@@ -19,7 +20,8 @@ export interface PolicyRule {
 export const policyRuleBeet = new beet.BeetArgsStruct<PolicyRule>(
   [
     ['index', beet.u8],
-    ['value', beet.uniformFixedSizeArray(beet.u8, 32)],
+    ['group', beet.u8],
+    ['value', beet.u32],
   ],
   'PolicyRule',
 )

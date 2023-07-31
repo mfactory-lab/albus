@@ -21,9 +21,10 @@ export interface PolicyArgs {
   circuit: web3.PublicKey
   name: string
   description: string
-  createdAt: beet.bignum
-  proofExpiresIn: number
+  expirationPeriod: number
+  retentionPeriod: number
   proofRequestCount: beet.bignum
+  createdAt: beet.bignum
   bump: number
   rules: PolicyRule[]
 }
@@ -42,9 +43,10 @@ export class Policy implements PolicyArgs {
     readonly circuit: web3.PublicKey,
     readonly name: string,
     readonly description: string,
-    readonly createdAt: beet.bignum,
-    readonly proofExpiresIn: number,
+    readonly expirationPeriod: number,
+    readonly retentionPeriod: number,
     readonly proofRequestCount: beet.bignum,
+    readonly createdAt: beet.bignum,
     readonly bump: number,
     readonly rules: PolicyRule[],
   ) {}
@@ -58,9 +60,10 @@ export class Policy implements PolicyArgs {
       args.circuit,
       args.name,
       args.description,
-      args.createdAt,
-      args.proofExpiresIn,
+      args.expirationPeriod,
+      args.retentionPeriod,
       args.proofRequestCount,
+      args.createdAt,
       args.bump,
       args.rules,
     )
@@ -175,8 +178,10 @@ export class Policy implements PolicyArgs {
       circuit: this.circuit.toBase58(),
       name: this.name,
       description: this.description,
-      createdAt: (() => {
-        const x = <{ toNumber: () => number }> this.createdAt
+      expirationPeriod: this.expirationPeriod,
+      retentionPeriod: this.retentionPeriod,
+      proofRequestCount: (() => {
+        const x = <{ toNumber: () => number }> this.proofRequestCount
         if (typeof x.toNumber === 'function') {
           try {
             return x.toNumber()
@@ -186,9 +191,8 @@ export class Policy implements PolicyArgs {
         }
         return x
       })(),
-      proofExpiresIn: this.proofExpiresIn,
-      proofRequestCount: (() => {
-        const x = <{ toNumber: () => number }> this.proofRequestCount
+      createdAt: (() => {
+        const x = <{ toNumber: () => number }> this.createdAt
         if (typeof x.toNumber === 'function') {
           try {
             return x.toNumber()
@@ -220,9 +224,10 @@ export const policyBeet = new beet.FixableBeetStruct<
     ['circuit', beetSolana.publicKey],
     ['name', beet.utf8String],
     ['description', beet.utf8String],
-    ['createdAt', beet.i64],
-    ['proofExpiresIn', beet.u32],
+    ['expirationPeriod', beet.u32],
+    ['retentionPeriod', beet.u32],
     ['proofRequestCount', beet.u64],
+    ['createdAt', beet.i64],
     ['bump', beet.u8],
     ['rules', beet.array(policyRuleBeet)],
   ],
