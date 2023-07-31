@@ -27,9 +27,9 @@
  */
 
 import { PublicKey } from '@solana/web3.js'
-import { assert, beforeAll, describe, it } from 'vitest'
+import { assert, beforeAll, describe, it, vi } from 'vitest'
 import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk/src'
-import { airdrop, loadFixture, mockedProve, payerKeypair, provider } from './utils'
+import { airdrop, loadFixture, payerKeypair, provider } from './utils'
 
 describe('albus', () => {
   const client = new AlbusClient(provider)
@@ -38,27 +38,30 @@ describe('albus', () => {
   const serviceCode = 'acme'
   let circuitAddress: PublicKey
 
+  const minAgeIndex = 8
+  const maxAgeIndex = 9
+  const circuitData = {
+    privateSignals: [
+      'birthDate',
+    ],
+    publicSignals: [
+      'birthDateProof[6]', 'birthDateKey',
+      'currentDate', 'minAge', 'maxAge',
+      'credentialRoot', 'issuerPk[2]', 'issuerSignature[3]',
+    ],
+    wasmUri: 'mock:wasmUri',
+    zkeyUri: 'mock:zkeyUri',
+    code: 'age',
+    name: 'Age policy',
+  }
+
   beforeAll(async () => {
     await airdrop(payerKeypair.publicKey)
   })
 
   it('can create circuit', async () => {
     try {
-      const data = {
-        privateSignals: [
-          'birthDate',
-        ],
-        publicSignals: [
-          'currentDate', 'minAge', 'maxAge',
-          'credentialRoot', 'credentialProof[10]', 'credentialKey',
-          'issuerPk[2]', 'issuerSignature[3]',
-        ],
-        wasmUri: 'mock:wasmUri',
-        zkeyUri: 'mock:zkeyUri',
-        code: 'age',
-        name: 'Age policy',
-      }
-      const { signature, address } = await client.circuit.create(data)
+      const { signature, address } = await client.circuit.create(circuitData)
       circuitAddress = address
       console.log('signature', signature)
       console.log('circuitAddress', circuitAddress)
@@ -110,10 +113,11 @@ describe('albus', () => {
         description: 'Test policy',
         expiresIn: 0,
         rules: [
-          { index: 1, value: client.utils.normalizePublicInput(18) },
-          { index: 2, value: client.utils.normalizePublicInput(100) },
-        ], // {}
+          { index: minAgeIndex, group: 0, value: 18 },
+          { index: maxAgeIndex, group: 0, value: 100 },
+        ],
       }
+
       const { signature } = await client.policy.create(data)
       console.log('signature', signature)
     } catch (e) {
@@ -129,21 +133,71 @@ describe('albus', () => {
     assert.equal(proofRequest.status, ProofRequestStatus.Pending)
   })
 
-  it('can prove proof request', async () => {
+  it('can prove a proof request', async () => {
     const [circuit] = client.pda.circuit('age')
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(circuit, service)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
-    await mockedProve(client, proofRequest)
+    vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve({
+      '@context': [
+        'https://www.w3.org/2018/credentials/v1',
+      ],
+      'type': [
+        'VerifiableCredential',
+        'AlbusCredential',
+      ],
+      'issuer': 'did:web:albus.finance',
+      'issuanceDate': '2023-07-27T00:12:43.635Z',
+      'credentialSubject': {
+        birthDate: '19890101',
+        firstName: 'Alex',
+        country: 'US',
+      },
+      'proof': {
+        type: 'BJJSignature2021',
+        created: 1690416764498,
+        verificationMethod: 'did:web:albus.finance#keys-0',
+        rootHash: '11077866633106981791340789987944870806147307639065753995447310137530607758623',
+        proofValue: {
+          ax: '20841523997579262969290434121704327723902935194219264790567899027938554056663',
+          ay: '20678780156819015018034618985253893352998041677807437760911245092739191906558',
+          r8x: '21153906701456715004295579276500758430977318622340395655171725984189489403836',
+          r8y: '15484492519285437260388749074045005694239822857741052851485555393361224949130',
+          s: '1662767948258934355069791443487100820038153707701411290986741440889424297316',
+        },
+        proofPurpose: 'assertionMethod',
+      },
+    } as any))
+
+    vi.spyOn(client.proofRequest, 'loadFull').mockImplementation(async (addr) => {
+      const proofRequest = await client.proofRequest.load(addr)
+      const policy = await client.policy.load(proofRequest.policy)
+      const circuit = await client.circuit.load(proofRequest.circuit)
+
+      return {
+        proofRequest,
+        circuit: {
+          ...circuit,
+          wasmUri: loadFixture('agePolicy.wasm'),
+          zkeyUri: loadFixture('agePolicy.zkey'),
+        },
+        policy,
+      } as any
+    })
+
+    const storageSpy = vi.spyOn(client.storage, 'uploadData')
+      .mockReturnValue(Promise.resolve(
+        'http://localhost/mock.json',
+      ))
 
     const { signature } = await client.prove({
-      exposedFields: [],
+      holderSecretKey: payerKeypair.secretKey,
+      exposedFields: circuitData.privateSignals,
       proofRequest,
-      vc: PublicKey.default,
-      // decryptionKey?: PrivateKey
-      // force?: boolean
+      vc: PublicKey.default, // mocked
     })
+
     // console.log('signature', signature)
     // const proofRequest = await client.proofRequest.load(address)
     // assert.equal(proofRequest.owner.toString(), provider.publicKey.toString())
