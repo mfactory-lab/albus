@@ -26,14 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-const NOW_FIELD = 'currentDate'
-
-interface PrepareProofInputProps {
-  claims: Record<string, any>
-  definitions: Record<string, any>
-  requiredFields: string[]
-}
-
 /**
  * Format {@link date} in circuit format `20230101`
  */
@@ -44,40 +36,4 @@ export function formatCircuitDate(date?: Date) {
     String(d.getUTCMonth() + 1).padStart(2, '0'),
     String(d.getUTCDate()).padStart(2, '0'),
   ].join('')
-}
-
-export function prepareProofInput({ claims, requiredFields, definitions }: PrepareProofInputProps) {
-  const input: { [key: string]: any } = {}
-
-  for (const field of requiredFields) {
-    if (field === NOW_FIELD) {
-      const date = new Date()
-      input[field] = [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()]
-      continue
-    }
-
-    if (definitions && definitions[field]) {
-      input[field] = definitions[field]
-      continue
-    }
-
-    input[field] = formatField(field, claims[field])
-  }
-
-  return input
-}
-
-function formatField(name: string, value: string) {
-  if (name === 'country') {
-    // TODO: get country number code (https://www.iban.com/country-codes) by iso code
-  }
-  if (name.endsWith('Date')) {
-    const date = String(value).split('-', 3)
-    if (date.length < 3) {
-      throw new Error(`The \`${name}\` attribute is not a valid date`)
-    }
-    // TODO: better validation
-    return date
-  }
-  return value
 }

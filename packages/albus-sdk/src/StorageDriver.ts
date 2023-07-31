@@ -70,7 +70,9 @@ export class BundlrStorageDriver {
     }
 
     let address
-    if (options.providerUrl.includes('devnet') || options.providerUrl.includes('testnet')) {
+    if (options.providerUrl.includes('localhost')
+      || options.providerUrl.includes('devnet')
+      || options.providerUrl.includes('testnet')) {
       address = BUNDLR_DEVNET
     } else {
       address = BUNDLR_MAINNET

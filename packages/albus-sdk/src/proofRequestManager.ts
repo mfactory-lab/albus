@@ -224,10 +224,10 @@ export class ProofRequestManager {
     const authority = this.provider.publicKey
     const proofRequest = await this.load(props.proofRequest)
 
-    const proof = Albus.zkp.parseProofToBytesArray(props.proof)
-
-    // reduce computation units
+    const proof = Albus.zkp.decodeProof(props.proof)
     proof.a = await Albus.zkp.altBn128G1Neg(proof.a)
+
+    const publicInputs = Albus.zkp.decodePublicSignals(props.publicSignals)
 
     const instruction = createProveInstruction(
       {
@@ -239,15 +239,15 @@ export class ProofRequestManager {
       {
         data: {
           uri: props.presentationUri,
+          publicInputs,
           proof,
-          publicInputs: Albus.zkp.parseToBytesArray(props.publicSignals),
         },
       },
     )
 
     try {
       const tx = new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 1000000 }))
         .add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
       return { signature }

@@ -82,21 +82,40 @@ export class AlbusClient {
 
   utils = {
     normalizePublicInput: (n) => {
-      return Albus.zkp.parseFiniteNumber(n).reverse()
+      return Albus.zkp.finiteToBytes(n).reverse()
     },
-    currentDate: async (rpc = true) => {
+    currentDate: async (useRpc = true) => {
       let date
-      if (rpc) {
+      if (useRpc) {
         const slot = await this.connection.getSlot()
         const timestamp = (await this.connection.getBlockTime(slot)) ?? 0
         date = new Date(timestamp * 1000)
+      } else {
+        date = new Date()
       }
       return formatCircuitDate(date)
     },
   }
 
   /**
-   * Prove the request
+   * Verify ZK-Proof
+   */
+  async verify(props: VerifyProps) {
+    const circuit = await this.circuit.load(props.circuit)
+    return Albus.zkp.verifyProof({
+      vk: Albus.zkp.encodeVerifyingKey(circuit.vk),
+      publicInput: props.publicInput,
+      proof: props.proof,
+    })
+  }
+
+  /**
+   * Prove the {@link ProofRequest}
+   * - Create Verifiable Presentation
+   * - Encrypt Verifiable Presentation
+   * - Generate ZK-Proof
+   * - Upload Verifiable Presentation to arweave
+   * - Verify ZK-Proof on-chain
    */
   async prove(props: ProveProps) {
     const { proofRequest, circuit, policy } = await this.proofRequest.loadFull(props.proofRequest)
@@ -117,69 +136,94 @@ export class AlbusClient {
 
     const input = await this.prepareInputs(circuit, policy, vp)
     const holder = Keypair.fromSecretKey(Uint8Array.from(props.holderSecretKey))
+
     const encryptedPresentation = await Albus.credential.encryptVerifiablePresentation(vp, {
       pubkey: holder.publicKey,
+      // encryptionKey: [],
     })
 
+    let proofResult: Awaited<ReturnType<typeof Albus.zkp.generateProof>>
+
     try {
-      const { proof, publicSignals } = await Albus.zkp.generateProof({
+      proofResult = await Albus.zkp.generateProof({
         wasmFile: circuit.wasmUri!,
         zkeyFile: circuit.zkeyUri!,
         input,
       })
-
-      const presentationUri = await this.storage.uploadData(JSON.stringify(encryptedPresentation))
-
-      const res = await this.proofRequest.prove({
-        proofRequest: props.proofRequest,
-        proof,
-        publicSignals,
-        presentationUri,
-      })
-
-      return { signature: res.signature, proof, publicSignals, presentationUri }
     } catch (e: any) {
-      // console.log(e)
-      throw new Error(`Circuit constraint violation (${e.message})`)
+      console.log(e)
+      throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
+
+    // const res = await this.verify({
+    //   circuit: proofRequest.circuit,
+    //   proof: proofResult.proof,
+    //   publicInput: proofResult.publicSignals,
+    // })
+    // console.log('verify', res)
+
+    const { proof, publicSignals } = proofResult
+    const presentationUri = await this.storage.uploadData(JSON.stringify(encryptedPresentation))
+
+    const { signature } = await this.proofRequest.prove({
+      proofRequest: props.proofRequest,
+      proof,
+      publicSignals,
+      presentationUri,
+    })
+
+    return { signature, proof, publicSignals, presentationUri }
   }
 
+  /**
+   * Generate circuit inputs
+   */
   async prepareInputs(circuit: Circuit, policy: Policy, vp: VerifiablePresentation) {
     if (vp.verifiableCredential === undefined || vp.verifiableCredential[0] === undefined) {
       throw new Error('invalid presentation, at least one credential required')
     }
 
     const input: any = {}
-    const filterSignal = s => s.replace(/\[(\d+)\]/, '')
+    const normalizeClaimKey = s => s.trim()
+
+    // convert signal name `xxx[5]` > ['xxx', 5]
+    const parseSignal = (s) => {
+      const r = s.match(/^(\w+)(?:\[(\d+)\])?$/)
+      return [r[1], r[2] ? Number(r[2]) : 1]
+    }
+
     const vc = vp.verifiableCredential[0]
 
     for (const signal of circuit.privateSignals) {
-      if (!vc.credentialSubject[signal] || !vc.credentialSubject['@proof'][signal]) {
-        throw new Error(`invalid presentation claim ${signal}`)
+      const claim = normalizeClaimKey(signal)
+      if (vc.credentialSubject[claim] === undefined || vc.credentialSubject['@proof']?.[claim] === undefined) {
+        throw new Error(`invalid presentation claim ${claim}`)
       }
-      const [key, ...proof] = vc.credentialSubject['@proof'][signal]
-      input[signal] = vc.credentialSubject[signal] ?? 0
+      const [key, ...proof] = vc.credentialSubject['@proof'][claim]
+      input[signal] = vc.credentialSubject[claim] ?? 0
       input[`${signal}Proof`] = proof
       input[`${signal}Key`] = key
     }
 
+    let idx = 0
     for (const signal of circuit.publicSignals) {
+      const [signalName, signalSize] = parseSignal(signal)
       switch (signal) {
         case KnownSignals.CurrentDate: {
-          input[signal] = await this.utils.currentDate()
+          input[signalName] = await this.utils.currentDate()
           break
         }
         case KnownSignals.CredentialRoot:
-          input[signal] = vc.proof.rootHash
+          input[signalName] = vc.proof.rootHash
           break
         case KnownSignals.IssuerPk:
-          input[filterSignal(signal)] = [
+          input[signalName] = [
             vc.proof.proofValue.ax,
             vc.proof.proofValue.ay,
           ]
           break
         case KnownSignals.IssuerSignature:
-          input[filterSignal(signal)] = [
+          input[signalName] = [
             vc.proof.proofValue.r8x,
             vc.proof.proofValue.r8y,
             vc.proof.proofValue.s,
@@ -187,15 +231,13 @@ export class AlbusClient {
           break
         default: {
           // apply policy rules
-          const idx = circuit.publicSignals.indexOf(signal)
-          if (idx >= 0) {
-            const value = policy.rules?.find(r => r.index === idx)?.value
-            if (value !== undefined) {
-              input[signal] = Albus.crypto.utils.arrayToBigInt(Uint8Array.from(value))
-            }
+          const value = policy.rules?.find(r => r.index === idx)?.value
+          if (value !== undefined) {
+            input[signal] = value
           }
         }
       }
+      idx += signalSize
     }
 
     return input
@@ -210,4 +252,10 @@ export interface ProveProps {
   holderSecretKey: Uint8Array | number[]
   exposedFields?: string[]
   decryptionKey?: PrivateKey
+}
+
+export interface VerifyProps {
+  circuit: PublicKeyInitData
+  publicInput: (string | bigint)[]
+  proof: any // TODO: add type
 }
