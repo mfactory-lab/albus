@@ -26,8 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { Buffer } from 'node:buffer'
-import type { VerifiablePresentation } from '@albus/core'
 import * as Albus from '@albus/core'
 import type { Wallet } from '@coral-xyz/anchor'
 import { AnchorProvider } from '@coral-xyz/anchor'
@@ -36,15 +34,14 @@ import { Keypair, PublicKey } from '@solana/web3.js'
 import { CircuitManager } from './circuitManager'
 import { CredentialManager } from './credentialManager'
 import { EventManager } from './eventManager'
-import type { Circuit, Policy } from './generated'
 import { PROGRAM_ID } from './generated'
 import { PdaManager } from './pda'
 import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { BundlrStorageDriver } from './StorageDriver'
-import { KnownSignals } from './types'
-import { formatCircuitDate } from './utils'
+import type { PrivateKey } from './types'
+import { getSolanaTimestamp, prepareInputs } from './utils'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -84,17 +81,6 @@ export class AlbusClient {
     normalizePublicInput: (n) => {
       return Albus.zkp.finiteToBytes(n).reverse()
     },
-    currentDate: async (useRpc = true) => {
-      let date
-      if (useRpc) {
-        const slot = await this.connection.getSlot()
-        const timestamp = (await this.connection.getBlockTime(slot)) ?? 0
-        date = new Date(timestamp * 1000)
-      } else {
-        date = new Date()
-      }
-      return formatCircuitDate(date)
-    },
   }
 
   /**
@@ -103,7 +89,7 @@ export class AlbusClient {
   async verify(props: VerifyProps) {
     const circuit = await this.circuit.load(props.circuit)
     return Albus.zkp.verifyProof({
-      vk: Albus.zkp.encodeVerifyingKey(circuit.vk),
+      vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
       publicInput: props.publicInput,
       proof: props.proof,
     })
@@ -134,7 +120,13 @@ export class AlbusClient {
       holderSecretKey: props.holderSecretKey,
     })
 
-    const input = await this.prepareInputs(circuit, policy, vp)
+    const input = await prepareInputs({
+      now: await getSolanaTimestamp(this.connection),
+      circuit,
+      policy,
+      vp,
+    })
+
     const holder = Keypair.fromSecretKey(Uint8Array.from(props.holderSecretKey))
 
     const encryptedPresentation = await Albus.credential.encryptVerifiablePresentation(vp, {
@@ -167,79 +159,7 @@ export class AlbusClient {
 
     return { signature, proof, publicSignals, presentationUri }
   }
-
-  /**
-   * Generate circuit inputs
-   */
-  async prepareInputs(circuit: Circuit, policy: Policy, vp: VerifiablePresentation) {
-    if (vp.verifiableCredential === undefined || vp.verifiableCredential[0] === undefined) {
-      throw new Error('invalid presentation, at least one credential required')
-    }
-
-    const input: any = {}
-    const normalizeClaimKey = s => s.trim()
-
-    // convert signal name `sig[5]` > ['sig', 5]
-    const parseSignal = (s): [string, number] => {
-      const r = s.match(/^(\w+)(?:\[(\d+)\])?$/)
-      return [r[1], r[2] ? Number(r[2]) : 1]
-    }
-
-    const vc = vp.verifiableCredential[0]
-
-    // apply private inputs
-    for (const signal of circuit.privateSignals) {
-      const claim = normalizeClaimKey(signal)
-      if (vc.credentialSubject[claim] === undefined || vc.credentialSubject['@proof']?.[claim] === undefined) {
-        throw new Error(`invalid presentation claim ${claim}`)
-      }
-      const [key, ...proof] = vc.credentialSubject['@proof'][claim]
-      input[signal] = vc.credentialSubject[claim] ?? 0
-      input[`${signal}Proof`] = proof
-      input[`${signal}Key`] = key
-    }
-
-    // apply public inputs
-    let idx = 0
-    for (const signal of circuit.publicSignals) {
-      const [signalName, signalSize] = parseSignal(signal)
-      switch (signal) {
-        case KnownSignals.CurrentDate: {
-          input[signalName] = await this.utils.currentDate()
-          break
-        }
-        case KnownSignals.CredentialRoot:
-          input[signalName] = vc.proof.rootHash
-          break
-        case KnownSignals.IssuerPk:
-          input[signalName] = [
-            vc.proof.proofValue.ax,
-            vc.proof.proofValue.ay,
-          ]
-          break
-        case KnownSignals.IssuerSignature:
-          input[signalName] = [
-            vc.proof.proofValue.r8x,
-            vc.proof.proofValue.r8y,
-            vc.proof.proofValue.s,
-          ]
-          break
-        default: {
-          // apply policy rules
-          const value = policy.rules?.find(r => r.index === idx)?.value
-          if (value !== undefined) {
-            input[signal] = value
-          }
-        }
-      }
-      idx += signalSize
-    }
-
-    return input
-  }
 }
-
-export type PrivateKey = number[] | string | Buffer | Uint8Array
 
 export interface ProveProps {
   proofRequest: PublicKeyInitData

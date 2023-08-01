@@ -26,13 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export enum AlbusNftCode {
-  Circuit = 'C',
-  Proof = 'P',
-  Identity = 'ID',
-  VerifiableCredential = 'VC',
-  VerifiablePresentation = 'VP',
-}
+import type { Buffer } from 'node:buffer'
+
+export type PrivateKey = number[] | string | Buffer | Uint8Array
+export type AlbusNftCode = 'VC' | 'ID'
 
 export enum KnownSignals {
   CurrentDate = 'currentDate',

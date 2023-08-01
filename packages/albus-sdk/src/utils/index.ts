@@ -26,5 +26,5 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './nft'
-export * from './proof'
+export * from './circuit'
+export * from './web3'

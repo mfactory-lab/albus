@@ -119,7 +119,7 @@ export class CircuitManager {
     const authority = this.provider.publicKey
     const [circuit] = this.pda.circuit(props.code)
 
-    const vk = Albus.zkp.decodeVerifyingKey(props.vk)
+    const vk = Albus.zkp.encodeVerifyingKey(props.vk)
 
     // max tx size = 1232 bytes
     // alpha + beta + gamma + delta = 448

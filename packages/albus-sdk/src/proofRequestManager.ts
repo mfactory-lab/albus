@@ -224,10 +224,10 @@ export class ProofRequestManager {
     const authority = this.provider.publicKey
     const proofRequest = await this.load(props.proofRequest)
 
-    const proof = Albus.zkp.decodeProof(props.proof)
+    const proof = Albus.zkp.encodeProof(props.proof)
     proof.a = await Albus.zkp.altBn128G1Neg(proof.a)
 
-    const publicInputs = Albus.zkp.decodePublicSignals(props.publicSignals)
+    const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
 
     const instruction = createProveInstruction(
       {

@@ -32,11 +32,10 @@ import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import axios from 'axios'
-import type { PrivateKey } from './client'
+import type { PrivateKey } from './types'
 import { ALBUS_DID, NFT_AUTHORITY, NFT_SYMBOL_PREFIX } from './constants'
 
 import type { PdaManager } from './pda'
-import { AlbusNftCode } from './types'
 import { getParsedNftAccountsByOwner, loadNft } from './utils'
 
 export class CredentialManager {
@@ -51,7 +50,7 @@ export class CredentialManager {
    * verify and decrypt if needed
    */
   async load(addr: PublicKeyInitData, props: LoadCredentialProps = {}) {
-    const nft = await loadNft(this.provider.connection, addr, { code: AlbusNftCode.VerifiableCredential })
+    const nft = await loadNft(this.provider.connection, addr, { code: 'VC' })
 
     if (!nft.json?.vc) {
       throw new Error('Invalid credential! Metadata does not contain `vc` attribute.')
@@ -71,7 +70,7 @@ export class CredentialManager {
       this.provider.connection,
       this.provider.publicKey,
       {
-        symbol: `${NFT_SYMBOL_PREFIX}-${AlbusNftCode.VerifiableCredential}`,
+        symbol: `${NFT_SYMBOL_PREFIX}-VC`,
         updateAuthority: NFT_AUTHORITY,
         withJson: true,
       },
