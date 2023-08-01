@@ -151,16 +151,9 @@ export class AlbusClient {
         input,
       })
     } catch (e: any) {
-      console.log(e)
+      // console.log(e)
       throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
-
-    // const res = await this.verify({
-    //   circuit: proofRequest.circuit,
-    //   proof: proofResult.proof,
-    //   publicInput: proofResult.publicSignals,
-    // })
-    // console.log('verify', res)
 
     const { proof, publicSignals } = proofResult
     const presentationUri = await this.storage.uploadData(JSON.stringify(encryptedPresentation))
@@ -186,14 +179,15 @@ export class AlbusClient {
     const input: any = {}
     const normalizeClaimKey = s => s.trim()
 
-    // convert signal name `xxx[5]` > ['xxx', 5]
-    const parseSignal = (s) => {
+    // convert signal name `sig[5]` > ['sig', 5]
+    const parseSignal = (s): [string, number] => {
       const r = s.match(/^(\w+)(?:\[(\d+)\])?$/)
       return [r[1], r[2] ? Number(r[2]) : 1]
     }
 
     const vc = vp.verifiableCredential[0]
 
+    // apply private inputs
     for (const signal of circuit.privateSignals) {
       const claim = normalizeClaimKey(signal)
       if (vc.credentialSubject[claim] === undefined || vc.credentialSubject['@proof']?.[claim] === undefined) {
@@ -205,6 +199,7 @@ export class AlbusClient {
       input[`${signal}Key`] = key
     }
 
+    // apply public inputs
     let idx = 0
     for (const signal of circuit.publicSignals) {
       const [signalName, signalSize] = parseSignal(signal)

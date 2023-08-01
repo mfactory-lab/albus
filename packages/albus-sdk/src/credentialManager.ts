@@ -33,11 +33,11 @@ import type { PublicKeyInitData } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import axios from 'axios'
 import type { PrivateKey } from './client'
-import { ALBUS_DID } from './constants'
+import { ALBUS_DID, NFT_AUTHORITY, NFT_SYMBOL_PREFIX } from './constants'
 
 import type { PdaManager } from './pda'
 import { AlbusNftCode } from './types'
-import { loadNft } from './utils'
+import { getParsedNftAccountsByOwner, loadNft } from './utils'
 
 export class CredentialManager {
   constructor(
@@ -47,7 +47,7 @@ export class CredentialManager {
   }
 
   /**
-   * Load verifiable credential
+   * Load verifiable credential by {@link addr}
    * verify and decrypt if needed
    */
   async load(addr: PublicKeyInitData, props: LoadCredentialProps = {}) {
@@ -61,6 +61,31 @@ export class CredentialManager {
       audience: ALBUS_DID,
       decryptionKey: props.decryptionKey,
     })
+  }
+
+  /**
+   * Load all verifiable credentials
+   */
+  async loadAll() {
+    const accounts = await getParsedNftAccountsByOwner(
+      this.provider.connection,
+      this.provider.publicKey,
+      {
+        symbol: `${NFT_SYMBOL_PREFIX}-${AlbusNftCode.VerifiableCredential}`,
+        updateAuthority: NFT_AUTHORITY,
+        withJson: true,
+      },
+    )
+
+    console.log(accounts)
+
+    for (const account of accounts) {
+      if (account.json?.vc !== undefined) {
+        // ..
+      }
+    }
+
+    return []
   }
 
   /**

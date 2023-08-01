@@ -43,7 +43,7 @@ describe('AlbusClient', () => {
   ]))
 
   const client = new AlbusClient(new AnchorProvider(
-    new Connection(clusterApiUrl('mainnet-beta')),
+    new Connection(clusterApiUrl('devnet')),
     new Wallet(payerKeypair),
     AnchorProvider.defaultOptions(),
   ))
@@ -65,6 +65,10 @@ describe('AlbusClient', () => {
       'credentialRoot', 'issuerPk[2]', 'issuerSignature[3]',
     ],
   } as unknown as Circuit
+
+  // it('credentials', async () => {
+  //   await client.credential.loadAll()
+  // })
 
   it('verify', async () => {
     console.log('alpha', JSON.stringify(circuit.vk.alpha))
