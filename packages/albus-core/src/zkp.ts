@@ -85,7 +85,7 @@ async function fetchBytes(url: string | Buffer | Uint8Array) {
 /**
  * Convert `snarkjs` proof representation to solana format
  */
-export function decodeProof(payload: any) {
+export function encodeProof(payload: any) {
   for (const i in payload) {
     if (i === 'pi_a' || i === 'pi_c') {
       for (const j in payload[i]) {
@@ -113,7 +113,7 @@ export function decodeProof(payload: any) {
 /**
  * Convert `snarkjs` signals representation to solana format
  */
-export function decodePublicSignals(publicSignals: Array<string | number | bigint>) {
+export function encodePublicSignals(publicSignals: Array<string | number | bigint>) {
   const publicInputsBytes = new Array<Array<number>>()
   for (const i in publicSignals) {
     publicInputsBytes.push(finiteToBytes(publicSignals[i]!).reverse())
@@ -124,7 +124,7 @@ export function decodePublicSignals(publicSignals: Array<string | number | bigin
 /**
  * Convert `snarkjs` VK representation to solana format
  */
-export function decodeVerifyingKey(data: VK) {
+export function encodeVerifyingKey(data: VK) {
   const g1 = (p): number[] => p
     .reduce((a, b) => a.concat(finiteToBytes(b).reverse()), [] as number[]).slice(0, 64)
 
@@ -147,7 +147,7 @@ export function decodeVerifyingKey(data: VK) {
 /**
  * Convert solana VK representation to `snarkjs` format
  */
-export function encodeVerifyingKey(data: {
+export function decodeVerifyingKey(data: {
   alpha: number[]
   beta: number[]
   gamma: number[]

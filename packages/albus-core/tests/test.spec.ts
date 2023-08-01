@@ -125,7 +125,7 @@ describe('test', () => {
       ],
     }
 
-    const bytes = decodeVerifyingKey(vk)
-    assert.deepEqual(vk, encodeVerifyingKey(bytes))
+    const bytes = encodeVerifyingKey(vk)
+    assert.deepEqual(vk, decodeVerifyingKey(bytes))
   })
 })
