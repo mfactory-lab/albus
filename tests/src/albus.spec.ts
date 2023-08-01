@@ -133,11 +133,13 @@ describe('albus', () => {
     assert.equal(proofRequest.status, ProofRequestStatus.Pending)
   })
 
-  it('can prove a proof request', async () => {
+  it('can prove a proof request and verify it on-chain', async () => {
     const [circuit] = client.pda.circuit('age')
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(circuit, service)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+
+    const mockedVpUri = 'http://localhost/mock.json'
 
     vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve({
       '@context': [
@@ -186,10 +188,7 @@ describe('albus', () => {
       } as any
     })
 
-    const storageSpy = vi.spyOn(client.storage, 'uploadData')
-      .mockReturnValue(Promise.resolve(
-        'http://localhost/mock.json',
-      ))
+    vi.spyOn(client.storage, 'uploadData').mockReturnValue(Promise.resolve(mockedVpUri))
 
     const { signature } = await client.prove({
       holderSecretKey: payerKeypair.secretKey,
@@ -198,10 +197,13 @@ describe('albus', () => {
       vc: PublicKey.default, // mocked
     })
 
-    // console.log('signature', signature)
-    // const proofRequest = await client.proofRequest.load(address)
-    // assert.equal(proofRequest.owner.toString(), provider.publicKey.toString())
-    // assert.equal(proofRequest.status, ProofRequestStatus.Pending)
+    assert.ok(!!signature)
+
+    const data = await client.proofRequest.load(proofRequest)
+
+    assert.equal(data.vpUri, mockedVpUri)
+    assert.equal(data.owner.toString(), provider.publicKey.toString())
+    assert.equal(data.status, ProofRequestStatus.Proved)
   })
 
   // it('can not create proof request with invalid circuit', async () => {
