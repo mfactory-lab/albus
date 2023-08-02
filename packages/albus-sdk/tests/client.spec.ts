@@ -55,7 +55,7 @@ describe('AlbusClient', () => {
   const circuit = {
     code: 'age',
     name: 'Age',
-    vk: Albus.zkp.decodeVerifyingKey(JSON.parse(loadFixture('agePolicy.vk.json').toString())),
+    vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('agePolicy.vk.json').toString())),
     wasmUri: loadFixture('agePolicy.wasm'),
     zkeyUri: loadFixture('agePolicy.zkey'),
     privateSignals: ['birthDate'],

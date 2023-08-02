@@ -35,7 +35,8 @@ import {
   Circuit,
   circuitDiscriminator,
   createCreateCircuitInstruction,
-  createDeleteCircuitInstruction, createUpdateCircuitVkInstruction,
+  createDeleteCircuitInstruction,
+  createUpdateCircuitVkInstruction,
   errorFromCode,
 } from './generated'
 import type { PdaManager } from './pda'

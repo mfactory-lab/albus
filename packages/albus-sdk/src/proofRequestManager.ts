@@ -247,7 +247,7 @@ export class ProofRequestManager {
 
     try {
       const tx = new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 1000000 }))
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
         .add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
       return { signature }
