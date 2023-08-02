@@ -83,30 +83,13 @@ async function fetchBytes(url: string | Buffer | Uint8Array) {
 }
 
 /**
- * Convert `snarkjs` proof representation to solana format
+ * Convert {@link ProofData} to bytes format
  */
-export function encodeProof(payload: any) {
-  for (const i in payload) {
-    if (i === 'pi_a' || i === 'pi_c') {
-      for (const j in payload[i]) {
-        payload[i][j] = finiteToBytes(payload[i][j]).reverse()
-      }
-    } else if (i === 'pi_b') {
-      for (const j in payload[i]) {
-        for (const z in payload[i][j]) {
-          payload[i][j][z] = finiteToBytes(payload[i][j][z])
-        }
-      }
-    }
-  }
-
+export function encodeProof(payload: ProofData) {
   return {
-    a: [payload.pi_a[0], payload.pi_a[1]].flat(),
-    b: [
-      payload.pi_b[0].flat().reverse(),
-      payload.pi_b[1].flat().reverse(),
-    ].flat(),
-    c: [payload.pi_c[0], payload.pi_c[1]].flat(),
+    a: encodeG1(payload.pi_a),
+    b: encodeG2(payload.pi_b),
+    c: encodeG1(payload.pi_c),
   }
 }
 
@@ -125,22 +108,14 @@ export function encodePublicSignals(publicSignals: Array<string | number | bigin
  * Convert `snarkjs` VK representation to solana format
  */
 export function encodeVerifyingKey(data: VK) {
-  const g1 = (p): number[] => p
-    .reduce((a, b) => a.concat(finiteToBytes(b).reverse()), [] as number[]).slice(0, 64)
-
-  const g2 = (p): number[] => p
-    .reduce((a, b) =>
-      a.concat(finiteToBytes(b[0]!).concat(finiteToBytes(b[1]!)).reverse()), [] as number[],
-    ).slice(0, 128)
-
   return {
     curve: String(data.curve),
     nPublic: String(data.nPublic),
-    alpha: g1(data.vk_alpha_1),
-    beta: g2(data.vk_beta_2),
-    gamma: g2(data.vk_gamma_2),
-    delta: g2(data.vk_delta_2),
-    ic: data.IC.map(g1) as number[][],
+    alpha: encodeG1(data.vk_alpha_1),
+    beta: encodeG2(data.vk_beta_2),
+    gamma: encodeG2(data.vk_gamma_2),
+    delta: encodeG2(data.vk_delta_2),
+    ic: data.IC.map(encodeG1) as number[][],
   }
 }
 
@@ -156,35 +131,15 @@ export function decodeVerifyingKey(data: {
   curve?: string
   protocol?: string
 }): VK {
-  const g1 = (bytes: number[]) => {
-    if (bytes.length < 64) {
-      throw new Error('G1 point must be 64 long')
-    }
-    return [bytesToFinite(bytes.slice(0, 32).reverse()), bytesToFinite(bytes.slice(32, 64).reverse()), '1']
-  }
-
-  const g2 = (bytes: number[]) => {
-    if (bytes.length < 128) {
-      throw new Error('G2 point must be 128 long')
-    }
-    const result: (string)[][] = []
-    for (let i = 0; i < bytes.length; i += 64) {
-      const chunk = bytes.slice(i, i + 64).reverse()
-      result.push([bytesToFinite(chunk.slice(0, 32)), bytesToFinite(chunk.slice(32, 64))])
-    }
-    result.push(['1', '0'])
-    return result
-  }
-
   return {
     curve: data.curve ?? 'bn128',
     protocol: data.protocol ?? 'groth16',
     nPublic: data.ic.length - 1,
-    vk_alpha_1: g1(data.alpha),
-    vk_beta_2: g2(data.beta),
-    vk_gamma_2: g2(data.gamma),
-    vk_delta_2: g2(data.delta),
-    IC: data.ic.map(g1),
+    vk_alpha_1: decodeG1(data.alpha),
+    vk_beta_2: decodeG2(data.beta),
+    vk_gamma_2: decodeG2(data.gamma),
+    vk_delta_2: decodeG2(data.delta),
+    IC: data.ic.map(decodeG1),
   }
 }
 
@@ -204,4 +159,42 @@ export function finiteToBytes(n: string | number | bigint) {
 
 export function bytesToFinite(bytes: number[] | Uint8Array): string {
   return stringifyBigInts(leBuff2int(Buffer.from(bytes)))
+}
+
+/**
+ * Convert G1 (snarkjs) to bytes
+ */
+function encodeG1(p): number[] {
+  return p
+    .reduce((a, b) => a.concat(finiteToBytes(b).reverse()), [] as number[]).slice(0, 64)
+}
+
+/**
+ * Convert G2 (snarkjs) to bytes
+ */
+function encodeG2(p): number[] {
+  return p
+    .reduce((a, b) =>
+      a.concat(finiteToBytes(b[0]).concat(finiteToBytes(b[1])).reverse()), [] as number[],
+    ).slice(0, 128)
+}
+
+function decodeG1(bytes: number[]) {
+  if (bytes.length < 64) {
+    throw new Error('G1 point must be 64 long')
+  }
+  return [bytesToFinite(bytes.slice(0, 32).reverse()), bytesToFinite(bytes.slice(32, 64).reverse()), '1']
+}
+
+function decodeG2(bytes: number[]) {
+  if (bytes.length < 128) {
+    throw new Error('G2 point must be 128 long')
+  }
+  const result: (string)[][] = []
+  for (let i = 0; i < bytes.length; i += 64) {
+    const chunk = bytes.slice(i, i + 64).reverse()
+    result.push([bytesToFinite(chunk.slice(0, 32)), bytesToFinite(chunk.slice(32, 64))])
+  }
+  result.push(['1', '0'])
+  return result
 }
