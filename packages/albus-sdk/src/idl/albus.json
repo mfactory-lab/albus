@@ -599,13 +599,6 @@
             "type": "i64"
           },
           {
-            "name": "bump",
-            "docs": [
-              "PDA bump."
-            ],
-            "type": "u8"
-          },
-          {
             "name": "status",
             "docs": [
               "Status of the request"
@@ -613,6 +606,13 @@
             "type": {
               "defined": "ProofRequestStatus"
             }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
           },
           {
             "name": "vpUri",

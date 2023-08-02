@@ -28,8 +28,8 @@ export interface ProofRequestArgs {
   expiredAt: beet.bignum
   verifiedAt: beet.bignum
   provedAt: beet.bignum
-  bump: number
   status: ProofRequestStatus
+  bump: number
   vpUri: string
 }
 
@@ -52,8 +52,8 @@ export class ProofRequest implements ProofRequestArgs {
     readonly expiredAt: beet.bignum,
     readonly verifiedAt: beet.bignum,
     readonly provedAt: beet.bignum,
-    readonly bump: number,
     readonly status: ProofRequestStatus,
+    readonly bump: number,
     readonly vpUri: string,
   ) {}
 
@@ -71,8 +71,8 @@ export class ProofRequest implements ProofRequestArgs {
       args.expiredAt,
       args.verifiedAt,
       args.provedAt,
-      args.bump,
       args.status,
+      args.bump,
       args.vpUri,
     )
   }
@@ -241,8 +241,8 @@ export class ProofRequest implements ProofRequestArgs {
         }
         return x
       })(),
-      bump: this.bump,
       status: `ProofRequestStatus.${ProofRequestStatus[this.status]}`,
+      bump: this.bump,
       vpUri: this.vpUri,
     }
   }
@@ -269,8 +269,8 @@ export const proofRequestBeet = new beet.FixableBeetStruct<
     ['expiredAt', beet.i64],
     ['verifiedAt', beet.i64],
     ['provedAt', beet.i64],
-    ['bump', beet.u8],
     ['status', proofRequestStatusBeet],
+    ['bump', beet.u8],
     ['vpUri', beet.utf8String],
   ],
   ProofRequest.fromArgs,
