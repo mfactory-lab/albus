@@ -2,9 +2,8 @@
 members = [
 #  "programs/*",
   "programs/albus",
-  # "packages/groth16",
+  "packages/albus-verifier",
   "packages/groth16-solana",
-#  "packages/albus-verifier"
 ]
 
 [profile.release]

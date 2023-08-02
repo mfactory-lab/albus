@@ -81,6 +81,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "albus-verifier"
+version = "0.1.1"
+dependencies = [
+ "arrayref",
+ "solana-program",
+]
+
+[[package]]
 name = "anchor-attribute-access-control"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

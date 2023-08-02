@@ -235,10 +235,10 @@ pub struct ProofRequest {
     pub verified_at: i64,
     /// Timestamp for when the user was added the `proof`
     pub proved_at: i64,
-    /// PDA bump.
-    pub bump: u8,
     /// Status of the request
     pub status: ProofRequestStatus,
+    /// PDA bump.
+    pub bump: u8,
     /// The address of the presentation used for proof generation
     #[max_len(200)]
     pub vp_uri: String,
