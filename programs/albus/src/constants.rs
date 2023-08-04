@@ -32,8 +32,8 @@ pub const AUTHORIZED_AUTHORITY: &[&str] = &[
     "5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH",
 ];
 
+/// Default Albus issuer public key
+pub const ISSUER_PK: [u8; 64] = [0; 64];
+
 pub const CURRENT_DATE_SIGNAL: &str = "currentDate";
 pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
-
-// pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
-// pub const VC_SYMBOL_CODE: &str = "VC";

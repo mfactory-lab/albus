@@ -29,7 +29,7 @@
 use anchor_lang::prelude::*;
 use groth16_solana::Groth16Verifier;
 
-use crate::constants::{CURRENT_DATE_SIGNAL, ISSUER_PK_SIGNAL};
+use crate::constants::{CURRENT_DATE_SIGNAL, ISSUER_PK, ISSUER_PK_SIGNAL};
 use crate::state::{Circuit, Policy, ProofData};
 use crate::utils::format_circuit_date;
 use crate::{
@@ -46,19 +46,20 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     let policy = &ctx.accounts.policy;
 
     let timestamp = Clock::get()?.unix_timestamp;
-    let signals = circuit.signals();
-
     let mut public_inputs = data.public_inputs;
+
+    let signals = circuit.signals();
 
     // check current date
     if let Some(s) = signals.get(CURRENT_DATE_SIGNAL) {
-        public_inputs[s.0] = format_circuit_date(timestamp).unwrap();
+        public_inputs[s.0] =
+            format_circuit_date(timestamp).expect("Failed to get current timestamp");
     }
 
     // // check issuer public key
     // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
-    //     public_inputs[*idx] = [0; 32]; //x
-    //     public_inputs[*idx + 1] = [0; 32]; //y
+    //     public_inputs[s.0] = <[u8; 32]>::try_from(&ISSUER_PK[..32]).unwrap();
+    //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
     // }
 
     policy.apply_rules(&mut public_inputs);
