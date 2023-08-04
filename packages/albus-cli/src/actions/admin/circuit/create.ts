@@ -38,7 +38,7 @@ import { downloadFile } from '../../../utils'
 
 interface Opts {}
 
-const { parseVerifyingKey } = zkp
+const { encodeVerifyingKey } = zkp
 const { bigIntToArray } = crypto.utils
 
 /**
@@ -115,7 +115,7 @@ export async function create(circuitId: string, _opts: Opts) {
 
   await mintNft({ name: 'ALBUS Circuit', code: circuitId, vk, zkeyUrl, wasmUrl, inputFields })
 
-  process.exit(0)
+  // process.exit(0)
 }
 
 interface MintProps {

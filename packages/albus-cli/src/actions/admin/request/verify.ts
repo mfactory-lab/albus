@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
@@ -39,21 +38,21 @@ export async function verifyRequest(addr: string, _opts: Opts) {
   const { client } = useContext()
 
   log.info('Verifying proof...')
-  const isVerified = await client.verifyProofRequest(addr)
-  log.info('Status:', isVerified)
-
-  try {
-    log.info('Try to update status...')
-    if (isVerified) {
-      await client.verify({ proofRequest: new PublicKey(addr) })
-      log.info('Verified!')
-    } else {
-      await client.reject({ proofRequest: new PublicKey(addr) })
-      log.info('Rejected!')
-    }
-  } catch (e) {
-    log.error(e)
-  }
-
-  process.exit(0)
+  // const isVerified = await client.verifyProofRequest(addr)
+  // log.info('Status:', isVerified)
+  //
+  // try {
+  //   log.info('Try to update status...')
+  //   if (isVerified) {
+  //     await client.verify({ proofRequest: new PublicKey(addr) })
+  //     log.info('Verified!')
+  //   } else {
+  //     await client.reject({ proofRequest: new PublicKey(addr) })
+  //     log.info('Rejected!')
+  //   }
+  // } catch (e) {
+  //   log.error(e)
+  // }
+  //
+  // process.exit(0)
 }

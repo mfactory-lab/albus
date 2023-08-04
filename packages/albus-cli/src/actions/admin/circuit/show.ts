@@ -26,51 +26,21 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Keypair } from '@solana/web3.js'
-import type { JsonMetadata, Metadata } from '@metaplex-foundation/js'
-import { MetadataV1GpaBuilder, toMetadata, toMetadataAccount } from '@metaplex-foundation/js'
 import log from 'loglevel'
-import { exploreAddress } from '@/utils'
 import { useContext } from '@/context'
 
 export async function showAll() {
-  const { metaplex, config } = useContext()
-
-  const albusKeypair = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
-
-  const gpaBuilder = new MetadataV1GpaBuilder(metaplex)
+  const { client } = useContext()
 
   log.info('Loading all circuits...')
 
-  const accounts = await gpaBuilder
-    .whereSymbol(`${config.nftSymbol}-C`)
-    .whereUpdateAuthority(albusKeypair.publicKey)
-    .get()
-
-  const metadataAccounts = accounts
-    .map<Metadata | null>((account) => {
-      if (account == null) {
-        return null
-      }
-      try {
-        return toMetadata(toMetadataAccount(account))
-      } catch (error) {
-        return null
-      }
-    })
-    .filter((nft): nft is Metadata => nft !== null)
-
-  log.debug('Circuits...')
+  const circuits = await client.circuit.find()
 
   log.info('--------------------------------------------------------------------------')
 
-  for (const metadata of metadataAccounts) {
-    const json = await metaplex.storage().downloadJson<JsonMetadata>(metadata.uri)
-
-    log.info('MintAddress:', metadata.mintAddress.toString())
-    log.info('ExploreLink:', exploreAddress(metadata.mintAddress))
-    log.info('Metadata', json)
-
+  for (const circuit of circuits) {
+    log.info('Address:', circuit.pubkey)
+    log.info(circuit.data.pretty())
     log.info('--------------------------------------------------------------------------')
   }
 }

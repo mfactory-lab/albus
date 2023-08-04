@@ -26,29 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-export async function remove(addr: string) {
-  const { metaplex, keypair } = useContext()
+export async function remove(code: string) {
+  const { client } = useContext()
 
-  // const updateAuthority = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
+  const { signature } = await client.circuit.delete({ code })
 
-  const mintAddress = new PublicKey(addr)
-
-  const ownerTokenAccount = metaplex.tokens().pdas().associatedTokenAccount({
-    mint: mintAddress,
-    owner: keypair.publicKey,
-  })
-
-  const res = await metaplex
-    .nfts()
-    .delete({
-      mintAddress,
-      // authority: updateAuthority,
-      ownerTokenAccount,
-    })
-
-  log.info(`Signature: ${res.response.signature}`)
+  log.info(`Signature: ${signature}`)
 }

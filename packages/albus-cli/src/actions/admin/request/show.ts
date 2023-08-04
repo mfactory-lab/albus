@@ -38,7 +38,7 @@ interface Opts {
 export async function showAll(userAddr: string, opts: Opts) {
   const { client } = useContext()
 
-  const items = await client.findProofRequests({
+  const items = await client.proofRequest.find({
     user: new PublicKey(userAddr),
     serviceProvider: opts.sp,
     circuit: opts.circuit,
@@ -54,8 +54,9 @@ export async function showAll(userAddr: string, opts: Opts) {
       String(item.data.circuit),
       String(item.data.serviceProvider),
       String(item.data.owner),
-      String(item.data.proof),
+      // String(item.data.proof),
     ])
   }
-  process.exit(0)
+
+  // process.exit(0)
 }

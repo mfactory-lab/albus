@@ -28,6 +28,7 @@
 
 import type { ServiceProvider } from '@albus/sdk'
 import { ProofRequestStatus } from '@albus/sdk'
+import type { PublicKey } from '@solana/web3.js'
 import Table from 'cli-table3'
 import log from 'loglevel'
 import { exploreAddress } from '@/utils'
@@ -36,7 +37,7 @@ import { useContext } from '@/context'
 export async function show(addr: string) {
   const { client } = useContext()
 
-  const proofRequest = await client.loadProofRequest(addr)
+  const proofRequest = await client.proofRequest.load(addr)
 
   log.info('--------------------------------------------------------------------------')
   log.info(`Address: ${addr}`)
@@ -45,7 +46,7 @@ export async function show(addr: string) {
   log.info(exploreAddress(proofRequest.circuit))
   log.info(`Owner: ${proofRequest.owner}`)
   log.info(exploreAddress(proofRequest.owner))
-  log.info('Proof', JSON.stringify(proofRequest.proof))
+  // log.info('Proof', JSON.stringify(proofRequest.proof))
   // if (zkpRequest.proof) {
   //   log.info(exploreAddress(zkpRequest.proof))
   // }
@@ -58,15 +59,13 @@ export async function show(addr: string) {
 }
 
 interface SearchOpts {
-  service: string
-  circuit: string
-  requester: string
+  policy: string | PublicKey
+  requester: string | PublicKey
 }
 
 export async function find(opts: SearchOpts) {
   const { client } = useContext()
-  const [serviceProviderAddr] = client.getServiceProviderPDA(opts.service)
-  const [zkpRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, opts.circuit, opts.requester)
+  const [zkpRequestAddr] = client.pda.proofRequest(opts.policy, opts.requester)
   await show(zkpRequestAddr.toString())
 }
 
@@ -79,13 +78,13 @@ interface ShowAllOpts {
 export async function showAll(opts: ShowAllOpts) {
   const { client } = useContext()
 
-  const services = (await client.findServiceProviders())
+  const services = (await client.service.find())
     .reduce((a, { pubkey, data }) => {
       a.set(pubkey.toString(), data)
       return a
     }, new Map<string, ServiceProvider>())
 
-  const items = await client.findProofRequests({
+  const items = await client.proofRequest.find({
     serviceProvider: opts.service,
     circuit: opts.circuit,
     status: opts.status ? ProofRequestStatus[opts.status] : undefined,

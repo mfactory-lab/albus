@@ -33,23 +33,19 @@ import { useContext } from '@/context'
 export async function show(code: string) {
   const { client } = useContext()
 
-  const [serviceProviderAddr] = client.getServiceProviderPDA(code)
-  const sp = await client.loadServiceProvider(serviceProviderAddr)
+  const [serviceProviderAddr] = client.pda.serviceProvider(code)
+  const sp = await client.service.load(serviceProviderAddr)
 
   log.info('--------------------------------------------------------------------------')
   log.info(`Address ${serviceProviderAddr}`)
-  log.info(`Authority: ${sp.authority}`)
-  log.info(`Code: ${sp.code}`)
-  log.info(`Name: ${sp.name}`)
-  log.info(`ZKP request's count: ${sp.proofRequestCount}`)
-  log.info(`Creation time: ${sp.createdAt}`)
+  log.info(sp.pretty())
   log.info('--------------------------------------------------------------------------')
 }
 
 export async function showAll(opts: { authority?: string }) {
   const { client } = useContext()
 
-  const items = await client.findServiceProviders({
+  const items = await client.service.find({
     authority: opts.authority,
   })
 

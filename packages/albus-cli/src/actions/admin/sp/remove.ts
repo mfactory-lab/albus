@@ -34,7 +34,7 @@ interface Opts {}
 export async function remove(code: string, _opts: Opts) {
   const { client } = useContext()
 
-  const { signature } = await client.manager.deleteServiceProvider({ code })
+  const { signature } = await client.service.delete({ code })
 
   log.info(`Signature: ${signature}`)
   log.info('OK')

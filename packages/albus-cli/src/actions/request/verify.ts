@@ -38,6 +38,7 @@ export async function verifyRequest(addr: string, _opts: Opts) {
   const { client } = useContext()
 
   log.info('Verifying proof...')
-  const isVerified = await client.verifyProofRequest(addr)
-  log.info('Status:', isVerified)
+  // TODO:
+  // const isVerified = await client.verify(addr)
+  // log.info('Status:', isVerified)
 }

@@ -28,11 +28,11 @@
 
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
+import { mergeDeep, pluginViteConfig } from '../../vite.config'
 import { version } from './package.json'
 
-// https://vitejs.dev/config/
 export default defineConfig(() => {
-  return {
+  return mergeDeep({
     envPrefix: 'CLI_',
     define: {
       'import.meta.env.VERSION': JSON.stringify(version),
@@ -48,5 +48,5 @@ export default defineConfig(() => {
     optimizeDeps: {
       include: ['@coral-xyz/anchor', '@solana/web3.js', '@faker-js/faker'],
     },
-  }
+  }, pluginViteConfig(import.meta.url))
 })

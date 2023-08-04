@@ -3,16 +3,26 @@
   "version": "0.0.3",
   "private": true,
   "type": "module",
-  "main": "src/index",
-  "module": "src/index",
+  "main": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "*.d.ts"
+  ],
   "bin": {
-    "albus-cli": "./lib/index.js"
+    "albus": "./cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
-    "cli": "vite-node ./src/index.ts --",
-    "build": "tsc --noEmit && echo",
+    "cli": "node ./dist/index.es.js",
+    "_cli": "vite-node ./src/index.ts --",
+    "dev": "tsc --emitDeclarationOnly && vite build --watch",
+    "build": "tsc --emitDeclarationOnly && vite build",
+    "tsc": "tsc --noEmit && echo",
     "release": "pnpm build & release-it",
-    "prepare": "pnpm build"
+    "prepublishOnly": "pnpm build"
   },
   "repository": {
     "type": "git",
@@ -20,8 +30,8 @@
     "directory": "packages/albus-cli"
   },
   "dependencies": {
-    "@albus/core": "workspace:*",
-    "@albus/sdk": "workspace:*",
+    "@albus/core": "workspace:^",
+    "@albus/sdk": "workspace:^",
     "@faker-js/faker": "^8.0.2",
     "@metaplex-foundation/js": "^0.19.4",
     "@coral-xyz/anchor": "^0.28.0",
@@ -34,7 +44,7 @@
     "snarkjs": "^0.7.0"
   },
   "devDependencies": {
-    "vite-node": "^0.32.0"
+    "vite-node": "^0.34.1"
   },
   "release-it": {
     "git": {

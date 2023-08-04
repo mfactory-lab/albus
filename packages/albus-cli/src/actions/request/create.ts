@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { find } from './show'
 import { useContext } from '@/context'
@@ -45,9 +44,9 @@ export async function create(opts: Opts) {
   const { client, provider } = useContext()
 
   try {
-    const { signature } = await client.createProofRequest({
-      serviceCode: opts.service,
-      circuit: new PublicKey(opts.circuit),
+    const { signature } = await client.proofRequest.create({
+      serviceId: opts.service,
+      circuitId: opts.circuit,
       expiresIn: opts.expiresIn,
     }, { commitment: 'confirmed' })
 
@@ -55,8 +54,7 @@ export async function create(opts: Opts) {
     log.info(exploreTransaction(signature))
 
     await find({
-      service: opts.service,
-      circuit: opts.circuit,
+      policy: client.pda.policy(opts.circuit, opts.service)[0],
       requester: provider.wallet.publicKey.toString(),
     })
   } catch (e) {

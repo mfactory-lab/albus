@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { exploreTransaction } from '@/utils'
 import { useContext } from '@/context'
@@ -36,9 +35,7 @@ interface Opts {}
 export async function remove(addr: string, _opts: Opts) {
   const { client } = useContext()
 
-  const { signature } = await client.deleteProofRequest({
-    proofRequest: new PublicKey(addr),
-  })
+  const { signature } = await client.proofRequest.delete({ addr })
 
   log.info(`Signature: ${signature}`)
   log.info(exploreTransaction(signature))

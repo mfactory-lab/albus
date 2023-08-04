@@ -43,10 +43,10 @@ export async function proveRequest(addr: string, opts: Opts) {
   const { client, keypair } = useContext()
 
   const { signature } = await client.prove({
+    holderSecretKey: keypair.secretKey,
+    // decryptionKey: keypair.secretKey,
     proofRequest: addr,
     vc: opts.vc,
-    decryptionKey: keypair.secretKey,
-    force: opts.force,
   })
 
   log.info(`Signature: ${signature}`)
