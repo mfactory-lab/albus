@@ -66,7 +66,7 @@ export class ServiceManager {
       .addFilter('accountDiscriminator', serviceProviderDiscriminator)
 
     if (filter.authority) {
-      builder.addFilter('authority', filter.authority)
+      builder.addFilter('authority', new PublicKey(filter.authority))
     }
 
     return (await builder.run(this.provider.connection)).map((acc) => {
@@ -128,5 +128,5 @@ export interface CreateServiceProps {
 }
 
 export interface FindServicesProps {
-  authority?: PublicKey
+  authority?: PublicKeyInitData
 }
