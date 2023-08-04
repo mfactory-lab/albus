@@ -11,7 +11,7 @@
   "scripts": {
     "sdk:gen": "pnpm -F @albus/sdk generate && pnpm run lint:fix",
     "cli": "pnpm -F @albus/cli run cli",
-    "dev": "pnpm --parallel run dev",
+    "dev": "NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm -r --parallel --filter='./packages/**' run dev",
     "test:unit": "vitest --dir ./packages",
     "test:e2e": "pnpm -F @albus/tests run test",
     "lint:fix": "eslint --fix --ext .js,.vue,.ts ./packages",
@@ -20,15 +20,15 @@
     "commit": "git-cz"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.39.8",
+    "@antfu/eslint-config": "^0.40.0",
     "@changesets/cli": "^2.26.0",
     "@rollup/plugin-inject": "^5.0.3",
-    "@types/node": "^18.0.0",
+    "@types/node": "^20.0.0",
     "@vitest/ui": "^0.33.0",
-    "eslint": "^8.45.0",
-    "typescript": "^4.9.5",
-    "vite": "^4.4.7",
-    "vitest": "^0.33.0",
+    "eslint": "^8.46.0",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8",
+    "vitest": "^0.34.0",
     "unbuild": "^1.2.1"
   },
   "pnpm": {

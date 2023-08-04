@@ -11,7 +11,10 @@ const external = [
   'tslib',
   'snarkjs',
   'circomlibjs',
-  // '@albus/core',
+  '@albus/cli',
+  '@albus/core',
+  '@albus/sdk',
+  'node:fs',
 ]
 
 export const libFileName = (format: string) => `index.${format}.js`
@@ -20,7 +23,7 @@ function isObject(item: unknown): item is Record<string, unknown> {
   return Boolean(item && typeof item === 'object' && !Array.isArray(item))
 }
 
-function mergeDeep<T>(target: T, ...sources: T[]): T {
+export function mergeDeep<T>(target: T, ...sources: T[]): T {
   if (!sources.length) {
     return target
   }
@@ -54,6 +57,7 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
     ...(globalPackageJson.devDependencies || {}),
     // ...(globalPackageJson.dependencies || {}),
   }
+
   return mergeDeep<BuildOptions>(
     {
       sourcemap: true,
@@ -103,7 +107,7 @@ export default defineConfig({
   test: {
     include: ['packages/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     environment: 'node',
+    // environment: 'jsdom',
     testTimeout: 10000,
-  //   // environment: 'jsdom',
   },
 } as any)
