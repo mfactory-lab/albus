@@ -15,8 +15,8 @@
     "src"
   ],
   "scripts": {
-    "dev": "tsc --emitDeclarationOnly && vite build --watch",
     "tsc": "tsc --noEmit && echo",
+    "dev": "tsc --emitDeclarationOnly && vite build --watch",
     "build": "tsc --emitDeclarationOnly && vite build",
     "publish:git": "gitpkg publish",
     "_prepare": "pnpm build",

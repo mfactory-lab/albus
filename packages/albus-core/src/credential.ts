@@ -491,8 +491,6 @@ export async function verifyPresentationProof(proof: PresentationProof, challeng
         throw new Error('invalid proof')
       }
 
-      // TODO: check claimsProof
-
       return eddsa.verifyPoseidon(babyJub.F.e(proof.challenge), {
         R8: [
           babyJub.F.e(proof.proofValue.r8x),
@@ -531,12 +529,13 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
     rootString: () => tree.F.toString(tree.root),
     find: (key: string) => tree.find(encodeKey(key))
       .then(res => ({ ...res, siblings: siblingsPad(res.siblings, nLevels) })),
-    proof: (key: string) => {
+    proof: async (key: string) => {
       const encodedKey = encodeKey(key)
-      return tree.find(encodedKey).then(res => [
+      const res = await tree.find(encodedKey)
+      return [
         encodedKey,
-        ...siblingsPad(res.siblings.map(s => tree.F.toString(s)), nLevels),
-      ])
+        ...siblingsPad(res.siblings.map((s: Uint8Array) => tree.F.toString(s)), nLevels),
+      ]
     },
     delete: (key: string) => tree.delete(encodeKey(key)),
     insert: (key: string, val: any) => tree.insert(encodeKey(key), encodeVal(val)),
@@ -548,7 +547,7 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
 
 // Helpers
 
-function flattenObject(obj: Object, parentKey?: string) {
+function flattenObject(obj: Record<string, any>, parentKey?: string) {
   let res: Record<string, any> = {}
   Object.entries(obj).forEach(([key, value]) => {
     const k = parentKey ? `${parentKey}.${key}` : key
@@ -561,7 +560,7 @@ function flattenObject(obj: Object, parentKey?: string) {
   return res
 }
 
-function unflattenObject(obj: Record<string, any>): Object {
+function unflattenObject(obj: Record<string, any>): Record<string, any> {
   return Object.keys(obj).reduce((res, k) => {
     k.split('.').reduce(
       (acc, e, i, keys) =>
