@@ -26,128 +26,21 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use anchor_lang::{prelude::*, solana_program::system_program};
 pub mod assert;
-// pub mod nft;
+pub mod circuit;
 
 pub use assert::*;
-use std::borrow::Cow;
-use std::collections::BTreeMap;
-use std::ops::Index;
-use time::OffsetDateTime;
+pub use circuit::*;
 
-pub fn close<'info>(acc: AccountInfo<'info>, sol_destination: AccountInfo<'info>) -> Result<()> {
-    // Transfer lamports from the account to the sol_destination.
-    let dest_starting_lamports = sol_destination.lamports();
-    **sol_destination.lamports.borrow_mut() =
-        dest_starting_lamports.checked_add(acc.lamports()).unwrap();
-    **acc.lamports.borrow_mut() = 0;
+// use anchor_lang::{prelude::*, solana_program::system_program};
 
-    acc.assign(&system_program::ID);
-    acc.realloc(0, false).map_err(Into::into)
-}
-
-// (index, size)
-type Signal = (usize, usize);
-
-pub struct Signals<'a> {
-    data: BTreeMap<Cow<'a, str>, Signal>,
-    count: usize,
-}
-
-impl<'a, Idx: Into<Cow<'a, str>>> Index<Idx> for Signals<'a> {
-    type Output = Signal;
-
-    fn index(&self, index: Idx) -> &Self::Output {
-        self.data.index(&index.into())
-    }
-}
-
-impl<'a> Signals<'a> {
-    pub fn new<T>(signals: impl IntoIterator<Item = T>) -> Self
-    where
-        T: Into<Cow<'a, str>>,
-    {
-        let mut data = BTreeMap::new();
-        let mut count = 0;
-
-        for signal in signals {
-            let (name, len) = {
-                let s: Cow<str> = signal.into();
-                match (s.find('['), s.rfind(']')) {
-                    (Some(open), Some(close)) if open < close => {
-                        let name = s[..open].to_owned();
-                        if let Ok(n) = s[open + 1..close].parse::<usize>() {
-                            (name.into(), n)
-                        } else {
-                            (name.into(), 1)
-                        }
-                    }
-                    _ => (s, 1),
-                }
-            };
-            data.insert(name, (count, len));
-            count += len;
-        }
-
-        Self { data, count }
-    }
-
-    pub fn get(&self, k: impl Into<Cow<'a, str>>) -> Option<&Signal> {
-        self.data.get(&k.into())
-    }
-
-    pub fn has(&self, k: impl Into<Cow<'a, str>>) -> bool {
-        self.data.contains_key(&k.into())
-    }
-
-    pub fn len(&self) -> usize {
-        self.count
-    }
-}
-
-/// Convert unix timestamp to [u8; 32] format
-pub fn format_circuit_date(ts: i64) -> Option<[u8; 32]> {
-    let d = OffsetDateTime::from_unix_timestamp(ts).ok()?.date();
-    let n = format!("{:+}{:02}{:02}", d.year(), d.month() as u8, d.day())
-        .parse::<u32>()
-        .ok()?;
-    Some(num_to_bytes(n))
-}
-
-pub fn num_to_bytes(n: u32) -> [u8; 32] {
-    let mut result = [0u8; 32];
-    let u32_bytes = n.to_be_bytes();
-    result[28..].copy_from_slice(&u32_bytes[..4]);
-    result
-}
-
-#[test]
-fn test_signals() {
-    let signals = Signals::new([
-        "currentDate",
-        "minAge",
-        "maxAge",
-        "credentialRoot",
-        "credentialProof[10]",
-        "credentialKey",
-        "issuerPk[2]",
-        "issuerSignature[3]",
-    ]);
-    assert_eq!(signals["credentialRoot"], (3, 1));
-    assert_eq!(signals["credentialKey"], (14, 1));
-    assert_eq!(signals["issuerSignature"], (17, 3));
-    assert_eq!(20, signals.len());
-}
-
-#[test]
-fn test_format_circuit_date() {
-    let bytes = format_circuit_date(1690815541);
-    assert_eq!(
-        bytes,
-        Some([
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            52, 178, 75
-        ])
-    );
-}
+// pub fn close<'info>(acc: AccountInfo<'info>, sol_destination: AccountInfo<'info>) -> Result<()> {
+//     // Transfer lamports from the account to the sol_destination.
+//     let dest_starting_lamports = sol_destination.lamports();
+//     **sol_destination.lamports.borrow_mut() =
+//         dest_starting_lamports.checked_add(acc.lamports()).unwrap();
+//     **acc.lamports.borrow_mut() = 0;
+//
+//     acc.assign(&system_program::ID);
+//     acc.realloc(0, false).map_err(Into::into)
+// }

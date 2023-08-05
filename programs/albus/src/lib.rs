@@ -41,10 +41,6 @@ declare_id!("ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz");
 pub mod albus {
     use super::*;
 
-    pub fn delete_account(ctx: Context<DeleteAccount>) -> Result<()> {
-        delete_account::handler(ctx)
-    }
-
     pub fn create_circuit(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<()> {
         create_circuit::handler(ctx, data)
     }
