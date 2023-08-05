@@ -10,6 +10,7 @@ import globalPackageJson from './package.json'
 const external = [
   'tslib',
   'snarkjs',
+  'axios',
   'circomlibjs',
   '@albus/cli',
   '@albus/core',
