@@ -54,13 +54,9 @@ export async function issue(opts: Opts) {
   })
 
   // Generate new VC-NFT
-  const nft = await mintVerifiableCredentialNFT({
-    vc,
-  })
+  const nft = await mintVerifiableCredentialNFT({ vc })
 
   log.info('Done')
   log.info(`Mint: ${nft.address}`)
   log.info(exploreAddress(nft.address))
-
-  process.exit(0)
 }

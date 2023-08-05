@@ -57,6 +57,16 @@ cli
   })
 
 // ------------------------------------------
+// DID
+// ------------------------------------------
+
+const did = cli.command('did')
+
+did.command('generate', { isDefault: true })
+  .description('Generate new issuer did')
+  .action(actions.did.generate)
+
+// ------------------------------------------
 // Identity
 // ------------------------------------------
 

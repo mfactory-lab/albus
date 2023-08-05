@@ -26,90 +26,25 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { credential } from '@albus/core'
-import type { JsonMetadata, Metadata } from '@metaplex-foundation/js'
-import { TokenGpaBuilder } from '@metaplex-foundation/js'
-import type { PublicKey } from '@solana/web3.js'
+import type { VerifiableCredential } from '@albus/core'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
 export async function showAll() {
-  const { metaplex, client, issuerKeypair, config } = useContext()
+  const { keypair, client } = useContext()
 
-  const credentials = await client.credential.loadAll()
+  const credentials = await client.credential.loadAll({
+    decryptionKey: keypair.secretKey,
+  })
 
-  console.log(credentials)
-
-  // const gpaBuilder = new MetadataV1GpaBuilder(metaplex)
-  //
-  // log.info('Loading token accounts...')
-  // const tokenMints = (await getTokenMints()).map(String)
-  // log.info(`Found ${tokenMints.length} tokens`)
-  //
-  // log.info('Loading all verifiable credentials...')
-  // const accounts = await gpaBuilder
-  //   .whereSymbol(`${config.nftSymbol}-VC`)
-  //   .whereUpdateAuthority(issuerKeypair.publicKey)
-  //   // .whereCreator(2, keypair.publicKey)
-  //   .get()
-  //
-  // const metadataAccounts = accounts
-  //   .map<Metadata | null>((account) => {
-  //     if (account == null) {
-  //       return null
-  //     }
-  //     try {
-  //       return toMetadata(toMetadataAccount(account))
-  //     } catch (error) {
-  //       return null
-  //     }
-  //   })
-  //   .filter((nft): nft is Metadata => nft !== null
-  //     && tokenMints.includes(nft.mintAddress.toString()))
-  //
-  // if (metadataAccounts.length > 0) {
-  //   log.info('--------------------------------------------------------------------------')
-  //   for (const metadata of metadataAccounts) {
-  //     log.info('Address:', metadata.mintAddress.toString())
-  //     await showCredentialInfo(metadata)
-  //     log.info('--------------------------------------------------------------------------')
-  //   }
-  // } else {
-  //   log.info('No data found')
-  // }
-}
-
-async function showCredentialInfo(metadata: Metadata) {
-  const { metaplex, keypair, config } = useContext()
-
-  if (!metadata.uri) {
-    log.warn('Invalid nft')
-    return
-  }
-
-  try {
-    const json = await metaplex.storage().downloadJson<JsonMetadata & { vc: any }>(metadata.uri)
-
-    const { verifiableCredential } = await credential.verifyCredential(json.vc, {
-      decryptionKey: keypair.secretKey,
-      audience: config.issuerDid,
-    })
-
-    log.info('Issuer:', verifiableCredential.issuer)
-    log.info('IssuanceDate:', verifiableCredential.issuanceDate)
-    log.info('ExpirationDate:', verifiableCredential.expirationDate)
-    log.info('CredentialSubject:', verifiableCredential.credentialSubject)
-  } catch (e) {
-    log.error(e)
+  for (const credential of credentials) {
+    log.info(showCredential(credential))
   }
 }
 
-async function getTokenMints(): Promise<PublicKey[]> {
-  const { metaplex, keypair } = useContext()
-  const tokenProgram = metaplex.programs().getToken()
-  return new TokenGpaBuilder(metaplex, tokenProgram.address)
-    .selectMint()
-    .whereOwner(keypair.publicKey)
-    .whereAmount(1)
-    .getDataAsPublicKeys()
+async function showCredential(vc: VerifiableCredential) {
+  log.info('Issuer:', vc.issuer)
+  log.info('IssuanceDate:', vc.issuanceDate)
+  log.info('ExpirationDate:', vc.expirationDate)
+  log.info('CredentialSubject:', vc.credentialSubject)
 }
