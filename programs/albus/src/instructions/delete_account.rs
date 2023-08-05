@@ -26,30 +26,24 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub mod add_service_provider;
-pub mod create_circuit;
-pub mod create_policy;
-pub mod create_proof_request;
-pub mod delete_circuit;
-pub mod delete_policy;
-pub mod delete_proof_request;
-pub mod delete_service_provider;
-// pub mod mint_credential;
-pub mod delete_account;
-pub mod prove;
-pub mod update_circuit_vk;
-pub mod verify;
+use anchor_lang::prelude::*;
 
-pub use add_service_provider::*;
-pub use create_circuit::*;
-pub use create_policy::*;
-pub use create_proof_request::*;
-pub use delete_account::*;
-pub use delete_circuit::*;
-pub use delete_policy::*;
-pub use delete_proof_request::*;
-pub use delete_service_provider::*;
-pub use update_circuit_vk::*;
-// pub use mint_credential::*;
-pub use prove::*;
-pub use verify::*;
+use crate::utils::close;
+
+pub fn handler(ctx: Context<DeleteAccount>) -> Result<()> {
+    let acc = ctx.accounts.account.to_account_info();
+    let sol_recipient = ctx.accounts.authority.to_account_info();
+
+    close(acc, sol_recipient)
+}
+
+#[derive(Accounts)]
+pub struct DeleteAccount<'info> {
+    #[account(mut)]
+    pub account: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}

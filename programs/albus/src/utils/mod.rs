@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+use anchor_lang::{prelude::*, solana_program::system_program};
 pub mod assert;
 // pub mod nft;
 
@@ -34,6 +35,17 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::ops::Index;
 use time::OffsetDateTime;
+
+pub fn close<'info>(acc: AccountInfo<'info>, sol_destination: AccountInfo<'info>) -> Result<()> {
+    // Transfer lamports from the account to the sol_destination.
+    let dest_starting_lamports = sol_destination.lamports();
+    **sol_destination.lamports.borrow_mut() =
+        dest_starting_lamports.checked_add(acc.lamports()).unwrap();
+    **acc.lamports.borrow_mut() = 0;
+
+    acc.assign(&system_program::ID);
+    acc.realloc(0, false).map_err(Into::into)
+}
 
 // (index, size)
 type Signal = (usize, usize);
