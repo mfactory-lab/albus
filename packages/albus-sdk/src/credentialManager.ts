@@ -65,7 +65,7 @@ export class CredentialManager {
   /**
    * Load all verifiable credentials
    */
-  async loadAll() {
+  async loadAll(props: LoadCredentialProps = {}) {
     const accounts = await getParsedNftAccountsByOwner(
       this.provider.connection,
       this.provider.publicKey,
@@ -76,15 +76,18 @@ export class CredentialManager {
       },
     )
 
-    console.log(accounts)
-
+    const result: VerifiableCredential[] = []
     for (const account of accounts) {
       if (account.json?.vc !== undefined) {
-        // ..
+        const vc = await Albus.credential.verifyCredential(account.json.vc, {
+          audience: ALBUS_DID,
+          decryptionKey: props.decryptionKey,
+        })
+        result.push(vc)
       }
     }
 
-    return []
+    return result
   }
 
   /**

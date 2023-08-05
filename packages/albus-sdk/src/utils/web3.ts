@@ -33,7 +33,7 @@ import type { Creator } from '@metaplex-foundation/mpl-token-metadata'
 import { PublicKey } from '@solana/web3.js'
 import type { AccountInfo, Connection, PublicKeyInitData } from '@solana/web3.js'
 import { PROGRAM_ID as METADATA_PROGRAM_ID, Metadata } from '@metaplex-foundation/mpl-token-metadata'
-import chunk from 'lodash/chunk'
+import { chunk } from 'lodash-es'
 import type { AlbusNftCode } from '../types'
 import { NFT_AUTHORITY, NFT_SYMBOL_PREFIX } from '../constants'
 
@@ -175,14 +175,13 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
 
   if (props.withJson) {
     return Promise.all(
-      filteredAccounts.map((acc) => {
-        return axios.get(acc.data.uri)
-          .then((r) => {
-            acc.json = r.data
-            return acc
-          })
-          .catch(_ => acc)
-      }),
+      filteredAccounts.map(acc => axios.get(acc.data.uri)
+        .then((r) => {
+          acc.json = r.data
+          return acc
+        })
+        .catch(_e => acc),
+      ),
     )
   }
 
