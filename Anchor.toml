@@ -29,3 +29,8 @@ albus = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz"
 #[[test.genesis]]
 #address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"
 #program = "target/deploy/stake_pool.so"
+
+#[workspace]
+#members = [
+#  "programs/albus",
+#]

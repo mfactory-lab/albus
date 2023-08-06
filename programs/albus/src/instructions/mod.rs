@@ -39,15 +39,17 @@ pub mod prove;
 pub mod update_circuit_vk;
 pub mod verify;
 
-pub use add_service_provider::*;
-pub use create_circuit::*;
-pub use create_policy::*;
-pub use create_proof_request::*;
-pub use delete_circuit::*;
-pub use delete_policy::*;
-pub use delete_proof_request::*;
-pub use delete_service_provider::*;
-pub use update_circuit_vk::*;
-// pub use mint_credential::*;
-pub use prove::*;
-pub use verify::*;
+pub use self::{
+    add_service_provider::*,
+    create_circuit::*,
+    create_policy::*,
+    create_proof_request::*,
+    delete_circuit::*,
+    delete_policy::*,
+    delete_proof_request::*,
+    delete_service_provider::*,
+    // mint_credential::*,
+    prove::*,
+    update_circuit_vk::*,
+    verify::*,
+};
