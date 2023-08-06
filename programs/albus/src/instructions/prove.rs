@@ -27,9 +27,11 @@
  */
 
 use anchor_lang::prelude::*;
+
+#[cfg(feature = "verify-on-chain")]
 use groth16_solana::Groth16Verifier;
 
-use crate::constants::{CURRENT_DATE_SIGNAL, ISSUER_PK, ISSUER_PK_SIGNAL};
+use crate::constants::CURRENT_DATE_SIGNAL;
 use crate::state::{Circuit, Policy, ProofData};
 use crate::utils::format_circuit_date;
 use crate::{
@@ -44,33 +46,9 @@ use crate::{
 pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     let circuit = &ctx.accounts.circuit;
     let policy = &ctx.accounts.policy;
+    let req = &mut ctx.accounts.proof_request;
 
     let timestamp = Clock::get()?.unix_timestamp;
-    let mut public_inputs = data.public_inputs;
-
-    let signals = circuit.signals();
-
-    // check current date
-    if let Some(s) = signals.get(CURRENT_DATE_SIGNAL) {
-        public_inputs[s.0] =
-            format_circuit_date(timestamp).expect("Failed to get current timestamp");
-    }
-
-    // // check issuer public key
-    // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
-    //     public_inputs[s.0] = <[u8; 32]>::try_from(&ISSUER_PK[..32]).unwrap();
-    //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
-    // }
-
-    policy.apply_rules(&mut public_inputs);
-
-    let verifier =
-        Groth16Verifier::new(data.proof.into(), public_inputs, circuit.vk.clone().into())
-            .expect("Invalid public inputs");
-
-    verifier.verify().expect("Proof verification failed");
-
-    let req = &mut ctx.accounts.proof_request;
 
     if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
         msg!("Error: Only request owner can prove it!");
@@ -81,10 +59,45 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
         return Err(AlbusError::Expired.into());
     }
 
-    req.status = ProofRequestStatus::Proved;
+    let mut public_inputs = data.public_inputs;
+
+    let signals = circuit.signals();
+
+    // apply current date
+    if let Some(s) = signals.get(CURRENT_DATE_SIGNAL) {
+        public_inputs[s.0] =
+            format_circuit_date(timestamp).expect("Failed to get current timestamp");
+    }
+
+    // // apply issuer public key
+    // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
+    //     public_inputs[s.0] = <[u8; 32]>::try_from(&ISSUER_PK[..32]).unwrap();
+    //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
+    // }
+
+    policy.apply_rules(&mut public_inputs);
+
+    if cfg!(feature = "verify-on-chain") {
+        #[cfg(feature = "verify-on-chain")]
+        Groth16Verifier::new(
+            &data.proof.to_owned().into(),
+            &public_inputs,
+            &circuit.vk.to_owned().into(),
+        )
+        .map_err(|_| AlbusError::InvalidPublicInputs)?
+        .verify()
+        .map_err(|_| AlbusError::ProofVerificationFailed)?;
+
+        req.status = ProofRequestStatus::Verified;
+        req.verified_at = timestamp;
+    } else {
+        req.status = ProofRequestStatus::Proved;
+    }
+
+    req.proof = Some(data.proof);
+    req.public_inputs = public_inputs;
     req.vp_uri = data.uri.to_owned();
     req.proved_at = timestamp;
-    req.verified_at = timestamp;
 
     emit!(ProveEvent {
         proof_request: req.key(),

@@ -111,4 +111,8 @@ pub enum AlbusError {
     IncorrectOwner,
     #[msg("Invalid metadata")]
     InvalidMetadata,
+    #[msg("Proof verification failed")]
+    ProofVerificationFailed,
+    #[msg("Invalid public inputs")]
+    InvalidPublicInputs,
 }

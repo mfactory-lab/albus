@@ -28,8 +28,12 @@
 
 use crate::utils::{num_to_bytes, Signals};
 use anchor_lang::prelude::*;
-use groth16_solana::{Proof, PublicInputs, VK};
 use std::borrow::Cow;
+
+#[cfg(feature = "verify-on-chain")]
+use groth16_solana::{Proof, VK};
+
+pub type PublicInputs = Vec<[u8; 32]>;
 
 #[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct ProofData {
@@ -38,10 +42,9 @@ pub struct ProofData {
     pub c: [u8; 64],
 }
 
+#[cfg(feature = "verify-on-chain")]
 impl From<ProofData> for Proof {
     fn from(value: ProofData) -> Self {
-        // let proof_a = &alt_bn128_g1_neg(value.a.as_slice()).unwrap()[..];
-        // Self::new(proof_a.try_into().unwrap(), value.b, value.c)
         Self::new(value.a, value.b, value.c)
     }
 }
@@ -66,6 +69,7 @@ impl VerificationKey {
     }
 }
 
+#[cfg(feature = "verify-on-chain")]
 impl From<VerificationKey> for VK {
     fn from(value: VerificationKey) -> Self {
         Self {
@@ -242,8 +246,11 @@ pub struct ProofRequest {
     /// The address of the presentation used for proof generation
     #[max_len(200)]
     pub vp_uri: String,
-    // /// Proof payload
-    // pub proof: Option<ProofData>,
+    /// Proof payload
+    pub proof: Option<ProofData>,
+    /// Public inputs that are used to verify the `proof`
+    #[max_len(20)]
+    pub public_inputs: Vec<[u8; 32]>,
 }
 
 impl ProofRequest {
