@@ -155,6 +155,52 @@ createErrorFromNameLookup.set(
 )
 
 /**
+ * ProofVerificationFailed: 'Proof verification failed'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class ProofVerificationFailedError extends Error {
+  readonly code: number = 0x1777
+  readonly name: string = 'ProofVerificationFailed'
+  constructor() {
+    super('Proof verification failed')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, ProofVerificationFailedError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1777, () => new ProofVerificationFailedError())
+createErrorFromNameLookup.set(
+  'ProofVerificationFailed',
+  () => new ProofVerificationFailedError(),
+)
+
+/**
+ * InvalidPublicInputs: 'Invalid public inputs'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class InvalidPublicInputsError extends Error {
+  readonly code: number = 0x1778
+  readonly name: string = 'InvalidPublicInputs'
+  constructor() {
+    super('Invalid public inputs')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, InvalidPublicInputsError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1778, () => new InvalidPublicInputsError())
+createErrorFromNameLookup.set(
+  'InvalidPublicInputs',
+  () => new InvalidPublicInputsError(),
+)
+
+/**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  * @category generated

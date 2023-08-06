@@ -12,6 +12,8 @@ import {
   ProofRequestStatus,
   proofRequestStatusBeet,
 } from '../types/ProofRequestStatus'
+import type { ProofData } from '../types/ProofData'
+import { proofDataBeet } from '../types/ProofData'
 
 /**
  * Arguments used to create {@link ProofRequest}
@@ -31,6 +33,8 @@ export interface ProofRequestArgs {
   status: ProofRequestStatus
   bump: number
   vpUri: string
+  proof: beet.COption<ProofData>
+  publicInputs: number[] /* size: 32 */[]
 }
 
 export const proofRequestDiscriminator = [78, 10, 176, 254, 231, 33, 111, 224]
@@ -55,6 +59,8 @@ export class ProofRequest implements ProofRequestArgs {
     readonly status: ProofRequestStatus,
     readonly bump: number,
     readonly vpUri: string,
+    readonly proof: beet.COption<ProofData>,
+    readonly publicInputs: number[] /* size: 32 */[],
   ) {}
 
   /**
@@ -74,6 +80,8 @@ export class ProofRequest implements ProofRequestArgs {
       args.status,
       args.bump,
       args.vpUri,
+      args.proof,
+      args.publicInputs,
     )
   }
 
@@ -244,6 +252,8 @@ export class ProofRequest implements ProofRequestArgs {
       status: `ProofRequestStatus.${ProofRequestStatus[this.status]}`,
       bump: this.bump,
       vpUri: this.vpUri,
+      proof: this.proof,
+      publicInputs: this.publicInputs,
     }
   }
 }
@@ -272,6 +282,8 @@ export const proofRequestBeet = new beet.FixableBeetStruct<
     ['status', proofRequestStatusBeet],
     ['bump', beet.u8],
     ['vpUri', beet.utf8String],
+    ['proof', beet.coption(proofDataBeet)],
+    ['publicInputs', beet.array(beet.uniformFixedSizeArray(beet.u8, 32))],
   ],
   ProofRequest.fromArgs,
   'ProofRequest',

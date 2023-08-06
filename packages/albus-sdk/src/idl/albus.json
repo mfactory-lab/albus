@@ -1,5 +1,5 @@
 {
-  "version": "0.0.6",
+  "version": "0.0.7",
   "name": "albus",
   "instructions": [
     {
@@ -620,6 +620,31 @@
               "The address of the presentation used for proof generation"
             ],
             "type": "string"
+          },
+          {
+            "name": "proof",
+            "docs": [
+              "Proof payload"
+            ],
+            "type": {
+              "option": {
+                "defined": "ProofData"
+              }
+            }
+          },
+          {
+            "name": "publicInputs",
+            "docs": [
+              "Public inputs that are used to verify the `proof`"
+            ],
+            "type": {
+              "vec": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
           }
         ]
       }
@@ -1160,6 +1185,16 @@
       "code": 6006,
       "name": "InvalidMetadata",
       "msg": "Invalid metadata"
+    },
+    {
+      "code": 6007,
+      "name": "ProofVerificationFailed",
+      "msg": "Proof verification failed"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidPublicInputs",
+      "msg": "Invalid public inputs"
     }
   ],
   "metadata": {
