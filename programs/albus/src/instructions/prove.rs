@@ -55,10 +55,6 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
         return Err(AlbusError::Unauthorized.into());
     }
 
-    if req.expired_at > 0 && req.expired_at < timestamp {
-        return Err(AlbusError::Expired.into());
-    }
-
     let mut public_inputs = data.public_inputs;
 
     let signals = circuit.signals();
@@ -98,6 +94,8 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     req.public_inputs = public_inputs;
     req.vp_uri = data.uri.to_owned();
     req.proved_at = timestamp;
+
+    // TODO: reset expired_at if needed
 
     emit!(ProveEvent {
         proof_request: req.key(),

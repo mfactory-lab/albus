@@ -26,8 +26,15 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub mod assert;
-pub mod circuit;
+use anchor_lang::{prelude::*, solana_program::system_program};
 
-pub use assert::*;
-pub use circuit::*;
+pub fn close<'info>(acc: AccountInfo<'info>, sol_destination: AccountInfo<'info>) -> Result<()> {
+    // Transfer lamports from the account to the sol_destination.
+    let dest_starting_lamports = sol_destination.lamports();
+    **sol_destination.lamports.borrow_mut() =
+        dest_starting_lamports.checked_add(acc.lamports()).unwrap();
+    **acc.lamports.borrow_mut() = 0;
+
+    acc.assign(&system_program::ID);
+    acc.realloc(0, false).map_err(Into::into)
+}

@@ -49,8 +49,9 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
         return Err(AlbusError::Unproved.into());
     }
 
-    // Check that the request has not yet expired
     let timestamp = Clock::get()?.unix_timestamp;
+
+    // Check that the request has not yet expired
     if req.expired_at > 0 && req.expired_at < timestamp {
         return Err(AlbusError::Expired.into());
     }
