@@ -39,8 +39,6 @@ pub type F = [u8; ALT_BN128_FIELD_SIZE];
 pub type G1 = [u8; G1_SIZE];
 pub type G2 = [u8; G2_SIZE];
 
-pub type PublicInputs = Vec<F>;
-
 #[derive(PartialEq, Eq, Debug)]
 pub struct VK {
     pub alpha: G1,
@@ -80,14 +78,14 @@ impl Proof {
 }
 
 #[derive(PartialEq, Eq, Debug)]
-pub struct Groth16Verifier {
-    proof: Proof,
-    public_inputs: Vec<[u8; ALT_BN128_FIELD_SIZE]>,
-    vk: VK,
+pub struct Groth16Verifier<'a> {
+    proof: &'a Proof,
+    public_inputs: &'a [[u8; ALT_BN128_FIELD_SIZE]],
+    vk: &'a VK,
 }
 
-impl Groth16Verifier {
-    pub fn new(proof: Proof, public_inputs: PublicInputs, vk: VK) -> Result<Self, Groth16Error> {
+impl<'a> Groth16Verifier<'a> {
+    pub fn new(proof: &'a Proof, public_inputs: &'a [F], vk: &'a VK) -> Result<Self, Groth16Error> {
         proof.validate()?;
 
         if public_inputs.len() + 1 != vk.ic.len() {
@@ -423,7 +421,7 @@ mod tests {
             c: proof[192..256].try_into().unwrap(),
         };
 
-        let verifier = Groth16Verifier::new(proof, public_inputs.to_vec(), vk).unwrap();
+        let verifier = Groth16Verifier::new(&proof, public_inputs, &vk).unwrap();
         assert!(verifier.verify().unwrap());
     }
 
@@ -688,7 +686,7 @@ mod tests {
         };
 
         let (vk, _, _) = test_data();
-        let verifier = Groth16Verifier::new(proof2, signals.to_vec(), vk2).unwrap();
+        let verifier = Groth16Verifier::new(&proof2, signals, &vk2).unwrap();
 
         assert!(verifier.verify().unwrap());
     }
