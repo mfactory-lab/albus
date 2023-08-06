@@ -10,8 +10,8 @@ test = "pnpm test:e2e"
 
 [provider]
 cluster = "localnet"
-#wallet = "./.secrets/upgrade-authority.json"
-wallet = "~/.config/solana/id.json"
+wallet = "./.secrets/upgrade-authority.json"
+#wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
 albus = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz"

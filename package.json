@@ -9,9 +9,9 @@
     "pnpm": ">=8"
   },
   "scripts": {
-    "sdk:gen": "pnpm -F @albus/sdk generate && pnpm run lint:fix",
     "cli": "pnpm -F @albus/cli run cli",
     "dev": "NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm -r --parallel --filter='./packages/**' run dev",
+    "sdk:gen": "pnpm -F @albus/sdk generate && eslint --fix --ext .ts ./packages/albus-sdk",
     "test:unit": "vitest --dir ./packages",
     "test:e2e": "pnpm -F @albus/tests run test",
     "lint:fix": "eslint --fix --ext .js,.vue,.ts ./packages",

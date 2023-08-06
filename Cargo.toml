@@ -10,7 +10,7 @@ members = [
 overflow-checks = true
 lto = "fat"
 codegen-units = 1
-#opt-level = "z"
+opt-level = "z"
 #panic = "abort"
 
 [profile.release.build-override]
