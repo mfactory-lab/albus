@@ -27,26 +27,23 @@
  */
 
 import { resolve } from 'node:path'
-import { defineConfig } from 'vite'
-import { mergeDeep, pluginViteConfig } from '../../vite.config'
+import { pluginViteConfig } from '../../vite.config'
 import { version } from './package.json'
 
-export default defineConfig(() => {
-  return mergeDeep({
-    envPrefix: 'CLI_',
-    define: {
-      'import.meta.env.VERSION': JSON.stringify(version),
+export default pluginViteConfig(import.meta.url, {
+  envPrefix: 'CLI_',
+  define: {
+    'import.meta.env.VERSION': JSON.stringify(version),
+  },
+  resolve: {
+    // by default Vite resolves `module` field, which not always a native ESM module
+    // setting this option can bypass that and fallback to cjs version
+    mainFields: [],
+    alias: {
+      '@/': `${resolve(__dirname, 'src')}/`,
     },
-    resolve: {
-      // by default Vite resolves `module` field, which not always a native ESM module
-      // setting this option can bypass that and fallback to cjs version
-      mainFields: [],
-      alias: {
-        '@/': `${resolve(__dirname, 'src')}/`,
-      },
-    },
-    optimizeDeps: {
-      include: ['@coral-xyz/anchor', '@solana/web3.js', '@faker-js/faker'],
-    },
-  }, pluginViteConfig(import.meta.url))
+  },
+  optimizeDeps: {
+    include: ['@coral-xyz/anchor', '@solana/web3.js', '@faker-js/faker'],
+  },
 })

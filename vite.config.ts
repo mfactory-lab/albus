@@ -24,7 +24,7 @@ function isObject(item: unknown): item is Record<string, unknown> {
   return Boolean(item && typeof item === 'object' && !Array.isArray(item))
 }
 
-export function mergeDeep<T>(target: T, ...sources: T[]): T {
+function mergeDeep<T>(target: T, ...sources: T[]): T {
   if (!sources.length) {
     return target
   }
@@ -93,13 +93,13 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
 export function pluginViteConfig(packageDirName: string, options: UserConfig = {}) {
   return defineConfig({
     ...options,
-    resolve: {
+    resolve: mergeDeep({
       alias: {
         'assert': 'assert',
         'node:crypto': 'crypto-browserify',
         'node:buffer': 'buffer',
       },
-    },
+    }, options.resolve),
     build: viteBuild(packageDirName, options.build),
   })
 }
