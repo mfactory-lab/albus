@@ -31,6 +31,7 @@ import { utils as ffUtils, getCurveFromName } from 'ffjavascript'
 import axios from 'axios'
 import type { ProofData, PublicSignals, VK } from 'snarkjs'
 import { groth16 } from 'snarkjs'
+import * as Albus from './index'
 
 const { leInt2Buff, leBuff2int, unstringifyBigInts, stringifyBigInts } = ffUtils
 
@@ -83,29 +84,57 @@ async function fetchBytes(url: string | Buffer | Uint8Array) {
 }
 
 /**
- * Convert {@link ProofData} to bytes format
+ * Encode snarkjs {@link ProofData} to bytes format
  */
-export function encodeProof(payload: ProofData) {
+export async function encodeProof(payload: ProofData) {
   return {
-    a: encodeG1(payload.pi_a),
+    a: await Albus.zkp.altBn128G1Neg(encodeG1(payload.pi_a)),
     b: encodeG2(payload.pi_b),
     c: encodeG1(payload.pi_c),
   }
 }
 
 /**
- * Convert `snarkjs` signals representation to solana format
+ * Decode proof bytes to snarkjs format
+ */
+export async function decodeProof(proof: {
+  a: number[] /* size: 64 */
+  b: number[] /* size: 128 */
+  c: number[] /* size: 64 */
+}) {
+  return {
+    curve: 'bn128',
+    protocol: 'groth16',
+    pi_a: decodeG1(await Albus.zkp.altBn128G1Neg(proof.a)),
+    pi_b: decodeG2(proof.b),
+    pi_c: decodeG1(proof.c),
+  }
+}
+
+/**
+ * Encode snarkjs signals to bytes format
  */
 export function encodePublicSignals(publicSignals: Array<string | number | bigint>) {
-  const publicInputsBytes = new Array<Array<number>>()
-  for (const i in publicSignals) {
-    publicInputsBytes.push(finiteToBytes(publicSignals[i]!).reverse())
+  const publicInputsBytes = new Array<number[]>()
+  for (const s of publicSignals) {
+    publicInputsBytes.push(finiteToBytes(s).reverse())
   }
   return publicInputsBytes
 }
 
 /**
- * Convert `snarkjs` VK representation to solana format
+ * Decode public signals to snarkjs format
+ */
+export function decodePublicSignals(publicSignals: Array<number[]>) {
+  const publicInputsBytes = new Array<string>()
+  for (const s of publicSignals) {
+    publicInputsBytes.push(bytesToFinite(s.reverse()))
+  }
+  return publicInputsBytes
+}
+
+/**
+ * Encode snarkjs VK to bytes format
  */
 export function encodeVerifyingKey(data: VK) {
   return {
@@ -120,7 +149,7 @@ export function encodeVerifyingKey(data: VK) {
 }
 
 /**
- * Convert solana VK representation to `snarkjs` format
+ * Decode bytes VK to snarkjs format
  */
 export function decodeVerifyingKey(data: {
   alpha: number[]
