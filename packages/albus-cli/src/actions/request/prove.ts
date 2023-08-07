@@ -42,7 +42,7 @@ interface Opts {
 export async function proveRequest(addr: string, opts: Opts) {
   const { client, keypair } = useContext()
 
-  const { signature } = await client.prove({
+  const { signature } = await client.proofRequest.fullProve({
     holderSecretKey: keypair.secretKey,
     // decryptionKey: keypair.secretKey,
     proofRequest: addr,

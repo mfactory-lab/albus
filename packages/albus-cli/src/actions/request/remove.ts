@@ -35,7 +35,7 @@ interface Opts {}
 export async function remove(addr: string, _opts: Opts) {
   const { client } = useContext()
 
-  const { signature } = await client.proofRequest.delete({ addr })
+  const { signature } = await client.proofRequest.delete({ proofRequest: addr })
 
   log.info(`Signature: ${signature}`)
   log.info(exploreTransaction(signature))
