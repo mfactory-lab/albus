@@ -26,10 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PublicKey } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
 import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk/src'
-import { airdrop, loadFixture, payerKeypair, provider } from './utils'
+import { airdrop, assertErrorCode, loadFixture, newProvider, payerKeypair, provider } from './utils'
 
 describe('albus', () => {
   const client = new AlbusClient(provider)
@@ -133,7 +133,7 @@ describe('albus', () => {
     assert.equal(proofRequest.status, ProofRequestStatus.Pending)
   })
 
-  it('can prove a proof request and verify it on-chain', async () => {
+  it('can prove a proof request', async () => {
     const [circuit] = client.pda.circuit('age')
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(circuit, service)
@@ -190,7 +190,7 @@ describe('albus', () => {
 
     vi.spyOn(client.storage, 'uploadData').mockReturnValue(Promise.resolve(mockedVpUri))
 
-    const { signature } = await client.prove({
+    const { signature } = await client.proofRequest.fullProve({
       holderSecretKey: payerKeypair.secretKey,
       exposedFields: circuitData.privateSignals,
       proofRequest,
@@ -206,98 +206,48 @@ describe('albus', () => {
     assert.equal(data.status, ProofRequestStatus.Proved)
   })
 
-  // it('can not create proof request with invalid circuit', async () => {
-  //   const newPayerKeypair = Keypair.generate()
-  //   await airdrop(newPayerKeypair.publicKey)
-  //
-  //   const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(newPayerKeypair))
-  //   const circuit = await mintNFT(metaplex, 'ALBUS-C')
-  //
-  //   try {
-  //     await client.createProofRequest({ circuit: circuit.address, serviceCode })
-  //     assert.ok(false)
-  //   } catch (e: any) {
-  //     assertErrorCode(e, 'Unauthorized')
-  //   }
-  // })
-  //
-  // it('can create proof request', async () => {
-  //   const { address } = await client.createProofRequest({ circuit: circuits.a, serviceCode })
-  //   const proofRequest = await client.loadProofRequest(address)
-  //   assert.equal(proofRequest.circuit.toString(), circuits.a?.toString())
-  //   assert.equal(proofRequest.owner.toString(), provider.publicKey.toString())
-  //   assert.equal(proofRequest.status, ProofRequestStatus.Pending)
-  //   assert.equal(proofRequest.proof, null)
-  // })
-  //
-  // it('can not create proof request if already exists', async () => {
-  //   try {
-  //     await client.createProofRequest({ circuit: circuits.a, serviceCode })
-  //     assert.ok(false)
-  //   } catch (e: any) {
-  //     assert.ok(e.message.includes('custom program error: 0x0'))
-  //   }
-  // })
-  //
-  // it('can prove proof request', async () => {
-  //   const { address } = await client.createProofRequest({ circuit: circuits.b, serviceCode })
-  //   await mockedProve(client, address)
-  //   const proofRequest = await client.loadProofRequest(address)
-  //   assert.equal(proofRequest.status, ProofRequestStatus.Proved)
-  // })
-  //
-  // it('can not verify proof request with unauthorized authority', async () => {
-  //   const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
-  //   const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.b, payerKeypair.publicKey)
-  //
-  //   const newPayerKeypair = Keypair.generate()
-  //   const newClient = new AlbusClient(newProvider(newPayerKeypair))
-  //   await airdrop(newPayerKeypair.publicKey)
-  //
-  //   try {
-  //     await newClient.manager.verifyProofRequest({ proofRequest: proofRequestAddr })
-  //     assert.ok(false)
-  //   } catch (e: any) {
-  //     assertErrorCode(e, 'Unauthorized')
-  //   }
-  // })
-  //
-  // it('can not verify unproved proof request', async () => {
-  //   const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
-  //   const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
-  //
-  //   try {
-  //     await client.manager.verifyProofRequest({ proofRequest: proofRequestAddr })
-  //     assert.ok(false)
-  //   } catch (e: any) {
-  //     console.log(e)
-  //     assertErrorCode(e, 'Unproved')
-  //   }
-  // })
-  //
-  // it('can verify proof request', async () => {
-  //   const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
-  //   const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.b, payerKeypair.publicKey)
-  //   await client.manager.verifyProofRequest({ proofRequest: proofRequestAddr })
-  //   const proofRequest = await client.loadProofRequest(proofRequestAddr)
-  //   assert.equal(proofRequest.status, ProofRequestStatus.Verified)
-  // })
-  //
-  // it('can reject proof request', async () => {
-  //   const { address } = await client.createProofRequest({ circuit: circuits.c, serviceCode })
-  //   const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
-  //   const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
-  //   await mockedProve(client, address)
-  //   await client.manager.rejectProofRequest({ proofRequest: proofRequestAddr })
-  //   const proofRequest = await client.loadProofRequest(proofRequestAddr)
-  //   assert.equal(proofRequest.status, ProofRequestStatus.Rejected)
-  // })
-  //
-  // it('can delete proof request', async () => {
-  //   const [serviceProviderAddr] = client.getServiceProviderPDA(serviceCode)
-  //   const [proofRequestAddr] = client.getProofRequestPDA(serviceProviderAddr, circuits.a, payerKeypair.publicKey)
-  //   await client.deleteProofRequest({ proofRequest: proofRequestAddr })
-  // })
+  it('can change proof request status', async () => {
+    const [circuit] = client.pda.circuit('age')
+    const [service] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(circuit, service)
+    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+    await client.proofRequest.changeStatus({ proofRequest, status: ProofRequestStatus.Rejected })
+  })
+
+  it('can not change proof request status with unauthorized authority', async () => {
+    const [circuit] = client.pda.circuit('age')
+    const [service] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(circuit, service)
+    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+
+    const newPayerKeypair = Keypair.generate()
+    const newClient = new AlbusClient(newProvider(newPayerKeypair))
+    await airdrop(newPayerKeypair.publicKey)
+
+    try {
+      await newClient.proofRequest.changeStatus({ proofRequest, status: ProofRequestStatus.Verified })
+      assert.ok(false)
+    } catch (e: any) {
+      assertErrorCode(e, 'Unauthorized')
+    }
+  })
+
+  it('can verify proof request', async () => {
+    const [circuit] = client.pda.circuit('age')
+    const [service] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(circuit, service)
+    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+    const res = await client.proofRequest.verify({ proofRequest })
+    assert.ok(res)
+  })
+
+  it('can delete proof request', async () => {
+    const [circuit] = client.pda.circuit('age')
+    const [service] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(circuit, service)
+    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+    await client.proofRequest.delete({ proofRequest })
+  })
 
   it('can delete policy', async () => {
     await client.policy.delete({ circuitCode: 'age', serviceCode })
