@@ -29,22 +29,32 @@
 import * as Albus from '@albus/core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
-import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
-import type { ProofData } from './generated'
+import { ComputeBudgetProgram, Keypair, PublicKey, Transaction } from '@solana/web3.js'
+import type { CircuitManager } from './circuitManager'
+import type { CredentialManager } from './credentialManager'
+import type {
+  ProofData,
+  ProofRequestStatus,
+} from './generated'
 import {
   Circuit,
   Policy,
   ProofRequest,
-  ProofRequestStatus,
   createCreateProofRequestInstruction,
   createDeleteProofRequestInstruction,
   createProveInstruction, createVerifyInstruction, errorFromCode, proofRequestDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
+import type { BundlrStorageDriver } from './StorageDriver'
+import type { PrivateKey } from './types'
+import { getSolanaTimestamp, prepareInputs } from './utils'
 
 export class ProofRequestManager {
   constructor(
     readonly provider: AnchorProvider,
+    readonly circuit: CircuitManager,
+    readonly credential: CredentialManager,
+    readonly storage: BundlrStorageDriver,
     readonly pda: PdaManager,
   ) {
   }
@@ -152,7 +162,7 @@ export class ProofRequestManager {
   async delete(props: DeleteProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const instruction = createDeleteProofRequestInstruction({
-      proofRequest: new PublicKey(props.addr),
+      proofRequest: new PublicKey(props.proofRequest),
       authority,
     })
 
@@ -165,37 +175,11 @@ export class ProofRequestManager {
     }
   }
 
-  // /**
-  //  * Verify the {@link ProofRequest}
-  //  * Required admin authority
-  //  */
-  // async verify(props: VerifyProps, opts?: ConfirmOptions) {
-  //   const instruction = createVerifyInstruction(
-  //     {
-  //       proofRequest: new PublicKey(props.proofRequest),
-  //       authority: this.provider.publicKey,
-  //     },
-  //     {
-  //       data: {
-  //         status: ProofRequestStatus.Verified,
-  //       },
-  //     },
-  //   )
-  //
-  //   try {
-  //     const tx = new Transaction().add(instruction)
-  //     const signature = await this.provider.sendAndConfirm(tx, [], opts)
-  //     return { signature }
-  //   } catch (e: any) {
-  //     throw errorFromCode(e.code) ?? e
-  //   }
-  // }
-
   /**
-   * Reject existing {@link ProofRequest}
+   * Change proof request status
    * Required admin authority
    */
-  async reject(props: VerifyProps, opts?: ConfirmOptions) {
+  async changeStatus(props: ChangeStatus, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
       {
         proofRequest: new PublicKey(props.proofRequest),
@@ -203,7 +187,7 @@ export class ProofRequestManager {
       },
       {
         data: {
-          status: ProofRequestStatus.Rejected,
+          status: props.status,
         },
       },
     )
@@ -218,15 +202,95 @@ export class ProofRequestManager {
   }
 
   /**
+   * Verify Proof request
+   */
+  async verify(props: VerifyProps) {
+    const proofRequest = await this.load(props.proofRequest)
+    if (!proofRequest.proof) {
+      throw new Error('Unable to verify the request, probably it\'s not proved')
+    }
+    const circuit = await this.circuit.load(proofRequest.circuit)
+    const vk = Albus.zkp.decodeVerifyingKey(circuit.vk)
+    const proof = await Albus.zkp.decodeProof(proofRequest.proof)
+    const publicInput = Albus.zkp.decodePublicSignals(proofRequest.publicInputs)
+    return Albus.zkp.verifyProof({ vk, proof, publicInput })
+  }
+
+  /**
+   * Prove the {@link ProofRequest}
+   * - Create Verifiable Presentation
+   * - Encrypt Verifiable Presentation
+   * - Generate ZK-Proof
+   * - Upload Verifiable Presentation to arweave
+   * - Verify ZK-Proof on-chain
+   */
+  async fullProve(props: FullProveProps) {
+    const { proofRequest, circuit, policy } = await this.loadFull(props.proofRequest)
+
+    if (!circuit) {
+      throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
+    }
+
+    if (!policy) {
+      throw new Error(`Unable to find Policy account at ${proofRequest.policy}`)
+    }
+
+    const vc = await this.credential.load(props.vc, { decryptionKey: props.decryptionKey })
+
+    const vp = await Albus.credential.createVerifiablePresentation({
+      credentials: [vc],
+      exposedFields: props.exposedFields,
+      holderSecretKey: props.holderSecretKey,
+    })
+
+    const input = await prepareInputs({
+      now: await getSolanaTimestamp(this.provider.connection),
+      circuit,
+      policy,
+      vp,
+    })
+
+    const holder = Keypair.fromSecretKey(Uint8Array.from(props.holderSecretKey))
+
+    const encryptedPresentation = await Albus.credential.encryptVerifiablePresentation(vp, {
+      pubkey: holder.publicKey,
+      // encryptionKey: [],
+    })
+
+    let proofResult: Awaited<ReturnType<typeof Albus.zkp.generateProof>>
+
+    try {
+      proofResult = await Albus.zkp.generateProof({
+        wasmFile: circuit.wasmUri!,
+        zkeyFile: circuit.zkeyUri!,
+        input,
+      })
+    } catch (e: any) {
+      // console.log(e)
+      throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
+    }
+
+    const { proof, publicSignals } = proofResult
+    const presentationUri = await this.storage.uploadData(JSON.stringify(encryptedPresentation))
+
+    const { signature } = await this.prove({
+      proofRequest: props.proofRequest,
+      proof,
+      publicSignals,
+      presentationUri,
+    })
+
+    return { signature, proof, publicSignals, presentationUri }
+  }
+
+  /**
    * Prove the proof request
    */
   async prove(props: ProveProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const proofRequest = await this.load(props.proofRequest)
 
-    const proof = Albus.zkp.encodeProof(props.proof)
-    proof.a = await Albus.zkp.altBn128G1Neg(proof.a)
-
+    const proof = await Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
 
     const instruction = createProveInstruction(
@@ -288,7 +352,7 @@ export interface CreateProofRequestProps {
 }
 
 export interface DeleteProofRequestProps {
-  addr: PublicKeyInitData
+  proofRequest: PublicKeyInitData
 }
 
 export interface FindProofRequestProps {
@@ -302,6 +366,18 @@ export interface FindProofRequestProps {
   skipUser?: boolean
 }
 
+export interface FullProveProps {
+  proofRequest: PublicKeyInitData
+  vc: PublicKeyInitData
+  holderSecretKey: Uint8Array | number[]
+  exposedFields?: string[]
+  decryptionKey?: PrivateKey
+}
+
+export interface VerifyProps {
+  proofRequest: PublicKeyInitData
+}
+
 export interface ProveProps {
   proofRequest: PublicKeyInitData
   proof: ProofData
@@ -309,6 +385,7 @@ export interface ProveProps {
   presentationUri: string
 }
 
-export interface VerifyProps {
+export interface ChangeStatus {
   proofRequest: PublicKeyInitData
+  status: ProofRequestStatus
 }
