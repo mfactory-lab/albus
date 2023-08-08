@@ -10,7 +10,10 @@
   },
   "scripts": {
     "cli": "pnpm -F @albus/cli run cli",
-    "dev": "NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm -r --parallel --filter='./packages/**' run dev",
+    "dev": "NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm -r --parallel --filter='./packages/**' run lib:dev",
+    "ui": "pnpm -F @albus/ui dev",
+    "core:build": "pnpm -F @albus/core build",
+    "sdk:build": "pnpm -F @albus/sdk build",
     "sdk:gen": "pnpm -F @albus/sdk generate && eslint --fix --ext .ts ./packages/albus-sdk",
     "test:unit": "vitest --dir ./packages",
     "test:e2e": "pnpm -F @albus/tests run test",
@@ -23,13 +26,16 @@
     "@antfu/eslint-config": "^0.40.0",
     "@changesets/cli": "^2.26.0",
     "@rollup/plugin-inject": "^5.0.3",
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@types/node": "^20.0.0",
     "@vitest/ui": "^0.33.0",
+    "buffer": "^6.0.3",
     "eslint": "^8.46.0",
     "typescript": "^5.1.6",
-    "vite": "^4.4.8",
-    "vitest": "^0.34.0",
-    "unbuild": "^1.2.1"
+    "unbuild": "^1.2.1",
+    "vite": "^4.4.9",
+    "vite-plugin-dts": "^3.5.1",
+    "vitest": "^0.34.0"
   },
   "pnpm": {
     "peerDependencyRules": {
