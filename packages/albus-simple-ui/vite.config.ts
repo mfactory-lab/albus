@@ -1,13 +1,13 @@
 import path from 'node:path'
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import inject from '@rollup/plugin-inject'
 import type { BuildOptions } from 'vite'
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 import Pages from 'vite-plugin-pages'
 import Layouts from 'vite-plugin-vue-layouts'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
+import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -17,13 +17,14 @@ export default defineConfig(({ mode }) => {
   const build: BuildOptions = {
     manifest: isProd,
     chunkSizeWarningLimit: 1024,
-    target: ['es2020'],
-    rollupOptions: {
-      plugins: [
-        inject({ Buffer: ['buffer', 'Buffer'] }) as any,
-      ],
-    },
+    // target: ['es2020'],
+    // rollupOptions: {
+    //   plugins: [
+    //     inject({ Buffer: ['buffer', 'Buffer'] }) as any,
+    //   ],
+    // },
   }
+
   return {
     build,
     plugins: [
@@ -37,8 +38,8 @@ export default defineConfig(({ mode }) => {
         extensions: ['vue', 'md'],
       }),
       Layouts(),
-
       AutoImport({
+        ignore: ['h'],
         imports: [
           'vue',
           'vue-router',
@@ -87,6 +88,12 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+
+    define: {
+      // 'process.env': process.env,
+      // 'Buffer': Buffer,
+    },
+
     optimizeDeps: {
       include: [
         'vue',
@@ -96,8 +103,21 @@ export default defineConfig(({ mode }) => {
         'axios',
         'pinia',
         'lodash',
+        // '@albus/core',
+        // '@albus/sdk',
       ],
       exclude: ['ethereum-cryptography', 'vue-demi'],
+      esbuildOptions: {
+        define: {
+          global: 'globalThis',
+        },
+        plugins: [
+          NodeGlobalsPolyfillPlugin({
+            process: true,
+            buffer: true,
+          }),
+        ],
+      },
     },
   }
 })

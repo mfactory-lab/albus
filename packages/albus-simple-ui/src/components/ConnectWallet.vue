@@ -36,7 +36,7 @@ const wallets = computed(() =>
 const dialog = ref(false)
 
 async function select(w: any) {
-  await wallet.select(w.adapter.name)
+  wallet.select(w.adapter.name)
   dialog.value = false
   await wallet.connect()
 }
@@ -57,13 +57,17 @@ function ok() {
 </script>
 
 <template>
-  <q-btn v-if="connected" v-bind="$attrs" :class="$style.btn" :ripple="false" text-color="white" rounded
-    class="connect-button" unelevated @click="show">
+  <q-btn
+    v-if="connected" v-bind="$attrs" :class="$style.btn" :ripple="false" text-color="white" rounded
+    class="connect-button" unelevated @click="show"
+  >
     {{ walletShortAddress }}
   </q-btn>
 
-  <q-btn v-else v-bind="$attrs" text-color="white" :class="$style.btn" unelevated :ripple="false" :loading="connecting"
-    class="connect-button" @click="show">
+  <q-btn
+    v-else v-bind="$attrs" text-color="white" :class="$style.btn" unelevated :ripple="false" :loading="connecting"
+    class="connect-button" @click="show"
+  >
     CONNECT WALLET
   </q-btn>
 
@@ -73,8 +77,10 @@ function ok() {
         <div class="text-h6 text-center">
           Your wallet
         </div>
-        <q-btn padding="md" color="transparent" text-color="primary-gray" unelevated
-          class="absolute-right close-wallet-btn" :icon="icons.close" size="md" @click="ok" />
+        <q-btn
+          padding="md" color="transparent" text-color="primary-gray" unelevated
+          class="absolute-right close-wallet-btn" :icon="icons.close" size="md" @click="ok"
+        />
       </q-card-section>
 
       <q-separator />
@@ -100,8 +106,7 @@ function ok() {
         <div class="text-h6">
           Connect to a wallet
         </div>
-        <q-btn padding="md" color="transparent" text-color="primary-gray" unelevated class="absolute-right"
-          :icon="icons.close" size="md" @click="ok" />
+        <q-btn padding="md" color="transparent" text-color="primary-gray" unelevated class="absolute-right" :icon="icons.close" size="md" @click="ok" />
       </q-card-section>
       <q-separator />
       <q-card-section style="max-height: 80vh" class="scroll">
@@ -111,8 +116,10 @@ function ok() {
               <q-item clickable @click="select(w)">
                 <q-item-section>
                   <b>{{ w.adapter.name }}</b>
-                  <div class="text-light-gray text-caption full-width text-no-wrap"
-                    style="text-overflow: ellipsis; overflow: hidden">
+                  <div
+                    class="text-light-gray text-caption full-width text-no-wrap"
+                    style="text-overflow: ellipsis; overflow: hidden"
+                  >
                     {{ w.adapter.url }}
                   </div>
                 </q-item-section>
