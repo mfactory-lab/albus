@@ -280,7 +280,8 @@ export class ProofRequestManager {
       presentationUri,
     })
 
-    return { signature, proof, publicSignals, presentationUri }
+    // TODO: type error for PublicSignals
+    return { signature, proof, presentationUri }
   }
 
   /**

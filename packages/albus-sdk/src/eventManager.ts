@@ -1,5 +1,4 @@
-import { BorshCoder } from '@coral-xyz/anchor'
-import { EventManager as AnchorEventManager } from '@coral-xyz/anchor/dist/cjs/program/event'
+import { EventManager as AnchorEventManager, BorshCoder } from '@coral-xyz/anchor'
 import type { AlbusClient } from './client'
 import idl from './idl/albus.json'
 
