@@ -26,7 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as utils from './utils'
-export * as xc20p from './xc20p'
+import * as utils from './utils'
+import * as xc20p from './xc20p'
+
 export * from './shamir'
+export { utils, xc20p }
 // export { poseidonEncrypt, poseidonDecrypt } from './poseidon'
