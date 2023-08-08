@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import fs from 'node:fs'
+import { Buffer } from 'node:buffer'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { StakeAuthorize } from '@albus/verified-stake-sdk/src/generated'
 import log from 'loglevel'
