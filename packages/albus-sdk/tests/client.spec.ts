@@ -27,7 +27,7 @@
  */
 
 import { readFileSync } from 'node:fs'
-import * as Albus from '@albus/core'
+import * as Albus from '@mfactory-lab/albus-core'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
 import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import { afterEach, assert, describe, expect, it, vi } from 'vitest'

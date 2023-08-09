@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { VerifiableCredential } from '@albus/core'
+import type { VerifiableCredential } from '@mfactory-lab/albus-core'
 import log from 'loglevel'
 import { useContext } from '@/context'
 

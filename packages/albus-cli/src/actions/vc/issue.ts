@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { credential } from '@albus/core'
+import { credential } from '@mfactory-lab/albus-core'
 import log from 'loglevel'
 import { generateCredentialSubject, mintVerifiableCredentialNFT } from './utils'
 import { useContext } from '@/context'

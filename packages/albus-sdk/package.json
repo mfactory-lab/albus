@@ -1,6 +1,6 @@
 {
-  "name": "@albus/sdk",
-  "version": "0.0.8",
+  "name": "@mfactory-lab/albus-sdk",
+  "version": "0.0.16",
   "description": "Albus Protocol SDK",
   "type": "module",
   "repository": {
@@ -19,19 +19,18 @@
     }
   },
   "files": [
-    "dist/*"
+    "dist"
   ],
   "scripts": {
     "lib:dev": "vite build --watch",
     "build": "vite build",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
-    "publish:git": "gitpkg publish",
-    "test": "vitest",
-    "_prepare": "pnpm run build",
-    "_build": "unbuild"
+    "release": "release-it",
+    "release:ci": "release-it --ci",
+    "test": "vitest"
   },
   "dependencies": {
-    "@albus/core": "*",
+    "@mfactory-lab/albus-core": "workspace:^",
     "@bundlr-network/client": "^0.11.9",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/beet": "^0.7.1",
@@ -45,5 +44,50 @@
   },
   "peerDependencies": {
     "snarkjs": "*"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "release-it": {
+    "hooks": {
+      "after:bump": "pnpm build"
+    },
+    "github": {
+      "release": false
+    },
+    "git": false,
+    "_git": {
+      "commitMessage": "chore(sdk): release v${version}",
+      "push": true,
+      "commit": true,
+      "requireCommits": false,
+      "requireCleanWorkingDir": false
+    },
+    "_plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": {
+          "name": "conventionalcommits",
+          "types": [
+            {
+              "type": "feat",
+              "scope": "vry",
+              "section": "Features 🎉"
+            },
+            {
+              "type": "fix",
+              "scope": "vry",
+              "section": "Bug Fixes 🐛"
+            },
+            {
+              "type": "misc",
+              "scope": "vry",
+              "section": "Miscellaneous 🦾"
+            }
+          ]
+        },
+        "ignoreRecommendedBump": true
+      }
+    }
   }
 }

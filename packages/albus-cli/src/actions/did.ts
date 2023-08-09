@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { utils } from '@albus/core'
+import { utils } from '@mfactory-lab/albus-core'
 import { Keypair } from '@solana/web3.js'
 import { useContext } from '@/context'
 

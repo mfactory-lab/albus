@@ -15,9 +15,6 @@ const external = [
   'snarkjs',
   'circomlibjs',
   'ffjavascript',
-  '@albus/cli',
-  '@albus/core',
-  '@albus/sdk',
   'node:fs',
 ]
 

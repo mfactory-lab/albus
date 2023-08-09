@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { PolicyRule } from '@albus/sdk'
+import type { PolicyRule } from '@mfactory-lab/albus-sdk'
 import log from 'loglevel'
 import { useContext } from '@/context'
 

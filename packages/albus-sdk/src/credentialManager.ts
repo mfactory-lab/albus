@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { VerifiableCredential } from '@albus/core'
-import * as Albus from '@albus/core'
+import type { VerifiableCredential } from '@mfactory-lab/albus-core'
+import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'

@@ -7,9 +7,7 @@
     "test:debug": "DEBUG=vite-node:* vitest --no-threads"
   },
   "devDependencies": {
-    "@albus/sdk": "workspace:*",
-    "@albus/verified-stake-pool-sdk": "workspace:*",
-    "@albus/verified-transfer-sdk": "workspace:*",
+    "@mfactory-lab/albus-sdk": "workspace:*",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/js": "^0.19.4",
     "@solana/spl-stake-pool": "mfactory-lab/jfactory-stake-pool",

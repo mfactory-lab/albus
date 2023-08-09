@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { ServiceProvider } from '@albus/sdk'
-import { ProofRequestStatus } from '@albus/sdk'
+import type { ServiceProvider } from '@mfactory-lab/albus-sdk'
+import { ProofRequestStatus } from '@mfactory-lab/albus-sdk'
 import type { PublicKey } from '@solana/web3.js'
 import Table from 'cli-table3'
 import log from 'loglevel'

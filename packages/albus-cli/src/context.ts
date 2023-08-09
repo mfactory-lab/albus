@@ -32,7 +32,7 @@ import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/j
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import { AlbusClient } from '@albus/sdk'
+import { AlbusClient } from '@mfactory-lab/albus-sdk'
 import { clusterUrl } from './utils'
 import config from './config'
 

@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { VerifiablePresentation } from '@albus/core'
+import type { VerifiablePresentation } from '@mfactory-lab/albus-core'
 import type { Circuit, Policy } from '../generated'
 import { KnownSignals } from '../types'
 

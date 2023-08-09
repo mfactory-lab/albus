@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { AlbusClient } from '@albus/sdk'
+import { AlbusClient } from '@mfactory-lab/albus-sdk'
 import { useAnchorWallet } from 'solana-wallets-vue'
 
 export function useAlbus() {

@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as Albus from '@albus/core'
+import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'

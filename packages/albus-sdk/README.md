@@ -1,3 +1,3 @@
-# @albus/core
+# @mfactory-lab/albus-sdk
 
-The core module of [albus-protocol](https://albus.finance/).
+The sdk module of [albus-protocol](https://albus.finance/).

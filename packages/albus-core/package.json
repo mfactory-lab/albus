@@ -1,6 +1,6 @@
 {
-  "name": "@albus/core",
-  "version": "0.0.4",
+  "name": "@mfactory-lab/albus-core",
+  "version": "0.0.5",
   "type": "module",
   "repository": {
     "type": "git",
@@ -18,13 +18,13 @@
     }
   },
   "files": [
-    "dist/*"
+    "dist"
   ],
   "scripts": {
     "lib:dev": "vite build --watch",
     "build": "vite build",
-    "publish:git": "gitpkg publish",
-    "_prepare": "pnpm build",
+    "release": "release-it",
+    "release:ci": "release-it --ci",
     "test": "vitest"
   },
   "dependencies": {
@@ -51,5 +51,26 @@
   },
   "devDependencies": {
     "circom_tester": "^0.0.19"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "release-it": {
+    "hooks": {
+      "after:bump": "pnpm build"
+    },
+    "github": {
+      "release": false
+    },
+    "git": false,
+    "_plugins": {
+      "@release-it/bumper": {
+        "out": {
+          "file": "../albus-sdk/package.json",
+          "path": "dependencies.@mfactory-lab/albus-core"
+        }
+      }
+    }
   }
 }
