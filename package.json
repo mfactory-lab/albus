@@ -22,6 +22,7 @@
     "release": "changeset publish",
     "commit": "git-cz"
   },
+  "dependencies": {},
   "devDependencies": {
     "@antfu/eslint-config": "^0.40.0",
     "@changesets/cli": "^2.26.0",
@@ -32,7 +33,6 @@
     "buffer": "^6.0.3",
     "eslint": "^8.46.0",
     "typescript": "^5.1.6",
-    "unbuild": "^1.2.1",
     "vite": "^4.4.9",
     "vite-plugin-dts": "^3.5.1",
     "vitest": "^0.34.0"
