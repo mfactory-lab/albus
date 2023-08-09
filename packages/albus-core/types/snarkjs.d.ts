@@ -107,9 +107,15 @@ declare module 'snarkjs' {
   };
 
   const wtns: {
-    calculate: any;
+    calculate(
+        _input: Record<string, BigNumberish | BigNumberish[]>,
+        wasmFileName: string,
+        wtnsFileName: {
+          type: string;
+        }
+    ): any;
+    exportJson(wtnsFileName: { type: string }): Array<bigint>;
     debug: any;
-    exportJson: any;
   };
 
   const zKey: {
