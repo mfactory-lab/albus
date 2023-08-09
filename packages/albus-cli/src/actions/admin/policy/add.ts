@@ -26,37 +26,40 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { PathLike } from 'node:fs'
-import { createWriteStream } from 'node:fs'
-import axios from 'axios'
+import type { PolicyRule } from '@albus/sdk'
+import log from 'loglevel'
+import { useContext } from '@/context'
 
-export function downloadFile(url: string, filePath: PathLike) {
-  return axios({
-    method: 'get',
-    url,
-    responseType: 'stream',
-  }).then(
-    // Ensure that the user can call `then()` only when the file has been downloaded entirely.
-    response => new Promise((resolve, reject) => {
-      const writer = createWriteStream(filePath)
+interface Opts {
+  serviceCode: string
+  circuitCode: string
+  name: string
+  description?: string
+  expiresIn?: number
+  rules?: string[]
+}
 
-      response.data.pipe(writer)
+export async function add(opts: Opts) {
+  const { client } = useContext()
 
-      let error: Error
-
-      writer.on('error', (err) => {
-        error = err
-        writer.close()
-        reject(err)
-      })
-
-      writer.on('close', () => {
-        if (!error) {
-          resolve(true)
-        }
-        // No need to call the reject here, as it will have been called in the 'error'
-        // stream;
-      })
+  const { signature } = await client.policy.create({
+    circuitCode: opts.circuitCode,
+    serviceCode: opts.serviceCode,
+    name: opts.name,
+    description: opts.description,
+    expiresIn: opts.expiresIn,
+    rules: opts.rules?.map((r) => {
+      const rr = r.split(':').map(Number)
+      if (rr.length < 2) {
+        throw new Error('Invalid rule')
+      }
+      if (rr.length === 2) {
+        return { index: rr[0], group: 0, value: rr[1] } as PolicyRule
+      }
+      return { index: rr[0], group: rr[1], value: rr[2] } as PolicyRule
     }),
-  )
+  })
+
+  log.info(`Signature: ${signature}`)
+  log.info('OK')
 }

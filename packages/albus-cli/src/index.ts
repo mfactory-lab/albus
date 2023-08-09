@@ -147,6 +147,31 @@ request.command('verify')
 
 const admin = cli.command('admin')
 
+///
+/// Policy Management
+///
+
+const adminPolicy = admin.command('policy')
+  .description('Policy Management')
+
+adminPolicy.command('all', { isDefault: true })
+  .description('Show all policies')
+  .action(actions.admin.policy.showAll)
+
+adminPolicy.command('add')
+  .description('Add new policy')
+  .requiredOption('--serviceCode <string>', 'service code')
+  .requiredOption('--circuitCode <string>', 'circuit code')
+  .requiredOption('--name <string>', 'policy name')
+  .option('-d,--description <string>', 'policy short description')
+  .option('-e,--expires-in <seconds>', 'expires in')
+  .option('-r,--rules <rule...>', 'policy rule, format: "index:group:value"')
+  .action(actions.admin.policy.add)
+
+///
+/// Circuit Management
+///
+
 const adminCircuit = admin.command('circuit')
   .description('Circuit Management')
 
@@ -154,15 +179,23 @@ adminCircuit.command('all', { isDefault: true })
   .description('Show all circuits')
   .action(actions.admin.circuit.showAll)
 
-adminCircuit.command('create')
-  .description('Create new circuit NFT')
-  .argument('name', 'Circuit name')
-  .action(actions.admin.circuit.create)
+adminCircuit.command('add')
+  .description('Add new circuit')
+  .argument('code', 'circuit code')
+  .requiredOption('--name <NAME>', 'circuit name')
+  .option('--description <TEXT>', 'circuit short description')
+  .option('--zkey <URI>', 'zkey file uri')
+  .option('--wasm <URI>', 'wasm file uri')
+  .action(actions.admin.circuit.add)
 
 adminCircuit.command('delete')
   .description('Delete circuit')
-  .argument('addr', 'Circuit address')
+  .argument('addr', 'circuit address')
   .action(actions.admin.circuit.remove)
+
+///
+/// Request Management
+///
 
 const adminRequest = admin.command('request')
   .description('Request Management')
@@ -179,29 +212,33 @@ adminRequest.command('verify')
   .argument('addr', 'Proof Request address')
   .action(actions.admin.request.verifyRequest)
 
-const adminSp = admin.command('sp')
-  .description('Service Provider Management')
+///
+/// Service Management
+///
 
-adminSp.command('add')
+const adminService = admin.command('service')
+  .description('Service Management')
+
+adminService.command('add')
   .description('Add service provider')
-  .requiredOption('--code <CODE>', 'Service provider`s unique code')
-  .requiredOption('--name <NAME>', 'Service provider`s name')
-  .action(actions.admin.sp.add)
+  .requiredOption('--code <CODE>', 'service code')
+  .requiredOption('--name <NAME>', 'service name')
+  .action(actions.admin.service.add)
 
-adminSp.command('delete')
+adminService.command('delete')
   .description('Delete service provider')
   .argument('code', 'Service provider`s unique code')
-  .action(actions.admin.sp.remove)
+  .action(actions.admin.service.remove)
 
-adminSp.command('show')
+adminService.command('show')
   .description('Show service provider`s info')
   .argument('addr', 'Service provider PDA`s address')
-  .action(actions.admin.sp.show)
+  .action(actions.admin.service.show)
 
-adminSp.command('all')
+adminService.command('all')
   .description('Show all service providers')
   .option('--authority', 'Filter by authority')
-  .action(actions.admin.sp.showAll)
+  .action(actions.admin.service.showAll)
 
 cli.command('*', { isDefault: true, hidden: true })
   .action(() => {

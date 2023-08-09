@@ -27,35 +27,20 @@
  */
 
 import log from 'loglevel'
-import Table from 'cli-table3'
 import { useContext } from '@/context'
 
-export async function show(code: string) {
+export async function showAll() {
   const { client } = useContext()
 
-  const [serviceProviderAddr] = client.pda.serviceProvider(code)
-  const sp = await client.service.load(serviceProviderAddr)
+  log.info('Loading all policies...')
+
+  const policies = await client.policy.find()
 
   log.info('--------------------------------------------------------------------------')
-  log.info(`Address ${serviceProviderAddr}`)
-  log.info(sp.pretty())
-  log.info('--------------------------------------------------------------------------')
-}
 
-export async function showAll(opts: { authority?: string }) {
-  const { client } = useContext()
-
-  const items = await client.service.find({
-    authority: opts.authority,
-  })
-
-  const table = new Table({
-    head: ['Address', 'Code', 'Name', 'Request count'],
-  })
-
-  for (const item of items) {
-    table.push([item.pubkey.toString(), item.data.code, item.data.name, Number(item.data.proofRequestCount)])
+  for (const policy of policies) {
+    log.info('Address:', policy.pubkey)
+    log.info(policy.data.pretty())
+    log.info('--------------------------------------------------------------------------')
   }
-
-  console.log(table.toString())
 }

@@ -18,9 +18,8 @@
   "scripts": {
     "cli": "node ./dist/index.es.js",
     "_cli": "vite-node ./src/index.ts --",
-    "dev": "tsc --emitDeclarationOnly && vite build --watch",
-    "build": "tsc --emitDeclarationOnly && vite build",
-    "tsc": "tsc --noEmit && echo",
+    "dev": "vite build --watch",
+    "build": "vite build",
     "release": "pnpm build & release-it",
     "prepublishOnly": "pnpm build"
   },

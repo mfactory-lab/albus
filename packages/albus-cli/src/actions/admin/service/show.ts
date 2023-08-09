@@ -26,37 +26,36 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { PathLike } from 'node:fs'
-import { createWriteStream } from 'node:fs'
-import axios from 'axios'
+import log from 'loglevel'
+import Table from 'cli-table3'
+import { useContext } from '@/context'
 
-export function downloadFile(url: string, filePath: PathLike) {
-  return axios({
-    method: 'get',
-    url,
-    responseType: 'stream',
-  }).then(
-    // Ensure that the user can call `then()` only when the file has been downloaded entirely.
-    response => new Promise((resolve, reject) => {
-      const writer = createWriteStream(filePath)
+export async function show(code: string) {
+  const { client } = useContext()
 
-      response.data.pipe(writer)
+  const [serviceProviderAddr] = client.pda.serviceProvider(code)
+  const sp = await client.service.load(serviceProviderAddr)
 
-      let error: Error
+  log.info('--------------------------------------------------------------------------')
+  log.info(`Address: ${serviceProviderAddr}`)
+  log.info(sp.pretty())
+  log.info('--------------------------------------------------------------------------')
+}
 
-      writer.on('error', (err) => {
-        error = err
-        writer.close()
-        reject(err)
-      })
+export async function showAll(opts: { authority?: string }) {
+  const { client } = useContext()
 
-      writer.on('close', () => {
-        if (!error) {
-          resolve(true)
-        }
-        // No need to call the reject here, as it will have been called in the 'error'
-        // stream;
-      })
-    }),
-  )
+  const items = await client.service.find({
+    authority: opts.authority,
+  })
+
+  const table = new Table({
+    head: ['Address', 'Code', 'Name', 'Request count'],
+  })
+
+  for (const item of items) {
+    table.push([item.pubkey.toString(), item.data.code, item.data.name, Number(item.data.proofRequestCount)])
+  }
+
+  console.log(table.toString())
 }

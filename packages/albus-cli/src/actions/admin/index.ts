@@ -27,5 +27,6 @@
  */
 
 export * as circuit from './circuit'
+export * as policy from './policy'
 export * as request from './request'
-export * as sp from './sp'
+export * as service from './service'

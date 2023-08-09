@@ -26,37 +26,5 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { PathLike } from 'node:fs'
-import { createWriteStream } from 'node:fs'
-import axios from 'axios'
-
-export function downloadFile(url: string, filePath: PathLike) {
-  return axios({
-    method: 'get',
-    url,
-    responseType: 'stream',
-  }).then(
-    // Ensure that the user can call `then()` only when the file has been downloaded entirely.
-    response => new Promise((resolve, reject) => {
-      const writer = createWriteStream(filePath)
-
-      response.data.pipe(writer)
-
-      let error: Error
-
-      writer.on('error', (err) => {
-        error = err
-        writer.close()
-        reject(err)
-      })
-
-      writer.on('close', () => {
-        if (!error) {
-          resolve(true)
-        }
-        // No need to call the reject here, as it will have been called in the 'error'
-        // stream;
-      })
-    }),
-  )
-}
+export * from './add'
+export * from './show'
