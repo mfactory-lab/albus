@@ -1,6 +1,6 @@
 {
   "name": "@mfactory-lab/albus-sdk",
-  "version": "0.0.20",
+  "version": "0.0.25",
   "description": "Albus Protocol SDK",
   "type": "module",
   "repository": {
@@ -30,7 +30,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@mfactory-lab/albus-core": "*",
+    "@mfactory-lab/albus-core": "0.0.9",
     "@bundlr-network/client": "^0.11.12",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/beet": "^0.7.1",
