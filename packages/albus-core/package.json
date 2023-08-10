@@ -1,6 +1,6 @@
 {
   "name": "@mfactory-lab/albus-core",
-  "version": "0.0.6",
+  "version": "0.0.9",
   "type": "module",
   "repository": {
     "type": "git",
@@ -36,17 +36,15 @@
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
-    "crypto-browserify": "^3.12.0",
-    "ffjavascript": "^0.2.59",
-    "did-jwt-vc": "^3.2.2",
-    "did-jwt": "^7.2.2",
+    "ffjavascript": "^0.2.60",
+    "did-jwt-vc": "^3.2.5",
+    "did-jwt": "^7.2.5",
     "did-resolver": "^4.1.0",
     "key-did-resolver": "^3.0.0",
-    "web-did-resolver": "^2.0.24",
+    "web-did-resolver": "^2.0.27",
     "circomlib": "^2.0.5",
     "circomlibjs": "^0.1.7",
     "snarkjs": "^0.7.0",
-    "poseidon-encryption": "^1.0.2",
     "uint8arrays": "^4.0.4"
   },
   "devDependencies": {
@@ -64,7 +62,7 @@
       "release": false
     },
     "git": false,
-    "_plugins": {
+    "plugins": {
       "@release-it/bumper": {
         "out": {
           "file": "../albus-sdk/package.json",
