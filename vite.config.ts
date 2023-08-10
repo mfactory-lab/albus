@@ -1,26 +1,13 @@
-import { readFileSync } from 'node:fs'
-import { basename, dirname, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import inject from '@rollup/plugin-inject'
 
 import type { BuildOptions, PluginOption, UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
-import inject from '@rollup/plugin-inject'
 
-import globalPackageJson from './package.json'
-
-const external = [
-  'axios',
-  'tslib',
-  'snarkjs',
-  'circomlibjs',
-  'ffjavascript',
-  'node:fs',
-]
-
-function isObject(item: unknown): item is Record<string, unknown> {
-  return Boolean(item && typeof item === 'object' && !Array.isArray(item))
-}
+const isObject = (item: unknown): item is Record<string, unknown> => Boolean(item && typeof item === 'object' && !Array.isArray(item))
+const isExternal = (id: string) => !id.startsWith('.') && !isAbsolute(id)
 
 function mergeDeep<T>(target: T, ...sources: T[]): T {
   if (!sources.length) {
@@ -46,39 +33,29 @@ function mergeDeep<T>(target: T, ...sources: T[]): T {
 
 function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
   const dir = dirname(fileURLToPath(path))
-  const packageDirName = basename(dir)
-
-  const packageJson = JSON.parse(
-    readFileSync(resolve(dir, 'package.json'), { encoding: 'utf-8' }),
-  )
-
-  const deps = {
-    ...(packageJson.dependencies || {}),
-    ...(packageJson.devDependencies || {}),
-    ...(packageJson.peerDependencies || {}),
-    ...(globalPackageJson.devDependencies || {}),
-    ...(globalPackageJson.dependencies || {}),
-  }
+  const pkgName = basename(dir)
 
   return mergeDeep<BuildOptions>(
     {
       sourcemap: true,
+      manifest: true,
+      minify: true,
+      reportCompressedSize: true,
       emptyOutDir: false,
       lib: {
-        name: `albus_${packageDirName}`,
+        name: `albus_${pkgName}`,
         entry: resolve(dir, 'src', 'index.ts'),
         fileName: format => `index.${format}.js`,
         formats: ['es', 'cjs'],
       },
       rollupOptions: {
-        external: Array.from(new Set([...Object.keys(deps), ...external])),
+        external: isExternal,
         plugins: [
           dts({
             // rollupTypes: true,
+            insertTypesEntry: true,
           }),
-          inject({
-            Buffer: ['buffer', 'Buffer'],
-          }) as PluginOption,
+          inject({ Buffer: ['buffer', 'Buffer'] }) as PluginOption,
         ],
         output: {
           dir: resolve(dir, 'dist'),
@@ -101,9 +78,6 @@ export function pluginViteConfig(packageDirName: string, options: UserConfig = {
     ...options,
     resolve: mergeDeep({
       alias: {
-        // 'assert': 'assert',
-        // 'node:crypto': 'crypto-browserify',
-        // 'buffer': 'buffer',
         'node:buffer': 'buffer',
       },
     }, options.resolve),
