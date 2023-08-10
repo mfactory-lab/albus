@@ -29,7 +29,7 @@
 import { Buffer } from 'node:buffer'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Connection, Keypair, SendOptions, Signer, Transaction, TransactionSignature } from '@solana/web3.js'
-import { NodeBundlr, WebBundlr } from '@bundlr-network/client'
+import * as bundlr from '@bundlr-network/client'
 
 const ARWEAVE_BASE_URL = 'https://arweave.net'
 const BUNDLR_DEVNET = 'https://devnet.bundlr.network'
@@ -64,7 +64,7 @@ export class BundlrStorageDriver {
     return `${ARWEAVE_BASE_URL}/${response.id}`
   }
 
-  private async initBundlr(opts: BundlrOpts = {}) {
+  async initBundlr(opts: BundlrOpts = {}) {
     const options = {
       timeout: opts.timeout,
       providerUrl: opts.providerUrl ?? this.provider.connection.rpcEndpoint,
@@ -81,10 +81,10 @@ export class BundlrStorageDriver {
 
     if ('payer' in this.provider.wallet) {
       const identity = this.provider.wallet.payer as Keypair
-      return new NodeBundlr(address, 'solana', identity.secretKey, options)
+      return new bundlr.NodeBundlr(address, 'solana', identity.secretKey, options)
     }
 
-    return new WebBundlr(address, 'solana', this.bundlrWallet, options)
+    return new bundlr.WebBundlr(address, 'solana', this.bundlrWallet, options)
   }
 
   get bundlrWallet() {
