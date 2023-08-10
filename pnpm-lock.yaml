@@ -164,8 +164,8 @@ importers:
   packages/albus-sdk:
     dependencies:
       '@bundlr-network/client':
-        specifier: ^0.11.9
-        version: 0.11.9
+        specifier: ^0.11.12
+        version: 0.11.12
       '@coral-xyz/anchor':
         specifier: ^0.28.0
         version: 0.28.0
@@ -592,8 +592,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@bundlr-network/client@0.11.9:
-    resolution: {integrity: sha512-0lZAB0kx+GZsIGPT+nN2tMLseAzg98hS1HEupRoZcuE9OoMOa4+H+SOTNEbmxp7kuDKoMC3TXN9GOJBXFcPe7Q==}
+  /@bundlr-network/client@0.11.12:
+    resolution: {integrity: sha512-wbWjIKsb8kRVSGNjhd7bEeYfRWhIx99cQQY1IYbYkg6GEgKKGB0MkHrNHkYlYkKazy3uBeObK1KhjHK7GF6quw==}
     engines: {node: '>=16.10.0'}
     hasBin: true
     dependencies:
@@ -610,7 +610,7 @@ packages:
       algosdk: 1.24.1
       aptos: 1.14.0
       arbundles: 0.9.8
-      arweave: 1.11.8
+      arweave: 1.11.9
       async-retry: 1.3.3
       axios: 0.25.0(debug@4.3.4)
       base64url: 3.0.1
@@ -5083,6 +5083,20 @@ packages:
 
   /arweave@1.11.8:
     resolution: {integrity: sha512-58ODeNPIC4OjaOCl2bXjKbOFGsiVZFs+DkQg3BvQGvFWNqw1zTJ4Jp01xGUz+GbdOaDyJcCC0g3l0HwdJfFPyw==}
+    engines: {node: '>=12'}
+    dependencies:
+      arconnect: 0.4.2
+      asn1.js: 5.4.1
+      axios: 0.27.2
+      base64-js: 1.5.1
+      bignumber.js: 9.1.1
+      util: 0.12.5
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /arweave@1.11.9:
+    resolution: {integrity: sha512-i+oQQkQgjASG/+iS/BVq0JDhpW0jLGMtiqPwfHe0x46YCnuA23prN82EW4KigxZAphF9jNzDexQjGLAKbhw4Zw==}
     engines: {node: '>=12'}
     dependencies:
       arconnect: 0.4.2
