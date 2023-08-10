@@ -87,10 +87,26 @@ const poseidonPromise = buildPoseidonOpt()
 const babyJubPromise = buildBabyjub()
 const eddsaPromise = buildEddsa()
 
+function normalizeClaims(claims: Claims) {
+  for (const key in claims) {
+    let value = String(claims[key]).trim()
+
+    // normalize date to integer format (2000-01-01 > 20000101)
+    if (key.toLowerCase().endsWith('date') && value.match(/\d{4}-\d{2}-\d{2}/)) {
+      value = value.split('-').join('')
+    }
+
+    claims[key] = value
+  }
+  return claims
+}
+
 /**
  * Create new verifiable credential
  */
 export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts) {
+  claims = normalizeClaims(claims)
+
   let credentialSubject: Claims = {}
 
   if (opts.encrypt) {
