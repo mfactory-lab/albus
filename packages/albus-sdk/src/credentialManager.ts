@@ -29,7 +29,7 @@
 import type { VerifiableCredential } from '@mfactory-lab/albus-core'
 import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import type { PublicKeyInitData } from '@solana/web3.js'
+import type { PublicKey, PublicKeyInitData } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import axios from 'axios'
 import type { PrivateKey } from './types'
@@ -76,14 +76,14 @@ export class CredentialManager {
       },
     )
 
-    const result: VerifiableCredential[] = []
+    const result: { address: PublicKey; credential: VerifiableCredential }[] = []
     for (const account of accounts) {
       if (account.json?.vc !== undefined) {
-        const vc = await Albus.credential.verifyCredential(account.json.vc, {
+        const credential = await Albus.credential.verifyCredential(account.json.vc, {
           audience: ALBUS_DID,
           decryptionKey: props.decryptionKey,
         })
-        result.push(vc)
+        result.push({ address: account.mint, credential })
       }
     }
 

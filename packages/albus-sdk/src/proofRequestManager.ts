@@ -235,7 +235,7 @@ export class ProofRequestManager {
       throw new Error(`Unable to find Policy account at ${proofRequest.policy}`)
     }
 
-    const vc = await this.credential.load(props.vc, { decryptionKey: props.decryptionKey })
+    const { issuerPubkey: _, ...vc } = await this.credential.load(props.vc, { decryptionKey: props.decryptionKey })
 
     const vp = await Albus.credential.createVerifiablePresentation({
       credentials: [vc],

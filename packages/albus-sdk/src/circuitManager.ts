@@ -82,6 +82,17 @@ export class CircuitManager {
   }
 
   /**
+   * Find circuits and return a map
+   */
+  async findMapped(filter: { code?: string } = {}) {
+    return (await this.find(filter))
+      .reduce((a, { pubkey, data }) => {
+        a.set(pubkey.toString(), data)
+        return a
+      }, new Map<string, Circuit>())
+  }
+
+  /**
    * Create new circuit
    */
   async create(props: CreateCircuitProps, opts?: ConfirmOptions) {

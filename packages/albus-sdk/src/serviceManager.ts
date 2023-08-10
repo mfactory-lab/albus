@@ -78,6 +78,17 @@ export class ServiceManager {
   }
 
   /**
+   * Find services and return a map
+   */
+  async findMapped(filter: FindServicesProps = {}) {
+    return (await this.find(filter))
+      .reduce((a, { pubkey, data }) => {
+        a.set(pubkey.toString(), data)
+        return a
+      }, new Map<string, ServiceProvider>())
+  }
+
+  /**
    * Add new service
    */
   async create(props: CreateServiceProps, opts?: ConfirmOptions) {

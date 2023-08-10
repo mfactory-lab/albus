@@ -29,6 +29,7 @@
 import { Buffer } from 'node:buffer'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Connection, Keypair, SendOptions, Signer, Transaction, TransactionSignature } from '@solana/web3.js'
+import { NodeBundlr, WebBundlr } from '@bundlr-network/client'
 
 const ARWEAVE_BASE_URL = 'https://arweave.net'
 const BUNDLR_DEVNET = 'https://devnet.bundlr.network'
@@ -69,7 +70,7 @@ export class BundlrStorageDriver {
       providerUrl: opts.providerUrl ?? this.provider.connection.rpcEndpoint,
     }
 
-    let address
+    let address: string
     if (options.providerUrl.includes('localhost')
       || options.providerUrl.includes('devnet')
       || options.providerUrl.includes('testnet')) {
@@ -78,14 +79,12 @@ export class BundlrStorageDriver {
       address = BUNDLR_MAINNET
     }
 
-    const bundlr = _removeDoubleDefault(await import('@bundlr-network/client'))
-
     if ('payer' in this.provider.wallet) {
       const identity = this.provider.wallet.payer as Keypair
-      return new bundlr.NodeBundlr(address, 'solana', identity.secretKey, options)
+      return new NodeBundlr(address, 'solana', identity.secretKey, options)
     }
 
-    return new bundlr.WebBundlr(address, 'solana', this.bundlrWallet, options)
+    return new WebBundlr(address, 'solana', this.bundlrWallet, options)
   }
 
   get bundlrWallet() {
@@ -104,30 +103,8 @@ export class BundlrStorageDriver {
         options: SendOptions & { signers?: Signer[] } = {},
       ): Promise<TransactionSignature> => {
         const { signers = [], ...sendOptions } = options
-        return this.provider
-          .connection
-          .sendTransaction(transaction, signers, sendOptions)
+        return connection.sendTransaction(transaction, signers, sendOptions)
       },
     }
   }
-}
-
-/**
- * This method is necessary to import certain packages on both ESM and CJS modules.
- * Without this, we get a different structure on each module. For instance:
- * - CJS: { default: [Getter], WebBundlr: [Getter] }
- * - ESM: { default: { default: [Getter], WebBundlr: [Getter] } }
- * This method fixes this by ensure there is not double default in the imported package.
- */
-export function _removeDoubleDefault<T>(pkg: T): T {
-  if (
-    pkg
-    && typeof pkg === 'object'
-    && 'default' in pkg
-    && 'default' in (pkg as any).default
-  ) {
-    return (pkg as any).default
-  }
-
-  return pkg
 }
