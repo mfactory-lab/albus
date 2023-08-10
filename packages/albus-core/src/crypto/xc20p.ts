@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import { randomBytes } from '@stablelib/random'
 import { generateKeyPair, scalarMultBase, sharedKey } from '@stablelib/x25519'
 import { convertPublicKeyToX25519, convertSecretKeyToX25519 } from '@stablelib/ed25519'
@@ -50,7 +49,7 @@ export const XC20P_EPK_LENGTH = 32
 
 // a 64-byte private key on the Ed25519 curve.
 // In string form it is base58-encoded
-export type PrivateKey = number[] | string | Buffer | Uint8Array
+export type PrivateKey = number[] | string | Uint8Array
 
 /**
  * Create a Solana keypair object from a x25519 private key
@@ -58,7 +57,7 @@ export type PrivateKey = number[] | string | Buffer | Uint8Array
  */
 export function makeKeypair(privateKey: PrivateKey): Keypair {
   if (Array.isArray(privateKey)) {
-    return Keypair.fromSecretKey(Buffer.from(privateKey))
+    return Keypair.fromSecretKey(Uint8Array.from(privateKey))
   }
 
   if (typeof privateKey === 'string') {

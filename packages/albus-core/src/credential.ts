@@ -26,22 +26,17 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import { buildBabyjub, buildEddsa, buildPoseidonOpt, newMemEmptyTrie } from 'circomlibjs'
-import type {
-  VerifyCredentialOptions,
-} from 'did-jwt-vc'
-import {
-  validateCredentialPayload, validatePresentationPayload,
-} from 'did-jwt-vc'
+import type { VerifyCredentialOptions } from 'did-jwt-vc'
+import { validateCredentialPayload, validatePresentationPayload } from 'did-jwt-vc'
 import type { ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
 import { xc20p } from './crypto'
-import { base58ToBytes } from './crypto/utils'
+import { arrayToHexString, base58ToBytes } from './crypto/utils'
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey } from './utils'
 
@@ -532,7 +527,7 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
     try {
       return BigInt(s)
     } catch (e) {
-      return `0x${Buffer.from(String(s)).toString('hex')}`
+      return `0x${arrayToHexString(new TextEncoder().encode(String(s)))}`
     }
   }
 

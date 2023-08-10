@@ -26,18 +26,17 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
-import { utils as ffUtils, getCurveFromName } from 'ffjavascript'
 import axios from 'axios'
-import type { ProofData, PublicSignals, VK } from 'snarkjs'
 import { groth16 } from 'snarkjs'
+import { utils as ffUtils, getCurveFromName } from 'ffjavascript'
+import type { ProofData, PublicSignals, VK } from 'snarkjs'
 import * as Albus from './index'
 
 const { leInt2Buff, leBuff2int, unstringifyBigInts, stringifyBigInts } = ffUtils
 
 interface GenerateProofProps {
-  wasmFile: string | Buffer
-  zkeyFile: string | Buffer
+  wasmFile: string | Uint8Array
+  zkeyFile: string | Uint8Array
   input?: Parameters<typeof groth16.fullProve>[0]
   logger?: unknown
 }
@@ -75,7 +74,7 @@ export async function verifyProof(props: VerifyProofProps) {
 /**
  * Fetches bytes from the specified {@link url}
  */
-async function fetchBytes(url: string | Buffer | Uint8Array) {
+async function fetchBytes(url: string | Uint8Array) {
   if (typeof url === 'string') {
     const { data } = await axios<ArrayBuffer>({ method: 'get', url, responseType: 'arraybuffer' })
     return new Uint8Array(data)
@@ -179,7 +178,7 @@ export function decodeVerifyingKey(data: {
 export async function altBn128G1Neg(input: number[]) {
   const bn128 = await getCurveFromName('bn128', true)
   const changeEndianness = (b: number[]) => [...b.slice(0, 32).reverse(), ...b.slice(32).reverse()]
-  return changeEndianness(bn128.G1.neg(Buffer.from(changeEndianness(input))))
+  return changeEndianness(bn128.G1.neg(Uint8Array.from(changeEndianness(input))))
 }
 
 export function finiteToBytes(n: string | number | bigint) {
@@ -187,7 +186,7 @@ export function finiteToBytes(n: string | number | bigint) {
 }
 
 export function bytesToFinite(bytes: number[] | Uint8Array): string {
-  return stringifyBigInts(leBuff2int(Buffer.from(bytes)))
+  return stringifyBigInts(leBuff2int(Uint8Array.from(bytes)))
 }
 
 /**

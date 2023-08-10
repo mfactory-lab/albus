@@ -117,8 +117,8 @@ describe('Proof', async () => {
   // const _holderPk = edDSA.prv2pub(holderKeypair.secretKey)
 
   it('proof', async () => {
-    const wasmFile = loadFixture('agePolicy.wasm')
-    const zkeyFile = loadFixture('agePolicy.zkey')
+    const wasmFile = Uint8Array.from(loadFixture('agePolicy.wasm'))
+    const zkeyFile = Uint8Array.from(loadFixture('agePolicy.zkey'))
     const vk = JSON.parse(loadFixture('agePolicy.vk.json').toString())
 
     const tree = await createClaimsTree(claims)
