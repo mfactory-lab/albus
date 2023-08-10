@@ -26,9 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { Buffer } from 'node:buffer'
-
-export type PrivateKey = number[] | string | Buffer | Uint8Array
+export type PrivateKey = number[] | string | Uint8Array
 export type AlbusNftCode = 'VC' | 'ID'
 
 export enum KnownSignals {

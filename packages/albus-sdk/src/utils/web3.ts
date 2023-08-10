@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import axios from 'axios'
 import { utils as AnchorUtils } from '@coral-xyz/anchor'
 import type { Creator } from '@metaplex-foundation/mpl-token-metadata'
@@ -139,7 +138,7 @@ type ExtendedMetadata = Metadata & { json: Record<string, any> | null }
  * Load multiple metadata with selected {@link props.mints}
  */
 export async function findMetadataAccounts(connection: Connection, props: FindMetadataAccounts): Promise<ExtendedMetadata[]> {
-  let rawAccounts: (AccountInfo<Buffer> | null)[] = []
+  let rawAccounts: (AccountInfo<any> | null)[] = []
 
   for (const pubKeys of chunk(props.mints.map(getMetadataPDA), props.chunkSize ?? 100)) {
     rawAccounts = [...rawAccounts, ...await connection.getMultipleAccountsInfo(pubKeys)]
@@ -209,7 +208,7 @@ function sanitizeMetadata(tokenData: Metadata) {
 
 function getMetadataPDA(mint: PublicKeyInitData): PublicKey {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from('metadata'), METADATA_PROGRAM_ID.toBuffer(), new PublicKey(mint).toBuffer()],
+    [new TextEncoder().encode('metadata'), METADATA_PROGRAM_ID.toBuffer(), new PublicKey(mint).toBuffer()],
     METADATA_PROGRAM_ID,
   )[0]
 }

@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 
@@ -35,23 +34,25 @@ import { PROGRAM_ID } from './generated'
 export class PdaManager {
   programId = PROGRAM_ID
 
+  constructor(private encoder = new TextEncoder()) {}
+
   circuit(code: string) {
     return PublicKey.findProgramAddressSync([
-      Buffer.from('circuit'),
-      Buffer.from(code),
+      this.encoder.encode('circuit'),
+      this.encoder.encode(code),
     ], this.programId)
   }
 
   serviceProvider(code: string) {
     return PublicKey.findProgramAddressSync([
-      Buffer.from('service-provider'),
-      Buffer.from(code),
+      this.encoder.encode('service-provider'),
+      this.encoder.encode(code),
     ], this.programId)
   }
 
   policy(circuit: PublicKeyInitData, service: PublicKeyInitData) {
     return PublicKey.findProgramAddressSync([
-      Buffer.from('policy'),
+      this.encoder.encode('policy'),
       new PublicKey(circuit).toBuffer(),
       new PublicKey(service).toBuffer(),
     ], this.programId)
@@ -59,7 +60,7 @@ export class PdaManager {
 
   proofRequest(policy: PublicKeyInitData, user: PublicKeyInitData) {
     return PublicKey.findProgramAddressSync([
-      Buffer.from('proof-request'),
+      this.encoder.encode('proof-request'),
       new PublicKey(policy).toBuffer(),
       new PublicKey(user).toBuffer(),
     ], this.programId)

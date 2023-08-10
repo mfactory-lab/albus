@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Connection, Keypair, SendOptions, Signer, Transaction, TransactionSignature } from '@solana/web3.js'
 import * as bundlr from '@bundlr-network/client'
@@ -52,14 +51,11 @@ export class BundlrStorageDriver {
    *   https://github.com/metaplex-foundation/js/blob/281403cfc045369be82fe8e44e87f7e094e57140/packages/js/src/plugins/bundlrStorage/BundlrStorageDriver.ts#L237
    *
    */
-  async uploadData(data: Buffer | Uint8Array | string, opts: BundlrOpts = {}) {
+  async uploadData(data: string, opts: BundlrOpts = {}) {
     const bundlr = await this.initBundlr(opts)
-    const response = await bundlr.uploader.uploadData(Buffer.from(data), {
+    const response = await bundlr.uploader.uploadData(data, {
       tags: [{ name: 'Content-Type', value: 'application/ld+json' }],
     })
-
-    console.log(response)
-
     // return response.public
     return `${ARWEAVE_BASE_URL}/${response.id}`
   }
