@@ -26,12 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { ServiceProvider } from '@mfactory-lab/albus-sdk'
 import { ProofRequestStatus } from '@mfactory-lab/albus-sdk'
 import type { PublicKey } from '@solana/web3.js'
 import Table from 'cli-table3'
 import log from 'loglevel'
-import { exploreAddress } from '@/utils'
 import { useContext } from '@/context'
 
 export async function show(addr: string) {
@@ -41,20 +39,7 @@ export async function show(addr: string) {
 
   log.info('--------------------------------------------------------------------------')
   log.info(`Address: ${addr}`)
-  log.info(`Service provider: ${proofRequest.serviceProvider}`)
-  log.info(`Circuit: ${proofRequest.circuit}`)
-  log.info(exploreAddress(proofRequest.circuit))
-  log.info(`Owner: ${proofRequest.owner}`)
-  log.info(exploreAddress(proofRequest.owner))
-  // log.info('Proof', JSON.stringify(proofRequest.proof))
-  // if (zkpRequest.proof) {
-  //   log.info(exploreAddress(zkpRequest.proof))
-  // }
-  log.info(`Created at: ${proofRequest.createdAt}`)
-  log.info(`Expired at: ${proofRequest.expiredAt}`)
-  log.info(`Proved at: ${proofRequest.provedAt}`)
-  log.info(`Verification date: ${proofRequest.verifiedAt}`)
-  log.info(`Status: ${ProofRequestStatus[proofRequest.status]}`)
+  log.info(proofRequest.pretty())
   log.info('--------------------------------------------------------------------------')
 }
 
@@ -78,11 +63,8 @@ interface ShowAllOpts {
 export async function showAll(opts: ShowAllOpts) {
   const { client } = useContext()
 
-  const services = (await client.service.find())
-    .reduce((a, { pubkey, data }) => {
-      a.set(pubkey.toString(), data)
-      return a
-    }, new Map<string, ServiceProvider>())
+  const services = await client.service.findMapped()
+  const circuits = await client.circuit.findMapped()
 
   const items = await client.proofRequest.find({
     serviceProvider: opts.service,
@@ -91,15 +73,19 @@ export async function showAll(opts: ShowAllOpts) {
   })
 
   const table = new Table({
-    head: ['Address', 'Status', 'Service Provider', 'Circuit'],
+    head: ['#', 'Address', 'Status', 'Service', 'Circuit', 'Date'],
   })
 
-  for (const item of items) {
+  let i = 0
+  for (const { pubkey, data } of items) {
+    // item.data.
     table.push([
-      String(item.pubkey),
-      String(ProofRequestStatus[item.data.status]),
-      String(services.get(item.data.serviceProvider.toString())?.code),
-      String(item.data.circuit),
+      String(++i),
+      String(pubkey),
+      String(ProofRequestStatus[data.status]),
+      String(services.get(data.serviceProvider.toString())?.code),
+      String(circuits.get(data.circuit.toString())?.code),
+      String(new Date(Number(data.createdAt) * 1000).toISOString()),
       // String(item.data.proof),
     ])
   }

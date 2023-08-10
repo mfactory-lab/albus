@@ -31,14 +31,10 @@ import { useContext } from '@/context'
 
 interface Opts {}
 
-/**
- * Verify Proof Request
- */
 export async function verifyRequest(addr: string, _opts: Opts) {
   const { client } = useContext()
 
   log.info('Verifying proof...')
-  // TODO:
-  // const isVerified = await client.verify(addr)
-  // log.info('Status:', isVerified)
+  const isVerified = await client.proofRequest.verify({ proofRequest: addr })
+  log.info('Status:', isVerified)
 }

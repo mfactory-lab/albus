@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { VerifiableCredential } from '@mfactory-lab/albus-core'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
@@ -37,14 +36,12 @@ export async function showAll() {
     decryptionKey: keypair.secretKey,
   })
 
-  for (const credential of credentials) {
-    log.info(showCredential(credential))
+  for (const { address, credential } of credentials) {
+    log.info('Address:', address.toString())
+    log.info('Issuer:', credential.issuer)
+    log.info('IssuanceDate:', credential.issuanceDate)
+    log.info('ExpirationDate:', credential.expirationDate)
+    log.info('CredentialSubject:', credential.credentialSubject)
+    log.info('----------------------------------------------------------------')
   }
-}
-
-async function showCredential(vc: VerifiableCredential) {
-  log.info('Issuer:', vc.issuer)
-  log.info('IssuanceDate:', vc.issuanceDate)
-  log.info('ExpirationDate:', vc.expirationDate)
-  log.info('CredentialSubject:', vc.credentialSubject)
 }
