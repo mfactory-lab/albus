@@ -35,7 +35,8 @@ interface Opts {
   circuitCode: string
   name: string
   description?: string
-  expiresIn?: number
+  expirationPeriod?: number
+  retentionPeriod?: number
   rules?: string[]
 }
 
@@ -47,7 +48,8 @@ export async function add(opts: Opts) {
     serviceCode: opts.serviceCode,
     name: opts.name,
     description: opts.description,
-    expiresIn: opts.expiresIn,
+    expirationPeriod: opts.expirationPeriod,
+    retentionPeriod: opts.retentionPeriod,
     rules: opts.rules?.map((r) => {
       const rr = r.split(':').map(Number)
       if (rr.length < 2) {

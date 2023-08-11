@@ -33,6 +33,7 @@ import { useContext } from '@/context'
 interface Opts {
   code: string
   name: string
+  authority?: string
 }
 
 export async function add(opts: Opts) {
@@ -41,6 +42,7 @@ export async function add(opts: Opts) {
   const { signature } = await client.service.create({
     code: opts.code,
     name: opts.name,
+    authority: opts.authority,
   })
 
   await show(opts.code)
