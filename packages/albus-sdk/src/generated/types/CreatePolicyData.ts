@@ -12,7 +12,8 @@ import { policyRuleBeet } from './PolicyRule'
 export interface CreatePolicyData {
   name: string
   description: string
-  expiresIn: number
+  expirationPeriod: number
+  retentionPeriod: number
   rules: PolicyRule[]
 }
 
@@ -25,7 +26,8 @@ export const createPolicyDataBeet
     [
       ['name', beet.utf8String],
       ['description', beet.utf8String],
-      ['expiresIn', beet.u32],
+      ['expirationPeriod', beet.u32],
+      ['retentionPeriod', beet.u32],
       ['rules', beet.array(policyRuleBeet)],
     ],
     'CreatePolicyData',

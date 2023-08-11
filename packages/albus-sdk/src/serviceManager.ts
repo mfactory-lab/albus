@@ -101,6 +101,7 @@ export class ServiceManager {
       data: {
         code: props.code,
         name: props.name,
+        authority: props.authority ? new PublicKey(props.authority) : null,
       },
     })
     try {
@@ -136,6 +137,8 @@ export class ServiceManager {
 export interface CreateServiceProps {
   code: string
   name: string
+  // Service manager authority
+  authority?: PublicKeyInitData
 }
 
 export interface FindServicesProps {

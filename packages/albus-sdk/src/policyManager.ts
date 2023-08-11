@@ -109,7 +109,8 @@ export class PolicyManager {
       data: {
         name: props.name,
         description: props.description ?? '',
-        expiresIn: props.expiresIn ?? 0,
+        expirationPeriod: props.expirationPeriod ?? 0,
+        retentionPeriod: props.retentionPeriod ?? 0,
         rules: props.rules ?? [],
       },
     })
@@ -153,7 +154,8 @@ export interface CreatePolicyProps {
   serviceCode: string
   name: string
   description?: string
-  expiresIn?: number
+  expirationPeriod?: number
+  retentionPeriod?: number
   rules?: PolicyRule[]
 }
 

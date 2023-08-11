@@ -9,22 +9,16 @@ import type * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 
-export interface CreateServiceProviderData {
-  code: string
-  name: string
-  authority: beet.COption<web3.PublicKey>
+export interface UpdateServiceData {
+  newAuthority: beet.COption<web3.PublicKey>
 }
 
 /**
  * @category userTypes
  * @category generated
  */
-export const createServiceProviderDataBeet
-  = new beet.FixableBeetArgsStruct<CreateServiceProviderData>(
-    [
-      ['code', beet.utf8String],
-      ['name', beet.utf8String],
-      ['authority', beet.coption(beetSolana.publicKey)],
-    ],
-    'CreateServiceProviderData',
+export const updateServiceDataBeet
+  = new beet.FixableBeetArgsStruct<UpdateServiceData>(
+    [['newAuthority', beet.coption(beetSolana.publicKey)]],
+    'UpdateServiceData',
   )

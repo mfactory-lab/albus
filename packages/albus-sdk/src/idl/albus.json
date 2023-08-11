@@ -108,6 +108,34 @@
       ]
     },
     {
+      "name": "updateServiceProvider",
+      "accounts": [
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdateServiceData"
+          }
+        }
+      ]
+    },
+    {
       "name": "deleteServiceProvider",
       "accounts": [
         {
@@ -672,6 +700,15 @@
               "The name of the service"
             ],
             "type": "string"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Service authority"
+            ],
+            "type": {
+              "option": "publicKey"
+            }
           }
         ]
       }
@@ -733,7 +770,11 @@
             "type": "string"
           },
           {
-            "name": "expiresIn",
+            "name": "expirationPeriod",
+            "type": "u32"
+          },
+          {
+            "name": "retentionPeriod",
             "type": "u32"
           },
           {
@@ -859,6 +900,20 @@
           {
             "name": "extendIc",
             "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateServiceData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "newAuthority",
+            "type": {
+              "option": "publicKey"
+            }
           }
         ]
       }
