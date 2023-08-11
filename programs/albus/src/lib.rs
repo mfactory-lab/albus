@@ -63,6 +63,13 @@ pub mod albus {
         add_service_provider::handler(ctx, data)
     }
 
+    pub fn update_service_provider(
+        ctx: Context<UpdateService>,
+        data: UpdateServiceData,
+    ) -> Result<()> {
+        update_service::handler(ctx, data)
+    }
+
     pub fn delete_service_provider(ctx: Context<DeleteServiceProvider>) -> Result<()> {
         delete_service_provider::handler(ctx)
     }

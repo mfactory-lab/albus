@@ -26,32 +26,34 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub mod add_service_provider;
-pub mod create_circuit;
-pub mod create_policy;
-pub mod create_proof_request;
-pub mod delete_circuit;
-pub mod delete_policy;
-pub mod delete_proof_request;
-pub mod delete_service_provider;
-// pub mod mint_credential;
-pub mod prove;
-pub mod update_circuit_vk;
-pub mod update_service;
-pub mod verify;
+use anchor_lang::prelude::*;
 
-pub use self::{
-    add_service_provider::*,
-    create_circuit::*,
-    create_policy::*,
-    create_proof_request::*,
-    delete_circuit::*,
-    delete_policy::*,
-    delete_proof_request::*,
-    delete_service_provider::*,
-    // mint_credential::*,
-    prove::*,
-    update_circuit_vk::*,
-    update_service::*,
-    verify::*,
-};
+use crate::{state::ServiceProvider, utils::assert_authorized};
+
+pub fn handler(ctx: Context<UpdateService>, data: UpdateServiceData) -> Result<()> {
+    assert_authorized(&ctx.accounts.authority.key())?;
+
+    let service = &mut ctx.accounts.service_provider;
+
+    if let Some(new_authority) = data.new_authority {
+        service.authority = new_authority;
+    }
+
+    Ok(())
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct UpdateServiceData {
+    pub new_authority: Option<Pubkey>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateService<'info> {
+    #[account(mut, has_one = authority)]
+    pub service_provider: Box<Account<'info, ServiceProvider>>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}

@@ -40,8 +40,8 @@ pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()>
     policy.name = data.name;
     policy.description = data.description;
     policy.rules = data.rules;
-    policy.expiration_period = data.expires_in;
-    policy.retention_period = 0; // TODO
+    policy.expiration_period = data.expiration_period;
+    policy.retention_period = data.retention_period;
     policy.created_at = timestamp;
     policy.bump = ctx.bumps["policy"];
 
@@ -53,8 +53,8 @@ pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()>
 pub struct CreatePolicyData {
     pub name: String,
     pub description: String,
-    pub expires_in: u32,
-    // pub retention_period: u32,
+    pub expiration_period: u32,
+    pub retention_period: u32,
     pub rules: Vec<PolicyRule>,
 }
 

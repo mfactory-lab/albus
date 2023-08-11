@@ -38,7 +38,7 @@ pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderD
     let sp = &mut ctx.accounts.service_provider;
     sp.code = data.code;
     sp.name = data.name;
-    sp.authority = ctx.accounts.authority.key();
+    sp.authority = data.authority.unwrap_or(ctx.accounts.authority.key());
     sp.proof_request_count = 0;
     sp.created_at = timestamp;
     sp.bump = ctx.bumps["service_provider"];
@@ -53,6 +53,8 @@ pub struct CreateServiceProviderData {
     pub code: String,
     /// The name of the service
     pub name: String,
+    /// Service authority
+    pub authority: Option<Pubkey>,
 }
 
 #[derive(Accounts)]
