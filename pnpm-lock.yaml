@@ -304,8 +304,6 @@ importers:
         specifier: ^1.8.0
         version: 1.8.1
 
-  packages/tsconfig: {}
-
   packages/verified-stake-pool-sdk:
     dependencies:
       '@coral-xyz/anchor':
@@ -2534,6 +2532,9 @@ packages:
     resolution: {integrity: sha512-5QXuGCtB+HL3VtKL2JN3+6t4qh8VXizK+aGDAv6Dqiq3MLrzgZHb4tjVgtEWMd8CcDtD/JqaAI1b6/EaYGtFIA==}
     peerDependencies:
       react-native: ^0.0.0-0 || 0.60 - 0.72 || 1000.0.0
+    peerDependenciesMeta:
+      react-native:
+        optional: true
     dependencies:
       merge-options: 3.0.4
     dev: false
@@ -2680,6 +2681,9 @@ packages:
     resolution: {integrity: sha512-T+xroGLYaYeI8TXy85oNul2m1k/oF9dAW7eRy/MF9up1EQ5SPL5KWFICQfV2gy87jBZd1y0k0M2GayVN7QdQpA==}
     peerDependencies:
       react-native: '>0.69'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
     dev: false
 
   /@solana-mobile/wallet-adapter-mobile@1.0.1(@solana/web3.js@1.77.3):

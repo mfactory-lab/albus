@@ -1,5 +1,5 @@
 {
-  "name": "@albus/cli",
+  "name": "@mfactory-lab/albus-cli",
   "version": "0.0.3",
   "private": true,
   "type": "module",

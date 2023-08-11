@@ -7,7 +7,7 @@ import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 const isObject = (item: unknown): item is Record<string, unknown> => Boolean(item && typeof item === 'object' && !Array.isArray(item))
-const isExternal = (id: string) => !id.startsWith('.') && !isAbsolute(id)
+const isExternal = (id: string) => !id.startsWith('.') && !id.startsWith('@/') && !id.startsWith('~/') && !isAbsolute(id)
 
 function mergeDeep<T>(target: T, ...sources: T[]): T {
   if (!sources.length) {

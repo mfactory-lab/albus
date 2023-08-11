@@ -9,12 +9,13 @@
     "pnpm": ">=8"
   },
   "scripts": {
-    "cli": "pnpm -F @albus/cli run cli",
+    "cli": "pnpm -F @mfactory-lab/albus-cli run cli",
     "dev": "NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm -r --parallel --filter='./packages/**' run lib:dev",
     "ui:dev": "pnpm -F @albus/ui dev",
     "gen:sdk": "pnpm -F @mfactory-lab/albus-sdk generate && eslint --fix --ext .ts ./packages/albus-sdk",
     "build:core": "pnpm -F @mfactory-lab/albus-core build",
     "build:sdk": "pnpm -F @mfactory-lab/albus-sdk build",
+    "build:cli": "pnpm -F @mfactory-lab/albus-cli build",
     "release:core": "pnpm -F @mfactory-lab/albus-core release",
     "release:sdk": "pnpm -F @mfactory-lab/albus-sdk release",
     "test:unit": "vitest --dir ./packages",
