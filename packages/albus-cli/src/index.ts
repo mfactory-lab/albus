@@ -175,6 +175,11 @@ adminPolicy.command('add')
   .option('-r,--rules <rule...>', '(optional) policy rule, format: "index:group:value"')
   .action(actions.admin.policy.add)
 
+adminPolicy.command('delete')
+  .description('Delete policy')
+  .argument('code', 'Policy code')
+  .action(actions.admin.policy.remove)
+
 ///
 /// Circuit Management
 ///

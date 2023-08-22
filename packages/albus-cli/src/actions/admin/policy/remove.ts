@@ -26,6 +26,14 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './add'
-export * from './show'
-export * from './remove'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+export async function remove(code: string) {
+  const { client } = useContext()
+
+  const chunks = code.split('_')
+  const { signature } = await client.policy.delete({ serviceCode: chunks[0]!, code: chunks[1]! })
+
+  log.info(`Signature: ${signature}`)
+}
