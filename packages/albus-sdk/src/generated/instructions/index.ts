@@ -1,3 +1,4 @@
+export * from './adminCloseAccount'
 export * from './createCircuit'
 export * from './createPolicy'
 export * from './createProofRequest'

@@ -1,5 +1,5 @@
 {
-  "version": "0.0.7",
+  "version": "0.0.9",
   "name": "albus",
   "instructions": [
     {
@@ -344,6 +344,27 @@
           }
         }
       ]
+    },
+    {
+      "name": "adminCloseAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -427,7 +448,7 @@
           {
             "name": "serviceProvider",
             "docs": [
-              "The service provider this belongs to."
+              "The service provider this belongs to"
             ],
             "type": "publicKey"
           },
@@ -437,6 +458,13 @@
               "The circuit associated with this policy"
             ],
             "type": "publicKey"
+          },
+          {
+            "name": "code",
+            "docs": [
+              "Unique code of the policy (associated with the service)"
+            ],
+            "type": "string"
           },
           {
             "name": "name",
@@ -483,7 +511,7 @@
           {
             "name": "bump",
             "docs": [
-              "PDA bump."
+              "PDA bump"
             ],
             "type": "u8"
           },
@@ -551,7 +579,7 @@
           {
             "name": "bump",
             "docs": [
-              "PDA bump."
+              "PDA bump"
             ],
             "type": "u8"
           }
@@ -638,7 +666,7 @@
           {
             "name": "bump",
             "docs": [
-              "PDA bump."
+              "PDA bump"
             ],
             "type": "u8"
           },
@@ -679,40 +707,6 @@
     }
   ],
   "types": [
-    {
-      "name": "CreateServiceProviderData",
-      "docs": [
-        "Data required to add a new service provider"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "code",
-            "docs": [
-              "The unique code representing the service"
-            ],
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "docs": [
-              "The name of the service"
-            ],
-            "type": "string"
-          },
-          {
-            "name": "authority",
-            "docs": [
-              "Service authority"
-            ],
-            "type": {
-              "option": "publicKey"
-            }
-          }
-        ]
-      }
-    },
     {
       "name": "CreateCircuitData",
       "type": {
@@ -762,6 +756,10 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "code",
+            "type": "string"
+          },
+          {
             "name": "name",
             "type": "string"
           },
@@ -802,6 +800,40 @@
               "Time in seconds until the request expires"
             ],
             "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateServiceProviderData",
+      "docs": [
+        "Data required to add a new service provider"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "docs": [
+              "The unique code representing the service"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the service"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Service authority"
+            ],
+            "type": {
+              "option": "publicKey"
+            }
           }
         ]
       }

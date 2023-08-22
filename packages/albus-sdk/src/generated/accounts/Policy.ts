@@ -19,6 +19,7 @@ import { policyRuleBeet } from '../types/PolicyRule'
 export interface PolicyArgs {
   serviceProvider: web3.PublicKey
   circuit: web3.PublicKey
+  code: string
   name: string
   description: string
   expirationPeriod: number
@@ -41,6 +42,7 @@ export class Policy implements PolicyArgs {
   private constructor(
     readonly serviceProvider: web3.PublicKey,
     readonly circuit: web3.PublicKey,
+    readonly code: string,
     readonly name: string,
     readonly description: string,
     readonly expirationPeriod: number,
@@ -58,6 +60,7 @@ export class Policy implements PolicyArgs {
     return new Policy(
       args.serviceProvider,
       args.circuit,
+      args.code,
       args.name,
       args.description,
       args.expirationPeriod,
@@ -176,6 +179,7 @@ export class Policy implements PolicyArgs {
     return {
       serviceProvider: this.serviceProvider.toBase58(),
       circuit: this.circuit.toBase58(),
+      code: this.code,
       name: this.name,
       description: this.description,
       expirationPeriod: this.expirationPeriod,
@@ -222,6 +226,7 @@ export const policyBeet = new beet.FixableBeetStruct<
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['serviceProvider', beetSolana.publicKey],
     ['circuit', beetSolana.publicKey],
+    ['code', beet.utf8String],
     ['name', beet.utf8String],
     ['description', beet.utf8String],
     ['expirationPeriod', beet.u32],

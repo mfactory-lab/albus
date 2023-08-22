@@ -10,6 +10,7 @@ import type { PolicyRule } from './PolicyRule'
 import { policyRuleBeet } from './PolicyRule'
 
 export interface CreatePolicyData {
+  code: string
   name: string
   description: string
   expirationPeriod: number
@@ -24,6 +25,7 @@ export interface CreatePolicyData {
 export const createPolicyDataBeet
   = new beet.FixableBeetArgsStruct<CreatePolicyData>(
     [
+      ['code', beet.utf8String],
       ['name', beet.utf8String],
       ['description', beet.utf8String],
       ['expirationPeriod', beet.u32],

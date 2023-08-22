@@ -87,38 +87,42 @@ export class ProofRequestManager {
   /**
    * Find proof requests
    */
-  async find(filter: FindProofRequestProps = {}) {
+  async find(props: FindProofRequestProps = {}) {
     const builder = ProofRequest.gpaBuilder()
       .addFilter('accountDiscriminator', proofRequestDiscriminator)
 
-    if (!filter.skipUser) {
-      builder.addFilter('owner', new PublicKey(filter.user ?? this.provider.publicKey))
+    if (props.withoutData) {
+      builder.config.dataSlice = { offset: 0, length: 0 }
     }
 
-    if (filter.serviceProvider) {
-      builder.addFilter('serviceProvider', new PublicKey(filter.serviceProvider))
-    } else if (filter.serviceProviderCode) {
-      builder.addFilter('serviceProvider', this.pda.serviceProvider(filter.serviceProviderCode)[0])
+    if (!props.skipUser) {
+      builder.addFilter('owner', new PublicKey(props.user ?? this.provider.publicKey))
     }
 
-    if (filter.circuit) {
-      builder.addFilter('circuit', new PublicKey(filter.circuit))
-    } else if (filter.circuitId) {
-      builder.addFilter('circuit', this.pda.circuit(filter.circuitId)[0])
+    if (props.serviceProvider) {
+      builder.addFilter('serviceProvider', new PublicKey(props.serviceProvider))
+    } else if (props.serviceProviderCode) {
+      builder.addFilter('serviceProvider', this.pda.serviceProvider(props.serviceProviderCode)[0])
     }
 
-    if (filter.policy) {
-      builder.addFilter('policy', new PublicKey(filter.policy))
+    if (props.circuit) {
+      builder.addFilter('circuit', new PublicKey(props.circuit))
+    } else if (props.circuitId) {
+      builder.addFilter('circuit', this.pda.circuit(props.circuitId)[0])
     }
 
-    if (filter.status) {
-      builder.addFilter('status', filter.status)
+    if (props.policy) {
+      builder.addFilter('policy', new PublicKey(props.policy))
+    }
+
+    if (props.status) {
+      builder.addFilter('status', props.status)
     }
 
     return (await builder.run(this.provider.connection)).map((acc) => {
       return {
         pubkey: acc.pubkey,
-        data: ProofRequest.fromAccountInfo(acc.account)[0],
+        data: !props.withoutData ? ProofRequest.fromAccountInfo(acc.account)[0] : null,
       }
     })
   }
@@ -128,9 +132,8 @@ export class ProofRequestManager {
    */
   async create(props: CreateProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const [serviceProvider] = this.pda.serviceProvider(props.serviceId)
-    const [circuit] = this.pda.circuit(props.circuitId)
-    const [policy] = this.pda.policy(circuit, serviceProvider)
+    const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
+    const [policy] = this.pda.policy(serviceProvider, props.policyCode)
     const [proofRequest] = this.pda.proofRequest(policy, authority)
 
     const instruction = createCreateProofRequestInstruction(
@@ -347,8 +350,8 @@ export class ProofRequestManager {
 }
 
 export interface CreateProofRequestProps {
-  serviceId: string
-  circuitId: string
+  serviceCode: string
+  policyCode: string
   expiresIn?: number
 }
 
@@ -365,6 +368,7 @@ export interface FindProofRequestProps {
   policy?: PublicKeyInitData
   status?: ProofRequestStatus
   skipUser?: boolean
+  withoutData?: boolean
 }
 
 export interface FullProveProps {

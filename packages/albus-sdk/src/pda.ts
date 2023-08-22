@@ -50,11 +50,11 @@ export class PdaManager {
     ], this.programId)
   }
 
-  policy(circuit: PublicKeyInitData, service: PublicKeyInitData) {
+  policy(service: PublicKeyInitData, code: string) {
     return PublicKey.findProgramAddressSync([
       this.encoder.encode('policy'),
-      new PublicKey(circuit).toBuffer(),
       new PublicKey(service).toBuffer(),
+      this.encoder.encode(code),
     ], this.programId)
   }
 

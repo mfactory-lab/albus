@@ -65,16 +65,18 @@ export class CredentialManager {
   /**
    * Load all verifiable credentials
    */
-  async loadAll(props: LoadCredentialProps = {}) {
+  async loadAll(props: LoadAllCredentialProps = {}) {
     const accounts = await getParsedNftAccountsByOwner(
       this.provider.connection,
-      this.provider.publicKey,
+      props.owner ?? this.provider.publicKey,
       {
         symbol: `${NFT_SYMBOL_PREFIX}-VC`,
         updateAuthority: NFT_AUTHORITY,
         withJson: true,
       },
     )
+
+    console.log('asd')
 
     const result: { address: PublicKey; credential: VerifiableCredential }[] = []
     for (const account of accounts) {
@@ -124,6 +126,10 @@ export class CredentialManager {
 
 export interface LoadCredentialProps {
   decryptionKey?: PrivateKey
+}
+
+export interface LoadAllCredentialProps extends LoadCredentialProps {
+  owner?: PublicKey
 }
 
 export interface LoadPresentationProps extends LoadCredentialProps {

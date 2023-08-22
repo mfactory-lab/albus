@@ -57,36 +57,40 @@ export class PolicyManager {
 
   /**
    * Load policy by id
+   * Example: `acme_123`
    */
   async loadById(id: string, commitment?: Commitment) {
-    const [serviceId, circuitId] = id.split(ID_SEPARATOR)
-    if (!serviceId || !circuitId) {
+    const [serviceId, policyId] = id.split(ID_SEPARATOR)
+    if (!serviceId || !policyId) {
       throw new Error('invalid policy id')
     }
-    const circuit = this.pda.circuit(circuitId)[0]
     const service = this.pda.serviceProvider(serviceId)[0]
-    return this.load(this.pda.policy(circuit, service)[0], commitment)
+    return this.load(this.pda.policy(service, policyId)[0], commitment)
   }
 
   /**
    * Find policies
    */
-  async find(filter: FindPolicyProps = {}) {
+  async find(props: FindPolicyProps = {}) {
     const builder = Policy.gpaBuilder()
       .addFilter('accountDiscriminator', policyDiscriminator)
 
-    if (filter.circuitCode) {
-      builder.addFilter('circuit', this.pda.circuit(filter.circuitCode)[0])
+    if (props.withoutData) {
+      builder.config.dataSlice = { offset: 0, length: 0 }
     }
 
-    if (filter.serviceCode) {
-      builder.addFilter('serviceProvider', this.pda.serviceProvider(filter.serviceCode)[0])
+    if (props.circuitCode) {
+      builder.addFilter('circuit', this.pda.circuit(props.circuitCode)[0])
+    }
+
+    if (props.serviceCode) {
+      builder.addFilter('serviceProvider', this.pda.serviceProvider(props.serviceCode)[0])
     }
 
     return (await builder.run(this.provider.connection)).map((acc) => {
       return {
         pubkey: acc.pubkey,
-        data: Policy.fromAccountInfo(acc.account)[0],
+        data: !props.withoutData ? Policy.fromAccountInfo(acc.account)[0] : null,
       }
     })
   }
@@ -98,7 +102,7 @@ export class PolicyManager {
     const authority = this.provider.publicKey
     const [circuit] = this.pda.circuit(props.circuitCode)
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
-    const [policy] = this.pda.policy(circuit, serviceProvider)
+    const [policy] = this.pda.policy(serviceProvider, props.code)
 
     const instruction = createCreatePolicyInstruction({
       policy,
@@ -108,6 +112,7 @@ export class PolicyManager {
     }, {
       data: {
         name: props.name,
+        code: props.code,
         description: props.description ?? '',
         expirationPeriod: props.expirationPeriod ?? 0,
         retentionPeriod: props.retentionPeriod ?? 0,
@@ -118,7 +123,7 @@ export class PolicyManager {
     try {
       const tx = new Transaction().add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { signature }
+      return { signature, address: policy }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
@@ -127,11 +132,10 @@ export class PolicyManager {
   /**
    * Delete policy
    */
-  async delete(props: { circuitCode: string; serviceCode: string }, opts?: ConfirmOptions) {
+  async delete(props: DeletePolicyProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const [circuit] = this.pda.circuit(props.circuitCode)
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
-    const [policy] = this.pda.policy(circuit, serviceProvider)
+    const [policy] = this.pda.policy(serviceProvider, props.code)
 
     const instruction = createDeletePolicyInstruction({
       policy,
@@ -152,6 +156,7 @@ export class PolicyManager {
 export interface CreatePolicyProps {
   circuitCode: string
   serviceCode: string
+  code: string
   name: string
   description?: string
   expirationPeriod?: number
@@ -159,7 +164,13 @@ export interface CreatePolicyProps {
   rules?: PolicyRule[]
 }
 
+export interface DeletePolicyProps {
+  serviceCode: string
+  code: string
+}
+
 export interface FindPolicyProps {
   circuitCode?: string
   serviceCode?: string
+  withoutData?: boolean
 }
