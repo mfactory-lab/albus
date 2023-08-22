@@ -1,6 +1,6 @@
 [package]
 name = "albus"
-version = "0.0.8"
+version = "0.0.9"
 description = "Albus Protocol on-chain program"
 license = "AGPL-3.0"
 edition = "2021"
@@ -16,7 +16,7 @@ verify-on-chain = ["dep:groth16-solana"]
 
 [dependencies]
 time = { version = "0.3.23", default-features = false }
-anchor-lang = { version = "0.28.0", features = ["init-if-needed"]}
+anchor-lang = { version = "0.28.0", features = ["init-if-needed"] }
 #anchor-spl = { version = "0.28.0" }
 #mpl-token-metadata = { version = "1.13.0", features = ["no-entrypoint"] }
 groth16-solana = { path = "../../packages/groth16-solana", optional = true }
