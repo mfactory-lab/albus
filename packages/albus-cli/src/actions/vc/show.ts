@@ -27,13 +27,19 @@
  */
 
 import log from 'loglevel'
+import { PublicKey } from '@solana/web3.js'
 import { useContext } from '@/context'
 
-export async function showAll() {
+interface Opts {
+  owner?: string
+}
+
+export async function showAll(opts: Opts) {
   const { keypair, client } = useContext()
 
   const credentials = await client.credential.loadAll({
     decryptionKey: keypair.secretKey,
+    owner: opts.owner ? new PublicKey(opts.owner) : undefined,
   })
 
   for (const { address, credential } of credentials) {

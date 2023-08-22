@@ -33,9 +33,9 @@ import { exploreTransaction } from '@/utils'
 
 interface Opts {
   // Service code
-  service: string
-  // Circuit code
-  circuit: string
+  serviceCode: string
+  // Policy code
+  policyCode: string
   // Expires in seconds
   expiresIn?: number
 }
@@ -45,15 +45,15 @@ export async function create(opts: Opts) {
 
   try {
     const { signature } = await client.proofRequest.create({
-      serviceId: opts.service,
-      circuitId: opts.circuit,
+      serviceCode: opts.serviceCode,
+      policyCode: opts.policyCode,
       expiresIn: opts.expiresIn,
     }, { commitment: 'confirmed' })
 
     log.info(`Signature: ${signature}`)
     log.info(exploreTransaction(signature))
 
-    const policy = client.pda.policy(opts.circuit, opts.service)[0]
+    const policy = client.pda.policy(opts.serviceCode, opts.policyCode)[0]
 
     await find({
       requester: provider.wallet.publicKey.toString(),

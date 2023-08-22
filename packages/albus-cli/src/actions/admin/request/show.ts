@@ -51,9 +51,9 @@ export async function showAll(userAddr: string, opts: Opts) {
   for (const item of items) {
     table.push([
       String(item.pubkey),
-      String(item.data.circuit),
-      String(item.data.serviceProvider),
-      String(item.data.owner),
+      String(item.data?.circuit),
+      String(item.data?.serviceProvider),
+      String(item.data?.owner),
       // String(item.data.proof),
     ])
   }

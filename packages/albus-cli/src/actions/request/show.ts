@@ -82,10 +82,10 @@ export async function showAll(opts: ShowAllOpts) {
     table.push([
       String(++i),
       String(pubkey),
-      String(ProofRequestStatus[data.status]),
-      String(services.get(data.serviceProvider.toString())?.code),
-      String(circuits.get(data.circuit.toString())?.code),
-      String(new Date(Number(data.createdAt) * 1000).toISOString()),
+      String(ProofRequestStatus[data!.status]),
+      String(services.get(data!.serviceProvider.toString())?.code),
+      String(circuits.get(data!.circuit.toString())?.code),
+      String(new Date(Number(data!.createdAt) * 1000).toISOString()),
       // String(item.data.proof),
     ])
   }

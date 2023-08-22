@@ -84,6 +84,7 @@ const vc = cli.command('vc')
 
 vc.command('all', { isDefault: true })
   .description('Show all issued VC`s')
+  .option('--owner <PUBKEY>', '(optional) nft owner address')
   .action(actions.vc.showAll)
 
 vc.command('issue')
@@ -100,9 +101,9 @@ const request = cli.command('request')
 
 request.command('create')
   .description('Create proof request')
-  .requiredOption('--service <CODE>', 'Service provider`s unique code')
-  .requiredOption('--circuit <CODE>', 'Circuit core')
-  .option('--expires-in <SECONDS>', '(optional) Expires in some time duration')
+  .requiredOption('--serviceCode <CODE>', 'Service code')
+  .requiredOption('--policyCode <CODE>', 'Policy core')
+  .option('--expiresIn <SECONDS>', '(optional) Expires in some time duration')
   .action(actions.request.create)
 
 request.command('delete')
@@ -147,6 +148,10 @@ request.command('verify')
 
 const admin = cli.command('admin')
 
+admin.command('clear')
+  .description('Clear all accounts')
+  .action(actions.admin.clear)
+
 ///
 /// Policy Management
 ///
@@ -160,9 +165,10 @@ adminPolicy.command('all', { isDefault: true })
 
 adminPolicy.command('add')
   .description('Add new policy')
+  .requiredOption('--code <string>', 'policy code')
+  .requiredOption('--name <string>', 'policy name')
   .requiredOption('--serviceCode <string>', 'service code')
   .requiredOption('--circuitCode <string>', 'circuit code')
-  .requiredOption('--name <string>', 'policy name')
   .option('-d,--description <string>', '(optional) policy short description')
   .option('-ep,--expirationPeriod <seconds>', '(optional) expiration period')
   .option('-rp,--retentionPeriod <seconds>', '(optional) retention period')

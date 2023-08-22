@@ -32,15 +32,19 @@ import { useContext } from '@/context'
 export async function showAll() {
   const { client } = useContext()
 
-  log.info('Loading all policies...')
+  const services = await client.service.findMapped()
+  const circuits = await client.circuit.findMapped()
 
+  log.info('Loading all policies...')
   const policies = await client.policy.find()
 
   log.info('--------------------------------------------------------------------------')
 
   for (const policy of policies) {
-    log.info('Address:', policy.pubkey)
-    log.info(policy.data.pretty())
+    log.info('Address:', policy.pubkey.toString())
+    log.info('ServiceCode:', services.get(policy.data!.serviceProvider.toString())?.code)
+    log.info('CircuitCode:', circuits.get(policy.data!.circuit.toString())?.code)
+    log.info(policy.data?.pretty())
     log.info('--------------------------------------------------------------------------')
   }
 }

@@ -33,6 +33,7 @@ import { useContext } from '@/context'
 interface Opts {
   serviceCode: string
   circuitCode: string
+  code: string
   name: string
   description?: string
   expirationPeriod?: number
@@ -46,6 +47,7 @@ export async function add(opts: Opts) {
   const { signature } = await client.policy.create({
     circuitCode: opts.circuitCode,
     serviceCode: opts.serviceCode,
+    code: opts.code,
     name: opts.name,
     description: opts.description,
     expirationPeriod: opts.expirationPeriod,
