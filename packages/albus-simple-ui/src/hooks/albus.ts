@@ -26,13 +26,19 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { AlbusClient } from '@mfactory-lab/albus-sdk'
+import { AlbusClient } from '@mfactory-lab/albus-sdk/src/index'
 import { useAnchorWallet } from 'solana-wallets-vue'
 
 export function useAlbus() {
   const connectionStore = useConnectionStore()
   const wallet = useAnchorWallet()
-  const client = AlbusClient.factory(connectionStore.connection, wallet.value as any)
+  let client = AlbusClient.factory(connectionStore.connection)
+
+  watch(wallet, async (w) => {
+    client = AlbusClient.factory(connectionStore.connection, w as any)
+    console.log(client.provider.wallet.publicKey.toString())
+    console.log(await client.credential.loadAll())
+  })
 
   return {
     client,

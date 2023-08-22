@@ -32,6 +32,7 @@ import {
   SolongWalletAdapter, SpotWalletAdapter,
   TokenPocketWalletAdapter,
 } from '@solana/wallet-adapter-wallets'
+
 // import { normalizePath } from '@/utils'
 
 export function install({ app }: { app: App<Element> }) {
@@ -73,6 +74,6 @@ export function install({ app }: { app: App<Element> }) {
       new BraveWalletAdapter(),
       new SalmonWalletAdapter(),
     ],
-    autoConnect: !!['holder', 'business'].includes(path),
+    autoConnect: true,
   })
 }

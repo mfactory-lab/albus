@@ -1,5 +1,6 @@
 import path from 'node:path'
-import { defineConfig, loadEnv } from 'vite'
+import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import type { BuildOptions } from 'vite'
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
@@ -7,11 +8,10 @@ import Pages from 'vite-plugin-pages'
 import Layouts from 'vite-plugin-vue-layouts'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
+  // process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
   const isProd = mode === 'production'
 
   const build: BuildOptions = {
@@ -81,17 +81,17 @@ export default defineConfig(({ mode }) => {
       // '@solana/buffer-layout',
       // ],
     },
-    css: {
-      preprocessorOptions: {
-        scss: {
-          additionalData: '@use "~/assets/styles/variables.scss" as *;',
-        },
-      },
-    },
+
+    // css: {
+    //   preprocessorOptions: {
+    //     scss: {
+    //       additionalData: '@use "~/assets/styles/variables.scss" as *;',
+    //     },
+    //   },
+    // },
 
     define: {
-      // 'process.env': process.env,
-      // 'Buffer': Buffer,
+      'process.env': {},
     },
 
     optimizeDeps: {
@@ -103,8 +103,6 @@ export default defineConfig(({ mode }) => {
         'axios',
         'pinia',
         'lodash',
-        // '@albus/core',
-        // '@albus/sdk',
       ],
       exclude: ['ethereum-cryptography', 'vue-demi'],
       esbuildOptions: {
