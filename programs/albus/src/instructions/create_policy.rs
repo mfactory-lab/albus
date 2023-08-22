@@ -34,8 +34,11 @@ use crate::state::{Policy, PolicyRule};
 pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
 
+    let service = &mut ctx.accounts.service_provider;
+    service.policy_count += 1;
+
     let policy = &mut ctx.accounts.policy;
-    policy.service_provider = ctx.accounts.service_provider.key();
+    policy.service_provider = service.key();
     policy.circuit = ctx.accounts.circuit.key();
     policy.name = data.name;
     policy.description = data.description;
@@ -51,6 +54,7 @@ pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()>
 /// Data required to create a new proof request
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreatePolicyData {
+    pub code: String,
     pub name: String,
     pub description: String,
     pub expiration_period: u32,
@@ -70,8 +74,8 @@ pub struct CreatePolicy<'info> {
         init,
         seeds = [
             Policy::SEED,
-            circuit.key().as_ref(),
             service_provider.key().as_ref(),
+            data.code.as_bytes()
         ],
         bump,
         payer = authority,

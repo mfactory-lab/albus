@@ -26,19 +26,26 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+use crate::utils::{assert_authorized, close};
 use anchor_lang::prelude::*;
 
-use crate::state::Circuit;
-use crate::utils::assert_authorized;
-
-pub fn handler(ctx: Context<DeleteCircuit>) -> Result<()> {
-    assert_authorized(ctx.accounts.authority.key)
+/// Close any program account
+/// Useful for fast cleanup
+/// Should be disabled in production
+pub fn close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
+    assert_authorized(ctx.accounts.authority.key).and_then(|_| {
+        close(
+            ctx.accounts.account.to_account_info(),
+            ctx.accounts.authority.to_account_info(),
+        )
+    })
 }
 
 #[derive(Accounts)]
-pub struct DeleteCircuit<'info> {
-    #[account(mut, close = authority)]
-    pub circuit: Box<Account<'info, Circuit>>,
+pub struct AdminCloseAccount<'info> {
+    /// CHECK:
+    #[account(mut)]
+    pub account: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

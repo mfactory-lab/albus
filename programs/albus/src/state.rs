@@ -138,10 +138,13 @@ impl Circuit {
 #[account]
 #[derive(InitSpace)]
 pub struct Policy {
-    /// The service provider this belongs to.
+    /// The service provider this belongs to
     pub service_provider: Pubkey,
     /// The circuit associated with this policy
     pub circuit: Pubkey,
+    /// Unique code of the policy (associated with the service)
+    #[max_len(16)]
+    pub code: String,
     /// Name of the policy
     #[max_len(32)]
     pub name: String,
@@ -156,7 +159,7 @@ pub struct Policy {
     pub proof_request_count: u64,
     /// Creation date
     pub created_at: i64,
-    /// PDA bump.
+    /// PDA bump
     pub bump: u8,
     /// Policy rules
     #[max_len(0)]
@@ -205,7 +208,7 @@ pub struct ServiceProvider {
     pub policy_count: u64,
     /// Timestamp for when the service was added
     pub created_at: i64,
-    /// PDA bump.
+    /// PDA bump
     pub bump: u8,
 }
 
@@ -241,7 +244,7 @@ pub struct ProofRequest {
     pub proved_at: i64,
     /// Status of the request
     pub status: ProofRequestStatus,
-    /// PDA bump.
+    /// PDA bump
     pub bump: u8,
     /// The address of the presentation used for proof generation
     #[max_len(200)]

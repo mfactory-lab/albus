@@ -30,6 +30,7 @@ use anchor_lang::prelude::*;
 
 use crate::state::Policy;
 use crate::state::ServiceProvider;
+use crate::AlbusError;
 
 pub fn handler(_ctx: Context<DeletePolicy>) -> Result<()> {
     Ok(())
@@ -37,7 +38,7 @@ pub fn handler(_ctx: Context<DeletePolicy>) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct DeletePolicy<'info> {
-    #[account(mut, has_one = authority)]
+    #[account(mut, has_one = authority @ AlbusError::Unauthorized)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 
     #[account(mut, has_one = service_provider, close = authority)]

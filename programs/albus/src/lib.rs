@@ -60,7 +60,7 @@ pub mod albus {
         ctx: Context<CreateServiceProvider>,
         data: CreateServiceProviderData,
     ) -> Result<()> {
-        add_service_provider::handler(ctx, data)
+        create_service_provider::handler(ctx, data)
     }
 
     pub fn update_service_provider(
@@ -99,6 +99,12 @@ pub mod albus {
 
     pub fn verify(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
         verify::handler(ctx, data)
+    }
+
+    // admin handlers
+
+    pub fn admin_close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
+        admin::close_account(ctx)
     }
 }
 

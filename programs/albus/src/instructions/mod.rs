@@ -26,10 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub mod add_service_provider;
+pub mod admin;
 pub mod create_circuit;
 pub mod create_policy;
 pub mod create_proof_request;
+pub mod create_service_provider;
 pub mod delete_circuit;
 pub mod delete_policy;
 pub mod delete_proof_request;
@@ -41,17 +42,7 @@ pub mod update_service;
 pub mod verify;
 
 pub use self::{
-    add_service_provider::*,
-    create_circuit::*,
-    create_policy::*,
-    create_proof_request::*,
-    delete_circuit::*,
-    delete_policy::*,
-    delete_proof_request::*,
-    delete_service_provider::*,
-    // mint_credential::*,
-    prove::*,
-    update_circuit_vk::*,
-    update_service::*,
-    verify::*,
+    admin::*, create_circuit::*, create_policy::*, create_proof_request::*,
+    create_service_provider::*, delete_circuit::*, delete_policy::*, delete_proof_request::*,
+    delete_service_provider::*, prove::*, update_circuit_vk::*, update_service::*, verify::*,
 };

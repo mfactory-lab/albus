@@ -26,8 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+pub mod account;
 pub mod assert;
 pub mod circuit;
+// pub mod nft;
 
-pub use assert::*;
-pub use circuit::*;
+pub use self::{account::*, assert::*, circuit::*};
