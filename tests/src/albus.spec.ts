@@ -26,7 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Keypair, PublicKey } from '@solana/web3.js'
+import { createAdminCloseAccountInstruction } from '@mfactory-lab/albus-sdk'
+import type { CreatePolicyProps } from '@mfactory-lab/albus-sdk/dist/policyManager'
+import { Keypair, PublicKey, Transaction } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
 import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk/src'
 import { airdrop, assertErrorCode, loadFixture, newProvider, payerKeypair, provider } from './utils'
@@ -106,18 +108,19 @@ describe('albus', () => {
 
   it('can create policy', async () => {
     try {
-      const data = {
+      const data: CreatePolicyProps = {
+        code: 'age',
         serviceCode,
         circuitCode: 'age',
         name: 'Age policy 18+',
         description: 'Test policy',
-        expiresIn: 0,
+        expirationPeriod: 0,
+        retentionPeriod: 0,
         rules: [
           { index: minAgeIndex, group: 0, value: 18 },
           { index: maxAgeIndex, group: 0, value: 100 },
         ],
       }
-
       const { signature } = await client.policy.create(data)
       console.log('signature', signature)
     } catch (e) {
@@ -127,16 +130,15 @@ describe('albus', () => {
   })
 
   it('can create proof request', async () => {
-    const { address } = await client.proofRequest.create({ circuitId: 'age', serviceId: serviceCode })
+    const { address } = await client.proofRequest.create({ serviceCode, policyCode: 'age' })
     const proofRequest = await client.proofRequest.load(address)
     assert.equal(proofRequest.owner.toString(), provider.publicKey.toString())
     assert.equal(proofRequest.status, ProofRequestStatus.Pending)
   })
 
   it('can prove a proof request', async () => {
-    const [circuit] = client.pda.circuit('age')
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(circuit, service)
+    const [policy] = client.pda.policy(service, 'age')
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
     const mockedVpUri = 'http://localhost/mock.json'
@@ -203,21 +205,122 @@ describe('albus', () => {
 
     assert.equal(data.vpUri, mockedVpUri)
     assert.equal(data.owner.toString(), provider.publicKey.toString())
+    assert.ok(data.proof)
+    assert.deepEqual(data.publicInputs, [
+      [
+        0, 199, 214, 240, 123, 172, 248,
+        120, 228, 226, 80, 170, 126, 30,
+        175, 137, 146, 226, 184, 21, 10,
+        234, 158, 225, 179, 97, 99, 42,
+        178, 165, 78, 197,
+      ],
+      [
+        1, 24, 137, 177, 30, 45, 57, 167,
+        210, 172, 227, 148, 76, 91, 156, 16,
+        58, 67, 90, 245, 67, 148, 118, 22,
+        242, 95, 231, 130, 15, 199, 245, 218,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 1, 52, 178, 166,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 18,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 100,
+      ],
+      [
+        24, 125, 217, 174, 133, 40, 203,
+        118, 245, 106, 154, 122, 19, 50,
+        71, 225, 18, 147, 174, 184, 246,
+        177, 138, 220, 37, 203, 36, 131,
+        167, 224, 109, 31,
+      ],
+      [
+        46, 19, 226, 114, 3, 228, 121, 0,
+        203, 132, 50, 204, 165, 145, 251, 3,
+        242, 141, 38, 88, 124, 50, 248, 61,
+        218, 182, 181, 189, 88, 230, 143, 215,
+      ],
+      [
+        45, 183, 198, 89, 118, 191, 150,
+        159, 106, 184, 128, 72, 245, 119,
+        147, 210, 107, 183, 226, 219, 241,
+        216, 158, 67, 9, 92, 26, 98,
+        61, 107, 160, 254,
+      ],
+      [
+        46, 196, 175, 216, 123, 42, 24, 178,
+        16, 98, 164, 254, 143, 46, 79, 106,
+        229, 141, 49, 13, 188, 75, 245, 196,
+        75, 161, 118, 58, 149, 60, 215, 188,
+      ],
+      [
+        34, 59, 233, 132, 237, 149, 239, 141,
+        62, 114, 113, 160, 135, 11, 50, 26,
+        18, 8, 164, 169, 71, 229, 111, 227,
+        32, 231, 29, 61, 112, 192, 93, 138,
+      ],
+      [
+        3, 173, 23, 227, 2, 43, 181, 73,
+        139, 193, 142, 183, 238, 255, 98, 64,
+        170, 184, 200, 150, 126, 198, 90, 126,
+        220, 16, 104, 57, 239, 125, 189, 100,
+      ],
+    ])
+
     assert.equal(data.status, ProofRequestStatus.Proved)
   })
 
   it('can change proof request status', async () => {
-    const [circuit] = client.pda.circuit('age')
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(circuit, service)
+    const [policy] = client.pda.policy(service, 'age')
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
     await client.proofRequest.changeStatus({ proofRequest, status: ProofRequestStatus.Rejected })
   })
 
   it('can not change proof request status with unauthorized authority', async () => {
-    const [circuit] = client.pda.circuit('age')
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(circuit, service)
+    const [policy] = client.pda.policy(service, 'age')
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
     const newPayerKeypair = Keypair.generate()
@@ -233,24 +336,22 @@ describe('albus', () => {
   })
 
   it('can verify proof request', async () => {
-    const [circuit] = client.pda.circuit('age')
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(circuit, service)
+    const [policy] = client.pda.policy(service, 'age')
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
     const res = await client.proofRequest.verify({ proofRequest })
     assert.ok(res)
   })
 
   it('can delete proof request', async () => {
-    const [circuit] = client.pda.circuit('age')
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(circuit, service)
+    const [policy] = client.pda.policy(service, 'age')
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
     await client.proofRequest.delete({ proofRequest })
   })
 
   it('can delete policy', async () => {
-    await client.policy.delete({ circuitCode: 'age', serviceCode })
+    await client.policy.delete({ serviceCode, code: 'age' })
   })
 
   it('can delete circuit', async () => {
@@ -259,5 +360,27 @@ describe('albus', () => {
 
   it('can delete service provider', async () => {
     await client.service.delete({ code: serviceCode })
+  })
+
+  describe('admin', () => {
+    it('can delete program accounts', async () => {
+      const s = await client.service.create({ code: serviceCode, name: serviceCode })
+      const c = await client.circuit.create(circuitData)
+      const p = await client.policy.create({ serviceCode, circuitCode: circuitData.code, code: 'x', name: 'x' })
+      const r = await client.proofRequest.create({ serviceCode, policyCode: 'x' })
+
+      for (const account of [r.address, p.address, c.address, s.address]) {
+        const ix = createAdminCloseAccountInstruction({
+          authority: provider.publicKey,
+          account,
+        })
+        await provider.sendAndConfirm(new Transaction().add(ix))
+      }
+
+      try {
+        await client.service.load(s.address)
+        assert.ok(false)
+      } catch (e) {}
+    })
   })
 })
