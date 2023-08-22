@@ -10,6 +10,7 @@
   },
   "scripts": {
     "cli": "pnpm -F @mfactory-lab/albus-cli run cli",
+    "cli:run": "pnpm -F @mfactory-lab/albus-cli run run",
     "dev": "NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm -r --parallel --filter='./packages/**' run dev",
     "ui:dev": "pnpm -F @albus/ui serve",
     "gen:sdk": "pnpm -F @mfactory-lab/albus-sdk generate && eslint --fix --ext .ts ./packages/albus-sdk",

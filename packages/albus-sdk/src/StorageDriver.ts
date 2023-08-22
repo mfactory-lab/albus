@@ -28,7 +28,9 @@
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Connection, Keypair, SendOptions, Signer, Transaction, TransactionSignature } from '@solana/web3.js'
-import * as bundlr from '@bundlr-network/client'
+
+import type { WebBundlr } from '@bundlr-network/client'
+import type { NodeBundlr } from '@bundlr-network/client/build/cjs/node'
 
 const ARWEAVE_BASE_URL = 'https://arweave.net'
 const BUNDLR_DEVNET = 'https://devnet.bundlr.network'
@@ -40,9 +42,17 @@ export interface BundlrOpts {
 }
 
 export class BundlrStorageDriver {
+  protected _bundlr: WebBundlr | NodeBundlr | undefined
+  protected _opts: BundlrOpts | undefined
+
   constructor(
     readonly provider: AnchorProvider,
   ) {
+  }
+
+  configure(opts: BundlrOpts) {
+    this._bundlr = undefined
+    this._opts = opts
   }
 
   /**
@@ -51,19 +61,61 @@ export class BundlrStorageDriver {
    *   https://github.com/metaplex-foundation/js/blob/281403cfc045369be82fe8e44e87f7e094e57140/packages/js/src/plugins/bundlrStorage/BundlrStorageDriver.ts#L237
    *
    */
-  async uploadData(data: string, opts: BundlrOpts = {}) {
-    const bundlr = await this.initBundlr(opts)
+  async uploadData(data: string) {
+    const bundlr = await this.bundlr()
+    const bytes = new TextEncoder().encode(data)
+
+    const amount = await this.getUploadPrice(bytes.byteLength)
+    await this.fund(amount)
+
     const response = await bundlr.uploader.uploadData(data, {
       tags: [{ name: 'Content-Type', value: 'application/ld+json' }],
     })
+
     // return response.public
     return `${ARWEAVE_BASE_URL}/${response.id}`
   }
 
-  async initBundlr(opts: BundlrOpts = {}) {
+  async getUploadPrice(bytes: number): Promise<number> {
+    const bundlr = await this.bundlr()
+    const price = await bundlr.getPrice(bytes)
+    return price.toNumber()
+  }
+
+  async fund(amount: number, skipBalanceCheck = false): Promise<void> {
+    const bundlr = await this.bundlr()
+    let toFund = amount
+
+    if (!skipBalanceCheck) {
+      const balance = await bundlr.getLoadedBalance()
+
+      toFund = toFund > balance.toNumber()
+        ? toFund - balance.toNumber()
+        : 0
+    }
+
+    if (toFund <= 0) {
+      return
+    }
+
+    // TODO: Catch errors and wrap in BundlrErrors.
+    await bundlr.fund(toFund)
+  }
+
+  async bundlr(): Promise<WebBundlr | NodeBundlr> {
+    if (this._bundlr) {
+      return this._bundlr
+    }
+
+    return (this._bundlr = await this.initBundlr())
+  }
+
+  async initBundlr(): Promise<WebBundlr | NodeBundlr> {
+    const currency = 'solana'
+
     const options = {
-      timeout: opts.timeout,
-      providerUrl: opts.providerUrl ?? this.provider.connection.rpcEndpoint,
+      timeout: this._opts?.timeout,
+      providerUrl: this._opts?.providerUrl ?? this.provider.connection.rpcEndpoint,
     }
 
     let address: string
@@ -75,19 +127,36 @@ export class BundlrStorageDriver {
       address = BUNDLR_MAINNET
     }
 
-    if ('payer' in this.provider.wallet) {
+    // eslint-disable-next-line n/prefer-global/process,no-prototype-builtins
+    const isNode = typeof window === 'undefined' || window.process?.hasOwnProperty('type')
+
+    if (isNode && 'payer' in this.provider.wallet) {
       const identity = this.provider.wallet.payer as Keypair
-      return new bundlr.NodeBundlr(address, 'solana', identity.secretKey, options)
+      return this.initNodeBundlr(address, currency, identity, options)
     }
 
-    return new bundlr.WebBundlr(address, 'solana', this.bundlrWallet, options)
+    return this.initWebBundlr(address, currency, options)
   }
 
-  get bundlrWallet() {
-    return {
+  async initNodeBundlr(
+    address: string,
+    currency: string,
+    keypair: Keypair,
+    options: any,
+  ): Promise<NodeBundlr> {
+    const { NodeBundlr } = await import('@bundlr-network/client')
+    return new NodeBundlr(address, currency, keypair.secretKey, options)
+  }
+
+  async initWebBundlr(
+    address: string,
+    currency: string,
+    options: any,
+  ): Promise<WebBundlr> {
+    const wallet = {
       publicKey: this.provider.publicKey,
-      signMessage: (message: Uint8Array) => {
-        // this.provider.wallet.signMessage(message)
+      signMessage: (_msg: Uint8Array) => {
+        // this.provider.wallet.signMessage(msg)
       },
       signTransaction: (transaction: Transaction) =>
         this.provider.wallet.signTransaction(transaction),
@@ -102,5 +171,14 @@ export class BundlrStorageDriver {
         return connection.sendTransaction(transaction, signers, sendOptions)
       },
     }
+
+    const { WebBundlr } = await import('@bundlr-network/client')
+
+    const bundlr = new WebBundlr(address, currency, wallet, options)
+
+    // Try to initiate bundlr.
+    await bundlr.ready()
+
+    return bundlr
   }
 }
