@@ -76,8 +76,6 @@ export class CredentialManager {
       },
     )
 
-    console.log('asd')
-
     const result: { address: PublicKey; credential: VerifiableCredential }[] = []
     for (const account of accounts) {
       if (account.json?.vc !== undefined) {

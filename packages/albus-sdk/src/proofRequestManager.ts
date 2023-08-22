@@ -107,12 +107,17 @@ export class ProofRequestManager {
 
     if (props.circuit) {
       builder.addFilter('circuit', new PublicKey(props.circuit))
-    } else if (props.circuitId) {
-      builder.addFilter('circuit', this.pda.circuit(props.circuitId)[0])
+    } else if (props.circuitCode) {
+      builder.addFilter('circuit', this.pda.circuit(props.circuitCode)[0])
     }
 
     if (props.policy) {
       builder.addFilter('policy', new PublicKey(props.policy))
+    }
+
+    if (props.policyId) {
+      const id = props.policyId.split('_')
+      builder.addFilter('policy', this.pda.policy(id[0]!, id[1]!)[0])
     }
 
     if (props.status) {
@@ -364,8 +369,9 @@ export interface FindProofRequestProps {
   serviceProvider?: PublicKeyInitData
   serviceProviderCode?: string
   circuit?: PublicKeyInitData
-  circuitId?: string
+  circuitCode?: string
   policy?: PublicKeyInitData
+  policyId?: string
   status?: ProofRequestStatus
   skipUser?: boolean
   withoutData?: boolean
