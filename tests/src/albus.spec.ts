@@ -121,8 +121,16 @@ describe('albus', () => {
           { index: maxAgeIndex, group: 0, value: 100 },
         ],
       }
-      const { signature } = await client.policy.create(data)
-      console.log('signature', signature)
+      const { address } = await client.policy.create(data)
+
+      const policy = await client.policy.load(address)
+      assert.equal(policy.serviceProvider.toString(), client.pda.serviceProvider(serviceCode)[0].toString())
+      assert.equal(policy.circuit.toString(), client.pda.circuit(data.circuitCode)[0].toString())
+      assert.equal(policy.code, data.code)
+      assert.equal(policy.name, data.name)
+      assert.equal(policy.description, data.description)
+      assert.equal(policy.expirationPeriod, data.expirationPeriod)
+      assert.equal(policy.retentionPeriod, data.retentionPeriod)
     } catch (e) {
       console.log(e)
       assert.ok(false)
