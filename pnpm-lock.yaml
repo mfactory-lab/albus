@@ -192,7 +192,7 @@ importers:
         specifier: ^0.28.0
         version: 0.28.0
       '@mfactory-lab/albus-sdk':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../albus-sdk
       '@solana/wallet-adapter-wallets':
         specifier: ^0.19.20
