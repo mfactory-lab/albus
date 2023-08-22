@@ -40,6 +40,7 @@ pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()>
     let policy = &mut ctx.accounts.policy;
     policy.service_provider = service.key();
     policy.circuit = ctx.accounts.circuit.key();
+    policy.code = data.code;
     policy.name = data.name;
     policy.description = data.description;
     policy.rules = data.rules;
