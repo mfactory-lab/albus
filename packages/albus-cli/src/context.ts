@@ -47,9 +47,11 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
   const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
   const connection = new web3.Connection(endpoint, opts.commitment)
 
-  const wallet = new Wallet(Keypair.fromSecretKey(Buffer.from(JSON.parse(
-    keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
-  ))))
+  const wallet = new Wallet(
+    Keypair.fromSecretKey(Buffer.from(JSON.parse(
+      keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
+    ))),
+  )
   const provider = new AnchorProvider(connection, wallet, opts)
   const client = new AlbusClient(provider)
   const metaplex = Metaplex.make(provider.connection)

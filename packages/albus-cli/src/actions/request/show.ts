@@ -32,7 +32,7 @@ import Table from 'cli-table3'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-export async function show(addr: string) {
+export async function show(addr: string | PublicKey) {
   const { client } = useContext()
 
   const proofRequest = await client.proofRequest.load(addr)
@@ -41,17 +41,6 @@ export async function show(addr: string) {
   log.info(`Address: ${addr}`)
   log.info(proofRequest.pretty())
   log.info('--------------------------------------------------------------------------')
-}
-
-interface SearchOpts {
-  policy: string | PublicKey
-  requester: string | PublicKey
-}
-
-export async function find(opts: SearchOpts) {
-  const { client } = useContext()
-  const [zkpRequestAddr] = client.pda.proofRequest(opts.policy, opts.requester)
-  await show(zkpRequestAddr.toString())
 }
 
 interface ShowAllOpts {

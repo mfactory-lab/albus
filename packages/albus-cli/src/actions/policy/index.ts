@@ -26,46 +26,4 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { ProofRequestStatus } from '@mfactory-lab/albus-sdk'
-import { PublicKey } from '@solana/web3.js'
-import Table from 'cli-table3'
-import { useContext } from '@/context'
-
-interface Opts {
-  serviceCode?: string
-  circuit?: string
-  circuitCode?: string
-  policy?: string
-  policyId?: string
-  status?: ProofRequestStatus
-}
-
-export async function showAll(userAddr: string, opts: Opts) {
-  const { client } = useContext()
-
-  const items = await client.proofRequest.find({
-    user: new PublicKey(userAddr),
-    serviceProviderCode: opts.serviceCode,
-    circuit: opts.circuit,
-    circuitCode: opts.circuitCode,
-    policy: opts.policy,
-    policyId: opts.policyId,
-    status: opts.status,
-  })
-
-  const table = new Table({
-    head: ['Address', 'Circuit', 'Service Provider', 'Requester', 'Proof'],
-  })
-
-  for (const item of items) {
-    table.push([
-      String(item.pubkey),
-      String(item.data?.circuit),
-      String(item.data?.serviceProvider),
-      String(item.data?.owner),
-      // String(item.data.proof),
-    ])
-  }
-
-  // process.exit(0)
-}
+export * from './show'

@@ -26,46 +26,33 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { ProofRequestStatus } from '@mfactory-lab/albus-sdk'
-import { PublicKey } from '@solana/web3.js'
-import Table from 'cli-table3'
+import log from 'loglevel'
 import { useContext } from '@/context'
 
 interface Opts {
-  serviceCode?: string
-  circuit?: string
   circuitCode?: string
-  policy?: string
-  policyId?: string
-  status?: ProofRequestStatus
+  serviceCode?: string
 }
 
-export async function showAll(userAddr: string, opts: Opts) {
+export async function showAll(opts: Opts) {
   const { client } = useContext()
 
-  const items = await client.proofRequest.find({
-    user: new PublicKey(userAddr),
-    serviceProviderCode: opts.serviceCode,
-    circuit: opts.circuit,
+  const services = await client.service.findMapped()
+  const circuits = await client.circuit.findMapped()
+
+  log.info('Loading all policies...')
+  const policies = await client.policy.find({
     circuitCode: opts.circuitCode,
-    policy: opts.policy,
-    policyId: opts.policyId,
-    status: opts.status,
+    serviceCode: opts.serviceCode,
   })
 
-  const table = new Table({
-    head: ['Address', 'Circuit', 'Service Provider', 'Requester', 'Proof'],
-  })
+  log.info('--------------------------------------------------------------------------')
 
-  for (const item of items) {
-    table.push([
-      String(item.pubkey),
-      String(item.data?.circuit),
-      String(item.data?.serviceProvider),
-      String(item.data?.owner),
-      // String(item.data.proof),
-    ])
+  for (const policy of policies) {
+    log.info('Address:', policy.pubkey.toString())
+    log.info('ServiceCode:', services.get(policy.data!.serviceProvider.toString())?.code)
+    log.info('CircuitCode:', circuits.get(policy.data!.circuit.toString())?.code)
+    log.info(policy.data?.pretty())
+    log.info('--------------------------------------------------------------------------')
   }
-
-  // process.exit(0)
 }

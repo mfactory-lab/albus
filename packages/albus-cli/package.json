@@ -17,7 +17,7 @@
   },
   "scripts": {
     "cli": "node ./dist/index.es.js",
-    "_cli": "vite-node ./src/index.ts --",
+    "run": "vite-node ./src/index.ts --",
     "dev": "vite build --watch",
     "build": "vite build",
     "release": "pnpm build & release-it",

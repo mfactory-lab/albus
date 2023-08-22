@@ -27,7 +27,7 @@
  */
 
 import log from 'loglevel'
-import { find } from './show'
+import { show } from './show'
 import { useContext } from '@/context'
 import { exploreTransaction } from '@/utils'
 
@@ -41,10 +41,10 @@ interface Opts {
 }
 
 export async function create(opts: Opts) {
-  const { client, provider } = useContext()
+  const { client } = useContext()
 
   try {
-    const { signature } = await client.proofRequest.create({
+    const { signature, address } = await client.proofRequest.create({
       serviceCode: opts.serviceCode,
       policyCode: opts.policyCode,
       expiresIn: opts.expiresIn,
@@ -53,12 +53,7 @@ export async function create(opts: Opts) {
     log.info(`Signature: ${signature}`)
     log.info(exploreTransaction(signature))
 
-    const policy = client.pda.policy(opts.serviceCode, opts.policyCode)[0]
-
-    await find({
-      requester: provider.wallet.publicKey.toString(),
-      policy,
-    })
+    await show(address)
   } catch (e) {
     log.error(e)
   }
