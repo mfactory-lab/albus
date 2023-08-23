@@ -266,7 +266,7 @@ export interface VerifyCredentialOpts extends VerifyCredentialOptions {
 /**
  * Verify credential
  */
-export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCredentialOpts = {}): Promise<VerifiableCredential & { issuerPubkey: [Uint8Array, Uint8Array] }> {
+export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCredentialOpts = {}): Promise<VerifiableCredential> {
   const resolver = opts.resolver ?? new Resolver({
     ...WebDidResolver.getResolver(),
     ...KeyDidResolver.getResolver(),
@@ -308,12 +308,9 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
     throw new Error('proof verification failed')
   }
 
-  const babyJub = await babyJubPromise
-
   return {
     ...vc,
     credentialSubject,
-    issuerPubkey: babyJub.unpackPoint(issuerPubkey),
   }
 }
 
