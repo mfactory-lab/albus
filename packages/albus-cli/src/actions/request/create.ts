@@ -32,21 +32,22 @@ import { useContext } from '@/context'
 import { exploreTransaction } from '@/utils'
 
 interface Opts {
-  // Service code
-  serviceCode: string
-  // Policy code
-  policyCode: string
   // Expires in seconds
   expiresIn?: number
 }
 
-export async function create(opts: Opts) {
+export async function create(policy: string, opts: Opts) {
   const { client } = useContext()
+
+  const [serviceCode, policyCode] = policy.split('_')
+  if (!serviceCode || !policyCode) {
+    throw new Error('invalid policy id')
+  }
 
   try {
     const { signature, address } = await client.proofRequest.create({
-      serviceCode: opts.serviceCode,
-      policyCode: opts.policyCode,
+      serviceCode,
+      policyCode,
       expiresIn: opts.expiresIn,
     }, { commitment: 'confirmed' })
 

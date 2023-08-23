@@ -38,8 +38,10 @@ export async function show(addr: string | PublicKey) {
   const proofRequest = await client.proofRequest.load(addr)
 
   log.info('--------------------------------------------------------------------------')
-  log.info(`Address: ${addr}`)
-  log.info(proofRequest.pretty())
+  log.info(JSON.stringify({
+    address: addr,
+    ...proofRequest.pretty(),
+  }, null, 2))
   log.info('--------------------------------------------------------------------------')
 }
 

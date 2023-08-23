@@ -28,6 +28,7 @@
 
 import type { Command } from 'commander'
 import { program as cli } from 'commander'
+import chalk from 'chalk'
 import log from 'loglevel'
 import { initContext } from '@/context'
 import * as actions from '@/actions'
@@ -36,6 +37,16 @@ const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
 const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet'
 const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
+
+const originFactory = log.methodFactory
+log.methodFactory = function (name, lvl, logger) {
+  const originMethod = originFactory(name, lvl, logger)
+  const colorMap = {
+    warn: chalk.hex('#FFA500'),
+    error: chalk.red,
+  }
+  return (...msg) => colorMap[name] ? originMethod(colorMap[name](...msg)) : originMethod(...msg)
+}
 
 cli
   .name('cli')
@@ -48,13 +59,13 @@ cli
     const opts = command.opts() as any
     log.setLevel(opts.logLevel)
     const { provider, cluster } = initContext(opts)
-    log.info(`# Version: ${VERSION}`)
-    log.info(`# Keypair: ${provider.wallet.publicKey}`)
-    log.info(`# Cluster: ${cluster}\n`)
+    console.log(chalk.dim(`# Version: ${VERSION}`))
+    console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
+    console.log(chalk.dim(`# Cluster: ${cluster}\n`))
   })
-  .hook('postAction', (_command: Command) => {
-    process.exit()
-  })
+  // .hook('postAction', (_command: Command) => {
+  //   process.exit()
+  // })
 
 // ------------------------------------------
 // DID
@@ -109,8 +120,7 @@ const request = cli.command('request')
 
 request.command('create')
   .description('Create proof request')
-  .requiredOption('-s, --serviceCode <string>', 'Service code')
-  .requiredOption('-p, --policyCode <string>', 'Policy core')
+  .argument('policy', 'Policy ID. Example: acme_p1')
   .option('-e, --expiresIn <seconds>', '(optional) Expires in some time duration')
   .action(actions.request.create)
 
@@ -270,4 +280,6 @@ cli.command('*', { isDefault: true, hidden: true })
     cli.help()
   })
 
-cli.parse()
+cli.parseAsync().catch((e) => {
+  log.error(e)
+})
