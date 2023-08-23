@@ -99,7 +99,7 @@ export class BundlrStorageDriver {
     }
 
     // TODO: Catch errors and wrap in BundlrErrors.
-    await bundlr.fund(toFund)
+    await bundlr.fund(toFund, 1.1)
   }
 
   async bundlr(): Promise<WebBundlr | NodeBundlr> {
@@ -163,12 +163,14 @@ export class BundlrStorageDriver {
       signAllTransactions: (transactions: Transaction[]) =>
         this.provider.wallet.signAllTransactions(transactions),
       sendTransaction: (
-        transaction: Transaction,
-        connection: Connection,
+        tx: Transaction,
+        _connection: Connection,
         options: SendOptions & { signers?: Signer[] } = {},
       ): Promise<TransactionSignature> => {
+        console.log('sendTransaction', options)
+        console.log(this.provider.wallet)
         const { signers = [], ...sendOptions } = options
-        return connection.sendTransaction(transaction, signers, sendOptions)
+        return this.provider.sendAndConfirm(tx, signers, sendOptions)
       },
     }
 
@@ -179,6 +181,6 @@ export class BundlrStorageDriver {
     // Try to initiate bundlr.
     await bundlr.ready()
 
-    return bundlr
+    return bundlr as any
   }
 }
