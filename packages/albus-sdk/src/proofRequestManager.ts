@@ -60,15 +60,23 @@ export class ProofRequestManager {
   }
 
   /**
-   * Load proof request by {@link addr}
+   * Load a proof request based on its public key address.
+   *
+   * @param {PublicKeyInitData} addr - The public key address of the proof request to load.
+   * @param {Commitment} [commitment] - Optional commitment level for loading the proof request.
+   * @returns {Promise<ProofRequest>} A Promise that resolves to the loaded proof request.
    */
   async load(addr: PublicKeyInitData, commitment?: Commitment) {
     return ProofRequest.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
   }
 
   /**
-   * Load proof request with additional `policy` and `circuit`
-   * reduce rpc requests by using `getMultipleAccountsInfo`
+   * Load a full set of data associated with a proof request, including the policy and circuit information.
+   *
+   * @param {PublicKeyInitData} addr - The public key address of the proof request to load.
+   * @param {Commitment} [commitment] - Optional commitment level for loading the data.
+   * @returns {Promise<{proofRequest:ProofRequest, policy?:Policy, circuit?:Circuit}>} A Promise that resolves to an object containing the loaded proof request, associated policy, and circuit information.
+   * @throws {Error} Throws an error if there is an issue during the loading process.
    */
   async loadFull(addr: PublicKeyInitData, commitment?: Commitment) {
     const proofRequest = await this.load(addr, commitment)
@@ -85,7 +93,10 @@ export class ProofRequestManager {
   }
 
   /**
-   * Find proof requests
+   * Find proof requests based on specified criteria.
+   *
+   * @param {FindProofRequestProps} [props] - Optional properties for customizing the proof request search.
+   * @returns {Promise<Array<{pubkey:PublicKey,data:ProofRequest}>>} A Promise that resolves to an array of proof request results.
    */
   async find(props: FindProofRequestProps = {}) {
     const builder = ProofRequest.gpaBuilder()
@@ -133,7 +144,12 @@ export class ProofRequestManager {
   }
 
   /**
-   * Create new proof request
+   * Create a new proof request with the specified properties.
+   *
+   * @param {CreateProofRequestProps} props - The properties for creating the proof request.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns {Promise<{signature:string,address:PublicKey}>} A Promise that resolves to the result of creating the proof request, including its address and signature.
+   * @throws {Error} Throws an error if there is an issue during the creation process or if the transaction fails to confirm.
    */
   async create(props: CreateProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -165,7 +181,12 @@ export class ProofRequestManager {
   }
 
   /**
-   * Delete proof request
+   * Delete a proof request based on the specified properties.
+   *
+   * @param {DeleteProofRequestProps} props - The properties for deleting the proof request.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of deleting the proof request, including its signature.
+   * @throws {Error} Throws an error if there is an issue during the deletion process or if the transaction fails to confirm.
    */
   async delete(props: DeleteProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -184,8 +205,13 @@ export class ProofRequestManager {
   }
 
   /**
-   * Change proof request status
-   * Required admin authority
+   * Change the status of a proof request by providing a new status value.
+   * Require admin authority.
+   *
+   * @param {ChangeStatus} props - The properties for changing the status of the proof request.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of changing the status, including the signature.
+   * @throws {Error} Throws an error if there is an issue during the status change process or if the transaction fails to confirm.
    */
   async changeStatus(props: ChangeStatus, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
@@ -210,7 +236,11 @@ export class ProofRequestManager {
   }
 
   /**
-   * Verify Proof request
+   * Verify a proof based on the provided properties.
+   *
+   * @param {VerifyProps} props - The properties for verifying the proof.
+   * @returns {Promise<boolean>} A Promise that resolves to a boolean indicating whether the proof is valid (true) or not (false).
+   * @throws {Error} Throws an error if there is an issue during the verification process or if the provided proof is not valid.
    */
   async verify(props: VerifyProps) {
     const proofRequest = await this.load(props.proofRequest)
@@ -225,12 +255,11 @@ export class ProofRequestManager {
   }
 
   /**
-   * Prove the {@link ProofRequest}
-   * - Create Verifiable Presentation
-   * - Encrypt Verifiable Presentation
-   * - Generate ZK-Proof
-   * - Upload Verifiable Presentation to arweave
-   * - Verify ZK-Proof on-chain
+   * Perform a full proof generation process based on the provided properties.
+   *
+   * @param {FullProveProps} props - The properties for the full proof generation process.
+   * @returns {Promise<{signature: string}>} A Promise that resolves to the result of the full proof generation, including the signature, proof, public signals, and presentation URI.
+   * @throws {Error} Throws an error if there is an issue during any step of the proof generation process.
    */
   async fullProve(props: FullProveProps) {
     const { proofRequest, circuit, policy } = await this.loadFull(props.proofRequest)
@@ -293,7 +322,12 @@ export class ProofRequestManager {
   }
 
   /**
-   * Prove the proof request
+   * Prove a proof request by providing the necessary proof and public signals.
+   *
+   * @param {ProveProps} props - The properties for proving the proof request.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of proving the proof request, including the signature.
+   * @throws {Error} Throws an error if there is an issue during the proof process or if the transaction fails to confirm.
    */
   async prove(props: ProveProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -331,10 +365,10 @@ export class ProofRequestManager {
   }
 
   /**
-   * Validates proof request.
+   * Validate a proof request to ensure it meets specific criteria.
    *
-   * @param {ProofRequest} req The proof request object to validate.
-   * @throws An error with a message indicating why the request is invalid.
+   * @param {ProofRequest} req - The proof request to validate.
+   * @throws {Error} Throws an error if the proof request fails validation based on specified criteria.
    */
   async validate(req: ProofRequest) {
     const slot = await this.provider.connection.getSlot()

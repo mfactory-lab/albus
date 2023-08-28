@@ -46,8 +46,13 @@ export class CredentialManager {
   }
 
   /**
-   * Load verifiable credential by {@link addr}
-   * verify and decrypt if needed
+   * Load a verifiable credential associated with a specified address.
+   * This function retrieves, verifies, and optionally decrypts the credential.
+   *
+   * @param {PublicKeyInitData} addr - The address associated with the verifiable credential.
+   * @param {LoadCredentialProps} [props] - Optional properties for loading and processing the credential.
+   * @returns {Promise<VerifiableCredential>} A Promise that resolves to the verified and, if necessary, decrypted Verifiable Credential.
+   * @throws {Error} Throws an error if the loaded credential is invalid or does not contain the `vc` attribute in its metadata.
    */
   async load(addr: PublicKeyInitData, props: LoadCredentialProps = {}) {
     const nft = await loadNft(this.provider.connection, addr, { code: 'VC' })
@@ -91,8 +96,12 @@ export class CredentialManager {
   }
 
   /**
-   * Load verifiable presentation
-   * verify and decrypt if needed
+   * Load a verifiable presentation from a specified URI, verify, and optionally decrypt it.
+   *
+   * @param {string} uri - The URI from which to retrieve the verifiable presentation.
+   * @param {LoadPresentationProps} [props] - Optional properties for loading and processing the presentation.
+   * @returns {Promise<object>} A Promise that resolves to the loaded, verified, and, if necessary, decrypted verifiable presentation.
+   * @throws {Error} Throws an error if there is an issue loading the presentation, if it fails verification, or if decryption fails.
    */
   async loadPresentation(uri: string, props: LoadPresentationProps = {}) {
     const presentation = (await axios.get(uri)).data

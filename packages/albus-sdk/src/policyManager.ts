@@ -49,27 +49,39 @@ export class PolicyManager {
   }
 
   /**
-   * Load policy by {@link addr}
+   * Load a policy based on its public key address.
+   *
+   * @param {PublicKeyInitData} addr - The public key address of the policy to load.
+   * @param {Commitment} [commitment] - Optional commitment level for loading the policy.
+   * @returns {Promise<Policy>} A Promise that resolves to the loaded policy.
    */
   async load(addr: PublicKeyInitData, commitment?: Commitment) {
     return Policy.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
   }
 
   /**
-   * Load policy by id
-   * Example: `acme_123`
+   * Load a policy by its unique identifier.
+   * The identifier should be in the format: `serviceCode_policyCode`.
+   *
+   * @param {string} id - The unique identifier of the policy to load (e.g., `acme_123`).
+   * @param {Commitment} [commitment] - Optional commitment level for loading the policy.
+   * @returns {Promise<Policy>} A Promise that resolves to the loaded policy.
+   * @throws {Error} Throws an error if the provided policy identifier is invalid or if there's an issue loading the policy.
    */
   async loadById(id: string, commitment?: Commitment) {
-    const [serviceId, policyId] = id.split(ID_SEPARATOR)
-    if (!serviceId || !policyId) {
+    const [serviceCode, policyCode] = id.split(ID_SEPARATOR)
+    if (!serviceCode || !policyCode) {
       throw new Error('invalid policy id')
     }
-    const service = this.pda.serviceProvider(serviceId)[0]
-    return this.load(this.pda.policy(service, policyId)[0], commitment)
+    const service = this.pda.serviceProvider(serviceCode)[0]
+    return this.load(this.pda.policy(service, policyCode)[0], commitment)
   }
 
   /**
-   * Find policies
+   * Find policies based on specified criteria.
+   *
+   * @param {FindPolicyProps} [props] - Optional properties for customizing the policy search.
+   * @returns {Promise<Array<{pubkey: PublicKey, data: Policy}>>>} A Promise that resolves to an array of policy results.
    */
   async find(props: FindPolicyProps = {}) {
     const builder = Policy.gpaBuilder()
@@ -96,7 +108,12 @@ export class PolicyManager {
   }
 
   /**
-   * Add new policy
+   * Add a new policy with the specified properties.
+   *
+   * @param {CreatePolicyProps} props - The properties for creating the policy.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns {Promise<{ signature:string, address: PublicKey }>} A Promise that resolves to the result of creating the policy, including its signature and address.
+   * @throws {Error} Throws an error if there is an issue creating the policy or if the transaction fails to confirm.
    */
   async create(props: CreatePolicyProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -130,7 +147,12 @@ export class PolicyManager {
   }
 
   /**
-   * Delete policy
+   * Delete a policy based on the specified properties.
+   *
+   * @param {DeletePolicyProps} props - The properties for deleting the policy.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns {Promise<{signature: string}>} A Promise that resolves to the result of deleting the policy, including its signature.
+   * @throws {Error} Throws an error if there is an issue deleting the policy or if the transaction fails to confirm.
    */
   async delete(props: DeletePolicyProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
