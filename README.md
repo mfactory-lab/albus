@@ -12,10 +12,6 @@ Albus Protocol is an all-in-one Compliance-as-a-Service solution that facilitate
 # Full documentation
 
 - [Introduction](https://github.com/mfactory-lab/albus/wiki)
-  - [What is Albus?](https://github.com/mfactory-lab/albus/wiki#what-is-albus)
-  - [Self-Sovereign Identity (SSI)](https://github.com/mfactory-lab/albus/wiki#self-sovereign-identity-ssi)
-  - [Secret sharing scheme](https://github.com/mfactory-lab/albus/wiki#secret-sharing-scheme)
-  - [Zero-Knowledge Proofs (ZKP)](https://github.com/mfactory-lab/albus/wiki#zero-knowledge-proofs-zkp)
 - [Albus diagrams](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams)
   - [Workflow overview](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-overview)
   - [Workflow diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-diagram)
