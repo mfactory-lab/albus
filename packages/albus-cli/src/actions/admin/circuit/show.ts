@@ -36,6 +36,8 @@ export async function showAll() {
 
   const circuits = await client.circuit.find()
 
+  log.info(`Found ${circuits.length} circuits`)
+
   log.info('--------------------------------------------------------------------------')
 
   for (const circuit of circuits) {

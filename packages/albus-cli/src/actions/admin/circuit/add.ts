@@ -28,7 +28,6 @@
 
 import type { Buffer } from 'node:buffer'
 import fs from 'node:fs'
-import { toMetaplexFile } from '@metaplex-foundation/js'
 import axios from 'axios'
 import chalk from 'chalk'
 import log from 'loglevel'
@@ -80,54 +79,55 @@ export async function add(circuitId: string, opts: Opts) {
       zKeyFile,
     )
 
-    // fs.writeFileSync(`${config.circuitPath}/${circuitId}.zkey`, zKeyFile.data)
+    fs.writeFileSync(`${config.circuitPath}/${circuitId}.zkey`, zKeyFile.data)
+    // return
 
-    log.info('Uploading zKey file...')
-    zkeyUri = await metaplex.storage().upload(toMetaplexFile(zKeyFile.data, 'circuit.zkey'))
-    log.info('Done')
-    log.info(`Uri: ${zkeyUri}`)
+    // log.info('Uploading zKey file...')
+    // zkeyUri = await metaplex.storage().upload(toMetaplexFile(zKeyFile.data, 'circuit.zkey'))
+    // log.info('Done')
+    // log.info(`Uri: ${zkeyUri}`)
   } else {
     zkeyUri = opts.zkey
     zKeyFile.data = await fetchBytes(opts.zkey)
   }
 
-  let wasmUri: string
-  if (!opts.wasm) {
-    const wasmFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.wasm`)
-    log.info('Uploading wasm file...')
-    wasmUri = await metaplex.storage().upload(toMetaplexFile(wasmFile, 'circuit.wasm'))
-    log.info('Done')
-    log.info(`Uri: ${wasmUri}`)
-  } else {
-    wasmUri = opts.wasm
-  }
+  // let wasmUri: string
+  // if (!opts.wasm) {
+  //   const wasmFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.wasm`)
+  //   log.info('Uploading wasm file...')
+  //   wasmUri = await metaplex.storage().upload(toMetaplexFile(wasmFile, 'circuit.wasm'))
+  //   log.info('Done')
+  //   log.info(`Uri: ${wasmUri}`)
+  // } else {
+  //   wasmUri = opts.wasm
+  // }
 
   log.info('Exporting verification Key...')
   const vk = await snarkjs.zKey.exportVerificationKey(zKeyFile)
-  // fs.writeFileSync(`${config.circuitPath}/${circuitId}.vk.json`, JSON.stringify(vk))
+  fs.writeFileSync(`${config.circuitPath}/${circuitId}.vk.json`, JSON.stringify(vk))
 
-  log.info('Loading signals...')
-  const symFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.sym`)
-  const signals = loadSignals(symFile.toString(), r1csInfo.nPubInputs, r1csInfo.nPrvInputs)
-
-  log.info('Creating circuit...')
-  const { signature } = await client.circuit.create({
-    code: circuitId,
-    name: opts.name,
-    description: opts.description,
-    privateSignals: signals.private,
-    publicSignals: signals.public,
-    wasmUri,
-    zkeyUri,
-  })
-
-  log.info('Done')
-  log.info(`Signature: ${signature}`)
-
-  log.info('Updating VK...')
-  const { signatures } = await client.circuit.updateVk({ code: circuitId, vk })
-  log.info('Done')
-  log.info(signatures)
+  // log.info('Loading signals...')
+  // const symFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.sym`)
+  // const signals = loadSignals(symFile.toString(), r1csInfo.nPubInputs, r1csInfo.nPrvInputs)
+  //
+  // log.info('Creating circuit...')
+  // const { signature } = await client.circuit.create({
+  //   code: circuitId,
+  //   name: opts.name,
+  //   description: opts.description,
+  //   privateSignals: signals.private,
+  //   publicSignals: signals.public,
+  //   wasmUri,
+  //   zkeyUri,
+  // })
+  //
+  // log.info('Done')
+  // log.info(`Signature: ${signature}`)
+  //
+  // log.info('Updating VK...')
+  // const { signatures } = await client.circuit.updateVk({ code: circuitId, vk })
+  // log.info('Done')
+  // log.info(signatures)
 }
 
 /**
