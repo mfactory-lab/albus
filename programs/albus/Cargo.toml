@@ -1,6 +1,6 @@
 [package]
 name = "albus"
-version = "0.0.9"
+version = "0.0.11"
 description = "Albus Protocol on-chain program"
 license = "AGPL-3.0"
 edition = "2021"
