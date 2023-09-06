@@ -253,6 +253,8 @@ export async function encryptVerifiablePresentation(vp: VerifiablePresentation, 
       } catch (e) {
         console.log(`failed to encrypt credential #${i}`)
       }
+    } else {
+      console.log(`credential #${i} already encrypted`)
     }
   }
   return { ...vp, verifiableCredential }

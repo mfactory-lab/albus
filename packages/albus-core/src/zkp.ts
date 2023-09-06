@@ -26,9 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { Buffer } from 'node:buffer'
 import axios from 'axios'
+import type { EdDSA } from 'circomlibjs'
+import { buildEddsa } from 'circomlibjs'
 import { groth16 } from 'snarkjs'
-import { utils as ffUtils, getCurveFromName } from 'ffjavascript'
+import createBlakeHash from 'blake-hash'
+import { Scalar, utils as ffUtils, getCurveFromName } from 'ffjavascript'
 import type { ProofData, PublicSignals, VK } from 'snarkjs'
 import * as Albus from './index'
 
@@ -181,8 +185,8 @@ export async function altBn128G1Neg(input: number[]) {
   return changeEndianness(bn128.G1.neg(Uint8Array.from(changeEndianness(input))))
 }
 
-export function finiteToBytes(n: string | number | bigint) {
-  return Array.from<number>(leInt2Buff(unstringifyBigInts(BigInt(n)), 32))
+export function finiteToBytes(n: string | number | bigint, len = 32) {
+  return Array.from<number>(leInt2Buff(unstringifyBigInts(BigInt(n)), len))
 }
 
 export function bytesToFinite(bytes: number[] | Uint8Array): string {
@@ -225,4 +229,27 @@ function decodeG2(bytes: number[]) {
   }
   result.push(['1', '0'])
   return result
+}
+
+/**
+ * Format a private key to be compatible with the BabyJub curve.
+ * This is the format which should be passed into the
+ * PubKey and other circuits.
+ */
+export async function formatPrivKeyForBabyJub(prv: Uint8Array, eddsa?: EdDSA) {
+  eddsa ??= await buildEddsa()
+  const sBuff = eddsa.pruneBuffer(createBlakeHash('blake512').update(Buffer.from(prv)).digest().slice(0, 32))
+  return BigInt(Scalar.shr(leBuff2int(sBuff), 3))
+  // return Scalar.fromRprLE(sBuff, 0, 32)
+}
+
+/**
+ * Generates an Elliptic-Curve Diffie–Hellman (ECDH) shared key
+ * given a private key and a public key.
+ * @return The ECDH shared key.
+ */
+export async function generateEcdhSharedKey(privKey: Uint8Array, pubKey: string[]) {
+  const eddsa = await buildEddsa()
+  const keyBuffers = eddsa.babyJub.mulPointEscalar(pubKey, await formatPrivKeyForBabyJub(privKey, eddsa))
+  return keyBuffers.map((buffer: any) => eddsa.F.toObject(buffer).toString())
 }
