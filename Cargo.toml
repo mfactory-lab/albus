@@ -2,7 +2,7 @@
 members = [
 #  "programs/*",
   "programs/albus",
-  "packages/albus-verifier",
+#  "packages/solana-verifier",
   "packages/groth16-solana",
 ]
 

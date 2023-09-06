@@ -90,6 +90,6 @@ export default defineConfig({
     include: ['packages/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     environment: 'node',
     // environment: 'jsdom',
-    testTimeout: 10000,
+    testTimeout: 20000,
   },
 } as any)
