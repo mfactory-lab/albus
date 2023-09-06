@@ -1,5 +1,5 @@
 [package]
-name = "albus-verifier"
+name = "albus-solana-verifier"
 description = "Albus on-chain compliance check"
 version = "0.1.1"
 edition = "2021"
