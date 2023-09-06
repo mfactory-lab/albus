@@ -67,21 +67,21 @@ describe('encryptionProof', async () => {
     const res = await calculateLabeledWitness(circuit, data, true)
 
     const decryptedData = poseidonDecrypt([
-      BigInt(res['main.encryptedData[0]']),
-      BigInt(res['main.encryptedData[1]']),
-      BigInt(res['main.encryptedData[2]']),
-      BigInt(res['main.encryptedData[3]']),
+      BigInt(res['main.encryptedData[0]']!),
+      BigInt(res['main.encryptedData[1]']!),
+      BigInt(res['main.encryptedData[2]']!),
+      BigInt(res['main.encryptedData[3]']!),
     ], [BigInt(data.secret), BigInt(data.secret)], data.data.length, data.nonce)
 
     console.log('decryptedData', decryptedData)
 
-    const shares = []
+    const shares: any[] = []
     for (let i = 0; i < 3; i++) {
       const share = poseidonDecrypt([
-        BigInt(res[`main.encryptedShare[${i}][0]`]),
-        BigInt(res[`main.encryptedShare[${i}][1]`]),
-        BigInt(res[`main.encryptedShare[${i}][2]`]),
-        BigInt(res[`main.encryptedShare[${i}][3]`]),
+        BigInt(res[`main.encryptedShare[${i}][0]`]!),
+        BigInt(res[`main.encryptedShare[${i}][1]`]!),
+        BigInt(res[`main.encryptedShare[${i}][2]`]!),
+        BigInt(res[`main.encryptedShare[${i}][3]`]!),
       ], shared, 1, data.nonce)
       shares.push(share[0])
     }

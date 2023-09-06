@@ -166,12 +166,12 @@ describe('Proof', async () => {
       issuerPk: [babyJub.F.toString(issuerPubkey[0]), babyJub.F.toString(issuerPubkey[1])],
       issuerSignature: [babyJub.F.toString(signature.R8[0]), babyJub.F.toString(signature.R8[1]), String(signature.S)],
       userPrivateKey,
-      trusteePublicKey: [],
+      trusteePublicKey: [] as string[],
     }
 
     const holderPublicKey = edDSA.prv2pub(holderKeypair.secretKey)
 
-    const sharedKeys = []
+    const sharedKeys: any[] = []
     for (let i = 0; i < trusteeCount; i++) {
       const trusteeKeypair = Keypair.generate()
       const trusteePublicKey = edDSA.prv2pub(trusteeKeypair.secretKey)
@@ -180,6 +180,8 @@ describe('Proof', async () => {
       // sharedKeys.push(await generateEcdhSharedKey(holderKeypair.secretKey, trusteePublicKey))
     }
 
+    console.log(sharedKeys)
+
     // console.log('input', input)
 
     const { proof, publicSignals } = await generateProof({ wasmFile, zkeyFile, input })
@@ -187,7 +189,7 @@ describe('Proof', async () => {
     // reconstruct secret key
 
     let i = 4
-    const shares = []
+    const shares: any[] = []
     for (const sharedKey of sharedKeys) {
       const share = poseidonDecrypt([
         BigInt(publicSignals[i]),
