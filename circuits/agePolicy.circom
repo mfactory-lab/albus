@@ -3,10 +3,12 @@ pragma circom 2.1.4;
 include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/eddsaposeidon.circom";
 include "utils/date.circom";
+include "utils/poseidon.circom";
 include "ageProof.circom";
-include "MerkleProof.circom";
+include "encryptionProof.circom";
+include "merkleProof.circom";
 
-template AgePolicy(credentialDepth) {
+template AgePolicy(credentialDepth, shamirN, shamirK) {
   signal input birthDate; // Example: 20020101
   signal input birthDateProof[credentialDepth];
   signal input birthDateKey;
@@ -21,21 +23,21 @@ template AgePolicy(credentialDepth) {
   signal input issuerSignature[3]; // [R8x, R8y, S]
 
   // Data integrity check
-  component smt=MerkleProof(credentialDepth);
-  smt.root<==credentialRoot;
-  smt.siblings<==birthDateProof;
-  smt.key<==birthDateKey;
-  smt.value<==birthDate;
+  component smt = MerkleProof(credentialDepth);
+  smt.root <== credentialRoot;
+  smt.siblings <== birthDateProof;
+  smt.key <== birthDateKey;
+  smt.value <== birthDate;
 
   // Issuer signature check
-  component eddsa=EdDSAPoseidonVerifier();
-  eddsa.enabled<==1;
-  eddsa.M<==credentialRoot;
-  eddsa.Ax<==issuerPk[0];
-  eddsa.Ay<==issuerPk[1];
-  eddsa.R8x<==issuerSignature[0];
-  eddsa.R8y<==issuerSignature[1];
-  eddsa.S<==issuerSignature[2];
+  component eddsa = EdDSAPoseidonVerifier();
+  eddsa.enabled <== 1;
+  eddsa.M <== credentialRoot;
+  eddsa.Ax <== issuerPk[0];
+  eddsa.Ay <== issuerPk[1];
+  eddsa.R8x <== issuerSignature[0];
+  eddsa.R8y <== issuerSignature[1];
+  eddsa.S <== issuerSignature[2];
 
 //  // Holder signature check
 
@@ -52,12 +54,38 @@ template AgePolicy(credentialDepth) {
 //  eddsa.R8y<==holderSignature[1];
 //  eddsa.S<==holderSignature[2];
 
-  // Age validation
-  component birth=ParseDate();
-  birth.date<==birthDate;
+//  signal input secret;
+//  signal input nonce;
+  signal input userPrivateKey;
+  signal input trusteePublicKey[shamirN][2];
 
-  component current=ParseDate();
-  current.date<==currentDate;
+  signal output encryptedData[adjustToMultiple(1, 3) + 1];
+  signal output encryptedShare[shamirN][4];
+
+  // Derive secret key
+  component secret = Poseidon(4);
+  secret.inputs[0] <== userPrivateKey;
+  secret.inputs[1] <== credentialRoot;
+  secret.inputs[2] <== currentDate;
+  secret.inputs[3] <== birthDate;
+
+  // Encrypt data and trustee shares
+  component enc = EncryptionProof(1, shamirN, shamirK);
+  enc.userPrivateKey <== userPrivateKey;
+  enc.trusteePublicKey <== trusteePublicKey;
+  enc.secret <== secret.out;
+  enc.nonce <== currentDate;
+  enc.data <== [birthDate];
+
+  encryptedData <== enc.encryptedData;
+  encryptedShare <== enc.encryptedShare;
+
+  // Age validation
+  component birth = ParseDate();
+  birth.date <== birthDate;
+
+  component current = ParseDate();
+  current.date <== currentDate;
 
   component age = AgeProof();
   age.birthYear <== birth.y;
@@ -79,5 +107,7 @@ component main{public [
   birthDateProof,
   birthDateKey,
   issuerPk,
-  issuerSignature
-]} = AgePolicy(6); // 2**6 = 64
+  issuerSignature,
+//  nonce,
+  trusteePublicKey
+]} = AgePolicy(6, 3, 2);
