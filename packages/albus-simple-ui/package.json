@@ -2,7 +2,6 @@
   "name": "@albus/ui",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "serve": "vite --port 3333",
     "build": "vite build --mode production",

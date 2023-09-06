@@ -71,6 +71,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         '~/': `${path.resolve(__dirname, 'src')}/`,
         '@/': `${path.resolve(__dirname, 'src')}/`,
+        // 'crypto': 'crypto-browserify',
       },
       // dedupe: [
       //  'bn.js',

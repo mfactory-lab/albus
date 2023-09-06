@@ -1,53 +1,41 @@
+import { clusterApiUrl } from '@solana/web3.js'
 import type { Commitment } from '@solana/web3.js'
 
 // import { clusterApiUrl } from '@solana/web3.js'
 import type { Endpoint } from '@/stores'
-import { getJFRpcToken } from '@/utils/rpc'
 
 export const ENDPOINTS: Endpoint[] = [
+  // {
+  //   id: 'jfactory-mainnet',
+  //   name: 'JFactory RPC',
+  //   cluster: 'mainnet-beta',
+  //   url: import.meta.env.DEV
+  //     ? 'https://restless-blue-valley.solana-mainnet.quiknode.pro/388d47063172de995210b42f44a3483d4269dcf9/'
+  //     : 'https://rpc.jfactory.ch/',
+  //   wsEndpoint: import.meta.env.DEV ? undefined : 'wss://sleek-solemn-rain.solana-mainnet.quiknode.pro/1bac3b4146d57810e23b4263129fda9dbff83fe9/',
+  //   getToken: getJFRpcToken,
+  // },
   {
-    id: 'jfactory-mainnet',
-    name: 'JFactory RPC',
-    cluster: 'mainnet-beta',
-    url: import.meta.env.DEV
-      ? 'https://restless-blue-valley.solana-mainnet.quiknode.pro/388d47063172de995210b42f44a3483d4269dcf9/'
-      : 'https://rpc.jfactory.ch/',
-    wsEndpoint: import.meta.env.DEV ? undefined : 'wss://sleek-solemn-rain.solana-mainnet.quiknode.pro/1bac3b4146d57810e23b4263129fda9dbff83fe9/',
-    getToken: getJFRpcToken,
-  },
-  {
-    id: 'serum-mainnet',
-    name: 'Serum RPC',
-    cluster: 'mainnet-beta',
-    url: 'https://solana-api.projectserum.com/',
-  },
-  {
-    id: 'rpcpool-mainnet',
-    name: 'RPCPool RPC',
-    cluster: 'mainnet-beta',
-    url: 'https://mainnet.rpcpool.com/',
-  },
-  /* {
     id: 'mainnet',
     name: 'Solana RPC',
     cluster: 'mainnet-beta',
     url: clusterApiUrl('mainnet-beta'),
-  }, */
+  },
   {
     id: 'testnet',
     name: 'TestNet',
     cluster: 'testnet',
-    url: 'https://testnet.rpcpool.com/',
+    url: clusterApiUrl('testnet'),
   },
   {
     id: 'devnet',
     name: 'DevNet',
     cluster: 'devnet',
-    url: 'https://devnet.rpcpool.com/',
+    url: clusterApiUrl('devnet'),
   },
 ]
 
-export const DEFAULT_ENDPOINT = ENDPOINTS[0] as Endpoint
+export const DEFAULT_ENDPOINT = ENDPOINTS[2] as Endpoint
 
 /**
  * The level of commitment desired when querying state
