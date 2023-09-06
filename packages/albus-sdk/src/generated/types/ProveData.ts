@@ -10,9 +10,9 @@ import type { ProofData } from './ProofData'
 import { proofDataBeet } from './ProofData'
 
 export interface ProveData {
-  uri: string
-  proof: ProofData
+  proof: beet.COption<ProofData>
   publicInputs: number[] /* size: 32 */[]
+  reset: boolean
 }
 
 /**
@@ -21,9 +21,9 @@ export interface ProveData {
  */
 export const proveDataBeet = new beet.FixableBeetArgsStruct<ProveData>(
   [
-    ['uri', beet.utf8String],
-    ['proof', proofDataBeet],
+    ['proof', beet.coption(proofDataBeet)],
     ['publicInputs', beet.array(beet.uniformFixedSizeArray(beet.u8, 32))],
+    ['reset', beet.bool],
   ],
   'ProveData',
 )

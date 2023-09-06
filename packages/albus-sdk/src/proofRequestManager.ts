@@ -29,7 +29,8 @@
 import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
-import { ComputeBudgetProgram, Keypair, PublicKey, Transaction } from '@solana/web3.js'
+import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
+import { chunk } from 'lodash-es'
 import type { CircuitManager } from './circuitManager'
 import type { CredentialManager } from './credentialManager'
 import type {
@@ -42,19 +43,18 @@ import {
   ProofRequest,
   createCreateProofRequestInstruction,
   createDeleteProofRequestInstruction,
-  createProveInstruction, createVerifyInstruction, errorFromCode, proofRequestDiscriminator,
+  createProveInstruction, createVerifyInstruction, errorFromCode,
+  proofRequestDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
-import type { BundlrStorageDriver } from './StorageDriver'
 import type { PrivateKey } from './types'
-import { getSolanaTimestamp, prepareInputs } from './utils'
+import { ProofInputBuilder, getSolanaTimestamp } from './utils'
 
 export class ProofRequestManager {
   constructor(
     readonly provider: AnchorProvider,
     readonly circuit: CircuitManager,
     readonly credential: CredentialManager,
-    readonly storage: BundlrStorageDriver,
     readonly pda: PdaManager,
   ) {
   }
@@ -103,7 +103,10 @@ export class ProofRequestManager {
       .addFilter('accountDiscriminator', proofRequestDiscriminator)
 
     if (props.withoutData) {
-      builder.config.dataSlice = { offset: 0, length: 0 }
+      builder.config.dataSlice = {
+        offset: 0,
+        length: 0,
+      }
     }
 
     if (!props.skipUser) {
@@ -174,7 +177,10 @@ export class ProofRequestManager {
     try {
       const tx = new Transaction().add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { address: proofRequest, signature }
+      return {
+        address: proofRequest,
+        signature,
+      }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
@@ -251,7 +257,11 @@ export class ProofRequestManager {
     const vk = Albus.zkp.decodeVerifyingKey(circuit.vk)
     const proof = await Albus.zkp.decodeProof(proofRequest.proof)
     const publicInput = Albus.zkp.decodePublicSignals(proofRequest.publicInputs)
-    return Albus.zkp.verifyProof({ vk, proof, publicInput })
+    return Albus.zkp.verifyProof({
+      vk,
+      proof,
+      publicInput,
+    })
   }
 
   /**
@@ -262,7 +272,11 @@ export class ProofRequestManager {
    * @throws {Error} Throws an error if there is an issue during any step of the proof generation process.
    */
   async fullProve(props: FullProveProps) {
-    const { proofRequest, circuit, policy } = await this.loadFull(props.proofRequest)
+    const {
+      proofRequest,
+      circuit,
+      policy,
+    } = await this.loadFull(props.proofRequest)
 
     if (!circuit) {
       throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
@@ -272,53 +286,36 @@ export class ProofRequestManager {
       throw new Error(`Unable to find Policy account at ${proofRequest.policy}`)
     }
 
-    const vc = await this.credential.load(props.vc, { decryptionKey: props.decryptionKey })
-
-    const vp = await Albus.credential.createVerifiablePresentation({
-      credentials: [vc],
-      exposedFields: props.exposedFields,
-      holderSecretKey: props.holderSecretKey,
+    const credential = await this.credential.load(props.vc, {
+      decryptionKey: props.decryptionKey ?? props.holderSecretKey,
     })
 
-    const input = await prepareInputs({
-      now: await getSolanaTimestamp(this.provider.connection),
-      circuit,
-      policy,
-      vp,
-    })
-
-    const holder = Keypair.fromSecretKey(Uint8Array.from(props.holderSecretKey))
-
-    const encryptedPresentation = await Albus.credential.encryptVerifiablePresentation(vp, {
-      pubkey: holder.publicKey,
-      // encryptionKey: [],
-    })
-
-    let proofResult: Awaited<ReturnType<typeof Albus.zkp.generateProof>>
+    const proofInput = await new ProofInputBuilder(credential)
+      .withNow(await getSolanaTimestamp(this.provider.connection))
+      .withUserPrivateKey(props.holderSecretKey && await Albus.zkp.formatPrivKeyForBabyJub(props.holderSecretKey))
+      .withTrusteePublicKey([])
+      .withCircuit(circuit)
+      .withPolicy(policy)
+      .build()
 
     try {
-      proofResult = await Albus.zkp.generateProof({
-        wasmFile: circuit.wasmUri!,
-        zkeyFile: circuit.zkeyUri!,
-        input,
+      const { proof, publicSignals } = await Albus.zkp.generateProof({
+        wasmFile: circuit.wasmUri,
+        zkeyFile: circuit.zkeyUri,
+        input: proofInput.data,
       })
+
+      const { signatures } = await this.prove({
+        proofRequest: props.proofRequest,
+        proof,
+        publicSignals,
+      })
+
+      return { signatures, proof, publicSignals }
     } catch (e: any) {
       // console.log(e)
       throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
-
-    const { proof, publicSignals } = proofResult
-    const presentationUri = await this.storage.uploadData(JSON.stringify(encryptedPresentation))
-
-    const { signature } = await this.prove({
-      proofRequest: props.proofRequest,
-      proof,
-      publicSignals,
-      presentationUri,
-    })
-
-    // TODO: type error for PublicSignals
-    return { signature, proof, publicSignals, presentationUri }
   }
 
   /**
@@ -336,28 +333,50 @@ export class ProofRequestManager {
     const proof = await Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
 
-    const instruction = createProveInstruction(
-      {
-        proofRequest: new PublicKey(props.proofRequest),
-        circuit: proofRequest.circuit,
-        policy: proofRequest.policy,
-        authority,
-      },
-      {
-        data: {
-          uri: props.presentationUri,
-          publicInputs,
-          proof,
-        },
-      },
-    )
+    // 1232 bytes - max tx data size
+    const chunkSize = Math.floor((1232 - 256 - 130) / 32)
+    const inputChunks = chunk(publicInputs, chunkSize)
+    const txs: { tx: Transaction }[] = []
+
+    for (let i = 0; i < inputChunks.length; i++) {
+      const inputs = inputChunks[i]!
+      const isFirst = i === 0
+      const isLast = inputChunks.length - 1
+
+      const tx = new Transaction()
+
+      tx.add(
+        createProveInstruction(
+          {
+            proofRequest: new PublicKey(props.proofRequest),
+            circuit: proofRequest.circuit,
+            policy: proofRequest.policy,
+            authority,
+          },
+          {
+            data: {
+              reset: isFirst,
+              publicInputs: inputs,
+              proof: isLast ? proof : null,
+            },
+          },
+        ),
+      )
+
+      if (isLast) {
+        tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
+      }
+
+      txs.push({ tx })
+    }
 
     try {
-      const tx = new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
-        .add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { signature }
+      const signatures = await this.provider.sendAll(txs, opts)
+      // const tx = new Transaction()
+      //   .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
+      //   .add(instruction)
+      // const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signatures }
     } catch (e: any) {
       // console.log(e)
       throw errorFromCode(e.code) ?? e
@@ -414,8 +433,8 @@ export interface FindProofRequestProps {
 export interface FullProveProps {
   proofRequest: PublicKeyInitData
   vc: PublicKeyInitData
-  holderSecretKey: Uint8Array | number[]
-  exposedFields?: string[]
+  holderSecretKey?: Uint8Array
+  // Credential decryption key
   decryptionKey?: PrivateKey
 }
 
@@ -427,7 +446,6 @@ export interface ProveProps {
   proofRequest: PublicKeyInitData
   proof: ProofData
   publicSignals: (string | number | bigint)[]
-  presentationUri: string
 }
 
 export interface ChangeStatus {

@@ -26,14 +26,18 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { VerifiablePresentation } from '@mfactory-lab/albus-core'
+import type { VerifiableCredential } from '@mfactory-lab/albus-core'
+import * as Albus from '@mfactory-lab/albus-core'
 import type { Circuit, Policy } from '../generated'
 import { KnownSignals } from '../types'
 
 /**
- * Format {@link date} in circuit format `20230101`
+ * Format a `Date` to a circuit-like format 'YYYYMMDD'.
+ *
+ * @param {Date} [date] - Optional date object to format; defaults to the current date if not provided.
+ * @returns {string} A string representing the formatted date.
  */
-export function formatCircuitDate(date?: Date) {
+export function formatCircuitDate(date?: Date): string {
   const d = date ?? new Date()
   return [
     String(d.getUTCFullYear()),
@@ -42,79 +46,176 @@ export function formatCircuitDate(date?: Date) {
   ].join('')
 }
 
-interface PrepareInputs {
-  vp: VerifiablePresentation
-  circuit: Circuit
-  policy: Policy
-  now?: Date
-}
+type ClaimsTree = Awaited<ReturnType<typeof Albus.credential.createClaimsTree>>
 
 /**
- * Generate circuit inputs
+ * A class for generating proof input data based on
+ * provided credentials, policies, and signals.
  */
-export async function prepareInputs({ vp, circuit, policy, now }: PrepareInputs) {
-  if (vp.verifiableCredential === undefined || vp.verifiableCredential[0] === undefined) {
-    throw new Error('invalid presentation, at least one credential required')
+export class ProofInputBuilder {
+  private claimsTree?: ClaimsTree
+  private userPrivateKey?: bigint | string
+  private trusteePublicKey?: (bigint | string)[][]
+  private circuit?: Circuit
+  private policy?: Policy
+  private now?: Date
+
+  /**
+   * Generated proof input data.
+   * @readonly
+   */
+  readonly data = {}
+
+  constructor(private readonly credential: VerifiableCredential) {
   }
 
-  const input: any = {}
-  const normalizeClaimKey = s => s.trim()
-
-  // convert signal name `sig[5]` > ['sig', 5]
-  const parseSignal = (s): [string, number] => {
-    const r = s.match(/^(\w+)(?:\[(\d+)\])?$/)
-    return [r[1], r[2] ? Number(r[2]) : 1]
+  withNow(value: Date) {
+    this.now = value
+    return this
   }
 
-  const vc = vp.verifiableCredential[0]
+  withPolicy(value: Policy) {
+    this.policy = value
+    return this
+  }
 
-  // apply private inputs
-  for (const signal of circuit.privateSignals) {
-    const claim = normalizeClaimKey(signal)
-    if (vc.credentialSubject[claim] === undefined || vc.credentialSubject['@proof']?.[claim] === undefined) {
-      throw new Error(`invalid presentation claim ${claim}`)
+  withCircuit(value: Circuit) {
+    this.circuit = value
+    return this
+  }
+
+  withUserPrivateKey(value?: bigint | string) {
+    this.userPrivateKey = value
+    return this
+  }
+
+  withTrusteePublicKey(value?: string[][]) {
+    this.trusteePublicKey = value
+    return this
+  }
+
+  async build() {
+    await this.initClaimsTree()
+    await Promise.all([this.applyPrivate(), this.applyPublic()])
+    return this
+  }
+
+  /**
+   * Initialize the claims tree for the provided credential's credential subject.
+   *
+   * @throws {Error} Throws an error if the claims tree initialization fails.
+   */
+  async initClaimsTree() {
+    this.claimsTree = await Albus.credential.createClaimsTree(this.credential.credentialSubject)
+  }
+
+  /**
+   * Normalize a claim key by trimming whitespace.
+   *
+   * @param {string} s - The claim key to normalize.
+   * @returns {string} The normalized claim key.
+   */
+  normalizeClaimKey(s: string): string {
+    return s.trim()
+  }
+
+  /**
+   * Generate proof input data based on private signals defined in the circuit.
+   *
+   * @throws {Error} Throws an error if the claims tree is not initialized.
+   */
+  private async applyPrivate() {
+    if (!this.claimsTree) {
+      throw new Error('claims tree is not initialized')
     }
-    const [key, ...proof] = vc.credentialSubject['@proof'][claim]
-    input[signal] = vc.credentialSubject[claim] ?? 0
-    input[`${signal}Proof`] = proof
-    input[`${signal}Key`] = key
+    for (const signal of this.circuit?.privateSignals ?? []) {
+      if (this.applySignal(signal)) {
+        continue
+      }
+      const claim = this.normalizeClaimKey(signal)
+      if (this.credential.credentialSubject[claim] !== undefined) {
+        const [key, ...proof] = await this.claimsTree.proof(claim)
+        this.data[signal] = this.credential.credentialSubject[claim] ?? 0
+        this.data[`${signal}Proof`] = proof
+        this.data[`${signal}Key`] = key
+      }
+    }
   }
 
-  // apply public inputs
-  let idx = 0
-  for (const signal of circuit.publicSignals) {
-    const [signalName, signalSize] = parseSignal(signal)
-    switch (signal) {
-      case KnownSignals.CurrentDate: {
-        input[signalName] = formatCircuitDate(now)
-        break
-      }
-      case KnownSignals.CredentialRoot:
-        input[signalName] = vc.proof.rootHash
-        break
-      case KnownSignals.IssuerPk:
-        input[signalName] = [
-          vc.proof.proofValue.ax,
-          vc.proof.proofValue.ay,
-        ]
-        break
-      case KnownSignals.IssuerSignature:
-        input[signalName] = [
-          vc.proof.proofValue.r8x,
-          vc.proof.proofValue.r8y,
-          vc.proof.proofValue.s,
-        ]
-        break
-      default: {
-        // apply policy rules
-        const value = policy.rules?.find(r => r.index === idx)?.value
+  /**
+   * Generate proof input data based on public signals defined in the circuit and policy rules.
+   */
+  private async applyPublic() {
+    let idx = 0
+    for (const signal of this.circuit?.publicSignals ?? []) {
+      const [signalName, signalSize, signalSubSize] = this.parseSignal(signal)
+      if (!this.applySignal(signal)) {
+        // try to apply policy rules if is not known signal
+        const value = this.policy?.rules?.find(r => r.index === idx)?.value
         if (value !== undefined) {
-          input[signal] = value
+          this.data[signalName] = value
         }
       }
+      idx += signalSize * signalSubSize
     }
-    idx += signalSize
   }
 
-  return input
+  /**
+   * Apply a known signal, such as TrusteePublicKey, UserPrivateKey, CurrentDate, etc.
+   *
+   * @param {string} signal - The name of the known signal to apply.
+   * @returns {boolean} True if the signal was successfully applied, false otherwise.
+   */
+  private applySignal(signal: string): boolean {
+    const [name, size] = this.parseSignal(signal)
+    switch (name) {
+      case KnownSignals.TrusteePublicKey:
+        if (this.trusteePublicKey === undefined) {
+          throw new Error('trustee public keys is not defined')
+        }
+        if (this.trusteePublicKey.length < size) {
+          throw new Error('incorrect size of trustee public keys')
+        }
+        this.data[name] = this.trusteePublicKey
+        return true
+      case KnownSignals.UserPrivateKey:
+        if (this.userPrivateKey === undefined) {
+          throw new Error('user private key is not defined')
+        }
+        this.data[name] = this.userPrivateKey
+        return true
+      case KnownSignals.CurrentDate: {
+        this.data[name] = formatCircuitDate(this.now)
+        return true
+      }
+      case KnownSignals.CredentialRoot:
+        this.data[name] = this.credential.proof.rootHash
+        return true
+      case KnownSignals.IssuerPublicKey:
+        this.data[name] = [
+          this.credential.proof.proofValue.ax,
+          this.credential.proof.proofValue.ay,
+        ]
+        return true
+      case KnownSignals.IssuerSignature:
+        this.data[name] = [
+          this.credential.proof.proofValue.r8x,
+          this.credential.proof.proofValue.r8y,
+          this.credential.proof.proofValue.s,
+        ]
+        return true
+    }
+    return false
+  }
+
+  /**
+   * Parse a signal with a name like 'sig[5][3]' into its components.
+   *
+   * @param {string} s - The signal name to parse.
+   * @returns {[string, number, number]} An array containing the parsed signal name, size, and subsize.
+   */
+  parseSignal(s: string): [string, number, number] {
+    const r = s.match(/^(\w+)(?:\[(\d+)](?:\[(\d+)])?)?$/)
+    return r ? [r[1]!, r[2] ? Number(r[2]) : 1, Number(r[3])] : ['', 0, 0]
+  }
 }

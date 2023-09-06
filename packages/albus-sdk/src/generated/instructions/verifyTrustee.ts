@@ -7,77 +7,56 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { VerifyProofRequestData } from '../types/VerifyProofRequestData'
-import {
-  verifyProofRequestDataBeet,
-} from '../types/VerifyProofRequestData'
 
 /**
  * @category Instructions
- * @category Verify
+ * @category VerifyTrustee
  * @category generated
  */
-export interface VerifyInstructionArgs {
-  data: VerifyProofRequestData
-}
-/**
- * @category Instructions
- * @category Verify
- * @category generated
- */
-export const verifyStruct = new beet.BeetArgsStruct<
-  VerifyInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */
-  }
->(
-  [
-    ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', verifyProofRequestDataBeet],
-  ],
-  'VerifyInstructionArgs',
+export const verifyTrusteeStruct = new beet.BeetArgsStruct<{
+  instructionDiscriminator: number[] /* size: 8 */
+}>(
+  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
+  'VerifyTrusteeInstructionArgs',
 )
 /**
- * Accounts required by the _verify_ instruction
+ * Accounts required by the _verifyTrustee_ instruction
  *
- * @property [_writable_] proofRequest
+ * @property [_writable_] trustee
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category Verify
+ * @category VerifyTrustee
  * @category generated
  */
-export interface VerifyInstructionAccounts {
-  proofRequest: web3.PublicKey
+export interface VerifyTrusteeInstructionAccounts {
+  trustee: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const verifyInstructionDiscriminator = [
-  133, 161, 141, 48, 120, 198, 88, 150,
+export const verifyTrusteeInstructionDiscriminator = [
+  55, 38, 74, 86, 185, 37, 255, 124,
 ]
 
 /**
- * Creates a _Verify_ instruction.
+ * Creates a _VerifyTrustee_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
- * @param args to provide as instruction data to the program
- *
  * @category Instructions
- * @category Verify
+ * @category VerifyTrustee
  * @category generated
  */
-export function createVerifyInstruction(
-  accounts: VerifyInstructionAccounts,
-  args: VerifyInstructionArgs,
+export function createVerifyTrusteeInstruction(
+  accounts: VerifyTrusteeInstructionAccounts,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = verifyStruct.serialize({
-    instructionDiscriminator: verifyInstructionDiscriminator,
-    ...args,
+  const [data] = verifyTrusteeStruct.serialize({
+    instructionDiscriminator: verifyTrusteeInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.proofRequest,
+      pubkey: accounts.trustee,
       isWritable: true,
       isSigner: false,
     },

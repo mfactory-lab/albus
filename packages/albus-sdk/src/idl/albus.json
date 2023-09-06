@@ -1,7 +1,138 @@
 {
-  "version": "0.0.9",
+  "version": "0.0.11",
   "name": "albus",
   "instructions": [
+    {
+      "name": "createInvestigationRequest",
+      "accounts": [
+        {
+          "name": "investigationRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proofRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateInvestigationRequestData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "createTrustee",
+      "accounts": [
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateTrusteeData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateTrustee",
+      "accounts": [
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdateTrusteeData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verifyTrustee",
+      "accounts": [
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deleteTrustee",
+      "accounts": [
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
     {
       "name": "createCircuit",
       "accounts": [
@@ -340,7 +471,7 @@
         {
           "name": "data",
           "type": {
-            "defined": "VerifyData"
+            "defined": "VerifyProofRequestData"
           }
         }
       ]
@@ -427,12 +558,18 @@
           },
           {
             "name": "privateSignals",
+            "docs": [
+              "Private signals associated with the circuit."
+            ],
             "type": {
               "vec": "string"
             }
           },
           {
             "name": "publicSignals",
+            "docs": [
+              "Public signals associated with the circuit."
+            ],
             "type": {
               "vec": "string"
             }
@@ -572,7 +709,171 @@
           {
             "name": "createdAt",
             "docs": [
-              "Timestamp for when the service was added"
+              "Timestamp for when the service was registered"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "secretShareThreshold",
+            "docs": [
+              "Required number of shares used to reconstruct the secret"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "trustees",
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Trustee",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "The authority that manages the trustee"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "key",
+            "docs": [
+              "The pubkey that is used for secret sharing encryption. (BJJ packed)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "docs": [
+              "Name of the trustee"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "website",
+            "type": "string"
+          },
+          {
+            "name": "isVerified",
+            "type": "bool"
+          },
+          {
+            "name": "revealedShareCount",
+            "docs": [
+              "The number of revealed secret shares"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Timestamp for when the trustee was registered"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InvestigationRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Investigation service public key"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "encryptionKey",
+            "docs": [
+              "The key that is used for secret sharing encryption.",
+              "If None, the `authority` is used instead."
+            ],
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "proofRequest",
+            "docs": [
+              "The [ProofRequest] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "proofRequestOwner",
+            "docs": [
+              "The public key of the user who owns the [ProofRequest]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "serviceProvider",
+            "docs": [
+              "The [ServiceProvider] associated with [ProofRequest]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "requiredShareCount",
+            "docs": [
+              "Required number of shares used to reconstruct the secret"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "secretShares",
+            "type": {
+              "vec": {
+                "defined": "SecretShare"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Investigation processing status"
+            ],
+            "type": {
+              "defined": "InvestigationStatus"
+            }
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
             ],
             "type": "i64"
           },
@@ -655,6 +956,13 @@
             "type": "i64"
           },
           {
+            "name": "retentionEndDate",
+            "docs": [
+              "Timestamp indicating when the data will no longer be retained"
+            ],
+            "type": "i64"
+          },
+          {
             "name": "status",
             "docs": [
               "Status of the request"
@@ -669,13 +977,6 @@
               "PDA bump"
             ],
             "type": "u8"
-          },
-          {
-            "name": "vpUri",
-            "docs": [
-              "The address of the presentation used for proof generation"
-            ],
-            "type": "string"
           },
           {
             "name": "proof",
@@ -742,6 +1043,20 @@
             "name": "publicSignals",
             "type": {
               "vec": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateInvestigationRequestData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "encryptionKey",
+            "type": {
+              "option": "publicKey"
             }
           }
         ]
@@ -839,18 +1154,45 @@
       }
     },
     {
+      "name": "CreateTrusteeData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "website",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "ProveData",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "uri",
-            "type": "string"
-          },
-          {
             "name": "proof",
             "type": {
-              "defined": "ProofData"
+              "option": {
+                "defined": "ProofData"
+              }
             }
           },
           {
@@ -863,6 +1205,10 @@
                 ]
               }
             }
+          },
+          {
+            "name": "reset",
+            "type": "bool"
           }
         ]
       }
@@ -951,7 +1297,44 @@
       }
     },
     {
-      "name": "VerifyData",
+      "name": "UpdateTrusteeData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          },
+          {
+            "name": "name",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "email",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "website",
+            "type": {
+              "option": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifyProofRequestData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1075,6 +1458,62 @@
       }
     },
     {
+      "name": "SecretShare",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "docs": [
+              "Secret share owner"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "index",
+            "docs": [
+              "Share position"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "share",
+            "docs": [
+              "Share itself (encrypted with [InvestigationRequest]'s `encryption_key`)"
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InvestigationStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "InProgress"
+          },
+          {
+            "name": "UnderReview"
+          },
+          {
+            "name": "Resolved"
+          }
+        ]
+      }
+    },
+    {
       "name": "ProofRequestStatus",
       "type": {
         "kind": "enum",
@@ -1162,11 +1601,6 @@
         {
           "name": "owner",
           "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "vpUrl",
-          "type": "string",
           "index": false
         },
         {

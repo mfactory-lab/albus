@@ -30,6 +30,7 @@ import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import { chunk } from 'lodash-es'
 
 import {
   Circuit,
@@ -138,39 +139,43 @@ export class CircuitManager {
     // one ic item = 64
 
     const instructions: TransactionInstruction[] = []
-    const ic_limit = 7
 
-    instructions.push(createUpdateCircuitVkInstruction({ circuit, authority }, {
-      data: {
-        alpha: vk.alpha,
-        beta: vk.beta,
-        gamma: vk.gamma,
-        delta: vk.delta,
-        ic: vk.ic.slice(0, ic_limit),
-        extendIc: false,
-      },
-    }))
-
-    if (vk.ic.length > ic_limit) {
-      instructions.push(createUpdateCircuitVkInstruction({ circuit, authority }, {
+    instructions.push(
+      createUpdateCircuitVkInstruction({ circuit, authority }, {
         data: {
-          alpha: null,
-          beta: null,
-          gamma: null,
-          delta: null,
-          ic: vk.ic.slice(ic_limit),
-          extendIc: true,
+          alpha: vk.alpha,
+          beta: vk.beta,
+          gamma: vk.gamma,
+          delta: vk.delta,
+          ic: vk.ic.slice(0, 7),
+          extendIc: false,
         },
-      }))
+      }),
+    )
+
+    if (vk.ic.length > 10) {
+      const icChunks = chunk(vk.ic.slice(10), 15)
+      for (const ic of icChunks) {
+        instructions.push(
+          createUpdateCircuitVkInstruction({ circuit, authority }, {
+            data: {
+              alpha: null,
+              beta: null,
+              gamma: null,
+              delta: null,
+              extendIc: true,
+              ic,
+            },
+          }),
+        )
+      }
     }
 
     try {
-      const signatures: string[] = []
-      for (const ix of instructions) {
-        const tx = new Transaction().add(ix)
-        const signature = await this.provider.sendAndConfirm(tx, [], opts)
-        signatures.push(signature)
-      }
+      const signatures = await this.provider.sendAll(
+        instructions.map(ix => ({ tx: new Transaction().add(ix) })),
+        opts,
+      )
       return { signatures }
     } catch (e: any) {
       console.log(e)

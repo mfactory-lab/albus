@@ -7,75 +7,83 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { VerifyProofRequestData } from '../types/VerifyProofRequestData'
+import type { CreateInvestigationRequestData } from '../types/CreateInvestigationRequestData'
 import {
-  verifyProofRequestDataBeet,
-} from '../types/VerifyProofRequestData'
+  createInvestigationRequestDataBeet,
+} from '../types/CreateInvestigationRequestData'
 
 /**
  * @category Instructions
- * @category Verify
+ * @category CreateInvestigationRequest
  * @category generated
  */
-export interface VerifyInstructionArgs {
-  data: VerifyProofRequestData
+export interface CreateInvestigationRequestInstructionArgs {
+  data: CreateInvestigationRequestData
 }
 /**
  * @category Instructions
- * @category Verify
+ * @category CreateInvestigationRequest
  * @category generated
  */
-export const verifyStruct = new beet.BeetArgsStruct<
-  VerifyInstructionArgs & {
+export const createInvestigationRequestStruct = new beet.FixableBeetArgsStruct<
+  CreateInvestigationRequestInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', verifyProofRequestDataBeet],
+    ['data', createInvestigationRequestDataBeet],
   ],
-  'VerifyInstructionArgs',
+  'CreateInvestigationRequestInstructionArgs',
 )
 /**
- * Accounts required by the _verify_ instruction
+ * Accounts required by the _createInvestigationRequest_ instruction
  *
+ * @property [_writable_] investigationRequest
  * @property [_writable_] proofRequest
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category Verify
+ * @category CreateInvestigationRequest
  * @category generated
  */
-export interface VerifyInstructionAccounts {
+export interface CreateInvestigationRequestInstructionAccounts {
+  investigationRequest: web3.PublicKey
   proofRequest: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const verifyInstructionDiscriminator = [
-  133, 161, 141, 48, 120, 198, 88, 150,
+export const createInvestigationRequestInstructionDiscriminator = [
+  252, 6, 45, 22, 207, 47, 209, 212,
 ]
 
 /**
- * Creates a _Verify_ instruction.
+ * Creates a _CreateInvestigationRequest_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category Verify
+ * @category CreateInvestigationRequest
  * @category generated
  */
-export function createVerifyInstruction(
-  accounts: VerifyInstructionAccounts,
-  args: VerifyInstructionArgs,
+export function createCreateInvestigationRequestInstruction(
+  accounts: CreateInvestigationRequestInstructionAccounts,
+  args: CreateInvestigationRequestInstructionArgs,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = verifyStruct.serialize({
-    instructionDiscriminator: verifyInstructionDiscriminator,
+  const [data] = createInvestigationRequestStruct.serialize({
+    instructionDiscriminator:
+      createInvestigationRequestInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
+    {
+      pubkey: accounts.investigationRequest,
+      isWritable: true,
+      isSigner: false,
+    },
     {
       pubkey: accounts.proofRequest,
       isWritable: true,

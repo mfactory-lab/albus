@@ -38,7 +38,6 @@ import { PdaManager } from './pda'
 import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
-import { BundlrStorageDriver } from './StorageDriver'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -49,7 +48,6 @@ export class AlbusClient {
   service: ServiceManager
   credential: CredentialManager
   proofRequest: ProofRequestManager
-  storage: BundlrStorageDriver
   eventManager: EventManager
 
   constructor(
@@ -57,12 +55,11 @@ export class AlbusClient {
   ) {
     this.pda = new PdaManager()
     this.eventManager = new EventManager(this)
-    this.storage = new BundlrStorageDriver(this.provider)
     this.circuit = new CircuitManager(this.provider, this.pda)
     this.policy = new PolicyManager(this.provider, this.pda)
     this.service = new ServiceManager(this.provider, this.pda)
     this.credential = new CredentialManager(this.provider, this.pda)
-    this.proofRequest = new ProofRequestManager(this.provider, this.circuit, this.credential, this.storage, this.pda)
+    this.proofRequest = new ProofRequestManager(this.provider, this.circuit, this.credential, this.pda)
   }
 
   static factory(connection: Connection, wallet?: Wallet, opts: ConfirmOptions = {}) {

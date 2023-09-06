@@ -34,6 +34,8 @@ export enum KnownSignals {
   CredentialRoot = 'credentialRoot',
   CredentialProof = 'credentialProof',
   CredentialKey = 'credentialKey',
-  IssuerPk = 'issuerPk[2]',
-  IssuerSignature = 'issuerSignature[3]',
+  IssuerPublicKey = 'issuerPk',
+  IssuerSignature = 'issuerSignature',
+  UserPrivateKey = 'userPrivateKey',
+  TrusteePublicKey = 'trusteePublicKey',
 }

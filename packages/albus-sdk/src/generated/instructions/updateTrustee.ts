@@ -7,77 +7,77 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { VerifyProofRequestData } from '../types/VerifyProofRequestData'
+import type { UpdateTrusteeData } from '../types/UpdateTrusteeData'
 import {
-  verifyProofRequestDataBeet,
-} from '../types/VerifyProofRequestData'
+  updateTrusteeDataBeet,
+} from '../types/UpdateTrusteeData'
 
 /**
  * @category Instructions
- * @category Verify
+ * @category UpdateTrustee
  * @category generated
  */
-export interface VerifyInstructionArgs {
-  data: VerifyProofRequestData
+export interface UpdateTrusteeInstructionArgs {
+  data: UpdateTrusteeData
 }
 /**
  * @category Instructions
- * @category Verify
+ * @category UpdateTrustee
  * @category generated
  */
-export const verifyStruct = new beet.BeetArgsStruct<
-  VerifyInstructionArgs & {
+export const updateTrusteeStruct = new beet.FixableBeetArgsStruct<
+  UpdateTrusteeInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', verifyProofRequestDataBeet],
+    ['data', updateTrusteeDataBeet],
   ],
-  'VerifyInstructionArgs',
+  'UpdateTrusteeInstructionArgs',
 )
 /**
- * Accounts required by the _verify_ instruction
+ * Accounts required by the _updateTrustee_ instruction
  *
- * @property [_writable_] proofRequest
+ * @property [_writable_] trustee
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category Verify
+ * @category UpdateTrustee
  * @category generated
  */
-export interface VerifyInstructionAccounts {
-  proofRequest: web3.PublicKey
+export interface UpdateTrusteeInstructionAccounts {
+  trustee: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const verifyInstructionDiscriminator = [
-  133, 161, 141, 48, 120, 198, 88, 150,
+export const updateTrusteeInstructionDiscriminator = [
+  53, 91, 92, 45, 24, 153, 197, 243,
 ]
 
 /**
- * Creates a _Verify_ instruction.
+ * Creates a _UpdateTrustee_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category Verify
+ * @category UpdateTrustee
  * @category generated
  */
-export function createVerifyInstruction(
-  accounts: VerifyInstructionAccounts,
-  args: VerifyInstructionArgs,
+export function createUpdateTrusteeInstruction(
+  accounts: UpdateTrusteeInstructionAccounts,
+  args: UpdateTrusteeInstructionArgs,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = verifyStruct.serialize({
-    instructionDiscriminator: verifyInstructionDiscriminator,
+  const [data] = updateTrusteeStruct.serialize({
+    instructionDiscriminator: updateTrusteeInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.proofRequest,
+      pubkey: accounts.trustee,
       isWritable: true,
       isSigner: false,
     },

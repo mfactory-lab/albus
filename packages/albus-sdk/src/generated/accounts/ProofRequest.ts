@@ -30,9 +30,9 @@ export interface ProofRequestArgs {
   expiredAt: beet.bignum
   verifiedAt: beet.bignum
   provedAt: beet.bignum
+  retentionEndDate: beet.bignum
   status: ProofRequestStatus
   bump: number
-  vpUri: string
   proof: beet.COption<ProofData>
   publicInputs: number[] /* size: 32 */[]
 }
@@ -56,9 +56,9 @@ export class ProofRequest implements ProofRequestArgs {
     readonly expiredAt: beet.bignum,
     readonly verifiedAt: beet.bignum,
     readonly provedAt: beet.bignum,
+    readonly retentionEndDate: beet.bignum,
     readonly status: ProofRequestStatus,
     readonly bump: number,
-    readonly vpUri: string,
     readonly proof: beet.COption<ProofData>,
     readonly publicInputs: number[] /* size: 32 */[],
   ) {}
@@ -77,9 +77,9 @@ export class ProofRequest implements ProofRequestArgs {
       args.expiredAt,
       args.verifiedAt,
       args.provedAt,
+      args.retentionEndDate,
       args.status,
       args.bump,
-      args.vpUri,
       args.proof,
       args.publicInputs,
     )
@@ -249,9 +249,19 @@ export class ProofRequest implements ProofRequestArgs {
         }
         return x
       })(),
+      retentionEndDate: (() => {
+        const x = <{ toNumber: () => number }> this.retentionEndDate
+        if (typeof x.toNumber === 'function') {
+          try {
+            return x.toNumber()
+          } catch (_) {
+            return x
+          }
+        }
+        return x
+      })(),
       status: `ProofRequestStatus.${ProofRequestStatus[this.status]}`,
       bump: this.bump,
-      vpUri: this.vpUri,
       proof: this.proof,
       publicInputs: this.publicInputs,
     }
@@ -279,9 +289,9 @@ export const proofRequestBeet = new beet.FixableBeetStruct<
     ['expiredAt', beet.i64],
     ['verifiedAt', beet.i64],
     ['provedAt', beet.i64],
+    ['retentionEndDate', beet.i64],
     ['status', proofRequestStatusBeet],
     ['bump', beet.u8],
-    ['vpUri', beet.utf8String],
     ['proof', beet.coption(proofDataBeet)],
     ['publicInputs', beet.array(beet.uniformFixedSizeArray(beet.u8, 32))],
   ],
