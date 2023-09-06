@@ -38,7 +38,7 @@ use crate::{
 /// Verifies the [ProofRequest] and updates its status accordingly.
 /// Returns an error if the authority is not authorized, the request has not been proved,
 /// the request has expired or the status is not valid.
-pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
+pub fn handler(ctx: Context<VerifyProofRequest>, data: VerifyProofRequestData) -> Result<()> {
     let req = &mut ctx.accounts.proof_request;
 
     // Check that the authority is authorized to perform this action
@@ -90,12 +90,12 @@ pub fn handler(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct VerifyData {
+pub struct VerifyProofRequestData {
     pub status: ProofRequestStatus,
 }
 
 #[derive(Accounts)]
-pub struct Verify<'info> {
+pub struct VerifyProofRequest<'info> {
     #[account(mut)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
 

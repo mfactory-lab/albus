@@ -41,6 +41,29 @@ declare_id!("ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz");
 pub mod albus {
     use super::*;
 
+    pub fn create_investigation_request(
+        ctx: Context<CreateInvestigationRequest>,
+        data: CreateInvestigationRequestData,
+    ) -> Result<()> {
+        create_investigation_request::handler(ctx, data)
+    }
+
+    pub fn create_trustee(ctx: Context<CreateTrustee>, data: CreateTrusteeData) -> Result<()> {
+        create_trustee::handler(ctx, data)
+    }
+
+    pub fn update_trustee(ctx: Context<UpdateTrustee>, data: UpdateTrusteeData) -> Result<()> {
+        update_trustee::handler(ctx, data)
+    }
+
+    pub fn verify_trustee(ctx: Context<VerifyTrustee>) -> Result<()> {
+        verify_trustee::handler(ctx)
+    }
+
+    pub fn delete_trustee(ctx: Context<DeleteTrustee>) -> Result<()> {
+        delete_trustee::handler(ctx)
+    }
+
     pub fn create_circuit(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<()> {
         create_circuit::handler(ctx, data)
     }
@@ -97,8 +120,8 @@ pub mod albus {
         prove::handler(ctx, data)
     }
 
-    pub fn verify(ctx: Context<Verify>, data: VerifyData) -> Result<()> {
-        verify::handler(ctx, data)
+    pub fn verify(ctx: Context<VerifyProofRequest>, data: VerifyProofRequestData) -> Result<()> {
+        verify_proof_request::handler(ctx, data)
     }
 
     // admin handlers

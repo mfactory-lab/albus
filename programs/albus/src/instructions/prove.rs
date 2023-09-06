@@ -55,13 +55,23 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
         return Err(AlbusError::Unauthorized.into());
     }
 
-    let mut public_inputs = data.public_inputs;
+    if data.reset {
+        req.proof = None;
+        req.public_inputs.clear();
+    }
+
+    req.public_inputs.extend(data.public_inputs);
+
+    if data.proof.is_none() {
+        msg!("Public inputs was updated");
+        return Ok(());
+    }
 
     let signals = circuit.signals();
 
     // apply current date
     if let Some(s) = signals.get(CURRENT_DATE_SIGNAL) {
-        public_inputs[s.0] =
+        req.public_inputs[s.0] =
             format_circuit_date(timestamp).expect("Failed to get current timestamp");
     }
 
@@ -71,37 +81,32 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
     // }
 
-    policy.apply_rules(&mut public_inputs);
+    policy.apply_rules(&mut req.public_inputs);
+
+    req.proved_at = timestamp;
 
     if cfg!(feature = "verify-on-chain") {
+        req.proof = data.proof.to_owned();
         #[cfg(feature = "verify-on-chain")]
         Groth16Verifier::new(
-            &data.proof.to_owned().into(),
-            &public_inputs,
+            &data.proof.unwrap().into(),
+            &req.public_inputs,
             &circuit.vk.to_owned().into(),
         )
         .map_err(|_| AlbusError::InvalidPublicInputs)?
         .verify()
         .map_err(|_| AlbusError::ProofVerificationFailed)?;
-
-        req.status = ProofRequestStatus::Verified;
         req.verified_at = timestamp;
+        req.status = ProofRequestStatus::Verified;
     } else {
+        req.proof = data.proof;
         req.status = ProofRequestStatus::Proved;
     }
-
-    req.proof = Some(data.proof);
-    req.public_inputs = public_inputs;
-    req.vp_uri = data.uri.to_owned();
-    req.proved_at = timestamp;
-
-    // TODO: reset expired_at if needed
 
     emit!(ProveEvent {
         proof_request: req.key(),
         service_provider: req.service_provider,
         circuit: circuit.key(),
-        vp_url: data.uri,
         owner: req.owner,
         timestamp,
     });
@@ -113,9 +118,9 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct ProveData {
-    pub uri: String,
-    pub proof: ProofData,
+    pub proof: Option<ProofData>,
     pub public_inputs: Vec<[u8; 32]>,
+    pub reset: bool,
 }
 
 #[derive(Accounts)]

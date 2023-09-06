@@ -104,8 +104,10 @@ pub struct Circuit {
     pub bump: u8,
     /// Verification key
     pub vk: VerificationKey,
+    /// Private signals associated with the circuit.
     #[max_len(0, 0)]
     pub private_signals: Vec<String>,
+    /// Public signals associated with the circuit.
     #[max_len(0, 0)]
     pub public_signals: Vec<String>,
 }
@@ -206,10 +208,14 @@ pub struct ServiceProvider {
     pub proof_request_count: u64,
     /// Total number of policies
     pub policy_count: u64,
-    /// Timestamp for when the service was added
+    /// Timestamp for when the service was registered
     pub created_at: i64,
     /// PDA bump
     pub bump: u8,
+    /// Required number of shares used to reconstruct the secret
+    pub secret_share_threshold: u8,
+    #[max_len(3)]
+    pub trustees: Vec<Pubkey>,
 }
 
 impl ServiceProvider {
@@ -219,6 +225,102 @@ impl ServiceProvider {
     pub fn space() -> usize {
         8 + Self::INIT_SPACE
     }
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct Trustee {
+    /// The authority that manages the trustee
+    pub authority: Pubkey,
+    /// The pubkey that is used for secret sharing encryption. (BJJ packed)
+    pub key: [u8; 32],
+    /// Name of the trustee
+    #[max_len(32)]
+    pub name: String,
+    #[max_len(128)]
+    pub email: String,
+    #[max_len(200)]
+    pub website: String,
+    pub is_verified: bool,
+    /// The number of revealed secret shares
+    pub revealed_share_count: u32,
+    /// Timestamp for when the trustee was registered
+    pub created_at: i64,
+    /// PDA bump
+    pub bump: u8,
+}
+
+impl Trustee {
+    pub const SEED: &'_ [u8] = b"trustee";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
+}
+
+// #[account]
+// #[derive(InitSpace)]
+// pub struct InvestigationService {}
+
+#[account]
+#[derive(InitSpace)]
+pub struct InvestigationRequest {
+    /// Investigation service public key
+    pub authority: Pubkey,
+    /// The key that is used for secret sharing encryption.
+    /// If None, the `authority` is used instead.
+    pub encryption_key: Option<Pubkey>,
+    /// The [ProofRequest] associated with this request
+    pub proof_request: Pubkey,
+    /// The public key of the user who owns the [ProofRequest]
+    pub proof_request_owner: Pubkey,
+    /// The [ServiceProvider] associated with [ProofRequest]
+    pub service_provider: Pubkey,
+    /// Required number of shares used to reconstruct the secret
+    pub required_share_count: u8,
+    #[max_len(2)]
+    pub secret_shares: Vec<SecretShare>,
+    /// Investigation processing status
+    pub status: InvestigationStatus,
+    /// Creation date
+    pub created_at: i64,
+    /// PDA bump
+    pub bump: u8,
+}
+
+impl InvestigationRequest {
+    pub const SEED: &'_ [u8] = b"investigation-request";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
+}
+
+#[repr(u8)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, InitSpace)]
+pub enum InvestigationStatus {
+    Pending = 0,
+    InProgress = 1,
+    UnderReview = 2,
+    // OnHold = 3,
+    // Escalated = 4,
+    // Abandoned = 5,
+    Resolved = u8::MAX,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, InitSpace)]
+pub struct SecretShare {
+    /// Secret share owner
+    pub owner: Pubkey,
+    /// Share position
+    pub index: u8,
+    /// Creation date
+    pub created_at: i64,
+    /// Share itself (encrypted with [InvestigationRequest]'s `encryption_key`)
+    #[max_len(64)]
+    pub share: String,
 }
 
 #[account]
@@ -242,17 +344,16 @@ pub struct ProofRequest {
     pub verified_at: i64,
     /// Timestamp for when the user was added the `proof`
     pub proved_at: i64,
+    /// Timestamp indicating when the data will no longer be retained
+    pub retention_end_date: i64,
     /// Status of the request
     pub status: ProofRequestStatus,
     /// PDA bump
     pub bump: u8,
-    /// The address of the presentation used for proof generation
-    #[max_len(200)]
-    pub vp_uri: String,
     /// Proof payload
     pub proof: Option<ProofData>,
     /// Public inputs that are used to verify the `proof`
-    #[max_len(20)]
+    #[max_len(40)]
     pub public_inputs: Vec<[u8; 32]>,
 }
 

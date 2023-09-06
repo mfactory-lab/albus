@@ -53,7 +53,6 @@ pub struct ProveEvent {
     pub service_provider: Pubkey,
     pub circuit: Pubkey,
     pub owner: Pubkey,
-    pub vp_url: String,
     pub timestamp: i64,
 }
 

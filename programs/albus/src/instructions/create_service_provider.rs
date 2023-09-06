@@ -28,6 +28,7 @@
 
 use anchor_lang::prelude::*;
 
+use crate::constants::DEFAULT_SECRET_SHARE_THRESHOLD;
 use crate::{state::ServiceProvider, utils::assert_authorized};
 
 pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
@@ -39,8 +40,8 @@ pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderD
     sp.code = data.code;
     sp.name = data.name;
     sp.authority = data.authority.unwrap_or(ctx.accounts.authority.key());
-    sp.proof_request_count = 0;
     sp.created_at = timestamp;
+    sp.secret_share_threshold = DEFAULT_SECRET_SHARE_THRESHOLD;
     sp.bump = ctx.bumps["service_provider"];
 
     Ok(())

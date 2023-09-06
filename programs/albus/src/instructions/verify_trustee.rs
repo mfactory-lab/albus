@@ -26,30 +26,26 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub mod admin;
-pub mod create_circuit;
-pub mod create_policy;
-pub mod create_proof_request;
-pub mod create_service_provider;
-pub mod create_trustee;
-pub mod delete_circuit;
-pub mod delete_policy;
-pub mod delete_proof_request;
-pub mod delete_service_provider;
-// pub mod mint_credential;
-pub mod create_investigation_request;
-pub mod delete_trustee;
-pub mod prove;
-pub mod update_circuit_vk;
-pub mod update_service;
-pub mod update_trustee;
-pub mod verify_proof_request;
-pub mod verify_trustee;
+use anchor_lang::prelude::*;
 
-pub use self::{
-    admin::*, create_circuit::*, create_investigation_request::*, create_policy::*,
-    create_proof_request::*, create_service_provider::*, create_trustee::*, delete_circuit::*,
-    delete_policy::*, delete_proof_request::*, delete_service_provider::*, delete_trustee::*,
-    prove::*, update_circuit_vk::*, update_service::*, update_trustee::*, verify_proof_request::*,
-    verify_trustee::*,
-};
+use crate::{state::Trustee, utils::assert_authorized};
+
+pub fn handler(ctx: Context<VerifyTrustee>) -> Result<()> {
+    assert_authorized(&ctx.accounts.authority.key())?;
+
+    let trustee = &mut ctx.accounts.trustee;
+    trustee.is_verified = true;
+
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct VerifyTrustee<'info> {
+    #[account(mut)]
+    pub trustee: Box<Account<'info, Trustee>>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
