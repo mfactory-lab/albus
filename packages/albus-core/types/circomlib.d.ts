@@ -40,13 +40,13 @@ declare module 'circomlibjs' {
 
     signPoseidon(prv: Uint8Array, msg: Uint8Array | any): BJJSignature;
 
+    pruneBuffer(buff: Uint8Array): Uint8Array;
+
     prv2pub(prv: Uint8Array): [Uint8Array, Uint8Array];
 
-    F: {
-      fromMontgomery: FromMontgomery;
-      toMontgomery: ToMontgomery;
-      p: bigint;
-    };
+    babyJub: BabyJub
+
+    F: F;
   }
 
   function buildEddsa(): Promise<EdDSA>;
@@ -60,16 +60,11 @@ declare module 'circomlibjs' {
 
     unpackPoint(buf: Uint8Array): [Uint8Array, Uint8Array];
 
+    mulPointEscalar(base: any, e: any): [Uint8Array, Uint8Array];
+
     D: bigint;
     p: any; // Scalar
-    F: {
-      fromMontgomery: FromMontgomery
-      toMontgomery: ToMontgomery
-      toObject: (n: Uint8Array | any) => bigint
-      toString: (n: Uint8Array | any) => string
-      e: (n: string | bigint) => Uint8Array
-      p: bigint
-    };
+    F: F;
   }
 
   function buildBabyjub(): Promise<BabyJub>;
@@ -84,6 +79,15 @@ declare module 'circomlibjs' {
   export type SmtKey = any; // TODO: Uint8Array(32)
   export type SmtLeafValue = any; // TODO: Uint8Array(32)
   export type SmtInternalValue = Uint8Array; // TODO: Uint8Array(32)
+
+  export interface F {
+    fromMontgomery: FromMontgomery
+    toMontgomery: ToMontgomery
+    toObject: (n: Uint8Array | any) => bigint
+    toString: (n: Uint8Array | any) => string
+    e: (n: string | bigint) => Uint8Array
+    p: bigint
+  }
 
   export interface SMT {
     F: {
@@ -151,10 +155,7 @@ declare module 'circomlibjs' {
   interface PoseidonFunction {
     (inputs: Uint8Array[]): Uint8Array;
 
-    F: {
-      fromMontgomery: FromMontgomery;
-      toMontgomery: ToMontgomery;
-    };
+    F: F;
   }
 
   function buildPoseidon(): Promise<PoseidonFunction>;
