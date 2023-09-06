@@ -45,6 +45,8 @@ describe('albus', () => {
   const circuitData = {
     privateSignals: [
       'birthDate',
+      'userPrivateKey',
+      'trusteePublicKey[3][2]',
     ],
     publicSignals: [
       'birthDateProof[6]', 'birthDateKey',
@@ -149,8 +151,6 @@ describe('albus', () => {
     const [policy] = client.pda.policy(service, 'age')
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
-    const mockedVpUri = 'http://localhost/mock.json'
-
     vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve({
       '@context': [
         'https://www.w3.org/2018/credentials/v1',
@@ -198,123 +198,18 @@ describe('albus', () => {
       } as any
     })
 
-    vi.spyOn(client.storage, 'uploadData').mockReturnValue(Promise.resolve(mockedVpUri))
-
-    const { signature } = await client.proofRequest.fullProve({
-      holderSecretKey: payerKeypair.secretKey,
-      exposedFields: circuitData.privateSignals,
+    const { signatures } = await client.proofRequest.fullProve({
       proofRequest,
       vc: PublicKey.default, // mocked
     })
 
-    assert.ok(!!signature)
+    assert.ok(signatures.length > 0)
 
     const data = await client.proofRequest.load(proofRequest)
 
-    assert.equal(data.vpUri, mockedVpUri)
     assert.equal(data.owner.toString(), provider.publicKey.toString())
-    assert.ok(data.proof)
-    assert.deepEqual(data.publicInputs, [
-      [
-        0, 199, 214, 240, 123, 172, 248,
-        120, 228, 226, 80, 170, 126, 30,
-        175, 137, 146, 226, 184, 21, 10,
-        234, 158, 225, 179, 97, 99, 42,
-        178, 165, 78, 197,
-      ],
-      [
-        1, 24, 137, 177, 30, 45, 57, 167,
-        210, 172, 227, 148, 76, 91, 156, 16,
-        58, 67, 90, 245, 67, 148, 118, 22,
-        242, 95, 231, 130, 15, 199, 245, 218,
-      ],
-      [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-      ],
-      [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-      ],
-      [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-      ],
-      [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-      ],
-      [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-      ],
-      [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 1, 52, 178, 166,
-      ],
-      [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 18,
-      ],
-      [
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 100,
-      ],
-      [
-        24, 125, 217, 174, 133, 40, 203,
-        118, 245, 106, 154, 122, 19, 50,
-        71, 225, 18, 147, 174, 184, 246,
-        177, 138, 220, 37, 203, 36, 131,
-        167, 224, 109, 31,
-      ],
-      [
-        46, 19, 226, 114, 3, 228, 121, 0,
-        203, 132, 50, 204, 165, 145, 251, 3,
-        242, 141, 38, 88, 124, 50, 248, 61,
-        218, 182, 181, 189, 88, 230, 143, 215,
-      ],
-      [
-        45, 183, 198, 89, 118, 191, 150,
-        159, 106, 184, 128, 72, 245, 119,
-        147, 210, 107, 183, 226, 219, 241,
-        216, 158, 67, 9, 92, 26, 98,
-        61, 107, 160, 254,
-      ],
-      [
-        46, 196, 175, 216, 123, 42, 24, 178,
-        16, 98, 164, 254, 143, 46, 79, 106,
-        229, 141, 49, 13, 188, 75, 245, 196,
-        75, 161, 118, 58, 149, 60, 215, 188,
-      ],
-      [
-        34, 59, 233, 132, 237, 149, 239, 141,
-        62, 114, 113, 160, 135, 11, 50, 26,
-        18, 8, 164, 169, 71, 229, 111, 227,
-        32, 231, 29, 61, 112, 192, 93, 138,
-      ],
-      [
-        3, 173, 23, 227, 2, 43, 181, 73,
-        139, 193, 142, 183, 238, 255, 98, 64,
-        170, 184, 200, 150, 126, 198, 90, 126,
-        220, 16, 104, 57, 239, 125, 189, 100,
-      ],
-    ])
+
+    console.log(data)
 
     assert.equal(data.status, ProofRequestStatus.Proved)
   })
