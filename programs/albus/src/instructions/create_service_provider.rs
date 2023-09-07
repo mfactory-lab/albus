@@ -29,6 +29,7 @@
 use anchor_lang::prelude::*;
 
 use crate::constants::DEFAULT_SECRET_SHARE_THRESHOLD;
+use crate::state::ContactInfo;
 use crate::{state::ServiceProvider, utils::assert_authorized};
 
 pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
@@ -37,11 +38,15 @@ pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderD
     let timestamp = Clock::get()?.unix_timestamp;
 
     let sp = &mut ctx.accounts.service_provider;
+    sp.authority = data.authority.unwrap_or(ctx.accounts.authority.key());
     sp.code = data.code;
     sp.name = data.name;
-    sp.authority = data.authority.unwrap_or(ctx.accounts.authority.key());
+    sp.website = data.website;
+    sp.contact_info = data.contact_info.unwrap_or_default();
+    sp.secret_share_threshold = data
+        .secret_share_threshold
+        .unwrap_or(DEFAULT_SECRET_SHARE_THRESHOLD);
     sp.created_at = timestamp;
-    sp.secret_share_threshold = DEFAULT_SECRET_SHARE_THRESHOLD;
     sp.bump = ctx.bumps["service_provider"];
 
     Ok(())
@@ -54,8 +59,12 @@ pub struct CreateServiceProviderData {
     pub code: String,
     /// The name of the service
     pub name: String,
+    pub website: String,
+    pub contact_info: Option<ContactInfo>,
     /// Service authority
     pub authority: Option<Pubkey>,
+    /// Required number of shares used to reconstruct the secret
+    pub secret_share_threshold: Option<u8>,
 }
 
 #[derive(Accounts)]

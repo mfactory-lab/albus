@@ -204,6 +204,11 @@ pub struct ServiceProvider {
     /// Name of the service
     #[max_len(32)]
     pub name: String,
+    /// The website link
+    #[max_len(200)]
+    pub website: String,
+    /// Contact information
+    pub contact_info: ContactInfo,
     /// Total number of proof requests
     pub proof_request_count: u64,
     /// Total number of policies
@@ -212,10 +217,18 @@ pub struct ServiceProvider {
     pub created_at: i64,
     /// PDA bump
     pub bump: u8,
-    /// Required number of shares used to reconstruct the secret
+    /// Required number of trustee shares used to reconstruct the proof request secret
     pub secret_share_threshold: u8,
+    /// List of selected trustees
     #[max_len(3)]
     pub trustees: Vec<Pubkey>,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Default, Clone, InitSpace)]
+pub struct ContactInfo {
+    pub kind: u8,
+    #[max_len(128)]
+    pub value: String,
 }
 
 impl ServiceProvider {
@@ -237,10 +250,13 @@ pub struct Trustee {
     /// Name of the trustee
     #[max_len(32)]
     pub name: String,
+    /// Email of the trustee
     #[max_len(128)]
     pub email: String,
+    /// Website of the trustee
     #[max_len(200)]
     pub website: String,
+    /// Indicates whether the [Trustee] has been verified
     pub is_verified: bool,
     /// The number of revealed secret shares
     pub revealed_share_count: u32,
@@ -344,7 +360,7 @@ pub struct ProofRequest {
     pub verified_at: i64,
     /// Timestamp for when the user was added the `proof`
     pub proved_at: i64,
-    /// Timestamp indicating when the data will no longer be retained
+    /// Timestamp indicating when the data will no longer be stored
     pub retention_end_date: i64,
     /// Status of the request
     pub status: ProofRequestStatus,
@@ -375,3 +391,15 @@ pub enum ProofRequestStatus {
     Verified,
     Rejected,
 }
+
+// #[account]
+// #[derive(InitSpace)]
+// pub struct ProofRequestHistory {
+//     pub proof_request: Pubkey,
+//     pub owner: Pubkey,
+//     // pub proof: Option<ProofData>,
+//     #[max_len(0)]
+//     pub public_inputs: Vec<[u8; 32]>,
+//     pub proved_at: i64,
+//     pub created_at: i64,
+// }
