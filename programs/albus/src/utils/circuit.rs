@@ -56,25 +56,34 @@ impl<'a> Signals<'a> {
         let mut count = 0;
 
         for signal in signals {
-            let (name, len) = {
-                let s: Cow<str> = signal.into();
-                match (s.find('['), s.rfind(']')) {
-                    (Some(open), Some(close)) if open < close => {
-                        let name = s[..open].to_owned();
-                        if let Ok(n) = s[open + 1..close].parse::<usize>() {
-                            (name.into(), n)
-                        } else {
-                            (name.into(), 1)
-                        }
-                    }
-                    _ => (s, 1),
-                }
-            };
+            let sig = signal.into();
+            let (name, len) = Self::parse_signal(&sig).unwrap_or((sig, 1));
             data.insert(name, (count, len));
             count += len;
         }
 
         Self { data, count }
+    }
+
+    fn parse_signal(s: &str) -> Option<(Cow<'a, str>, usize)> {
+        if s.is_empty() {
+            return None;
+        }
+        match (s.find('['), s.find(']')) {
+            (Some(open), Some(close)) if open < close => {
+                let name = s[..open].to_owned();
+                if let Ok(n) = s[open + 1..close].parse::<usize>() {
+                    if let Some((_, m)) = Self::parse_signal(&s[close + 1..]) {
+                        Some((name.into(), n * m))
+                    } else {
+                        Some((name.into(), n))
+                    }
+                } else {
+                    Some((name.into(), 1))
+                }
+            }
+            _ => None,
+        }
     }
 
     pub fn get(&self, k: impl Into<Cow<'a, str>>) -> Option<&Signal> {
@@ -117,11 +126,15 @@ fn test_signals() {
         "credentialKey",
         "issuerPk[2]",
         "issuerSignature[3]",
+        "encryptedShare[3][4]",
+        "threeLevel[3][4][2]",
     ]);
     assert_eq!(signals["credentialRoot"], (3, 1));
     assert_eq!(signals["credentialKey"], (14, 1));
     assert_eq!(signals["issuerSignature"], (17, 3));
-    assert_eq!(20, signals.len());
+    assert_eq!(signals["encryptedShare"], (20, 12));
+    assert_eq!(signals["threeLevel"], (32, 24));
+    assert_eq!(56, signals.len());
 }
 
 #[test]
