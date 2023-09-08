@@ -38,6 +38,7 @@ import { PdaManager } from './pda'
 import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
+import { TrusteeManager } from './trusteeManager'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -47,6 +48,7 @@ export class AlbusClient {
   policy: PolicyManager
   service: ServiceManager
   credential: CredentialManager
+  trustee: TrusteeManager
   proofRequest: ProofRequestManager
   eventManager: EventManager
 
@@ -59,6 +61,7 @@ export class AlbusClient {
     this.policy = new PolicyManager(this.provider, this.pda)
     this.service = new ServiceManager(this.provider, this.pda)
     this.credential = new CredentialManager(this.provider, this.pda)
+    this.trustee = new TrusteeManager(this.provider, this.pda)
     this.proofRequest = new ProofRequestManager(this.provider, this.circuit, this.credential, this.pda)
   }
 
