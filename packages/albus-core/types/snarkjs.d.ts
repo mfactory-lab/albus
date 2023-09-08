@@ -53,6 +53,23 @@ declare module 'snarkjs' {
     readonly IC: (string | number | bigint)[][];
   };
 
+  type R1csInfo = {
+    readonly n8: number
+    readonly prime: number
+    readonly curve: string
+    readonly nVars: number
+    readonly nOutputs: number
+    readonly nPubInputs: number
+    readonly nPrvInputs: number
+    readonly nLabels: number
+    readonly nConstraints: number
+    readonly useCustomGates: any
+    readonly constraints: any
+    readonly map: any
+    readonly customGates: any
+    readonly customGatesUses: any
+  };
+
   const groth16: {
     readonly fullProve: (
       input: {
@@ -102,7 +119,7 @@ declare module 'snarkjs' {
 
   const r1cs: {
     exportJson: (r1csName: string, logger?: unknown) => Promise<any>;
-    info: (r1csName: string, logger?: unknown) => Promise<any>;
+    info: (r1csName: string, logger?: unknown) => Promise<R1csInfo>;
     print: (params: object, options: object) => Promise<any>;
   };
 
