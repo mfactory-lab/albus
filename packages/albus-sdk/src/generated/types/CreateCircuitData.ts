@@ -13,8 +13,9 @@ export interface CreateCircuitData {
   description: string
   wasmUri: string
   zkeyUri: string
-  privateSignals: string[]
+  outputs: string[]
   publicSignals: string[]
+  privateSignals: string[]
 }
 
 /**
@@ -29,8 +30,9 @@ export const createCircuitDataBeet
       ['description', beet.utf8String],
       ['wasmUri', beet.utf8String],
       ['zkeyUri', beet.utf8String],
-      ['privateSignals', beet.array(beet.utf8String)],
+      ['outputs', beet.array(beet.utf8String)],
       ['publicSignals', beet.array(beet.utf8String)],
+      ['privateSignals', beet.array(beet.utf8String)],
     ],
     'CreateCircuitData',
   )

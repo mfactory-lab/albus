@@ -7,20 +7,19 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface CreateProofRequestData {
-  expiresIn: number
-  maxPublicInputs: number
+export interface ContactInfo {
+  kind: number
+  value: string
 }
 
 /**
  * @category userTypes
  * @category generated
  */
-export const createProofRequestDataBeet
-  = new beet.BeetArgsStruct<CreateProofRequestData>(
-    [
-      ['expiresIn', beet.u32],
-      ['maxPublicInputs', beet.u8],
-    ],
-    'CreateProofRequestData',
-  )
+export const contactInfoBeet = new beet.FixableBeetArgsStruct<ContactInfo>(
+  [
+    ['kind', beet.u8],
+    ['value', beet.utf8String],
+  ],
+  'ContactInfo',
+)

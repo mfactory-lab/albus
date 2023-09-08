@@ -5,14 +5,20 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import type * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
+import type * as web3 from '@solana/web3.js'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
+import type { ContactInfo } from './ContactInfo'
+import { contactInfoBeet } from './ContactInfo'
 
 export interface CreateServiceProviderData {
   code: string
   name: string
+  website: string
+  contactInfo: beet.COption<ContactInfo>
   authority: beet.COption<web3.PublicKey>
+  secretShareThreshold: beet.COption<number>
+  trustees: beet.COption<web3.PublicKey[]>
 }
 
 /**
@@ -24,7 +30,11 @@ export const createServiceProviderDataBeet
     [
       ['code', beet.utf8String],
       ['name', beet.utf8String],
+      ['website', beet.utf8String],
+      ['contactInfo', beet.coption(contactInfoBeet)],
       ['authority', beet.coption(beetSolana.publicKey)],
+      ['secretShareThreshold', beet.coption(beet.u8)],
+      ['trustees', beet.coption(beet.array(beetSolana.publicKey))],
     ],
     'CreateServiceProviderData',
   )

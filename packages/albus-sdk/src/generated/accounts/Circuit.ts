@@ -25,8 +25,9 @@ export interface CircuitArgs {
   createdAt: beet.bignum
   bump: number
   vk: VerificationKey
-  privateSignals: string[]
+  outputs: string[]
   publicSignals: string[]
+  privateSignals: string[]
 }
 
 export const circuitDiscriminator = [113, 209, 5, 225, 233, 216, 248, 61]
@@ -47,8 +48,9 @@ export class Circuit implements CircuitArgs {
     readonly createdAt: beet.bignum,
     readonly bump: number,
     readonly vk: VerificationKey,
-    readonly privateSignals: string[],
+    readonly outputs: string[],
     readonly publicSignals: string[],
+    readonly privateSignals: string[],
   ) {}
 
   /**
@@ -64,8 +66,9 @@ export class Circuit implements CircuitArgs {
       args.createdAt,
       args.bump,
       args.vk,
-      args.privateSignals,
+      args.outputs,
       args.publicSignals,
+      args.privateSignals,
     )
   }
 
@@ -192,8 +195,9 @@ export class Circuit implements CircuitArgs {
       })(),
       bump: this.bump,
       vk: this.vk,
-      privateSignals: this.privateSignals,
+      outputs: this.outputs,
       publicSignals: this.publicSignals,
+      privateSignals: this.privateSignals,
     }
   }
 }
@@ -218,8 +222,9 @@ export const circuitBeet = new beet.FixableBeetStruct<
     ['createdAt', beet.i64],
     ['bump', beet.u8],
     ['vk', verificationKeyBeet],
-    ['privateSignals', beet.array(beet.utf8String)],
+    ['outputs', beet.array(beet.utf8String)],
     ['publicSignals', beet.array(beet.utf8String)],
+    ['privateSignals', beet.array(beet.utf8String)],
   ],
   Circuit.fromArgs,
   'Circuit',

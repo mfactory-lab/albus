@@ -8,9 +8,15 @@
 import type * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
+import type { ContactInfo } from './ContactInfo'
+import { contactInfoBeet } from './ContactInfo'
 
 export interface UpdateServiceData {
   newAuthority: beet.COption<web3.PublicKey>
+  name: beet.COption<string>
+  website: beet.COption<string>
+  contactInfo: beet.COption<ContactInfo>
+  secretShareThreshold: beet.COption<number>
 }
 
 /**
@@ -19,6 +25,12 @@ export interface UpdateServiceData {
  */
 export const updateServiceDataBeet
   = new beet.FixableBeetArgsStruct<UpdateServiceData>(
-    [['newAuthority', beet.coption(beetSolana.publicKey)]],
+    [
+      ['newAuthority', beet.coption(beetSolana.publicKey)],
+      ['name', beet.coption(beet.utf8String)],
+      ['website', beet.coption(beet.utf8String)],
+      ['contactInfo', beet.coption(contactInfoBeet)],
+      ['secretShareThreshold', beet.coption(beet.u8)],
+    ],
     'UpdateServiceData',
   )

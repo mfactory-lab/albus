@@ -92,24 +92,24 @@ createErrorFromCodeLookup.set(0x1773, () => new ExpiredError())
 createErrorFromNameLookup.set('Expired', () => new ExpiredError())
 
 /**
- * WrongData: 'Wrong data'
+ * InvalidData: 'Invalid data'
  *
  * @category Errors
  * @category generated
  */
-export class WrongDataError extends Error {
+export class InvalidDataError extends Error {
   readonly code: number = 0x1774
-  readonly name: string = 'WrongData'
+  readonly name: string = 'InvalidData'
   constructor() {
-    super('Wrong data')
+    super('Invalid data')
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, WrongDataError)
+      Error.captureStackTrace(this, InvalidDataError)
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x1774, () => new WrongDataError())
-createErrorFromNameLookup.set('WrongData', () => new WrongDataError())
+createErrorFromCodeLookup.set(0x1774, () => new InvalidDataError())
+createErrorFromNameLookup.set('InvalidData', () => new InvalidDataError())
 
 /**
  * IncorrectOwner: 'Incorrect owner'

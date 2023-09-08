@@ -557,10 +557,7 @@
             }
           },
           {
-            "name": "privateSignals",
-            "docs": [
-              "Private signals associated with the circuit."
-            ],
+            "name": "outputs",
             "type": {
               "vec": "string"
             }
@@ -569,6 +566,15 @@
             "name": "publicSignals",
             "docs": [
               "Public signals associated with the circuit."
+            ],
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "privateSignals",
+            "docs": [
+              "Private signals associated with the circuit."
             ],
             "type": {
               "vec": "string"
@@ -693,6 +699,22 @@
             "type": "string"
           },
           {
+            "name": "website",
+            "docs": [
+              "The website link"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "contactInfo",
+            "docs": [
+              "Contact information"
+            ],
+            "type": {
+              "defined": "ContactInfo"
+            }
+          },
+          {
             "name": "proofRequestCount",
             "docs": [
               "Total number of proof requests"
@@ -723,12 +745,15 @@
           {
             "name": "secretShareThreshold",
             "docs": [
-              "Required number of shares used to reconstruct the secret"
+              "Required number of trustee shares used to reconstruct the proof request secret"
             ],
             "type": "u8"
           },
           {
             "name": "trustees",
+            "docs": [
+              "List of selected trustees"
+            ],
             "type": {
               "vec": "publicKey"
             }
@@ -742,16 +767,10 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
-            "docs": [
-              "The authority that manages the trustee"
-            ],
-            "type": "publicKey"
-          },
-          {
             "name": "key",
             "docs": [
-              "The pubkey that is used for secret sharing encryption. (BJJ packed)"
+              "Key that is used for secret sharing encryption.",
+              "BJJ packed public key"
             ],
             "type": {
               "array": [
@@ -759,6 +778,13 @@
                 32
               ]
             }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The authority that manages the trustee"
+            ],
+            "type": "publicKey"
           },
           {
             "name": "name",
@@ -769,14 +795,23 @@
           },
           {
             "name": "email",
+            "docs": [
+              "Email of the trustee"
+            ],
             "type": "string"
           },
           {
             "name": "website",
+            "docs": [
+              "Website of the trustee"
+            ],
             "type": "string"
           },
           {
             "name": "isVerified",
+            "docs": [
+              "Indicates whether the [Trustee] has been verified"
+            ],
             "type": "bool"
           },
           {
@@ -958,7 +993,7 @@
           {
             "name": "retentionEndDate",
             "docs": [
-              "Timestamp indicating when the data will no longer be retained"
+              "Timestamp indicating when the data will no longer be stored"
             ],
             "type": "i64"
           },
@@ -1034,13 +1069,19 @@
             "type": "string"
           },
           {
-            "name": "privateSignals",
+            "name": "outputs",
             "type": {
               "vec": "string"
             }
           },
           {
             "name": "publicSignals",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "privateSignals",
             "type": {
               "vec": "string"
             }
@@ -1115,6 +1156,10 @@
               "Time in seconds until the request expires"
             ],
             "type": "u32"
+          },
+          {
+            "name": "maxPublicInputs",
+            "type": "u8"
           }
         ]
       }
@@ -1142,12 +1187,41 @@
             "type": "string"
           },
           {
+            "name": "website",
+            "type": "string"
+          },
+          {
+            "name": "contactInfo",
+            "type": {
+              "option": {
+                "defined": "ContactInfo"
+              }
+            }
+          },
+          {
             "name": "authority",
             "docs": [
               "Service authority"
             ],
             "type": {
               "option": "publicKey"
+            }
+          },
+          {
+            "name": "secretShareThreshold",
+            "docs": [
+              "Required number of shares used to reconstruct the secret"
+            ],
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "trustees",
+            "type": {
+              "option": {
+                "vec": "publicKey"
+              }
             }
           }
         ]
@@ -1291,6 +1365,32 @@
             "name": "newAuthority",
             "type": {
               "option": "publicKey"
+            }
+          },
+          {
+            "name": "name",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "website",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "contactInfo",
+            "type": {
+              "option": {
+                "defined": "ContactInfo"
+              }
+            }
+          },
+          {
+            "name": "secretShareThreshold",
+            "type": {
+              "option": "u8"
             }
           }
         ]
@@ -1453,6 +1553,22 @@
           {
             "name": "value",
             "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ContactInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "value",
+            "type": "string"
           }
         ]
       }
@@ -1694,8 +1810,8 @@
     },
     {
       "code": 6004,
-      "name": "WrongData",
-      "msg": "Wrong data"
+      "name": "InvalidData",
+      "msg": "Invalid data"
     },
     {
       "code": 6005,

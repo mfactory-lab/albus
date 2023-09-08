@@ -8,6 +8,8 @@
 import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
+import type { ContactInfo } from '../types/ContactInfo'
+import { contactInfoBeet } from '../types/ContactInfo'
 
 /**
  * Arguments used to create {@link ServiceProvider}
@@ -18,6 +20,8 @@ export interface ServiceProviderArgs {
   authority: web3.PublicKey
   code: string
   name: string
+  website: string
+  contactInfo: ContactInfo
   proofRequestCount: beet.bignum
   policyCount: beet.bignum
   createdAt: beet.bignum
@@ -39,6 +43,8 @@ export class ServiceProvider implements ServiceProviderArgs {
     readonly authority: web3.PublicKey,
     readonly code: string,
     readonly name: string,
+    readonly website: string,
+    readonly contactInfo: ContactInfo,
     readonly proofRequestCount: beet.bignum,
     readonly policyCount: beet.bignum,
     readonly createdAt: beet.bignum,
@@ -55,6 +61,8 @@ export class ServiceProvider implements ServiceProviderArgs {
       args.authority,
       args.code,
       args.name,
+      args.website,
+      args.contactInfo,
       args.proofRequestCount,
       args.policyCount,
       args.createdAt,
@@ -172,6 +180,8 @@ export class ServiceProvider implements ServiceProviderArgs {
       authority: this.authority.toBase58(),
       code: this.code,
       name: this.name,
+      website: this.website,
+      contactInfo: this.contactInfo,
       proofRequestCount: (() => {
         const x = <{ toNumber: () => number }> this.proofRequestCount
         if (typeof x.toNumber === 'function') {
@@ -227,6 +237,8 @@ export const serviceProviderBeet = new beet.FixableBeetStruct<
     ['authority', beetSolana.publicKey],
     ['code', beet.utf8String],
     ['name', beet.utf8String],
+    ['website', beet.utf8String],
+    ['contactInfo', contactInfoBeet],
     ['proofRequestCount', beet.u64],
     ['policyCount', beet.u64],
     ['createdAt', beet.i64],

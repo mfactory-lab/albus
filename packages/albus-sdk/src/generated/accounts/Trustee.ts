@@ -15,8 +15,8 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
  * @category generated
  */
 export interface TrusteeArgs {
-  authority: web3.PublicKey
   key: number[] /* size: 32 */
+  authority: web3.PublicKey
   name: string
   email: string
   website: string
@@ -36,8 +36,8 @@ export const trusteeDiscriminator = [206, 26, 220, 171, 26, 39, 92, 219]
  */
 export class Trustee implements TrusteeArgs {
   private constructor(
-    readonly authority: web3.PublicKey,
     readonly key: number[] /* size: 32 */,
+    readonly authority: web3.PublicKey,
     readonly name: string,
     readonly email: string,
     readonly website: string,
@@ -52,8 +52,8 @@ export class Trustee implements TrusteeArgs {
    */
   static fromArgs(args: TrusteeArgs) {
     return new Trustee(
-      args.authority,
       args.key,
+      args.authority,
       args.name,
       args.email,
       args.website,
@@ -169,8 +169,8 @@ export class Trustee implements TrusteeArgs {
    */
   pretty() {
     return {
-      authority: this.authority.toBase58(),
       key: this.key,
+      authority: this.authority.toBase58(),
       name: this.name,
       email: this.email,
       website: this.website,
@@ -204,8 +204,8 @@ export const trusteeBeet = new beet.FixableBeetStruct<
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['authority', beetSolana.publicKey],
     ['key', beet.uniformFixedSizeArray(beet.u8, 32)],
+    ['authority', beetSolana.publicKey],
     ['name', beet.utf8String],
     ['email', beet.utf8String],
     ['website', beet.utf8String],
