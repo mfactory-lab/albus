@@ -33,7 +33,9 @@ import {
   ServiceProvider,
   createCreateServiceProviderInstruction,
   createDeleteServiceProviderInstruction,
-  errorFromCode, serviceProviderDiscriminator,
+  createUpdateServiceProviderInstruction,
+  errorFromCode,
+  serviceProviderDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 
@@ -101,6 +103,10 @@ export class ServiceManager {
       data: {
         code: props.code,
         name: props.name,
+        website: props.website,
+        contactInfo: props.contactInfo ?? null,
+        secretShareThreshold: props.secretShareThreshold ?? null,
+        trustees: props.trustees ?? null,
         authority: props.authority ? new PublicKey(props.authority) : null,
       },
     })
@@ -108,6 +114,36 @@ export class ServiceManager {
       const tx = new Transaction().add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
       return { address: serviceProvider, signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  /**
+   * Update service
+   */
+  async update(props: UpdateServiceProps, opts?: ConfirmOptions) {
+    const instruction = createUpdateServiceProviderInstruction({
+      authority: this.provider.publicKey,
+      serviceProvider: new PublicKey(props.serviceProvider),
+      anchorRemainingAccounts: props.trustees?.map(pubkey => ({
+        pubkey,
+        isSigner: false,
+        isWritable: false,
+      })),
+    }, {
+      data: {
+        name: props.name,
+        website: props.website,
+        contactInfo: props.contactInfo ?? null,
+        secretShareThreshold: props.secretShareThreshold ?? null,
+        newAuthority: props.newAuthority ? new PublicKey(props.newAuthority) : null,
+      },
+    })
+    try {
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
@@ -134,11 +170,37 @@ export class ServiceManager {
   }
 }
 
+export enum ServiceContactType {
+  Email = 1,
+  Phone = 2,
+  Telegram = 3,
+}
+
 export interface CreateServiceProps {
   code: string
   name: string
+  website: string
+  contactInfo?: {
+    kind: ServiceContactType
+    value: string
+  }
+  secretShareThreshold?: number
+  trustees?: PublicKey[]
   // Service manager authority
   authority?: PublicKeyInitData
+}
+
+export interface UpdateServiceProps {
+  serviceProvider: PublicKeyInitData
+  name: string
+  website: string
+  contactInfo?: {
+    kind: ServiceContactType
+    value: string
+  }
+  secretShareThreshold?: number
+  trustees?: PublicKey[]
+  newAuthority?: PublicKeyInitData
 }
 
 export interface FindServicesProps {
