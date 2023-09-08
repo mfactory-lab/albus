@@ -141,8 +141,8 @@ pub enum AlbusError {
     Unproved,
     #[msg("Expired")]
     Expired,
-    #[msg("Wrong data")]
-    WrongData,
+    #[msg("Invalid data")]
+    InvalidData,
     #[msg("Incorrect owner")]
     IncorrectOwner,
     #[msg("Invalid metadata")]

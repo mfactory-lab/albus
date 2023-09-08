@@ -28,15 +28,45 @@
 
 use anchor_lang::prelude::*;
 
-use crate::{state::ServiceProvider, utils::assert_authorized};
+use crate::state::{ContactInfo, Trustee};
+use crate::{state::ServiceProvider, AlbusError};
 
 pub fn handler(ctx: Context<UpdateService>, data: UpdateServiceData) -> Result<()> {
-    assert_authorized(&ctx.accounts.authority.key())?;
-
     let service = &mut ctx.accounts.service_provider;
 
     if let Some(new_authority) = data.new_authority {
         service.authority = new_authority;
+    }
+
+    if let Some(name) = data.name {
+        service.name = name;
+    }
+
+    if let Some(website) = data.website {
+        service.website = website;
+    }
+
+    if let Some(contact_info) = data.contact_info {
+        service.contact_info = contact_info;
+    }
+
+    if let Some(n) = data.secret_share_threshold {
+        service.secret_share_threshold = n;
+    }
+
+    if !ctx.remaining_accounts.is_empty() {
+        service.trustees = Vec::with_capacity(3);
+        for acc in ctx.remaining_accounts {
+            let trustee = Account::<'_, Trustee>::try_from(acc).map_err(|_e| {
+                msg!("Invalid trustee account `{}`", acc.key);
+                AlbusError::InvalidData
+            })?;
+            if !trustee.is_verified {
+                msg!("Selected trustee `{}` is not verified", acc.key);
+                return Err(AlbusError::InvalidData.into());
+            }
+            service.trustees.push(acc.key());
+        }
     }
 
     Ok(())
@@ -45,6 +75,10 @@ pub fn handler(ctx: Context<UpdateService>, data: UpdateServiceData) -> Result<(
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateServiceData {
     pub new_authority: Option<Pubkey>,
+    pub name: Option<String>,
+    pub website: Option<String>,
+    pub contact_info: Option<ContactInfo>,
+    pub secret_share_threshold: Option<u8>,
 }
 
 #[derive(Accounts)]

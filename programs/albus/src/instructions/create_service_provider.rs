@@ -37,17 +37,23 @@ pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderD
 
     let timestamp = Clock::get()?.unix_timestamp;
 
-    let sp = &mut ctx.accounts.service_provider;
-    sp.authority = data.authority.unwrap_or(ctx.accounts.authority.key());
-    sp.code = data.code;
-    sp.name = data.name;
-    sp.website = data.website;
-    sp.contact_info = data.contact_info.unwrap_or_default();
-    sp.secret_share_threshold = data
+    let service = &mut ctx.accounts.service_provider;
+    service.authority = data.authority.unwrap_or(ctx.accounts.authority.key());
+    service.code = data.code;
+    service.name = data.name;
+    service.website = data.website;
+    service.contact_info = data.contact_info.unwrap_or_default();
+
+    service.secret_share_threshold = data
         .secret_share_threshold
         .unwrap_or(DEFAULT_SECRET_SHARE_THRESHOLD);
-    sp.created_at = timestamp;
-    sp.bump = ctx.bumps["service_provider"];
+
+    service.created_at = timestamp;
+    service.bump = ctx.bumps["service_provider"];
+
+    if let Some(trustees) = data.trustees {
+        service.trustees = trustees;
+    }
 
     Ok(())
 }
@@ -65,6 +71,7 @@ pub struct CreateServiceProviderData {
     pub authority: Option<Pubkey>,
     /// Required number of shares used to reconstruct the secret
     pub secret_share_threshold: Option<u8>,
+    pub trustees: Option<Vec<Pubkey>>,
 }
 
 #[derive(Accounts)]

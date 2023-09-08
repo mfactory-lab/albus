@@ -76,9 +76,11 @@ pub fn handler(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -
 pub struct CreateProofRequestData {
     /// Time in seconds until the request expires
     pub expires_in: u32,
+    pub max_public_inputs: u8,
 }
 
 #[derive(Accounts)]
+#[instruction(data: CreateProofRequestData)]
 pub struct CreateProofRequest<'info> {
     #[account(mut)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
@@ -95,7 +97,7 @@ pub struct CreateProofRequest<'info> {
         ],
         bump,
         payer = authority,
-        space = ProofRequest::space()
+        space = ProofRequest::space(data.max_public_inputs)
     )]
     pub proof_request: Box<Account<'info, ProofRequest>>,
 

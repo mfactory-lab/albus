@@ -44,6 +44,7 @@ pub fn handler(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<(
     circuit.wasm_uri = data.wasm_uri;
     circuit.zkey_uri = data.zkey_uri;
     circuit.created_at = timestamp;
+    circuit.outputs = data.outputs;
     circuit.private_signals = data.private_signals;
     circuit.public_signals = data.public_signals;
     circuit.bump = ctx.bumps["circuit"];
@@ -58,8 +59,9 @@ pub struct CreateCircuitData {
     pub description: String,
     pub wasm_uri: String,
     pub zkey_uri: String,
-    pub private_signals: Vec<String>,
+    pub outputs: Vec<String>,
     pub public_signals: Vec<String>,
+    pub private_signals: Vec<String>,
 }
 
 #[derive(Accounts)]
@@ -71,6 +73,7 @@ pub struct CreateCircuit<'info> {
         bump,
         payer = authority,
         space = Circuit::space(
+            Circuit::signals_count(&data.outputs) +
             Circuit::signals_count(&data.private_signals) +
             Circuit::signals_count(&data.public_signals)
         )

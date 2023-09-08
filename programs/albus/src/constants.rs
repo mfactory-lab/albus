@@ -33,9 +33,8 @@ pub const AUTHORIZED_AUTHORITY: &[&str] = &[
 ];
 
 /// Default Albus issuer public key
-pub const ISSUER_PK: [u8; 64] = [0; 64];
-
+// pub const ISSUER_PK: [u8; 64] = [0; 64];
+// pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
 pub const CURRENT_DATE_SIGNAL: &str = "currentDate";
-pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
 
 pub const DEFAULT_SECRET_SHARE_THRESHOLD: u8 = 2;

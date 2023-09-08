@@ -104,12 +104,14 @@ pub struct Circuit {
     pub bump: u8,
     /// Verification key
     pub vk: VerificationKey,
-    /// Private signals associated with the circuit.
     #[max_len(0, 0)]
-    pub private_signals: Vec<String>,
+    pub outputs: Vec<String>,
     /// Public signals associated with the circuit.
     #[max_len(0, 0)]
     pub public_signals: Vec<String>,
+    /// Private signals associated with the circuit.
+    #[max_len(0, 0)]
+    pub private_signals: Vec<String>,
 }
 
 impl Circuit {
@@ -243,10 +245,11 @@ impl ServiceProvider {
 #[account]
 #[derive(InitSpace)]
 pub struct Trustee {
+    /// Key that is used for secret sharing encryption.
+    /// BJJ packed public key
+    pub key: [u8; 32],
     /// The authority that manages the trustee
     pub authority: Pubkey,
-    /// The pubkey that is used for secret sharing encryption. (BJJ packed)
-    pub key: [u8; 32],
     /// Name of the trustee
     #[max_len(32)]
     pub name: String,
@@ -369,7 +372,7 @@ pub struct ProofRequest {
     /// Proof payload
     pub proof: Option<ProofData>,
     /// Public inputs that are used to verify the `proof`
-    #[max_len(40)]
+    #[max_len(0)]
     pub public_inputs: Vec<[u8; 32]>,
 }
 
@@ -377,8 +380,8 @@ impl ProofRequest {
     pub const SEED: &'_ [u8] = b"proof-request";
 
     #[inline]
-    pub fn space() -> usize {
-        8 + Self::INIT_SPACE
+    pub fn space(max_public_inputs: u8) -> usize {
+        8 + Self::INIT_SPACE + (max_public_inputs as usize * 32)
     }
 }
 

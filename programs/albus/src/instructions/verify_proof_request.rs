@@ -82,7 +82,7 @@ pub fn handler(ctx: Context<VerifyProofRequest>, data: VerifyProofRequestData) -
         }
         _ => {
             msg!("Invalid status!");
-            return Err(AlbusError::WrongData.into());
+            return Err(AlbusError::InvalidData.into());
         }
     }
 
