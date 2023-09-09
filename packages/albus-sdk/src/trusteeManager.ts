@@ -27,15 +27,14 @@
  */
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
+import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import type { CreateTrusteeData, UpdateTrusteeData } from './generated'
 import {
   Trustee,
   createCreateTrusteeInstruction,
   createDeleteTrusteeInstruction,
-  createUpdateTrusteeInstruction,
-  createVerifyTrusteeInstruction, errorFromCode, trusteeDiscriminator,
+  createUpdateTrusteeInstruction, createVerifyTrusteeInstruction, errorFromCode, trusteeDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 
@@ -51,6 +50,15 @@ export class TrusteeManager {
    */
   async load(addr: PublicKeyInitData, commitment?: Commitment) {
     return Trustee.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
+  }
+
+  /**
+   * Load multiple trustees
+   */
+  async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
+    return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
+      .filter(acc => acc !== null)
+      .map(acc => Trustee.fromAccountInfo(acc!)[0])
   }
 
   /**

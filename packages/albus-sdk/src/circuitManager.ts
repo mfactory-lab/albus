@@ -110,6 +110,7 @@ export class CircuitManager {
         description: props.description ?? '',
         wasmUri: props.wasmUri,
         zkeyUri: props.zkeyUri,
+        outputs: props.outputs,
         privateSignals: props.privateSignals,
         publicSignals: props.publicSignals,
       },
@@ -214,6 +215,7 @@ export interface CreateCircuitProps {
   description?: string
   wasmUri: string
   zkeyUri: string
+  outputs: string[]
   privateSignals: string[]
   publicSignals: string[]
 }

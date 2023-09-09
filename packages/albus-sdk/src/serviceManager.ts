@@ -27,15 +27,15 @@
  */
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
+import * as Albus from '@mfactory-lab/albus-core'
+import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import {
   ServiceProvider,
   createCreateServiceProviderInstruction,
   createDeleteServiceProviderInstruction,
   createUpdateServiceProviderInstruction,
-  errorFromCode,
-  serviceProviderDiscriminator,
+  errorFromCode, serviceProviderDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 
@@ -49,15 +49,40 @@ export class ServiceManager {
   /**
    * Load service by {@link addr}
    */
-  async load(addr: PublicKeyInitData, commitment?: Commitment) {
-    return ServiceProvider.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
+  async load(addr: PublicKeyInitData, commitmentOrConfig?: Commitment | GetAccountInfoConfig) {
+    return ServiceProvider.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitmentOrConfig)
+  }
+
+  /**
+   * Load multiple services
+   */
+  async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
+    return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
+      .filter(acc => acc !== null)
+      .map(acc => ServiceProvider.fromAccountInfo(acc!)[0])
   }
 
   /**
    * Load service by id
    */
-  async loadById(id: string, commitment?: Commitment) {
-    return this.load(this.pda.serviceProvider(id)[0], commitment)
+  async loadById(id: string, commitmentOrConfig?: Commitment | GetAccountInfoConfig) {
+    return this.load(this.pda.serviceProvider(id)[0], commitmentOrConfig)
+  }
+
+  /**
+   * Load and unpack trustee keys
+   */
+  async loadTrusteeKeys(trustees: PublicKey[]) {
+    const accounts = await this.provider.connection
+      .getMultipleAccountsInfo(trustees, {
+        dataSlice: {
+          offset: 0,
+          length: 32,
+        },
+      })
+    return accounts
+      .map(acc => acc && Albus.zkp.unpackPubkey(Uint8Array.from(acc.data)))
+      .filter(acc => acc !== null) as [bigint, bigint][]
   }
 
   /**
@@ -103,7 +128,7 @@ export class ServiceManager {
       data: {
         code: props.code,
         name: props.name,
-        website: props.website,
+        website: props.website ?? '',
         contactInfo: props.contactInfo ?? null,
         secretShareThreshold: props.secretShareThreshold ?? null,
         trustees: props.trustees ?? null,
@@ -120,7 +145,11 @@ export class ServiceManager {
   }
 
   /**
-   * Update service
+   * Update a service.
+   *
+   * @param {UpdateServiceProps} props - The properties for updating the service.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns Promise<{signature:string}>
    */
   async update(props: UpdateServiceProps, opts?: ConfirmOptions) {
     const instruction = createUpdateServiceProviderInstruction({
@@ -150,7 +179,12 @@ export class ServiceManager {
   }
 
   /**
-   * Delete service
+   * Delete a service by its code.
+   * Require admin authority.
+   *
+   * @param {code} props - The properties for deleting the service.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns Promise<{signature:string}>
    */
   async delete(props: { code: string }, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -176,14 +210,16 @@ export enum ServiceContactType {
   Telegram = 3,
 }
 
+export interface ServiceContact {
+  kind: ServiceContactType
+  value: string
+}
+
 export interface CreateServiceProps {
   code: string
   name: string
-  website: string
-  contactInfo?: {
-    kind: ServiceContactType
-    value: string
-  }
+  website?: string
+  contactInfo?: ServiceContact
   secretShareThreshold?: number
   trustees?: PublicKey[]
   // Service manager authority
@@ -194,10 +230,7 @@ export interface UpdateServiceProps {
   serviceProvider: PublicKeyInitData
   name: string
   website: string
-  contactInfo?: {
-    kind: ServiceContactType
-    value: string
-  }
+  contactInfo?: ServiceContact
   secretShareThreshold?: number
   trustees?: PublicKey[]
   newAuthority?: PublicKeyInitData

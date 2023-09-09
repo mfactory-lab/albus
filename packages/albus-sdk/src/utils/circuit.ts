@@ -89,7 +89,7 @@ export class ProofInputBuilder {
     return this
   }
 
-  withTrusteePublicKey(value?: string[][]) {
+  withTrusteePublicKey(value?: bigint[][]) {
     this.trusteePublicKey = value
     return this
   }
@@ -216,6 +216,6 @@ export class ProofInputBuilder {
    */
   parseSignal(s: string): [string, number, number] {
     const r = s.match(/^(\w+)(?:\[(\d+)](?:\[(\d+)])?)?$/)
-    return r ? [r[1]!, r[2] ? Number(r[2]) : 1, Number(r[3])] : ['', 0, 0]
+    return r ? [r[1]!, r[2] ? Number(r[2]) : 1, r[3] ? Number(r[3]) : 1] : ['', 0, 0]
   }
 }

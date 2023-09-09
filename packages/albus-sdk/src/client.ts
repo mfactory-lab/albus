@@ -62,7 +62,13 @@ export class AlbusClient {
     this.service = new ServiceManager(this.provider, this.pda)
     this.credential = new CredentialManager(this.provider, this.pda)
     this.trustee = new TrusteeManager(this.provider, this.pda)
-    this.proofRequest = new ProofRequestManager(this.provider, this.circuit, this.credential, this.pda)
+    this.proofRequest = new ProofRequestManager(
+      this.provider,
+      this.circuit,
+      this.service,
+      this.credential,
+      this.pda,
+    )
   }
 
   static factory(connection: Connection, wallet?: Wallet, opts: ConfirmOptions = {}) {

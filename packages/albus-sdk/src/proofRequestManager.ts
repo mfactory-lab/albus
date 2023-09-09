@@ -28,7 +28,12 @@
 
 import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
+import type {
+  Commitment,
+  ConfirmOptions,
+  GetMultipleAccountsConfig,
+  PublicKeyInitData,
+} from '@solana/web3.js'
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import { chunk } from 'lodash-es'
 import type { CircuitManager } from './circuitManager'
@@ -41,12 +46,13 @@ import {
   Circuit,
   Policy,
   ProofRequest,
+  ServiceProvider,
   createCreateProofRequestInstruction,
-  createDeleteProofRequestInstruction,
-  createProveInstruction, createVerifyInstruction, errorFromCode,
-  proofRequestDiscriminator,
+  createDeleteProofRequestInstruction, createProveInstruction, createVerifyInstruction,
+  errorFromCode, proofRequestDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
+import type { ServiceManager } from './serviceManager'
 import type { PrivateKey } from './types'
 import { ProofInputBuilder, getSolanaTimestamp } from './utils'
 
@@ -54,6 +60,7 @@ export class ProofRequestManager {
   constructor(
     readonly provider: AnchorProvider,
     readonly circuit: CircuitManager,
+    readonly service: ServiceManager,
     readonly credential: CredentialManager,
     readonly pda: PdaManager,
   ) {
@@ -71,25 +78,51 @@ export class ProofRequestManager {
   }
 
   /**
-   * Load a full set of data associated with a proof request, including the policy and circuit information.
+   * Load multiple proof requests
+   */
+  async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
+    return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
+      .filter(acc => acc !== null)
+      .map(acc => ProofRequest.fromAccountInfo(acc!)[0])
+  }
+
+  /**
+   * Load a full set of data associated with a proof request,
+   * including the service, policy and circuit information.
    *
    * @param {PublicKeyInitData} addr - The public key address of the proof request to load.
+   * @param {Array<keyof LoadFullResult>} props - Extra accounts
    * @param {Commitment} [commitment] - Optional commitment level for loading the data.
    * @returns {Promise<{proofRequest:ProofRequest, policy?:Policy, circuit?:Circuit}>} A Promise that resolves to an object containing the loaded proof request, associated policy, and circuit information.
    * @throws {Error} Throws an error if there is an issue during the loading process.
    */
-  async loadFull(addr: PublicKeyInitData, commitment?: Commitment) {
+  async loadFull(
+    addr: PublicKeyInitData,
+    props: Array<Exclude<keyof LoadFullResult, 'proofRequest'>> = [],
+    commitment?: Commitment,
+  ) {
     const proofRequest = await this.load(addr, commitment)
-    const accounts = await this.provider.connection.getMultipleAccountsInfo([
-      proofRequest.policy,
-      proofRequest.circuit,
-      // proofRequest.serviceProvider,
-    ])
-    return {
-      proofRequest,
-      policy: accounts[0] ? Policy.fromAccountInfo(accounts[0])[0] : undefined,
-      circuit: accounts[1] ? Circuit.fromAccountInfo(accounts[1])[0] : undefined,
+    const pubKeys = props.map(key => proofRequest[key])
+    const result: LoadFullResult = { proofRequest }
+
+    if (pubKeys.length > 0) {
+      const accountInfos = await this.provider.connection.getMultipleAccountsInfo(pubKeys)
+      for (let i = 0; i < props.length; i++) {
+        const prop = props[i]!
+        const accountInfo = accountInfos[i]
+        if (accountInfo) {
+          result[prop as any] = (() => {
+            switch (prop) {
+              case 'circuit': return Circuit.fromAccountInfo(accountInfo)[0]
+              case 'policy': return Policy.fromAccountInfo(accountInfo)[0]
+              case 'serviceProvider': return ServiceProvider.fromAccountInfo(accountInfo)[0]
+            }
+          })()
+        }
+      }
     }
+
+    return result
   }
 
   /**
@@ -160,6 +193,9 @@ export class ProofRequestManager {
     const [policy] = this.pda.policy(serviceProvider, props.policyCode)
     const [proofRequest] = this.pda.proofRequest(policy, authority)
 
+    // TODO: load circuit, get maxPublicInputs
+    const maxPublicInputs = props.maxPublicInputs ?? 40
+
     const instruction = createCreateProofRequestInstruction(
       {
         serviceProvider,
@@ -170,6 +206,7 @@ export class ProofRequestManager {
       {
         data: {
           expiresIn: props.expiresIn ?? 0,
+          maxPublicInputs,
         },
       },
     )
@@ -200,7 +237,6 @@ export class ProofRequestManager {
       proofRequest: new PublicKey(props.proofRequest),
       authority,
     })
-
     try {
       const tx = new Transaction().add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
@@ -272,11 +308,8 @@ export class ProofRequestManager {
    * @throws {Error} Throws an error if there is an issue during any step of the proof generation process.
    */
   async fullProve(props: FullProveProps) {
-    const {
-      proofRequest,
-      circuit,
-      policy,
-    } = await this.loadFull(props.proofRequest)
+    const { proofRequest, circuit, policy, serviceProvider }
+      = await this.loadFull(props.proofRequest, ['circuit', 'policy', 'serviceProvider'])
 
     if (!circuit) {
       throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
@@ -286,17 +319,25 @@ export class ProofRequestManager {
       throw new Error(`Unable to find Policy account at ${proofRequest.policy}`)
     }
 
+    if (!serviceProvider) {
+      throw new Error(`Unable to find Service account at ${proofRequest.serviceProvider}`)
+    }
+
+    const trusteePubKeys = await this.service.loadTrusteeKeys(serviceProvider.trustees)
+
     const credential = await this.credential.load(props.vc, {
-      decryptionKey: props.decryptionKey ?? props.holderSecretKey,
+      decryptionKey: props.decryptionKey ?? props.userPrivateKey,
     })
 
     const proofInput = await new ProofInputBuilder(credential)
       .withNow(await getSolanaTimestamp(this.provider.connection))
-      .withUserPrivateKey(props.holderSecretKey && await Albus.zkp.formatPrivKeyForBabyJub(props.holderSecretKey))
-      .withTrusteePublicKey([])
+      .withUserPrivateKey(props.userPrivateKey && Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
+      .withTrusteePublicKey(trusteePubKeys)
       .withCircuit(circuit)
       .withPolicy(policy)
       .build()
+
+    // console.log(proofInput.data)
 
     try {
       const { proof, publicSignals } = await Albus.zkp.generateProof({
@@ -307,13 +348,14 @@ export class ProofRequestManager {
 
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
+        proofRequestData: proofRequest,
         proof,
         publicSignals,
       })
 
       return { signatures, proof, publicSignals }
     } catch (e: any) {
-      // console.log(e)
+      console.log(e)
       throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
   }
@@ -328,7 +370,7 @@ export class ProofRequestManager {
    */
   async prove(props: ProveProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const proofRequest = await this.load(props.proofRequest)
+    const proofRequest = props.proofRequestData ?? await this.load(props.proofRequest)
 
     const proof = await Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
@@ -407,10 +449,18 @@ export class ProofRequestManager {
   }
 }
 
+interface LoadFullResult {
+  proofRequest: ProofRequest
+  circuit?: Circuit
+  policy?: Policy
+  serviceProvider?: ServiceProvider
+}
+
 export interface CreateProofRequestProps {
   serviceCode: string
   policyCode: string
   expiresIn?: number
+  maxPublicInputs?: number
 }
 
 export interface DeleteProofRequestProps {
@@ -433,7 +483,7 @@ export interface FindProofRequestProps {
 export interface FullProveProps {
   proofRequest: PublicKeyInitData
   vc: PublicKeyInitData
-  holderSecretKey?: Uint8Array
+  userPrivateKey?: Uint8Array
   // Credential decryption key
   decryptionKey?: PrivateKey
 }
@@ -444,6 +494,7 @@ export interface VerifyProps {
 
 export interface ProveProps {
   proofRequest: PublicKeyInitData
+  proofRequestData?: ProofRequest
   proof: ProofData
   publicSignals: (string | number | bigint)[]
 }

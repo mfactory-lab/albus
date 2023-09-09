@@ -27,13 +27,15 @@
  */
 
 import { readFileSync } from 'node:fs'
+import { eddsa } from '@iden3/js-crypto'
 import * as Albus from '@mfactory-lab/albus-core'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
 import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js'
-import { afterEach, assert, describe, expect, it, vi } from 'vitest'
-import type { Circuit, Policy } from '../src'
+import { afterEach, assert, describe, it, vi } from 'vitest'
+import type { Circuit, Policy, ServiceProvider } from '../src'
 import { AlbusClient } from '../src'
 import { ProofInputBuilder } from '../src/utils'
+import '@vitest/web-worker'
 
 describe('AlbusClient', () => {
   const payerKeypair = Keypair.fromSecretKey(Uint8Array.from([
@@ -53,21 +55,36 @@ describe('AlbusClient', () => {
     vi.restoreAllMocks()
   })
 
+  const serviceProvider = {
+    code: 'acme',
+    name: 'acme',
+    trustees: [
+      PublicKey.default,
+      PublicKey.default,
+      PublicKey.default,
+    ],
+  } as ServiceProvider
+
   const circuit = {
     code: 'age',
     name: 'Age',
     vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('agePolicy.vk.json').toString())),
     wasmUri: loadFixture('agePolicy.wasm'),
     zkeyUri: loadFixture('agePolicy.zkey'),
+    outputs: [
+      'encryptedData[4]',
+      'encryptedShare[3][4]',
+    ],
     privateSignals: [
       'birthDate',
       'userPrivateKey',
-      'trusteePublicKey[3][2]',
     ],
     publicSignals: [
       'birthDateProof[6]', 'birthDateKey',
       'currentDate', 'minAge', 'maxAge',
-      'credentialRoot', 'issuerPk[2]', 'issuerSignature[3]',
+      'credentialRoot',
+      'issuerPk[2]', 'issuerSignature[3]',
+      'trusteePublicKey[3][2]',
     ],
   } as unknown as Circuit
 
@@ -77,6 +94,8 @@ describe('AlbusClient', () => {
     code: 'policy',
     name: 'policy',
     description: 'policy',
+    expirationPeriod: 0,
+    retentionPeriod: 0,
     rules: [
       { index: 8, group: 0, value: 18 },
       { index: 9, group: 0, value: 100 },
@@ -116,50 +135,134 @@ describe('AlbusClient', () => {
 
   it('prepareInputs', async () => {
     const user = Keypair.generate()
-    const prv = await Albus.zkp.formatPrivKeyForBabyJub(user.secretKey)
+    const prv = Albus.zkp.formatPrivKeyForBabyJub(user.secretKey)
 
     const inputs = await new ProofInputBuilder(credential)
       .withUserPrivateKey(prv)
-      .withTrusteePublicKey([['1', '2'], ['1', '2'], ['1', '2']])
+      .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
       .withPolicy(policy)
       .withCircuit(circuit)
       .build()
-    console.log(inputs)
+
+    const data = inputs.data as any
+    assert.equal(data.issuerPk.length, 2)
+    assert.equal(data.issuerSignature.length, 3)
+    assert.equal(data.birthDate, '19890101')
+    assert.equal(data.birthDateKey, 0n)
+    assert.equal(data.birthDateProof.length, 6)
+    assert.deepEqual(data.trusteePublicKey, [[1n, 2n], [1n, 2n], [1n, 2n]])
+    // console.log(inputs.data)
   })
 
   it('prove', async () => {
     vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
-    vi.spyOn(client.circuit, 'load').mockReturnValue(Promise.resolve(circuit))
-    vi.spyOn(client.policy, 'load').mockReturnValue(Promise.resolve(policy))
+    // vi.spyOn(client.circuit, 'load').mockReturnValue(Promise.resolve(circuit))
+    // vi.spyOn(client.policy, 'load').mockReturnValue(Promise.resolve(policy))
 
     vi.spyOn(client.proofRequest, 'loadFull').mockReturnValue(Promise.resolve({
       proofRequest: { circuit: PublicKey.default, policy: PublicKey.default },
       circuit,
       policy,
+      serviceProvider,
     } as any))
 
-    const proveSpy = vi.spyOn(client.proofRequest, 'prove')
-      .mockReturnValue(Promise.resolve({
-        signature: 'abc123',
-      } as any))
+    const trusteeCount = 3
+    const trusteePublicKeys: [bigint, bigint][] = []
+    for (let i = 0; i < trusteeCount; i++) {
+      const trusteeKeypair = Keypair.generate()
+      const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
+      trusteePublicKeys.push(trusteePublicKey)
+    }
+
+    vi.spyOn(client.service, 'loadTrusteeKeys').mockReturnValue(Promise.resolve(trusteePublicKeys))
+    vi.spyOn(client.provider, 'sendAll').mockReturnValue(Promise.resolve(['abc123']))
 
     const { signatures, proof, publicSignals } = await client.proofRequest.fullProve({
       // exposedFields: circuit.privateSignals,
-      // holderSecretKey: payerKeypair.secretKey,
+      userPrivateKey: payerKeypair.secretKey,
       proofRequest: PublicKey.default,
       vc: PublicKey.default,
     })
 
-    // assert.equal(publicSignals.length, 16)
-    // assert.ok(proof !== undefined)
-    // assert.equal(signature, 'abc123')
+    const isVerified = await Albus.zkp.verifyProof({
+      vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
+      proof,
+      publicInput: publicSignals,
+    })
 
-    expect(proveSpy).toHaveBeenCalledTimes(1)
+    console.log(proof)
+    console.log(publicSignals)
+
+    assert.ok(isVerified)
+    assert.equal(signatures[0], 'abc123')
   })
 
   it('verify', async () => {
-    const proof = { a: [35, 9, 56, 130, 46, 68, 65, 212, 204, 98, 78, 113, 33, 70, 56, 191, 255, 221, 43, 190, 238, 56, 74, 56, 230, 18, 234, 226, 192, 141, 205, 10, 46, 193, 38, 2, 142, 88, 8, 158, 45, 152, 22, 203, 240, 86, 144, 125, 123, 105, 127, 26, 235, 240, 67, 193, 155, 196, 138, 53, 145, 43, 254, 179], b: [32, 89, 3, 32, 141, 116, 113, 99, 151, 140, 103, 123, 54, 42, 8, 164, 10, 119, 238, 228, 156, 116, 158, 115, 108, 72, 197, 132, 74, 155, 6, 85, 32, 133, 75, 77, 153, 148, 61, 27, 181, 19, 80, 77, 47, 51, 0, 87, 203, 104, 177, 69, 238, 19, 112, 142, 53, 253, 211, 100, 245, 164, 0, 90, 23, 54, 86, 71, 156, 243, 245, 7, 189, 209, 95, 58, 85, 18, 187, 227, 66, 165, 226, 62, 226, 207, 47, 1, 202, 30, 141, 97, 83, 160, 192, 138, 37, 70, 33, 164, 37, 115, 102, 146, 231, 253, 188, 162, 44, 142, 141, 204, 76, 241, 168, 88, 212, 48, 201, 159, 118, 193, 177, 76, 255, 242, 92, 87], c: [47, 180, 233, 78, 155, 215, 17, 177, 224, 20, 126, 62, 109, 132, 115, 69, 59, 86, 196, 241, 128, 127, 144, 112, 158, 22, 7, 118, 100, 75, 178, 249, 32, 45, 36, 165, 174, 51, 92, 64, 99, 132, 48, 50, 3, 235, 245, 203, 47, 54, 214, 111, 3, 86, 252, 34, 37, 77, 99, 91, 167, 218, 213, 199] }
-    const publicInputs = [[0, 199, 214, 240, 123, 172, 248, 120, 228, 226, 80, 170, 126, 30, 175, 137, 146, 226, 184, 21, 10, 234, 158, 225, 179, 97, 99, 42, 178, 165, 78, 197], [1, 24, 137, 177, 30, 45, 57, 167, 210, 172, 227, 148, 76, 91, 156, 16, 58, 67, 90, 245, 67, 148, 118, 22, 242, 95, 231, 130, 15, 199, 245, 218], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 52, 178, 151], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100], [24, 125, 217, 174, 133, 40, 203, 118, 245, 106, 154, 122, 19, 50, 71, 225, 18, 147, 174, 184, 246, 177, 138, 220, 37, 203, 36, 131, 167, 224, 109, 31], [46, 19, 226, 114, 3, 228, 121, 0, 203, 132, 50, 204, 165, 145, 251, 3, 242, 141, 38, 88, 124, 50, 248, 61, 218, 182, 181, 189, 88, 230, 143, 215], [45, 183, 198, 89, 118, 191, 150, 159, 106, 184, 128, 72, 245, 119, 147, 210, 107, 183, 226, 219, 241, 216, 158, 67, 9, 92, 26, 98, 61, 107, 160, 254], [46, 196, 175, 216, 123, 42, 24, 178, 16, 98, 164, 254, 143, 46, 79, 106, 229, 141, 49, 13, 188, 75, 245, 196, 75, 161, 118, 58, 149, 60, 215, 188], [34, 59, 233, 132, 237, 149, 239, 141, 62, 114, 113, 160, 135, 11, 50, 26, 18, 8, 164, 169, 71, 229, 111, 227, 32, 231, 29, 61, 112, 192, 93, 138], [3, 173, 23, 227, 2, 43, 181, 73, 139, 193, 142, 183, 238, 255, 98, 64, 170, 184, 200, 150, 126, 198, 90, 126, 220, 16, 104, 57, 239, 125, 189, 100]]
+    const proof = await Albus.zkp.encodeProof({
+      pi_a: [
+        '14877120137072350404451562016933109912343459838696863512647181576223910049519',
+        '5283016619089287284873368587226416915084846353046100197646496297327078788626',
+        '1',
+      ],
+      pi_b: [
+        [
+          '13427322630132977201450473789107006492140442873689781311403220222715074968762',
+          '14378795640557794552257608171871641139887786714168891220642918235299944288490',
+        ],
+        [
+          '7766037847519377637212164665055682340698222884300983326982119911976670170040',
+          '10397022106135207376432508645115021723296662067668650329666769560520191231898',
+        ],
+        ['1', '0'],
+      ],
+      pi_c: [
+        '6544844402132970515282100255483321625167672181161134211119926388406743279521',
+        '15108957982288472860635321822188088414260445377201485882135190894080137241925',
+        '1',
+      ],
+      protocol: 'groth16',
+      curve: 'bn128',
+    })
+    const publicInputs = Albus.zkp.encodePublicSignals([
+      '3389657497941546973390185279054304215387223826025722652684566341821905279852',
+      '3144776032721753441579347533935953825236870206403523881337101183702378619169',
+      '18725001175259552492080291914403230471777074788306554092850120571305526853051',
+      '3009264531042146821637816024324852139069182165716365829163807916448330876744',
+      '11958206282218304757754581705946390608154057381305404191475932663052998189461',
+      '16552832345961828297800664353954034346334241571036303999633629457337825928653',
+      '11990852389867973821618554389097516969122768715890020265877545265781864729830',
+      '8429340023121542904064627584647128083953472602497449867733648274351632997724',
+      '14265763046590171117444009530162345385587554538226581562538370764666274421866',
+      '11394389402360423621662396420864930996041056664987189976535689274783230006348',
+      '541291649750184114754181692421501860827183639469333927243972543320738268442',
+      '4713798917154821803206191278392161339359554972747765192887316159783993063869',
+      '21702879519569140708865948274895913864477962780028690503796227373308463620407',
+      '18835764051229976616253900454292477409991849105464563307972433004202672940433',
+      '15418152363260905282672272092798720555092445004518622649458263861773750560661',
+      '21041245511809871973578346950712805496817635914202145672099507977960711387541',
+      '353086023020879629087888673454917369147465163855843886593149553676241948357',
+      '495667492475991330422281750651009254772949868345543114298160384197425362394',
+      '0',
+      '0',
+      '0',
+      '0',
+      '0',
+      '20230909',
+      '18',
+      '100',
+      '11077866633106981791340789987944870806147307639065753995447310137530607758623',
+      '20841523997579262969290434121704327723902935194219264790567899027938554056663',
+      '20678780156819015018034618985253893352998041677807437760911245092739191906558',
+      '21153906701456715004295579276500758430977318622340395655171725984189489403836',
+      '15484492519285437260388749074045005694239822857741052851485555393361224949130',
+      '1662767948258934355069791443487100820038153707701411290986741440889424297316',
+      '3263630635455922504365748183269925770087061746500878013475609215352015773209',
+      '3467186729853389068796259263567817399900380819142308399502216371804987398934',
+      '14893009881651362467243765843593590230033241044248455228927820365341119996478',
+      '5618202302112815398174118128176041580031132320103534776831395436332769013897',
+      '1322690608085645443122217162409972428542992581277158762689467846703898431881',
+      '5831246835101001762809269261844468705907411077796589302665403329692977909843',
+    ])
 
     vi.spyOn(client.circuit, 'load').mockReturnValue(Promise.resolve(circuit))
     vi.spyOn(client.proofRequest, 'load').mockReturnValue(Promise.resolve({
@@ -172,10 +275,6 @@ describe('AlbusClient', () => {
       proofRequest: PublicKey.default,
     }))
   })
-
-  // it('utils.currentDate', async () => {
-  //   console.log(await client.utils.currentDate())
-  // })
 })
 
 export function loadFixture(name: string) {

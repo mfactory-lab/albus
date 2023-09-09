@@ -770,7 +770,7 @@
             "name": "key",
             "docs": [
               "Key that is used for secret sharing encryption.",
-              "BJJ packed public key"
+              "BabyJub unpacked pubkey"
             ],
             "type": {
               "array": [
