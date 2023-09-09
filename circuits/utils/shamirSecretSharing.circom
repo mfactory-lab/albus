@@ -68,11 +68,29 @@ template Polynomial(k, n) {
     signal input x[n];
     signal output y[n];
 
-    for (var i = 0; i < n; i++) {
-        var term = coef[k-1];
-        for (var j = k-2; j >= 0; j--) {
-            term = term * x[i] + coef[j];
+    // Calculate the polynomial by adding up terms
+    // We can reduce the number of multiplication by a factor of 2 if we calculate the polynomial from the other side,
+    // i.e. f(x) = a_0 + a_1x + a_2x^2 + a_3x^3 = a_0 + x(a_1 + x(a_2 + xa_3))
+    signal summingUp[n][k+1];
+    for (var pointIndex = 0; pointIndex < n; pointIndex++) {
+        summingUp[pointIndex][0] <== coef[k-1];
+        for (var i = 1; i < k; i++) {
+            summingUp[pointIndex][i] <== summingUp[pointIndex][i-1] * x[pointIndex] + coef[k-i-1];
         }
-        y[i] <== term;
+        y[pointIndex] <== summingUp[pointIndex][k-1];
     }
 }
+
+//template Polynomial(k, n) {
+//    signal input coef[k];
+//    signal input x[n];
+//    signal output y[n];
+//
+//    for (var i = 0; i < n; i++) {
+//        var term = coef[k-1];
+//        for (var j = k-2; j >= 0; j--) {
+//            term = term * x[i] + coef[j];
+//        }
+//        y[i] <== term;
+//    }
+//}
