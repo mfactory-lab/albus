@@ -27,11 +27,10 @@
  */
 
 import { Keypair } from '@solana/web3.js'
-import { buildBabyjub, buildEddsa } from 'circomlibjs'
+import { babyJub, eddsa } from '@iden3/js-crypto'
 import { assert, describe, it } from 'vitest'
 import { createClaimsTree } from '../src/credential'
-import { reconstructShamirSecret } from '../src/crypto'
-import { genRandomNonce, poseidonDecrypt } from '../src/crypto/poseidon'
+import { poseidonDecrypt, reconstructShamirSecret } from '../src/crypto'
 import { formatPrivKeyForBabyJub, generateEcdhSharedKey, generateProof, verifyProof } from '../src/zkp'
 import { loadFixture, setupCircuit } from './utils'
 
@@ -45,19 +44,17 @@ describe('AgePolicy', async () => {
     birthDate: 20050711,
   }
 
-  const babyJub = await buildBabyjub()
-  const edDSA = await buildEddsa()
-  const issuerPk = edDSA.prv2pub(issuerKeypair.secretKey)
-  // const _holderPk = edDSA.prv2pub(holderKeypair.secretKey)
+  const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
+  // const _holderPk = eddsa.prv2pub(holderKeypair.secretKey)
 
   const circuit = await setupCircuit('agePolicy')
 
   it('valid verification', async () => {
     const tree = await createClaimsTree(claims)
-    const signature = edDSA.signPoseidon(issuerKeypair.secretKey, tree.root)
+    const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
     const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
 
-    const userPrivateKey = await formatPrivKeyForBabyJub(holderKeypair.secretKey, edDSA)
+    const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
     const trusteeCount = 3
 
     const input = {
@@ -67,19 +64,21 @@ describe('AgePolicy', async () => {
       currentDate,
       minAge: 18,
       maxAge: 100,
-      credentialRoot: babyJub.F.toString(tree.root),
-      issuerPk: [babyJub.F.toString(issuerPk[0]), babyJub.F.toString(issuerPk[1])],
-      issuerSignature: [babyJub.F.toString(signature.R8[0]), babyJub.F.toString(signature.R8[1]), String(signature.S)],
-      secret: genRandomNonce(),
+      credentialRoot: tree.root,
+      issuerPk,
+      issuerSignature: [...signature.R8, signature.S],
+      // secret: genRandomNonce(),
       userPrivateKey,
       trusteePublicKey: [],
     } as any
 
     for (let i = 0; i < trusteeCount; i++) {
       const trusteeKeypair = Keypair.generate()
-      const trusteePublicKey = edDSA.prv2pub(trusteeKeypair.secretKey)
-      input.trusteePublicKey.push(trusteePublicKey.map(p => edDSA.F.toString(p)))
+      const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
+      input.trusteePublicKey.push(trusteePublicKey)
     }
+
+    // console.log(input)
 
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, {})
@@ -89,8 +88,11 @@ describe('AgePolicy', async () => {
     // Tomorrow will be 18
     claims.birthDate += 1
     const tree = await createClaimsTree(claims)
-    const signature = edDSA.signPoseidon(issuerKeypair.secretKey, tree.root)
+    const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
     const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
+
+    const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
+    const trusteeCount = 3
 
     const input = {
       birthDate: claims.birthDate,
@@ -99,17 +101,26 @@ describe('AgePolicy', async () => {
       currentDate,
       minAge: 18,
       maxAge: 100,
-      credentialRoot: babyJub.F.toString(tree.root),
-      issuerPk: [babyJub.F.toString(issuerPk[0]), babyJub.F.toString(issuerPk[1])],
-      issuerSignature: [babyJub.F.toString(signature.R8[0]), babyJub.F.toString(signature.R8[1]), String(signature.S)],
+      credentialRoot: tree.root,
+      issuerPk,
+      issuerSignature: [...signature.R8, signature.S],
+      userPrivateKey,
+      trusteePublicKey: [],
     } as any
+
+    for (let i = 0; i < trusteeCount; i++) {
+      const trusteeKeypair = Keypair.generate()
+      const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
+      input.trusteePublicKey.push(trusteePublicKey)
+    }
 
     try {
       const witness = await circuit.calculateWitness(input, true)
       await circuit.assertOut(witness, {})
+      assert.ok(false)
     } catch (e: any) {
       // console.log(e.message)
-      assert.include(e.message, 'Error in template AgePolicy_257') // line: 72
+      assert.include(e.message, 'Error in template AgePolicy_344')
     }
   })
 })
@@ -125,12 +136,10 @@ describe('Proof', async () => {
     country: 'US',
   }
 
-  const babyJub = await buildBabyjub()
-  const edDSA = await buildEddsa()
-  const issuerPubkey = edDSA.prv2pub(issuerKeypair.secretKey)
+  const issuerPubkey = eddsa.prv2pub(issuerKeypair.secretKey)
   // const _holderPk = edDSA.prv2pub(holderKeypair.secretKey)
 
-  it('test', async () => {
+  it('poseidonDecrypt', async () => {
     const encData = [
       '3492256907623638915689586474801812198395017384415567085378861909185165398097',
       '12394761557417503556986200237947612068807125837264760317749764602613090659674',
@@ -149,39 +158,38 @@ describe('Proof', async () => {
     const vk = JSON.parse(loadFixture('agePolicy.vk.json').toString())
 
     const tree = await createClaimsTree(claims)
-    const signature = edDSA.signPoseidon(issuerKeypair.secretKey, tree.root)
+    const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
     const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
 
-    const userPrivateKey = await formatPrivKeyForBabyJub(holderKeypair.secretKey, edDSA)
+    const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
     const trusteeCount = 3
 
     const input = {
       birthDate: claims.birthDate,
       birthDateProof,
-      birthDateKey,
+      birthDateKey: birthDateKey!,
       currentDate,
       minAge: 18,
       maxAge: 100,
-      credentialRoot: babyJub.F.toString(tree.root),
-      issuerPk: [babyJub.F.toString(issuerPubkey[0]), babyJub.F.toString(issuerPubkey[1])],
-      issuerSignature: [babyJub.F.toString(signature.R8[0]), babyJub.F.toString(signature.R8[1]), String(signature.S)],
+      credentialRoot: tree.root,
+      issuerPk: issuerPubkey,
+      issuerSignature: [...signature.R8, signature.S],
       userPrivateKey,
-      trusteePublicKey: [] as string[],
+      trusteePublicKey: [] as bigint[][],
     }
 
-    const holderPublicKey = edDSA.prv2pub(holderKeypair.secretKey)
+    const holderPublicKey = eddsa.prv2pub(holderKeypair.secretKey)
 
     const sharedKeys: any[] = []
     for (let i = 0; i < trusteeCount; i++) {
       const trusteeKeypair = Keypair.generate()
-      const trusteePublicKey = edDSA.prv2pub(trusteeKeypair.secretKey)
-      input.trusteePublicKey.push(trusteePublicKey.map(p => edDSA.F.toString(p)))
-      sharedKeys.push(await generateEcdhSharedKey(trusteeKeypair.secretKey, holderPublicKey))
+      const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
+      input.trusteePublicKey.push(trusteePublicKey)
+      sharedKeys.push(generateEcdhSharedKey(trusteeKeypair.secretKey, holderPublicKey))
       // sharedKeys.push(await generateEcdhSharedKey(holderKeypair.secretKey, trusteePublicKey))
     }
 
-    console.log(sharedKeys)
-
+    // console.log(sharedKeys)
     // console.log('input', input)
 
     const { proof, publicSignals } = await generateProof({ wasmFile, zkeyFile, input })
@@ -192,25 +200,25 @@ describe('Proof', async () => {
     const shares: any[] = []
     for (const sharedKey of sharedKeys) {
       const share = poseidonDecrypt([
-        BigInt(publicSignals[i]),
-        BigInt(publicSignals[i + 1]),
-        BigInt(publicSignals[i + 2]),
-        BigInt(publicSignals[i + 3]),
+        BigInt(publicSignals[i]!),
+        BigInt(publicSignals[i + 1]!),
+        BigInt(publicSignals[i + 2]!),
+        BigInt(publicSignals[i + 3]!),
       ], sharedKey, 1, BigInt(input.currentDate))
       shares.push(share)
       i += 4
     }
 
-    const decryptedSecret = reconstructShamirSecret(edDSA.F, 2, [
+    const decryptedSecret = reconstructShamirSecret(babyJub.F, 2, [
       [1, shares[0]],
       [2, shares[1]],
     ])
 
     const decryptedData = poseidonDecrypt([
-      BigInt(publicSignals[0]),
-      BigInt(publicSignals[1]),
-      BigInt(publicSignals[2]),
-      BigInt(publicSignals[3]),
+      BigInt(publicSignals[0]!),
+      BigInt(publicSignals[1]!),
+      BigInt(publicSignals[2]!),
+      BigInt(publicSignals[3]!),
     ], [BigInt(decryptedSecret), BigInt(decryptedSecret)], 1, BigInt(input.currentDate))
 
     // console.log('publicSignals', publicSignals)

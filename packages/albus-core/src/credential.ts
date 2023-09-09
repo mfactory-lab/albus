@@ -26,15 +26,17 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { InMemoryDB, Merkletree, ZERO_HASH, str2Bytes } from '@iden3/js-merkletree'
+import { Signature, babyJub, eddsa, ffUtils, poseidon } from '@iden3/js-crypto'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import { buildBabyjub, buildEddsa, buildPoseidonOpt, newMemEmptyTrie } from 'circomlibjs'
 import type { VerifyCredentialOptions } from 'did-jwt-vc'
 import { validateCredentialPayload, validatePresentationPayload } from 'did-jwt-vc'
 import type { ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
+
 import { xc20p } from './crypto'
 import { arrayToHexString, base58ToBytes } from './crypto/utils'
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
@@ -78,9 +80,9 @@ export interface CreateCredentialOpts {
   aud?: string[]
 }
 
-const poseidonPromise = buildPoseidonOpt()
-const babyJubPromise = buildBabyjub()
-const eddsaPromise = buildEddsa()
+// const poseidonPromise = buildPoseidonOpt()
+// const babyJubPromise = buildBabyjub()
+// const eddsaPromise = buildEddsa()
 
 function normalizeClaims(claims: Claims) {
   for (const key in claims) {
@@ -381,7 +383,7 @@ interface BJJProof extends Proof {
   type: ProofType.BJJSignature2021
   created: number
   verificationMethod?: string
-  proofValue: { r8y: any; r8x: any; s: string; ax?: string; ay?: string }
+  proofValue: { r8y: string; r8x: string; s: string; ax?: string; ay?: string }
   proofPurpose?: string
 }
 
@@ -394,7 +396,7 @@ interface PresentationProof extends BJJProof {
 }
 
 export interface CreateCredentialProof {
-  rootHash: Uint8Array
+  rootHash: bigint
   signerSecret: Uint8Array
   verificationMethod: string
   proofPurpose?: string
@@ -405,15 +407,15 @@ export interface CreateCredentialProof {
  * Generate BabyJubJub proof for provided credential root hash
  */
 export async function createCredentialProof(opts: CreateCredentialProof) {
-  const babyJub = await babyJubPromise
-  const eddsa = await eddsaPromise
+  // const babyJub = await babyJubPromise
+  // const eddsa = await eddsaPromise
 
   const signer = Keypair.fromSecretKey(opts.signerSecret)
   const signerPubkey = eddsa.prv2pub(signer.secretKey)
 
-  const signature = eddsa.signPoseidon(signer.secretKey, opts.rootHash)
+  const { R8, S } = eddsa.signPoseidon(signer.secretKey, opts.rootHash)
 
-  if (!eddsa.verifyPoseidon(opts.rootHash, signature, signerPubkey)) {
+  if (!eddsa.verifyPoseidon(opts.rootHash, new Signature(R8, S), signerPubkey)) {
     throw new Error('self check on EdDSA signature failed')
   }
 
@@ -421,13 +423,13 @@ export async function createCredentialProof(opts: CreateCredentialProof) {
     type: ProofType.BJJSignature2021,
     created: createProofDate(),
     verificationMethod: opts.verificationMethod,
-    rootHash: babyJub.F.toString(opts.rootHash),
+    rootHash: opts.rootHash.toString(),
     proofValue: {
-      ax: babyJub.F.toString(signerPubkey[0]),
-      ay: babyJub.F.toString(signerPubkey[1]),
-      r8x: babyJub.F.toString(signature.R8[0]),
-      r8y: babyJub.F.toString(signature.R8[1]),
-      s: String(signature.S),
+      ax: String(signerPubkey[0]),
+      ay: String(signerPubkey[1]),
+      r8x: String(R8[0]),
+      r8y: String(R8[1]),
+      s: String(S),
     },
     proofPurpose: opts.proofPurpose ?? 'assertionMethod',
     ...opts.extra,
@@ -437,13 +439,17 @@ export async function createCredentialProof(opts: CreateCredentialProof) {
 export async function verifyCredentialProof(proof: CredentialProof, pubKey: Uint8Array) {
   switch (proof.type) {
     case ProofType.BJJSignature2021: {
-      const babyJub = await babyJubPromise
-      const eddsa = await eddsaPromise
+      // const babyJub = await babyJubPromise
+      // const eddsa = await eddsaPromise
       // const a = [babyJub.F.e(proof.proofValue.ax), babyJub.F.e(proof.proofValue.ay)]
-      return eddsa.verifyPoseidon(babyJub.F.e(proof.rootHash), {
-        R8: [babyJub.F.e(proof.proofValue.r8x), babyJub.F.e(proof.proofValue.r8y)],
-        S: BigInt(proof.proofValue.s),
-      }, babyJub.unpackPoint(pubKey))
+      return eddsa.verifyPoseidon(
+        BigInt(proof.rootHash),
+        new Signature(
+          [BigInt(proof.proofValue.r8x), BigInt(proof.proofValue.r8y)],
+          BigInt(proof.proofValue.s),
+        ),
+        babyJub.unpackPoint(pubKey)!,
+      )
     }
     default:
       throw new Error(`unsupported credential proof type ${proof.type}`)
@@ -457,17 +463,19 @@ export interface CreatePresentationProof {
 }
 
 export async function createPresentationProof(opts: CreatePresentationProof) {
-  const babyJub = await babyJubPromise
-  const eddsa = await eddsaPromise
-  const poseidon = await poseidonPromise
+  // const babyJub = await babyJubPromise
+  // const eddsa = await eddsaPromise
+  // const poseidon = await poseidonPromise
 
   const signer = Keypair.fromSecretKey(opts.signerSecret)
   const signerPubkey = eddsa.prv2pub(signer.secretKey)
 
-  const challenge = poseidon([opts.challenge ?? signer.publicKey.toBytes()])
-  const signature = eddsa.signPoseidon(signer.secretKey, challenge)
+  const challenge = poseidon.hash([
+    ffUtils.leBuff2int(opts.challenge ?? signer.publicKey.toBytes()),
+  ])
+  const { R8, S } = eddsa.signPoseidon(signer.secretKey, challenge)
 
-  if (!eddsa.verifyPoseidon(challenge, signature, signerPubkey)) {
+  if (!eddsa.verifyPoseidon(challenge, new Signature(R8, S), signerPubkey)) {
     throw new Error('self check on EdDSA signature failed')
   }
 
@@ -476,11 +484,11 @@ export async function createPresentationProof(opts: CreatePresentationProof) {
     created: createProofDate(),
     challenge: babyJub.F.toString(challenge),
     proofValue: {
-      ax: babyJub.F.toString(signerPubkey[0]),
-      ay: babyJub.F.toString(signerPubkey[1]),
-      r8x: babyJub.F.toString(signature.R8[0]),
-      r8y: babyJub.F.toString(signature.R8[1]),
-      s: String(signature.S),
+      ax: String(signerPubkey[0]),
+      ay: String(signerPubkey[1]),
+      r8x: String(R8[0]),
+      r8y: String(R8[1]),
+      s: String(S),
     },
     ...opts.extra,
   } as PresentationProof
@@ -489,11 +497,11 @@ export async function createPresentationProof(opts: CreatePresentationProof) {
 export async function verifyPresentationProof(proof: PresentationProof, challenge: Uint8Array) {
   switch (proof.type) {
     case ProofType.BJJSignature2021: {
-      const babyJub = await babyJubPromise
-      const eddsa = await eddsaPromise
-      const poseidon = await poseidonPromise
+      // const babyJub = await babyJubPromise
+      // const eddsa = await eddsaPromise
+      // const poseidon = await poseidonPromise
 
-      if (proof.challenge !== babyJub.F.toString(poseidon([challenge]))) {
+      if (proof.challenge !== babyJub.F.toString(poseidon.hash([ffUtils.leBuff2int(challenge)]))) {
         throw new Error('presentation verification failed, invalid challenge')
       }
 
@@ -501,15 +509,15 @@ export async function verifyPresentationProof(proof: PresentationProof, challeng
         throw new Error('invalid proof')
       }
 
-      return eddsa.verifyPoseidon(babyJub.F.e(proof.challenge), {
-        R8: [
-          babyJub.F.e(proof.proofValue.r8x),
-          babyJub.F.e(proof.proofValue.r8y),
+      return eddsa.verifyPoseidon(babyJub.F.e(proof.challenge), new Signature(
+        [
+          BigInt(proof.proofValue.r8x),
+          BigInt(proof.proofValue.r8y),
         ],
-        S: BigInt(proof.proofValue.s),
-      }, [
-        babyJub.F.e(proof.proofValue.ax),
-        babyJub.F.e(proof.proofValue.ay),
+        BigInt(proof.proofValue.s),
+      ), [
+        BigInt(proof.proofValue.ax),
+        BigInt(proof.proofValue.ay),
       ])
     }
     default:
@@ -518,40 +526,41 @@ export async function verifyPresentationProof(proof: PresentationProof, challeng
 }
 
 export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_TREE_DEPTH) {
-  const tree = await newMemEmptyTrie()
+  // const tree = await newMemEmptyTrie()
+
+  const sto = new InMemoryDB(str2Bytes('albus'))
+  const tree = new Merkletree(sto, true, nLevels)
 
   const flattenClaims = flattenObject(claims)
-  const encodeKey = (k: string) => Object.keys(flattenClaims).indexOf(k)
+  const encodeKey = (k: string) => BigInt(Object.keys(flattenClaims).indexOf(k))
   const encodeVal = (s: any) => {
     try {
       return BigInt(s)
     } catch (e) {
-      return `0x${arrayToHexString(new TextEncoder().encode(String(s)))}`
+      return BigInt(`0x${arrayToHexString(new TextEncoder().encode(String(s)))}`)
     }
   }
 
   for (const [key, val] of Object.entries(flattenClaims)) {
-    await tree.insert(encodeKey(key), encodeVal(val))
+    await tree.add(encodeKey(key), encodeVal(val))
   }
 
   return {
-    root: tree.root,
-    rootString: () => tree.F.toString(tree.root),
-    find: (key: string) => tree.find(encodeKey(key))
-      .then(res => ({ ...res, siblings: siblingsPad(res.siblings, nLevels) })),
-    proof: async (key: string) => {
-      const encodedKey = encodeKey(key)
-      const res = await tree.find(encodedKey)
-      return [
-        encodedKey,
-        ...siblingsPad(res.siblings.map((s: Uint8Array) => tree.F.toString(s)), nLevels),
-      ]
-    },
-    delete: (key: string) => tree.delete(encodeKey(key)),
-    insert: (key: string, val: any) => tree.insert(encodeKey(key), encodeVal(val)),
-    update: (key: string, val: any) => tree.update(encodeKey(key), encodeVal(val)),
     encodeKey,
     encodeVal,
+    root: await tree.root().then(r => r.bigInt()),
+    proof: async (key: string) => {
+      const encodedKey = encodeKey(key)
+      const res = await tree.generateCircomVerifierProof(encodedKey, ZERO_HASH)
+      return [
+        encodedKey,
+        ...res.siblings.map(s => s.bigInt()),
+      ]
+    },
+    get: (key: string) => tree.get(encodeKey(key)),
+    delete: (key: string) => tree.delete(encodeKey(key)),
+    add: (key: string, val: any) => tree.add(encodeKey(key), encodeVal(val)),
+    update: (key: string, val: any) => tree.update(encodeKey(key), encodeVal(val)),
   }
 }
 

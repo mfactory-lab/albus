@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { eddsa } from '@iden3/js-crypto'
 import { Keypair } from '@solana/web3.js'
-import { buildBabyjub, buildEddsa } from 'circomlibjs'
 import { describe, it } from 'vitest'
 import { setupCircuit } from './utils'
 
@@ -41,9 +41,7 @@ describe('CountryPolicy', async () => {
     birthDate: 20050711,
   }
 
-  const babyJub = await buildBabyjub()
-  const edDSA = await buildEddsa()
-  const issuerPk = edDSA.prv2pub(issuerKeypair.secretKey)
+  const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
   // const _holderPk = edDSA.prv2pub(holderKeypair.secretKey)
 
   const circuit = await setupCircuit('agePolicy')

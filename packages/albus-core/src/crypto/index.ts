@@ -30,5 +30,5 @@ import * as utils from './utils'
 import * as xc20p from './xc20p'
 
 export * from './shamir'
+export * from './poseidon'
 export { utils, xc20p }
-// export { poseidonEncrypt, poseidonDecrypt } from './poseidon'

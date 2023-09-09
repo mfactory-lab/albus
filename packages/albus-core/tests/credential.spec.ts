@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { babyJub, eddsa } from '@iden3/js-crypto'
 import { Keypair } from '@solana/web3.js'
-import { buildBabyjub, buildEddsa } from 'circomlibjs'
 import { assert, describe, it } from 'vitest'
 import {
   createClaimsTree,
@@ -65,9 +65,7 @@ describe('credential', () => {
   it('can create and verify credential proof', async () => {
     const claimsTree = await createClaimsTree(claims)
     const issuerKeypair = Keypair.generate()
-    const edDSA = await buildEddsa()
-    const babyJub = await buildBabyjub()
-    const pubkey = babyJub.packPoint(edDSA.prv2pub(issuerKeypair.secretKey))
+    const pubkey = babyJub.packPoint(eddsa.prv2pub(issuerKeypair.secretKey))
     const proof = await createCredentialProof({
       rootHash: claimsTree.root,
       signerSecret: issuerKeypair.secretKey,
@@ -176,8 +174,10 @@ describe('credential', () => {
 
     const tree = await createClaimsTree(claims)
 
-    assert.ok((await tree.find('birthDate')).found)
-    assert.ok((await tree.find('degree.university.name')).found)
-    assert.ok((await tree.find('test2.0.name')).found)
+    console.log((await tree.get('degree.name')))
+
+    assert.equal((await tree.get('birthDate')).key, 7n)
+    assert.equal((await tree.get('degree.university.name')).key, 2n)
+    assert.equal((await tree.get('test2.0.name')).value, 1n)
   })
 })

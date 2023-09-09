@@ -26,17 +26,21 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
+import crypto from 'node:crypto'
+import { Blake512, babyJub, eddsa, ffUtils } from '@iden3/js-crypto'
 import axios from 'axios'
-import type { EdDSA } from 'circomlibjs'
-import { buildEddsa } from 'circomlibjs'
-import { groth16 } from 'snarkjs'
-import createBlakeHash from 'blake-hash'
-import { Scalar, utils as ffUtils, getCurveFromName } from 'ffjavascript'
+
+// TODO: replace
+import { getCurveFromName } from 'ffjavascript'
+
 import type { ProofData, PublicSignals, VK } from 'snarkjs'
+import { groth16 } from 'snarkjs'
 import * as Albus from './index'
 
-const { leInt2Buff, leBuff2int, unstringifyBigInts, stringifyBigInts } = ffUtils
+// The BN254 group order p
+const SNARK_FIELD_SIZE = BigInt(
+  '21888242871839275222246405745257275088548364400416034343698204186575808495617',
+)
 
 interface GenerateProofProps {
   wasmFile: string | Uint8Array
@@ -120,7 +124,7 @@ export async function decodeProof(proof: {
 export function encodePublicSignals(publicSignals: Array<string | number | bigint>) {
   const publicInputsBytes = new Array<number[]>()
   for (const s of publicSignals) {
-    publicInputsBytes.push(finiteToBytes(s).reverse())
+    publicInputsBytes.push(Array.from(finiteToBytes(s).reverse()))
   }
   return publicInputsBytes
 }
@@ -129,7 +133,7 @@ export function encodePublicSignals(publicSignals: Array<string | number | bigin
  * Decode public signals to snarkjs format
  */
 export function decodePublicSignals(publicSignals: Array<number[]>) {
-  const publicInputsBytes = new Array<string>()
+  const publicInputsBytes = new Array<bigint>()
   for (const s of publicSignals) {
     publicInputsBytes.push(bytesToFinite(s.reverse()))
   }
@@ -180,35 +184,37 @@ export function decodeVerifyingKey(data: {
  * used for on-chain verify optimization
  */
 export async function altBn128G1Neg(input: number[]) {
+  // const bn128 = buildBn128(true)
   const bn128 = await getCurveFromName('bn128', true)
   const changeEndianness = (b: number[]) => [...b.slice(0, 32).reverse(), ...b.slice(32).reverse()]
   return changeEndianness(bn128.G1.neg(Uint8Array.from(changeEndianness(input))))
 }
 
 export function finiteToBytes(n: string | number | bigint, len = 32) {
-  return Array.from<number>(leInt2Buff(unstringifyBigInts(BigInt(n)), len))
+  return ffUtils.leInt2Buff(BigInt(n), len)
 }
 
-export function bytesToFinite(bytes: number[] | Uint8Array): string {
-  return stringifyBigInts(leBuff2int(Uint8Array.from(bytes)))
+export function bytesToFinite(bytes: ArrayLike<number>) {
+  return ffUtils.leBuff2int(Uint8Array.from(bytes))
 }
 
 /**
  * Convert G1 (snarkjs) to bytes
  */
-function encodeG1(p): number[] {
-  return p
-    .reduce((a, b) => a.concat(finiteToBytes(b).reverse()), [] as number[]).slice(0, 64)
+function encodeG1(p) {
+  return p.map(BigInt)
+    .reduce((a, b) => a.concat(Array.from(finiteToBytes(b).reverse())), [] as number[])
+    .slice(0, 64)
 }
 
 /**
  * Convert G2 (snarkjs) to bytes
  */
 function encodeG2(p): number[] {
-  return p
-    .reduce((a, b) =>
-      a.concat(finiteToBytes(b[0]).concat(finiteToBytes(b[1])).reverse()), [] as number[],
-    ).slice(0, 128)
+  return p.reduce((a, b) =>
+    a.concat(Array.from(finiteToBytes(b[0])).concat(Array.from(finiteToBytes(b[1]))).reverse()),
+  [] as number[],
+  ).slice(0, 128)
 }
 
 function decodeG1(bytes: number[]) {
@@ -222,12 +228,12 @@ function decodeG2(bytes: number[]) {
   if (bytes.length < 128) {
     throw new Error('G2 point must be 128 long')
   }
-  const result: (string)[][] = []
+  const result: (bigint)[][] = []
   for (let i = 0; i < bytes.length; i += 64) {
     const chunk = bytes.slice(i, i + 64).reverse()
     result.push([bytesToFinite(chunk.slice(0, 32)), bytesToFinite(chunk.slice(32, 64))])
   }
-  result.push(['1', '0'])
+  result.push([1n, 0n])
   return result
 }
 
@@ -236,11 +242,9 @@ function decodeG2(bytes: number[]) {
  * This is the format which should be passed into the
  * PubKey and other circuits.
  */
-export async function formatPrivKeyForBabyJub(prv: Uint8Array, eddsa?: EdDSA) {
-  eddsa ??= await buildEddsa()
-  const sBuff = eddsa.pruneBuffer(createBlakeHash('blake512').update(Buffer.from(prv)).digest().slice(0, 32))
-  return BigInt(Scalar.shr(leBuff2int(sBuff), 3))
-  // return Scalar.fromRprLE(sBuff, 0, 32)
+export function formatPrivKeyForBabyJub(prv: Uint8Array) {
+  const sBuff = eddsa.pruneBuffer(new Blake512().update(prv).digest().slice(0, 32))
+  return ffUtils.leBuff2int(sBuff) >> 3n
 }
 
 /**
@@ -248,8 +252,48 @@ export async function formatPrivKeyForBabyJub(prv: Uint8Array, eddsa?: EdDSA) {
  * given a private key and a public key.
  * @return The ECDH shared key.
  */
-export async function generateEcdhSharedKey(privKey: Uint8Array, pubKey: string[]) {
-  const eddsa = await buildEddsa()
-  const keyBuffers = eddsa.babyJub.mulPointEscalar(pubKey, await formatPrivKeyForBabyJub(privKey, eddsa))
-  return keyBuffers.map((buffer: any) => eddsa.F.toObject(buffer).toString())
+export function generateEcdhSharedKey(privKey: Uint8Array, pubKey: bigint[]) {
+  return babyJub.mulPointEscalar(pubKey, formatPrivKeyForBabyJub(privKey))
+}
+
+/**
+ * Compresses a public key into a 32-byte array.
+ */
+export function packPubkey(pubkey: bigint[]) {
+  const buff = babyJub.packPoint(pubkey)
+  return ffUtils.leBuff2int(buff)
+}
+
+/**
+ * Unpacks a BabyJup public key into its component parts.
+ */
+export function unpackPubkey(packed: Uint8Array) {
+  return babyJub.unpackPoint(packed)
+}
+
+/**
+ * Returns a BabyJub-compatible random value. We create it by first generating
+ * a random value (initially 256 bits large) modulo the snark field size as
+ * described in EIP197. This results in a key size of roughly 253 bits and no
+ * more than 254 bits. To prevent modulo bias, we then use this efficient
+ * algorithm:
+ * http://cvsweb.openbsd.org/cgi-bin/cvsweb/~checkout~/src/lib/libc/crypt/arc4random_uniform.c
+ * @return {bigint} A BabyJub-compatible random value.
+ */
+export function genRandomBabyJubValue(): bigint {
+  // Prevent modulo bias
+  // const lim = BigInt('0x10000000000000000000000000000000000000000000000000000000000000000')
+  // const min = (lim - SNARK_FIELD_SIZE) % SNARK_FIELD_SIZE
+  const min = BigInt('6350874878119819312338956282401532410528162663560392320966563075034087161851')
+
+  let rand: number | bigint
+  while (true) {
+    rand = BigInt(`0x${crypto.randomBytes(32).toString('hex')}`)
+
+    if (rand >= min) {
+      break
+    }
+  }
+
+  return rand % SNARK_FIELD_SIZE
 }

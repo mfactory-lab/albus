@@ -27,7 +27,7 @@
  */
 
 import type { Keypair } from '@solana/web3.js'
-import { buildBabyjub, buildEddsa } from 'circomlibjs'
+import { babyJub, eddsa } from '@iden3/js-crypto'
 import * as u8a from 'uint8arrays'
 import { bytesToBase58 } from '../crypto/utils'
 
@@ -54,10 +54,8 @@ export function decodeDidKey(did: string): Uint8Array {
   return bytes.slice(2)
 }
 
-export async function generateDid(keypair: Keypair) {
+export function generateDid(keypair: Keypair) {
   const id = ALBUS_DID
-  const eddsa = await buildEddsa()
-  const babyJub = await buildBabyjub()
   const pubkey = babyJub.packPoint(eddsa.prv2pub(keypair.secretKey))
 
   const verificationMethod = [

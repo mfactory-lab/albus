@@ -27,40 +27,35 @@
  */
 
 import { Keypair } from '@solana/web3.js'
-import { buildEddsa } from 'circomlibjs'
-import { describe, it } from 'vitest'
-import { reconstructShamirSecret } from '../src/crypto'
-import { genRandomNonce, poseidonDecrypt } from '../src/crypto/poseidon'
+import { babyJub, eddsa } from '@iden3/js-crypto'
+import { assert, describe, it } from 'vitest'
+import { genRandomNonce, poseidonDecrypt, reconstructShamirSecret } from '../src/crypto'
 import { formatPrivKeyForBabyJub, generateEcdhSharedKey } from '../src/zkp'
-
 import { calculateLabeledWitness, setupCircuit } from './utils'
 
 describe('encryptionProof', async () => {
-  const edDSA = await buildEddsa()
   const circuit = await setupCircuit('test/encryptionProof')
 
   it('produces a witness with valid constraints', async () => {
     const userKeypair = Keypair.generate()
-    const userPrivateKey = await formatPrivKeyForBabyJub(userKeypair.secretKey, edDSA)
+    const userPrivateKey = formatPrivKeyForBabyJub(userKeypair.secretKey)
 
     const trusteeKeypair = Keypair.generate()
-    const trusteePublicKey = edDSA.prv2pub(trusteeKeypair.secretKey)
-    const trusteePublicKeyFormat = trusteePublicKey.map(p => edDSA.F.toString(p))
-
-    const shared = await generateEcdhSharedKey(userKeypair.secretKey, trusteePublicKey)
+    const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
+    const shared = generateEcdhSharedKey(userKeypair.secretKey, trusteePublicKey)
 
     const data = {
       userPrivateKey,
       trusteePublicKey: [
-        trusteePublicKeyFormat,
-        trusteePublicKeyFormat,
-        trusteePublicKeyFormat,
+        trusteePublicKey,
+        trusteePublicKey,
+        trusteePublicKey,
       ],
       secret: genRandomNonce(),
       nonce: genRandomNonce(),
       data: [
-        19891302,
-        240,
+        19891302n,
+        240n,
       ],
     }
 
@@ -73,7 +68,9 @@ describe('encryptionProof', async () => {
       BigInt(res['main.encryptedData[3]']!),
     ], [BigInt(data.secret), BigInt(data.secret)], data.data.length, data.nonce)
 
-    console.log('decryptedData', decryptedData)
+    assert.deepEqual(decryptedData, data.data)
+
+    // console.log('decryptedData', decryptedData)
 
     const shares: any[] = []
     for (let i = 0; i < 3; i++) {
@@ -86,14 +83,16 @@ describe('encryptionProof', async () => {
       shares.push(share[0])
     }
 
-    const decryptedSecret = reconstructShamirSecret(edDSA.F, 2, [
+    const decryptedSecret = reconstructShamirSecret(babyJub.F, 2, [
       [1, shares[0]],
       [2, shares[1]],
     ])
 
-    console.log('shares', shares)
-    console.log('secret', data.secret)
-    console.log('decryptedSecret', decryptedSecret)
+    assert.equal(BigInt(decryptedSecret), data.secret)
+
+    // console.log('shares', shares)
+    // console.log('secret', data.secret)
+    // console.log('decryptedSecret', decryptedSecret)
 
     // const witness = await circuit.calculateWitness(data, true)
     // console.log(await circuit.getDecoratedOutput(witness))

@@ -26,22 +26,20 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { babyJub } from '@iden3/js-crypto'
 import { Keypair } from '@solana/web3.js'
-import { buildEddsa } from 'circomlibjs'
-import { describe, it } from 'vitest'
-
-import { groth16 } from 'snarkjs'
+import { assert, describe, it } from 'vitest'
 import { reconstructShamirSecret } from '../src/crypto'
-import { bytesToFinite } from '../src/zkp'
+import { bytesToFinite, generateProof } from '../src/zkp'
+
 import { loadFixture, setupCircuit } from './utils'
 
 describe('Shamir\'s secret sharing', async () => {
   const issuerKeypair = Keypair.generate()
-  const edDSA = await buildEddsa()
   const circuit = await setupCircuit('test/shamirSecretSharing')
 
   it('produces a witness with valid constraints', async () => {
-    const witness = await circuit.calculateWitness({ secret: 3, salt: 15649468315 }, true)
+    const witness = await circuit.calculateWitness({ secret: 23123123123, salt: 16841814841235345n }, true)
     await circuit.checkConstraints(witness)
   })
 
@@ -49,27 +47,20 @@ describe('Shamir\'s secret sharing', async () => {
   const zkeyFile = Uint8Array.from(loadFixture('shamirSecretSharing.zkey'))
 
   it('computes fragments that can reconstruct the secret', async () => {
-    console.log(issuerKeypair.secretKey)
-    console.log(bytesToFinite(issuerKeypair.secretKey))
-
     const testInputs = [
-      // { secret: 12345, salt: 23323d3434 },
-      { secret: bytesToFinite(issuerKeypair.secretKey).slice(0, 64), salt: '16841814841235345' },
+      { secret: String(bytesToFinite(issuerKeypair.secretKey)).slice(0, 64), salt: 16841814841235345n },
     ]
 
-    for (const testInput of testInputs) {
-      const { _, publicSignals } = await groth16.fullProve(testInput, wasmFile, zkeyFile)
+    for (const input of testInputs) {
+      const { publicSignals } = await generateProof({ wasmFile, zkeyFile, input })
 
-      console.log('testInput', testInput)
-      console.log(publicSignals)
-
-      const res = reconstructShamirSecret(edDSA.F, 3, [
-        [1, publicSignals[0]],
-        [2, publicSignals[1]],
-        [3, publicSignals[2]],
+      const res = reconstructShamirSecret(babyJub.F, 3, [
+        [1, String(publicSignals[0])],
+        [2, String(publicSignals[1])],
+        [3, String(publicSignals[2])],
       ])
 
-      console.log(res)
+      assert.equal(input.secret, res)
     }
   })
 })

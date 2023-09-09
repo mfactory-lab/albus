@@ -74,12 +74,12 @@ declare module 'snarkjs' {
     readonly fullProve: (
       input: {
         readonly [key: string]:
-          | bigint | number
+          | string | bigint | number
           | readonly bigint[] | readonly number[]
           | readonly (readonly bigint[])[] | readonly (readonly number[])[];
       },
-      wasmFile: string | { type: string, data: Uint8Array },
-      zkeyFileName: string | { type: string, data: Uint8Array },
+      wasmFile: string | Uint8Array | { type: string, data: Uint8Array },
+      zkeyFileName: string | Uint8Array | { type: string, data: Uint8Array },
       logger?: unknown,
     ) => Promise<SNARK>;
     readonly prove: (

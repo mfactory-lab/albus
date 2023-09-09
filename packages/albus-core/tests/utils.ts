@@ -53,8 +53,8 @@ export async function calculateLabeledWitness(tester: WasmTester, input: unknown
 
   for (const n in tester.symbols) {
     let v: string
-    if (typeof witness[tester.symbols[n].varIdx] !== 'undefined') {
-      v = witness[tester.symbols[n].varIdx].toString()
+    if (typeof witness[tester.symbols[n]!.varIdx] !== 'undefined') {
+      v = witness[tester.symbols[n]!.varIdx].toString()
     } else {
       v = 'undefined'
     }
