@@ -246,7 +246,7 @@ impl ServiceProvider {
 #[derive(InitSpace)]
 pub struct Trustee {
     /// Key that is used for secret sharing encryption.
-    /// BJJ packed public key
+    /// BabyJub packed pubkey
     pub key: [u8; 32],
     /// The authority that manages the trustee
     pub authority: Pubkey,
