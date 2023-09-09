@@ -54,12 +54,12 @@ export async function proveRequest(proofRequestAddr: string, opts: Opts) {
 
   log.log('Generating proof...')
 
-  const { signature } = await client.proofRequest.fullProve({
-    holderSecretKey: keypair.secretKey,
+  const { signatures } = await client.proofRequest.fullProve({
+    userPrivateKey: keypair.secretKey,
     proofRequest: proofRequestAddr,
     decryptionKey,
     vc: opts.vc,
   })
 
-  log.info(`Signature: ${signature}`)
+  log.info(`Signatures: ${signatures}`)
 }
