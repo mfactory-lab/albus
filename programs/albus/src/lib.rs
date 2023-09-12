@@ -41,11 +41,18 @@ declare_id!("ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz");
 pub mod albus {
     use super::*;
 
-    pub fn create_investigation_request(
-        ctx: Context<CreateInvestigationRequest>,
+    pub fn create_investigation_request<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateInvestigationRequest<'info>>,
         data: CreateInvestigationRequestData,
     ) -> Result<()> {
         create_investigation_request::handler(ctx, data)
+    }
+
+    pub fn reveal_secret_share(
+        ctx: Context<RevealSecretShare>,
+        data: RevealSecretShareData,
+    ) -> Result<()> {
+        reveal_secret_share::handler(ctx, data)
     }
 
     pub fn create_trustee(ctx: Context<CreateTrustee>, data: CreateTrusteeData) -> Result<()> {

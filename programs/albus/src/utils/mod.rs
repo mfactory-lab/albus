@@ -29,6 +29,7 @@
 pub mod account;
 pub mod assert;
 pub mod circuit;
+// pub mod random_util;
 // pub mod nft;
 
 pub use self::{account::*, assert::*, circuit::*};

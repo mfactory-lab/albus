@@ -285,7 +285,7 @@ impl Trustee {
 #[account]
 #[derive(InitSpace)]
 pub struct InvestigationRequest {
-    /// Investigation service public key
+    /// Investigation service authority public key
     pub authority: Pubkey,
     /// The key that is used for secret sharing encryption.
     /// If None, the `authority` is used instead.
@@ -298,8 +298,8 @@ pub struct InvestigationRequest {
     pub service_provider: Pubkey,
     /// Required number of shares used to reconstruct the secret
     pub required_share_count: u8,
-    #[max_len(2)]
-    pub secret_shares: Vec<SecretShare>,
+    /// Revealed number of shares used to reconstruct the secret
+    pub revealed_share_count: u8,
     /// Investigation processing status
     pub status: InvestigationStatus,
     /// Creation date
@@ -329,17 +329,44 @@ pub enum InvestigationStatus {
     Resolved = u8::MAX,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, InitSpace)]
-pub struct SecretShare {
-    /// Secret share owner
-    pub owner: Pubkey,
+#[account]
+#[derive(InitSpace)]
+pub struct InvestigationRequestShare {
+    /// The address of the [InvestigationRequest]
+    pub investigation_request: Pubkey,
+    /// The public key of the user who owns the [ProofRequest]
+    pub proof_request_owner: Pubkey,
+    /// The address of the [Trustee]
+    pub trustee: Pubkey,
     /// Share position
     pub index: u8,
     /// Creation date
     pub created_at: i64,
-    /// Share itself (encrypted with [InvestigationRequest]'s `encryption_key`)
+    /// Revelation date
+    pub revealed_at: i64,
+    /// Revelation status
+    pub status: RevelationStatus,
+    /// Encrypted share
     #[max_len(64)]
     pub share: String,
+}
+
+#[repr(u8)]
+#[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
+pub enum RevelationStatus {
+    #[default]
+    Pending,
+    RevealedByUser,
+    RevealedByTrustee,
+}
+
+impl InvestigationRequestShare {
+    pub const SEED: &'_ [u8] = b"investigation-request-share";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
 }
 
 #[account]

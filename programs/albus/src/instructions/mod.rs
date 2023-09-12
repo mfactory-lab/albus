@@ -40,6 +40,7 @@ pub mod delete_service_provider;
 pub mod create_investigation_request;
 pub mod delete_trustee;
 pub mod prove;
+pub mod reveal_secret_share;
 pub mod update_circuit_vk;
 pub mod update_service;
 pub mod update_trustee;
@@ -50,6 +51,6 @@ pub use self::{
     admin::*, create_circuit::*, create_investigation_request::*, create_policy::*,
     create_proof_request::*, create_service_provider::*, create_trustee::*, delete_circuit::*,
     delete_policy::*, delete_proof_request::*, delete_service_provider::*, delete_trustee::*,
-    prove::*, update_circuit_vk::*, update_service::*, update_trustee::*, verify_proof_request::*,
-    verify_trustee::*,
+    prove::*, reveal_secret_share::*, update_circuit_vk::*, update_service::*, update_trustee::*,
+    verify_proof_request::*, verify_trustee::*,
 };

@@ -26,31 +26,94 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::constants::DEFAULT_SECRET_SHARE_THRESHOLD;
+use crate::AlbusError;
 use anchor_lang::prelude::*;
 
-use crate::state::{InvestigationRequest, InvestigationStatus, ProofRequest};
+use crate::state::{
+    InvestigationRequest, InvestigationRequestShare, InvestigationStatus, ProofRequest,
+    ServiceProvider,
+};
+use crate::utils::{cmp_pubkeys, create_account, BpfWriter};
 
-pub fn handler(
-    ctx: Context<CreateInvestigationRequest>,
+pub fn handler<'info>(
+    ctx: Context<'_, '_, '_, 'info, CreateInvestigationRequest<'info>>,
     data: CreateInvestigationRequestData,
 ) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
 
-    let proof_request = &mut ctx.accounts.proof_request;
+    // TODO: validate authority
 
-    let investigation_request = &mut ctx.accounts.investigation_request;
-    investigation_request.authority = ctx.accounts.authority.key();
-    investigation_request.encryption_key = data.encryption_key;
-    investigation_request.proof_request = proof_request.key();
-    investigation_request.proof_request_owner = proof_request.owner;
-    investigation_request.service_provider = proof_request.service_provider;
-    // TODO: get from service provider
-    investigation_request.required_share_count = DEFAULT_SECRET_SHARE_THRESHOLD;
-    // investigation_request.secret_shares = Default::default();
-    investigation_request.status = InvestigationStatus::Pending;
-    investigation_request.created_at = timestamp;
-    investigation_request.bump = ctx.bumps["investigation_request"];
+    let proof_request = &mut ctx.accounts.proof_request;
+    let service = &mut ctx.accounts.service_provider;
+
+    if proof_request.proof.is_none() {
+        msg!("`ProofRequest` is not proved yet");
+        return Err(AlbusError::Unproved.into());
+    }
+
+    let req = &mut ctx.accounts.investigation_request;
+    req.authority = ctx.accounts.authority.key();
+    req.encryption_key = data.encryption_key;
+    req.proof_request = proof_request.key();
+    req.proof_request_owner = proof_request.owner;
+    req.service_provider = proof_request.service_provider;
+    req.required_share_count = service.secret_share_threshold;
+    req.status = InvestigationStatus::Pending;
+    req.created_at = timestamp;
+    req.bump = ctx.bumps["investigation_request"];
+
+    // Try to initialize share accounts
+    if !ctx.remaining_accounts.is_empty() {
+        // let slots_ref = ctx.accounts.slot_hashes.try_borrow_data()?;
+        // let slots = &**slots_ref;
+        // let mut offset: usize = 1;
+        // let rand = u8::random_within_range(slots, &mut offset, 1, 3);
+
+        if data.trustees.len() != ctx.remaining_accounts.len() {
+            msg!("Invalid length of trustees");
+            return Err(AlbusError::InvalidData.into());
+        }
+
+        for (idx, acc) in &mut ctx.remaining_accounts.iter().enumerate() {
+            if acc.data_is_empty() {
+                let trustee = data.trustees[idx];
+                let index = (idx + 1) as u8;
+
+                let (addr, _) = Pubkey::find_program_address(
+                    &[
+                        InvestigationRequestShare::SEED,
+                        req.key().as_ref(),
+                        &[index],
+                    ],
+                    &crate::ID,
+                );
+
+                if !cmp_pubkeys(acc.key, &addr) {
+                    msg!("Invalid share account address `{}`", acc.key);
+                    return Err(AlbusError::InvalidData.into());
+                }
+
+                create_account(
+                    ctx.accounts.system_program.to_account_info(),
+                    ctx.accounts.authority.to_account_info(),
+                    acc.to_account_info(),
+                    InvestigationRequestShare::space(),
+                    ctx.program_id,
+                )?;
+
+                let mut share: Account<InvestigationRequestShare> = Account::try_from(acc)?;
+                share.investigation_request = req.key();
+                share.proof_request_owner = proof_request.owner;
+                share.trustee = trustee;
+                share.created_at = timestamp;
+                share.index = index;
+
+                let dst: &mut [u8] = &mut acc.try_borrow_mut_data().unwrap();
+                let mut writer: BpfWriter<&mut [u8]> = BpfWriter::new(dst);
+                InvestigationRequestShare::try_serialize(&share, &mut writer)?;
+            }
+        }
+    }
 
     Ok(())
 }
@@ -58,6 +121,7 @@ pub fn handler(
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateInvestigationRequestData {
     pub encryption_key: Option<Pubkey>,
+    pub trustees: Vec<Pubkey>,
 }
 
 #[derive(Accounts)]
@@ -76,11 +140,16 @@ pub struct CreateInvestigationRequest<'info> {
     )]
     pub investigation_request: Box<Account<'info, InvestigationRequest>>,
 
-    #[account(mut)]
+    #[account(has_one = service_provider)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
+
+    pub service_provider: Box<Account<'info, ServiceProvider>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
 
+    // /// CHECK:
+    // #[account(address = anchor_lang::solana_program::sysvar::slot_hashes::id())]
+    // pub slot_hashes: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
