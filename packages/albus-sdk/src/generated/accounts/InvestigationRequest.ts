@@ -8,8 +8,6 @@
 import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
-import type { SecretShare } from '../types/SecretShare'
-import { secretShareBeet } from '../types/SecretShare'
 import {
   InvestigationStatus,
   investigationStatusBeet,
@@ -22,12 +20,12 @@ import {
  */
 export interface InvestigationRequestArgs {
   authority: web3.PublicKey
-  encryptionKey: beet.COption<web3.PublicKey>
+  encryptionKey: web3.PublicKey
   proofRequest: web3.PublicKey
   proofRequestOwner: web3.PublicKey
   serviceProvider: web3.PublicKey
   requiredShareCount: number
-  secretShares: SecretShare[]
+  revealedShareCount: number
   status: InvestigationStatus
   createdAt: beet.bignum
   bump: number
@@ -46,12 +44,12 @@ export const investigationRequestDiscriminator = [
 export class InvestigationRequest implements InvestigationRequestArgs {
   private constructor(
     readonly authority: web3.PublicKey,
-    readonly encryptionKey: beet.COption<web3.PublicKey>,
+    readonly encryptionKey: web3.PublicKey,
     readonly proofRequest: web3.PublicKey,
     readonly proofRequestOwner: web3.PublicKey,
     readonly serviceProvider: web3.PublicKey,
     readonly requiredShareCount: number,
-    readonly secretShares: SecretShare[],
+    readonly revealedShareCount: number,
     readonly status: InvestigationStatus,
     readonly createdAt: beet.bignum,
     readonly bump: number,
@@ -68,7 +66,7 @@ export class InvestigationRequest implements InvestigationRequestArgs {
       args.proofRequestOwner,
       args.serviceProvider,
       args.requiredShareCount,
-      args.secretShares,
+      args.revealedShareCount,
       args.status,
       args.createdAt,
       args.bump,
@@ -144,36 +142,34 @@ export class InvestigationRequest implements InvestigationRequestArgs {
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link InvestigationRequest} for the provided args.
-   *
-   * @param args need to be provided since the byte size for this account
-   * depends on them
+   * {@link InvestigationRequest}
    */
-  static byteSize(args: InvestigationRequestArgs) {
-    const instance = InvestigationRequest.fromArgs(args)
-    return investigationRequestBeet.toFixedFromValue({
-      accountDiscriminator: investigationRequestDiscriminator,
-      ...instance,
-    }).byteSize
+  static get byteSize() {
+    return investigationRequestBeet.byteSize
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
    * {@link InvestigationRequest} data from rent
    *
-   * @param args need to be provided since the byte size for this account
-   * depends on them
    * @param connection used to retrieve the rent exemption information
    */
   static async getMinimumBalanceForRentExemption(
-    args: InvestigationRequestArgs,
     connection: web3.Connection,
     commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
-      InvestigationRequest.byteSize(args),
+      InvestigationRequest.byteSize,
       commitment,
     )
+  }
+
+  /**
+   * Determines if the provided {@link Buffer} has the correct byte size to
+   * hold {@link InvestigationRequest} data.
+   */
+  static hasCorrectByteSize(buf: Buffer, offset = 0) {
+    return buf.byteLength - offset === InvestigationRequest.byteSize
   }
 
   /**
@@ -183,12 +179,12 @@ export class InvestigationRequest implements InvestigationRequestArgs {
   pretty() {
     return {
       authority: this.authority.toBase58(),
-      encryptionKey: this.encryptionKey,
+      encryptionKey: this.encryptionKey.toBase58(),
       proofRequest: this.proofRequest.toBase58(),
       proofRequestOwner: this.proofRequestOwner.toBase58(),
       serviceProvider: this.serviceProvider.toBase58(),
       requiredShareCount: this.requiredShareCount,
-      secretShares: this.secretShares,
+      revealedShareCount: this.revealedShareCount,
       status: `InvestigationStatus.${InvestigationStatus[this.status]}`,
       createdAt: (() => {
         const x = <{ toNumber: () => number }> this.createdAt
@@ -210,7 +206,7 @@ export class InvestigationRequest implements InvestigationRequestArgs {
  * @category Accounts
  * @category generated
  */
-export const investigationRequestBeet = new beet.FixableBeetStruct<
+export const investigationRequestBeet = new beet.BeetStruct<
   InvestigationRequest,
   InvestigationRequestArgs & {
     accountDiscriminator: number[] /* size: 8 */
@@ -219,12 +215,12 @@ export const investigationRequestBeet = new beet.FixableBeetStruct<
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['authority', beetSolana.publicKey],
-    ['encryptionKey', beet.coption(beetSolana.publicKey)],
+    ['encryptionKey', beetSolana.publicKey],
     ['proofRequest', beetSolana.publicKey],
     ['proofRequestOwner', beetSolana.publicKey],
     ['serviceProvider', beetSolana.publicKey],
     ['requiredShareCount', beet.u8],
-    ['secretShares', beet.array(secretShareBeet)],
+    ['revealedShareCount', beet.u8],
     ['status', investigationStatusBeet],
     ['createdAt', beet.i64],
     ['bump', beet.u8],

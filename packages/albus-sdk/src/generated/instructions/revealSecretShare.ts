@@ -7,93 +7,99 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { CreateInvestigationRequestData } from '../types/CreateInvestigationRequestData'
+import type { RevealSecretShareData } from '../types/RevealSecretShareData'
 import {
-  createInvestigationRequestDataBeet,
-} from '../types/CreateInvestigationRequestData'
+  revealSecretShareDataBeet,
+} from '../types/RevealSecretShareData'
 
 /**
  * @category Instructions
- * @category CreateInvestigationRequest
+ * @category RevealSecretShare
  * @category generated
  */
-export interface CreateInvestigationRequestInstructionArgs {
-  data: CreateInvestigationRequestData
+export interface RevealSecretShareInstructionArgs {
+  data: RevealSecretShareData
 }
 /**
  * @category Instructions
- * @category CreateInvestigationRequest
+ * @category RevealSecretShare
  * @category generated
  */
-export const createInvestigationRequestStruct = new beet.FixableBeetArgsStruct<
-  CreateInvestigationRequestInstructionArgs & {
+export const revealSecretShareStruct = new beet.FixableBeetArgsStruct<
+  RevealSecretShareInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', createInvestigationRequestDataBeet],
+    ['data', revealSecretShareDataBeet],
   ],
-  'CreateInvestigationRequestInstructionArgs',
+  'RevealSecretShareInstructionArgs',
 )
 /**
- * Accounts required by the _createInvestigationRequest_ instruction
+ * Accounts required by the _revealSecretShare_ instruction
  *
+ * @property [_writable_] investigationRequestShare
  * @property [_writable_] investigationRequest
- * @property [] proofRequest
- * @property [] serviceProvider
+ * @property [_writable_] trustee
+ * @property [_writable_] serviceProvider
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category CreateInvestigationRequest
+ * @category RevealSecretShare
  * @category generated
  */
-export interface CreateInvestigationRequestInstructionAccounts {
+export interface RevealSecretShareInstructionAccounts {
+  investigationRequestShare: web3.PublicKey
   investigationRequest: web3.PublicKey
-  proofRequest: web3.PublicKey
+  trustee: web3.PublicKey
   serviceProvider: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const createInvestigationRequestInstructionDiscriminator = [
-  252, 6, 45, 22, 207, 47, 209, 212,
+export const revealSecretShareInstructionDiscriminator = [
+  137, 113, 154, 99, 90, 161, 41, 235,
 ]
 
 /**
- * Creates a _CreateInvestigationRequest_ instruction.
+ * Creates a _RevealSecretShare_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category CreateInvestigationRequest
+ * @category RevealSecretShare
  * @category generated
  */
-export function createCreateInvestigationRequestInstruction(
-  accounts: CreateInvestigationRequestInstructionAccounts,
-  args: CreateInvestigationRequestInstructionArgs,
+export function createRevealSecretShareInstruction(
+  accounts: RevealSecretShareInstructionAccounts,
+  args: RevealSecretShareInstructionArgs,
   programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
 ) {
-  const [data] = createInvestigationRequestStruct.serialize({
-    instructionDiscriminator:
-      createInvestigationRequestInstructionDiscriminator,
+  const [data] = revealSecretShareStruct.serialize({
+    instructionDiscriminator: revealSecretShareInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
+    {
+      pubkey: accounts.investigationRequestShare,
+      isWritable: true,
+      isSigner: false,
+    },
     {
       pubkey: accounts.investigationRequest,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.proofRequest,
-      isWritable: false,
+      pubkey: accounts.trustee,
+      isWritable: true,
       isSigner: false,
     },
     {
       pubkey: accounts.serviceProvider,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {

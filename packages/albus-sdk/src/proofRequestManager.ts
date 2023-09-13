@@ -69,11 +69,14 @@ export class ProofRequestManager {
   /**
    * Load a proof request based on its public key address.
    *
-   * @param {PublicKeyInitData} addr - The public key address of the proof request to load.
+   * @param {PublicKeyInitData | ProofRequest} addr - The public key address of the proof request to load.
    * @param {Commitment} [commitment] - Optional commitment level for loading the proof request.
    * @returns {Promise<ProofRequest>} A Promise that resolves to the loaded proof request.
    */
-  async load(addr: PublicKeyInitData, commitment?: Commitment) {
+  async load(addr: PublicKeyInitData | ProofRequest, commitment?: Commitment) {
+    if (addr instanceof ProofRequest) {
+      return addr
+    }
     return ProofRequest.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
   }
 
@@ -102,6 +105,7 @@ export class ProofRequestManager {
     commitment?: Commitment,
   ) {
     const proofRequest = await this.load(addr, commitment)
+
     const pubKeys = props.map(key => proofRequest[key])
     const result: LoadFullResult = { proofRequest }
 
@@ -110,14 +114,19 @@ export class ProofRequestManager {
       for (let i = 0; i < props.length; i++) {
         const prop = props[i]!
         const accountInfo = accountInfos[i]
+
         if (accountInfo) {
-          result[prop as any] = (() => {
-            switch (prop) {
-              case 'circuit': return Circuit.fromAccountInfo(accountInfo)[0]
-              case 'policy': return Policy.fromAccountInfo(accountInfo)[0]
-              case 'serviceProvider': return ServiceProvider.fromAccountInfo(accountInfo)[0]
-            }
-          })()
+          switch (prop) {
+            case 'circuit':
+              result.circuit = Circuit.fromAccountInfo(accountInfo)[0]
+              break
+            case 'policy':
+              result.policy = Policy.fromAccountInfo(accountInfo)[0]
+              break
+            case 'serviceProvider':
+              result.serviceProvider = ServiceProvider.fromAccountInfo(accountInfo)[0]
+              break
+          }
         }
       }
     }
@@ -135,7 +144,7 @@ export class ProofRequestManager {
     const builder = ProofRequest.gpaBuilder()
       .addFilter('accountDiscriminator', proofRequestDiscriminator)
 
-    if (props.withoutData) {
+    if (props.noData) {
       builder.config.dataSlice = {
         offset: 0,
         length: 0,
@@ -171,12 +180,11 @@ export class ProofRequestManager {
       builder.addFilter('status', props.status)
     }
 
-    return (await builder.run(this.provider.connection)).map((acc) => {
-      return {
+    return (await builder.run(this.provider.connection))
+      .map(acc => ({
         pubkey: acc.pubkey,
-        data: !props.withoutData ? ProofRequest.fromAccountInfo(acc.account)[0] : null,
-      }
-    })
+        data: props.noData ? null : ProofRequest.fromAccountInfo(acc.account)[0],
+      }))
   }
 
   /**
@@ -323,7 +331,12 @@ export class ProofRequestManager {
       throw new Error(`Unable to find Service account at ${proofRequest.serviceProvider}`)
     }
 
-    const trusteePubKeys = await this.service.loadTrusteeKeys(serviceProvider.trustees)
+    if (serviceProvider.trustees.length < 3) {
+      throw new Error('Service account does not contains required trustee count')
+    }
+
+    const trusteePubKeys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
+      .filter(p => p !== null)
 
     const credential = await this.credential.load(props.vc, {
       decryptionKey: props.decryptionKey ?? props.userPrivateKey,
@@ -331,8 +344,8 @@ export class ProofRequestManager {
 
     const proofInput = await new ProofInputBuilder(credential)
       .withNow(await getSolanaTimestamp(this.provider.connection))
-      .withUserPrivateKey(props.userPrivateKey && Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
-      .withTrusteePublicKey(trusteePubKeys)
+      .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
+      .withTrusteePublicKey(trusteePubKeys as [bigint, bigint][])
       .withCircuit(circuit)
       .withPolicy(policy)
       .build()
@@ -350,6 +363,7 @@ export class ProofRequestManager {
         proofRequest: props.proofRequest,
         proofRequestData: proofRequest,
         proof,
+        // @ts-expect-error ...
         publicSignals,
       })
 
@@ -375,9 +389,9 @@ export class ProofRequestManager {
     const proof = await Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
 
-    // 1232 bytes - max tx data size
-    const chunkSize = Math.floor((1232 - 256 - 130) / 32)
-    const inputChunks = chunk(publicInputs, chunkSize)
+    // const chunkSize = Math.ceil((1232 /* max tx */ - 256 /* proof */ - 1 - 160 /* accounts */) / 32)
+    // TODO: calculate
+    const inputChunks = chunk(publicInputs, 19)
     const txs: { tx: Transaction }[] = []
 
     for (let i = 0; i < inputChunks.length; i++) {
@@ -477,13 +491,13 @@ export interface FindProofRequestProps {
   policyId?: string
   status?: ProofRequestStatus
   skipUser?: boolean
-  withoutData?: boolean
+  noData?: boolean
 }
 
 export interface FullProveProps {
   proofRequest: PublicKeyInitData
   vc: PublicKeyInitData
-  userPrivateKey?: Uint8Array
+  userPrivateKey: Uint8Array
   // Credential decryption key
   decryptionKey?: PrivateKey
 }

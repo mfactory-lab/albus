@@ -34,6 +34,7 @@ import { CircuitManager } from './circuitManager'
 import { CredentialManager } from './credentialManager'
 import { EventManager } from './eventManager'
 import { PROGRAM_ID } from './generated'
+import { InvestigationManager } from './investigationManager'
 import { PdaManager } from './pda'
 import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
@@ -49,6 +50,7 @@ export class AlbusClient {
   service: ServiceManager
   credential: CredentialManager
   trustee: TrusteeManager
+  investigation: InvestigationManager
   proofRequest: ProofRequestManager
   eventManager: EventManager
 
@@ -61,7 +63,6 @@ export class AlbusClient {
     this.policy = new PolicyManager(this.provider, this.pda)
     this.service = new ServiceManager(this.provider, this.pda)
     this.credential = new CredentialManager(this.provider, this.pda)
-    this.trustee = new TrusteeManager(this.provider, this.pda)
     this.proofRequest = new ProofRequestManager(
       this.provider,
       this.circuit,
@@ -69,6 +70,8 @@ export class AlbusClient {
       this.credential,
       this.pda,
     )
+    this.trustee = new TrusteeManager(this.provider, this.pda)
+    this.investigation = new InvestigationManager(this.provider, this.proofRequest, this.service, this.pda)
   }
 
   static factory(connection: Connection, wallet?: Wallet, opts: ConfirmOptions = {}) {

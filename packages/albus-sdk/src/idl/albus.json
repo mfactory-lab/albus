@@ -1,5 +1,5 @@
 {
-  "version": "0.0.11",
+  "version": "0.0.12",
   "name": "albus",
   "instructions": [
     {
@@ -12,7 +12,12 @@
         },
         {
           "name": "proofRequest",
-          "isMut": true,
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "serviceProvider",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -31,6 +36,49 @@
           "name": "data",
           "type": {
             "defined": "CreateInvestigationRequestData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "revealSecretShare",
+      "accounts": [
+        {
+          "name": "investigationRequestShare",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "investigationRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "RevealSecretShareData"
           }
         }
       ]
@@ -770,7 +818,7 @@
             "name": "key",
             "docs": [
               "Key that is used for secret sharing encryption.",
-              "BabyJub unpacked pubkey"
+              "BabyJub packed pubkey"
             ],
             "type": {
               "array": [
@@ -846,7 +894,7 @@
           {
             "name": "authority",
             "docs": [
-              "Investigation service public key"
+              "Investigation service authority public key"
             ],
             "type": "publicKey"
           },
@@ -856,9 +904,7 @@
               "The key that is used for secret sharing encryption.",
               "If None, the `authority` is used instead."
             ],
-            "type": {
-              "option": "publicKey"
-            }
+            "type": "publicKey"
           },
           {
             "name": "proofRequest",
@@ -889,12 +935,11 @@
             "type": "u8"
           },
           {
-            "name": "secretShares",
-            "type": {
-              "vec": {
-                "defined": "SecretShare"
-              }
-            }
+            "name": "revealedShareCount",
+            "docs": [
+              "Revealed number of shares used to reconstruct the secret"
+            ],
+            "type": "u8"
           },
           {
             "name": "status",
@@ -918,6 +963,72 @@
               "PDA bump"
             ],
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InvestigationRequestShare",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "investigationRequest",
+            "docs": [
+              "The address of the [InvestigationRequest]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "proofRequestOwner",
+            "docs": [
+              "The public key of the user who owns the [ProofRequest]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "trustee",
+            "docs": [
+              "The address of the [Trustee]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "index",
+            "docs": [
+              "Share position"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "revealedAt",
+            "docs": [
+              "Revelation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Revelation status"
+            ],
+            "type": {
+              "defined": "RevelationStatus"
+            }
+          },
+          {
+            "name": "share",
+            "docs": [
+              "Encrypted share"
+            ],
+            "type": "string"
           }
         ]
       }
@@ -1096,8 +1207,12 @@
         "fields": [
           {
             "name": "encryptionKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "trustees",
             "type": {
-              "option": "publicKey"
+              "vec": "publicKey"
             }
           }
         ]
@@ -1283,6 +1398,22 @@
           {
             "name": "reset",
             "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RevealSecretShareData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "share",
+            "type": "string"
           }
         ]
       }
@@ -1574,42 +1705,6 @@
       }
     },
     {
-      "name": "SecretShare",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "owner",
-            "docs": [
-              "Secret share owner"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "index",
-            "docs": [
-              "Share position"
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "createdAt",
-            "docs": [
-              "Creation date"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "share",
-            "docs": [
-              "Share itself (encrypted with [InvestigationRequest]'s `encryption_key`)"
-            ],
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
       "name": "InvestigationStatus",
       "type": {
         "kind": "enum",
@@ -1625,6 +1720,23 @@
           },
           {
             "name": "Resolved"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RevelationStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "RevealedByUser"
+          },
+          {
+            "name": "RevealedByTrustee"
           }
         ]
       }

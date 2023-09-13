@@ -6,11 +6,12 @@
  */
 
 import type * as web3 from '@solana/web3.js'
-import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
+import * as beet from '@metaplex-foundation/beet'
 
 export interface CreateInvestigationRequestData {
-  encryptionKey: beet.COption<web3.PublicKey>
+  encryptionKey: web3.PublicKey
+  trustees: web3.PublicKey[]
 }
 
 /**
@@ -19,6 +20,9 @@ export interface CreateInvestigationRequestData {
  */
 export const createInvestigationRequestDataBeet
   = new beet.FixableBeetArgsStruct<CreateInvestigationRequestData>(
-    [['encryptionKey', beet.coption(beetSolana.publicKey)]],
+    [
+      ['encryptionKey', beetSolana.publicKey],
+      ['trustees', beet.array(beetSolana.publicKey)],
+    ],
     'CreateInvestigationRequestData',
   )

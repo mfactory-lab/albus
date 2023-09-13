@@ -66,6 +66,22 @@ export class PdaManager {
     ], this.programId)
   }
 
+  investigationRequest(proofRequest: PublicKeyInitData, authority: PublicKeyInitData) {
+    return PublicKey.findProgramAddressSync([
+      this.encoder.encode('investigation-request'),
+      new PublicKey(proofRequest).toBuffer(),
+      new PublicKey(authority).toBuffer(),
+    ], this.programId)
+  }
+
+  investigationRequestShare(investigation: PublicKeyInitData, index: number) {
+    return PublicKey.findProgramAddressSync([
+      this.encoder.encode('investigation-request-share'),
+      new PublicKey(investigation).toBuffer(),
+      Uint8Array.from([index & 0xFF]),
+    ], this.programId)
+  }
+
   trustee(authority: PublicKeyInitData) {
     return PublicKey.findProgramAddressSync([
       this.encoder.encode('trustee'),

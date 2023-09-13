@@ -30,6 +30,7 @@ import type { AnchorProvider } from '@coral-xyz/anchor'
 import * as Albus from '@mfactory-lab/albus-core'
 import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import type { UpdateServiceData } from './generated'
 import {
   ServiceProvider,
   createCreateServiceProviderInstruction,
@@ -47,14 +48,17 @@ export class ServiceManager {
   }
 
   /**
-   * Load service by {@link addr}
+   * Load {@link ServiceProvider} by {@link addr}
    */
-  async load(addr: PublicKeyInitData, commitmentOrConfig?: Commitment | GetAccountInfoConfig) {
+  async load(addr: PublicKeyInitData | ServiceProvider, commitmentOrConfig?: Commitment | GetAccountInfoConfig) {
+    if (addr instanceof ServiceProvider) {
+      return addr
+    }
     return ServiceProvider.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitmentOrConfig)
   }
 
   /**
-   * Load multiple services
+   * Load multiple {@link ServiceProvider}[]
    */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -63,7 +67,7 @@ export class ServiceManager {
   }
 
   /**
-   * Load service by id
+   * Load {@link ServiceProvider} by id
    */
   async loadById(id: string, commitmentOrConfig?: Commitment | GetAccountInfoConfig) {
     return this.load(this.pda.serviceProvider(id)[0], commitmentOrConfig)
@@ -76,47 +80,70 @@ export class ServiceManager {
     const accounts = await this.provider.connection
       .getMultipleAccountsInfo(trustees, {
         dataSlice: {
-          offset: 0,
-          length: 32,
+          offset: 8,
+          length: 40,
         },
       })
     return accounts
       .map(acc => acc && Albus.zkp.unpackPubkey(Uint8Array.from(acc.data)))
-      .filter(acc => acc !== null) as [bigint, bigint][]
+    // .filter(acc => acc !== null) as [bigint, bigint][]
   }
 
   /**
-   * Find services
+   * Find {@link ServiceProvider}[]
    */
-  async find(filter: FindServicesProps = {}) {
+  async find(props: FindServicesProps = {}) {
     const builder = ServiceProvider.gpaBuilder()
       .addFilter('accountDiscriminator', serviceProviderDiscriminator)
 
-    if (filter.authority) {
-      builder.addFilter('authority', new PublicKey(filter.authority))
+    // after fetch filters
+    const filters: CallableFunction[] = []
+
+    if (props.noData) {
+      builder.config.dataSlice = {
+        offset: 0,
+        length: 0,
+      }
     }
 
-    return (await builder.run(this.provider.connection)).map((acc) => {
-      return {
+    if (props.authority) {
+      builder.addFilter('authority', new PublicKey(props.authority))
+    }
+
+    if (props.code) {
+      builder.addFilter('code', props.code)
+    }
+
+    if (props.name) {
+      builder.addFilter('name', props.name)
+    }
+
+    if (props.trustees) {
+      filters.push((data: ServiceProvider) => props.trustees?.every(t => data.trustees.includes(new PublicKey(t))))
+    }
+
+    const res = (await builder.run(this.provider.connection))
+      .map(acc => ({
         pubkey: acc.pubkey,
-        data: ServiceProvider.fromAccountInfo(acc.account)[0],
-      }
-    })
+        data: props.noData ? null : ServiceProvider.fromAccountInfo(acc.account)[0],
+      }))
+
+    return filters.length === 0 ? res : res.filter(({ data }) => filters.every(f => f(data)))
   }
 
   /**
-   * Find services and return a map
+   * Find {@link ServiceProvider}[] and return a map
    */
-  async findMapped(filter: FindServicesProps = {}) {
-    return (await this.find(filter))
+  async findMapped(props: FindServicesProps = {}) {
+    return (await this.find(props))
       .reduce((a, { pubkey, data }) => {
         a.set(pubkey.toString(), data)
         return a
-      }, new Map<string, ServiceProvider>())
+      }, new Map<string, ServiceProvider | null>())
   }
 
   /**
-   * Add new service
+   * Add new {@link ServiceProvider}
    */
   async create(props: CreateServiceProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -145,7 +172,7 @@ export class ServiceManager {
   }
 
   /**
-   * Update a service.
+   * Update a {@link ServiceProvider}
    *
    * @param {UpdateServiceProps} props - The properties for updating the service.
    * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
@@ -162,8 +189,8 @@ export class ServiceManager {
       })),
     }, {
       data: {
-        name: props.name,
-        website: props.website,
+        name: props.name ?? null,
+        website: props.website ?? null,
         contactInfo: props.contactInfo ?? null,
         secretShareThreshold: props.secretShareThreshold ?? null,
         newAuthority: props.newAuthority ? new PublicKey(props.newAuthority) : null,
@@ -179,8 +206,8 @@ export class ServiceManager {
   }
 
   /**
-   * Delete a service by its code.
-   * Require admin authority.
+   * Delete a {@link ServiceProvider} by its code
+   * Require admin authority
    *
    * @param {code} props - The properties for deleting the service.
    * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
@@ -215,27 +242,22 @@ export interface ServiceContact {
   value: string
 }
 
-export interface CreateServiceProps {
+export interface CreateServiceProps extends Partial<UpdateServiceData> {
   code: string
   name: string
-  website?: string
-  contactInfo?: ServiceContact
-  secretShareThreshold?: number
+  authority?: PublicKey
   trustees?: PublicKey[]
-  // Service manager authority
-  authority?: PublicKeyInitData
 }
 
-export interface UpdateServiceProps {
+export interface UpdateServiceProps extends Partial<UpdateServiceData> {
   serviceProvider: PublicKeyInitData
-  name: string
-  website: string
-  contactInfo?: ServiceContact
-  secretShareThreshold?: number
   trustees?: PublicKey[]
-  newAuthority?: PublicKeyInitData
 }
 
 export interface FindServicesProps {
   authority?: PublicKeyInitData
+  code?: string
+  name?: string
+  noData?: boolean
+  trustees?: PublicKeyInitData[]
 }

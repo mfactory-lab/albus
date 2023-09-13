@@ -89,7 +89,7 @@ export class ProofInputBuilder {
     return this
   }
 
-  withTrusteePublicKey(value?: bigint[][]) {
+  withTrusteePublicKey(value?: [bigint, bigint][]) {
     this.trusteePublicKey = value
     return this
   }
@@ -171,16 +171,16 @@ export class ProofInputBuilder {
     switch (name) {
       case KnownSignals.TrusteePublicKey:
         if (this.trusteePublicKey === undefined) {
-          throw new Error('trustee public keys is not defined')
+          throw new Error('The trustee public keys are not defined.')
         }
         if (this.trusteePublicKey.length < size) {
-          throw new Error('incorrect size of trustee public keys')
+          throw new Error(`The size of the trustee public keys is incorrect. It must be ${size}.`)
         }
         this.data[name] = this.trusteePublicKey
         return true
       case KnownSignals.UserPrivateKey:
         if (this.userPrivateKey === undefined) {
-          throw new Error('user private key is not defined')
+          throw new Error('The user private key is not defined.')
         }
         this.data[name] = this.userPrivateKey
         return true

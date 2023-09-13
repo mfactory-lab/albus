@@ -27,14 +27,19 @@
  */
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
+import { eddsa } from '@iden3/js-crypto'
+import * as Albus from '@mfactory-lab/albus-core'
 import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { Keypair, PublicKey, Transaction } from '@solana/web3.js'
 import type { CreateTrusteeData, UpdateTrusteeData } from './generated'
 import {
   Trustee,
   createCreateTrusteeInstruction,
   createDeleteTrusteeInstruction,
-  createUpdateTrusteeInstruction, createVerifyTrusteeInstruction, errorFromCode, trusteeDiscriminator,
+  createUpdateTrusteeInstruction,
+  createVerifyTrusteeInstruction,
+  errorFromCode,
+  trusteeDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 
@@ -43,6 +48,15 @@ export class TrusteeManager {
     readonly provider: AnchorProvider,
     readonly pda: PdaManager,
   ) {
+  }
+
+  /**
+   * Generate encryption keypair
+   */
+  generateEncryptionKey(keypair?: Keypair) {
+    keypair ??= Keypair.generate()
+    const key = Albus.zkp.packPubkey(eddsa.prv2pub(keypair.secretKey))
+    return { keypair, key }
   }
 
   /**
@@ -71,38 +85,43 @@ export class TrusteeManager {
   /**
    * Find trustees
    */
-  async find(filter: FindTrusteeProps = {}) {
+  async find(props: FindTrusteeProps = {}) {
     const builder = Trustee.gpaBuilder()
       .addFilter('accountDiscriminator', trusteeDiscriminator)
 
-    if (filter.authority) {
-      builder.addFilter('authority', new PublicKey(filter.authority))
+    if (props.noData) {
+      builder.config.dataSlice = {
+        offset: 0,
+        length: 0,
+      }
     }
 
-    if (filter.key) {
-      builder.addFilter('key', filter.key)
+    if (props.authority) {
+      builder.addFilter('authority', new PublicKey(props.authority))
     }
 
-    if (filter.verified) {
-      builder.addFilter('isVerified', filter.verified)
+    if (props.key) {
+      builder.addFilter('key', props.key)
     }
 
-    let res = (await builder.run(this.provider.connection)).map((acc) => {
+    if (props.name) {
+      builder.addFilter('name', props.name)
+    }
+
+    if (props.email) {
+      builder.addFilter('email', props.email)
+    }
+
+    if (props.verified) {
+      builder.addFilter('isVerified', props.verified)
+    }
+
+    return (await builder.run(this.provider.connection)).map((acc) => {
       return {
         pubkey: acc.pubkey,
-        data: Trustee.fromAccountInfo(acc.account)[0],
+        data: props.noData ? null : Trustee.fromAccountInfo(acc.account)[0],
       }
     })
-
-    if (filter.name) {
-      res = res.filter(({ data }) => data.name.includes(filter.name!))
-    }
-
-    if (filter.email) {
-      res = res.filter(({ data }) => data.email.includes(filter.email!))
-    }
-
-    return res
   }
 
   /**
@@ -142,10 +161,10 @@ export class TrusteeManager {
       authority,
     }, {
       data: {
-        key: props.key,
-        name: props.name,
-        email: props.email,
-        website: props.website,
+        key: props.key ?? null,
+        name: props.name ?? null,
+        email: props.email ?? null,
+        website: props.website ?? null,
       },
     })
     try {
@@ -197,7 +216,7 @@ export class TrusteeManager {
 }
 
 export interface CreateTrusteeProps extends CreateTrusteeData {}
-export interface UpdateTrusteeProps extends UpdateTrusteeData {}
+export interface UpdateTrusteeProps extends Partial<UpdateTrusteeData> {}
 
 export interface FindTrusteeProps {
   name?: string
@@ -205,4 +224,5 @@ export interface FindTrusteeProps {
   authority?: PublicKeyInitData
   verified?: boolean
   key?: number[]
+  noData?: boolean
 }
