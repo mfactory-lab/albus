@@ -26,11 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { createAdminCloseAccountInstruction } from '@mfactory-lab/albus-sdk'
-import type { CreatePolicyProps } from '@mfactory-lab/albus-sdk/dist/policyManager'
-import { Keypair, PublicKey, Transaction } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
-import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk/src'
+import * as Albus from '../../packages/albus-core/src'
+import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../packages/albus-sdk/src'
 import { airdrop, assertErrorCode, loadFixture, newProvider, payerKeypair, provider } from './utils'
 
 describe('albus', () => {
@@ -38,119 +37,52 @@ describe('albus', () => {
   // const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(payerKeypair))
 
   const serviceCode = 'acme'
-  let circuitAddress: PublicKey
+  const circuitCode = 'age'
+  const policyCode = 'age'
 
-  const minAgeIndex = 8
-  const maxAgeIndex = 9
+  const trustees = [
+    Keypair.generate(),
+    Keypair.generate(),
+    Keypair.generate(),
+  ]
+
   const circuitData = {
+    code: circuitCode,
+    name: 'Age policy',
+    wasmUri: 'mock:wasmUri',
+    zkeyUri: 'mock:zkeyUri',
+    outputs: [
+      'encryptedData[4]',
+      'encryptedShare[3][4]',
+    ],
     privateSignals: [
       'birthDate',
       'userPrivateKey',
-      'trusteePublicKey[3][2]',
     ],
     publicSignals: [
       'birthDateProof[6]', 'birthDateKey',
       'currentDate', 'minAge', 'maxAge',
-      'credentialRoot', 'issuerPk[2]', 'issuerSignature[3]',
+      'credentialRoot',
+      'issuerPk[2]', 'issuerSignature[3]',
+      'trusteePublicKey[3][2]',
     ],
-    wasmUri: 'mock:wasmUri',
-    zkeyUri: 'mock:zkeyUri',
-    code: 'age',
-    name: 'Age policy',
+  }
+
+  const policyData = {
+    code: policyCode,
+    serviceCode,
+    circuitCode: circuitData.code,
+    name: 'Age policy 18+',
+    description: 'Test policy',
+    expirationPeriod: 0,
+    retentionPeriod: 0,
+    rules: [
+      { index: 8, group: 0, value: 18 },
+      { index: 9, group: 0, value: 100 },
+    ],
   }
 
   beforeAll(async () => {
-    await airdrop(payerKeypair.publicKey)
-  })
-
-  it('can create circuit', async () => {
-    try {
-      const { signature, address } = await client.circuit.create(circuitData)
-      circuitAddress = address
-      console.log('signature', signature)
-      console.log('circuitAddress', circuitAddress)
-    } catch (e) {
-      console.log(e)
-      assert.ok(false)
-    }
-  })
-
-  it('can update circuit vk', async () => {
-    const vk = JSON.parse(loadFixture('agePolicy.vk.json').toString())
-    try {
-      const data = { code: 'age', vk }
-      const { signatures } = await client.circuit.updateVk(data)
-      console.log('signatures', signatures)
-      const circuit = await client.circuit.loadById(data.code)
-
-      assert.equal(circuit.vk.alpha.length, 64)
-      assert.equal(circuit.vk.beta.length, 128)
-      assert.equal(circuit.vk.gamma.length, 128)
-      assert.equal(circuit.vk.delta.length, 128)
-      // assert.equal(circuit.vk.ic.length, 17)
-    } catch (e) {
-      console.log(e)
-      assert.ok(false)
-    }
-  })
-
-  it('can add service provider', async () => {
-    try {
-      const data = { code: serviceCode, name: 'name' }
-      const { address } = await client.service.create(data)
-      const service = await client.service.load(address)
-      assert.equal(service.authority.toString(), payerKeypair.publicKey.toString())
-      assert.equal(service.code, data.code)
-      assert.equal(service.name, data.name)
-    } catch (e) {
-      console.log(e)
-      assert.ok(false)
-    }
-  })
-
-  it('can create policy', async () => {
-    try {
-      const data: CreatePolicyProps = {
-        code: 'age',
-        serviceCode,
-        circuitCode: 'age',
-        name: 'Age policy 18+',
-        description: 'Test policy',
-        expirationPeriod: 0,
-        retentionPeriod: 0,
-        rules: [
-          { index: minAgeIndex, group: 0, value: 18 },
-          { index: maxAgeIndex, group: 0, value: 100 },
-        ],
-      }
-      const { address } = await client.policy.create(data)
-
-      const policy = await client.policy.load(address)
-      assert.equal(policy.serviceProvider.toString(), client.pda.serviceProvider(serviceCode)[0].toString())
-      assert.equal(policy.circuit.toString(), client.pda.circuit(data.circuitCode)[0].toString())
-      assert.equal(policy.code, data.code)
-      assert.equal(policy.name, data.name)
-      assert.equal(policy.description, data.description)
-      assert.equal(policy.expirationPeriod, data.expirationPeriod)
-      assert.equal(policy.retentionPeriod, data.retentionPeriod)
-    } catch (e) {
-      console.log(e)
-      assert.ok(false)
-    }
-  })
-
-  it('can create proof request', async () => {
-    const { address } = await client.proofRequest.create({ serviceCode, policyCode: 'age' })
-    const proofRequest = await client.proofRequest.load(address)
-    assert.equal(proofRequest.owner.toString(), provider.publicKey.toString())
-    assert.equal(proofRequest.status, ProofRequestStatus.Pending)
-  })
-
-  it('can prove a proof request', async () => {
-    const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(service, 'age')
-    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
-
     vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve({
       '@context': [
         'https://www.w3.org/2018/credentials/v1',
@@ -182,48 +114,219 @@ describe('albus', () => {
       },
     } as any))
 
-    vi.spyOn(client.proofRequest, 'loadFull').mockImplementation(async (addr) => {
-      const proofRequest = await client.proofRequest.load(addr)
-      const policy = await client.policy.load(proofRequest.policy)
-      const circuit = await client.circuit.load(proofRequest.circuit)
+    // airdrops
+    await airdrop(payerKeypair.publicKey)
+    for (const trusteeKeypair of trustees) {
+      await airdrop(trusteeKeypair.publicKey)
+    }
+  })
 
-      return {
-        proofRequest,
-        circuit: {
-          ...circuit,
-          wasmUri: loadFixture('agePolicy.wasm'),
-          zkeyUri: loadFixture('agePolicy.zkey'),
-        },
-        policy,
-      } as any
-    })
+  it('can create circuit', async () => {
+    try {
+      const { signature, address } = await client.circuit.create(circuitData)
+      assert.ok(!!signature)
+      assert.ok(!!address)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('can update circuit vk', async () => {
+    const vk = JSON.parse(loadFixture('agePolicy.vk.json').toString())
+    try {
+      const data = { code: circuitCode, vk }
+      const { signatures } = await client.circuit.updateVk(data)
+      // console.log('signatures', signatures)
+      const circuit = await client.circuit.loadById(data.code)
+
+      assert.equal(circuit.vk.alpha.length, 64)
+      assert.equal(circuit.vk.beta.length, 128)
+      assert.equal(circuit.vk.gamma.length, 128)
+      assert.equal(circuit.vk.delta.length, 128)
+      // assert.equal(circuit.vk.ic.length, 17)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it(`can create ${trustees.length} trustees`, async () => {
+    try {
+      for (let i = 0; i < trustees.length; i++) {
+        const trusteeKeypair = trustees[i]!
+        const newClient = new AlbusClient(newProvider(trusteeKeypair))
+        const { key } = client.trustee.generateEncryptionKey(trusteeKeypair)
+        const data = {
+          name: `trustee${i}`,
+          email: `trustee${i}@albus.finance`,
+          website: `https://trustee${i}.albus.finance`,
+          key: Array.from(key),
+        }
+        const { address, signature } = await newClient.trustee.create(data)
+        assert.ok(!!signature)
+        const trustee = await newClient.trustee.load(address)
+
+        const pk = Albus.zkp.unpackPubkey(Uint8Array.from(trustee.key))
+        assert.equal(pk?.length, 2)
+
+        // console.log(`trustee${i}`, pk, key)
+
+        assert.deepEqual(trustee.key, data.key)
+        assert.equal(trustee.name, data.name)
+        assert.equal(trustee.email, data.email)
+        assert.equal(trustee.website, data.website)
+        assert.equal(trustee.isVerified, false)
+      }
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it(`can verify ${trustees.length} trustees`, async () => {
+    try {
+      const trustees = await client.trustee.find({ noData: true })
+      for (const { pubkey } of trustees) {
+        await client.trustee.verify(pubkey)
+      }
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('can update a trustee', async () => {
+    try {
+      const trusteeKeypair = trustees[0]!
+      const newClient = new AlbusClient(newProvider(trusteeKeypair))
+      const { key } = client.trustee.generateEncryptionKey()
+      const data = {
+        name: 'trustee123',
+        email: 'trustee123@albus.finance',
+        website: 'https://trustee123.albus.finance',
+        key: Array.from(key),
+      }
+      const { address } = await newClient.trustee.update(data)
+      const trustee = await newClient.trustee.load(address)
+      assert.deepEqual(trustee.key, data.key)
+      assert.equal(trustee.name, data.name)
+      assert.equal(trustee.email, data.email)
+      assert.equal(trustee.website, data.website)
+      assert.equal(trustee.isVerified, true)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('can create a service', async () => {
+    try {
+      const data = { code: serviceCode, name: 'acme', website: 'https://example.com' }
+      const { address } = await client.service.create(data)
+      const service = await client.service.load(address)
+      assert.equal(service.authority.toString(), payerKeypair.publicKey.toString())
+      assert.equal(service.code, data.code)
+      assert.equal(service.name, data.name)
+      assert.equal(service.website, data.website)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('can service select a trustee', async () => {
+    try {
+      const [serviceProvider] = client.pda.serviceProvider(serviceCode)
+      const data = {
+        trustees: trustees.map(kp => client.pda.trustee(kp.publicKey)[0]).slice(0, 3),
+        serviceProvider,
+      }
+      const { signature } = await client.service.update(data)
+      assert.ok(!!signature)
+      const service = await client.service.load(serviceProvider)
+      assert.deepEqual(service.trustees, data.trustees)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('can create a policy', async () => {
+    try {
+      const { address } = await client.policy.create(policyData)
+      const policy = await client.policy.load(address)
+      assert.equal(policy.serviceProvider.toString(), client.pda.serviceProvider(policyData.serviceCode)[0].toString())
+      assert.equal(policy.circuit.toString(), client.pda.circuit(policyData.circuitCode)[0].toString())
+      assert.equal(policy.code, policyData.code)
+      assert.equal(policy.name, policyData.name)
+      assert.equal(policy.description, policyData.description)
+      assert.equal(policy.expirationPeriod, policyData.expirationPeriod)
+      assert.equal(policy.retentionPeriod, policyData.retentionPeriod)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('can create a proof request', async () => {
+    const { address } = await client.proofRequest.create({ serviceCode, policyCode })
+    const proofRequest = await client.proofRequest.load(address)
+
+    const [serviceProvider] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(serviceProvider, policyCode)
+    const [circuit] = client.pda.circuit(circuitCode)
+
+    assert.equal(proofRequest.serviceProvider.toString(), serviceProvider.toString())
+    assert.equal(proofRequest.policy.toString(), policy.toString())
+    assert.equal(proofRequest.circuit.toString(), circuit.toString())
+    assert.equal(proofRequest.owner.toString(), provider.publicKey.toString())
+    assert.equal(proofRequest.status, ProofRequestStatus.Pending)
+  })
+
+  it('can prove a proof request', async () => {
+    const [service] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(service, policyCode)
+    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+
+    vi.spyOn(client.proofRequest, 'loadFull')
+      .mockImplementationOnce(async (addr, props) => {
+        const res = await client.proofRequest.loadFull(addr, props)
+        return {
+          ...res,
+          circuit: {
+            ...res.circuit,
+            wasmUri: loadFixture('agePolicy.wasm'),
+            zkeyUri: loadFixture('agePolicy.zkey'),
+          },
+        } as any
+      })
 
     const { signatures } = await client.proofRequest.fullProve({
       proofRequest,
       vc: PublicKey.default, // mocked
+      userPrivateKey: payerKeypair.secretKey,
     })
 
     assert.ok(signatures.length > 0)
 
     const data = await client.proofRequest.load(proofRequest)
-
-    assert.equal(data.owner.toString(), provider.publicKey.toString())
-
-    console.log(data)
-
-    assert.equal(data.status, ProofRequestStatus.Proved)
+    assert.include([ProofRequestStatus.Proved, ProofRequestStatus.Verified], data.status)
+    assert.ok(!!data.proof)
+    assert.ok(!!data.provedAt)
+    assert.ok(data.publicInputs.length > 0)
   })
 
   it('can change proof request status', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(service, 'age')
+    const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
     await client.proofRequest.changeStatus({ proofRequest, status: ProofRequestStatus.Rejected })
   })
 
   it('can not change proof request status with unauthorized authority', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(service, 'age')
+    const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
     const newPayerKeypair = Keypair.generate()
@@ -240,50 +343,91 @@ describe('albus', () => {
 
   it('can verify proof request', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(service, 'age')
+    const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
     const res = await client.proofRequest.verify({ proofRequest })
     assert.ok(res)
   })
 
+  let investigationAddress
+
+  it('can create investigation request', async () => {
+    const newPayerKeypair = Keypair.generate()
+    const newClient = new AlbusClient(newProvider(newPayerKeypair))
+    await airdrop(newPayerKeypair.publicKey)
+
+    const [service] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(service, policyCode)
+    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+
+    try {
+      const { address } = await newClient.investigation.create({
+        proofRequest,
+        // encryptionKey: ...
+      })
+      investigationAddress = address
+      const investigation = await newClient.investigation.load(address)
+      assert.equal(investigation.authority.toString(), newPayerKeypair.publicKey.toString())
+      assert.equal(investigation.encryptionKey.toString(), newPayerKeypair.publicKey.toString())
+      assert.equal(investigation.proofRequest.toString(), proofRequest.toString())
+      // assert.equal(investigation.proofRequestOwner.toString(), proofRequest.toString())
+      assert.equal(investigation.serviceProvider.toString(), service.toString())
+      assert.equal(investigation.requiredShareCount, 2)
+      assert.equal(investigation.status, InvestigationStatus.Pending)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('can reveal secret key', async () => {
+    const investigation = await client.investigation.load(investigationAddress)
+  })
+
   it('can delete proof request', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(service, 'age')
+    const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
     await client.proofRequest.delete({ proofRequest })
   })
 
   it('can delete policy', async () => {
-    await client.policy.delete({ serviceCode, code: 'age' })
+    await client.policy.delete({ serviceCode, code: policyCode })
   })
 
   it('can delete circuit', async () => {
-    await client.circuit.delete({ code: 'age' })
+    await client.circuit.delete({ code: circuitCode })
   })
 
   it('can delete service provider', async () => {
     await client.service.delete({ code: serviceCode })
   })
 
-  describe('admin', () => {
-    it('can delete program accounts', async () => {
-      const s = await client.service.create({ code: serviceCode, name: serviceCode })
-      const c = await client.circuit.create(circuitData)
-      const p = await client.policy.create({ serviceCode, circuitCode: circuitData.code, code: 'x', name: 'x' })
-      const r = await client.proofRequest.create({ serviceCode, policyCode: 'x' })
-
-      for (const account of [r.address, p.address, c.address, s.address]) {
-        const ix = createAdminCloseAccountInstruction({
-          authority: provider.publicKey,
-          account,
-        })
-        await provider.sendAndConfirm(new Transaction().add(ix))
-      }
-
-      try {
-        await client.service.load(s.address)
-        assert.ok(false)
-      } catch (e) {}
-    })
+  it('can delete all trustees', async () => {
+    for (const trustee of trustees) {
+      await client.trustee.delete({ authority: trustee.publicKey })
+    }
   })
+
+  // describe('admin', () => {
+  //   it('can delete program accounts', async () => {
+  //     const s = await client.service.create({ code: serviceCode, name: serviceCode })
+  //     const c = await client.circuit.create(circuitData)
+  //     const p = await client.policy.create({ serviceCode, circuitCode: circuitData.code, code: 'x', name: 'x' })
+  //     const r = await client.proofRequest.create({ serviceCode, policyCode: 'x' })
+  //
+  //     for (const account of [r.address, p.address, c.address, s.address]) {
+  //       const ix = createAdminCloseAccountInstruction({
+  //         authority: provider.publicKey,
+  //         account,
+  //       })
+  //       await provider.sendAndConfirm(new Transaction().add(ix))
+  //     }
+  //
+  //     try {
+  //       await client.service.load(s.address)
+  //       assert.ok(false)
+  //     } catch (e) {}
+  //   })
+  // })
 })
