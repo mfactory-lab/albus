@@ -53,12 +53,12 @@ export function arrayToByteLength(byteArray: Uint8Array, length: number) {
  * @param array - Array to convert
  * @returns bigint
  */
-export function arrayToBigInt(array: Uint8Array): bigint {
+export function arrayToBigInt(array: ArrayLike<number>): bigint {
   // Initialize result as 0
   let result = 0n
 
   // Loop through each element in the array
-  array.forEach((element) => {
+  Array.from(array).forEach((element) => {
     // Shift result bits left by 1 byte
     result = result << 8n
 

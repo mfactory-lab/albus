@@ -26,15 +26,17 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import crypto from 'node:crypto'
+// import crypto from 'node:crypto'
 import { Blake512, babyJub, eddsa, ffUtils } from '@iden3/js-crypto'
+import { randomBytes } from '@stablelib/random'
 import axios from 'axios'
 
 // TODO: replace
 import { getCurveFromName } from 'ffjavascript'
 
-import type { ProofData, PublicSignals, VK } from 'snarkjs'
+import type { ProofData, VK } from 'snarkjs'
 import { groth16 } from 'snarkjs'
+import { arrayToBigInt } from './crypto/utils'
 import * as Albus from './index'
 
 // The BN254 group order p
@@ -67,7 +69,7 @@ export async function generateProof(props: GenerateProofProps) {
 
 interface VerifyProofProps {
   vk: VK
-  publicInput?: PublicSignals
+  publicInput?: (string | bigint)[]
   proof: ProofData
   logger?: unknown
 }
@@ -250,7 +252,7 @@ export function formatPrivKeyForBabyJub(prv: Uint8Array) {
 /**
  * Generates an Elliptic-Curve Diffie–Hellman (ECDH) shared key
  * given a private key and a public key.
- * @return The ECDH shared key.
+ * @returns The ECDH shared key.
  */
 export function generateEcdhSharedKey(privKey: Uint8Array, pubKey: bigint[]) {
   return babyJub.mulPointEscalar(pubKey, formatPrivKeyForBabyJub(privKey))
@@ -260,8 +262,7 @@ export function generateEcdhSharedKey(privKey: Uint8Array, pubKey: bigint[]) {
  * Compresses a public key into a 32-byte array.
  */
 export function packPubkey(pubkey: bigint[]) {
-  const buff = babyJub.packPoint(pubkey)
-  return ffUtils.leBuff2int(buff)
+  return babyJub.packPoint(pubkey)
 }
 
 /**
@@ -278,7 +279,7 @@ export function unpackPubkey(packed: Uint8Array) {
  * more than 254 bits. To prevent modulo bias, we then use this efficient
  * algorithm:
  * http://cvsweb.openbsd.org/cgi-bin/cvsweb/~checkout~/src/lib/libc/crypt/arc4random_uniform.c
- * @return {bigint} A BabyJub-compatible random value.
+ * @returns {bigint} A BabyJub-compatible random value.
  */
 export function genRandomBabyJubValue(): bigint {
   // Prevent modulo bias
@@ -288,8 +289,7 @@ export function genRandomBabyJubValue(): bigint {
 
   let rand: number | bigint
   while (true) {
-    rand = BigInt(`0x${crypto.randomBytes(32).toString('hex')}`)
-
+    rand = arrayToBigInt(randomBytes(32))
     if (rand >= min) {
       break
     }
