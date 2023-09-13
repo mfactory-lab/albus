@@ -133,6 +133,12 @@ describe('AlbusClient', () => {
     },
   }
 
+  it('can packPubkey and unpackPubkey', async () => {
+    const keypair = Keypair.generate()
+    const key = Albus.zkp.packPubkey(eddsa.prv2pub(keypair.secretKey))
+    assert.ok(Albus.zkp.unpackPubkey(key) !== null)
+  })
+
   it('prepareInputs', async () => {
     const user = Keypair.generate()
     const prv = Albus.zkp.formatPrivKeyForBabyJub(user.secretKey)
@@ -187,6 +193,7 @@ describe('AlbusClient', () => {
     const isVerified = await Albus.zkp.verifyProof({
       vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
       proof,
+      // @ts-expect-error readonly
       publicInput: publicSignals,
     })
 
