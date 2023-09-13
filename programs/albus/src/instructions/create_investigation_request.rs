@@ -120,7 +120,7 @@ pub fn handler<'info>(
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateInvestigationRequestData {
-    pub encryption_key: Option<Pubkey>,
+    pub encryption_key: Pubkey,
     pub trustees: Vec<Pubkey>,
 }
 

@@ -57,7 +57,7 @@ pub fn handler(ctx: Context<UpdateService>, data: UpdateServiceData) -> Result<(
     if !ctx.remaining_accounts.is_empty() {
         service.trustees = Vec::with_capacity(3);
         for acc in ctx.remaining_accounts {
-            let trustee = Account::<'_, Trustee>::try_from(acc).map_err(|_e| {
+            let trustee = Account::<Trustee>::try_from(acc).map_err(|_e| {
                 msg!("Invalid trustee account `{}`", acc.key);
                 AlbusError::InvalidData
             })?;

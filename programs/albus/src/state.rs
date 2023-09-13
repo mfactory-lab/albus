@@ -288,8 +288,7 @@ pub struct InvestigationRequest {
     /// Investigation service authority public key
     pub authority: Pubkey,
     /// The key that is used for secret sharing encryption.
-    /// If None, the `authority` is used instead.
-    pub encryption_key: Option<Pubkey>,
+    pub encryption_key: Pubkey,
     /// The [ProofRequest] associated with this request
     pub proof_request: Pubkey,
     /// The public key of the user who owns the [ProofRequest]
