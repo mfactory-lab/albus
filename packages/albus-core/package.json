@@ -1,6 +1,6 @@
 {
   "name": "@mfactory-lab/albus-core",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "type": "module",
   "repository": {
     "type": "git",
@@ -28,7 +28,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@iden3/js-crypto": "^1.0.1",
     "@iden3/js-merkletree": "^1.0.1",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
     "@stablelib/random": "^1.0.2",

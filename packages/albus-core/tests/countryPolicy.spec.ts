@@ -26,9 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { eddsa } from '@iden3/js-crypto'
 import { Keypair } from '@solana/web3.js'
 import { describe, it } from 'vitest'
+import { eddsa } from '../src/crypto'
 import { setupCircuit } from './utils'
 
 describe('CountryPolicy', async () => {

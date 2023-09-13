@@ -56,7 +56,7 @@ describe('test', () => {
   it('test finite helpers', async () => {
     const n = '1662767948258934355069791443487100820038153707701411290986741440889424297316'
     const bytes = finiteToBytes(n)
-    assert.equal(n, bytesToFinite(bytes))
+    assert.equal(n, bytesToFinite(bytes).toString())
   })
 
   it('test encode decode VK', async () => {

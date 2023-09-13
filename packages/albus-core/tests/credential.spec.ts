@@ -26,14 +26,15 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { babyJub, eddsa } from '@iden3/js-crypto'
 import { Keypair } from '@solana/web3.js'
 import { assert, describe, it } from 'vitest'
+import { babyJub, eddsa } from '../src/crypto'
 import {
   createClaimsTree,
   createCredentialProof,
   createVerifiableCredential,
-  createVerifiablePresentation, encryptVerifiablePresentation,
+  createVerifiablePresentation,
+  encryptVerifiablePresentation,
   verifyCredential,
   verifyCredentialProof,
   verifyPresentation,

@@ -27,8 +27,8 @@
  */
 
 import type { Keypair } from '@solana/web3.js'
-import { babyJub, eddsa } from '@iden3/js-crypto'
 import * as u8a from 'uint8arrays'
+import { babyJub, eddsa } from '../crypto'
 import { bytesToBase58 } from '../crypto/utils'
 
 const ALBUS_DID = 'did:web:albus.finance'

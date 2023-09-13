@@ -26,10 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { babyJub } from '@iden3/js-crypto'
 import { Keypair } from '@solana/web3.js'
 import { assert, describe, it } from 'vitest'
-import { reconstructShamirSecret } from '../src/crypto'
+import { babyJub, reconstructShamirSecret } from '../src/crypto'
 import { bytesToFinite, generateProof } from '../src/zkp'
 
 import { loadFixture, setupCircuit } from './utils'

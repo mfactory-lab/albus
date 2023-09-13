@@ -27,9 +27,8 @@
  */
 
 import { Keypair } from '@solana/web3.js'
-import { babyJub, eddsa } from '@iden3/js-crypto'
 import { assert, describe, it } from 'vitest'
-import { genRandomNonce, poseidonDecrypt, reconstructShamirSecret } from '../src/crypto'
+import { Poseidon, babyJub, eddsa, reconstructShamirSecret } from '../src/crypto'
 import { formatPrivKeyForBabyJub, generateEcdhSharedKey } from '../src/zkp'
 import { calculateLabeledWitness, setupCircuit } from './utils'
 
@@ -51,8 +50,8 @@ describe('encryptionProof', async () => {
         trusteePublicKey,
         trusteePublicKey,
       ],
-      secret: genRandomNonce(),
-      nonce: genRandomNonce(),
+      secret: Poseidon.genRandomNonce(),
+      nonce: Poseidon.genRandomNonce(),
       data: [
         19891302n,
         240n,
@@ -61,7 +60,7 @@ describe('encryptionProof', async () => {
 
     const res = await calculateLabeledWitness(circuit, data, true)
 
-    const decryptedData = poseidonDecrypt([
+    const decryptedData = Poseidon.decrypt([
       BigInt(res['main.encryptedData[0]']!),
       BigInt(res['main.encryptedData[1]']!),
       BigInt(res['main.encryptedData[2]']!),
@@ -74,7 +73,7 @@ describe('encryptionProof', async () => {
 
     const shares: any[] = []
     for (let i = 0; i < 3; i++) {
-      const share = poseidonDecrypt([
+      const share = Poseidon.decrypt([
         BigInt(res[`main.encryptedShare[${i}][0]`]!),
         BigInt(res[`main.encryptedShare[${i}][1]`]!),
         BigInt(res[`main.encryptedShare[${i}][2]`]!),

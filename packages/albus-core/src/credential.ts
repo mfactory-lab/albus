@@ -27,7 +27,6 @@
  */
 
 import { InMemoryDB, Merkletree, ZERO_HASH, str2Bytes } from '@iden3/js-merkletree'
-import { Signature, babyJub, eddsa, ffUtils, poseidon } from '@iden3/js-crypto'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import type { VerifyCredentialOptions } from 'did-jwt-vc'
@@ -36,11 +35,12 @@ import type { ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
+import { Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
 
-import { xc20p } from './crypto'
-import { arrayToHexString, base58ToBytes } from './crypto/utils'
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey } from './utils'
+
+const { arrayToHexString, base58ToBytes } = utils
 
 export const DEFAULT_CONTEXT = 'https://www.w3.org/2018/credentials/v1'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
@@ -74,7 +74,7 @@ export interface CreateCredentialOpts {
   verificationMethod?: string
   encrypt?: boolean
   // Used for ECDH
-  encryptionKey?: xc20p.PrivateKey
+  encryptionKey?: number[] | Uint8Array
   nbf?: number
   exp?: number
   aud?: string[]
@@ -107,7 +107,7 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
   let credentialSubject: Claims = {}
 
   if (opts.encrypt) {
-    credentialSubject.encrypted = await xc20p.encrypt(JSON.stringify(claims), opts.holder, opts.encryptionKey)
+    credentialSubject.encrypted = await XC20P.encrypt(JSON.stringify(claims), opts.holder, opts.encryptionKey)
   } else {
     credentialSubject = { ...claims }
   }
@@ -146,7 +146,7 @@ export interface CreatePresentationOpts {
   // By default, all credential fields will be exposed
   exposedFields?: string[]
   // Used for credential decryption
-  decryptionKey?: xc20p.PrivateKey
+  decryptionKey?: number[] | Uint8Array
   // By default, the challenge is the holder's public key.
   challenge?: Uint8Array
 }
@@ -170,7 +170,7 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
     let claims: Claims = {}
     if ('encrypted' in credential.credentialSubject) {
       try {
-        claims = JSON.parse(await xc20p.decrypt(credential.credentialSubject.encrypted, decryptionKey))
+        claims = JSON.parse(await XC20P.decrypt(credential.credentialSubject.encrypted, decryptionKey))
       } catch (e) {
         console.log(`Error: unable to decrypt credential (${e})`)
       }
@@ -233,7 +233,7 @@ export interface EncryptPresentationOpts {
   // Used for presentation encryption (actually it is a shared key)
   // if not selected, ephemeral key will be used instead
   pubkey: PublicKey
-  encryptionKey?: xc20p.PrivateKey
+  encryptionKey?: number[] | Uint8Array
 }
 
 export async function encryptVerifiablePresentation(vp: VerifiablePresentation, opts: EncryptPresentationOpts) {
@@ -245,7 +245,7 @@ export async function encryptVerifiablePresentation(vp: VerifiablePresentation, 
         verifiableCredential[i] = {
           ...cred,
           credentialSubject: {
-            encrypted: await xc20p.encrypt(
+            encrypted: await XC20P.encrypt(
               JSON.stringify(cred.credentialSubject),
               opts.pubkey,
               opts.encryptionKey,
@@ -263,7 +263,7 @@ export async function encryptVerifiablePresentation(vp: VerifiablePresentation, 
 }
 
 export interface VerifyCredentialOpts extends VerifyCredentialOptions {
-  decryptionKey?: xc20p.PrivateKey
+  decryptionKey?: number[] | Uint8Array
   resolver?: Resolver
 }
 
@@ -282,7 +282,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   let credentialSubject = vc.credentialSubject
   if (vc.credentialSubject.encrypted && opts.decryptionKey) {
     try {
-      credentialSubject = JSON.parse(await xc20p.decrypt(credentialSubject.encrypted, opts.decryptionKey))
+      credentialSubject = JSON.parse(await XC20P.decrypt(credentialSubject.encrypted, opts.decryptionKey))
     } catch (e) {
       console.log('failed to decrypt credential subject')
     }
@@ -320,7 +320,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 
 export interface VerifyPresentationOpts {
   // Used to decrypt verifiable credential subject
-  decryptionKey?: xc20p.PrivateKey
+  decryptionKey?: number[] | Uint8Array
   decryptionRethrow?: boolean
   // By default, the challenge is the holder's public key.
   challenge?: Uint8Array
@@ -363,7 +363,7 @@ export async function verifyPresentation(vp: VerifiablePresentation, opts: Verif
   for (const vc of vp.verifiableCredential ?? []) {
     if ('encrypted' in vc.credentialSubject && opts.decryptionKey) {
       try {
-        const credentialSubject = JSON.parse(await xc20p.decrypt(vc.credentialSubject.encrypted, opts.decryptionKey))
+        const credentialSubject = JSON.parse(await XC20P.decrypt(vc.credentialSubject.encrypted, opts.decryptionKey))
         verifiableCredential.push({ ...vc, credentialSubject })
       } catch (e) {
         if (opts.decryptionRethrow) {
@@ -592,13 +592,6 @@ function unflattenObject(obj: Record<string, any>): Record<string, any> {
     )
     return res
   }, {} as any)
-}
-
-function siblingsPad<T>(siblings: T[], nLevels: number) {
-  while (siblings.length < nLevels) {
-    siblings.push(0 as T)
-  }
-  return siblings
 }
 
 function createProofDate() {

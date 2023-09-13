@@ -148,7 +148,7 @@ export function hexStringToArray(hexString: string) {
  * @param size - size of chunks
  * @returns chunked data
  */
-export function chunk(data: Uint8Array, size: number): Uint8Array[] {
+export function chunkU8a(data: Uint8Array, size: number): Uint8Array[] {
   // Define chunks array
   const chunks: Uint8Array[] = []
 
@@ -167,7 +167,7 @@ export function chunk(data: Uint8Array, size: number): Uint8Array[] {
  * @param chunks - chunks to combine
  * @returns combined data
  */
-export function combine(chunks: Uint8Array[]): Uint8Array {
+export function combineU8a(chunks: Uint8Array[]): Uint8Array {
   return chunks.reduce((left, right) => new Uint8Array([...left, ...right]))
 }
 

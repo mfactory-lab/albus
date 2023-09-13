@@ -27,7 +27,7 @@
  */
 
 // import crypto from 'node:crypto'
-import { Blake512, babyJub, eddsa, ffUtils } from '@iden3/js-crypto'
+import { Keypair } from '@solana/web3.js'
 import { randomBytes } from '@stablelib/random'
 import axios from 'axios'
 
@@ -36,6 +36,7 @@ import { getCurveFromName } from 'ffjavascript'
 
 import type { ProofData, VK } from 'snarkjs'
 import { groth16 } from 'snarkjs'
+import { Blake512, babyJub, eddsa, ffUtils } from './crypto'
 import { arrayToBigInt } from './crypto/utils'
 import * as Albus from './index'
 
@@ -256,6 +257,16 @@ export function formatPrivKeyForBabyJub(prv: Uint8Array) {
  */
 export function generateEcdhSharedKey(privKey: Uint8Array, pubKey: bigint[]) {
   return babyJub.mulPointEscalar(pubKey, formatPrivKeyForBabyJub(privKey))
+}
+
+/**
+ * Generate encryption keypair
+ * @param keypair
+ */
+export function generateEncryptionKey(keypair?: Keypair) {
+  keypair ??= Keypair.generate()
+  const key = packPubkey(eddsa.prv2pub(keypair.secretKey))
+  return { keypair, key }
 }
 
 /**

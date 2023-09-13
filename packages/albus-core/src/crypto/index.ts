@@ -27,8 +27,12 @@
  */
 
 import * as utils from './utils'
-import * as xc20p from './xc20p'
 
-export * from './shamir'
+export * from './babyjub'
+export * from './blake'
+export * from './hex'
 export * from './poseidon'
-export { utils, xc20p }
+export * from './shamir'
+export * from './xc20p'
+export { utils as ffUtils, Scalar, F1Field } from './ff'
+export { utils }

@@ -27,10 +27,9 @@
  */
 
 import { Keypair } from '@solana/web3.js'
-import { babyJub, eddsa } from '@iden3/js-crypto'
 import { assert, describe, it } from 'vitest'
+import { Poseidon, babyJub, eddsa, reconstructShamirSecret } from '../src/crypto'
 import { createClaimsTree } from '../src/credential'
-import { poseidonDecrypt, reconstructShamirSecret } from '../src/crypto'
 import { formatPrivKeyForBabyJub, generateEcdhSharedKey, generateProof, verifyProof } from '../src/zkp'
 import { loadFixture, setupCircuit } from './utils'
 
@@ -148,7 +147,7 @@ describe('Proof', async () => {
     ]
     const secret = '186558642041440299711362618815710781931'
     const nonce = 20230711
-    const data = poseidonDecrypt(encData.map(BigInt), [secret, secret].map(BigInt), 1, BigInt(nonce))
+    const data = Poseidon.decrypt(encData.map(BigInt), [secret, secret].map(BigInt), 1, BigInt(nonce))
     console.log(data)
   })
 
@@ -199,7 +198,7 @@ describe('Proof', async () => {
     let i = 4
     const shares: any[] = []
     for (const sharedKey of sharedKeys) {
-      const share = poseidonDecrypt([
+      const share = Poseidon.decrypt([
         BigInt(publicSignals[i]!),
         BigInt(publicSignals[i + 1]!),
         BigInt(publicSignals[i + 2]!),
@@ -214,7 +213,7 @@ describe('Proof', async () => {
       [2, shares[1]],
     ])
 
-    const decryptedData = poseidonDecrypt([
+    const decryptedData = Poseidon.decrypt([
       BigInt(publicSignals[0]!),
       BigInt(publicSignals[1]!),
       BigInt(publicSignals[2]!),
