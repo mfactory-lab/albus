@@ -1,6 +1,6 @@
 {
   "name": "@mfactory-lab/albus-core",
-  "version": "0.1.0",
+  "version": "0.0.12",
   "type": "module",
   "repository": {
     "type": "git",
@@ -23,8 +23,7 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
-    "release": "release-it",
-    "release:ci": "release-it --ci",
+    "release": "release-it --ci",
     "test": "vitest"
   },
   "dependencies": {
@@ -47,9 +46,11 @@
     "uint8arrays": "^4.0.6"
   },
   "devDependencies": {
+    "@mfactory-lab/release-it-config": "workspace:^",
     "circom_tester": "^0.0.19"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   }
 }
