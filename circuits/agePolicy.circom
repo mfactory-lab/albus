@@ -2,6 +2,7 @@ pragma circom 2.1.4;
 
 include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/eddsaposeidon.circom";
+include "circomlib/circuits/babyjub.circom";
 include "utils/date.circom";
 include "utils/poseidon.circom";
 include "ageProof.circom";
@@ -9,18 +10,32 @@ include "encryptionProof.circom";
 include "merkleProof.circom";
 
 template AgePolicy(credentialDepth, shamirN, shamirK) {
-  signal input birthDate; // Example: 20020101
-  signal input birthDateProof[credentialDepth];
-  signal input birthDateKey;
-
   signal input currentDate; // Example: 20220101
   signal input minAge;
   signal input maxAge;
 
   signal input credentialRoot;
 
+  signal input birthDate; // Example: 20020101
+  signal input birthDateProof[credentialDepth];
+  signal input birthDateKey;
+
   signal input issuerPk[2]; // [Ax, Ay]
   signal input issuerSignature[3]; // [R8x, R8y, S]
+
+//  signal input secret;
+//  signal input nonce;
+  signal input userPrivateKey;
+  signal input trusteePublicKey[shamirN][2];
+
+  signal output encryptedData[adjustToMultiple(1, 3) + 1];
+  signal output encryptedShare[shamirN][4];
+  signal output userPublicKey[2];
+
+  // extracts the user public key from private key
+  component upk = BabyPbk();
+  upk.in <== userPrivateKey;
+  userPublicKey <== [upk.Ax, upk.Ay];
 
   // Data integrity check
   component smt = MerkleProof(credentialDepth);
@@ -53,14 +68,6 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
 //  eddsa.R8x<==holderSignature[0];
 //  eddsa.R8y<==holderSignature[1];
 //  eddsa.S<==holderSignature[2];
-
-//  signal input secret;
-//  signal input nonce;
-  signal input userPrivateKey;
-  signal input trusteePublicKey[shamirN][2];
-
-  signal output encryptedData[adjustToMultiple(1, 3) + 1];
-  signal output encryptedShare[shamirN][4];
 
   // Derive secret key
   component secret = Poseidon(4);
@@ -108,6 +115,5 @@ component main{public [
   birthDateKey,
   issuerPk,
   issuerSignature,
-//  nonce,
   trusteePublicKey
 ]} = AgePolicy(6, 3, 2);
