@@ -60,10 +60,14 @@ describe('albus', () => {
       'userPrivateKey',
     ],
     publicSignals: [
-      'birthDateProof[6]', 'birthDateKey',
-      'currentDate', 'minAge', 'maxAge',
+      'currentDate',
+      'minAge',
+      'maxAge',
       'credentialRoot',
-      'issuerPk[2]', 'issuerSignature[3]',
+      'birthDateProof[6]',
+      'birthDateKey',
+      'issuerPk[2]',
+      'issuerSignature[3]',
       'trusteePublicKey[3][2]',
     ],
   }
@@ -77,8 +81,8 @@ describe('albus', () => {
     expirationPeriod: 0,
     retentionPeriod: 0,
     rules: [
-      { index: 8, group: 0, value: 18 },
-      { index: 9, group: 0, value: 100 },
+      { key: 'minAge', value: 18 },
+      { key: 'maxAge', value: 100 },
     ],
   }
 
@@ -156,7 +160,7 @@ describe('albus', () => {
       for (let i = 0; i < trustees.length; i++) {
         const trusteeKeypair = trustees[i]!
         const newClient = new AlbusClient(newProvider(trusteeKeypair))
-        const { key } = client.trustee.generateEncryptionKey(trusteeKeypair)
+        const { key } = Albus.zkp.generateEncryptionKey(trusteeKeypair)
         const data = {
           name: `trustee${i}`,
           email: `trustee${i}@albus.finance`,
@@ -200,7 +204,7 @@ describe('albus', () => {
     try {
       const trusteeKeypair = trustees[0]!
       const newClient = new AlbusClient(newProvider(trusteeKeypair))
-      const { key } = client.trustee.generateEncryptionKey()
+      const { key } = Albus.zkp.generateEncryptionKey()
       const data = {
         name: 'trustee123',
         email: 'trustee123@albus.finance',
@@ -239,7 +243,9 @@ describe('albus', () => {
     try {
       const [serviceProvider] = client.pda.serviceProvider(serviceCode)
       const data = {
-        trustees: trustees.map(kp => client.pda.trustee(kp.publicKey)[0]).slice(0, 3),
+        trustees: trustees.map(kp => client.pda.trustee(
+          Albus.zkp.generateEncryptionKey(kp).key,
+        )[0]).slice(0, 3),
         serviceProvider,
       }
       const { signature } = await client.service.update(data)
@@ -382,6 +388,7 @@ describe('albus', () => {
 
   it('can reveal secret key', async () => {
     const investigation = await client.investigation.load(investigationAddress)
+    console.log(investigation)
   })
 
   it('can delete proof request', async () => {
@@ -405,7 +412,8 @@ describe('albus', () => {
 
   it('can delete all trustees', async () => {
     for (const trustee of trustees) {
-      await client.trustee.delete({ authority: trustee.publicKey })
+      const { key } = Albus.zkp.generateEncryptionKey(trustee)
+      await client.trustee.deleteByKey(key)
     }
   })
 
