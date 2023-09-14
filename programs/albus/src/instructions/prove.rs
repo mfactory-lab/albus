@@ -81,7 +81,7 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
     // }
 
-    policy.apply_rules(&mut req.public_inputs);
+    policy.apply_rules(&mut req.public_inputs, &signals);
 
     req.proved_at = timestamp;
 

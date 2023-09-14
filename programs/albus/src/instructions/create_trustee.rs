@@ -60,7 +60,7 @@ pub struct CreateTrusteeData {
 pub struct CreateTrustee<'info> {
     #[account(
         init,
-        seeds = [Trustee::SEED, authority.key().as_ref()],
+        seeds = [Trustee::SEED, data.key.as_ref()],
         bump,
         payer = authority,
         space = Trustee::space()

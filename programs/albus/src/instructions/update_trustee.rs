@@ -33,9 +33,11 @@ use crate::state::Trustee;
 pub fn handler(ctx: Context<UpdateTrustee>, data: UpdateTrusteeData) -> Result<()> {
     let trustee = &mut ctx.accounts.trustee;
 
-    if let Some(key) = data.key {
-        trustee.key = key;
-    }
+    // TODO: create new account ?
+    // if let Some(key) = data.newKey {
+    //     trustee.key = key;
+    // }
+
     if let Some(name) = data.name {
         trustee.name = name;
     }
@@ -51,7 +53,7 @@ pub fn handler(ctx: Context<UpdateTrustee>, data: UpdateTrusteeData) -> Result<(
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateTrusteeData {
-    pub key: Option<[u8; 32]>,
+    // pub newKey: Option<[u8; 32]>,
     pub name: Option<String>,
     pub email: Option<String>,
     pub website: Option<String>,

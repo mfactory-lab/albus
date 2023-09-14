@@ -179,10 +179,14 @@ impl Policy {
     }
 
     #[inline]
-    pub fn apply_rules(&self, public_inputs: &mut PublicInputs) {
+    pub fn apply_rules(&self, public_inputs: &mut PublicInputs, signals: &Signals) {
         for rule in &self.rules {
-            if let Some(i) = public_inputs.get_mut(rule.index as usize) {
-                *i = num_to_bytes(rule.value);
+            let (name, idx) = rule.parse();
+            if let Some(signal) = signals.get(name) {
+                let index = signal.0 + idx.unwrap_or_default() as usize;
+                if let Some(i) = public_inputs.get_mut(index) {
+                    *i = num_to_bytes(rule.value);
+                }
             }
         }
     }
@@ -190,9 +194,21 @@ impl Policy {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
 pub struct PolicyRule {
-    pub index: u8,
-    pub group: u8,
-    pub value: u32,
+    #[max_len(32)]
+    pub key: String,
+    pub value: u32, // TODO: support > u32 ?
+}
+
+impl PolicyRule {
+    pub const DELIMITER: char = '.';
+
+    /// Parses the name of a policy rule and returns a tuple with the name and length
+    pub fn parse(&self) -> (&str, Option<u8>) {
+        let mut split = self.key.splitn(2, Self::DELIMITER);
+        let name = split.next().unwrap_or_default();
+        let len = split.next().and_then(|len| len.parse().ok());
+        (name, len)
+    }
 }
 
 #[account]
@@ -432,3 +448,46 @@ pub enum ProofRequestStatus {
 //     pub proved_at: i64,
 //     pub created_at: i64,
 // }
+
+#[test]
+fn test_apply_rules() {
+    let policy = Policy {
+        service_provider: Default::default(),
+        circuit: Default::default(),
+        code: "".to_string(),
+        name: "".to_string(),
+        description: "".to_string(),
+        expiration_period: 0,
+        retention_period: 0,
+        proof_request_count: 0,
+        created_at: 0,
+        bump: 0,
+        rules: vec![
+            PolicyRule {
+                key: "minAge".to_string(),
+                value: 18,
+            },
+            PolicyRule {
+                key: "maxAge".to_string(),
+                value: 100,
+            },
+            PolicyRule {
+                key: "issuerPk.0".to_string(),
+                value: 1,
+            },
+            PolicyRule {
+                key: "issuerPk.1".to_string(),
+                value: 2,
+            },
+        ],
+    };
+
+    let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"]);
+    let mut public_inputs: PublicInputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
+
+    policy.apply_rules(&mut public_inputs, &signals);
+
+    for (i, rule) in policy.rules.iter().enumerate() {
+        assert_eq!(public_inputs[i], num_to_bytes(rule.value));
+    }
+}
