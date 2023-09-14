@@ -1,6 +1,6 @@
 {
   "name": "@mfactory-lab/albus-sdk",
-  "version": "0.0.29",
+  "version": "0.1.0",
   "description": "Albus Protocol SDK",
   "type": "module",
   "repository": {
@@ -45,48 +45,6 @@
     "snarkjs": "*"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "release-it": {
-    "hooks": {
-      "after:bump": "pnpm build"
-    },
-    "github": {
-      "release": false
-    },
-    "git": false,
-    "_git": {
-      "commitMessage": "chore(sdk): release v${version}",
-      "push": true,
-      "commit": true,
-      "requireCommits": false,
-      "requireCleanWorkingDir": false
-    },
-    "_plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": {
-          "name": "conventionalcommits",
-          "types": [
-            {
-              "type": "feat",
-              "scope": "vry",
-              "section": "Features 🎉"
-            },
-            {
-              "type": "fix",
-              "scope": "vry",
-              "section": "Bug Fixes 🐛"
-            },
-            {
-              "type": "misc",
-              "scope": "vry",
-              "section": "Miscellaneous 🦾"
-            }
-          ]
-        },
-        "ignoreRecommendedBump": true
-      }
-    }
   }
 }

@@ -34,7 +34,6 @@ import { afterEach, assert, describe, it, vi } from 'vitest'
 import type { Circuit, Policy, ServiceProvider } from '../src'
 import { AlbusClient } from '../src'
 import { ProofInputBuilder } from '../src/utils'
-import '@vitest/web-worker'
 
 const { eddsa } = Albus.crypto
 describe('AlbusClient', () => {

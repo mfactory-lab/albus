@@ -50,24 +50,6 @@
     "circom_tester": "^0.0.19"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
     "access": "public"
-  },
-  "release-it": {
-    "hooks": {
-      "after:bump": "pnpm build"
-    },
-    "github": {
-      "release": false
-    },
-    "git": false,
-    "plugins": {
-      "@release-it/bumper": {
-        "out": {
-          "file": "../albus-sdk/package.json",
-          "path": "dependencies.@mfactory-lab/albus-core"
-        }
-      }
-    }
   }
 }

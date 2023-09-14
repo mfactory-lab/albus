@@ -84,7 +84,6 @@ export function pluginViteConfig(packageDirName: string, options: UserConfig = {
     build: viteBuild(packageDirName, options.build),
     test: {
       globals: true,
-      // setupFiles: ['@vitest/web-worker'],
       // include: ['packages/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
       // environment: 'node',
       // environment: 'jsdom',
@@ -96,7 +95,6 @@ export function pluginViteConfig(packageDirName: string, options: UserConfig = {
 // export default defineConfig({
 //   test: {
 //     globals: true,
-//     setupFiles: ['@vitest/web-worker'],
 //     include: ['packages/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 //     environment: 'node',
 //     // environment: 'jsdom',

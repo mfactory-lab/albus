@@ -1,6 +1,6 @@
 {
   "name": "@albus/monorepo",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "AGPL-3.0",
   "packageManager": "pnpm@8.6.2",
   "private": true,
@@ -17,6 +17,7 @@
     "build:core": "pnpm -F @mfactory-lab/albus-core build",
     "build:sdk": "pnpm -F @mfactory-lab/albus-sdk build",
     "build:cli": "pnpm -F @mfactory-lab/albus-cli build",
+    "release": "pnpm release-it",
     "release:core": "pnpm -F @mfactory-lab/albus-core release",
     "release:sdk": "pnpm -F @mfactory-lab/albus-sdk release",
     "test:unit": "vitest --dir ./packages",
@@ -26,14 +27,15 @@
     "commit": "git-cz"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.41.2",
+    "@antfu/eslint-config": "^0.42.0",
     "@changesets/cli": "^2.26.0",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@release-it/bumper": "^5.1.0",
+    "@release-it/conventional-changelog": "^7.0.1",
+    "@release-it-plugins/workspaces": "^4.0.0",
     "@rollup/plugin-inject": "^5.0.3",
     "@types/node": "^20.0.0",
     "@vitest/ui": "^0.34.4",
-    "@vitest/web-worker": "^0.34.4",
     "buffer": "^6.0.3",
     "eslint": "^8.49.0",
     "release-it": "^16.1.5",
@@ -51,19 +53,9 @@
         "react-native",
         "react-dom",
         "rollup",
+        "esbuild",
         "snarkjs"
       ]
-    }
-  },
-  "release-it": {
-    "git": {
-      "requireCleanWorkingDir": false
-    },
-    "github": {
-      "release": true,
-      "comments": {
-        "submit": true
-      }
     }
   }
 }
