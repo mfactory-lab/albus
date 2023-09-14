@@ -901,8 +901,7 @@
           {
             "name": "encryptionKey",
             "docs": [
-              "The key that is used for secret sharing encryption.",
-              "If None, the `authority` is used instead."
+              "The key that is used for secret sharing encryption."
             ],
             "type": "publicKey"
           },
@@ -1674,12 +1673,8 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "index",
-            "type": "u8"
-          },
-          {
-            "name": "group",
-            "type": "u8"
+            "name": "key",
+            "type": "string"
           },
           {
             "name": "value",

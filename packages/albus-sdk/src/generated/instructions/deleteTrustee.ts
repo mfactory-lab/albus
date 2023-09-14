@@ -43,6 +43,7 @@ export const deleteTrusteeInstructionDiscriminator = [
  * Creates a _DeleteTrustee_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
+ * @param programId
  * @category Instructions
  * @category DeleteTrustee
  * @category generated

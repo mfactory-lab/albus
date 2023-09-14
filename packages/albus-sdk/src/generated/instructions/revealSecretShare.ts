@@ -68,6 +68,7 @@ export const revealSecretShareInstructionDiscriminator = [
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
+ * @param programId
  * @category Instructions
  * @category RevealSecretShare
  * @category generated

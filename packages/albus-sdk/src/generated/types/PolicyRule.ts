@@ -8,8 +8,7 @@
 import * as beet from '@metaplex-foundation/beet'
 
 export interface PolicyRule {
-  index: number
-  group: number
+  key: string
   value: number
 }
 
@@ -17,10 +16,9 @@ export interface PolicyRule {
  * @category userTypes
  * @category generated
  */
-export const policyRuleBeet = new beet.BeetArgsStruct<PolicyRule>(
+export const policyRuleBeet = new beet.FixableBeetArgsStruct<PolicyRule>(
   [
-    ['index', beet.u8],
-    ['group', beet.u8],
+    ['key', beet.utf8String],
     ['value', beet.u32],
   ],
   'PolicyRule',

@@ -64,6 +64,7 @@ export const proveInstructionDiscriminator = [
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
+ * @param programId
  * @category Instructions
  * @category Prove
  * @category generated

@@ -55,6 +55,7 @@ export class ServiceProvider implements ServiceProviderArgs {
 
   /**
    * Creates a {@link ServiceProvider} instance from the provided args.
+   * @param args
    */
   static fromArgs(args: ServiceProviderArgs) {
     return new ServiceProvider(
@@ -74,6 +75,8 @@ export class ServiceProvider implements ServiceProviderArgs {
 
   /**
    * Deserializes the {@link ServiceProvider} from the data of the provided {@link web3.AccountInfo}.
+   * @param accountInfo
+   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
@@ -87,6 +90,9 @@ export class ServiceProvider implements ServiceProviderArgs {
    * Retrieves the account info from the provided address and deserializes
    * the {@link ServiceProvider} from its data.
    *
+   * @param connection
+   * @param address
+   * @param commitmentOrConfig
    * @throws Error if no account info is found at the address or if deserialization fails
    */
   static async fromAccountAddress(
@@ -120,6 +126,8 @@ export class ServiceProvider implements ServiceProviderArgs {
 
   /**
    * Deserializes the {@link ServiceProvider} from the provided data Buffer.
+   * @param buf
+   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [ServiceProvider, number] {
@@ -159,6 +167,7 @@ export class ServiceProvider implements ServiceProviderArgs {
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
+   * @param commitment
    */
   static async getMinimumBalanceForRentExemption(
     args: ServiceProviderArgs,

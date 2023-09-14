@@ -65,6 +65,7 @@ export class ProofRequest implements ProofRequestArgs {
 
   /**
    * Creates a {@link ProofRequest} instance from the provided args.
+   * @param args
    */
   static fromArgs(args: ProofRequestArgs) {
     return new ProofRequest(
@@ -87,6 +88,8 @@ export class ProofRequest implements ProofRequestArgs {
 
   /**
    * Deserializes the {@link ProofRequest} from the data of the provided {@link web3.AccountInfo}.
+   * @param accountInfo
+   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
@@ -100,6 +103,9 @@ export class ProofRequest implements ProofRequestArgs {
    * Retrieves the account info from the provided address and deserializes
    * the {@link ProofRequest} from its data.
    *
+   * @param connection
+   * @param address
+   * @param commitmentOrConfig
    * @throws Error if no account info is found at the address or if deserialization fails
    */
   static async fromAccountAddress(
@@ -133,6 +139,8 @@ export class ProofRequest implements ProofRequestArgs {
 
   /**
    * Deserializes the {@link ProofRequest} from the provided data Buffer.
+   * @param buf
+   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [ProofRequest, number] {
@@ -172,6 +180,7 @@ export class ProofRequest implements ProofRequestArgs {
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
+   * @param commitment
    */
   static async getMinimumBalanceForRentExemption(
     args: ProofRequestArgs,

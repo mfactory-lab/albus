@@ -57,6 +57,7 @@ export class InvestigationRequest implements InvestigationRequestArgs {
 
   /**
    * Creates a {@link InvestigationRequest} instance from the provided args.
+   * @param args
    */
   static fromArgs(args: InvestigationRequestArgs) {
     return new InvestigationRequest(
@@ -75,6 +76,8 @@ export class InvestigationRequest implements InvestigationRequestArgs {
 
   /**
    * Deserializes the {@link InvestigationRequest} from the data of the provided {@link web3.AccountInfo}.
+   * @param accountInfo
+   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
@@ -88,6 +91,9 @@ export class InvestigationRequest implements InvestigationRequestArgs {
    * Retrieves the account info from the provided address and deserializes
    * the {@link InvestigationRequest} from its data.
    *
+   * @param connection
+   * @param address
+   * @param commitmentOrConfig
    * @throws Error if no account info is found at the address or if deserialization fails
    */
   static async fromAccountAddress(
@@ -123,6 +129,8 @@ export class InvestigationRequest implements InvestigationRequestArgs {
 
   /**
    * Deserializes the {@link InvestigationRequest} from the provided data Buffer.
+   * @param buf
+   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [InvestigationRequest, number] {
@@ -153,6 +161,7 @@ export class InvestigationRequest implements InvestigationRequestArgs {
    * {@link InvestigationRequest} data from rent
    *
    * @param connection used to retrieve the rent exemption information
+   * @param commitment
    */
   static async getMinimumBalanceForRentExemption(
     connection: web3.Connection,
@@ -167,6 +176,8 @@ export class InvestigationRequest implements InvestigationRequestArgs {
   /**
    * Determines if the provided {@link Buffer} has the correct byte size to
    * hold {@link InvestigationRequest} data.
+   * @param buf
+   * @param offset
    */
   static hasCorrectByteSize(buf: Buffer, offset = 0) {
     return buf.byteLength - offset === InvestigationRequest.byteSize

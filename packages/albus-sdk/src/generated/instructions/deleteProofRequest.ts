@@ -43,6 +43,7 @@ export const deleteProofRequestInstructionDiscriminator = [
  * Creates a _DeleteProofRequest_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
+ * @param programId
  * @category Instructions
  * @category DeleteProofRequest
  * @category generated
