@@ -43,7 +43,7 @@ export async function clear(_opts: any) {
   log.info('Delete `ProofRequest` accounts...')
   const proofRequests = await client.proofRequest.find({
     skipUser: true,
-    withoutData: true,
+    noData: true,
   })
   log.info(`Found ${proofRequests.length} accounts`)
 
