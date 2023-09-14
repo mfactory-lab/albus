@@ -24,7 +24,8 @@
     "test:e2e": "pnpm -F @albus/tests run test",
     "lint:fix": "eslint --fix --ext .js,.vue,.ts ./packages",
     "changeset": "changeset",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "postinstall": "syncpack fix-mismatches"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.42.0",
@@ -39,6 +40,7 @@
     "buffer": "^6.0.3",
     "eslint": "^8.49.0",
     "release-it": "^16.1.5",
+    "syncpack": "^11.2.1",
     "typescript": "5.0.4",
     "vite": "^4.4.9",
     "vite-plugin-dts": "^3.5.3",
