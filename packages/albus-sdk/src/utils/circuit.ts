@@ -146,17 +146,18 @@ export class ProofInputBuilder {
    * Generate proof input data based on public signals defined in the circuit and policy rules.
    */
   private async applyPublic() {
-    let idx = 0
     for (const signal of this.circuit?.publicSignals ?? []) {
-      const [signalName, signalSize, signalSubSize] = this.parseSignal(signal)
+      const [signalName, signalSize, _signalSubSize] = parseSymbol(signal)
       if (!this.applySignal(signal)) {
         // try to apply policy rules if is not known signal
-        const value = this.policy?.rules?.find(r => r.index === idx)?.value
-        if (value !== undefined) {
-          this.data[signalName] = value
+        const rules = this.policy?.rules
+          ?.filter(r => r.key === signalName || r.key.startsWith(`${signalName}.`)) ?? []
+        if (rules.length > 1 && signalSize > 1) {
+          this.data[signalName] = rules.map(r => r.value)
+        } else if (rules[0] !== undefined) {
+          this.data[signalName] = rules[0].value
         }
       }
-      idx += signalSize * signalSubSize
     }
   }
 
@@ -167,7 +168,7 @@ export class ProofInputBuilder {
    * @returns {boolean} True if the signal was successfully applied, false otherwise.
    */
   private applySignal(signal: string): boolean {
-    const [name, size] = this.parseSignal(signal)
+    const [name, size] = parseSymbol(signal)
     switch (name) {
       case KnownSignals.TrusteePublicKey:
         if (this.trusteePublicKey === undefined) {
@@ -207,15 +208,46 @@ export class ProofInputBuilder {
     }
     return false
   }
+}
 
-  /**
-   * Parse a signal with a name like 'sig[5][3]' into its components.
-   *
-   * @param {string} s - The signal name to parse.
-   * @returns {[string, number, number]} An array containing the parsed signal name, size, and subsize.
-   */
-  parseSignal(s: string): [string, number, number] {
-    const r = s.match(/^(\w+)(?:\[(\d+)](?:\[(\d+)])?)?$/)
-    return r ? [r[1]!, r[2] ? Number(r[2]) : 1, r[3] ? Number(r[3]) : 1] : ['', 0, 0]
+/**
+ * Parse a symbol with a name like 'symbol[5][3]' into its components.
+ *
+ * @param {string} s - The symbol name to parse.
+ * @returns {[string, number, number]} An array containing the parsed signal name, size, and subsize.
+ */
+function parseSymbol(s: string): [string, number, number] {
+  const r = s.match(/^(\w+)(?:\[(\d+)](?:\[(\d+)])?)?$/)
+  return r ? [r[1]!, r[2] ? Number(r[2]) : 1, r[3] ? Number(r[3]) : 1] : ['', 0, 0]
+}
+
+/**
+ * Generate signals map
+ *
+ * @param symbols
+ * @param inputs
+ */
+export function getSignals(symbols: string[], inputs: bigint[]): Record<string, bigint | bigint[] | bigint[][]> {
+  let idx = 0
+  const map = {}
+  for (const symbol of symbols) {
+    const [name, size, subSize] = parseSymbol(symbol)
+    if (size > 1) {
+      map[name] = []
+      for (let i = idx; i < idx + size; i++) {
+        if (subSize > 1) {
+          map[name][i] = []
+          for (let j = i; j < i + subSize; j++) {
+            map[name][i].push(inputs[j])
+          }
+        } else {
+          map[name].push(inputs[i])
+        }
+      }
+    } else {
+      map[name] = inputs[idx]
+    }
+    idx += size * subSize
   }
+  return map
 }

@@ -28,11 +28,15 @@
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import * as Albus from '@mfactory-lab/albus-core'
-import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
+import type {
+  Commitment,
+  ConfirmOptions,
+  GetMultipleAccountsConfig,
+  PublicKeyInitData,
+} from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import type {
   InvestigationStatus,
-
   ProofRequest,
   RevelationStatus,
 } from './generated'
@@ -48,6 +52,7 @@ import {
 import type { PdaManager } from './pda'
 import type { ProofRequestManager } from './proofRequestManager'
 import type { ServiceManager } from './serviceManager'
+import { getSignals } from './utils'
 
 export class InvestigationManager {
   constructor(
@@ -60,6 +65,8 @@ export class InvestigationManager {
 
   /**
    * Load {@link InvestigationRequest} by {@link addr}
+   * @param addr
+   * @param commitment
    */
   async load(addr: PublicKeyInitData, commitment?: Commitment) {
     return InvestigationRequest.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
@@ -67,6 +74,8 @@ export class InvestigationManager {
 
   /**
    * Load multiple {@link InvestigationRequest}s
+   * @param addrs
+   * @param commitmentOrConfig
    */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -76,6 +85,8 @@ export class InvestigationManager {
 
   /**
    * Load {@link InvestigationRequestShare} by {@link addr}
+   * @param addr
+   * @param commitment
    */
   async loadShare(addr: PublicKeyInitData, commitment?: Commitment) {
     return InvestigationRequestShare.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
@@ -83,6 +94,8 @@ export class InvestigationManager {
 
   /**
    * Load multiple {@link InvestigationRequestShare}s
+   * @param addrs
+   * @param commitmentOrConfig
    */
   async loadMultipleShares(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -92,6 +105,7 @@ export class InvestigationManager {
 
   /**
    * Find {@link InvestigationRequest}
+   * @param props
    */
   async find(props: FindInvestigationProps = {}) {
     const builder = InvestigationRequest.gpaBuilder()
@@ -124,16 +138,18 @@ export class InvestigationManager {
       builder.addFilter('proofRequestOwner', new PublicKey(props.proofRequestOwner))
     }
 
-    return (await builder.run(this.provider.connection)).map((acc) => {
-      return {
-        pubkey: acc.pubkey,
-        data: props.noData ? null : InvestigationRequest.fromAccountInfo(acc.account)[0],
-      }
-    })
+    return (await builder.run(this.provider.connection))
+      .map((acc) => {
+        return {
+          pubkey: acc.pubkey,
+          data: props.noData ? null : InvestigationRequest.fromAccountInfo(acc.account)[0],
+        }
+      })
   }
 
   /**
    * Find {@link InvestigationRequestShare}
+   * @param props
    */
   async findShares(props: FindInvestigationShareProps = {}) {
     const builder = InvestigationRequestShare.gpaBuilder()
@@ -176,33 +192,37 @@ export class InvestigationManager {
   }
 
   /**
-   * Add new {@link InvestigationRequest}
+   * Create new {@link InvestigationRequest}
+   * @param props
+   * @param opts
    */
   async create(props: CreateInvestigationProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
 
     const proofRequest = await this.proofRequest.load(props.proofRequest)
+
     if (!proofRequest.proof) {
       throw new Error('Proof request is not proved yet')
     }
 
-    const service = await this.service.load(proofRequest.serviceProvider)
-    const trusteeKeys = await this.service.loadTrusteeKeys(service.trustees)
-    const selectedTrustees: PublicKey[] = []
+    const { serviceProvider, circuit } = await this.proofRequest.loadFull(
+      proofRequest,
+      ['serviceProvider', 'circuit'],
+    )
 
-    // Find selected trustees
-    for (const [i, key] of trusteeKeys.entries()) {
-      const trustee = service.trustees[i]
-      if (!key || !trustee) {
-        console.log(`Invalid trustee #${i}`)
-        continue
-      }
-      const aX = proofRequest.publicInputs.find(i => Albus.crypto.utils.arrayToBigInt(i) === key[0])
-      const aY = proofRequest.publicInputs.find(i => Albus.crypto.utils.arrayToBigInt(i) === key[1])
-      if (aX && aY) {
-        selectedTrustees.push(trustee)
-      }
+    if (!serviceProvider) {
+      throw new Error(`Unable to find Service account at ${proofRequest.serviceProvider}`)
     }
+
+    const signals = getSignals(
+      [...circuit?.outputs ?? [], ...circuit?.publicSignals ?? []],
+      proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
+    )
+
+    const selectedTrustees = (signals.trusteePublicKey as bigint[][] ?? [])
+      .map(p => this.pda.trustee(Albus.zkp.packPubkey(p))[0])
+
+    console.log('selectedTrustees', selectedTrustees)
 
     const [investigationRequest] = this.pda.investigationRequest(props.proofRequest, authority)
 
@@ -234,16 +254,33 @@ export class InvestigationManager {
   }
 
   /**
-   * Add new {@link InvestigationRequest}
+   * Reveal a secret share for {@link InvestigationRequest}
+   * @param props
+   * @param opts
    */
   async revealShare(props: RevealShareProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
 
     const investigationRequest = await this.load(props.investigationRequest)
+    const { proofRequest, circuit } = await this.proofRequest.loadFull(investigationRequest.proofRequest, ['circuit'])
+
+    if (!circuit) {
+      throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
+    }
+
     const [investigationRequestShare] = this.pda.investigationRequestShare(props.investigationRequest, props.index)
 
-    // Decode share
-    // investigationRequest.encryptionKey
+    const signals = getSignals(
+      [...circuit?.outputs ?? [], ...circuit?.publicSignals ?? []],
+      proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
+    )
+
+    const shares = signals.encryptedShare?.[props.index - 1]
+
+    // generateEcdhSharedKey(trusteeKeypair.secretKey, holderPublicKey)
+
+    // Find a share
+    // Decrypt a share with  investigationRequest.encryptionKey
 
     const instruction = createRevealSecretShareInstruction({
       investigationRequestShare,
@@ -284,6 +321,7 @@ export interface FindInvestigationProps {
 
 export interface RevealShareProps {
   investigationRequest: PublicKeyInitData
+  encryptionKey: Uint8Array
   index: number
 }
 

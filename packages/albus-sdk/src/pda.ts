@@ -82,10 +82,10 @@ export class PdaManager {
     ], this.programId)
   }
 
-  trustee(authority: PublicKeyInitData) {
+  trustee(key: ArrayLike<number>) {
     return PublicKey.findProgramAddressSync([
       this.encoder.encode('trustee'),
-      new PublicKey(authority).toBuffer(),
+      Uint8Array.from(key),
     ], this.programId)
   }
 }

@@ -49,6 +49,8 @@ export interface ValidateNftProps {
 
 /**
  * Validate NFT Metadata
+ * @param nft
+ * @param props
  */
 export function validateNft(nft: Metadata, props: ValidateNftProps = {}) {
   if (nft.updateAuthority.toString() !== NFT_AUTHORITY) {
@@ -69,6 +71,9 @@ export function validateNft(nft: Metadata, props: ValidateNftProps = {}) {
 
 /**
  * Load and validate NFT Metadata
+ * @param connection
+ * @param addr
+ * @param validate
  */
 export async function loadNft(connection: Connection, addr: PublicKeyInitData, validate?: ValidateNftProps) {
   const metadata = await getMetadataByMint(connection, addr, true)
@@ -81,6 +86,9 @@ export async function loadNft(connection: Connection, addr: PublicKeyInitData, v
 
 /**
  * Load Metadata by mint address
+ * @param connection
+ * @param mint
+ * @param loadJson
  */
 async function getMetadataByMint(connection: Connection, mint: PublicKeyInitData, loadJson = false) {
   const accountInfo = await connection.getAccountInfo(getMetadataPDA(mint))
@@ -101,6 +109,9 @@ async function getMetadataByMint(connection: Connection, mint: PublicKeyInitData
 /**
  * Load multiple metadata accounts for {@link owner}
  * Can be optionally filtered by {@link filter}
+ * @param connection
+ * @param owner
+ * @param filter
  */
 export async function getParsedNftAccountsByOwner(connection: Connection, owner: PublicKey, filter?: Omit<FindMetadataAccounts, 'mints'>) {
   const { value: splAccounts } = await connection.getParsedTokenAccountsByOwner(
@@ -136,6 +147,8 @@ type ExtendedMetadata = Metadata & { json: Record<string, any> | null }
 
 /**
  * Load multiple metadata with selected {@link props.mints}
+ * @param connection
+ * @param props
  */
 export async function findMetadataAccounts(connection: Connection, props: FindMetadataAccounts): Promise<ExtendedMetadata[]> {
   let rawAccounts: (AccountInfo<any> | null)[] = []
@@ -191,6 +204,7 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
  * Remove all empty space, new line, etc. symbols
  * In some reason such symbols parsed back from Buffer looks weird
  * like "\x0000" instead of usual spaces.
+ * @param str
  */
 const sanitizeString = (str: string) => str.replace(/\0/g, '')
 

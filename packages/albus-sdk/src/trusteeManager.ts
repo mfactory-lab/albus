@@ -27,10 +27,8 @@
  */
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import { eddsa } from '@iden3/js-crypto'
-import * as Albus from '@mfactory-lab/albus-core'
 import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
-import { Keypair, PublicKey, Transaction } from '@solana/web3.js'
+import { PublicKey, Transaction } from '@solana/web3.js'
 import type { CreateTrusteeData, UpdateTrusteeData } from './generated'
 import {
   Trustee,
@@ -51,16 +49,9 @@ export class TrusteeManager {
   }
 
   /**
-   * Generate encryption keypair
-   */
-  generateEncryptionKey(keypair?: Keypair) {
-    keypair ??= Keypair.generate()
-    const key = Albus.zkp.packPubkey(eddsa.prv2pub(keypair.secretKey))
-    return { keypair, key }
-  }
-
-  /**
    * Load trustee by {@link addr}
+   * @param addr
+   * @param commitment
    */
   async load(addr: PublicKeyInitData, commitment?: Commitment) {
     return Trustee.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
@@ -68,6 +59,8 @@ export class TrusteeManager {
 
   /**
    * Load multiple trustees
+   * @param addrs
+   * @param commitmentOrConfig
    */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -76,14 +69,25 @@ export class TrusteeManager {
   }
 
   /**
-   * Load trustee by authority
+   * Load {@link Trustee} by key
+   * @param key
+   * @param commitment
    */
-  async loadByAuthority(authority: PublicKeyInitData, commitment?: Commitment) {
-    return Trustee.fromAccountAddress(this.provider.connection, this.pda.trustee(authority)[0], commitment)
+  async loadByKey(key: number[], commitment?: Commitment) {
+    return Trustee.fromAccountAddress(this.provider.connection, this.pda.trustee(key)[0], commitment)
+  }
+
+  /**
+   * Load {@link Trustee} by authority
+   * @param authority
+   */
+  async loadByAuthority(authority: PublicKeyInitData) {
+    return this.find({ authority }).then(res => res[0])
   }
 
   /**
    * Find trustees
+   * @param props
    */
   async find(props: FindTrusteeProps = {}) {
     const builder = Trustee.gpaBuilder()
@@ -116,20 +120,23 @@ export class TrusteeManager {
       builder.addFilter('isVerified', props.verified)
     }
 
-    return (await builder.run(this.provider.connection)).map((acc) => {
-      return {
-        pubkey: acc.pubkey,
-        data: props.noData ? null : Trustee.fromAccountInfo(acc.account)[0],
-      }
-    })
+    return (await builder.run(this.provider.connection))
+      .map((acc) => {
+        return {
+          pubkey: acc.pubkey,
+          data: props.noData ? null : Trustee.fromAccountInfo(acc.account)[0],
+        }
+      })
   }
 
   /**
    * Add new trustee
+   * @param props
+   * @param opts
    */
   async create(props: CreateTrusteeProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const [trustee] = this.pda.trustee(authority)
+    const [trustee] = this.pda.trustee(props.key)
     const instruction = createCreateTrusteeInstruction({
       trustee,
       authority,
@@ -152,10 +159,12 @@ export class TrusteeManager {
 
   /**
    * Update trustee
+   * @param props
+   * @param opts
    */
   async update(props: UpdateTrusteeProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const [trustee] = this.pda.trustee(authority)
+    const [trustee] = this.pda.trustee(props.key)
     const instruction = createUpdateTrusteeInstruction({
       trustee,
       authority,
@@ -178,6 +187,8 @@ export class TrusteeManager {
 
   /**
    * Verify trustee
+   * @param trustee
+   * @param opts
    */
   async verify(trustee: PublicKeyInitData, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -196,12 +207,13 @@ export class TrusteeManager {
 
   /**
    * Delete trustee
+   * @param trustee
+   * @param opts
    */
-  async delete(props: { authority: PublicKeyInitData }, opts?: ConfirmOptions) {
+  async delete(trustee: PublicKeyInitData, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const [trustee] = this.pda.trustee(props.authority)
     const instruction = createDeleteTrusteeInstruction({
-      trustee,
+      trustee: new PublicKey(trustee),
       authority,
     })
 
@@ -213,10 +225,17 @@ export class TrusteeManager {
       throw errorFromCode(e.code) ?? e
     }
   }
+
+  async deleteByKey(key: ArrayLike<number>, opts?: ConfirmOptions) {
+    return this.delete(this.pda.trustee(key), opts)
+  }
 }
 
 export interface CreateTrusteeProps extends CreateTrusteeData {}
-export interface UpdateTrusteeProps extends Partial<UpdateTrusteeData> {}
+export interface UpdateTrusteeProps extends Partial<UpdateTrusteeData> {
+  key: number[]
+  // newKey: number[]
+}
 
 export interface FindTrusteeProps {
   name?: string

@@ -32,6 +32,7 @@ export class EventManager {
 
   /**
    * Unsubscribes from the given listener.
+   * @param listener
    */
   public async removeEventListener(listener: number): Promise<void> {
     return await this._events.removeEventListener(listener)

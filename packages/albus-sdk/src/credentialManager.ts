@@ -69,6 +69,7 @@ export class CredentialManager {
 
   /**
    * Load all verifiable credentials
+   * @param props
    */
   async loadAll(props: LoadAllCredentialProps = {}) {
     const accounts = await getParsedNftAccountsByOwner(
@@ -116,6 +117,7 @@ export class CredentialManager {
   /**
    * Create new verifiable presentation
    * encrypted with shared key
+   * @param props
    */
   async createPresentation(props: CreatePresentationProps) {
     const sharedKey = Keypair.generate().secretKey

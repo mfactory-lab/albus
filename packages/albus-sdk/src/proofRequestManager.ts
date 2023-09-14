@@ -34,7 +34,7 @@ import type {
   GetMultipleAccountsConfig,
   PublicKeyInitData,
 } from '@solana/web3.js'
-import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
+import { PublicKey, Transaction } from '@solana/web3.js'
 import { chunk } from 'lodash-es'
 import type { CircuitManager } from './circuitManager'
 import type { CredentialManager } from './credentialManager'
@@ -68,10 +68,8 @@ export class ProofRequestManager {
 
   /**
    * Load a proof request based on its public key address.
-   *
-   * @param {PublicKeyInitData | ProofRequest} addr - The public key address of the proof request to load.
-   * @param {Commitment} [commitment] - Optional commitment level for loading the proof request.
-   * @returns {Promise<ProofRequest>} A Promise that resolves to the loaded proof request.
+   * @param addr
+   * @param commitment
    */
   async load(addr: PublicKeyInitData | ProofRequest, commitment?: Commitment) {
     if (addr instanceof ProofRequest) {
@@ -82,6 +80,8 @@ export class ProofRequestManager {
 
   /**
    * Load multiple proof requests
+   * @param addrs
+   * @param commitmentOrConfig
    */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -92,27 +92,22 @@ export class ProofRequestManager {
   /**
    * Load a full set of data associated with a proof request,
    * including the service, policy and circuit information.
-   *
-   * @param {PublicKeyInitData} addr - The public key address of the proof request to load.
-   * @param {Array<keyof LoadFullResult>} props - Extra accounts
-   * @param {Commitment} [commitment] - Optional commitment level for loading the data.
-   * @returns {Promise<{proofRequest:ProofRequest, policy?:Policy, circuit?:Circuit}>} A Promise that resolves to an object containing the loaded proof request, associated policy, and circuit information.
-   * @throws {Error} Throws an error if there is an issue during the loading process.
+   * @param addr
+   * @param accounts
+   * @param commitmentOrConfig
    */
   async loadFull(
-    addr: PublicKeyInitData,
-    props: Array<Exclude<keyof LoadFullResult, 'proofRequest'>> = [],
-    commitment?: Commitment,
+    addr: PublicKeyInitData | ProofRequest,
+    accounts: Array<Exclude<keyof LoadFullResult, 'proofRequest'>> = [],
+    commitmentOrConfig?: Commitment | GetMultipleAccountsConfig,
   ) {
-    const proofRequest = await this.load(addr, commitment)
-
-    const pubKeys = props.map(key => proofRequest[key])
+    const proofRequest = await this.load(addr)
+    const pubKeys = accounts.map(key => proofRequest[key])
     const result: LoadFullResult = { proofRequest }
-
     if (pubKeys.length > 0) {
-      const accountInfos = await this.provider.connection.getMultipleAccountsInfo(pubKeys)
-      for (let i = 0; i < props.length; i++) {
-        const prop = props[i]!
+      const accountInfos = await this.provider.connection.getMultipleAccountsInfo(pubKeys, commitmentOrConfig)
+      for (let i = 0; i < accounts.length; i++) {
+        const prop = accounts[i]!
         const accountInfo = accountInfos[i]
 
         if (accountInfo) {
@@ -130,15 +125,12 @@ export class ProofRequestManager {
         }
       }
     }
-
     return result
   }
 
   /**
    * Find proof requests based on specified criteria.
-   *
-   * @param {FindProofRequestProps} [props] - Optional properties for customizing the proof request search.
-   * @returns {Promise<Array<{pubkey:PublicKey,data:ProofRequest}>>} A Promise that resolves to an array of proof request results.
+   * @param props
    */
   async find(props: FindProofRequestProps = {}) {
     const builder = ProofRequest.gpaBuilder()
@@ -336,7 +328,7 @@ export class ProofRequestManager {
     }
 
     const trusteePubKeys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
-      .filter(p => p !== null)
+      .filter(p => p !== null) as [bigint, bigint][]
 
     const credential = await this.credential.load(props.vc, {
       decryptionKey: props.decryptionKey ?? props.userPrivateKey,
@@ -345,7 +337,7 @@ export class ProofRequestManager {
     const proofInput = await new ProofInputBuilder(credential)
       .withNow(await getSolanaTimestamp(this.provider.connection))
       .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
-      .withTrusteePublicKey(trusteePubKeys as [bigint, bigint][])
+      .withTrusteePublicKey(trusteePubKeys)
       .withCircuit(circuit)
       .withPolicy(policy)
       .build()
@@ -363,7 +355,7 @@ export class ProofRequestManager {
         proofRequest: props.proofRequest,
         proofRequestData: proofRequest,
         proof,
-        // @ts-expect-error ...
+        // @ts-expect-error readonly
         publicSignals,
       })
 
@@ -419,19 +411,16 @@ export class ProofRequestManager {
         ),
       )
 
-      if (isLast) {
-        tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
-      }
+      // on-chain verification
+      // if (isLast) {
+      //   tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
+      // }
 
       txs.push({ tx })
     }
 
     try {
       const signatures = await this.provider.sendAll(txs, opts)
-      // const tx = new Transaction()
-      //   .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
-      //   .add(instruction)
-      // const signature = await this.provider.sendAndConfirm(tx, [], opts)
       return { signatures }
     } catch (e: any) {
       // console.log(e)

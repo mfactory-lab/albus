@@ -49,6 +49,8 @@ export class ServiceManager {
 
   /**
    * Load {@link ServiceProvider} by {@link addr}
+   * @param addr
+   * @param commitmentOrConfig
    */
   async load(addr: PublicKeyInitData | ServiceProvider, commitmentOrConfig?: Commitment | GetAccountInfoConfig) {
     if (addr instanceof ServiceProvider) {
@@ -59,6 +61,8 @@ export class ServiceManager {
 
   /**
    * Load multiple {@link ServiceProvider}[]
+   * @param addrs
+   * @param commitmentOrConfig
    */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -68,6 +72,8 @@ export class ServiceManager {
 
   /**
    * Load {@link ServiceProvider} by id
+   * @param id
+   * @param commitmentOrConfig
    */
   async loadById(id: string, commitmentOrConfig?: Commitment | GetAccountInfoConfig) {
     return this.load(this.pda.serviceProvider(id)[0], commitmentOrConfig)
@@ -75,12 +81,13 @@ export class ServiceManager {
 
   /**
    * Load and unpack trustee keys
+   * @param trustees
    */
   async loadTrusteeKeys(trustees: PublicKey[]) {
     const accounts = await this.provider.connection
       .getMultipleAccountsInfo(trustees, {
         dataSlice: {
-          offset: 8,
+          offset: 8, // discriminator
           length: 40,
         },
       })
@@ -91,6 +98,7 @@ export class ServiceManager {
 
   /**
    * Find {@link ServiceProvider}[]
+   * @param props
    */
   async find(props: FindServicesProps = {}) {
     const builder = ServiceProvider.gpaBuilder()
@@ -133,6 +141,7 @@ export class ServiceManager {
 
   /**
    * Find {@link ServiceProvider}[] and return a map
+   * @param props
    */
   async findMapped(props: FindServicesProps = {}) {
     return (await this.find(props))
@@ -144,6 +153,8 @@ export class ServiceManager {
 
   /**
    * Add new {@link ServiceProvider}
+   * @param props
+   * @param opts
    */
   async create(props: CreateServiceProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -210,6 +221,7 @@ export class ServiceManager {
    * Require admin authority
    *
    * @param {code} props - The properties for deleting the service.
+   * @param props.code
    * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
    * @returns Promise<{signature:string}>
    */

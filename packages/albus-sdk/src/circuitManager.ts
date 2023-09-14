@@ -51,6 +51,8 @@ export class CircuitManager {
 
   /**
    * Load circuit by {@link addr}
+   * @param addr
+   * @param commitment
    */
   async load(addr: PublicKeyInitData, commitment?: Commitment) {
     return Circuit.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
@@ -58,6 +60,8 @@ export class CircuitManager {
 
   /**
    * Load circuit by {@link id}
+   * @param id
+   * @param commitment
    */
   async loadById(id: string, commitment?: Commitment) {
     return this.load(this.pda.circuit(id)[0], commitment)
@@ -65,6 +69,8 @@ export class CircuitManager {
 
   /**
    * Find circuits
+   * @param filter
+   * @param filter.code
    */
   async find(filter: { code?: string } = {}) {
     const builder = Circuit.gpaBuilder()
@@ -84,6 +90,8 @@ export class CircuitManager {
 
   /**
    * Find circuits and return a map
+   * @param filter
+   * @param filter.code
    */
   async findMapped(filter: { code?: string } = {}) {
     return (await this.find(filter))
@@ -95,6 +103,8 @@ export class CircuitManager {
 
   /**
    * Create new circuit
+   * @param props
+   * @param opts
    */
   async create(props: CreateCircuitProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -128,6 +138,8 @@ export class CircuitManager {
 
   /**
    * Update circuit verification key
+   * @param props
+   * @param opts
    */
   async updateVk(props: UpdateCircuitVkProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -186,6 +198,9 @@ export class CircuitManager {
 
   /**
    * Delete circuit by code
+   * @param props
+   * @param props.code
+   * @param opts
    */
   async delete(props: { code: string }, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
