@@ -52,8 +52,8 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
         external: isExternal,
         plugins: [
           dts({
-            // rollupTypes: true,
-            insertTypesEntry: true,
+            rollupTypes: true,
+            // insertTypesEntry: true,
           }),
           inject({ Buffer: ['buffer', 'Buffer'] }) as PluginOption,
         ],
@@ -82,14 +82,24 @@ export function pluginViteConfig(packageDirName: string, options: UserConfig = {
       },
     }, options.resolve),
     build: viteBuild(packageDirName, options.build),
-  })
+    test: {
+      globals: true,
+      // setupFiles: ['@vitest/web-worker'],
+      // include: ['packages/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+      // environment: 'node',
+      // environment: 'jsdom',
+      testTimeout: 20000,
+    },
+  } as any)
 }
 
-export default defineConfig({
-  test: {
-    include: ['packages/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    environment: 'node',
-    // environment: 'jsdom',
-    testTimeout: 20000,
-  },
-} as any)
+// export default defineConfig({
+//   test: {
+//     globals: true,
+//     setupFiles: ['@vitest/web-worker'],
+//     include: ['packages/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+//     environment: 'node',
+//     // environment: 'jsdom',
+//     testTimeout: 20000,
+//   },
+// } as any)

@@ -99,9 +99,6 @@ importers:
 
   packages/albus-core:
     dependencies:
-      '@iden3/js-crypto':
-        specifier: ^1.0.1
-        version: 1.0.1
       '@iden3/js-merkletree':
         specifier: ^1.0.1
         version: 1.0.1
@@ -141,9 +138,6 @@ importers:
       did-resolver:
         specifier: ^4.1.0
         version: 4.1.0
-      ffjavascript:
-        specifier: ^0.2.60
-        version: 0.2.60
       key-did-resolver:
         specifier: ^3.0.0
         version: 3.0.0
@@ -176,7 +170,7 @@ importers:
         specifier: ^2.13.0
         version: 2.13.0
       '@mfactory-lab/albus-core':
-        specifier: 0.0.9
+        specifier: workspace:^
         version: link:../albus-core
       '@solana/web3.js':
         specifier: ^1.77.3
