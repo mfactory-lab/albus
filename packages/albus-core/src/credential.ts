@@ -40,7 +40,7 @@ import { Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './cr
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey } from './utils'
 
-const { arrayToHexString, base58ToBytes } = utils
+const { bytesToBigInt, base58ToBytes } = utils
 
 export const DEFAULT_CONTEXT = 'https://www.w3.org/2018/credentials/v1'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
@@ -100,6 +100,8 @@ function normalizeClaims(claims: Claims) {
 
 /**
  * Create new verifiable credential
+ * @param claims
+ * @param opts
  */
 export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts) {
   claims = normalizeClaims(claims)
@@ -153,6 +155,7 @@ export interface CreatePresentationOpts {
 
 /**
  * Create new verifiable presentation
+ * @param opts
  */
 export async function createVerifiablePresentation(opts: CreatePresentationOpts) {
   const holderKeypair = Keypair.fromSecretKey(Uint8Array.from(opts.holderSecretKey))
@@ -269,6 +272,8 @@ export interface VerifyCredentialOpts extends VerifyCredentialOptions {
 
 /**
  * Verify credential
+ * @param vc
+ * @param opts
  */
 export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCredentialOpts = {}): Promise<VerifiableCredential> {
   const resolver = opts.resolver ?? new Resolver({
@@ -329,6 +334,8 @@ export interface VerifyPresentationOpts {
 
 /**
  * Verify presentation
+ * @param vp
+ * @param opts
  */
 export async function verifyPresentation(vp: VerifiablePresentation, opts: VerifyPresentationOpts = {}): Promise<VerifiablePresentation> {
   const resolver = opts.resolver ?? new Resolver({
@@ -405,6 +412,7 @@ export interface CreateCredentialProof {
 
 /**
  * Generate BabyJubJub proof for provided credential root hash
+ * @param opts
  */
 export async function createCredentialProof(opts: CreateCredentialProof) {
   // const babyJub = await babyJubPromise
@@ -537,7 +545,7 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
     try {
       return BigInt(s)
     } catch (e) {
-      return BigInt(`0x${arrayToHexString(new TextEncoder().encode(String(s)))}`)
+      return bytesToBigInt(new TextEncoder().encode(String(s)))
     }
   }
 

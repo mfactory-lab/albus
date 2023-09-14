@@ -29,12 +29,16 @@
 import assert from 'node:assert'
 import { randomBytes } from '@stablelib/random'
 import { F1Field, Scalar, utils } from '../ff'
-import { arrayToBigInt } from '../utils'
-import op from './poseidon_constants.json'
+import { bytesToBigInt } from '../utils'
+import constants from './poseidon-constants.json'
+import constantsOp from './poseidon-constants-opt.json'
 
-type EcdhSharedKey = bigint[]
+const { C, M } = utils.unstringifyBigInts(constants) as {
+  C: bigint[][]
+  M: bigint[][][]
+}
 
-export const OPT = utils.unstringifyBigInts(op) as {
+export const OPT = utils.unstringifyBigInts(constantsOp) as {
   C: bigint[][]
   S: bigint[][]
   M: bigint[][][]
@@ -49,9 +53,8 @@ const SPONGE_CHUNK_SIZE = 31
 const F = new F1Field(
   Scalar.fromString('21888242871839275222246405745257275088548364400416034343698204186575808495617'),
 )
-const pow5 = (a: bigint): bigint => F.mul(a, F.square(F.square(a)))
-
 const two128 = F.e('340282366920938463463374607431768211456')
+const pow5 = (a: bigint): bigint => F.mul(a, F.square(F.square(a)))
 
 // circomlibjs Poseidon bn128
 export class Poseidon {
@@ -64,15 +67,15 @@ export class Poseidon {
 
     const t = inputs.length + 1
     const nRoundsF = N_ROUNDS_F
-    const nRoundsP = N_ROUNDS_P[t - 2]!
-    const C = OPT.C[t - 2]!
-    const S = OPT.S[t - 2]!
-    const M = OPT.M[t - 2]!
-    const P = OPT.P[t - 2]!
+    const nRoundsP = N_ROUNDS_P[t - 2]
+    const C = OPT.C[t - 2]
+    const S = OPT.S[t - 2]
+    const M = OPT.M[t - 2]
+    const P = OPT.P[t - 2]
 
     let state: bigint[] = [F.zero, ...inputs.map(a => F.e(a) as bigint)]
 
-    state = state.map((a, i) => F.add(a, C[i]!))
+    state = state.map((a, i) => F.add(a, C[i]))
 
     for (let r = 0; r < nRoundsF / 2 - 1; r++) {
       state = state.map(a => pow5(a))
@@ -86,13 +89,13 @@ export class Poseidon {
     state = state.map((_, i) => state.reduce((acc, a, j) => F.add(acc, F.mul(P[j]![i]!, a)), F.zero))
     for (let r = 0; r < nRoundsP; r++) {
       state[0] = pow5(state[0]!)
-      state[0] = F.add(state[0], C[(nRoundsF / 2 + 1) * t + r]!)
+      state[0] = F.add(state[0], C[(nRoundsF / 2 + 1) * t + r])
 
       const s0 = state.reduce((acc, a, j) => {
-        return F.add(acc, F.mul(S[(t * 2 - 1) * r + j]!, a))
+        return F.add(acc, F.mul(S[(t * 2 - 1) * r + j], a))
       }, F.zero)
       for (let k = 1; k < t; k++) {
-        state[k] = F.add(state[k]!, F.mul(state[0], S[(t * 2 - 1) * r + t + k - 1]!))
+        state[k] = F.add(state[k], F.mul(state[0], S[(t * 2 - 1) * r + t + k - 1]))
       }
       state[0] = s0
     }
@@ -195,130 +198,116 @@ export class Poseidon {
     return hash
   }
 
-  static genRandomNonce(): bigint {
-    const max = two128
-    // Prevent modulo bias
-    const lim = F.e('0x10000000000000000000000000000000000000000000000000000000000000000')
-    const min = F.mod(F.sub(lim, max), max)
+  static encrypt = poseidonEncrypt
 
-    let rand: bigint
-    while (true) {
-      rand = arrayToBigInt(randomBytes(32))
-      if (rand >= min) {
-        break
-      }
-    }
+  static decrypt = poseidonDecrypt
 
-    const nonce: bigint = F.mod(F.e(rand), max)
-    assert(nonce < max)
+  static genRandomNonce = genRandomNonce
+}
 
-    return nonce
+function poseidonEncrypt(msg: any[], sharedKey: bigint[], nonce = BigInt(0)) {
+  msg = msg.map(x => F.e(x))
+
+  // The nonce must be less than 2 ^ 128
+  assert(nonce < two128)
+
+  const message: any[] = [...msg]
+
+  // Pad the message if needed
+  while (message.length % 3 > 0) {
+    message.push(F.zero)
   }
 
-  static encrypt(msg: any[], sharedKey: EcdhSharedKey, nonce = BigInt(0)) {
-    msg = msg.map(x => F.e(x))
+  const cipherLength = message.length
 
-    // The nonce must be less than 2 ^ 128
-    assert(nonce < two128)
+  // Create the initial state
+  let state = [
+    F.zero,
+    F.e(sharedKey[0]),
+    F.e(sharedKey[1]),
+    F.add(
+      F.e(nonce),
+      F.mul(F.e(msg.length), two128),
+    ),
+  ]
 
-    const message: any[] = [...msg]
+  const ciphertext: bigint[] = []
 
-    // Pad the message if needed
-    while (message.length % 3 > 0) {
-      message.push(F.zero)
-    }
-
-    const cipherLength = message.length
-
-    // Create the initial state
-    let state = [
-      F.zero,
-      F.e(sharedKey[0]),
-      F.e(sharedKey[1]),
-      F.add(
-        F.e(nonce),
-        F.mul(F.e(msg.length), two128),
-      ),
-    ]
-
-    const ciphertext: bigint[] = []
-
-    for (let i = 0; i < cipherLength / 3; i++) {
-      // Iterate Poseidon on the state
-      state = poseidonStrategy(state)
-
-      // Absorb three elements of message
-      state[1] = F.add(state[1], BigInt(message[i * 3]))
-      state[2] = F.add(state[2], BigInt(message[i * 3 + 1]))
-      state[3] = F.add(state[3], BigInt(message[i * 3 + 2]))
-
-      // Release three elements of the ciphertext
-      ciphertext.push(state[1])
-      ciphertext.push(state[2])
-      ciphertext.push(state[3])
-    }
-
-    // Iterate Poseidon on the state one last time
+  for (let i = 0; i < cipherLength / 3; i++) {
+    // Iterate Poseidon on the state
     state = poseidonStrategy(state)
 
-    // Release the last ciphertext element
+    // Absorb three elements of message
+    state[1] = F.add(state[1], BigInt(message[i * 3]))
+    state[2] = F.add(state[2], BigInt(message[i * 3 + 1]))
+    state[3] = F.add(state[3], BigInt(message[i * 3 + 2]))
+
+    // Release three elements of the ciphertext
     ciphertext.push(state[1])
-
-    return ciphertext
+    ciphertext.push(state[2])
+    ciphertext.push(state[3])
   }
 
-  static decrypt(ciphertext: bigint[], sharedKey: EcdhSharedKey, length: number, nonce: bigint = BigInt(0)) {
-    assert(nonce < two128)
+  // Iterate Poseidon on the state one last time
+  state = poseidonStrategy(state)
 
-    // Create the initial state
-    let state = [
-      F.zero,
-      F.e(sharedKey[0]),
-      F.e(sharedKey[1]),
-      F.add(
-        F.e(nonce),
-        F.mul(F.e(length), two128),
-      ),
-    ]
+  // Release the last ciphertext element
+  ciphertext.push(state[1])
 
-    const message: any[] = []
+  return ciphertext
+}
 
-    const n = Math.floor(ciphertext.length / 3)
+function poseidonDecrypt(ciphertext: bigint[], sharedKey: bigint[], length: number, nonce: bigint = BigInt(0)) {
+  assert(nonce < two128)
 
-    for (let i = 0; i < n; i++) {
-      // Iterate Poseidon on the state
-      state = poseidonStrategy(state)
+  // Create the initial state
+  let state = [
+    F.zero,
+    F.e(sharedKey[0]),
+    F.e(sharedKey[1]),
+    F.add(
+      F.e(nonce),
+      F.mul(F.e(length), two128),
+    ),
+  ]
 
-      // Release three elements of the message
-      message.push(F.sub(ciphertext[i * 3], state[1]))
-      message.push(F.sub(ciphertext[i * 3 + 1], state[2]))
-      message.push(F.sub(ciphertext[i * 3 + 2], state[3]))
+  const message: any[] = []
 
-      // Modify the state
-      state[1] = ciphertext[i * 3]
-      state[2] = ciphertext[i * 3 + 1]
-      state[3] = ciphertext[i * 3 + 2]
-    }
+  const n = Math.floor(ciphertext.length / 3)
 
-    // If length > 3, check if the last (3 - (l mod 3)) elements of the message
-    // are 0
-    if (length > 3) {
-      if (length % 3 === 2) {
-        assert(F.eq(message[message.length - 1], F.zero))
-      } else if (length % 3 === 1) {
-        assert(F.eq(message[message.length - 1], F.zero))
-        assert(F.eq(message[message.length - 2], F.zero))
-      }
-    }
-
-    // Iterate Poseidon on the state one last time
+  for (let i = 0; i < n; i++) {
+    // Iterate Poseidon on the state
     state = poseidonStrategy(state)
 
-    // Check the last ciphertext element
-    assert(F.eq(ciphertext[ciphertext.length - 1], state[1]))
+    // Release three elements of the message
+    message.push(F.sub(ciphertext[i * 3], state[1]))
+    message.push(F.sub(ciphertext[i * 3 + 1], state[2]))
+    message.push(F.sub(ciphertext[i * 3 + 2], state[3]))
 
-    return message.slice(0, length)
+    // Modify the state
+    state[1] = ciphertext[i * 3]
+    state[2] = ciphertext[i * 3 + 1]
+    state[3] = ciphertext[i * 3 + 2]
   }
+
+  // If length > 3, check if the last (3 - (l mod 3)) elements of the message
+  // are 0
+  if (length > 3) {
+    if (length % 3 === 2) {
+      assert(F.eq(message[message.length - 1], F.zero))
+    } else if (length % 3 === 1) {
+      assert(F.eq(message[message.length - 1], F.zero))
+      assert(F.eq(message[message.length - 2], F.zero))
+    }
+  }
+
+  // Iterate Poseidon on the state one last time
+  state = poseidonStrategy(state)
+
+  // Check the last ciphertext element
+  assert(F.eq(ciphertext[ciphertext.length - 1], state[1]))
+
+  return message.slice(0, length)
 }
 
 function poseidonStrategy(state) {
@@ -331,7 +320,7 @@ function poseidonStrategy(state) {
 
   state = state.map(x => F.e(x))
   for (let r = 0; r < nRoundsF + nRoundsP; r++) {
-    state = state.map((a, i) => F.add(a, OPT.C[t - 2][r * t + i]))
+    state = state.map((a, i) => F.add(a, C[t - 2][r * t + i]))
 
     if (r < nRoundsF / 2 || r >= nRoundsF / 2 + nRoundsP) {
       state = state.map(a => pow5(a))
@@ -340,10 +329,30 @@ function poseidonStrategy(state) {
     }
 
     state = state.map((_, i) =>
-      state.reduce((acc, a, j) => F.add(acc, F.mul(OPT.M[t - 2][i][j], a)), F.zero),
+      state.reduce((acc, a, j) => F.add(acc, F.mul(M[t - 2][i][j], a)), F.zero),
     )
   }
   return state.map(x => F.normalize(x))
+}
+
+function genRandomNonce(): bigint {
+  const max = two128
+  // Prevent modulo bias
+  const lim = F.e('0x10000000000000000000000000000000000000000000000000000000000000000')
+  const min = F.mod(F.sub(lim, max), max)
+
+  let rand: bigint
+  while (true) {
+    rand = bytesToBigInt(randomBytes(32))
+    if (rand >= min) {
+      break
+    }
+  }
+
+  const nonce: bigint = F.mod(F.e(rand), max)
+  assert(nonce < max)
+
+  return nonce
 }
 
 export const poseidon = Poseidon

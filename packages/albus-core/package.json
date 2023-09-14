@@ -37,7 +37,6 @@
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
-    "ffjavascript": "^0.2.60",
     "did-jwt-vc": "^3.2.5",
     "did-jwt": "^7.2.5",
     "did-resolver": "^4.1.0",

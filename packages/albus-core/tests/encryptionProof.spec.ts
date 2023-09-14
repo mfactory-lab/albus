@@ -65,7 +65,7 @@ describe('encryptionProof', async () => {
       BigInt(res['main.encryptedData[1]']!),
       BigInt(res['main.encryptedData[2]']!),
       BigInt(res['main.encryptedData[3]']!),
-    ], [BigInt(data.secret), BigInt(data.secret)], data.data.length, data.nonce)
+    ], [data.secret, data.secret], data.data.length, data.nonce)
 
     assert.deepEqual(decryptedData, data.data)
 

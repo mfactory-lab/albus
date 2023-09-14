@@ -26,6 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import type { F1Field } from './ff'
+
 /**
  * Reconstruct a secret from Shamir's secret sharing.
  * All shares must be in decrypted form.
@@ -33,9 +35,9 @@
  * @param field The finite field to use.
  * @param k The minimum number of shares required to reconstruct the secret (defines degree of polynomial).
  * @param shares Shares of the participants to reconstruct the secret. Each is a 2-tuple containing the share index =x and the value =y.
- * @returns The reconstructed secret as stringifies field element.
+ * @returns {string} The reconstructed secret as stringifies field element.
  */
-export function reconstructShamirSecret(field: any, k: number, shares: [number, string][]): string {
+export function reconstructShamirSecret(field: F1Field, k: number, shares: [number, string][]): string {
   if (shares.length < k) {
     throw new Error('Not enough shares to reconstruct secret')
   }
@@ -58,15 +60,15 @@ export function reconstructShamirSecret(field: any, k: number, shares: [number, 
       product = field.mul(
         product,
         field.div(
-          field.e(shares[m]![0]),
+          field.e(shares[m][0]),
           field.sub(
-            field.e(shares[m]![0]),
-            field.e(shares[j]![0]),
+            field.e(shares[m][0]),
+            field.e(shares[j][0]),
           ),
         ),
       )
     }
-    sum = field.add(sum, field.mul(field.e(shares[j]![1]), product))
+    sum = field.add(sum, field.mul(field.e(shares[j][1]), product))
   }
   return field.toObject(sum).toString()
 }

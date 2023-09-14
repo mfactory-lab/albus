@@ -9,8 +9,8 @@ export class Eddsa {
   babyJub: BabyJub = babyJub
 
   static pruneBuffer(buff: Uint8Array) {
-    buff[0] = buff[0]! & 0xF8
-    buff[31] = buff[31]! & 0x7F
+    buff[0] = buff[0] & 0xF8
+    buff[31] = buff[31] & 0x7F
     buff[31] = buff[31] | 0x40
     return buff
   }

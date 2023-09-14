@@ -26,31 +26,37 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
+import { bytesToBigInt } from 'did-jwt/lib/util'
 import { assert, describe, it } from 'vitest'
-import { bytesToFinite, decodeVerifyingKey, encodeVerifyingKey, finiteToBytes } from '../src/zkp'
+import { base64ToBytes } from '../src/crypto/utils'
+import {
+  altBn128G1Neg,
+  bytesToFinite, decodeG1,
+  decodeVerifyingKey,
+  encodeG1,
+  encodeVerifyingKey,
+  finiteToBytes,
+} from '../src/zkp'
 
-describe('test', () => {
-  const encodeVal = (s: any) => {
-    try {
-      return BigInt(s)
-    } catch (e) {
-      return `0x${Buffer.from(String(s)).toString('hex')}`
-    }
-  }
+describe('misc', () => {
+  it('x1', async () => {
+    const o = 'CcRunsaOm9T+H6q6KUy6OKcaoXdTTN0bbH3A29Cr16c='
+    const byteArray = bytesToBigInt(base64ToBytes(o))
 
-  it('#12', async () => {
-    const x = 'asdasAasd2d[122]'.match(/^(\w+)(?:\[(\d+)\])?$/)
-
-    console.log(x)
+    console.log(byteArray)
   })
 
-  it('#1', async () => {
-    console.log(encodeVal('123'))
-    console.log(encodeVal('asdads'))
-    console.log(encodeVal('test'))
-    console.log(encodeVal(123))
-    console.log(encodeVal(11.22))
+  it('amtBn1238Neg', async () => {
+    const g1 = encodeG1([
+      2013390181102474934237225984904052601084975840579903307271824986534913896045n,
+      4558797724519420279226569456496440112057206950163580132097987045500495063086n,
+      '1',
+    ])
+    assert.deepEqual(decodeG1(altBn128G1Neg(g1)), [
+      2013390181102474934237225984904052601084975840579903307271824986534913896045n,
+      17329445147319854943019836288760834976639104207134243530591050849144731145497n,
+      '1',
+    ])
   })
 
   it('test finite helpers', async () => {

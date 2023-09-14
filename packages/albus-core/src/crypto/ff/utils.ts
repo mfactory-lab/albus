@@ -1,4 +1,21 @@
+import { bytesToBase64, hexToBytes } from '../utils'
 import * as Scalar from './scalar'
+
+export function stringifyBigInts(o: any): any {
+  if ((typeof (o) == 'bigint') || (o instanceof BigInt)) {
+    return bytesToBase64(hexToBytes(o.toString(16)))
+  } else if (Array.isArray(o)) {
+    return o.map(stringifyBigInts)
+  } else if (typeof o === 'object') {
+    const res = {}
+    for (const k in o) {
+      res[k] = stringifyBigInts(o[k])
+    }
+    return res
+  } else {
+    return o
+  }
+}
 
 export function unstringifyBigInts(o: unknown): unknown {
   if (Array.isArray(o)) {
@@ -10,6 +27,10 @@ export function unstringifyBigInts(o: unknown): unknown {
     }
     return res
   }
+
+  // return o
+  // return bytesToBigInt(base64ToBytes(o as string))
+
   // base64 decode
   const byteArray = Uint8Array.from(atob(o as string), c => c.charCodeAt(0))
   const hex = [...byteArray].map(x => x.toString(16).padStart(2, '0')).join('')

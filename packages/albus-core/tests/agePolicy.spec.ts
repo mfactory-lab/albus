@@ -138,16 +138,16 @@ describe('Proof', async () => {
   const issuerPubkey = eddsa.prv2pub(issuerKeypair.secretKey)
   // const _holderPk = edDSA.prv2pub(holderKeypair.secretKey)
 
-  it('poseidonDecrypt', async () => {
-    const encData = [
-      '3492256907623638915689586474801812198395017384415567085378861909185165398097',
-      '12394761557417503556986200237947612068807125837264760317749764602613090659674',
-      '1130867009931226106191543978960732037526128032541504427931914881399654214948',
-      '15572539609619963723450936353267031363425395278411889980469904474360306402314',
+  it('poseidon encryption', async () => {
+    const msg = [
+      130289n,
+      20230711n,
+      186558642041440299711362618815710781931n,
     ]
-    const secret = '186558642041440299711362618815710781931'
-    const nonce = 20230711
-    const data = Poseidon.decrypt(encData.map(BigInt), [secret, secret].map(BigInt), 1, BigInt(nonce))
+    const secret = 186558642041440299711362618815710781931n
+    const nonce = 20230711n
+    const encData = Poseidon.encrypt(msg, [secret, secret], nonce)
+    const data = Poseidon.decrypt(encData, [secret, secret], msg.length, nonce)
     console.log(data)
   })
 
@@ -192,6 +192,8 @@ describe('Proof', async () => {
     // console.log('input', input)
 
     const { proof, publicSignals } = await generateProof({ wasmFile, zkeyFile, input })
+
+    console.log(publicSignals)
 
     // reconstruct secret key
 

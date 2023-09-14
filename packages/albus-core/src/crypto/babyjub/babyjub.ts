@@ -2,7 +2,7 @@ import { F1Field, Scalar } from '../ff'
 
 // circomlibjs BabyJub
 export class BabyJub {
-  F
+  F: F1Field
   p: bigint
   pm1d2: bigint
   Generator: bigint[]

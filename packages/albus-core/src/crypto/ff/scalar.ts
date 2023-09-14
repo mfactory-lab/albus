@@ -222,7 +222,7 @@ export function toRprBE(buff: Uint8Array, o: number, e: bigint, n8: number): voi
   }
 }
 
-// Pases a buffer with Little Endian Representation
+// Passes a buffer with Little Endian Representation
 export function fromRprLE(buff: Uint8Array, o: number, n8?: number): bigint {
   n8 = n8 || buff.byteLength
   o = o || 0
