@@ -73,6 +73,7 @@ describe('AlbusClient', () => {
     outputs: [
       'encryptedData[4]',
       'encryptedShare[3][4]',
+      'userPublicKey[2]',
     ],
     privateSignals: [
       'birthDate',
