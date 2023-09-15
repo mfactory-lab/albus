@@ -27,7 +27,9 @@
  */
 
 export * as admin from './admin'
+export * as did from './did'
 export * as identity from './identity'
 export * as test from './test'
 export * as vc from './vc'
+export * as policy from './policy'
 export * as request from './request'

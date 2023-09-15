@@ -26,28 +26,40 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { Buffer } from 'node:buffer'
+import fs from 'node:fs'
+import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
 interface Opts {
   // Verifiable Credential Address
   vc: string
-  // Override if exists
-  force?: boolean
+  // Path to decryption key
+  decryptionKey?: string
 }
 
 /**
- * Create a proof for Proof Request with {@link addr}
+ * Create a proof for {@link proofRequest} address
  */
-export async function proveRequest(addr: string, opts: Opts) {
+export async function proveRequest(proofRequestAddr: string, opts: Opts) {
   const { client, keypair } = useContext()
 
-  const { signature } = await client.prove({
-    proofRequest: addr,
+  let decryptionKey: any
+  if (opts.decryptionKey) {
+    decryptionKey = Keypair.fromSecretKey(
+      Buffer.from(JSON.parse(fs.readFileSync(opts.decryptionKey).toString())),
+    ).secretKey
+  }
+
+  log.log('Generating proof...')
+
+  const { signatures } = await client.proofRequest.fullProve({
+    userPrivateKey: keypair.secretKey,
+    proofRequest: proofRequestAddr,
+    decryptionKey,
     vc: opts.vc,
-    decryptionKey: keypair.secretKey,
-    force: opts.force,
   })
 
-  log.info(`Signature: ${signature}`)
+  log.info(`Signatures: ${signatures}`)
 }

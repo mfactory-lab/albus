@@ -1,12 +1,27 @@
 {
-  "name": "@albus/cli",
-  "version": "0.0.3",
+  "name": "@mfactory-lab/albus-cli",
+  "version": "0.0.5",
   "private": true,
   "type": "module",
-  "main": "src/index",
-  "module": "src/index",
+  "main": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "*.d.ts"
+  ],
+  "bin": {
+    "albus": "./cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "cli": "vite-node ./src/index.ts --"
+    "cli": "node ./dist/index.es.js",
+    "run": "vite-node ./src/index.ts --",
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "release": "pnpm build & release-it",
+    "prepublishOnly": "pnpm build"
   },
   "repository": {
     "type": "git",
@@ -14,10 +29,10 @@
     "directory": "packages/albus-cli"
   },
   "dependencies": {
-    "@albus/core": "workspace:*",
-    "@albus/sdk": "workspace:*",
     "@faker-js/faker": "^8.0.2",
     "@metaplex-foundation/js": "^0.19.4",
+    "@mfactory-lab/albus-core": "workspace:^",
+    "@mfactory-lab/albus-sdk": "workspace:^",
     "@coral-xyz/anchor": "^0.28.0",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
@@ -25,9 +40,12 @@
     "commander": "^10.0.0",
     "chalk": "^4.1.2",
     "loglevel": "^1.8.1",
-    "snarkjs": "^0.7.0"
+    "snarkjs": "*"
   },
   "devDependencies": {
-    "vite-node": "^0.32.0"
+    "vite-node": "^0.34.1"
+  },
+  "release-it": {
+    "git": false
   }
 }

@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import axios from 'axios'
 import { PROGRAM_ID as METADATA_PROGRAM_ID, Metadata } from '@metaplex-foundation/mpl-token-metadata'
 import type { Connection, PublicKeyInitData } from '@solana/web3.js'
@@ -38,7 +37,7 @@ type ExtendedMetadata = Metadata & { json: Record<string, any> }
 
 export function getMetadataPDA(mint: PublicKeyInitData) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from(METADATA_SEED_PREFIX), METADATA_PROGRAM_ID.toBuffer(), new PublicKey(mint).toBuffer()],
+    [new TextEncoder().encode(METADATA_SEED_PREFIX), METADATA_PROGRAM_ID.toBuffer(), new PublicKey(mint).toBuffer()],
     METADATA_PROGRAM_ID,
   )[0]
 }

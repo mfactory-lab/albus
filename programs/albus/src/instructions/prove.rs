@@ -28,7 +28,12 @@
 
 use anchor_lang::prelude::*;
 
-use crate::state::Proof;
+#[cfg(feature = "verify-on-chain")]
+use groth16_solana::Groth16Verifier;
+
+use crate::constants::CURRENT_DATE_SIGNAL;
+use crate::state::{Circuit, Policy, ProofData};
+use crate::utils::format_circuit_date;
 use crate::{
     events::ProveEvent,
     state::{ProofRequest, ProofRequestStatus},
@@ -39,29 +44,69 @@ use crate::{
 /// Proves the [ProofRequest] by validating the proof metadata and updating its status to `Proved`.
 /// Returns an error if the request has expired or if the proof metadata is invalid.
 pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
+    let circuit = &ctx.accounts.circuit;
+    let policy = &ctx.accounts.policy;
     let req = &mut ctx.accounts.proof_request;
+
+    let timestamp = Clock::get()?.unix_timestamp;
 
     if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
         msg!("Error: Only request owner can prove it!");
         return Err(AlbusError::Unauthorized.into());
     }
 
-    let timestamp = Clock::get()?.unix_timestamp;
-
-    if req.expired_at > 0 && req.expired_at < timestamp {
-        return Err(AlbusError::Expired.into());
+    if data.reset {
+        req.proof = None;
+        req.public_inputs.clear();
     }
 
-    req.status = ProofRequestStatus::Proved;
-    req.proof = Some(data.proof.to_owned());
+    req.public_inputs.extend(data.public_inputs);
+
+    if data.proof.is_none() {
+        msg!("Public inputs was updated");
+        return Ok(());
+    }
+
+    let signals = circuit.signals();
+
+    // apply current date
+    if let Some(s) = signals.get(CURRENT_DATE_SIGNAL) {
+        req.public_inputs[s.0] =
+            format_circuit_date(timestamp).expect("Failed to get current timestamp");
+    }
+
+    // // apply issuer public key
+    // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
+    //     public_inputs[s.0] = <[u8; 32]>::try_from(&ISSUER_PK[..32]).unwrap();
+    //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
+    // }
+
+    policy.apply_rules(&mut req.public_inputs, &signals);
+
     req.proved_at = timestamp;
-    req.verified_at = 0;
+
+    if cfg!(feature = "verify-on-chain") {
+        req.proof = data.proof.to_owned();
+        #[cfg(feature = "verify-on-chain")]
+        Groth16Verifier::new(
+            &data.proof.unwrap().into(),
+            &req.public_inputs,
+            &circuit.vk.to_owned().into(),
+        )
+        .map_err(|_| AlbusError::InvalidPublicInputs)?
+        .verify()
+        .map_err(|_| AlbusError::ProofVerificationFailed)?;
+        req.verified_at = timestamp;
+        req.status = ProofRequestStatus::Verified;
+    } else {
+        req.proof = data.proof;
+        req.status = ProofRequestStatus::Proved;
+    }
 
     emit!(ProveEvent {
         proof_request: req.key(),
         service_provider: req.service_provider,
-        circuit: req.circuit,
-        proof: data.proof,
+        circuit: circuit.key(),
         owner: req.owner,
         timestamp,
     });
@@ -73,14 +118,19 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct ProveData {
-    pub proof: Proof,
+    pub proof: Option<ProofData>,
+    pub public_inputs: Vec<[u8; 32]>,
+    pub reset: bool,
 }
 
 #[derive(Accounts)]
 #[instruction(data: ProveData)]
 pub struct Prove<'info> {
-    #[account(mut, realloc = ProofRequest::space() + data.proof.space(), realloc::payer = authority, realloc::zero = false)]
+    #[account(mut, has_one = policy, has_one = circuit)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
+
+    pub circuit: Account<'info, Circuit>,
+    pub policy: Account<'info, Policy>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

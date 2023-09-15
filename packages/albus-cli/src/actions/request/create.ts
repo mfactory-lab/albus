@@ -26,39 +26,35 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import { find } from './show'
+import { show } from './show'
 import { useContext } from '@/context'
 import { exploreTransaction } from '@/utils'
 
 interface Opts {
-  // Service provider code
-  service: string
-  // Circuit mint address
-  circuit: string
   // Expires in seconds
   expiresIn?: number
 }
 
-export async function create(opts: Opts) {
-  const { client, provider } = useContext()
+export async function create(policy: string, opts: Opts) {
+  const { client } = useContext()
+
+  const [serviceCode, policyCode] = policy.split('_')
+  if (!serviceCode || !policyCode) {
+    throw new Error('invalid policy id')
+  }
 
   try {
-    const { signature } = await client.createProofRequest({
-      serviceCode: opts.service,
-      circuit: new PublicKey(opts.circuit),
+    const { signature, address } = await client.proofRequest.create({
+      serviceCode,
+      policyCode,
       expiresIn: opts.expiresIn,
     }, { commitment: 'confirmed' })
 
     log.info(`Signature: ${signature}`)
     log.info(exploreTransaction(signature))
 
-    await find({
-      service: opts.service,
-      circuit: opts.circuit,
-      requester: provider.wallet.publicKey.toString(),
-    })
+    await show(address)
   } catch (e) {
     log.error(e)
   }

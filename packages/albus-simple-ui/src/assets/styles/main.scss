@@ -1,0 +1,17 @@
+@import "components";
+@import "vendors";
+@import "dark";
+
+body {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.container {
+  max-width: 1200px;
+  width: 96%;
+  margin: 0 auto;
+}

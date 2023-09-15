@@ -30,7 +30,7 @@
 // import { BN } from '@coral-xyz/anchor'
 // import { TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 // import * as web3 from '@solana/web3.js'
-// import { AlbusClient } from '@albus/sdk'
+// import { AlbusClient } from '@mfactory-lab/albus-sdk'
 // import { VerifiedTransferClient } from '@albus/verified-transfer-sdk'
 // import { assert, describe, it } from 'vitest'
 // import { assertErrorCode, getProofMock, mintNFT, payerKeypair, provider } from './utils'

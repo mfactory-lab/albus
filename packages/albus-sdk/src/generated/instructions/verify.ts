@@ -7,8 +7,10 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { VerifyData } from '../types/VerifyData'
-import { verifyDataBeet } from '../types/VerifyData'
+import type { VerifyProofRequestData } from '../types/VerifyProofRequestData'
+import {
+  verifyProofRequestDataBeet,
+} from '../types/VerifyProofRequestData'
 
 /**
  * @category Instructions
@@ -16,7 +18,7 @@ import { verifyDataBeet } from '../types/VerifyData'
  * @category generated
  */
 export interface VerifyInstructionArgs {
-  data: VerifyData
+  data: VerifyProofRequestData
 }
 /**
  * @category Instructions
@@ -30,7 +32,7 @@ export const verifyStruct = new beet.BeetArgsStruct<
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', verifyDataBeet],
+    ['data', verifyProofRequestDataBeet],
   ],
   'VerifyInstructionArgs',
 )

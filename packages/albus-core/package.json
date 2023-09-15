@@ -1,6 +1,6 @@
 {
-  "name": "@albus/core",
-  "version": "0.0.3",
+  "name": "@mfactory-lab/albus-core",
+  "version": "0.1.0",
   "type": "module",
   "repository": {
     "type": "git",
@@ -8,21 +8,27 @@
     "directory": "packages/albus-core"
   },
   "sideEffects": false,
-  "main": "./dist/index.es.js",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "scripts": {
     "dev": "vite build --watch",
-    "tsc": "tsc --noEmit && echo",
-    "build": "tsc --emitDeclarationOnly && vite build",
-    "_prepare": "pnpm run build",
+    "build": "vite build",
+    "release": "release-it --ci",
     "test": "vitest"
   },
   "dependencies": {
-    "@metaplex-foundation/mpl-token-metadata": "^2.12.0",
+    "@iden3/js-merkletree": "^1.0.1",
+    "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
     "@stablelib/random": "^1.0.2",
     "@stablelib/sha256": "^1.0.1",
     "@stablelib/x25519": "^1.0.3",
@@ -30,18 +36,21 @@
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
-    "crypto-browserify": "^3.12.0",
-    "ffjavascript": "^0.2.59",
-    "did-jwt-vc": "^3.2.2",
-    "did-jwt": "^7.2.2",
+    "did-jwt-vc": "^3.2.5",
+    "did-jwt": "^7.2.5",
     "did-resolver": "^4.1.0",
     "key-did-resolver": "^3.0.0",
-    "web-did-resolver": "^2.0.24",
-    "jsonld-signatures": "^11.2.1",
+    "web-did-resolver": "^2.0.27",
     "circomlib": "^2.0.5",
-    "circomlibjs": "^0.1.7",
-    "snarkjs": "^0.7.0",
-    "poseidon-encryption": "^1.0.2",
-    "uint8arrays": "^4.0.4"
+    "snarkjs": "*",
+    "uint8arrays": "^4.0.6"
+  },
+  "devDependencies": {
+    "@mfactory-lab/release-it-config": "workspace:^",
+    "circom_tester": "^0.0.19"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   }
 }

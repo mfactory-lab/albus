@@ -36,6 +36,8 @@ export default defineConfig({
     // ],
     include: ['./src/**/*.spec.ts'],
     // include: ['**/?(*.){test,spec}.?(c|m)[jt]s?(x)'],
+    testTimeout: 20000,
+    environment: 'node',
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

@@ -37,3 +37,5 @@ test-ledger
 /circuits/*.r1cs
 /circuits/*.wasm
 /circuits/*.sym
+/circuits/*.vk.json
+/circuits/*.zkey

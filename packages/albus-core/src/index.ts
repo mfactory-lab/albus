@@ -26,7 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as crypto from './crypto'
-export * as zkp from './zkp'
-export * as vc from './vc'
-export * as utils from './utils'
+import * as crypto from './crypto'
+import * as zkp from './zkp'
+import * as credential from './credential'
+import * as utils from './utils'
+
+export * from './types'
+export { crypto, zkp, credential, utils }

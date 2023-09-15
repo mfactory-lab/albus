@@ -1,6 +1,6 @@
 {
   "name": "@albus/monorepo",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "AGPL-3.0",
   "packageManager": "pnpm@8.6.2",
   "private": true,
@@ -9,47 +9,50 @@
     "pnpm": ">=8"
   },
   "scripts": {
-    "sdk:gen": "pnpm -F @albus/sdk generate && pnpm run lint:fix",
-    "cli": "pnpm -F @albus/cli run cli",
-    "dev": "pnpm --parallel run dev",
-    "test:unit": "vitest",
+    "cli": "pnpm -F @mfactory-lab/albus-cli run cli",
+    "cli:run": "pnpm -F @mfactory-lab/albus-cli run run",
+    "dev": "NODE_OPTIONS=\"--max-old-space-size=8192\" pnpm -r --parallel --filter='./packages/**' run dev",
+    "ui:dev": "pnpm -F @albus/ui serve",
+    "gen:sdk": "pnpm -F @mfactory-lab/albus-sdk generate && eslint --fix --ext .ts ./packages/albus-sdk",
+    "build:core": "pnpm -F @mfactory-lab/albus-core build",
+    "build:sdk": "pnpm -F @mfactory-lab/albus-sdk build",
+    "build:cli": "pnpm -F @mfactory-lab/albus-cli build",
+    "release:core": "pnpm -F @mfactory-lab/albus-core release",
+    "release:sdk": "pnpm -F @mfactory-lab/albus-sdk release",
+    "test:unit": "vitest --dir ./packages",
     "test:e2e": "pnpm -F @albus/tests run test",
     "lint:fix": "eslint --fix --ext .js,.vue,.ts ./packages",
     "changeset": "changeset",
-    "release": "changeset publish",
-    "commit": "git-cz"
-  },
-  "resolutions": {
-    "@albus/core": "file:packages/albus-core",
-    "@albus/sdk": "file:packages/albus-sdk"
+    "commit": "git-cz",
+    "syncpack": "syncpack fix-mismatches"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.39.5",
+    "@antfu/eslint-config": "^0.42.0",
+    "@changesets/cli": "^2.26.0",
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@rollup/plugin-inject": "^5.0.3",
-    "@types/node": "^18.0.0",
-    "@vitest/ui": "^0.32.0",
-    "eslint": "^8.43.0",
-    "typescript": "^4.9.5",
-    "vite": "^4.3.9",
-    "vitest": "^0.32.0",
-    "unbuild": "^1.2.1"
+    "@types/node": "^20.0.0",
+    "@vitest/ui": "^0.34.4",
+    "buffer": "^6.0.3",
+    "eslint": "^8.49.0",
+    "syncpack": "^11.2.1",
+    "typescript": "5.0.4",
+    "vite": "^4.4.9",
+    "vite-plugin-dts": "^3.5.3",
+    "vitest": "0.34.3"
   },
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
+        "@babel/runtime",
         "@solana/web3.js",
-        "@babel/core",
+        "react",
+        "react-native",
+        "react-dom",
         "rollup",
-        "babel-runtime",
-        "cypress",
-        "snarkjs",
-        "jest",
-        "vue",
-        "vite"
-      ],
-      "allowedVersions": {
-        "typescript": "5"
-      }
+        "esbuild",
+        "snarkjs"
+      ]
     }
   }
 }

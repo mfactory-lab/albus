@@ -1,45 +1,51 @@
 {
-  "name": "@albus/sdk",
-  "version": "0.0.6",
+  "name": "@mfactory-lab/albus-sdk",
+  "version": "0.1.0",
   "description": "Albus Protocol SDK",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-sdk"
   },
+  "sideEffects": false,
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.es.js",
       "require": "./dist/index.cjs.js"
     }
   },
-  "main": "./dist/index.es.js",
-  "types": "./dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
-  "sideEffects": false,
   "scripts": {
     "dev": "vite build --watch",
-    "tsc": "tsc --noEmit && echo",
-    "build": "tsc --emitDeclarationOnly && vite build",
+    "build": "vite build",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
-    "_prepare": "pnpm run build",
-    "test": "vitest",
-    "_build": "unbuild"
+    "release": "release-it --ci",
+    "test": "vitest"
   },
   "dependencies": {
-    "@albus/core": "*",
+    "@mfactory-lab/albus-core": "workspace:^",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
-    "@solana/web3.js": "^1.77.3"
+    "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
+    "@solana/web3.js": "^1.77.3",
+    "lodash-es": "^4.17.21"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.19.4"
+    "@mfactory-lab/release-it-config": "workspace:^",
+    "@metaplex-foundation/solita": "^0.20.0"
   },
   "peerDependencies": {
     "snarkjs": "*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   }
 }

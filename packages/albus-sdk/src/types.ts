@@ -26,10 +26,16 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export enum AlbusNftCode {
-  Circuit = 'C',
-  Proof = 'P',
-  Identity = 'ID',
-  VerifiableCredential = 'VC',
-  VerifiablePresentation = 'VP',
+export type PrivateKey = number[] | string | Uint8Array
+export type AlbusNftCode = 'VC' | 'ID'
+
+export enum KnownSignals {
+  CurrentDate = 'currentDate',
+  CredentialRoot = 'credentialRoot',
+  CredentialProof = 'credentialProof',
+  CredentialKey = 'credentialKey',
+  IssuerPublicKey = 'issuerPk',
+  IssuerSignature = 'issuerSignature',
+  UserPrivateKey = 'userPrivateKey',
+  TrusteePublicKey = 'trusteePublicKey',
 }

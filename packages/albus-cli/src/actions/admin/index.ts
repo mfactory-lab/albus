@@ -26,6 +26,36 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { createAdminCloseAccountInstruction } from '@mfactory-lab/albus-sdk'
+import type { PublicKey } from '@solana/web3.js'
+import { Transaction } from '@solana/web3.js'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
 export * as circuit from './circuit'
+export * as policy from './policy'
 export * as request from './request'
-export * as sp from './sp'
+export * as service from './service'
+
+export async function clear(_opts: any) {
+  const { client } = useContext()
+
+  const accounts = await client.provider.connection.getProgramAccounts(client.programId)
+
+  log.info(`Found ${accounts.length} program accounts`)
+
+  for (const { pubkey } of accounts) {
+    await closeAccount(pubkey)
+  }
+}
+
+async function closeAccount(pubkey: PublicKey) {
+  const { client } = useContext()
+  log.info(`Deleting: ${pubkey}`)
+  const ix = createAdminCloseAccountInstruction({
+    authority: client.provider.publicKey,
+    account: pubkey,
+  })
+  const sig = await client.provider.sendAndConfirm(new Transaction().add(ix))
+  log.info(`Signature: ${sig}`)
+}
