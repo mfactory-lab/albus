@@ -81,7 +81,7 @@ export class PolicyManager {
    * Find policies based on specified criteria.
    *
    * @param {FindPolicyProps} [props] - Optional properties for customizing the policy search.
-   * @returns {Promise<Array<{pubkey: PublicKey, data: Policy}>>>} A Promise that resolves to an array of policy results.
+   * @returns {Promise<{pubkey: PublicKey, data: Policy}[]>} A Promise that resolves to an array of policy results.
    */
   async find(props: FindPolicyProps = {}) {
     const builder = Policy.gpaBuilder()

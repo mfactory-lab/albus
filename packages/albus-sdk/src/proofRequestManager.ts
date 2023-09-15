@@ -34,7 +34,7 @@ import type {
   GetMultipleAccountsConfig,
   PublicKeyInitData,
 } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import { chunk } from 'lodash-es'
 import type { CircuitManager } from './circuitManager'
 import type { CredentialManager } from './credentialManager'
@@ -267,7 +267,6 @@ export class ProofRequestManager {
         },
       },
     )
-
     try {
       const tx = new Transaction().add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
@@ -291,13 +290,71 @@ export class ProofRequestManager {
     }
     const circuit = await this.circuit.load(proofRequest.circuit)
     const vk = Albus.zkp.decodeVerifyingKey(circuit.vk)
-    const proof = await Albus.zkp.decodeProof(proofRequest.proof)
+    const proof = Albus.zkp.decodeProof(proofRequest.proof)
     const publicInput = Albus.zkp.decodePublicSignals(proofRequest.publicInputs)
-    return Albus.zkp.verifyProof({
-      vk,
-      proof,
-      publicInput,
-    })
+    return Albus.zkp.verifyProof({ vk, proof, publicInput })
+  }
+
+  /**
+   * Prove a proof request by providing the necessary proof and public signals.
+   *
+   * @param {ProveProps} props - The properties for proving the proof request.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of proving the proof request, including the signature.
+   * @throws {Error} Throws an error if there is an issue during the proof process or if the transaction fails to confirm.
+   */
+  async prove(props: ProveProps, opts?: ConfirmOptions) {
+    const authority = this.provider.publicKey
+    const proofRequest = props.proofRequestData ?? await this.load(props.proofRequest)
+
+    const proof = Albus.zkp.encodeProof(props.proof)
+    const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
+
+    // const chunkSize = Math.ceil((1232 /* max tx */ - 256 /* proof */ - 1 - 160 /* accounts */) / 32)
+    // TODO: calculate
+    const inputChunks = chunk(publicInputs, 19)
+    const txs: { tx: Transaction }[] = []
+
+    for (let i = 0; i < inputChunks.length; i++) {
+      const inputs = inputChunks[i]!
+      const isFirst = i === 0
+      const isLast = i === inputChunks.length - 1
+
+      const tx = new Transaction()
+
+      tx.add(
+        createProveInstruction(
+          {
+            proofRequest: new PublicKey(props.proofRequest),
+            circuit: proofRequest.circuit,
+            policy: proofRequest.policy,
+            authority,
+          },
+          {
+            data: {
+              reset: isFirst,
+              publicInputs: inputs,
+              proof: isLast ? proof : null,
+            },
+          },
+        ),
+      )
+
+      // on-chain verification
+      if (isLast) {
+        tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 500000 }))
+      }
+
+      txs.push({ tx })
+    }
+
+    try {
+      const signatures = await this.provider.sendAll(txs, opts)
+      return { signatures }
+    } catch (e: any) {
+      // console.log(e)
+      throw errorFromCode(e.code) ?? e
+    }
   }
 
   /**
@@ -367,68 +424,6 @@ export class ProofRequestManager {
   }
 
   /**
-   * Prove a proof request by providing the necessary proof and public signals.
-   *
-   * @param {ProveProps} props - The properties for proving the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of proving the proof request, including the signature.
-   * @throws {Error} Throws an error if there is an issue during the proof process or if the transaction fails to confirm.
-   */
-  async prove(props: ProveProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
-    const proofRequest = props.proofRequestData ?? await this.load(props.proofRequest)
-
-    const proof = await Albus.zkp.encodeProof(props.proof)
-    const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
-
-    // const chunkSize = Math.ceil((1232 /* max tx */ - 256 /* proof */ - 1 - 160 /* accounts */) / 32)
-    // TODO: calculate
-    const inputChunks = chunk(publicInputs, 19)
-    const txs: { tx: Transaction }[] = []
-
-    for (let i = 0; i < inputChunks.length; i++) {
-      const inputs = inputChunks[i]!
-      const isFirst = i === 0
-      const isLast = inputChunks.length - 1
-
-      const tx = new Transaction()
-
-      tx.add(
-        createProveInstruction(
-          {
-            proofRequest: new PublicKey(props.proofRequest),
-            circuit: proofRequest.circuit,
-            policy: proofRequest.policy,
-            authority,
-          },
-          {
-            data: {
-              reset: isFirst,
-              publicInputs: inputs,
-              proof: isLast ? proof : null,
-            },
-          },
-        ),
-      )
-
-      // on-chain verification
-      // if (isLast) {
-      //   tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200000 }))
-      // }
-
-      txs.push({ tx })
-    }
-
-    try {
-      const signatures = await this.provider.sendAll(txs, opts)
-      return { signatures }
-    } catch (e: any) {
-      // console.log(e)
-      throw errorFromCode(e.code) ?? e
-    }
-  }
-
-  /**
    * Validate a proof request to ensure it meets specific criteria.
    *
    * @param {ProofRequest} req - The proof request to validate.
@@ -492,7 +487,7 @@ export interface FullProveProps {
 }
 
 export interface VerifyProps {
-  proofRequest: PublicKeyInitData
+  proofRequest: PublicKeyInitData | ProofRequest
 }
 
 export interface ProveProps {

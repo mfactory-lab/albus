@@ -74,11 +74,11 @@ export class PdaManager {
     ], this.programId)
   }
 
-  investigationRequestShare(investigation: PublicKeyInitData, index: number) {
+  investigationRequestShare(investigation: PublicKeyInitData, trustee: PublicKeyInitData) {
     return PublicKey.findProgramAddressSync([
       this.encoder.encode('investigation-request-share'),
       new PublicKey(investigation).toBuffer(),
-      Uint8Array.from([index & 0xFF]),
+      new PublicKey(trustee).toBuffer(),
     ], this.programId)
   }
 
