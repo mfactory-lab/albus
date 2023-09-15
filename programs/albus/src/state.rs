@@ -64,8 +64,8 @@ pub struct VerificationKey {
 }
 
 impl VerificationKey {
-    pub fn space(inputs_len: usize) -> usize {
-        Self::INIT_SPACE + ((inputs_len + 1) * 64)
+    pub fn space(public_inputs_len: usize) -> usize {
+        Self::INIT_SPACE + ((public_inputs_len + 1) * 64)
     }
 }
 
@@ -119,10 +119,10 @@ impl Circuit {
     pub const MAX_SIGNAL_NAME_LEN: usize = 32;
 
     #[inline]
-    pub fn space(signals_len: usize) -> usize {
+    pub fn space(public_len: usize, private_len: usize) -> usize {
         8 + Self::INIT_SPACE
-            + VerificationKey::space(signals_len)
-            + signals_len * Self::MAX_SIGNAL_NAME_LEN
+            + VerificationKey::space(public_len)
+            + (public_len + private_len) * Self::MAX_SIGNAL_NAME_LEN
     }
 
     #[inline]
@@ -135,7 +135,7 @@ impl Circuit {
 
     #[inline]
     pub fn signals(&self) -> Signals {
-        Signals::new(&self.public_signals)
+        Signals::new([self.outputs.as_slice(), self.public_signals.as_slice()].concat())
     }
 }
 
@@ -361,9 +361,11 @@ pub struct InvestigationRequestShare {
     pub revealed_at: i64,
     /// Revelation status
     pub status: RevelationStatus,
+    /// PDA bump
+    pub bump: u8,
     /// Encrypted share
-    #[max_len(64)]
-    pub share: String,
+    #[max_len(128)]
+    pub share: Vec<u8>,
 }
 
 #[repr(u8)]

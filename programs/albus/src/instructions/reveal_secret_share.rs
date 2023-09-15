@@ -29,26 +29,24 @@
 use crate::AlbusError;
 use anchor_lang::prelude::*;
 
-use crate::state::{
-    InvestigationRequest, InvestigationRequestShare, RevelationStatus, ServiceProvider, Trustee,
-};
+use crate::state::{InvestigationRequest, InvestigationRequestShare, RevelationStatus, Trustee};
 use crate::utils::cmp_pubkeys;
 
 pub fn handler(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
 
-    let service = &mut ctx.accounts.service_provider;
     let trustee = &mut ctx.accounts.trustee;
     trustee.revealed_share_count += 1;
 
-    if !service
-        .trustees
-        .iter()
-        .any(|t| cmp_pubkeys(t, &trustee.key()))
-    {
-        msg!("Error: Unauthorized trustee");
-        return Err(AlbusError::Unauthorized.into());
-    }
+    // let service = &mut ctx.accounts.service_provider;
+    // if !service
+    //     .trustees
+    //     .iter()
+    //     .any(|t| cmp_pubkeys(t, &trustee.key()))
+    // {
+    //     msg!("Error: Unauthorized trustee");
+    //     return Err(AlbusError::Unauthorized.into());
+    // }
 
     let request = &mut ctx.accounts.investigation_request;
 
@@ -59,19 +57,8 @@ pub fn handler(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> 
 
     request.revealed_share_count += 1;
 
-    let share = &mut ctx.accounts.investigation_request_share;
-    share.investigation_request = request.key();
-    share.proof_request_owner = request.proof_request_owner;
-    share.trustee = trustee.key();
-    share.index = data.index;
-    share.share = data.share;
-    share.revealed_at = timestamp;
-
-    if share.created_at == 0 {
-        share.created_at = timestamp;
-    }
-
     let authority = ctx.accounts.authority.key();
+    let share = &mut ctx.accounts.investigation_request_share;
 
     if cmp_pubkeys(&request.proof_request_owner, &authority) {
         share.status = RevelationStatus::RevealedByUser;
@@ -82,24 +69,36 @@ pub fn handler(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> 
         return Err(AlbusError::Unauthorized.into());
     }
 
+    share.investigation_request = request.key();
+    share.proof_request_owner = request.proof_request_owner;
+    share.trustee = trustee.key();
+
+    // TODO: don't update index if account already created?
+    share.index = data.index;
+    share.share = data.share;
+    share.revealed_at = timestamp;
+
+    if share.created_at == 0 {
+        share.created_at = timestamp;
+    }
+
     Ok(())
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct RevealSecretShareData {
     pub index: u8,
-    pub share: String,
+    pub share: Vec<u8>,
 }
 
 #[derive(Accounts)]
-#[instruction(data: RevealSecretShareData)]
 pub struct RevealSecretShare<'info> {
     #[account(
         init_if_needed,
         seeds = [
             InvestigationRequestShare::SEED,
             investigation_request.key().as_ref(),
-            &data.index.to_le_bytes(),
+            trustee.key().as_ref(),
         ],
         bump,
         payer = authority,
@@ -107,15 +106,14 @@ pub struct RevealSecretShare<'info> {
     )]
     pub investigation_request_share: Box<Account<'info, InvestigationRequestShare>>,
 
-    #[account(mut, has_one = service_provider)]
+    #[account(mut)]
     pub investigation_request: Box<Account<'info, InvestigationRequest>>,
 
     #[account(mut)]
     pub trustee: Box<Account<'info, Trustee>>,
 
-    #[account(mut)]
-    pub service_provider: Box<Account<'info, ServiceProvider>>,
-
+    // #[account(mut)]
+    // pub service_provider: Box<Account<'info, ServiceProvider>>,
     #[account(mut)]
     pub authority: Signer<'info>,
 

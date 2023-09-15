@@ -83,6 +83,7 @@ impl<'a> Signals<'a> {
                 }
             }
             _ => None,
+            // _ => Some((s.to_owned().into(), 1)),
         }
     }
 

@@ -28,12 +28,13 @@
 
 use crate::AlbusError;
 use anchor_lang::prelude::*;
+use anchor_lang::Discriminator;
 
 use crate::state::{
     InvestigationRequest, InvestigationRequestShare, InvestigationStatus, ProofRequest,
     ServiceProvider,
 };
-use crate::utils::{cmp_pubkeys, create_account, BpfWriter};
+use crate::utils::{cmp_pubkeys, initialize_account, BpfWriter};
 
 pub fn handler<'info>(
     ctx: Context<'_, '_, '_, 'info, CreateInvestigationRequest<'info>>,
@@ -75,15 +76,17 @@ pub fn handler<'info>(
         }
 
         for (idx, acc) in &mut ctx.remaining_accounts.iter().enumerate() {
+            // share account is not already created
             if acc.data_is_empty() {
                 let trustee = data.trustees[idx];
-                let index = (idx + 1) as u8;
 
-                let (addr, _) = Pubkey::find_program_address(
+                let investigation_request = req.key();
+
+                let (addr, bump) = Pubkey::find_program_address(
                     &[
                         InvestigationRequestShare::SEED,
-                        req.key().as_ref(),
-                        &[index],
+                        investigation_request.as_ref(),
+                        trustee.as_ref(),
                     ],
                     &crate::ID,
                 );
@@ -93,22 +96,34 @@ pub fn handler<'info>(
                     return Err(AlbusError::InvalidData.into());
                 }
 
-                create_account(
-                    ctx.accounts.system_program.to_account_info(),
-                    ctx.accounts.authority.to_account_info(),
-                    acc.to_account_info(),
-                    InvestigationRequestShare::space(),
-                    ctx.program_id,
-                )?;
+                {
+                    initialize_account(
+                        ctx.accounts.authority.to_account_info(),
+                        acc.to_account_info(),
+                        ctx.accounts.system_program.to_account_info(),
+                        &crate::ID,
+                        &[&[
+                            InvestigationRequestShare::SEED,
+                            investigation_request.as_ref(),
+                            trustee.as_ref(),
+                            &[bump],
+                        ]],
+                        InvestigationRequestShare::space(),
+                    )?;
+                    let dst: &mut [u8] = &mut acc.try_borrow_mut_data()?;
+                    dst[..8].copy_from_slice(InvestigationRequestShare::discriminator().as_slice());
+                }
 
-                let mut share: Account<InvestigationRequestShare> = Account::try_from(acc)?;
-                share.investigation_request = req.key();
+                let mut share = Account::<InvestigationRequestShare>::try_from(acc)?;
+                share.investigation_request = investigation_request;
                 share.proof_request_owner = proof_request.owner;
                 share.trustee = trustee;
                 share.created_at = timestamp;
-                share.index = index;
+                share.index = (idx + 1) as u8;
+                share.share = Default::default();
+                share.bump = bump;
 
-                let dst: &mut [u8] = &mut acc.try_borrow_mut_data().unwrap();
+                let dst: &mut [u8] = &mut acc.try_borrow_mut_data()?;
                 let mut writer: BpfWriter<&mut [u8]> = BpfWriter::new(dst);
                 InvestigationRequestShare::try_serialize(&share, &mut writer)?;
             }

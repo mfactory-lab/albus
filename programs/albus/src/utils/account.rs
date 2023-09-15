@@ -27,7 +27,6 @@
  */
 
 use anchor_lang::solana_program::program_memory::sol_memcpy;
-use anchor_lang::system_program::CreateAccount;
 use anchor_lang::{prelude::*, solana_program::system_program};
 use std::cmp;
 use std::io::{self, Write};
@@ -43,19 +42,59 @@ pub fn close<'info>(acc: AccountInfo<'info>, sol_destination: AccountInfo<'info>
     acc.realloc(0, false).map_err(Into::into)
 }
 
-pub fn create_account<'info>(
+pub fn initialize_account<'info>(
+    payer: AccountInfo<'info>,
+    target_account: AccountInfo<'info>,
     system_program: AccountInfo<'info>,
-    from: AccountInfo<'info>,
-    to: AccountInfo<'info>,
-    space: usize,
     owner: &Pubkey,
+    seeds: &[&[&[u8]]],
+    len: usize,
 ) -> Result<()> {
-    anchor_lang::system_program::create_account(
-        CpiContext::new(system_program, CreateAccount { from, to }).with_signer(&[]),
-        Rent::get()?.minimum_balance(space),
-        space.try_into().unwrap(),
-        owner,
-    )
+    let current_lamports = target_account.try_lamports()?;
+    if current_lamports == 0 {
+        // if account doesn't have any lamports initialize it with conventional create_account
+        let lamports = Rent::get()?.minimum_balance(len);
+        let cpi_accounts = anchor_lang::system_program::CreateAccount {
+            from: payer,
+            to: target_account,
+        };
+        let cpi_context = CpiContext::new(system_program, cpi_accounts);
+        anchor_lang::system_program::create_account(
+            cpi_context.with_signer(seeds),
+            lamports,
+            len.try_into().unwrap(),
+            owner,
+        )?;
+    } else {
+        // fund the account for rent exemption
+        let required_lamports = Rent::get()?
+            .minimum_balance(len)
+            .saturating_sub(current_lamports);
+        if required_lamports > 0 {
+            let cpi_accounts = anchor_lang::system_program::Transfer {
+                from: payer,
+                to: target_account.clone(),
+            };
+            let cpi_context = CpiContext::new(system_program.clone(), cpi_accounts);
+            anchor_lang::system_program::transfer(cpi_context, required_lamports)?;
+        }
+        // allocate space
+        let cpi_accounts = anchor_lang::system_program::Allocate {
+            account_to_allocate: target_account.clone(),
+        };
+        let cpi_context = CpiContext::new(system_program.clone(), cpi_accounts);
+        anchor_lang::system_program::allocate(
+            cpi_context.with_signer(seeds),
+            len.try_into().unwrap(),
+        )?;
+        // assign to the program
+        let cpi_accounts = anchor_lang::system_program::Assign {
+            account_to_assign: target_account,
+        };
+        let cpi_context = anchor_lang::context::CpiContext::new(system_program, cpi_accounts);
+        anchor_lang::system_program::assign(cpi_context.with_signer(seeds), owner)?;
+    }
+    Ok(())
 }
 
 #[derive(Debug, Default)]

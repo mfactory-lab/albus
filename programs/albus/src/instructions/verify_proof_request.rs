@@ -45,7 +45,7 @@ pub fn handler(ctx: Context<VerifyProofRequest>, data: VerifyProofRequestData) -
     assert_authorized(&ctx.accounts.authority.key())?;
 
     // Check that the request has already been proved
-    if req.status != ProofRequestStatus::Proved {
+    if req.status == ProofRequestStatus::Pending {
         return Err(AlbusError::Unproved.into());
     }
 

@@ -74,8 +74,8 @@ pub struct CreateCircuit<'info> {
         payer = authority,
         space = Circuit::space(
             Circuit::signals_count(&data.outputs) +
-            Circuit::signals_count(&data.private_signals) +
-            Circuit::signals_count(&data.public_signals)
+            Circuit::signals_count(&data.public_signals),
+            Circuit::signals_count(&data.private_signals)
         )
     )]
     pub circuit: Box<Account<'info, Circuit>>,

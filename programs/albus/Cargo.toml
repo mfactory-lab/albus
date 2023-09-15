@@ -12,7 +12,7 @@ crate-type = ["cdylib", "lib"]
 no-entrypoint = []
 cpi = ["no-entrypoint"]
 verify-on-chain = ["dep:groth16-solana"]
-#default = ["verify-on-chain"]
+default = ["verify-on-chain"]
 
 [dependencies]
 anchor-lang = { version = "0.28.0", features = ["init-if-needed"] }
