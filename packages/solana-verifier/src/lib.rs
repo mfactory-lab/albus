@@ -150,7 +150,7 @@ pub fn check_compliant(
     }
 }
 
-/// Generates the service provider program address for the Albus protocol
+/// Generates the service provider program address for Albus Protocol
 pub fn find_service_provider_address(program_id: &Pubkey, code: &str) -> (Pubkey, u8) {
     Pubkey::find_program_address(&[b"service-provider", code.as_bytes()], program_id)
 }
