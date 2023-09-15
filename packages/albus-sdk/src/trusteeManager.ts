@@ -170,7 +170,6 @@ export class TrusteeManager {
       authority,
     }, {
       data: {
-        key: props.key ?? null,
         name: props.name ?? null,
         email: props.email ?? null,
         website: props.website ?? null,

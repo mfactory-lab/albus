@@ -34,7 +34,7 @@ import type {
   GetMultipleAccountsConfig,
   PublicKeyInitData,
 } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { Keypair, PublicKey, Transaction } from '@solana/web3.js'
 import type {
   InvestigationStatus,
   ProofRequest,
@@ -219,21 +219,21 @@ export class InvestigationManager {
       proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
     )
 
+    console.log('signals.trusteePublicKey', (signals.trusteePublicKey as bigint[][] ?? []).length)
+
     const selectedTrustees = (signals.trusteePublicKey as bigint[][] ?? [])
       .map(p => this.pda.trustee(Albus.zkp.packPubkey(p))[0])
 
-    console.log('selectedTrustees', selectedTrustees)
-
     const [investigationRequest] = this.pda.investigationRequest(props.proofRequest, authority)
 
-    const instruction = createCreateInvestigationRequestInstruction({
+    const ix = createCreateInvestigationRequestInstruction({
       investigationRequest,
       proofRequest: new PublicKey(props.proofRequest),
       serviceProvider: proofRequest.serviceProvider,
       authority,
       anchorRemainingAccounts: selectedTrustees.length > 0
         ? selectedTrustees.map(pubkey => ({
-          pubkey,
+          pubkey: this.pda.investigationRequestShare(investigationRequest, pubkey)[0],
           isSigner: false,
           isWritable: true,
         }))
@@ -244,10 +244,11 @@ export class InvestigationManager {
         trustees: selectedTrustees,
       },
     })
+
     try {
-      const tx = new Transaction().add(instruction)
+      const tx = new Transaction().add(ix)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { address: investigationRequest, signature }
+      return { address: investigationRequest, selectedTrustees, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
@@ -259,6 +260,10 @@ export class InvestigationManager {
    * @param opts
    */
   async revealShare(props: RevealShareProps, opts?: ConfirmOptions) {
+    if (Number(props.index) < 1) {
+      throw new Error('Invalid index. Must be greater than or equal to 1.')
+    }
+
     const authority = this.provider.publicKey
 
     const investigationRequest = await this.load(props.investigationRequest)
@@ -268,39 +273,108 @@ export class InvestigationManager {
       throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
     }
 
-    const [investigationRequestShare] = this.pda.investigationRequestShare(props.investigationRequest, props.index)
+    const signals = getSignals(
+      [...circuit?.outputs ?? [], ...circuit?.publicSignals ?? []],
+      proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
+    )
+
+    const trusteePubkey = (signals.trusteePublicKey as bigint[][] ?? [])[props.index - 1]
+    if (!trusteePubkey) {
+      throw new Error(`Unable to find a trustee pubkey with index ${props.index - 1}`)
+    }
+
+    const trustee = this.pda.trustee(Albus.zkp.packPubkey(trusteePubkey))[0]
+    const [investigationRequestShare] = this.pda.investigationRequestShare(props.investigationRequest, trustee)
+
+    const encryptedShare = signals.encryptedShare?.[props.index - 1]
+    if (!encryptedShare) {
+      throw new Error(`Unable to find an encrypted share with index ${props.index - 1}`)
+    }
+
+    const userPublicKey = signals.userPublicKey as [bigint, bigint]
+    const sharedKey = Albus.zkp.generateEcdhSharedKey(props.encryptionKey, userPublicKey)
+    const secretShare = Albus.crypto.Poseidon.decrypt(encryptedShare, sharedKey, 1, signals.currentDate as bigint)
+    const newEncryptedShare = await Albus.crypto.XC20P.encryptBytes(
+      Albus.crypto.utils.bigintToBytes(secretShare[0]),
+      investigationRequest.encryptionKey,
+    )
+
+    // console.log('userPublicKey', userPublicKey)
+    // console.log('sharedKey', sharedKey)
+    // console.log('secretShare', secretShare)
+    // console.log('encryptionKey', investigationRequest.encryptionKey)
+    // console.log('newEncryptedShare', newEncryptedShare.length, newEncryptedShare)
+
+    const ix = createRevealSecretShareInstruction({
+      investigationRequestShare,
+      investigationRequest: new PublicKey(props.investigationRequest),
+      trustee,
+      authority,
+    }, {
+      data: {
+        index: props.index,
+        share: newEncryptedShare,
+      },
+    })
+
+    try {
+      const tx = new Transaction().add(ix)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { address: investigationRequest, userPublicKey, secretShare, signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  /**
+   * Decrypt investigation data
+   * @param props
+   */
+  async decryptData(props: DecryptDataProps) {
+    const investigationRequest = await this.load(props.investigationRequest)
+    const shares = await this.findShares({ investigationRequest: props.investigationRequest })
+
+    if (shares.length < investigationRequest.requiredShareCount) {
+      throw new Error('Invalid shares count')
+    }
+
+    const encKeypair = Keypair.fromSecretKey(props.encryptionKey)
+    if (encKeypair.publicKey.toString() !== investigationRequest.encryptionKey.toString()) {
+      throw new Error('Invalid encryption key')
+    }
+
+    const decryptedShares: [number, bigint][] = []
+    for (const { data } of shares) {
+      const dataShare = Uint8Array.from(data?.share ?? [])
+      if (dataShare.length === 0) {
+        continue
+      }
+      const shareBytes = await Albus.crypto.XC20P.decryptBytes(dataShare, encKeypair.secretKey)
+      const share = Albus.crypto.utils.bytesToBigInt(shareBytes)
+      decryptedShares.push([data?.index ?? 0, share])
+    }
+
+    const decryptedSecret = Albus.crypto.reconstructShamirSecret(Albus.crypto.babyJub.F, investigationRequest.requiredShareCount, decryptedShares)
+
+    // console.log('decryptedSecret', decryptedSecret)
+
+    const { proofRequest, circuit } = await this.proofRequest.loadFull(investigationRequest.proofRequest, ['circuit'])
+
+    if (!circuit) {
+      throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
+    }
 
     const signals = getSignals(
       [...circuit?.outputs ?? [], ...circuit?.publicSignals ?? []],
       proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
     )
 
-    const shares = signals.encryptedShare?.[props.index - 1]
+    const nonce = signals.currentDate as bigint
+    const encryptedData = (signals.encryptedData ?? []) as bigint[]
+    // console.log('encryptedData', encryptedData)
 
-    // generateEcdhSharedKey(trusteeKeypair.secretKey, holderPublicKey)
-
-    // Find a share
-    // Decrypt a share with  investigationRequest.encryptionKey
-
-    const instruction = createRevealSecretShareInstruction({
-      investigationRequestShare,
-      investigationRequest: new PublicKey(props.investigationRequest),
-      serviceProvider: investigationRequest.serviceProvider,
-      trustee: investigationRequest.serviceProvider,
-      authority,
-    }, {
-      data: {
-        index: props.index,
-        share: '...',
-      },
-    })
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
-      return { address: investigationRequest, signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const data = Albus.crypto.Poseidon.decrypt(encryptedData, [decryptedSecret, decryptedSecret], 1, nonce)
+    console.log('data', data)
   }
 }
 
@@ -319,12 +393,6 @@ export interface FindInvestigationProps {
   noData?: boolean
 }
 
-export interface RevealShareProps {
-  investigationRequest: PublicKeyInitData
-  encryptionKey: Uint8Array
-  index: number
-}
-
 export interface FindInvestigationShareProps {
   trustee?: PublicKeyInitData
   proofRequestOwner?: PublicKeyInitData
@@ -332,4 +400,15 @@ export interface FindInvestigationShareProps {
   status?: RevelationStatus
   index?: number
   noData?: boolean
+}
+
+export interface RevealShareProps {
+  investigationRequest: PublicKeyInitData
+  encryptionKey: Uint8Array
+  index: number
+}
+
+export interface DecryptDataProps {
+  investigationRequest: PublicKeyInitData
+  encryptionKey: Uint8Array
 }
