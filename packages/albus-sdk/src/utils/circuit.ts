@@ -147,15 +147,18 @@ export class ProofInputBuilder {
    */
   private async applyPublic() {
     for (const signal of this.circuit?.publicSignals ?? []) {
-      const [signalName, signalSize, _signalSubSize] = parseSymbol(signal)
       if (!this.applySignal(signal)) {
+        const sig = parseSignal(signal)
+        if (sig === null) {
+          continue
+        }
         // try to apply policy rules if is not known signal
         const rules = this.policy?.rules
-          ?.filter(r => r.key === signalName || r.key.startsWith(`${signalName}.`)) ?? []
-        if (rules.length > 1 && signalSize > 1) {
-          this.data[signalName] = rules.map(r => r.value)
+          ?.filter(r => r.key === sig.name || r.key.startsWith(`${sig.name}.`)) ?? []
+        if (rules.length > 1 && sig.size > 1) {
+          this.data[sig.name] = rules.map(r => r.value)
         } else if (rules[0] !== undefined) {
-          this.data[signalName] = rules[0].value
+          this.data[sig.name] = rules[0].value
         }
       }
     }
@@ -168,7 +171,11 @@ export class ProofInputBuilder {
    * @returns {boolean} True if the signal was successfully applied, false otherwise.
    */
   private applySignal(signal: string): boolean {
-    const [name, size] = parseSymbol(signal)
+    const sig = parseSignal(signal)
+    if (!sig) {
+      return false
+    }
+    const { name, size } = sig
     switch (name) {
       case KnownSignals.TrusteePublicKey:
         if (this.trusteePublicKey === undefined) {
@@ -211,17 +218,6 @@ export class ProofInputBuilder {
 }
 
 /**
- * Parse a symbol with a name like 'symbol[5][3]' into its components.
- *
- * @param {string} s - The symbol name to parse.
- * @returns {[string, number, number]} An array containing the parsed signal name, size, and subsize.
- */
-function parseSymbol(s: string): [string, number, number] {
-  const r = s.match(/^(\w+)(?:\[(\d+)](?:\[(\d+)])?)?$/)
-  return r ? [r[1]!, r[2] ? Number(r[2]) : 1, r[3] ? Number(r[3]) : 1] : ['', 0, 0]
-}
-
-/**
  * Generate signals map
  *
  * @param symbols
@@ -230,24 +226,60 @@ function parseSymbol(s: string): [string, number, number] {
 export function getSignals(symbols: string[], inputs: bigint[]): Record<string, bigint | bigint[] | bigint[][]> {
   let idx = 0
   const map = {}
-  for (const symbol of symbols) {
-    const [name, size, subSize] = parseSymbol(symbol)
-    if (size > 1) {
-      map[name] = []
-      for (let i = idx; i < idx + size; i++) {
-        if (subSize > 1) {
-          map[name][i] = []
-          for (let j = i; j < i + subSize; j++) {
-            map[name][i].push(inputs[j])
-          }
-        } else {
-          map[name].push(inputs[i])
-        }
-      }
-    } else {
-      map[name] = inputs[idx]
+
+  function assignValue(sig: ParseSignalResult): any {
+    if (sig.next) {
+      const result = Array(sig.size).fill(null).map(() => assignValue(sig.next!))
+      return sig.size === 1 ? result[0] : result
     }
-    idx += size * subSize
+    if (sig.size === 1) {
+      return inputs[idx++]
+    }
+    return Array(sig.size).fill(null).map(() => inputs[idx++])
   }
+
+  for (const symbol of symbols) {
+    const sig = parseSignal(symbol)
+    if (sig) {
+      map[sig.name] ||= assignValue(sig)
+    }
+  }
+
   return map
+}
+
+// /**
+//  * Parse a symbol with a name like 'symbol[5][3]' into its components.
+//  *
+//  * @param {string} s - The symbol name to parse.
+//  * @returns {[string, number, number]} An array containing the parsed signal name, size, and subsize.
+//  */
+// function parseSymbol(s: string): [string, number, number] {
+//   const r = s.match(/^(\w+)(?:\[(\d+)](?:\[(\d+)])?)?$/)
+//   return r ? [r[1]!, r[2] ? Number(r[2]) : 1, r[3] ? Number(r[3]) : 1] : ['', 0, 0]
+// }
+
+function parseSignal(signal: string): ParseSignalResult | null {
+  if (signal.length === 0) {
+    return null
+  }
+  const open = signal.indexOf('[')
+  const close = signal.indexOf(']')
+  if (open !== -1 && close !== -1 && open < close) {
+    const name = signal.slice(0, open)
+    const numberStr = signal.slice(open + 1, close)
+    const size = Number.parseInt(numberStr, 10)
+    if (!Number.isNaN(size)) {
+      const remaining = signal.slice(close + 1)
+      return { name, size, next: parseSignal(remaining) }
+    }
+    return { name, size: 1, next: null }
+  }
+  return { name: signal, size: 1, next: null }
+}
+
+interface ParseSignalResult {
+  name: string
+  size: number
+  next: ParseSignalResult | null
 }
