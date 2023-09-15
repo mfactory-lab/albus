@@ -51,28 +51,28 @@ module.exports = {
     }
   },
   plugins: {
-    // '@release-it/conventional-changelog': {
-    //   path: '.',
-    //   // ignoreRecommendedBump: false,
-    //   gitRawCommitsOpts: {
-    //     path: '.',
-    //   },
-    //   header: '# Changelog',
-    //   infile: 'CHANGELOG.md',
-    //   preset: {
-    //     name: "conventionalcommits",
-    //     types: [
-    //       { "type": "fix", "section": "🐞 Bug Fixes" },
-    //       { "type": "feat", "section": "🌟 Features" },
-    //       { "type": "infra", "section": "🏗 Internal improvements", "hidden": true },
-    //       { "type": "perf", "section": "⚡️ Performance enhancements" },
-    //       { "type": "chore", "section": "🧼 Chores", "hidden": true },
-    //       { "type": "test", "section": "✅ Test coverage", "hidden": true },
-    //       { "type": "docs", "section": "📚 Documentation" },
-    //       { "type": "refactor", "section": "♻️ Refactors" }
-    //     ]
-    //   },
-    // },
+    '@release-it/conventional-changelog': {
+      path: '.',
+      // ignoreRecommendedBump: false,
+      gitRawCommitsOpts: {
+        path: '.',
+      },
+      header: '# Changelog',
+      infile: 'CHANGELOG.md',
+      preset: {
+        name: "conventionalcommits",
+        types: [
+          { "type": "fix", "section": "🐞 Bug Fixes" },
+          { "type": "feat", "section": "🌟 Features" },
+          { "type": "infra", "section": "🏗 Internal improvements", "hidden": true },
+          { "type": "perf", "section": "⚡️ Performance enhancements" },
+          { "type": "chore", "section": "🧼 Chores", "hidden": true },
+          { "type": "test", "section": "✅ Test coverage", "hidden": true },
+          { "type": "docs", "section": "📚 Documentation" },
+          { "type": "refactor", "section": "♻️ Refactors" }
+        ]
+      },
+    },
     // '@release-it-plugins/workspaces': {
     //   // skipChecks: true,
     //   workspaces: [
