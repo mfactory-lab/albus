@@ -40,6 +40,7 @@ describe('albus', () => {
   const circuitCode = 'age'
   const policyCode = 'age'
 
+  const investigator = Keypair.generate()
   const trustees = [
     Keypair.generate(),
     Keypair.generate(),
@@ -54,6 +55,7 @@ describe('albus', () => {
     outputs: [
       'encryptedData[4]',
       'encryptedShare[3][4]',
+      'userPublicKey[2]',
     ],
     privateSignals: [
       'birthDate',
@@ -120,6 +122,7 @@ describe('albus', () => {
 
     // airdrops
     await airdrop(payerKeypair.publicKey)
+    await airdrop(investigator.publicKey)
     for (const trusteeKeypair of trustees) {
       await airdrop(trusteeKeypair.publicKey)
     }
@@ -141,14 +144,13 @@ describe('albus', () => {
     try {
       const data = { code: circuitCode, vk }
       const { signatures } = await client.circuit.updateVk(data)
-      // console.log('signatures', signatures)
       const circuit = await client.circuit.loadById(data.code)
-
+      assert.ok(signatures.length > 0)
       assert.equal(circuit.vk.alpha.length, 64)
       assert.equal(circuit.vk.beta.length, 128)
       assert.equal(circuit.vk.gamma.length, 128)
       assert.equal(circuit.vk.delta.length, 128)
-      // assert.equal(circuit.vk.ic.length, 17)
+      assert.equal(circuit.vk.ic.length, 41) // public signals count + 1
     } catch (e) {
       console.log(e)
       assert.ok(false)
@@ -204,12 +206,12 @@ describe('albus', () => {
     try {
       const trusteeKeypair = trustees[0]!
       const newClient = new AlbusClient(newProvider(trusteeKeypair))
-      const { key } = Albus.zkp.generateEncryptionKey()
+      const { key } = Albus.zkp.generateEncryptionKey(trusteeKeypair)
       const data = {
+        key: Array.from(key),
         name: 'trustee123',
         email: 'trustee123@albus.finance',
         website: 'https://trustee123.albus.finance',
-        key: Array.from(key),
       }
       const { address } = await newClient.trustee.update(data)
       const trustee = await newClient.trustee.load(address)
@@ -358,28 +360,38 @@ describe('albus', () => {
   let investigationAddress
 
   it('can create investigation request', async () => {
-    const newPayerKeypair = Keypair.generate()
-    const newClient = new AlbusClient(newProvider(newPayerKeypair))
-    await airdrop(newPayerKeypair.publicKey)
+    const newClient = new AlbusClient(newProvider(investigator))
 
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
     try {
-      const { address } = await newClient.investigation.create({
+      const { address, selectedTrustees } = await newClient.investigation.create({
         proofRequest,
         // encryptionKey: ...
       })
       investigationAddress = address
       const investigation = await newClient.investigation.load(address)
-      assert.equal(investigation.authority.toString(), newPayerKeypair.publicKey.toString())
-      assert.equal(investigation.encryptionKey.toString(), newPayerKeypair.publicKey.toString())
+      assert.equal(investigation.authority.toString(), investigator.publicKey.toString())
+      assert.equal(investigation.encryptionKey.toString(), investigator.publicKey.toString())
       assert.equal(investigation.proofRequest.toString(), proofRequest.toString())
       // assert.equal(investigation.proofRequestOwner.toString(), proofRequest.toString())
       assert.equal(investigation.serviceProvider.toString(), service.toString())
       assert.equal(investigation.requiredShareCount, 2)
       assert.equal(investigation.status, InvestigationStatus.Pending)
+
+      let idx = 1
+      for (const selectedTrustee of selectedTrustees) {
+        const [shareAddr] = client.pda.investigationRequestShare(address, selectedTrustee)
+        const share = await newClient.investigation.loadShare(shareAddr)
+        assert.deepEqual(share.investigationRequest, address)
+        assert.deepEqual(share.proofRequestOwner, investigation.proofRequestOwner)
+        assert.equal(share.index, idx)
+        assert.equal(share.status, 0)
+        assert.ok(Array.from(share.share).length === 0)
+        idx++
+      }
     } catch (e) {
       console.log(e)
       assert.ok(false)
@@ -387,8 +399,29 @@ describe('albus', () => {
   })
 
   it('can reveal secret key', async () => {
-    const investigation = await client.investigation.load(investigationAddress)
-    console.log(investigation)
+    if (!investigationAddress) {
+      throw new Error('No investigation request found')
+    }
+    try {
+      for (let i = 0; i < 2; i++) {
+        const { secretShare } = await client.investigation.revealShare({
+          investigationRequest: investigationAddress,
+          encryptionKey: trustees[i]!.secretKey,
+          index: i + 1,
+        })
+        console.log('secretShare', secretShare)
+      }
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('can reconstruct secret key and decrypt data', async () => {
+    const result = await client.investigation.decryptData({
+      investigationRequest: investigationAddress,
+      encryptionKey: investigator.secretKey,
+    })
   })
 
   it('can delete proof request', async () => {
