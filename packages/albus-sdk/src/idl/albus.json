@@ -59,11 +59,6 @@
           "isSigner": false
         },
         {
-          "name": "serviceProvider",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -1023,11 +1018,18 @@
             }
           },
           {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
             "name": "share",
             "docs": [
               "Encrypted share"
             ],
-            "type": "string"
+            "type": "bytes"
           }
         ]
       }
@@ -1412,7 +1414,7 @@
           },
           {
             "name": "share",
-            "type": "string"
+            "type": "bytes"
           }
         ]
       }
@@ -1531,17 +1533,6 @@
       "type": {
         "kind": "struct",
         "fields": [
-          {
-            "name": "key",
-            "type": {
-              "option": {
-                "array": [
-                  "u8",
-                  32
-                ]
-              }
-            }
-          },
           {
             "name": "name",
             "type": {

@@ -45,7 +45,6 @@ export const deletePolicyInstructionDiscriminator = [
  * Creates a _DeletePolicy_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
- * @param programId
  * @category Instructions
  * @category DeletePolicy
  * @category generated

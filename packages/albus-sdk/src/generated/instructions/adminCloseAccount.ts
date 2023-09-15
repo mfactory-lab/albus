@@ -43,7 +43,6 @@ export const adminCloseAccountInstructionDiscriminator = [
  * Creates a _AdminCloseAccount_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
- * @param programId
  * @category Instructions
  * @category AdminCloseAccount
  * @category generated

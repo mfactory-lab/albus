@@ -9,7 +9,7 @@ import * as beet from '@metaplex-foundation/beet'
 
 export interface RevealSecretShareData {
   index: number
-  share: string
+  share: Uint8Array
 }
 
 /**
@@ -20,7 +20,7 @@ export const revealSecretShareDataBeet
   = new beet.FixableBeetArgsStruct<RevealSecretShareData>(
     [
       ['index', beet.u8],
-      ['share', beet.utf8String],
+      ['share', beet.bytes],
     ],
     'RevealSecretShareData',
   )

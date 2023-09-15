@@ -26,7 +26,8 @@ export interface InvestigationRequestShareArgs {
   createdAt: beet.bignum
   revealedAt: beet.bignum
   status: RevelationStatus
-  share: string
+  bump: number
+  share: Uint8Array
 }
 
 export const investigationRequestShareDiscriminator = [
@@ -49,12 +50,12 @@ implements InvestigationRequestShareArgs {
     readonly createdAt: beet.bignum,
     readonly revealedAt: beet.bignum,
     readonly status: RevelationStatus,
-    readonly share: string,
+    readonly bump: number,
+    readonly share: Uint8Array,
   ) {}
 
   /**
    * Creates a {@link InvestigationRequestShare} instance from the provided args.
-   * @param args
    */
   static fromArgs(args: InvestigationRequestShareArgs) {
     return new InvestigationRequestShare(
@@ -65,14 +66,13 @@ implements InvestigationRequestShareArgs {
       args.createdAt,
       args.revealedAt,
       args.status,
+      args.bump,
       args.share,
     )
   }
 
   /**
    * Deserializes the {@link InvestigationRequestShare} from the data of the provided {@link web3.AccountInfo}.
-   * @param accountInfo
-   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
@@ -86,9 +86,6 @@ implements InvestigationRequestShareArgs {
    * Retrieves the account info from the provided address and deserializes
    * the {@link InvestigationRequestShare} from its data.
    *
-   * @param connection
-   * @param address
-   * @param commitmentOrConfig
    * @throws Error if no account info is found at the address or if deserialization fails
    */
   static async fromAccountAddress(
@@ -127,8 +124,6 @@ implements InvestigationRequestShareArgs {
 
   /**
    * Deserializes the {@link InvestigationRequestShare} from the provided data Buffer.
-   * @param buf
-   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(
@@ -171,7 +166,6 @@ implements InvestigationRequestShareArgs {
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
-   * @param commitment
    */
   static async getMinimumBalanceForRentExemption(
     args: InvestigationRequestShareArgs,
@@ -217,6 +211,7 @@ implements InvestigationRequestShareArgs {
         return x
       })(),
       status: `RevelationStatus.${RevelationStatus[this.status]}`,
+      bump: this.bump,
       share: this.share,
     }
   }
@@ -241,7 +236,8 @@ export const investigationRequestShareBeet = new beet.FixableBeetStruct<
     ['createdAt', beet.i64],
     ['revealedAt', beet.i64],
     ['status', revelationStatusBeet],
-    ['share', beet.utf8String],
+    ['bump', beet.u8],
+    ['share', beet.bytes],
   ],
   InvestigationRequestShare.fromArgs,
   'InvestigationRequestShare',

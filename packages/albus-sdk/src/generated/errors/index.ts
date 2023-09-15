@@ -202,7 +202,6 @@ createErrorFromNameLookup.set(
 
 /**
  * Attempts to resolve a custom program error from the provided error code.
- * @param code
  * @category Errors
  * @category generated
  */
@@ -213,7 +212,6 @@ export function errorFromCode(code: number): MaybeErrorWithCode {
 
 /**
  * Attempts to resolve a custom program error from the provided error name, i.e. 'Unauthorized'.
- * @param name
  * @category Errors
  * @category generated
  */

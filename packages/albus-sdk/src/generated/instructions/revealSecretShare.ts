@@ -42,7 +42,6 @@ export const revealSecretShareStruct = new beet.FixableBeetArgsStruct<
  * @property [_writable_] investigationRequestShare
  * @property [_writable_] investigationRequest
  * @property [_writable_] trustee
- * @property [_writable_] serviceProvider
  * @property [_writable_, **signer**] authority
  * @category Instructions
  * @category RevealSecretShare
@@ -52,7 +51,6 @@ export interface RevealSecretShareInstructionAccounts {
   investigationRequestShare: web3.PublicKey
   investigationRequest: web3.PublicKey
   trustee: web3.PublicKey
-  serviceProvider: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -68,7 +66,6 @@ export const revealSecretShareInstructionDiscriminator = [
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
- * @param programId
  * @category Instructions
  * @category RevealSecretShare
  * @category generated
@@ -95,11 +92,6 @@ export function createRevealSecretShareInstruction(
     },
     {
       pubkey: accounts.trustee,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.serviceProvider,
       isWritable: true,
       isSigner: false,
     },

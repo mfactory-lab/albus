@@ -8,7 +8,6 @@
 import * as beet from '@metaplex-foundation/beet'
 
 export interface UpdateTrusteeData {
-  key: beet.COption<number[] /* size: 32 */>
   name: beet.COption<string>
   email: beet.COption<string>
   website: beet.COption<string>
@@ -21,7 +20,6 @@ export interface UpdateTrusteeData {
 export const updateTrusteeDataBeet
   = new beet.FixableBeetArgsStruct<UpdateTrusteeData>(
     [
-      ['key', beet.coption(beet.uniformFixedSizeArray(beet.u8, 32))],
       ['name', beet.coption(beet.utf8String)],
       ['email', beet.coption(beet.utf8String)],
       ['website', beet.coption(beet.utf8String)],

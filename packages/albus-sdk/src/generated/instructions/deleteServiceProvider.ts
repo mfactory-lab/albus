@@ -43,7 +43,6 @@ export const deleteServiceProviderInstructionDiscriminator = [
  * Creates a _DeleteServiceProvider_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
- * @param programId
  * @category Instructions
  * @category DeleteServiceProvider
  * @category generated

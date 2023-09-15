@@ -43,7 +43,6 @@ export const deleteCircuitInstructionDiscriminator = [
  * Creates a _DeleteCircuit_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
- * @param programId
  * @category Instructions
  * @category DeleteCircuit
  * @category generated

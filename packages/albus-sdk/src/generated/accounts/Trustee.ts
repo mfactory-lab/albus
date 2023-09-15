@@ -49,7 +49,6 @@ export class Trustee implements TrusteeArgs {
 
   /**
    * Creates a {@link Trustee} instance from the provided args.
-   * @param args
    */
   static fromArgs(args: TrusteeArgs) {
     return new Trustee(
@@ -67,8 +66,6 @@ export class Trustee implements TrusteeArgs {
 
   /**
    * Deserializes the {@link Trustee} from the data of the provided {@link web3.AccountInfo}.
-   * @param accountInfo
-   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
@@ -82,9 +79,6 @@ export class Trustee implements TrusteeArgs {
    * Retrieves the account info from the provided address and deserializes
    * the {@link Trustee} from its data.
    *
-   * @param connection
-   * @param address
-   * @param commitmentOrConfig
    * @throws Error if no account info is found at the address or if deserialization fails
    */
   static async fromAccountAddress(
@@ -118,8 +112,6 @@ export class Trustee implements TrusteeArgs {
 
   /**
    * Deserializes the {@link Trustee} from the provided data Buffer.
-   * @param buf
-   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [Trustee, number] {
@@ -159,7 +151,6 @@ export class Trustee implements TrusteeArgs {
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
-   * @param commitment
    */
   static async getMinimumBalanceForRentExemption(
     args: TrusteeArgs,

@@ -55,7 +55,6 @@ export class Policy implements PolicyArgs {
 
   /**
    * Creates a {@link Policy} instance from the provided args.
-   * @param args
    */
   static fromArgs(args: PolicyArgs) {
     return new Policy(
@@ -75,8 +74,6 @@ export class Policy implements PolicyArgs {
 
   /**
    * Deserializes the {@link Policy} from the data of the provided {@link web3.AccountInfo}.
-   * @param accountInfo
-   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
@@ -90,9 +87,6 @@ export class Policy implements PolicyArgs {
    * Retrieves the account info from the provided address and deserializes
    * the {@link Policy} from its data.
    *
-   * @param connection
-   * @param address
-   * @param commitmentOrConfig
    * @throws Error if no account info is found at the address or if deserialization fails
    */
   static async fromAccountAddress(
@@ -126,8 +120,6 @@ export class Policy implements PolicyArgs {
 
   /**
    * Deserializes the {@link Policy} from the provided data Buffer.
-   * @param buf
-   * @param offset
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [Policy, number] {
@@ -167,7 +159,6 @@ export class Policy implements PolicyArgs {
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
-   * @param commitment
    */
   static async getMinimumBalanceForRentExemption(
     args: PolicyArgs,
