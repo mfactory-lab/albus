@@ -145,11 +145,9 @@ export class CircuitManager {
     const authority = this.provider.publicKey
     const [circuit] = this.pda.circuit(props.code)
 
+    const icFirstSize = 8
+    const icChunkSize = 15
     const vk = Albus.zkp.encodeVerifyingKey(props.vk)
-
-    // max tx size = 1232 bytes
-    // alpha + beta + gamma + delta = 448
-    // one ic item = 64
 
     const instructions: TransactionInstruction[] = []
 
@@ -160,14 +158,14 @@ export class CircuitManager {
           beta: vk.beta,
           gamma: vk.gamma,
           delta: vk.delta,
-          ic: vk.ic.slice(0, 7),
+          ic: vk.ic.slice(0, icFirstSize),
           extendIc: false,
         },
       }),
     )
 
-    if (vk.ic.length > 10) {
-      const icChunks = chunk(vk.ic.slice(10), 15)
+    if (vk.ic.length > icFirstSize) {
+      const icChunks = chunk(vk.ic.slice(icFirstSize), icChunkSize)
       for (const ic of icChunks) {
         instructions.push(
           createUpdateCircuitVkInstruction({ circuit, authority }, {
