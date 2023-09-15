@@ -40,24 +40,11 @@ export * as service from './service'
 export async function clear(_opts: any) {
   const { client } = useContext()
 
-  log.info('Delete `ProofRequest` accounts...')
-  const proofRequests = await client.proofRequest.find({
-    skipUser: true,
-    noData: true,
-  })
-  log.info(`Found ${proofRequests.length} accounts`)
+  const accounts = await client.provider.connection.getProgramAccounts(client.programId)
 
-  for (const { pubkey } of proofRequests) {
-    await closeAccount(pubkey)
-  }
+  log.info(`Found ${accounts.length} program accounts`)
 
-  log.info('Delete `Policy` accounts...')
-  const policies = await client.policy.find({
-    withoutData: true,
-  })
-  log.info(`Found ${policies.length} accounts`)
-
-  for (const { pubkey } of policies) {
+  for (const { pubkey } of accounts) {
     await closeAccount(pubkey)
   }
 }
