@@ -37,10 +37,8 @@ import * as u8a from 'uint8arrays'
 import { concat } from 'uint8arrays'
 import { Keypair } from '@solana/web3.js'
 import {
-  base58ToBytes,
-  base64ToBytes,
-  bytesToBase64,
-  bytesToString,
+  base58ToBytes, base64ToBytes,
+  bytesToBase64, bytesToString,
   stringToBytes,
 } from './utils'
 
@@ -67,12 +65,9 @@ type Decrypter = (ciphertext: Uint8Array, tag: Uint8Array, iv: Uint8Array, aad?:
 
 export class XC20P {
   /**
-   * Encrypt a message with a {@link pubKey}
-   * @param message
-   * @param pubKey
-   * @param ephemeralKey
+   * Encrypt bytes with a {@link pubKey} and {@link ephemeralKey}
    */
-  static async encrypt(message: string, pubKey: PublicKey, ephemeralKey?: PrivateKey): Promise<string> {
+  static async encryptBytes(bytes: Uint8Array, pubKey: PublicKey, ephemeralKey?: PrivateKey): Promise<Uint8Array> {
     const epk = ephemeralKey ? convertSecretKeyToX25519Keypair(ephemeralKey) : generateKeyPair()
     const sharedSecret = sharedKey(epk.secretKey, convertPublicKeyToX25519(pubKey.toBytes()))
     const kek = concatKDF(
@@ -80,29 +75,31 @@ export class XC20P {
       ECDH_ES_XC20PKW_KEYLEN,
       ECDH_ES_XC20PKW_ALG,
     )
-    const res = xc20pEncrypter(kek)(stringToBytes(message))
+    const res = xc20pEncrypter(kek)(bytes)
 
-    return bytesToBase64(
-      concat([
-        res.iv,
-        res.tag,
-        res.ciphertext,
-        epk.publicKey,
-      ]),
-    )
+    return concat([
+      res.iv,
+      res.tag,
+      res.ciphertext,
+      epk.publicKey,
+    ])
   }
 
   /**
-   * Decrypt an encrypted message with the {@link privateKey} that was used to encrypt it
-   * @param encryptedMessage
-   * @param privateKey
+   * Encrypt a message with a {@link pubKey} and {@link ephemeralKey}
    */
-  static async decrypt(encryptedMessage: string, privateKey: PrivateKey): Promise<string> {
-    const encMessage = base64ToBytes(encryptedMessage)
-    const iv = encMessage.subarray(0, XC20P_IV_LENGTH)
-    const tag = encMessage.subarray(XC20P_IV_LENGTH, XC20P_IV_LENGTH + XC20P_TAG_LENGTH)
-    const ciphertext = encMessage.subarray(XC20P_IV_LENGTH + XC20P_TAG_LENGTH, -XC20P_EPK_LENGTH)
-    const epkPub = encMessage.subarray(-XC20P_EPK_LENGTH)
+  static async encrypt(message: string, pubKey: PublicKey, ephemeralKey?: PrivateKey): Promise<string> {
+    return bytesToBase64(await this.encryptBytes(stringToBytes(message), pubKey, ephemeralKey))
+  }
+
+  /**
+   * Decrypt an encrypted bytes with the {@link privateKey} that was used to encrypt it
+   */
+  static async decryptBytes(bytes: Uint8Array, privateKey: PrivateKey): Promise<Uint8Array> {
+    const iv = bytes.subarray(0, XC20P_IV_LENGTH)
+    const tag = bytes.subarray(XC20P_IV_LENGTH, XC20P_IV_LENGTH + XC20P_TAG_LENGTH)
+    const ciphertext = bytes.subarray(XC20P_IV_LENGTH + XC20P_TAG_LENGTH, -XC20P_EPK_LENGTH)
+    const epkPub = bytes.subarray(-XC20P_EPK_LENGTH)
 
     // normalise the key into an uint array
     const ed25519Key = makeKeypair(privateKey).secretKey
@@ -125,7 +122,14 @@ export class XC20P {
       throw new Error('There was an error decoding the message!')
     }
 
-    return bytesToString(binMessage)
+    return binMessage
+  }
+
+  /**
+   * Decrypt an encrypted message with the {@link privateKey} that was used to encrypt it
+   */
+  static async decrypt(encryptedMessage: string, privateKey: PrivateKey): Promise<string> {
+    return bytesToString(await this.decryptBytes(base64ToBytes(encryptedMessage), privateKey))
   }
 }
 

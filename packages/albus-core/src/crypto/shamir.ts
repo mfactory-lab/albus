@@ -37,7 +37,7 @@ import type { F1Field } from './ff'
  * @param shares Shares of the participants to reconstruct the secret. Each is a 2-tuple containing the share index =x and the value =y.
  * @returns {string} The reconstructed secret as stringifies field element.
  */
-export function reconstructShamirSecret(field: F1Field, k: number, shares: [number, string][]): string {
+export function reconstructShamirSecret(field: F1Field, k: number, shares: [number, bigint | string][]): bigint {
   if (shares.length < k) {
     throw new Error('Not enough shares to reconstruct secret')
   }
@@ -70,5 +70,5 @@ export function reconstructShamirSecret(field: F1Field, k: number, shares: [numb
     }
     sum = field.add(sum, field.mul(field.e(shares[j][1]), product))
   }
-  return field.toObject(sum).toString()
+  return field.toObject(sum)
 }

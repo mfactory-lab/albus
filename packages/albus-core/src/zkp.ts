@@ -209,7 +209,7 @@ export function decodeG1(bytes: number[]) {
   if (bytes.length < 64) {
     throw new Error('G1 point must be 64 long')
   }
-  return [bytesToFinite(bytes.slice(0, 32).reverse()), bytesToFinite(bytes.slice(32, 64).reverse()), '1']
+  return [bytesToFinite(bytes.slice(0, 32).reverse()), bytesToFinite(bytes.slice(32, 64).reverse()), 1n]
 }
 
 function decodeG2(bytes: number[]) {
