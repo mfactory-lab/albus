@@ -345,11 +345,11 @@ export class InvestigationManager {
 
     const decryptedShares: [number, bigint][] = []
     for (const { data } of shares) {
-      const dataShare = Uint8Array.from(data?.share ?? [])
-      if (dataShare.length === 0) {
+      const encBytes = Uint8Array.from(data?.share ?? [])
+      if (encBytes.length === 0) {
         continue
       }
-      const shareBytes = await Albus.crypto.XC20P.decryptBytes(dataShare, encKeypair.secretKey)
+      const shareBytes = await Albus.crypto.XC20P.decryptBytes(encBytes, encKeypair.secretKey)
       const share = Albus.crypto.utils.bytesToBigInt(shareBytes)
       decryptedShares.push([data?.index ?? 0, share])
     }

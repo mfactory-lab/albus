@@ -534,8 +534,6 @@ export async function verifyPresentationProof(proof: PresentationProof, challeng
 }
 
 export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_TREE_DEPTH) {
-  // const tree = await newMemEmptyTrie()
-
   const sto = new InMemoryDB(str2Bytes('albus'))
   const tree = new Merkletree(sto, true, nLevels)
 
