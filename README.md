@@ -2,25 +2,21 @@
 
 # Introduction
 
-The Albus Protocol is an innovative Compliance-as-a-Service (CaaS) solution that verifies user compliance with predefined policies of DeFi Protocols. Leveraging an adapted Self-Sovereign Identity (SSI) framework, the Albus Protocol harnesses the power of blockchain and Zero-Knowledge Proof (ZKP) technologies to conduct compliance verification in a secure and confidential manner, striking a critical balance between privacy, control, and regulatory compliance in the DeFi landscape.
+Albus Protocol is an all-in-one Compliance-as-a-Service solution that facilitates AML compliance for transactions on public blockchains. Building on a self-sovereign identity (SSI) model, Albus harnesses the power of blockchain and zero-knowledge proof cryptography to enable verification of these transactions in a privacy-oriented manner. This approach brings together the strengths of two worlds: the steps involving human interaction ensure that the verification is conducted as per applicable legal requirements, while the cryptographic mechanisms allow for the results of this verification to be implemented at scale.
 
 # Website and litepaper
 
 - [Albus website](https://albus.finance/)
-- [Albus litepaper](https://albus.finance/assets/download/litepaper.pdf)
+- [Albus litepaper](https://albus.finance/assets/Albus%20Protocol%20Litepaper%2008.08.23-c8206a29.pdf)
 
 # Full documentation
 
 - [Introduction](https://github.com/mfactory-lab/albus/wiki)
-  - [What is Albus?](https://github.com/mfactory-lab/albus/wiki#what-is-albus)
-  - [Self-Sovereign Identity (SSI)](https://github.com/mfactory-lab/albus/wiki#self-sovereign-identity-ssi)
-  - [Threshold encryption](https://github.com/mfactory-lab/albus/wiki#self-sovereign-identity-ssi)
-  - [Zero-Knowledge Proofs (ZKP)](https://github.com/mfactory-lab/albus/wiki#zero-knowledge-proofs-zkp)
 - [Albus diagrams](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams)
   - [Workflow overview](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-overview)
   - [Workflow diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-diagram)
   - [Architecture diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#architecture-diagram)
-  - [Legal request for access to PII](https://github.com/mfactory-lab/albus/wiki/legal-request-for-access-to-pii)
+  - [Legal request for access to PII](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#legal-request-for-access-to-pii)
 - [Glossary](https://github.com/mfactory-lab/albus/wiki/Glossary)
   - [Entities and modules](https://github.com/mfactory-lab/albus/wiki/Glossary#entities-and-modules)
   - [General terms](https://github.com/mfactory-lab/albus/wiki/Glossary#general-terms)
