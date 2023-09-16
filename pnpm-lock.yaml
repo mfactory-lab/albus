@@ -189,8 +189,8 @@ importers:
         specifier: ^0.28.0
         version: 0.28.0
       '@mfactory-lab/albus-sdk':
-        specifier: 0.0.12
-        version: 0.0.12
+        specifier: 0.1.0
+        version: 0.1.0
       '@solana/wallet-adapter-wallets':
         specifier: ^0.19.20
         version: 0.19.20(@solana/web3.js@1.77.3)
@@ -1949,8 +1949,8 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@mfactory-lab/albus-core@0.0.12:
-    resolution: {integrity: sha512-UsxaNuiIL5mU8XQXhoNi+Okw1YM7b2Ali9uK1JhBeZiLeIB5iGBK2Y402s/ui6pqzvzQGkQMyGSZ4fezHysJBw==, tarball: https://npm.pkg.github.com/download/@mfactory-lab/albus-core/0.0.12/e7ccbf90d7dda5c886076a573f91f84a3540640b}
+  /@mfactory-lab/albus-core@0.1.0:
+    resolution: {integrity: sha512-5DzZpGOYBxDyzD6HRXIHZO9x7rE1oN249txDaa/3ijd2yweXVpcfrkrvgsEpfDTQD03vxATPo3UIHATWGIv9dQ==, tarball: https://npm.pkg.github.com/download/@mfactory-lab/albus-core/0.1.0/f01e07b1d957a0edefbfb0151a505569cb33be1b}
     dependencies:
       '@iden3/js-merkletree': 1.0.1
       '@metaplex-foundation/mpl-token-metadata': 2.13.0
@@ -1977,8 +1977,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@mfactory-lab/albus-sdk@0.0.12:
-    resolution: {integrity: sha512-iroS1txd3Gbw+ZIpqNbeb8MS23yJe8n1rBM3IQdls5WQMXVicFndqdGHvAy9xfhUirErAlQH6RgpXRxE5D9jJg==, tarball: https://npm.pkg.github.com/download/@mfactory-lab/albus-sdk/0.0.12/3c5cb30a371b483741789cebf53ded5e57aa5686}
+  /@mfactory-lab/albus-sdk@0.1.0:
+    resolution: {integrity: sha512-mZUnXcC9O6ieebLaFv7DiG7S5PzqX/0bf8us/i6D0jBttYuosZS8/2yl7jrqLf4VJ3sptDvvV1H8DDN/+YLBfA==, tarball: https://npm.pkg.github.com/download/@mfactory-lab/albus-sdk/0.1.0/54b493b50795d615ea7b73ff156687fd4b1b13ac}
     peerDependencies:
       snarkjs: '*'
     peerDependenciesMeta:
@@ -1989,7 +1989,7 @@ packages:
       '@metaplex-foundation/beet': 0.7.1
       '@metaplex-foundation/beet-solana': 0.4.0
       '@metaplex-foundation/mpl-token-metadata': 2.13.0
-      '@mfactory-lab/albus-core': 0.0.12
+      '@mfactory-lab/albus-core': 0.1.0
       '@solana/web3.js': 1.77.3
       lodash-es: 4.17.21
     transitivePeerDependencies:
