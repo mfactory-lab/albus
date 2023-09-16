@@ -30,10 +30,8 @@ import type { VerifiableCredential } from '@mfactory-lab/albus-core'
 import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { PublicKey, PublicKeyInitData } from '@solana/web3.js'
-import { Keypair } from '@solana/web3.js'
 import axios from 'axios'
-import type { PrivateKey } from './types'
-import { ALBUS_DID, NFT_AUTHORITY, NFT_SYMBOL_PREFIX } from './constants'
+import { ALBUS_DID, NFT_AUTHORITY, NFT_SYMBOL_PREFIX, NFT_VC_SYMBOL } from './constants'
 
 import type { PdaManager } from './pda'
 import { getParsedNftAccountsByOwner, loadNft } from './utils'
@@ -55,7 +53,7 @@ export class CredentialManager {
    * @throws {Error} Throws an error if the loaded credential is invalid or does not contain the `vc` attribute in its metadata.
    */
   async load(addr: PublicKeyInitData, props: LoadCredentialProps = {}) {
-    const nft = await loadNft(this.provider.connection, addr, { code: 'VC' })
+    const nft = await loadNft(this.provider.connection, addr, { code: NFT_VC_SYMBOL })
 
     if (!nft.json?.vc) {
       throw new Error('Invalid credential! Metadata does not contain `vc` attribute.')
@@ -76,7 +74,7 @@ export class CredentialManager {
       this.provider.connection,
       props.owner ?? this.provider.publicKey,
       {
-        symbol: `${NFT_SYMBOL_PREFIX}-VC`,
+        symbol: `${NFT_SYMBOL_PREFIX}-${NFT_VC_SYMBOL}`,
         updateAuthority: NFT_AUTHORITY,
         withJson: true,
       },
@@ -120,11 +118,6 @@ export class CredentialManager {
    * @param props
    */
   async createPresentation(props: CreatePresentationProps) {
-    const sharedKey = Keypair.generate().secretKey
-
-    // TODO: split sharedKey
-    // TODO: save shares
-
     return Albus.credential.createVerifiablePresentation({
       holderSecretKey: props.holderSecretKey,
       exposedFields: props.exposedFields,
@@ -134,7 +127,7 @@ export class CredentialManager {
 }
 
 export interface LoadCredentialProps {
-  decryptionKey?: PrivateKey
+  decryptionKey?: number[] | Uint8Array
 }
 
 export interface LoadAllCredentialProps extends LoadCredentialProps {

@@ -53,7 +53,6 @@ import {
 } from './generated'
 import type { PdaManager } from './pda'
 import type { ServiceManager } from './serviceManager'
-import type { PrivateKey } from './types'
 import { ProofInputBuilder, getSolanaTimestamp } from './utils'
 
 export class ProofRequestManager {
@@ -483,7 +482,7 @@ export interface FullProveProps {
   vc: PublicKeyInitData
   userPrivateKey: Uint8Array
   // Credential decryption key
-  decryptionKey?: PrivateKey
+  decryptionKey?: Uint8Array
 }
 
 export interface VerifyProps {

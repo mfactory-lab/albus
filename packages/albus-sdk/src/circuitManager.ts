@@ -216,10 +216,6 @@ export class CircuitManager {
       throw errorFromCode(e.code) ?? e
     }
   }
-
-  normalizeVk() {
-
-  }
 }
 
 export interface CreateCircuitProps {

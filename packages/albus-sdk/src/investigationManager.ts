@@ -68,7 +68,10 @@ export class InvestigationManager {
    * @param addr
    * @param commitment
    */
-  async load(addr: PublicKeyInitData, commitment?: Commitment) {
+  async load(addr: PublicKeyInitData | InvestigationRequest, commitment?: Commitment) {
+    if (addr instanceof InvestigationRequest) {
+      return addr
+    }
     return InvestigationRequest.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
   }
 
@@ -88,7 +91,10 @@ export class InvestigationManager {
    * @param addr
    * @param commitment
    */
-  async loadShare(addr: PublicKeyInitData, commitment?: Commitment) {
+  async loadShare(addr: PublicKeyInitData | InvestigationRequestShare, commitment?: Commitment) {
+    if (addr instanceof InvestigationRequestShare) {
+      return addr
+    }
     return InvestigationRequestShare.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
   }
 
@@ -374,7 +380,16 @@ export class InvestigationManager {
     // console.log('encryptedData', encryptedData)
 
     const data = Albus.crypto.Poseidon.decrypt(encryptedData, [decryptedSecret, decryptedSecret], 1, nonce)
-    console.log('data', data)
+
+    return {
+      claims: data,
+      birthDateProof: signals.birthDateProof,
+      birthDateKey: signals.birthDateKey,
+      credentialRoot: signals.credentialRoot,
+      issuerPk: signals.issuerPk,
+      issuerSignature: signals.issuerSignature,
+      userPublicKey: signals.userPublicKey,
+    }
   }
 }
 

@@ -226,7 +226,7 @@ export class TrusteeManager {
   }
 
   async deleteByKey(key: ArrayLike<number>, opts?: ConfirmOptions) {
-    return this.delete(this.pda.trustee(key), opts)
+    return this.delete(this.pda.trustee(key)[0], opts)
   }
 }
 
