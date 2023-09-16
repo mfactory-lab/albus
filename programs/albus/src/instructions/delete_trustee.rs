@@ -39,7 +39,7 @@ pub fn handler(ctx: Context<DeleteTrustee>) -> Result<()> {
 #[derive(Accounts)]
 pub struct DeleteTrustee<'info> {
     #[account(mut, close = authority)]
-    pub trustee: Box<Account<'info, Trustee>>,
+    pub trustee: Account<'info, Trustee>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
