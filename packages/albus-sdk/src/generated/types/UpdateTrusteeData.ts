@@ -5,9 +5,12 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
+import type * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
+import * as beetSolana from '@metaplex-foundation/beet-solana'
 
 export interface UpdateTrusteeData {
+  newAuthority: beet.COption<web3.PublicKey>
   name: beet.COption<string>
   email: beet.COption<string>
   website: beet.COption<string>
@@ -20,6 +23,7 @@ export interface UpdateTrusteeData {
 export const updateTrusteeDataBeet
   = new beet.FixableBeetArgsStruct<UpdateTrusteeData>(
     [
+      ['newAuthority', beet.coption(beetSolana.publicKey)],
       ['name', beet.coption(beet.utf8String)],
       ['email', beet.coption(beet.utf8String)],
       ['website', beet.coption(beet.utf8String)],

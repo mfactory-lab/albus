@@ -1,5 +1,5 @@
 {
-  "version": "0.0.12",
+  "version": "0.0.13",
   "name": "albus",
   "instructions": [
     {
@@ -364,6 +364,39 @@
           "name": "data",
           "type": {
             "defined": "CreatePolicyData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updatePolicy",
+      "accounts": [
+        {
+          "name": "policy",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdatePolicyData"
           }
         }
       ]
@@ -1489,6 +1522,48 @@
       }
     },
     {
+      "name": "UpdatePolicyData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "description",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "expirationPeriod",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "retentionPeriod",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "rules",
+            "type": {
+              "option": {
+                "vec": {
+                  "defined": "PolicyRule"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateServiceData",
       "type": {
         "kind": "struct",
@@ -1533,6 +1608,12 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "newAuthority",
+            "type": {
+              "option": "publicKey"
+            }
+          },
           {
             "name": "name",
             "type": {

@@ -34,8 +34,8 @@ import {
   Policy,
   createCreatePolicyInstruction,
   createDeletePolicyInstruction,
-  errorFromCode,
-  policyDiscriminator,
+  createUpdatePolicyInstruction,
+  errorFromCode, policyDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 
@@ -147,6 +147,42 @@ export class PolicyManager {
   }
 
   /**
+   * Update a policy with the specified properties.
+   *
+   * @param {UpdatePolicyProps} props - The properties for creating the policy.
+   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
+   * @returns {Promise<{ signature:string, address: PublicKey }>} A Promise that resolves to the result of creating the policy, including its signature and address.
+   * @throws {Error} Throws an error if there is an issue creating the policy or if the transaction fails to confirm.
+   */
+  async update(props: UpdatePolicyProps, opts?: ConfirmOptions) {
+    const authority = this.provider.publicKey
+    const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
+    const [policy] = this.pda.policy(serviceProvider, props.code)
+
+    const instruction = createUpdatePolicyInstruction({
+      policy,
+      serviceProvider,
+      authority,
+    }, {
+      data: {
+        name: props.name ?? null,
+        description: props.description ?? null,
+        expirationPeriod: props.expirationPeriod ?? null,
+        retentionPeriod: props.retentionPeriod ?? null,
+        rules: props.rules ?? [],
+      },
+    })
+
+    try {
+      const tx = new Transaction().add(instruction)
+      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      return { signature, address: policy }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  /**
    * Delete a policy based on the specified properties.
    *
    * @param {DeletePolicyProps} props - The properties for deleting the policy.
@@ -175,11 +211,15 @@ export class PolicyManager {
   }
 }
 
-export interface CreatePolicyProps {
+export interface CreatePolicyProps extends UpdatePolicyProps {
   circuitCode: string
+  name: string
+}
+
+export interface UpdatePolicyProps {
   serviceCode: string
   code: string
-  name: string
+  name?: string
   description?: string
   expirationPeriod?: number
   retentionPeriod?: number
