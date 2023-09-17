@@ -26,11 +26,43 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as admin from './admin'
-export * as did from './did'
-export * as identity from './identity'
-export * as test from './test'
-export * as vc from './vc'
-export * as policy from './policy'
-export * as request from './request'
-export * as trustee from './trustee'
+import { Buffer } from 'node:buffer'
+import { readFileSync } from 'node:fs'
+import * as Albus from '@mfactory-lab/albus-core'
+import { Keypair } from '@solana/web3.js'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+interface Opts {
+  email?: string
+  website?: string
+  keypair?: string
+}
+
+export async function create(name: string, opts: Opts) {
+  const { client } = useContext()
+
+  let keypair: Keypair
+  if (opts.keypair) {
+    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.keypair).toString())))
+  } else {
+    keypair = Keypair.generate()
+    log.info('New encryption keypair was generated!')
+    log.info(`SecretKey: [${keypair.secretKey}]`)
+    log.info(`PublicKey: ${keypair.publicKey}`)
+  }
+
+  const { key } = Albus.zkp.generateEncryptionKey(keypair)
+
+  const { signature, address } = await client.trustee.create({
+    key: Array.from(key),
+    name,
+    email: opts.email ?? '',
+    website: opts.website ?? '',
+  })
+
+  log.info('\nDone')
+  log.info(`Signature: ${signature}`)
+  log.info(`\nAddress: ${address}`)
+  log.info(`\nKey: ${key}`)
+}

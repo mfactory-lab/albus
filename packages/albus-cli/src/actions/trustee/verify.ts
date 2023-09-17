@@ -26,11 +26,17 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as admin from './admin'
-export * as did from './did'
-export * as identity from './identity'
-export * as test from './test'
-export * as vc from './vc'
-export * as policy from './policy'
-export * as request from './request'
-export * as trustee from './trustee'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+interface Opts {
+}
+
+export async function verify(addr: string, _opts: Opts) {
+  const { client } = useContext()
+
+  const { signature } = await client.trustee.verify(addr)
+
+  log.info('\nDone')
+  log.info(`Signature: ${signature}`)
+}

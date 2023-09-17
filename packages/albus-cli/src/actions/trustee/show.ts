@@ -26,11 +26,42 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as admin from './admin'
-export * as did from './did'
-export * as identity from './identity'
-export * as test from './test'
-export * as vc from './vc'
-export * as policy from './policy'
-export * as request from './request'
-export * as trustee from './trustee'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+interface Opts {
+}
+
+export async function show(addr: string, _opts: Opts) {
+  const { client } = useContext()
+
+  const trustee = await client.trustee.load(addr)
+
+  log.info('\n')
+  log.info(trustee.pretty())
+}
+
+interface AllOpts {
+  name?: string
+  email?: string
+  authority?: string
+  verified?: boolean
+  key?: number[]
+  noData?: boolean
+}
+
+export async function showAll(opts: AllOpts) {
+  const { client } = useContext()
+
+  const trustees = await client.trustee.find(opts)
+
+  log.info('--------------------------------------------------------------------------')
+  log.info(`Found ${trustees.length} accounts`)
+  log.info('--------------------------------------------------------------------------')
+
+  for (const trustee of trustees) {
+    log.info(`Address: ${trustee.pubkey}`)
+    log.info(trustee.data?.pretty())
+    log.info('--------------------------------------------------------------------------')
+  }
+}

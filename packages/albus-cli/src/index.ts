@@ -63,9 +63,9 @@ cli
     console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
     console.log(chalk.dim(`# Cluster: ${cluster}\n`))
   })
-  // .hook('postAction', (_command: Command) => {
-  //   process.exit()
-  // })
+  .hook('postAction', (_c: Command) => {
+    process.exit()
+  })
 
 // ------------------------------------------
 // DID
@@ -111,6 +111,38 @@ policy.command('all', { isDefault: true })
   .option('-s, --serviceCode <string>', 'Filter by service code')
   .option('-s, --circuitCode <string>', 'Filter by circuit code')
   .action(actions.policy.showAll)
+
+// ------------------------------------------
+// Trustee
+// ------------------------------------------
+
+const trustee = cli.command('trustee')
+
+trustee.command('create')
+  .description('Create new Trustee')
+  .argument('name', 'The name of the trustee')
+  .option('--email <string>', '(optional) Email')
+  .option('--website <string>', '(optional) Website')
+  .option('--keypair <string>', '(optional) Encryption keypair')
+  .action(actions.trustee.create)
+
+trustee.command('verify')
+  .description('Verify a trustee')
+  .argument('addr', 'Trustee address')
+  .action(actions.trustee.verify)
+
+trustee.command('show')
+  .description('Show all trustees')
+  .argument('addr', 'Trustee address')
+  .action(actions.trustee.show)
+
+trustee.command('all', { isDefault: true })
+  .description('Show all trustees')
+  .option('--authority <string>', 'Filter by authority')
+  .option('--email <string>', 'Filter by email')
+  .option('--name <string>', 'Filter by name')
+  .option('--verified', 'Filter by verified')
+  .action(actions.trustee.showAll)
 
 // ------------------------------------------
 // Proof Requests
@@ -282,4 +314,8 @@ cli.command('*', { isDefault: true, hidden: true })
 
 cli.parseAsync().catch((e) => {
   log.error(e)
+  if (e.logs) {
+    log.error(JSON.stringify(e.logs, null, 2))
+  }
+  process.exit()
 })
