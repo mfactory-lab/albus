@@ -65,7 +65,7 @@ pub struct CreateTrustee<'info> {
         payer = authority,
         space = Trustee::space()
     )]
-    pub trustee: Box<Account<'info, Trustee>>,
+    pub trustee: Account<'info, Trustee>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

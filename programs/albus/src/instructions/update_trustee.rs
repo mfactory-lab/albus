@@ -38,6 +38,9 @@ pub fn handler(ctx: Context<UpdateTrustee>, data: UpdateTrusteeData) -> Result<(
     //     trustee.key = key;
     // }
 
+    if let Some(authority) = data.new_authority {
+        trustee.authority = authority;
+    }
     if let Some(name) = data.name {
         trustee.name = name;
     }
@@ -53,7 +56,8 @@ pub fn handler(ctx: Context<UpdateTrustee>, data: UpdateTrusteeData) -> Result<(
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateTrusteeData {
-    // pub newKey: Option<[u8; 32]>,
+    // pub new_key: Option<[u8; 32]>,
+    pub new_authority: Option<Pubkey>,
     pub name: Option<String>,
     pub email: Option<String>,
     pub website: Option<String>,
