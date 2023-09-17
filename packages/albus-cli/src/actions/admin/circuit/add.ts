@@ -28,6 +28,8 @@
 
 import type { Buffer } from 'node:buffer'
 import fs from 'node:fs'
+import { toMetaplexFile } from '@metaplex-foundation/js'
+import { parseSignal } from '@mfactory-lab/albus-sdk'
 import axios from 'axios'
 import chalk from 'chalk'
 import log from 'loglevel'
@@ -56,78 +58,92 @@ export async function add(circuitId: string, opts: Opts) {
   }
 
   const r1csInfo = await snarkjs.r1cs.info(`${config.circuitPath}/${circuitId}.r1cs`)
+
   const zKeyFile = { type: 'mem', data: new Uint8Array() }
-
   let zkeyUri: string
-  if (!opts.zkey) {
-    const power = Math.ceil(Math.log2(r1csInfo.nVars)).toString().padStart(2, '0')
 
-    // Download PowersOfTau from Hermez
-    if (!fs.existsSync(`${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`)) {
-      log.info(`Downloading powersOfTau with power ${power} from Hermez`)
-      await downloadFile(
-        `https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${power}.ptau`,
-        `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
-      )
-    }
-
-    log.info('Generating keys...')
-
-    await snarkjs.zKey.newZKey(
-      `${config.circuitPath}/${circuitId}.r1cs`,
-      `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
-      zKeyFile,
-    )
-
-    fs.writeFileSync(`${config.circuitPath}/${circuitId}.zkey`, zKeyFile.data)
-    // return
-
-    // log.info('Uploading zKey file...')
-    // zkeyUri = await metaplex.storage().upload(toMetaplexFile(zKeyFile.data, 'circuit.zkey'))
-    // log.info('Done')
-    // log.info(`Uri: ${zkeyUri}`)
-  } else {
+  if (opts.zkey) {
     zkeyUri = opts.zkey
     zKeyFile.data = await fetchBytes(opts.zkey)
+  } else {
+    const zKeyFileExists = fs.existsSync(`${config.circuitPath}/${circuitId}.zkey`)
+    if (!zKeyFileExists) {
+      log.info('No zKey file found...')
+
+      const power = Math.ceil(Math.log2(r1csInfo.nVars)).toString().padStart(2, '0')
+
+      // Download PowersOfTau from Hermez
+      if (!fs.existsSync(`${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`)) {
+        log.info(`Downloading powersOfTau with power ${power} from Hermez`)
+        await downloadFile(
+        `https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${power}.ptau`,
+        `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
+        )
+      }
+
+      log.info('Generating keys...')
+
+      await snarkjs.zKey.newZKey(
+        `${config.circuitPath}/${circuitId}.r1cs`,
+        `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
+        zKeyFile,
+      )
+
+      fs.writeFileSync(`${config.circuitPath}/${circuitId}.zkey`, zKeyFile.data)
+    } else {
+      const file = fs.readFileSync(`${config.circuitPath}/${circuitId}.zkey`)
+      zKeyFile.data = Uint8Array.from(file)
+    }
+
+    log.info('Uploading zKey file...')
+    zkeyUri = await metaplex.storage().upload(toMetaplexFile(zKeyFile.data, 'circuit.zkey'))
+
+    log.info('Done')
+    log.info(`Uri: ${zkeyUri}`)
   }
 
-  // let wasmUri: string
-  // if (!opts.wasm) {
-  //   const wasmFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.wasm`)
-  //   log.info('Uploading wasm file...')
-  //   wasmUri = await metaplex.storage().upload(toMetaplexFile(wasmFile, 'circuit.wasm'))
-  //   log.info('Done')
-  //   log.info(`Uri: ${wasmUri}`)
-  // } else {
-  //   wasmUri = opts.wasm
-  // }
+  let wasmUri: string
+  if (opts.wasm) {
+    wasmUri = opts.wasm
+  } else {
+    const wasmFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.wasm`)
+    log.info('Uploading wasm file...')
+    wasmUri = await metaplex.storage().upload(toMetaplexFile(wasmFile, 'circuit.wasm'))
+    log.info('Done')
+    log.info(`Uri: ${wasmUri}`)
+  }
+
+  log.info(`Using zKey uri ${zkeyUri}`)
+  log.info(`Using wasm uri ${wasmUri}`)
 
   log.info('Exporting verification Key...')
   const vk = await snarkjs.zKey.exportVerificationKey(zKeyFile)
   fs.writeFileSync(`${config.circuitPath}/${circuitId}.vk.json`, JSON.stringify(vk))
 
-  // log.info('Loading signals...')
-  // const symFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.sym`)
-  // const signals = loadSignals(symFile.toString(), r1csInfo.nPubInputs, r1csInfo.nPrvInputs)
-  //
-  // log.info('Creating circuit...')
-  // const { signature } = await client.circuit.create({
-  //   code: circuitId,
-  //   name: opts.name,
-  //   description: opts.description,
-  //   privateSignals: signals.private,
-  //   publicSignals: signals.public,
-  //   wasmUri,
-  //   zkeyUri,
-  // })
-  //
-  // log.info('Done')
-  // log.info(`Signature: ${signature}`)
-  //
-  // log.info('Updating VK...')
-  // const { signatures } = await client.circuit.updateVk({ code: circuitId, vk })
-  // log.info('Done')
-  // log.info(signatures)
+  log.info('Loading signals...')
+  const symFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.sym`)
+  const signals = loadSignals(symFile.toString(),
+    r1csInfo.nOutputs, r1csInfo.nPubInputs, r1csInfo.nPrvInputs)
+
+  log.info('Creating circuit...')
+  const { signature } = await client.circuit.create({
+    code: circuitId,
+    name: opts.name,
+    description: opts.description,
+    privateSignals: signals.private,
+    publicSignals: signals.public,
+    outputs: signals.output,
+    wasmUri,
+    zkeyUri,
+  })
+
+  log.info('Done')
+  log.info(`Signature: ${signature}`)
+
+  log.info('Updating VK...')
+  const { signatures } = await client.circuit.updateVk({ code: circuitId, vk })
+  log.info('Done')
+  log.info(signatures)
 }
 
 /**
@@ -141,22 +157,39 @@ async function fetchBytes(url: string | Buffer | Uint8Array) {
   return Uint8Array.from(url)
 }
 
-function loadSignals(symData: string, nPubInputs: number, nPrvInputs: number) {
+function loadSignals(symData: string, nOutputs: number, nPubInputs: number, nPrvInputs: number) {
   const signals = loadSymbols(symData, (acc, { idx, name }) => {
-    const m = name.match(/^main\.(\w+)(?:\[(\d+)\])?$/)
-    const signal = m[1]
-    if (!acc[signal]) {
-      acc[signal] = { private: idx > nPubInputs, size: 1 }
-    } else {
-      acc[signal].size += 1
+    const sig = { ...parseSignal(name.replace('main.', '')), type: '' }
+    if (!sig?.name) {
+      return
     }
-  }, nPubInputs + nPrvInputs)
+    if (idx < nOutputs) {
+      sig.type = 'output'
+    } else if (idx < nPubInputs) {
+      sig.type = 'public'
+    } else {
+      sig.type = 'private'
+    }
+    acc[sig.name] = sig
+  }, nOutputs + nPubInputs + nPrvInputs)
 
-  return Object.keys(signals).reduce((acc, name) => {
-    const sig = signals[name]
-    acc[sig.private ? 'private' : 'public'].push(sig.size > 1 ? `${name}[${sig.size}]` : name)
-    return acc
-  }, { public: [] as string[], private: [] as string[] })
+  return Object.keys(signals)
+    .reduce((acc, name) => {
+      const sig = signals[name]
+      let input = name
+      if (sig.size > 0) {
+        input += `[${sig.size + 1}]`
+        if (sig.next && sig.next.size > 0) {
+          input += `[${sig.next.size + 1}]`
+        }
+      }
+      acc[sig.type].push(input)
+      return acc
+    }, {
+      output: [] as string[],
+      public: [] as string[],
+      private: [] as string[],
+    })
 }
 
 function loadSymbols<T>(symData: string, apply: (acc: { [key: string]: any }, any: any) => T, limit?: number) {

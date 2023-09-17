@@ -41,7 +41,7 @@ export async function create(policy: string, opts: Opts) {
 
   const [serviceCode, policyCode] = policy.split('_')
   if (!serviceCode || !policyCode) {
-    throw new Error('invalid policy id')
+    throw new Error('Invalid policy id, must be in format `{serviceCode}_{policyCode}`')
   }
 
   try {

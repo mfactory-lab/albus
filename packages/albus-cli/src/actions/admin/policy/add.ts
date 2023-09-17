@@ -53,14 +53,11 @@ export async function add(opts: Opts) {
     expirationPeriod: opts.expirationPeriod,
     retentionPeriod: opts.retentionPeriod,
     rules: opts.rules?.map((r) => {
-      const rr = r.split(':').map(Number)
+      const rr = r.split(':')
       if (rr.length < 2) {
         throw new Error('Invalid rule')
       }
-      if (rr.length === 2) {
-        return { index: rr[0], group: 0, value: rr[1] } as PolicyRule
-      }
-      return { index: rr[0], group: rr[1], value: rr[2] } as PolicyRule
+      return { key: String(rr[0]), value: Number(rr[2]) } as PolicyRule
     }),
   })
 
