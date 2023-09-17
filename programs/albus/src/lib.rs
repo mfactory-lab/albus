@@ -108,6 +108,10 @@ pub mod albus {
         create_policy::handler(ctx, data)
     }
 
+    pub fn update_policy(ctx: Context<UpdatePolicy>, data: UpdatePolicyData) -> Result<()> {
+        update_policy::handler(ctx, data)
+    }
+
     pub fn delete_policy(ctx: Context<DeletePolicy>) -> Result<()> {
         delete_policy::handler(ctx)
     }
