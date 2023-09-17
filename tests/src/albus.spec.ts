@@ -465,26 +465,4 @@ describe('albus', () => {
       }
     }
   })
-
-  // describe('admin', () => {
-  //   it('can delete program accounts', async () => {
-  //     const s = await client.service.create({ code: serviceCode, name: serviceCode })
-  //     const c = await client.circuit.create(circuitData)
-  //     const p = await client.policy.create({ serviceCode, circuitCode: circuitData.code, code: 'x', name: 'x' })
-  //     const r = await client.proofRequest.create({ serviceCode, policyCode: 'x' })
-  //
-  //     for (const account of [r.address, p.address, c.address, s.address]) {
-  //       const ix = createAdminCloseAccountInstruction({
-  //         authority: provider.publicKey,
-  //         account,
-  //       })
-  //       await provider.sendAndConfirm(new Transaction().add(ix))
-  //     }
-  //
-  //     try {
-  //       await client.service.load(s.address)
-  //       assert.ok(false)
-  //     } catch (e) {}
-  //   })
-  // })
 })
