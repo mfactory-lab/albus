@@ -112,6 +112,33 @@ policy.command('all', { isDefault: true })
   .option('-s, --circuitCode <string>', 'Filter by circuit code')
   .action(actions.policy.showAll)
 
+policy.command('create')
+  .description('Create new policy')
+  .requiredOption('--code <string>', 'policy code')
+  .requiredOption('--name <string>', 'policy name')
+  .requiredOption('--serviceCode <string>', 'service code')
+  .requiredOption('--circuitCode <string>', 'circuit code')
+  .option('-d,--description <string>', '(optional) policy short description')
+  .option('-ep,--expirationPeriod <seconds>', '(optional) expiration period')
+  .option('-rp,--retentionPeriod <seconds>', '(optional) retention period')
+  .option('-r,--rules <rules...>', '(optional) policy rule, format: "key:value"')
+  .action(actions.policy.create)
+
+policy.command('update')
+  .description('Update a policy')
+  .argument('code', 'policy code')
+  .option('-n,--name <string>', 'policy name')
+  .option('-d,--description <string>', '(optional) policy short description')
+  .option('-ep,--expirationPeriod <seconds>', '(optional) expiration period')
+  .option('-rp,--retentionPeriod <seconds>', '(optional) retention period')
+  .option('-r,--rules <rules...>', '(optional) policy rule, format: "key:value"')
+  .action(actions.policy.update)
+
+policy.command('delete')
+  .description('Delete policy')
+  .argument('code', 'policy code')
+  .action(actions.policy.remove)
+
 // ------------------------------------------
 // Trustee
 // ------------------------------------------
@@ -201,34 +228,6 @@ const admin = cli.command('admin')
 admin.command('clear')
   .description('Clear all accounts')
   .action(actions.admin.clear)
-
-///
-/// Policy Management
-///
-
-const adminPolicy = admin.command('policy')
-  .description('Policy Management')
-
-adminPolicy.command('all', { isDefault: true })
-  .description('Show all policies')
-  .action(actions.admin.policy.showAll)
-
-adminPolicy.command('add')
-  .description('Add new policy')
-  .requiredOption('--code <string>', 'policy code')
-  .requiredOption('--name <string>', 'policy name')
-  .requiredOption('--serviceCode <string>', 'service code')
-  .requiredOption('--circuitCode <string>', 'circuit code')
-  .option('-d,--description <string>', '(optional) policy short description')
-  .option('-ep,--expirationPeriod <seconds>', '(optional) expiration period')
-  .option('-rp,--retentionPeriod <seconds>', '(optional) retention period')
-  .option('-r,--rules <rule...>', '(optional) policy rule, format: "index:group:value"')
-  .action(actions.admin.policy.add)
-
-adminPolicy.command('delete')
-  .description('Delete policy')
-  .argument('code', 'Policy code')
-  .action(actions.admin.policy.remove)
 
 ///
 /// Circuit Management

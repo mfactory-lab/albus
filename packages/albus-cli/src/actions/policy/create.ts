@@ -26,6 +26,41 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './add'
-export * from './show'
-export * from './remove'
+import type { PolicyRule } from '@mfactory-lab/albus-sdk'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+interface Opts {
+  serviceCode: string
+  circuitCode: string
+  code: string
+  name: string
+  description?: string
+  expirationPeriod?: number
+  retentionPeriod?: number
+  rules?: string[]
+}
+
+export async function create(opts: Opts) {
+  const { client } = useContext()
+
+  const { signature } = await client.policy.create({
+    circuitCode: opts.circuitCode,
+    serviceCode: opts.serviceCode,
+    code: opts.code,
+    name: opts.name,
+    description: opts.description,
+    expirationPeriod: opts.expirationPeriod,
+    retentionPeriod: opts.retentionPeriod,
+    rules: opts.rules?.map((r) => {
+      const rr = r.split(':')
+      if (rr.length < 2) {
+        throw new Error('Invalid rule')
+      }
+      return { key: String(rr[0]), value: Number(rr[2]) } as PolicyRule
+    }),
+  })
+
+  log.info(`Signature: ${signature}`)
+  log.info('OK')
+}

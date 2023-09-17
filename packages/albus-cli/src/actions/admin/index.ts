@@ -33,7 +33,6 @@ import log from 'loglevel'
 import { useContext } from '@/context'
 
 export * as circuit from './circuit'
-export * as policy from './policy'
 export * as request from './request'
 export * as service from './service'
 

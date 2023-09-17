@@ -32,20 +32,18 @@ import { useContext } from '@/context'
 
 interface Opts {
   serviceCode: string
-  circuitCode: string
   code: string
-  name: string
+  name?: string
   description?: string
   expirationPeriod?: number
   retentionPeriod?: number
   rules?: string[]
 }
 
-export async function add(opts: Opts) {
+export async function update(opts: Opts) {
   const { client } = useContext()
 
-  const { signature } = await client.policy.create({
-    circuitCode: opts.circuitCode,
+  const { signature } = await client.policy.update({
     serviceCode: opts.serviceCode,
     code: opts.code,
     name: opts.name,
@@ -55,9 +53,9 @@ export async function add(opts: Opts) {
     rules: opts.rules?.map((r) => {
       const rr = r.split(':')
       if (rr.length < 2) {
-        throw new Error('Invalid rule')
+        throw new Error(`Invalid rule ${rr}, should be in format \`{key}:{value}\``)
       }
-      return { key: String(rr[0]), value: Number(rr[2]) } as PolicyRule
+      return { key: String(rr[0]), value: Number(rr[1]) } as PolicyRule
     }),
   })
 
