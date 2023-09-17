@@ -28,41 +28,28 @@
 
 import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
-import Table from 'cli-table3'
 import { useContext } from '@/context'
 
-export async function show(code: string) {
-  const { client } = useContext()
-
-  let serviceProviderAddr: PublicKey
-  try {
-    serviceProviderAddr = new PublicKey(code)
-  } catch (e) {
-    serviceProviderAddr = client.pda.serviceProvider(code)[0]
-  }
-
-  const sp = await client.service.load(serviceProviderAddr)
-
-  log.info('--------------------------------------------------------------------------')
-  log.info(`Address: ${serviceProviderAddr}`)
-  log.info(sp.pretty())
-  log.info('--------------------------------------------------------------------------')
+interface Opts {
+  name?: string
+  website?: string
+  secretShareThreshold?: number
+  newAuthority?: string
+  trustees?: string[]
 }
 
-export async function showAll(opts: { authority?: string }) {
+export async function update(addr: string, opts: Opts) {
   const { client } = useContext()
 
-  const items = await client.service.find({
-    authority: opts.authority,
+  const { signature } = await client.service.update({
+    serviceProvider: new PublicKey(addr),
+    name: opts.name,
+    website: opts.website,
+    secretShareThreshold: opts.secretShareThreshold,
+    trustees: opts.trustees,
+    newAuthority: opts.newAuthority ? new PublicKey(opts.newAuthority) : null,
   })
 
-  const table = new Table({
-    head: ['Address', 'Code', 'Name', 'Request count'],
-  })
-
-  for (const { pubkey, data } of items) {
-    table.push([pubkey.toString(), data?.code, data?.name, Number(data?.proofRequestCount)])
-  }
-
-  console.log(table.toString())
+  log.info(`Signature: ${signature}`)
+  log.info('OK')
 }

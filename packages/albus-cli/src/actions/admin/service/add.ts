@@ -34,16 +34,15 @@ interface Opts {
   code: string
   name: string
   authority?: string
+  website?: string
+  secretShareThreshold?: number
+  trustees?: string[]
 }
 
 export async function add(opts: Opts) {
   const { client } = useContext()
 
-  const { signature } = await client.service.create({
-    code: opts.code,
-    name: opts.name,
-    authority: opts.authority,
-  })
+  const { signature } = await client.service.create(opts)
 
   await show(opts.code)
 
