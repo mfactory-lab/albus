@@ -173,6 +173,7 @@ export class TrusteeManager {
         name: props.name ?? null,
         email: props.email ?? null,
         website: props.website ?? null,
+        newAuthority: props.newAuthority ?? null,
       },
     })
     try {
