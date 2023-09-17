@@ -10,7 +10,7 @@ async function prove(proofRequest: PublicKey) {
     console.log('Start proving...')
     await albus.client.value.proofRequest.fullProve({
       proofRequest,
-      holderSecretKey: albus.state.holderSecretKey,
+      userPrivateKey: Uint8Array.from(albus.state.userPrivateKey),
       vc: albus.state.creds[0].address,
     })
   } finally {
@@ -43,7 +43,7 @@ async function prove(proofRequest: PublicKey) {
         <div class="q-pa-md row items-start q-gutter-md">
           <q-card v-for="req in albus.state.requests" :key="req.pubkey" flat bordered>
             <q-card-section>
-              <q-btn v-if="req.data.status === 0" :loading="proving" color="primary" rounded @click="prove(req.pubkey)">
+              <q-btn v-if="req.data?.status === 0" :loading="proving" color="primary" rounded @click="prove(req.pubkey)">
                 prove
               </q-btn>
               {{ req.pubkey }}

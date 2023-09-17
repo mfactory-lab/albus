@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import type { ProofRequest } from '@mfactory-lab/albus-sdk'
 import { AlbusClient } from '@mfactory-lab/albus-sdk'
 import { PublicKey } from '@solana/web3.js'
 import { useAnchorWallet } from 'solana-wallets-vue'
@@ -40,10 +41,10 @@ export function useAlbus() {
   })
 
   const state = reactive({
-    holderSecretKey: [156, 231, 50, 119, 29, 160, 68, 192, 204, 224, 175, 22, 158, 203, 7, 203, 175, 79, 39, 61, 204, 174, 114, 231, 149, 151, 117, 140, 158, 255, 66, 41, 124, 57, 232, 127, 220, 24, 36, 247, 90, 241, 69, 122, 228, 126, 216, 40, 227, 117, 243, 139, 177, 64, 160, 194, 195, 185, 182, 7, 43, 166, 105, 140],
+    userPrivateKey: [156, 231, 50, 119, 29, 160, 68, 192, 204, 224, 175, 22, 158, 203, 7, 203, 175, 79, 39, 61, 204, 174, 114, 231, 149, 151, 117, 140, 158, 255, 66, 41, 124, 57, 232, 127, 220, 24, 36, 247, 90, 241, 69, 122, 228, 126, 216, 40, 227, 117, 243, 139, 177, 64, 160, 194, 195, 185, 182, 7, 43, 166, 105, 140],
     creds: [] as any,
     credsLoading: false,
-    requests: [] as any,
+    requests: [] as { pubkey: PublicKey; data: ProofRequest | null }[],
     requestsLoading: false,
   })
 
@@ -53,7 +54,7 @@ export function useAlbus() {
       state.requestsLoading = true
       const res = await Promise.all([
         client.value.credential.loadAll({
-          decryptionKey: state.holderSecretKey,
+          decryptionKey: state.userPrivateKey,
         }),
         client.value.proofRequest.find({
           // ...

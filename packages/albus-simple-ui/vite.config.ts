@@ -1,5 +1,4 @@
 import path from 'node:path'
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import type { BuildOptions } from 'vite'
@@ -8,6 +7,7 @@ import Pages from 'vite-plugin-pages'
 import Layouts from 'vite-plugin-vue-layouts'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
+import inject from '@rollup/plugin-inject'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -18,11 +18,11 @@ export default defineConfig(({ mode }) => {
     manifest: isProd,
     chunkSizeWarningLimit: 1024,
     // target: ['es2020'],
-    // rollupOptions: {
-    //   plugins: [
-    //     inject({ Buffer: ['buffer', 'Buffer'] }) as any,
-    //   ],
-    // },
+    rollupOptions: {
+      plugins: [
+        inject({ Buffer: ['buffer', 'Buffer'] }) as any,
+      ],
+    },
   }
 
   return {
@@ -93,6 +93,7 @@ export default defineConfig(({ mode }) => {
 
     define: {
       'process.env': {},
+      'process.browser': true,
     },
 
     optimizeDeps: {
@@ -106,17 +107,17 @@ export default defineConfig(({ mode }) => {
         'lodash',
       ],
       exclude: ['ethereum-cryptography', 'vue-demi'],
-      esbuildOptions: {
-        define: {
-          global: 'globalThis',
-        },
-        plugins: [
-          NodeGlobalsPolyfillPlugin({
-            process: true,
-            buffer: true,
-          }),
-        ],
-      },
+      // esbuildOptions: {
+      // define: {
+      //   global: 'globalThis',
+      // },
+      // plugins: [
+      //   NodeGlobalsPolyfillPlugin({
+      //     process: true,
+      //     buffer: true,
+      //   }),
+      // ],
+      // },
     },
   }
 })

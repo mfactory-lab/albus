@@ -189,14 +189,23 @@ importers:
         specifier: ^0.28.0
         version: 0.28.0
       '@mfactory-lab/albus-sdk':
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: workspace:^
+        version: link:../albus-sdk
+      '@quasar/extras':
+        specifier: ^1.16.5
+        version: 1.16.5
       '@solana/wallet-adapter-wallets':
         specifier: ^0.19.20
         version: 0.19.20(@solana/web3.js@1.77.3)
       '@solana/web3.js':
         specifier: ^1.77.3
         version: 1.77.3
+      '@vueuse/core':
+        specifier: ^10.3.0
+        version: 10.3.0(vue@3.3.4)
+      '@vueuse/head':
+        specifier: ^1.1.26
+        version: 1.1.26(vue@3.3.4)
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -206,6 +215,9 @@ importers:
       pinia:
         specifier: ^2.1.6
         version: 2.1.6(typescript@5.0.4)(vue@3.3.4)
+      quasar:
+        specifier: ^2.12.7
+        version: 2.12.7
       solana-wallets-vue:
         specifier: ^0.6.0
         version: 0.6.0(@solana/web3.js@1.77.3)(vue@3.3.4)
@@ -219,12 +231,9 @@ importers:
       '@antfu/eslint-config':
         specifier: ^0.42.0
         version: 0.42.0(eslint@8.49.0)(typescript@5.0.4)
-      '@quasar/extras':
-        specifier: ^1.16.5
-        version: 1.16.5
       '@quasar/vite-plugin':
         specifier: ^1.4.1
-        version: 1.4.1(@vitejs/plugin-vue@4.2.3)(quasar@2.12.3)(vite@4.4.9)(vue@3.3.4)
+        version: 1.4.1(@vitejs/plugin-vue@4.2.3)(quasar@2.12.7)(vite@4.4.9)(vue@3.3.4)
       '@rollup/plugin-inject':
         specifier: ^5.0.3
         version: 5.0.3
@@ -237,18 +246,9 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^4.2.3
         version: 4.2.3(vite@4.4.9)(vue@3.3.4)
-      '@vueuse/core':
-        specifier: ^10.3.0
-        version: 10.3.0(vue@3.3.4)
-      '@vueuse/head':
-        specifier: ^1.1.26
-        version: 1.1.26(vue@3.3.4)
       eslint:
         specifier: ^8.49.0
         version: 8.49.0
-      quasar:
-        specifier: ^2.12.3
-        version: 2.12.3
       sass:
         specifier: ^1.64.2
         version: 1.64.2
@@ -1949,57 +1949,6 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@mfactory-lab/albus-core@0.1.0:
-    resolution: {integrity: sha512-5DzZpGOYBxDyzD6HRXIHZO9x7rE1oN249txDaa/3ijd2yweXVpcfrkrvgsEpfDTQD03vxATPo3UIHATWGIv9dQ==, tarball: https://npm.pkg.github.com/download/@mfactory-lab/albus-core/0.1.0/f01e07b1d957a0edefbfb0151a505569cb33be1b}
-    dependencies:
-      '@iden3/js-merkletree': 1.0.1
-      '@metaplex-foundation/mpl-token-metadata': 2.13.0
-      '@solana/web3.js': 1.77.3
-      '@stablelib/ed25519': 1.0.3
-      '@stablelib/random': 1.0.2
-      '@stablelib/sha256': 1.0.1
-      '@stablelib/x25519': 1.0.3
-      '@stablelib/xchacha20poly1305': 1.0.1
-      axios: 1.4.0
-      circomlib: 2.0.5
-      did-jwt: 7.2.5
-      did-jwt-vc: 3.2.5
-      did-resolver: 4.1.0
-      key-did-resolver: 3.0.0
-      snarkjs: 0.5.0
-      uint8arrays: 4.0.6
-      web-did-resolver: 2.0.27
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
-
-  /@mfactory-lab/albus-sdk@0.1.0:
-    resolution: {integrity: sha512-mZUnXcC9O6ieebLaFv7DiG7S5PzqX/0bf8us/i6D0jBttYuosZS8/2yl7jrqLf4VJ3sptDvvV1H8DDN/+YLBfA==, tarball: https://npm.pkg.github.com/download/@mfactory-lab/albus-sdk/0.1.0/54b493b50795d615ea7b73ff156687fd4b1b13ac}
-    peerDependencies:
-      snarkjs: '*'
-    peerDependenciesMeta:
-      snarkjs:
-        optional: true
-    dependencies:
-      '@coral-xyz/anchor': 0.28.0
-      '@metaplex-foundation/beet': 0.7.1
-      '@metaplex-foundation/beet-solana': 0.4.0
-      '@metaplex-foundation/mpl-token-metadata': 2.13.0
-      '@mfactory-lab/albus-core': 0.1.0
-      '@solana/web3.js': 1.77.3
-      lodash-es: 4.17.21
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
-
   /@microsoft/api-extractor-model@7.27.6(@types/node@20.0.0):
     resolution: {integrity: sha512-eiCnlayyum1f7fS2nA9pfIod5VCNR1G+Tq84V/ijDrKrOFVa598BLw145nCsGDMoFenV6ajNi2PR5WCwpAxW6Q==}
     dependencies:
@@ -2277,9 +2226,9 @@ packages:
 
   /@quasar/extras@1.16.5:
     resolution: {integrity: sha512-3VAJS9NECr1OSHX674+3YvEMIlHclr81aZrEkoBtVqr+sX4In22Up44toua+qNFsxnoATPqzpwKOJxA3iAF71Q==}
-    dev: true
+    dev: false
 
-  /@quasar/vite-plugin@1.4.1(@vitejs/plugin-vue@4.2.3)(quasar@2.12.3)(vite@4.4.9)(vue@3.3.4):
+  /@quasar/vite-plugin@1.4.1(@vitejs/plugin-vue@4.2.3)(quasar@2.12.7)(vite@4.4.9)(vue@3.3.4):
     resolution: {integrity: sha512-lLw7j1A7viLQ6++p29NuYUdfjpaWctRi6tRhMYm8VPumXs8enGeV59JEJ+1tJR2FcQUMYsGOoyHHcQrsakXIkA==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -2289,7 +2238,7 @@ packages:
       vue: ^3.0.0
     dependencies:
       '@vitejs/plugin-vue': 4.2.3(vite@4.4.9)(vue@3.3.4)
-      quasar: 2.12.3
+      quasar: 2.12.7
       vite: 4.4.9(@types/node@20.0.0)(sass@1.64.2)
       vue: 3.3.4
     dev: true
@@ -3847,7 +3796,6 @@ packages:
 
   /@types/web-bluetooth@0.0.17:
     resolution: {integrity: sha512-4p9vcSmxAayx72yn70joFoL44c9MO/0+iVEBIQXe3v2h2SiAsEIo/G5v6ObFWvNKRFjbrVadNf9LqEEZeQPzdA==}
-    dev: true
 
   /@types/ws@7.4.7:
     resolution: {integrity: sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==}
@@ -4052,27 +4000,27 @@ packages:
     dependencies:
       '@unhead/schema': 1.2.2
       '@unhead/shared': 1.2.2
-    dev: true
+    dev: false
 
   /@unhead/schema@1.2.2:
     resolution: {integrity: sha512-cGtNvadL76eGl7QxGjWHZxFqLv9a2VrmRpeEb1d7sm0cvnN0bWngdXDTdUyXzn7RVv/Um+/yae6eiT6A+pyQOw==}
     dependencies:
       hookable: 5.5.3
       zhead: 2.0.10
-    dev: true
+    dev: false
 
   /@unhead/shared@1.2.2:
     resolution: {integrity: sha512-bWRjRyVzFsunih9GbHctvS8Aenj6KBe5ycql1JE4LawBL/NRYvCYUCPpdK5poVOqjYr0yDAf9m4JGaM2HwpVLw==}
     dependencies:
       '@unhead/schema': 1.2.2
-    dev: true
+    dev: false
 
   /@unhead/ssr@1.2.2:
     resolution: {integrity: sha512-mpWSNNbrQFJZolAfdVInPPiSGUva08bK9UbNV1zgDScUz+p+FnRg4cj77X+PpVeJ0+KPgjXfOsI8VQKYt+buYA==}
     dependencies:
       '@unhead/schema': 1.2.2
       '@unhead/shared': 1.2.2
-    dev: true
+    dev: false
 
   /@unhead/vue@1.2.2(vue@3.3.4):
     resolution: {integrity: sha512-AxOmY5JPn4fS34ovaivPnqg2my+InIkZDNSxCKfRkmbBtstFre/Fyf0d92Qfx0u8PJiSRPOjthEHx5vKDgTEJQ==}
@@ -4084,7 +4032,7 @@ packages:
       hookable: 5.5.3
       unhead: 1.2.2
       vue: 3.3.4
-    dev: true
+    dev: false
 
   /@vitejs/plugin-vue@4.2.3(vite@4.4.9)(vue@3.3.4):
     resolution: {integrity: sha512-R6JDUfiZbJA9cMiguQ7jxALsgiprjBeHL5ikpXfJCH62pPHtI+JdJ5xWj6Ev73yXSlYl86+blXn1kZHQ7uElxw==}
@@ -4290,7 +4238,6 @@ packages:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
-    dev: true
 
   /@vueuse/core@9.13.0(vue@3.3.4):
     resolution: {integrity: sha512-pujnclbeHWxxPRqXWmdkKV5OX4Wk4YeK7wusHqRwU0Q7EFusHoqNA/aPhB6KCh9hEqJkLAJo7bb0Lh9b+OIVzw==}
@@ -4314,11 +4261,10 @@ packages:
       '@unhead/ssr': 1.2.2
       '@unhead/vue': 1.2.2(vue@3.3.4)
       vue: 3.3.4
-    dev: true
+    dev: false
 
   /@vueuse/metadata@10.3.0:
     resolution: {integrity: sha512-Ema3YhNOa4swDsV0V7CEY5JXvK19JI/o1szFO1iWxdFg3vhdFtCtSTP26PCvbUpnUtNHBY2wx5y3WDXND5Pvnw==}
-    dev: true
 
   /@vueuse/metadata@9.13.0:
     resolution: {integrity: sha512-gdU7TKNAUVlXXLbaF+ZCfte8BjRJQWPCa2J55+7/h+yDtzw3vOoGQDRXzI6pyKyo6bXFT5/QoPE4hAknExjRLQ==}
@@ -4331,7 +4277,6 @@ packages:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
-    dev: true
 
   /@vueuse/shared@9.13.0(vue@3.3.4):
     resolution: {integrity: sha512-UrnhU+Cnufu4S6JLCPZnkWh0WwZGUp72ktOF2DFptMlOs3TOdVv8xJN53zhHGARmVOsz5KqOls09+J1NR6sBKw==}
@@ -7665,7 +7610,7 @@ packages:
 
   /hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
-    dev: true
+    dev: false
 
   /hoopy@0.1.4:
     resolution: {integrity: sha512-HRcs+2mr52W0K+x8RzcLzuPPmVIKMSv97RGHy0Ea9y/mpcaK+xTrjICA04KAHi4GRzxliNqNJEFYWHghy3rSfQ==}
@@ -9737,10 +9682,9 @@ packages:
       yargs: 13.3.2
     dev: false
 
-  /quasar@2.12.3:
-    resolution: {integrity: sha512-9KK5TXWGsZ6XFF6MJQ0E98yp++D1PagqSJrKpE91A6QnZ1gng4KtkFI5iPyuqXciFpXvxniiLsZtxD5ZICHvPw==}
+  /quasar@2.12.7:
+    resolution: {integrity: sha512-JF2rb8u1RcXPpiaDh/RnO/5rFx7kABDMov0WnRI3acJ5s4TD2FyPrCmS7VgleLubDYRSsSAontJ6EijGz4BHig==}
     engines: {node: '>= 10.18.1', npm: '>= 6.13.4', yarn: '>= 1.21.1'}
-    dev: true
 
   /query-string@7.1.3:
     resolution: {integrity: sha512-hh2WYhq4fi8+b+/2Kg9CEge4fDPvHS534aOOvOZeQ3+Vf2mCFsaFBYj0i+iXcAq6I9Vzp5fjMFBlONvayDC1qg==}
@@ -11095,7 +11039,7 @@ packages:
       '@unhead/schema': 1.2.2
       '@unhead/shared': 1.2.2
       hookable: 5.5.3
-    dev: true
+    dev: false
 
   /unimport@3.1.3:
     resolution: {integrity: sha512-up4TE2yA+nMyyErGTjbYGVw95MriGa2hVRXQ3/JRp7984cwwqULcnBjHaovVpsO8tZc2j0fvgGu9yiBKOyxvYw==}
@@ -12010,7 +11954,7 @@ packages:
 
   /zhead@2.0.10:
     resolution: {integrity: sha512-irug8fXNKjqazkA27cFQs7C6/ZD3qNiEzLC56kDyzQART/Z9GMGfg8h2i6fb9c8ZWnIx/QgOgFJxK3A/CYHG0g==}
-    dev: true
+    dev: false
 
   github.com/Bundlr-Network/avsc/a730cc8018b79e114b6a3381bbb57760a24c6cef:
     resolution: {tarball: https://codeload.github.com/Bundlr-Network/avsc/tar.gz/a730cc8018b79e114b6a3381bbb57760a24c6cef}
