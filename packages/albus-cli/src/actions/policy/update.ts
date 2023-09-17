@@ -31,8 +31,6 @@ import log from 'loglevel'
 import { useContext } from '@/context'
 
 interface Opts {
-  serviceCode: string
-  code: string
   name?: string
   description?: string
   expirationPeriod?: number
@@ -40,12 +38,18 @@ interface Opts {
   rules?: string[]
 }
 
-export async function update(opts: Opts) {
+export async function update(code: string, opts: Opts) {
   const { client } = useContext()
 
+  const chunks = code.split('_')
+
+  if (chunks.length < 2) {
+    throw new Error('Invalid policy code, should be in format `{serviceCode}_{policyCode}`')
+  }
+
   const { signature } = await client.policy.update({
-    serviceCode: opts.serviceCode,
-    code: opts.code,
+    serviceCode: chunks[0]!,
+    code: chunks[1]!,
     name: opts.name,
     description: opts.description,
     expirationPeriod: opts.expirationPeriod,
