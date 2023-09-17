@@ -26,13 +26,16 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as utils from './utils'
+import { assert, describe, it } from 'vitest'
+import { bytesToHex, hexToBytes, hexToString } from '../src/crypto/utils'
 
-export * from './babyjub'
-export * from './blake'
-export * from './poseidon'
-export * from './shamir'
-export * from './xc20p'
+describe('misc', () => {
+  it('hex', async () => {
+    const string = 'Hello world!'
+    const bytes = new TextEncoder().encode(string)
+    const hex = bytesToHex(bytes)
 
-export { utils as ffUtils, Scalar, F1Field } from './ff'
-export { utils }
+    assert.deepEqual(hexToBytes(hex), bytes)
+    assert.deepEqual(hexToString(hex), string)
+  })
+})
