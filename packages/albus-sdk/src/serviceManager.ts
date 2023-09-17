@@ -169,7 +169,7 @@ export class ServiceManager {
         website: props.website ?? '',
         contactInfo: props.contactInfo ?? null,
         secretShareThreshold: props.secretShareThreshold ?? null,
-        trustees: props.trustees ?? null,
+        trustees: props.trustees ? props.trustees.map(t => new PublicKey(t)) : null,
         authority: props.authority ? new PublicKey(props.authority) : null,
       },
     })
@@ -194,7 +194,7 @@ export class ServiceManager {
       authority: this.provider.publicKey,
       serviceProvider: new PublicKey(props.serviceProvider),
       anchorRemainingAccounts: props.trustees?.map(pubkey => ({
-        pubkey,
+        pubkey: new PublicKey(pubkey),
         isSigner: false,
         isWritable: false,
       })),
@@ -207,6 +207,7 @@ export class ServiceManager {
         newAuthority: props.newAuthority ? new PublicKey(props.newAuthority) : null,
       },
     })
+
     try {
       const tx = new Transaction().add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], opts)
@@ -257,13 +258,13 @@ export interface ServiceContact {
 export interface CreateServiceProps extends Partial<UpdateServiceData> {
   code: string
   name: string
-  authority?: PublicKey
-  trustees?: PublicKey[]
+  authority?: PublicKeyInitData
+  trustees?: PublicKeyInitData[]
 }
 
 export interface UpdateServiceProps extends Partial<UpdateServiceData> {
   serviceProvider: PublicKeyInitData
-  trustees?: PublicKey[]
+  trustees?: PublicKeyInitData[]
 }
 
 export interface FindServicesProps {
