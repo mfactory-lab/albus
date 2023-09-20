@@ -128,7 +128,7 @@ describe('Proof', async () => {
   const issuerKeypair = Keypair.generate()
   const holderKeypair = Keypair.generate()
 
-  const currentDate = 20230711
+  const currentDate = 20230711n
   const claims = {
     birthDate: '20050711',
     firstName: 'Alex',
@@ -147,8 +147,8 @@ describe('Proof', async () => {
     const secret = 186558642041440299711362618815710781931n
     const nonce = 20230711n
     const encData = Poseidon.encrypt(msg, [secret, secret], nonce)
-    const data = Poseidon.decrypt(encData, [secret, secret], msg.length, nonce)
-    console.log(data)
+    const result = Poseidon.decrypt(encData, [secret, secret], msg.length, nonce)
+    assert.deepEqual(result, msg)
   })
 
   it('proof', async () => {
@@ -193,7 +193,7 @@ describe('Proof', async () => {
 
     const { proof, publicSignals } = await generateProof({ wasmFile, zkeyFile, input })
 
-    console.log(publicSignals)
+    // console.log(publicSignals)
 
     // reconstruct secret key
 
@@ -214,6 +214,14 @@ describe('Proof', async () => {
       [1, shares[0]],
       [2, shares[1]],
     ])
+
+    const userSecret = Poseidon.hash([
+      input.userPrivateKey,
+      input.credentialRoot,
+      input.currentDate,
+    ])
+
+    assert.equal(decryptedSecret, userSecret)
 
     const decryptedData = Poseidon.decrypt([
       BigInt(publicSignals[0]!),

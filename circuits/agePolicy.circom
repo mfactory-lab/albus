@@ -23,7 +23,6 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   signal input issuerPk[2]; // [Ax, Ay]
   signal input issuerSignature[3]; // [R8x, R8y, S]
 
-//  signal input secret;
 //  signal input nonce;
   signal input userPrivateKey;
   signal input trusteePublicKey[shamirN][2];
@@ -54,27 +53,9 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   eddsa.R8y <== issuerSignature[1];
   eddsa.S <== issuerSignature[2];
 
-//  // Holder signature check
-
-//  signal input challenge;
-//  signal input holderPk[2]; // [Ax, Ay]
-//  signal input holderSignature[3]; // [R8x, R8y, S]
-
-//  component eddsa=EdDSAPoseidonVerifier();
-//  eddsa.enabled<==1;
-//  eddsa.M<==challenge;
-//  eddsa.Ax<==holderPk[0];
-//  eddsa.Ay<==holderPk[1];
-//  eddsa.R8x<==holderSignature[0];
-//  eddsa.R8y<==holderSignature[1];
-//  eddsa.S<==holderSignature[2];
-
   // Derive secret key
-  component secret = Poseidon(4);
-  secret.inputs[0] <== userPrivateKey;
-  secret.inputs[1] <== credentialRoot;
-  secret.inputs[2] <== currentDate;
-  secret.inputs[3] <== birthDate;
+  component secret = Poseidon(3);
+  secret.inputs <== [userPrivateKey, credentialRoot, currentDate];
 
   // Encrypt data and trustee shares
   component enc = EncryptionProof(1, shamirN, shamirK);
