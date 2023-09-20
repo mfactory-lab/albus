@@ -33,6 +33,7 @@ export * from './blake'
 export * from './poseidon'
 export * from './shamir'
 export * from './xc20p'
+export * from './multibase'
 
 export { utils as ffUtils, Scalar, F1Field } from './ff'
 export { utils }

@@ -67,12 +67,12 @@ describe('credential', () => {
     const claimsTree = await createClaimsTree(claims)
     const issuerKeypair = Keypair.generate()
     const pubkey = babyJub.packPoint(eddsa.prv2pub(issuerKeypair.secretKey))
-    const proof = await createCredentialProof({
+    const proof = createCredentialProof({
       rootHash: claimsTree.root,
-      signerSecret: issuerKeypair.secretKey,
+      signerSecretKey: issuerKeypair.secretKey,
       verificationMethod: '',
     })
-    const res = await verifyCredentialProof(proof, pubkey)
+    const res = verifyCredentialProof(proof, pubkey)
     assert.ok(res)
   })
 
@@ -80,7 +80,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const data = await createVerifiableCredential(claims, {
-      holder: holder.publicKey,
+      userPublicKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
@@ -105,7 +105,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const credential = await createVerifiableCredential(claims, {
-      holder: holder.publicKey,
+      userPublicKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
@@ -130,7 +130,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const credential = await createVerifiableCredential(claims, {
-      holder: holder.publicKey,
+      userPublicKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })

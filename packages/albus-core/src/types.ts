@@ -26,14 +26,30 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-type Extensible<T> = T & { [x: string]: any }
+export enum CredentialType {
+  AlbusCredential = 'AlbusCredential',
+}
 
-export type CredentialSubject = Record<string, any>
+export enum PresentationType {
+  AlbusPresentation = 'AlbusPresentation',
+}
+
+export enum ProofType {
+  BJJSignature2021 = 'BJJSignature2021',
+}
+
+export enum VerifyType {
+  EddsaBJJVerificationKey = 'EddsaBJJVerificationKey',
+}
+
+export type Claims = Record<string, any>
 
 export interface CredentialStatus {
   id: string
   type: string
 }
+
+type Extensible<T> = T & { [x: string]: any }
 
 /**
  * Represents a readonly representation of a verifiable object, including the {@link Proof}
@@ -50,7 +66,7 @@ export type W3CCredential = Extensible<{
   issuer: IssuerType
   issuanceDate: string
   expirationDate?: string
-  credentialSubject: CredentialSubject // Extensible<{ id: string }>
+  credentialSubject: Claims // Extensible<{ id: string }>
   credentialStatus?: CredentialStatus
   evidence?: any
   termsOfUse?: any
