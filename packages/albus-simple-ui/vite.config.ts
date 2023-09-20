@@ -9,9 +9,13 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import inject from '@rollup/plugin-inject'
 
+const esbuildShim = require.resolve('node-stdlib-browser/helpers/esbuild/shim')
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   // process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
+  const { default: stdLibBrowser } = await import('node-stdlib-browser')
+
   const isProd = mode === 'production'
 
   const build: BuildOptions = {
@@ -65,12 +69,21 @@ export default defineConfig(({ mode }) => {
         include: [/\.vue$/, /\.vue\?vue/, /\.md$/, /\.jsx$/, /\.tsx$/],
         dts: 'types/components.d.ts',
       }),
+      {
+        ...inject({
+          global: [esbuildShim, 'global'],
+          process: [esbuildShim, 'process'],
+          Buffer: [esbuildShim, 'Buffer'],
+        }),
+        enforce: 'post',
+      },
     ],
     resolve: {
       // preserveSymlinks: true,
       alias: {
         '~/': `${path.resolve(__dirname, 'src')}/`,
         '@/': `${path.resolve(__dirname, 'src')}/`,
+        ...stdLibBrowser,
         // 'crypto': 'crypto-browserify',
       },
       // dedupe: [
@@ -95,7 +108,6 @@ export default defineConfig(({ mode }) => {
       'process.env': {},
       'process.browser': true,
     },
-
     optimizeDeps: {
       include: [
         'vue',
