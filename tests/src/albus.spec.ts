@@ -428,7 +428,7 @@ describe('albus', () => {
       investigationRequest: investigationAddress,
       encryptionKey: investigator.secretKey,
     })
-    assert.equal(String(result.claims[0]), credential.credentialSubject.birthDate)
+    assert.equal(String(result.claims.birthDate.value), credential.credentialSubject.birthDate)
     console.log(result)
   })
 

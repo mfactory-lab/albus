@@ -48,8 +48,8 @@ export async function issue(opts: Opts) {
   // Issue new Verifiable Credential
   const vc = await credential.createVerifiableCredential(claims, {
     issuerSecretKey: config.issuerSecretKey,
+    userPublicKey: keypair.publicKey,
     encrypt: opts.encrypt,
-    holder: keypair.publicKey,
     aud: [config.issuerDid],
   })
 
