@@ -191,9 +191,6 @@ function lengthAndInput(input: Uint8Array): Uint8Array {
 /**
  * Implementation from:
  * https://github.com/decentralized-identity/did-jwt
- * @param secret
- * @param keyLen
- * @param alg
  */
 export function concatKDF(
   secret: Uint8Array,
@@ -209,7 +206,7 @@ export function concatKDF(
     lengthAndInput(new Uint8Array(0)), // apv
     writeUint32BE(keyLen),
   ])
-  // since our key length is 256 we only have to do one round
+  // since our key length is 256, we only have to do one round
   const roundNumber = 1
   return hash(u8a.concat([writeUint32BE(roundNumber), secret, value]))
 }
