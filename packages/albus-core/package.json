@@ -1,6 +1,6 @@
 {
   "name": "@mfactory-lab/albus-core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
@@ -36,7 +36,6 @@
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
-    "did-jwt-vc": "^2.1.14",
     "did-resolver": "^3.2.2",
     "key-did-resolver": "^3.0.0",
     "web-did-resolver": "^2.0.27",

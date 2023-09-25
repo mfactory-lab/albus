@@ -58,6 +58,7 @@ type Extensible<T> = T & { [x: string]: any }
 export type Verifiable<T> = Readonly<T> & { readonly proof: Proof }
 export type Proof = Extensible<{ type?: string }>
 export type IssuerType = Extensible<{ id: string }> | string
+export type DateType = string | Date
 
 export type W3CCredential = Extensible<{
   '@context': string[]

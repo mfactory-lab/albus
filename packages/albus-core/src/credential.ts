@@ -29,17 +29,14 @@
 import { InMemoryDB, Merkletree, ZERO_HASH, str2Bytes } from '@iden3/js-merkletree'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import type { VerifyCredentialOptions } from 'did-jwt-vc'
-import { validateCredentialPayload, validatePresentationPayload } from 'did-jwt-vc'
 import type { ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
 import { Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
-
 import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
-import { encodeDidKey } from './utils'
+import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
 
 const { bytesToBigInt, base58ToBytes } = utils
 
@@ -236,7 +233,7 @@ export async function encryptVerifiablePresentation(vp: VerifiablePresentation, 
   return { ...vp, verifiableCredential }
 }
 
-export interface VerifyCredentialOpts extends VerifyCredentialOptions {
+export interface VerifyCredentialOpts {
   decryptionKey?: number[] | Uint8Array
   resolver?: Resolver
 }
