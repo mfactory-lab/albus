@@ -31,13 +31,13 @@ export function useCredential() {
       // Issue new Verifiable Credential
       const vc = await credential.createVerifiableCredential(claims, {
         issuerSecretKey: ISSUER_SECRET_KEY,
+        userPublicKey: wallet.value?.publicKey,
         encrypt: true,
-        holder: wallet.value?.publicKey,
       })
 
-      // // Generate new VC-NFT
+      // Generate new VC-NFT
       await mintVerifiableCredentialNFT({ vc })
-      notifyStatus('VC succesfully created!')
+      notifyStatus('VC successfully created!')
     } catch (err) {
       console.log(err)
       notifyStatus(`[Error]: ${err}`, 'negative')
@@ -47,8 +47,8 @@ export function useCredential() {
   }
 
   /**
-  * Mint `VerifiableCredential` NFT
-  */
+   * Mint `VerifiableCredential` NFT
+   */
   async function mintVerifiableCredentialNFT(payload: { [key: string]: any }) {
     if (!wallet.value) {
       return
@@ -57,7 +57,7 @@ export function useCredential() {
 
     const _wallet = { ...cloneDeep(wallet.value), signMessage: _w.signMessage.value }
 
-    const metaplex = await Metaplex.make(connectionStore.connection)
+    const metaplex = Metaplex.make(connectionStore.connection)
       .use(walletAdapterIdentity(_wallet))
       .use(bundlrStorage({
         address: 'https://devnet.bundlr.network',
