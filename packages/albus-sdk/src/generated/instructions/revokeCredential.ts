@@ -24,9 +24,10 @@ export const revokeCredentialStruct = new beet.BeetArgsStruct<{
  * Accounts required by the _revokeCredential_ instruction
  *
  * @property [_writable_] albusAuthority
- * @property [] tokenAccount
- * @property [] mint
+ * @property [_writable_] tokenAccount
+ * @property [_writable_] mint
  * @property [_writable_] metadataAccount
+ * @property [_writable_] editionAccount
  * @property [_writable_, **signer**] authority
  * @property [] metadataProgram
  * @property [] sysvarInstructions
@@ -39,6 +40,7 @@ export interface RevokeCredentialInstructionAccounts {
   tokenAccount: web3.PublicKey
   mint: web3.PublicKey
   metadataAccount: web3.PublicKey
+  editionAccount: web3.PublicKey
   authority: web3.PublicKey
   metadataProgram: web3.PublicKey
   tokenProgram?: web3.PublicKey
@@ -74,16 +76,21 @@ export function createRevokeCredentialInstruction(
     },
     {
       pubkey: accounts.tokenAccount,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {
       pubkey: accounts.mint,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {
       pubkey: accounts.metadataAccount,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.editionAccount,
       isWritable: true,
       isSigner: false,
     },

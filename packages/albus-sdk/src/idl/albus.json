@@ -210,7 +210,7 @@
         },
         {
           "name": "tokenAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "Destination token account (required for pNFT).",
@@ -219,7 +219,7 @@
         },
         {
           "name": "mint",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "Mint account of the NFT.",
@@ -237,6 +237,16 @@
           "docs": [
             "Metadata account of the NFT.",
             "This account must be uninitialized.",
+            ""
+          ]
+        },
+        {
+          "name": "editionAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Master edition account of the NFT.",
+            "The account will be initialized if necessary.",
             ""
           ]
         },
