@@ -30,7 +30,7 @@ import { readFileSync } from 'node:fs'
 import type { WasmTester } from 'circom_tester'
 import { wasm as circomTester } from 'circom_tester'
 
-const FIXTURES_BASE_PATH = '../../circuits'
+const FIXTURES_BASE_PATH = '../circuits'
 
 export function setupCircuit(name: string) {
   return circomTester(`${FIXTURES_BASE_PATH}/${name}.circom`, {

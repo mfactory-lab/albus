@@ -24,7 +24,8 @@
     "build": "vite build",
     "release": "release-it --ci",
     "release:dry": "release-it --ci --dry-run",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublishOnly": "vite build"
   },
   "dependencies": {
     "@iden3/js-merkletree": "^1.0.1",
@@ -39,7 +40,6 @@
     "did-resolver": "^3.2.2",
     "key-did-resolver": "^3.0.0",
     "web-did-resolver": "^2.0.27",
-    "circomlib": "^2.0.5",
     "snarkjs": "*",
     "uint8arrays": "^3.1.1"
   },

@@ -46,7 +46,7 @@ export const XC20P_IV_LENGTH = NONCE_LENGTH
 export const XC20P_TAG_LENGTH = TAG_LENGTH
 export const XC20P_EPK_LENGTH = 32
 
-// a 64-byte private key on the Ed25519 curve.
+// A 64-byte private key on the Ed25519 curve.
 // In string form it is base58-encoded
 type PrivateKey = number[] | string | Uint8Array
 
@@ -101,7 +101,7 @@ export class XC20P {
     const ciphertext = bytes.subarray(XC20P_IV_LENGTH + XC20P_TAG_LENGTH, -XC20P_EPK_LENGTH)
     const epkPub = epk ?? bytes.subarray(-XC20P_EPK_LENGTH)
 
-    // normalise the key into an uint array
+    // normalize the key into an uint array
     const ed25519Key = makeKeypair(privateKey).secretKey
 
     // convert ed25519Key to x25519Key
