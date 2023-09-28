@@ -26,16 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-mod admin;
-mod circuit;
-mod credential;
-mod investigation;
-mod policy;
-mod proof_request;
-mod service_provider;
-mod trustee;
+pub mod create_trustee;
+pub mod delete_trustee;
+pub mod update_trustee;
+pub mod verify_trustee;
 
-pub use self::{
-    admin::*, circuit::*, credential::*, investigation::*, policy::*, proof_request::*,
-    service_provider::*, trustee::*,
-};
+pub use self::create_trustee::*;
+pub use self::delete_trustee::*;
+pub use self::update_trustee::*;
+pub use self::verify_trustee::*;

@@ -31,7 +31,7 @@ use anchor_lang::prelude::*;
 use crate::state::{ContactInfo, Trustee};
 use crate::{state::ServiceProvider, AlbusError};
 
-pub fn handler(ctx: Context<UpdateService>, data: UpdateServiceData) -> Result<()> {
+pub fn handler(ctx: Context<UpdateServiceProvider>, data: UpdateServiceProviderData) -> Result<()> {
     let service = &mut ctx.accounts.service_provider;
 
     if let Some(new_authority) = data.new_authority {
@@ -73,7 +73,7 @@ pub fn handler(ctx: Context<UpdateService>, data: UpdateServiceData) -> Result<(
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct UpdateServiceData {
+pub struct UpdateServiceProviderData {
     pub new_authority: Option<Pubkey>,
     pub name: Option<String>,
     pub website: Option<String>,
@@ -82,7 +82,7 @@ pub struct UpdateServiceData {
 }
 
 #[derive(Accounts)]
-pub struct UpdateService<'info> {
+pub struct UpdateServiceProvider<'info> {
     #[account(mut, has_one = authority)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 

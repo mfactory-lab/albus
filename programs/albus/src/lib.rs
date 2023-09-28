@@ -41,19 +41,63 @@ declare_id!("ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz");
 pub mod albus {
     use super::*;
 
-    pub fn create_investigation_request<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateInvestigationRequest<'info>>,
-        data: CreateInvestigationRequestData,
-    ) -> Result<()> {
-        create_investigation_request::handler(ctx, data)
+    // Credentials
+
+    pub fn mint_credential(ctx: Context<MintCredential>, data: MintCredentialData) -> Result<()> {
+        mint_credential::handler(ctx, data)
     }
 
-    pub fn reveal_secret_share(
-        ctx: Context<RevealSecretShare>,
-        data: RevealSecretShareData,
-    ) -> Result<()> {
-        reveal_secret_share::handler(ctx, data)
+    pub fn update_credential(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
+        update_credential::handler(ctx, data)
     }
+
+    pub fn revoke_credential(ctx: Context<RevokeCredential>) -> Result<()> {
+        revoke_credential::handler(ctx)
+    }
+
+    // Circuit
+
+    pub fn create_circuit(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<()> {
+        create_circuit::handler(ctx, data)
+    }
+
+    pub fn update_circuit_vk(ctx: Context<UpdateCircuitVk>, data: UpdateCircuitVkData) -> Result<()> {
+        update_circuit_vk::handler(ctx, data)
+    }
+
+    pub fn delete_circuit(ctx: Context<DeleteCircuit>) -> Result<()> {
+        delete_circuit::handler(ctx)
+    }
+
+    // Service Provider
+
+    pub fn create_service_provider(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
+        create_service_provider::handler(ctx, data)
+    }
+
+    pub fn update_service_provider(ctx: Context<UpdateServiceProvider>, data: UpdateServiceProviderData) -> Result<()> {
+        update_service_provider::handler(ctx, data)
+    }
+
+    pub fn delete_service_provider(ctx: Context<DeleteServiceProvider>) -> Result<()> {
+        delete_service_provider::handler(ctx)
+    }
+
+    // Policy
+
+    pub fn create_policy(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()> {
+        create_policy::handler(ctx, data)
+    }
+
+    pub fn update_policy(ctx: Context<UpdatePolicy>, data: UpdatePolicyData) -> Result<()> {
+        update_policy::handler(ctx, data)
+    }
+
+    pub fn delete_policy(ctx: Context<DeletePolicy>) -> Result<()> {
+        delete_policy::handler(ctx)
+    }
+
+    // Trustee
 
     pub fn create_trustee(ctx: Context<CreateTrustee>, data: CreateTrusteeData) -> Result<()> {
         create_trustee::handler(ctx, data)
@@ -71,55 +115,9 @@ pub mod albus {
         delete_trustee::handler(ctx)
     }
 
-    pub fn create_circuit(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<()> {
-        create_circuit::handler(ctx, data)
-    }
+    // Proof Request
 
-    pub fn update_circuit_vk(
-        ctx: Context<UpdateCircuitVk>,
-        data: UpdateCircuitVkData,
-    ) -> Result<()> {
-        update_circuit_vk::handler(ctx, data)
-    }
-
-    pub fn delete_circuit(ctx: Context<DeleteCircuit>) -> Result<()> {
-        delete_circuit::handler(ctx)
-    }
-
-    pub fn create_service_provider(
-        ctx: Context<CreateServiceProvider>,
-        data: CreateServiceProviderData,
-    ) -> Result<()> {
-        create_service_provider::handler(ctx, data)
-    }
-
-    pub fn update_service_provider(
-        ctx: Context<UpdateService>,
-        data: UpdateServiceData,
-    ) -> Result<()> {
-        update_service::handler(ctx, data)
-    }
-
-    pub fn delete_service_provider(ctx: Context<DeleteServiceProvider>) -> Result<()> {
-        delete_service_provider::handler(ctx)
-    }
-
-    pub fn create_policy(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()> {
-        create_policy::handler(ctx, data)
-    }
-
-    pub fn update_policy(ctx: Context<UpdatePolicy>, data: UpdatePolicyData) -> Result<()> {
-        update_policy::handler(ctx, data)
-    }
-
-    pub fn delete_policy(ctx: Context<DeletePolicy>) -> Result<()> {
-        delete_policy::handler(ctx)
-    }
-
-    pub fn create_proof_request(
-        ctx: Context<CreateProofRequest>,
-        data: CreateProofRequestData,
-    ) -> Result<()> {
+    pub fn create_proof_request(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -> Result<()> {
         create_proof_request::handler(ctx, data)
     }
 
@@ -128,17 +126,30 @@ pub mod albus {
     }
 
     pub fn prove(ctx: Context<Prove>, data: ProveData) -> Result<()> {
-        prove::handler(ctx, data)
+        prove_proof_request::handler(ctx, data)
     }
 
     pub fn verify(ctx: Context<VerifyProofRequest>, data: VerifyProofRequestData) -> Result<()> {
         verify_proof_request::handler(ctx, data)
     }
 
-    // admin handlers
+    // Investigation
+
+    pub fn create_investigation_request<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateInvestigationRequest<'info>>,
+        data: CreateInvestigationRequestData,
+    ) -> Result<()> {
+        create_investigation_request::handler(ctx, data)
+    }
+
+    pub fn reveal_secret_share(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> Result<()> {
+        reveal_secret_share::handler(ctx, data)
+    }
+
+    // Admin
 
     pub fn admin_close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
-        admin::close_account(ctx)
+        close_account::close_account(ctx)
     }
 }
 

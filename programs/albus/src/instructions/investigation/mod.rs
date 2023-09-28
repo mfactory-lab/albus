@@ -26,16 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-mod admin;
-mod circuit;
-mod credential;
-mod investigation;
-mod policy;
-mod proof_request;
-mod service_provider;
-mod trustee;
+pub mod create_investigation_request;
+pub mod reveal_secret_share;
 
-pub use self::{
-    admin::*, circuit::*, credential::*, investigation::*, policy::*, proof_request::*,
-    service_provider::*, trustee::*,
-};
+pub use self::create_investigation_request::*;
+pub use self::reveal_secret_share::*;
