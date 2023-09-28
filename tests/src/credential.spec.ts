@@ -27,23 +27,32 @@
  */
 
 import { AccountState } from '@solana/spl-token'
+import type { PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it } from 'vitest'
-import { AlbusClient } from '../../packages/albus-sdk/src'
+import {
+  AlbusClient,
+  getAssociatedTokenAddress,
+  getMasterEditionPDA,
+  getMetadataPDA,
+} from '../../packages/albus-sdk/src'
 import { airdrop, netMetaplex, payerKeypair, provider } from './utils'
 
 describe('Albus credential', () => {
   const client = new AlbusClient(provider)
+  const mx = netMetaplex(payerKeypair)
 
   beforeAll(async () => {
     await airdrop(payerKeypair.publicKey)
   })
 
-  it('can create credential nft', async () => {
+  let credentialMint: PublicKey
+
+  it('can create credential', async () => {
     const { signature, mintAddress } = await client.credential.create()
     console.log(`signature ${signature}`)
     console.log(`mintAddress ${mintAddress}`)
 
-    const mx = netMetaplex(payerKeypair)
+    credentialMint = mintAddress
 
     const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
       mint: mintAddress,
@@ -53,11 +62,41 @@ describe('Albus credential', () => {
 
     assert.equal(String(tokenWithMint.delegateAddress), String(client.pda.authority()[0]))
     assert.equal(tokenWithMint.state, AccountState.Frozen)
+  })
 
-    // const nftByOwner = await mx.nfts().findAllByOwner({ owner: payerKeypair.publicKey })
-    // console.log(nftByOwner)
+  it('can update credential', async () => {
+    const data = {
+      mint: credentialMint,
+      uri: 'https://example.com',
+      name: 'Test Credential',
+    }
+    await client.credential.update(data)
 
-    // const nft = await mx.nfts().findByMint({ mintAddress })
-    // console.log(nft)
+    const nft = await mx.nfts().findByMint({ mintAddress: credentialMint })
+    assert.equal(nft.uri, data.uri)
+    assert.equal(nft.name, data.name)
+  })
+
+  it('can revoke credential', async () => {
+    await client.credential.revoke({
+      mint: credentialMint,
+    })
+
+    const token = getAssociatedTokenAddress(credentialMint, client.provider.publicKey)
+
+    // Then the NFT accounts no longer exist.
+    const accounts = await mx
+      .rpc()
+      .getMultipleAccounts([
+        credentialMint,
+        token,
+        getMetadataPDA(credentialMint),
+        getMasterEditionPDA(credentialMint),
+      ])
+
+    assert.equal(accounts[0]?.exists, true, 'mint account still exists because of SPL Token')
+    assert.equal(accounts[1]?.exists, false, 'token account no longer exists')
+    // assert.equal(accounts[2]?.exists, false, 'metadata account no longer exists')
+    assert.equal(accounts[3]?.exists, false, 'edition account no longer exists')
   })
 })
