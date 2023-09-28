@@ -1,0 +1,6 @@
+*.ptau
+*.r1cs
+*.wasm
+*.sym
+*.vk.json
+*.zkey
