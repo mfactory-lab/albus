@@ -42,9 +42,7 @@ pub fn handler(ctx: Context<MintCredential>, data: MintCredentialData) -> Result
 
     let signer_seeds = [ID.as_ref(), &[ctx.bumps["albus_authority"]]];
 
-    let mut builder = CreateV1CpiBuilder::new(&ctx.accounts.metadata_program);
-
-    let create_builder = builder
+    CreateV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .metadata(&ctx.accounts.metadata_account)
         .name(name.into())
         .uri(data.uri)
@@ -61,14 +59,13 @@ pub fn handler(ctx: Context<MintCredential>, data: MintCredentialData) -> Result
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
         .spl_token_program(&ctx.accounts.token_program)
         .print_supply(PrintSupply::Zero)
-        .is_mutable(true);
+        .is_mutable(true)
+        .invoke_signed(&[&signer_seeds])?;
 
-    create_builder.invoke_signed(&[&signer_seeds])?;
-
-    let mut mint_builder = MintV1CpiBuilder::new(&ctx.accounts.token_program);
-    mint_builder
+    MintV1CpiBuilder::new(&ctx.accounts.token_program)
         .token(&ctx.accounts.token_account)
         .token_owner(Some(&ctx.accounts.payer))
+        .token_record(ctx.accounts.token_record.as_deref())
         .mint(&ctx.accounts.mint)
         .metadata(&ctx.accounts.metadata_account)
         .master_edition(Some(&ctx.accounts.edition_account))
@@ -77,16 +74,10 @@ pub fn handler(ctx: Context<MintCredential>, data: MintCredentialData) -> Result
         .system_program(&ctx.accounts.system_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
         .spl_token_program(&ctx.accounts.token_program)
-        .spl_ata_program(&ctx.accounts.ata_program);
+        .spl_ata_program(&ctx.accounts.ata_program)
+        .invoke_signed(&[&signer_seeds])?;
 
-    if let Some(t) = &ctx.accounts.token_record {
-        mint_builder.token_record(Some(t));
-    }
-
-    mint_builder.invoke_signed(&[&signer_seeds])?;
-
-    let mut delegate_builder = DelegateStandardV1CpiBuilder::new(&ctx.accounts.metadata_program);
-    delegate_builder
+    DelegateStandardV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .delegate(&ctx.accounts.albus_authority)
         .token(&ctx.accounts.token_account)
         .metadata(&ctx.accounts.metadata_account)
@@ -96,19 +87,16 @@ pub fn handler(ctx: Context<MintCredential>, data: MintCredentialData) -> Result
         .payer(&ctx.accounts.payer)
         .spl_token_program(Some(&ctx.accounts.token_program))
         .system_program(&ctx.accounts.system_program)
-        .sysvar_instructions(&ctx.accounts.sysvar_instructions);
+        .sysvar_instructions(&ctx.accounts.sysvar_instructions)
+        .invoke_signed(&[&signer_seeds])?;
 
-    delegate_builder.invoke_signed(&[&signer_seeds])?;
-
-    let mut freeze_builder = FreezeDelegatedAccountCpiBuilder::new(&ctx.accounts.metadata_program);
-    freeze_builder
+    FreezeDelegatedAccountCpiBuilder::new(&ctx.accounts.metadata_program)
         .mint(&ctx.accounts.mint)
         .edition(&ctx.accounts.edition_account)
         .token_account(&ctx.accounts.token_account)
         .delegate(&ctx.accounts.albus_authority)
-        .token_program(&ctx.accounts.token_program);
-
-    freeze_builder.invoke_signed(&[&signer_seeds])?;
+        .token_program(&ctx.accounts.token_program)
+        .invoke_signed(&[&signer_seeds])?;
 
     // For Programmable NFT use UtilityV1 and LockV1
 

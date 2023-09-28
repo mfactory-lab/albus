@@ -39,9 +39,7 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
 
     let signer_seeds = [ID.as_ref(), &[ctx.bumps["albus_authority"]]];
 
-    let mut builder = UpdateV1CpiBuilder::new(&ctx.accounts.metadata_program);
-
-    builder
+    UpdateV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .metadata(&ctx.accounts.metadata_account)
         .authority(&ctx.accounts.albus_authority)
         .token(Some(&ctx.accounts.token_account))
@@ -63,9 +61,8 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
                 // Add issuer account ?
             ]),
         })
-        .is_mutable(true);
-
-    builder.invoke_signed(&[&signer_seeds])?;
+        .is_mutable(true)
+        .invoke_signed(&[&signer_seeds])?;
 
     Ok(())
 }

@@ -30,25 +30,32 @@ use crate::ID;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
 use anchor_spl::token::Token;
-use mpl_token_metadata::instructions::BurnV1CpiBuilder;
+use mpl_token_metadata::instructions::{BurnV1CpiBuilder, ThawDelegatedAccountCpiBuilder};
 
 pub fn handler(ctx: Context<RevokeCredential>) -> Result<()> {
     // assert_authorized(ctx.accounts.authority.key)?;
     let signer_seeds = [ID.as_ref(), &[ctx.bumps["albus_authority"]]];
 
-    let mut builder = BurnV1CpiBuilder::new(&ctx.accounts.metadata_program);
+    ThawDelegatedAccountCpiBuilder::new(&ctx.accounts.metadata_program)
+        .mint(&ctx.accounts.mint)
+        .edition(&ctx.accounts.edition_account)
+        .token_account(&ctx.accounts.token_account)
+        .delegate(&ctx.accounts.albus_authority)
+        .token_program(&ctx.accounts.token_program)
+        .invoke_signed(&[&signer_seeds])?;
 
-    builder
+    BurnV1CpiBuilder::new(&ctx.accounts.metadata_program)
+        .authority(&ctx.accounts.authority)
         .metadata(&ctx.accounts.metadata_account)
-        .authority(&ctx.accounts.albus_authority)
         .token(&ctx.accounts.token_account)
         .mint(&ctx.accounts.mint)
-        // .master_edition(&ctx.accounts.edition_account)
+        .edition(Some(&ctx.accounts.edition_account))
         .spl_token_program(&ctx.accounts.token_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
-        .system_program(&ctx.accounts.system_program);
+        .system_program(&ctx.accounts.system_program)
+        .invoke()?;
 
-    builder.invoke_signed(&[&signer_seeds])?;
+    // builder.invoke_signed(&[&signer_seeds])?;
 
     Ok(())
 }
@@ -62,6 +69,7 @@ pub struct RevokeCredential<'info> {
     /// Destination token account (required for pNFT).
     ///
     /// CHECK: account checked in CPI
+    #[account(mut)]
     pub token_account: UncheckedAccount<'info>,
 
     /// Mint account of the NFT.
@@ -71,6 +79,7 @@ pub struct RevokeCredential<'info> {
     ///   * the mint account does not exist.
     ///
     /// CHECK: account checked in CPI
+    #[account(mut)]
     pub mint: UncheckedAccount<'info>,
 
     /// Metadata account of the NFT.
@@ -80,12 +89,13 @@ pub struct RevokeCredential<'info> {
     #[account(mut)]
     pub metadata_account: UncheckedAccount<'info>,
 
-    // /// Master edition account of the NFT.
-    // /// The account will be initialized if necessary.
-    // ///
-    // /// CHECK: account checked in CPI
-    // #[account(mut)]
-    // pub edition_account: UncheckedAccount<'info>,
+    /// Master edition account of the NFT.
+    /// The account will be initialized if necessary.
+    ///
+    /// CHECK: account checked in CPI
+    #[account(mut)]
+    pub edition_account: UncheckedAccount<'info>,
+
     #[account(mut)]
     pub authority: Signer<'info>,
 
