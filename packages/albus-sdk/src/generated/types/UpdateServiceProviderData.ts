@@ -11,7 +11,7 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
 import type { ContactInfo } from './ContactInfo'
 import { contactInfoBeet } from './ContactInfo'
 
-export interface UpdateServiceData {
+export interface UpdateServiceProviderData {
   newAuthority: beet.COption<web3.PublicKey>
   name: beet.COption<string>
   website: beet.COption<string>
@@ -23,8 +23,8 @@ export interface UpdateServiceData {
  * @category userTypes
  * @category generated
  */
-export const updateServiceDataBeet
-  = new beet.FixableBeetArgsStruct<UpdateServiceData>(
+export const updateServiceProviderDataBeet
+  = new beet.FixableBeetArgsStruct<UpdateServiceProviderData>(
     [
       ['newAuthority', beet.coption(beetSolana.publicKey)],
       ['name', beet.coption(beet.utf8String)],
@@ -32,5 +32,5 @@ export const updateServiceDataBeet
       ['contactInfo', beet.coption(contactInfoBeet)],
       ['secretShareThreshold', beet.coption(beet.u8)],
     ],
-    'UpdateServiceData',
+    'UpdateServiceProviderData',
   )
