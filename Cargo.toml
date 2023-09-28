@@ -8,12 +8,12 @@ members = [
 ]
 
 [profile.release]
-overflow-checks = true
-lto = true
 codegen-units = 1
+lto = "fat"
+overflow-checks = true
 opt-level = "z"
+#panic = 'abort'
 #strip = true
-#panic = "abort"
 
 #[profile.release.build-override]
 #opt-level = 3
