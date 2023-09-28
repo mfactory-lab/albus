@@ -26,18 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub const AUTHORIZED_AUTHORITY: &[&str] = &[
-    // test payer
-    "4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i",
-    "5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH",
-];
+pub mod mint_credential;
+pub mod revoke_credential;
+pub mod update_credential;
 
-/// Default Albus issuer public key
-// pub const ISSUER_PK: [u8; 64] = [0; 64];
-// pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
-pub const CURRENT_DATE_SIGNAL: &str = "currentDate";
-
-pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
-pub const VC_SYMBOL_CODE: &str = "VC";
-
-pub const DEFAULT_SECRET_SHARE_THRESHOLD: u8 = 2;
+pub use self::mint_credential::*;
+pub use self::revoke_credential::*;
+pub use self::update_credential::*;
