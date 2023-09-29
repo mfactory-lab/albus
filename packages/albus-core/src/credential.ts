@@ -52,6 +52,7 @@ export interface CreateCredentialOpts {
   issuerDid?: string
   verificationMethod?: string
   encrypt?: boolean
+  // Ephemeral Secret Key
   esk?: number[] | Uint8Array
   nbf?: number
   exp?: number
@@ -98,6 +99,11 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
     'issuanceDate': new Date().toISOString(),
     'credentialSubject': credentialSubject,
   }
+
+  // vc.credentialStatus = {
+  //   id: 'https://example.edu/status/24',
+  //   type: 'CredentialStatusList2017',
+  // }
 
   if (opts?.exp) {
     vc.expirationDate = new Date(opts.exp * 1000).toISOString()
@@ -511,9 +517,13 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
     encodeKey,
     encodeVal,
     root: await tree.root().then(r => r.bigInt()),
+    // root: () => tree.root().then(r => r.bigInt()),
     proof: async (key: string) => {
       const encodedKey = encodeKey(key)
       const res = await tree.generateCircomVerifierProof(encodedKey, ZERO_HASH)
+
+      console.log(res)
+
       return [
         encodedKey,
         ...res.siblings.map(s => s.bigInt()),

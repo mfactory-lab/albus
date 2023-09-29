@@ -37,7 +37,7 @@ use mpl_token_metadata::instructions::{
 };
 use mpl_token_metadata::types::{PrintSupply, TokenStandard};
 
-pub fn handler(ctx: Context<MintCredential>, data: MintCredentialData) -> Result<()> {
+pub fn handler(ctx: Context<MintCredential>, _data: MintCredentialData) -> Result<()> {
     let name = "Albus Verifiable Credential";
 
     let signer_seeds = [ID.as_ref(), &[ctx.bumps["albus_authority"]]];
@@ -45,7 +45,7 @@ pub fn handler(ctx: Context<MintCredential>, data: MintCredentialData) -> Result
     CreateV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .metadata(&ctx.accounts.metadata_account)
         .name(name.into())
-        .uri(data.uri)
+        .uri(Default::default())
         .symbol(format!("{}-{}", NFT_SYMBOL_PREFIX, VC_SYMBOL_CODE))
         .mint(&ctx.accounts.mint, true)
         .master_edition(Some(&ctx.accounts.edition_account))
