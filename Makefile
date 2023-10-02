@@ -1,17 +1,18 @@
 #!/usr/bin/make
 
-program = albus
-
-# Get program id by program name
-program_id = $(shell sed -n 's/^ *${program}.*=.*"\([^"]*\)".*/\1/p' Anchor.toml | head -1)
-
-# Get wallet from Anchor.toml
-wallet = $(shell sed -n '/\[provider\]/,/\[/ s/^wallet[[:space:]]*=[[:space:]]*"\(.*\)"/\1/p' Anchor.toml | head -1)
-
-# Parse args
-args := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-
 .DEFAULT_GOAL: help
+.PHONY: build bump test test-unit
+
+NETWORK ?= devnet
+PROGRAM ?= albus
+
+CIRCUITS_PATH ?= ./packages/circuits
+
+# Get the program ID by program name from the Anchor.toml file
+program_id = $(shell sed -n 's/^ *${PROGRAM}.*=.*"\([^"]*\)".*/\1/p' Anchor.toml | head -1)
+
+# Get wallet address from the Anchor.toml file
+wallet = $(shell sed -n '/\[provider\]/,/\[/ s/^wallet[[:space:]]*=[[:space:]]*"\(.*\)"/\1/p' Anchor.toml | head -1)
 
 help: ## Show this help
 	@printf "\033[33m%s:\033[0m\n" 'Available commands'
@@ -19,52 +20,65 @@ help: ## Show this help
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-.PHONY: bump
-bump: ## Bump albus program version
-	cd ./programs/albus/ && cargo bump
+bump: ## Bump program version
+	cd ./programs/$(PROGRAM)/ && cargo bump
 
-.PHONY: build
-build: ## Build program
-	anchor build -p $(program)
+build:
+ifdef NETWORK
+	@echo "> Building programs for $(NETWORK)"
+	anchor build -p $(PROGRAM) --arch sbf -- --features $(NETWORK)
+else
+	anchor build -p $(PROGRAM) --arch sbf
+endif
 
-.PHONY: test
-test: ## Test program (Localnet)
-	anchor test --skip-lint --provider.cluster localnet
+test: ## Test integration (localnet)
+	anchor test --arch sbf --skip-lint --provider.cluster localnet
 
-.PHONY: sdk
+test-unit: ## Test unit
+	cargo clippy --all-features -- --allow clippy::result_large_err
+	cargo test --all-features
+
 sdk: ## Generate new sdk
 	pnpm gen:sdk
 
-.PHONY: deploy
 deploy: build ## Deploy program
-	anchor deploy -p $(program)
+	anchor deploy -p $(PROGRAM) --provider.cluster $(NETWORK)
+#	--program-keypair ./target/deploy/$(PROGRAM)-keypair-$(NETWORK).json
 
-.PHONY: deploy-mainnet
-deploy-mainnet: build ## Deploy program (Mainnet)
-	anchor deploy -p $(program) --provider.cluster mainnet
+deploy-mainnet: build ## Deploy program (mainnet)
+	anchor deploy -p $(PROGRAM) --provider.cluster mainnet
 
-.PHONY: upgrade
 upgrade: build ## Upgrade program
-	anchor upgrade -p $(program_id) ./target/deploy/$(program).so
+	anchor upgrade -p $(program_id) ./target/deploy/$(PROGRAM).so
 
-.PHONY: upgrade-mainnet
 upgrade-mainnet: build ## Upgrade program (Mainnet)
-	anchor upgrade -p $(program_id) --provider.cluster mainnet ./target/deploy/$(program).so
+	anchor upgrade -p $(program_id) --provider.cluster mainnet ./target/deploy/$(PROGRAM).so
 
-.PHONY: show-buffers
 show-buffers: ## Show program buffers
 	solana program show --buffers -k $(wallet)
 
-.PHONY: close-buffers
 close-buffers: ## Close program buffers
 	solana program close --buffers -k $(wallet)
 
+clean:
+	rm -rf node_modules target .anchor
+
+#ifneq ($(NETWORK), $(shell cat target/network_changed 2>/dev/null))
+##force update of target/network_changed if value of NETWORK changed from last time
+#.PHONY: target/network_changed
+#endif
+#target/network_changed:
+#	echo $(NETWORK) > target/network_changed
+
 # ----------------------------------------------------------------------------------------------------------------------
 
-.PHONY: circom
+# Parse args
+args := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+
 circom: ## Build circom (e.g. make circom AgePolicy)
-	circom ./circuits/$(args).circom -p bn128 -l node_modules --r1cs --wasm --sym -o ./circuits && \
-	mv ./circuits/$(args)_js/$(args).wasm ./circuits/ && rm -rf ./circuits/$(args)_js
+	circom $(CIRCUITS_PATH)/$(args).circom -p bn128 -l node_modules --r1cs --wasm --sym -o $(CIRCUITS_PATH) && \
+	mv $(CIRCUITS_PATH)/$(args)_js/$(args).wasm $(CIRCUITS_PATH)/ && \
+	rm -rf $(CIRCUITS_PATH)/$(args)_js
 
 %::
 	@true
