@@ -63,7 +63,7 @@
           ]
         },
         {
-          "name": "payer",
+          "name": "authority",
           "isMut": true,
           "isSigner": true
         },

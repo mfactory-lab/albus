@@ -46,7 +46,7 @@ export const mintCredentialStruct = new beet.FixableBeetArgsStruct<
  * @property [_writable_, **signer**] mint
  * @property [_writable_] metadataAccount
  * @property [_writable_] editionAccount
- * @property [_writable_, **signer**] payer
+ * @property [_writable_, **signer**] authority
  * @property [] metadataProgram
  * @property [] sysvarInstructions
  * @category Instructions
@@ -60,7 +60,7 @@ export interface MintCredentialInstructionAccounts {
   mint: web3.PublicKey
   metadataAccount: web3.PublicKey
   editionAccount: web3.PublicKey
-  payer: web3.PublicKey
+  authority: web3.PublicKey
   tokenProgram?: web3.PublicKey
   ataProgram?: web3.PublicKey
   metadataProgram: web3.PublicKey
@@ -127,7 +127,7 @@ export function createMintCredentialInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.payer,
+      pubkey: accounts.authority,
       isWritable: true,
       isSigner: true,
     },
