@@ -28,7 +28,9 @@
 
 import { AccountState } from '@solana/spl-token'
 import type { PublicKey } from '@solana/web3.js'
-import { assert, beforeAll, describe, it } from 'vitest'
+import axios from 'axios'
+
+import { assert, beforeAll, describe, it, vi } from 'vitest'
 import {
   AlbusClient,
   getAssociatedTokenAddress,
@@ -37,12 +39,49 @@ import {
 } from '../../packages/albus-sdk/src'
 import { airdrop, netMetaplex, payerKeypair, provider } from './utils'
 
+const credential = {
+  name: 'ALBUS Verifiable Credential',
+  image: 'https://arweave.net/hcbme7qK8G-aos2akxPub-nm7XGNaZ0Tr-sh7syqWxk',
+  external_url: 'https://albus.finance',
+  vc: {
+    '@context': [
+      'https://www.w3.org/ns/credentials/v2',
+    ],
+    'type': [
+      'VerifiableCredential',
+      'AlbusCredential',
+    ],
+    'issuer': 'did:web:issuer.albus.finance:fake',
+    'issuanceDate': '2023-10-02T18:59:11.425Z',
+    'credentialSubject': {
+      encrypted: 'W5xvhgbJDiEaFYwJaS+OR5kYfZ957CxXoqsdsZc9lSgRYh36+X4ee//t1ZEtfeiDsycY//rNPZCzmWT1csfhzL3q3v9DXmM5RFDvSWpMJ9PBYUGnDcA6VL9vDpc9rhVbqnT5+RaPSO/KBZkr3r4Hj5N27WdBQCWVTD53l8F0iWM0rZqex7Vq/JILOV6JRAeqfOpNzOloOfeu3nGHcvavra55UBGxQpy8IUzynHMneEpMkflRJGyeboQVRt0xxt7lzNTujukvl7z809OmoU6qqkg4NamQxeLgaZBgJ6OsGGtWkn/Vk2GtyWSkLJwBErANMvdzYg==',
+    },
+    'proof': {
+      type: 'BJJSignature2021',
+      created: 1696273151721,
+      verificationMethod: 'did:web:issuer.albus.finance:fake#eddsa-bjj',
+      rootHash: '13734296669612465157065630684375000547574498367020126210327710078244046279320',
+      proofValue: {
+        ax: '17281608414500272942926857538904179701981623683161575728981126685887789130748',
+        ay: '15375967852937051010384309239440519791525886180615377470153101980457579998366',
+        r8x: '13752946170795660522212744808413559627947178088732602814020765250952213206748',
+        r8y: '438153240054645829900098164755628400290372863044956388237821033323841734115',
+        s: '2349542200687397301602429863181401276929629554567127558810400042014053165114',
+      },
+      proofPurpose: 'assertionMethod',
+    },
+  },
+}
+
 describe('Albus credential', () => {
   const client = new AlbusClient(provider)
   const mx = netMetaplex(payerKeypair)
 
+  const updateAuthority = client.pda.authority()[0]
+
   beforeAll(async () => {
     await airdrop(payerKeypair.publicKey)
+    await airdrop(updateAuthority)
   })
 
   let credentialMint: PublicKey
@@ -54,27 +93,65 @@ describe('Albus credential', () => {
 
     credentialMint = mintAddress
 
+    const nft = await mx.nfts().findByMint({ mintAddress })
+
+    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
+
     const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
       mint: mintAddress,
       address: payerKeypair.publicKey,
       addressType: 'owner',
     })
 
-    assert.equal(String(tokenWithMint.delegateAddress), String(client.pda.authority()[0]))
+    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
     assert.equal(tokenWithMint.state, AccountState.Frozen)
   })
 
   it('can update credential', async () => {
     const data = {
       mint: credentialMint,
-      uri: 'https://example.com',
+      uri: 'https://credential.json',
       name: 'Test Credential',
     }
     await client.credential.update(data)
-
     const nft = await mx.nfts().findByMint({ mintAddress: credentialMint })
     assert.equal(nft.uri, data.uri)
     assert.equal(nft.name, data.name)
+  })
+
+  it('can load credential', async () => {
+    vi.spyOn(axios, 'get')
+      .mockImplementationOnce(async (uri) => {
+        switch (uri) {
+          case 'https://credential.json':
+            return {
+              status: 200,
+              data: credential,
+            }
+        }
+      })
+
+    const vc = await client.credential.load(credentialMint)
+
+    assert.deepEqual(vc, credential.vc)
+  })
+
+  it('can load all credentials', async () => {
+    vi.spyOn(axios, 'get')
+      .mockImplementationOnce(async (uri) => {
+        switch (uri) {
+          case 'https://credential.json':
+            return {
+              status: 200,
+              data: credential,
+            }
+        }
+      })
+
+    const vc = await client.credential.loadAll()
+
+    assert.equal(vc.length, 1)
+    assert.deepEqual(vc[0]?.credential, credential.vc)
   })
 
   it('can revoke credential', async () => {
