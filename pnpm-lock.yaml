@@ -391,6 +391,9 @@ importers:
       '@metaplex-foundation/js':
         specifier: ^0.19.4
         version: 0.19.4
+      '@mfactory-lab/albus-core':
+        specifier: workspace:^
+        version: link:../packages/albus-core
       '@mfactory-lab/albus-sdk':
         specifier: workspace:^
         version: link:../packages/albus-sdk
