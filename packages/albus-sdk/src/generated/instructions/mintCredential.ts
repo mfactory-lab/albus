@@ -89,7 +89,7 @@ export const mintCredentialInstructionDiscriminator = [
 export function createMintCredentialInstruction(
   accounts: MintCredentialInstructionAccounts,
   args: MintCredentialInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = mintCredentialStruct.serialize({
     instructionDiscriminator: mintCredentialInstructionDiscriminator,

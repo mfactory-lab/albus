@@ -63,7 +63,7 @@ export const revokeCredentialInstructionDiscriminator = [
  */
 export function createRevokeCredentialInstruction(
   accounts: RevokeCredentialInstructionAccounts,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = revokeCredentialStruct.serialize({
     instructionDiscriminator: revokeCredentialInstructionDiscriminator,

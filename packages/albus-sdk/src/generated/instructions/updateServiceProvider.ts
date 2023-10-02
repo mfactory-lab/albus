@@ -69,7 +69,7 @@ export const updateServiceProviderInstructionDiscriminator = [
 export function createUpdateServiceProviderInstruction(
   accounts: UpdateServiceProviderInstructionAccounts,
   args: UpdateServiceProviderInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = updateServiceProviderStruct.serialize({
     instructionDiscriminator: updateServiceProviderInstructionDiscriminator,

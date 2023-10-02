@@ -69,7 +69,7 @@ export const updateTrusteeInstructionDiscriminator = [
 export function createUpdateTrusteeInstruction(
   accounts: UpdateTrusteeInstructionAccounts,
   args: UpdateTrusteeInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = updateTrusteeStruct.serialize({
     instructionDiscriminator: updateTrusteeInstructionDiscriminator,

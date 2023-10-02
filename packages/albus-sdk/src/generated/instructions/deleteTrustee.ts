@@ -49,7 +49,7 @@ export const deleteTrusteeInstructionDiscriminator = [
  */
 export function createDeleteTrusteeInstruction(
   accounts: DeleteTrusteeInstructionAccounts,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = deleteTrusteeStruct.serialize({
     instructionDiscriminator: deleteTrusteeInstructionDiscriminator,
