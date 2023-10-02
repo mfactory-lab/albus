@@ -30,7 +30,7 @@ import type { AnchorProvider } from '@coral-xyz/anchor'
 import * as Albus from '@mfactory-lab/albus-core'
 import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
-import type { UpdateServiceData } from './generated'
+import type { UpdateServiceProviderData } from './generated'
 import {
   ServiceProvider,
   createCreateServiceProviderInstruction,
@@ -255,14 +255,14 @@ export interface ServiceContact {
   value: string
 }
 
-export interface CreateServiceProps extends Partial<UpdateServiceData> {
+export interface CreateServiceProps extends Partial<UpdateServiceProviderData> {
   code: string
   name: string
   authority?: PublicKeyInitData
   trustees?: PublicKeyInitData[]
 }
 
-export interface UpdateServiceProps extends Partial<UpdateServiceData> {
+export interface UpdateServiceProps extends Partial<UpdateServiceProviderData> {
   serviceProvider: PublicKeyInitData
   trustees?: PublicKeyInitData[]
 }

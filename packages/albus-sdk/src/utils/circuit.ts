@@ -110,7 +110,7 @@ export class ProofInputBuilder {
   }
 
   /**
-   * Normalize a claim key by trimming whitespace.
+   * Normalize a claim key by trimming space.
    *
    * @param {string} s - The claim key to normalize.
    * @returns {string} The normalized claim key.
@@ -247,17 +247,6 @@ export function getSignals(symbols: string[], inputs: bigint[]): Record<string, 
 
   return map
 }
-
-// /**
-//  * Parse a symbol with a name like 'symbol[5][3]' into its components.
-//  *
-//  * @param {string} s - The symbol name to parse.
-//  * @returns {[string, number, number]} An array containing the parsed signal name, size, and subsize.
-//  */
-// function parseSymbol(s: string): [string, number, number] {
-//   const r = s.match(/^(\w+)(?:\[(\d+)](?:\[(\d+)])?)?$/)
-//   return r ? [r[1]!, r[2] ? Number(r[2]) : 1, r[3] ? Number(r[3]) : 1] : ['', 0, 0]
-// }
 
 export function parseSignal(signal: string): ParseSignalResult | null {
   if (signal.length === 0) {
