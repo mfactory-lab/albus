@@ -36,6 +36,10 @@ export class PdaManager {
 
   constructor(private encoder = new TextEncoder()) {}
 
+  authority() {
+    return PublicKey.findProgramAddressSync([this.programId.toBuffer()], this.programId)
+  }
+
   circuit(code: string) {
     return PublicKey.findProgramAddressSync([
       this.encoder.encode('circuit'),

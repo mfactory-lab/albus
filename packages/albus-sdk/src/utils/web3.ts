@@ -34,7 +34,7 @@ import type { AccountInfo, Connection, PublicKeyInitData } from '@solana/web3.js
 import { PROGRAM_ID as METADATA_PROGRAM_ID, Metadata } from '@metaplex-foundation/mpl-token-metadata'
 import { chunk } from 'lodash-es'
 import type { AlbusNftCode } from '../types'
-import { NFT_AUTHORITY, NFT_SYMBOL_PREFIX } from '../constants'
+import { NFT_SYMBOL_PREFIX } from '../constants'
 
 export async function getSolanaTimestamp(connection: Connection) {
   const slot = await connection.getSlot()
@@ -43,6 +43,7 @@ export async function getSolanaTimestamp(connection: Connection) {
 }
 
 export interface ValidateNftProps {
+  authority: PublicKeyInitData
   code?: AlbusNftCode
   creators?: Creator[]
 }
@@ -52,8 +53,8 @@ export interface ValidateNftProps {
  * @param nft
  * @param props
  */
-export function validateNft(nft: Metadata, props: ValidateNftProps = {}) {
-  if (nft.updateAuthority.toString() !== NFT_AUTHORITY) {
+export function validateNft(nft: Metadata, props: ValidateNftProps) {
+  if (props.authority && nft.updateAuthority.toString() !== new PublicKey(props.authority).toString()) {
     throw new Error('Unauthorized NFT')
   }
 
@@ -75,7 +76,7 @@ export function validateNft(nft: Metadata, props: ValidateNftProps = {}) {
  * @param addr
  * @param validate
  */
-export async function loadNft(connection: Connection, addr: PublicKeyInitData, validate?: ValidateNftProps) {
+export async function loadNft(connection: Connection, addr: PublicKeyInitData, validate: ValidateNftProps) {
   const metadata = await getMetadataByMint(connection, addr, true)
   if (!metadata) {
     throw new Error(`Unable to find Metadata account at ${addr}`)
@@ -160,7 +161,7 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
   rawAccounts = rawAccounts.filter(a => a !== null)
 
   // There is no reason to continue processing
-  // if mints doesn't have associated metadata account. just return []
+  // if mints don't have an associated metadata account. Just return []
   if (!rawAccounts?.length || rawAccounts?.length === 0) {
     return []
   }
@@ -177,7 +178,7 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
       valid &&= acc.updateAuthority.toString() === new PublicKey(props.updateAuthority).toString()
     }
     if (props.symbol !== undefined) {
-      valid &&= acc.data.symbol === props.symbol
+      valid &&= acc.data.symbol.startsWith(props.symbol)
     }
     if (props.name !== undefined) {
       valid &&= acc.data.name.includes(props.name)
@@ -187,13 +188,14 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
 
   if (props.withJson) {
     return Promise.all(
-      filteredAccounts.map(acc => axios.get(acc.data.uri)
-        .then((r) => {
-          acc.json = r.data
-          return acc
-        })
-        .catch(_e => acc),
-      ),
+      filteredAccounts
+        .map(acc => axios.get(acc.data.uri)
+          .then((r) => {
+            acc.json = r.data
+            return acc
+          })
+          .catch(_e => acc),
+        ),
     )
   }
 
@@ -220,9 +222,42 @@ function sanitizeMetadata(tokenData: Metadata) {
   }) as Metadata
 }
 
-function getMetadataPDA(mint: PublicKeyInitData): PublicKey {
+export function getMetadataPDA(mint: PublicKeyInitData): PublicKey {
   return PublicKey.findProgramAddressSync(
-    [new TextEncoder().encode('metadata'), METADATA_PROGRAM_ID.toBuffer(), new PublicKey(mint).toBuffer()],
+    [
+      new TextEncoder().encode('metadata'),
+      METADATA_PROGRAM_ID.toBuffer(),
+      new PublicKey(mint).toBuffer(),
+    ],
     METADATA_PROGRAM_ID,
+  )[0]
+}
+
+export function getMasterEditionPDA(mint: PublicKeyInitData) {
+  return PublicKey.findProgramAddressSync(
+    [
+      new TextEncoder().encode('metadata'),
+      METADATA_PROGRAM_ID.toBuffer(),
+      new PublicKey(mint).toBuffer(),
+      new TextEncoder().encode('edition'),
+    ],
+    METADATA_PROGRAM_ID,
+  )[0]
+}
+
+export function getAssociatedTokenAddress(
+  mint: PublicKey,
+  owner: PublicKey,
+  allowOwnerOffCurve = false,
+  programId = AnchorUtils.token.TOKEN_PROGRAM_ID,
+  associatedTokenProgramId = AnchorUtils.token.ASSOCIATED_PROGRAM_ID,
+) {
+  if (!allowOwnerOffCurve && !PublicKey.isOnCurve(owner.toBuffer())) {
+    throw new Error('Invalid token owner account')
+  }
+
+  return PublicKey.findProgramAddressSync(
+    [owner.toBuffer(), programId.toBuffer(), mint.toBuffer()],
+    associatedTokenProgramId,
   )[0]
 }
