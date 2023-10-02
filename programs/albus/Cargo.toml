@@ -12,9 +12,12 @@ crate-type = ["cdylib", "lib"]
 
 [features]
 no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
 cpi = ["no-entrypoint"]
-verify-on-chain = ["dep:groth16-solana"]
+verify-on-chain = ["groth16-solana"]
 default = ["verify-on-chain"]
+devnet = []
 
 [dependencies]
 anchor-lang = { version = "0.28.0", features = ["init-if-needed"] }

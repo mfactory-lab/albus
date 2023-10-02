@@ -71,8 +71,7 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
 
     // apply current date
     if let Some(s) = signals.get(CURRENT_DATE_SIGNAL) {
-        req.public_inputs[s.0] =
-            format_circuit_date(timestamp).expect("Failed to get current timestamp");
+        req.public_inputs[s.0] = format_circuit_date(timestamp).expect("Failed to get current timestamp");
     }
 
     // // apply issuer public key

@@ -51,7 +51,7 @@ pub fn handler(ctx: Context<MintCredential>, _data: MintCredentialData) -> Resul
         .master_edition(Some(&ctx.accounts.edition_account))
         .token_standard(TokenStandard::NonFungible)
         // .token_standard(TokenStandard::ProgrammableNonFungible)
-        .payer(&ctx.accounts.payer)
+        .payer(&ctx.accounts.albus_authority)
         .authority(&ctx.accounts.albus_authority)
         .seller_fee_basis_points(0)
         .update_authority(&ctx.accounts.albus_authority, true)
@@ -64,13 +64,13 @@ pub fn handler(ctx: Context<MintCredential>, _data: MintCredentialData) -> Resul
 
     MintV1CpiBuilder::new(&ctx.accounts.token_program)
         .token(&ctx.accounts.token_account)
-        .token_owner(Some(&ctx.accounts.payer))
+        .token_owner(Some(&ctx.accounts.authority))
         .token_record(ctx.accounts.token_record.as_deref())
         .mint(&ctx.accounts.mint)
         .metadata(&ctx.accounts.metadata_account)
         .master_edition(Some(&ctx.accounts.edition_account))
         .authority(&ctx.accounts.albus_authority)
-        .payer(&ctx.accounts.payer)
+        .payer(&ctx.accounts.albus_authority)
         .system_program(&ctx.accounts.system_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
         .spl_token_program(&ctx.accounts.token_program)
@@ -83,8 +83,8 @@ pub fn handler(ctx: Context<MintCredential>, _data: MintCredentialData) -> Resul
         .metadata(&ctx.accounts.metadata_account)
         .mint(&ctx.accounts.mint)
         .master_edition(Some(&ctx.accounts.edition_account))
-        .authority(&ctx.accounts.payer)
-        .payer(&ctx.accounts.payer)
+        .authority(&ctx.accounts.authority)
+        .payer(&ctx.accounts.albus_authority)
         .spl_token_program(Some(&ctx.accounts.token_program))
         .system_program(&ctx.accounts.system_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
@@ -166,7 +166,7 @@ pub struct MintCredential<'info> {
     pub edition_account: UncheckedAccount<'info>,
 
     #[account(mut)]
-    pub payer: Signer<'info>,
+    pub authority: Signer<'info>,
 
     /// SPL Token program.
     pub token_program: Program<'info, Token>,

@@ -26,6 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+// TODO: fixed in https://github.com/coral-xyz/anchor/pull/2600
+#![allow(clippy::result_large_err)]
+
 mod constants;
 mod events;
 mod instructions;
@@ -35,7 +38,11 @@ mod utils;
 use anchor_lang::prelude::*;
 use instructions::*;
 
-declare_id!("ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz");
+#[cfg(feature = "devnet")]
+declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
+
+#[cfg(not(feature = "devnet"))]
+declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
 
 #[program]
 pub mod albus {
