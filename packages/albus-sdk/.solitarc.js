@@ -30,7 +30,8 @@ const os = require('os');
 const path = require('path');
 
 const programName = 'albus'
-const programId = 'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'
+// const programId = 'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'
+const programId = 'ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'
 
 const programDir = path.join(__dirname, '..', '..', 'programs', programName)
 const idlGenerator = 'anchor'
