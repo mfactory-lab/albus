@@ -66,7 +66,8 @@ export type W3CCredential = Extensible<{
   type: string[]
   issuer: IssuerType
   issuanceDate: string
-  expirationDate?: string
+  validFrom?: string
+  validUntil?: string
   credentialSubject: Claims // Extensible<{ id: string }>
   credentialStatus?: CredentialStatus
   evidence?: any
@@ -81,7 +82,7 @@ export type W3CPresentation = Extensible<{
   holder: string
   verifier?: string[]
   issuanceDate?: string
-  expirationDate?: string
+  validFrom?: string
 }>
 
 /**

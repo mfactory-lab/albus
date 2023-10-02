@@ -31,6 +31,7 @@ import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import type { ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
+import type { Resolvable } from 'did-resolver/src/resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
 import { Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
@@ -40,7 +41,9 @@ import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } 
 
 const { bytesToBigInt, base58ToBytes } = utils
 
-export const DEFAULT_CONTEXT = 'https://www.w3.org/2018/credentials/v1'
+// https://www.w3.org/TR/vc-data-model-2.0
+
+export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
@@ -54,8 +57,8 @@ export interface CreateCredentialOpts {
   encrypt?: boolean
   // Ephemeral Secret Key
   esk?: number[] | Uint8Array
-  nbf?: number
-  exp?: number
+  validFrom?: number
+  validUntil?: number
   aud?: string[]
 }
 
@@ -105,8 +108,12 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
   //   type: 'CredentialStatusList2017',
   // }
 
-  if (opts?.exp) {
-    vc.expirationDate = new Date(opts.exp * 1000).toISOString()
+  if (opts?.validFrom) {
+    vc.validFrom = new Date(opts.validFrom * 1000).toISOString()
+  }
+
+  if (opts?.validUntil) {
+    vc.validUntil = new Date(opts.validUntil * 1000).toISOString()
   }
 
   vc.proof = createCredentialProof({
@@ -241,7 +248,7 @@ export async function encryptVerifiablePresentation(vp: VerifiablePresentation, 
 
 export interface VerifyCredentialOpts {
   decryptionKey?: number[] | Uint8Array
-  resolver?: Resolver
+  resolver?: Resolvable
 }
 
 /**
@@ -269,7 +276,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   const issuerDid = vc.issuer?.id ?? vc.issuer
   const result = await resolver.resolve(issuerDid, { accept: 'application/did+json' })
   if (!result.didDocument?.verificationMethod) {
-    throw new Error('invalid issuer verification method')
+    throw new Error('invalid issuer, no verification methods found')
   }
 
   let issuerPubkey: Uint8Array | undefined
@@ -521,9 +528,6 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
     proof: async (key: string) => {
       const encodedKey = encodeKey(key)
       const res = await tree.generateCircomVerifierProof(encodedKey, ZERO_HASH)
-
-      console.log(res)
-
       return [
         encodedKey,
         ...res.siblings.map(s => s.bigInt()),
