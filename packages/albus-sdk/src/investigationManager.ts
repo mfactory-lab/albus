@@ -334,7 +334,6 @@ export class InvestigationManager {
 
   /**
    * Decrypt investigation data
-   * @param props
    */
   async decryptData(props: DecryptDataProps) {
     const investigationRequest = await this.load(props.investigationRequest)
@@ -360,9 +359,8 @@ export class InvestigationManager {
       decryptedShares.push([data?.index ?? 0, share])
     }
 
-    const decryptedSecret = Albus.crypto.reconstructShamirSecret(Albus.crypto.babyJub.F, investigationRequest.requiredShareCount, decryptedShares)
-
-    // console.log('decryptedSecret', decryptedSecret)
+    const secret = Albus.crypto.reconstructShamirSecret(Albus.crypto.babyJub.F, investigationRequest.requiredShareCount, decryptedShares)
+    // console.log('decryptedSecret', secret)
 
     const { proofRequest, circuit } = await this.proofRequest.loadFull(investigationRequest.proofRequest, ['circuit'])
 
@@ -375,21 +373,7 @@ export class InvestigationManager {
       proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
     )
 
-    const nonce = signals.currentDate as bigint
-    const encryptedData = (signals.encryptedData ?? []) as bigint[]
-    // console.log('encryptedData', encryptedData)
-
-    const data = Albus.crypto.Poseidon.decrypt(encryptedData, [decryptedSecret, decryptedSecret], 1, nonce)
-
-    return {
-      claims: data,
-      birthDateProof: signals.birthDateProof,
-      birthDateKey: signals.birthDateKey,
-      credentialRoot: signals.credentialRoot,
-      issuerPk: signals.issuerPk,
-      issuerSignature: signals.issuerSignature,
-      userPublicKey: signals.userPublicKey,
-    }
+    return this.proofRequest.decryptData({ secret, signals })
   }
 }
 

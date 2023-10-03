@@ -53,7 +53,7 @@ import {
 } from './generated'
 import type { PdaManager } from './pda'
 import type { ServiceManager } from './serviceManager'
-import { ProofInputBuilder, getSolanaTimestamp } from './utils'
+import { ProofInputBuilder, getSignals, getSolanaTimestamp } from './utils'
 
 export class ProofRequestManager {
   constructor(
@@ -108,7 +108,6 @@ export class ProofRequestManager {
       for (let i = 0; i < accounts.length; i++) {
         const prop = accounts[i]!
         const accountInfo = accountInfos[i]
-
         if (accountInfo) {
           switch (prop) {
             case 'circuit':
@@ -282,7 +281,7 @@ export class ProofRequestManager {
    * @returns {Promise<boolean>} A Promise that resolves to a boolean indicating whether the proof is valid (true) or not (false).
    * @throws {Error} Throws an error if there is an issue during the verification process or if the provided proof is not valid.
    */
-  async verify(props: VerifyProps) {
+  async verify(props: VerifyProps): Promise<boolean> {
     const proofRequest = await this.load(props.proofRequest)
     if (!proofRequest.proof) {
       throw new Error('Unable to verify the request, probably it\'s not proved')
@@ -292,6 +291,80 @@ export class ProofRequestManager {
     const proof = Albus.zkp.decodeProof(proofRequest.proof)
     const publicInput = Albus.zkp.decodePublicSignals(proofRequest.publicInputs)
     return Albus.zkp.verifyProof({ vk, proof, publicInput })
+  }
+
+  decryptData(props: { secret: bigint; signals: Record<string, any> }) {
+    const { secret, signals } = props
+    const nonce = signals.currentDate as bigint
+    const encryptedData = (signals.encryptedData ?? []) as bigint[]
+    // console.log('encryptedData', encryptedData)
+
+    const data = Albus.crypto.Poseidon.decrypt(encryptedData, [secret, secret], 1, nonce)
+
+    return {
+      claims: {
+        birthDate: {
+          proof: signals.birthDateProof,
+          key: signals.birthDateKey,
+          value: data[0],
+        },
+      },
+      credentialRoot: signals.credentialRoot,
+      issuerPk: signals.issuerPk, // [Ax, Ay]
+      issuerSignature: signals.issuerSignature, // [R8x, R8y, S]
+      userPublicKey: signals.userPublicKey,
+    }
+  }
+
+  async generateVerifiablePresentation(props: any) {
+    interface CreateVpProps {
+      proofRequest: PublicKeyInitData
+      userPrivateKey: Uint8Array
+    }
+    props = props as CreateVpProps
+
+    const { proofRequest, circuit } = await this.loadFull(props.proofRequest, ['circuit'])
+
+    if (!circuit) {
+      throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
+    }
+
+    const signals = getSignals(
+      [...circuit?.outputs ?? [], ...circuit?.publicSignals ?? []],
+      proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
+    )
+
+    const secret = Albus.crypto.Poseidon.hash([
+      Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey),
+      signals.credentialRoot as bigint,
+      signals.currentDate as bigint,
+    ])
+
+    const data = this.decryptData({ secret, signals })
+
+    const vc = await Albus.credential.createVerifiableCredential({
+      birthDate: data.claims.birthDate.value,
+      customProof: {
+        type: 'BJJSignature2021',
+        created: Number(new Date()),
+        // TODO: fixme
+        verificationMethod: 'did:web:albus.finance#keys-0',
+        rootHash: data.credentialRoot,
+        proofValue: {
+          ax: data.issuerPk[0],
+          ay: data.issuerPk[1],
+          r8x: data.issuerSignature[0],
+          r8y: data.issuerSignature[1],
+          s: data.issuerSignature[2],
+        },
+        proofPurpose: 'assertionMethod',
+      },
+    })
+
+    return Albus.credential.createVerifiablePresentation({
+      holderSecretKey: props.userPrivateKey,
+      credentials: [vc],
+    })
   }
 
   /**
@@ -308,6 +381,9 @@ export class ProofRequestManager {
 
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
+
+    // const version = await this.provider.connection.getVersion()
+    const isVerifyOnChain = true // if version >= 16.0
 
     // const chunkSize = Math.ceil((1232 /* max tx */ - 256 /* proof */ - 1 - 160 /* accounts */) / 32)
     // TODO: calculate
@@ -340,7 +416,7 @@ export class ProofRequestManager {
       )
 
       // on-chain verification
-      if (isLast) {
+      if (isLast && isVerifyOnChain) {
         tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 500000 }))
       }
 
@@ -360,7 +436,6 @@ export class ProofRequestManager {
    * Perform a full proof generation process based on the provided properties.
    *
    * @param {FullProveProps} props - The properties for the full proof generation process.
-   * @returns {Promise<{signature: string}>} A Promise that resolves to the result of the full proof generation, including the signature, proof, public signals, and presentation URI.
    * @throws {Error} Throws an error if there is an issue during any step of the proof generation process.
    */
   async fullProve(props: FullProveProps) {
