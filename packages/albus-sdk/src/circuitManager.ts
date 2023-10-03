@@ -30,7 +30,7 @@ import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
-import { chunk } from 'lodash-es'
+import chunk from 'lodash/chunk'
 
 import {
   Circuit,

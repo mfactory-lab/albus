@@ -32,7 +32,7 @@ import type { Creator } from '@metaplex-foundation/mpl-token-metadata'
 import { PublicKey } from '@solana/web3.js'
 import type { AccountInfo, Connection, PublicKeyInitData } from '@solana/web3.js'
 import { PROGRAM_ID as METADATA_PROGRAM_ID, Metadata } from '@metaplex-foundation/mpl-token-metadata'
-import { chunk } from 'lodash-es'
+import chunk from 'lodash/chunk'
 import type { AlbusNftCode } from '../types'
 import { NFT_SYMBOL_PREFIX } from '../constants'
 

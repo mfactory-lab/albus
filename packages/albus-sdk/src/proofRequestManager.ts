@@ -35,7 +35,7 @@ import type {
   PublicKeyInitData,
 } from '@solana/web3.js'
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
-import { chunk } from 'lodash-es'
+import chunk from 'lodash/chunk'
 import type { CircuitManager } from './circuitManager'
 import type { CredentialManager } from './credentialManager'
 import type {
