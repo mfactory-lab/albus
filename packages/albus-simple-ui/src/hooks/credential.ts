@@ -31,7 +31,7 @@ export function useCredential() {
       // Issue new Verifiable Credential
       const vc = await credential.createVerifiableCredential(claims, {
         issuerSecretKey: ISSUER_SECRET_KEY,
-        userPublicKey: wallet.value?.publicKey,
+        encryptionKey: wallet.value?.publicKey,
         encrypt: true,
       })
 
