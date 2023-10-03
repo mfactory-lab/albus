@@ -47,7 +47,7 @@ interface Opts {
 /**
  * Create a new Circuit
  */
-export async function add(circuitId: string, opts: Opts) {
+export async function create(circuitId: string, opts: Opts) {
   const { metaplex, client, config } = useContext()
 
   for (const ext of ['r1cs', 'wasm', 'sym']) {

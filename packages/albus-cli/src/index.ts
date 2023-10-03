@@ -83,14 +83,14 @@ did.command('generate', { isDefault: true })
 // Identity
 // ------------------------------------------
 
-const id = cli.command('identity')
+const id = cli.command('id')
 
 id.command('new')
   .description('Create new identity')
   .action(actions.identity.create)
 
 // ------------------------------------------
-// Verifiable Credentials
+// VC Management
 // ------------------------------------------
 
 const vc = cli.command('vc')
@@ -105,6 +105,81 @@ vc.command('issue')
   .option('--provider <string>', 'KYC provider unique code')
   .option('-e,--encrypt', '(optional) Encrypt VC with holder public key')
   .action(actions.vc.issue)
+
+///
+/// Circuit Management
+///
+
+const circuit = cli.command('circuit')
+  .description('Circuit Management')
+
+circuit.command('all', { isDefault: true })
+  .description('Show all circuits')
+  .action(actions.circuit.showAll)
+
+circuit.command('show')
+  .description('Show circuit data')
+  .argument('<address>', 'Circuit address')
+  .action(actions.circuit.show)
+
+circuit.command('create')
+  .description('Create new circuit')
+  .argument('code', 'circuit code')
+  .requiredOption('--name <string>', 'circuit name')
+  .option('--description <string>', '(optional) circuit short description')
+  .option('--zkey <uri>', '(optional) zkey file uri')
+  .option('--wasm <uri>', '(optional) wasm file uri')
+  .action(actions.circuit.create)
+
+circuit.command('delete')
+  .description('Delete circuit')
+  .argument('addr', 'circuit address')
+  .action(actions.circuit.remove)
+
+///
+/// Service Management
+///
+
+const service = cli.command('service')
+  .description('Service Management')
+
+service.command('create')
+  .description('Create new service')
+  .requiredOption('--code <string>', 'service code')
+  .requiredOption('--name <string>', 'service name')
+  .option('--website <string>', '(optional) service website')
+  .option('--authority <pubkey>', '(optional) service manager authority')
+  .option('-t, --trustee <trustee...>', '(optional) selected trustees')
+  .action(actions.service.create)
+
+service.command('update')
+  .description('Update service')
+  .argument('addr', 'service address')
+  .option('--name <string>', 'service name')
+  .option('--website <string>', 'service website')
+  .option('--secretShareThreshold <pubkey>', 'new Secret Share Threshold')
+  .option('--newAuthority <pubkey>', 'new authority')
+  .option('-t, --trustees <trustees...>', 'selected trustees')
+  .action(actions.service.update)
+
+service.command('delete')
+  .description('Delete service provider')
+  .argument('code', 'Service provider`s unique code')
+  .action(actions.service.remove)
+
+service.command('show')
+  .description('Show service provider`s info')
+  .argument('addr', 'Service provider PDA`s address')
+  .action(actions.service.show)
+
+service.command('all')
+  .description('Show all service providers')
+  .option('--authority', '(optional) filter by authority')
+  .action(actions.service.showAll)
+
+// ------------------------------------------
+// Policy Management
+// ------------------------------------------
 
 const policy = cli.command('policy')
 
@@ -142,7 +217,7 @@ policy.command('delete')
   .action(actions.policy.remove)
 
 // ------------------------------------------
-// Trustee
+// Trustee Management
 // ------------------------------------------
 
 const trustee = cli.command('trustee')
@@ -210,84 +285,13 @@ request.command('prove')
   .description('Create a zkp proof for selected proof proof')
   .argument('addr', 'Proof Request address')
   .requiredOption('--vc <pubkey>', 'VC address')
-  .option('-d, --decryptionKey <path>', 'Path to the decryption key')
+  .option('-d, --decryptionKey <keypath>', 'Path to the decryption key')
   .action(actions.request.proveRequest)
 
 request.command('verify')
   .description('Verify Proof Request')
   .argument('<pubkey>', 'Proof Request address')
   .action(actions.request.verifyRequest)
-
-///
-/// Circuit Management
-///
-
-const circuit = cli.command('circuit')
-  .description('Circuit Management')
-
-circuit.command('all', { isDefault: true })
-  .description('Show all circuits')
-  .action(actions.circuit.showAll)
-
-circuit.command('show')
-  .description('Show circuit data')
-  .argument('<address>', 'Circuit address')
-  .action(actions.circuit.show)
-
-circuit.command('add')
-  .description('Add new circuit')
-  .argument('code', 'circuit code')
-  .requiredOption('--name <string>', 'circuit name')
-  .option('--description <string>', '(optional) circuit short description')
-  .option('--zkey <uri>', '(optional) zkey file uri')
-  .option('--wasm <uri>', '(optional) wasm file uri')
-  .action(actions.circuit.add)
-
-circuit.command('delete')
-  .description('Delete circuit')
-  .argument('addr', 'circuit address')
-  .action(actions.circuit.remove)
-
-///
-/// Service Management
-///
-
-const service = cli.command('service')
-  .description('Service Management')
-
-service.command('add')
-  .description('Add service provider')
-  .requiredOption('--code <string>', 'service code')
-  .requiredOption('--name <string>', 'service name')
-  .option('--website <string>', '(optional) service website')
-  .option('--authority <pubkey>', '(optional) service manager authority')
-  .option('-t, --trustee <trustee...>', '(optional) selected trustees')
-  .action(actions.service.add)
-
-service.command('update')
-  .description('Update service')
-  .argument('addr', 'service address')
-  .option('--name <string>', 'service name')
-  .option('--website <string>', 'service website')
-  .option('--secretShareThreshold <pubkey>', 'new Secret Share Threshold')
-  .option('--newAuthority <pubkey>', 'new authority')
-  .option('-t, --trustees <trustees...>', 'selected trustees')
-  .action(actions.service.update)
-
-service.command('delete')
-  .description('Delete service provider')
-  .argument('code', 'Service provider`s unique code')
-  .action(actions.service.remove)
-
-service.command('show')
-  .description('Show service provider`s info')
-  .argument('addr', 'Service provider PDA`s address')
-  .action(actions.service.show)
-
-service.command('all')
-  .description('Show all service providers')
-  .option('--authority', '(optional) filter by authority')
-  .action(actions.service.showAll)
 
 // ------------------------------------------
 // Admin Management
@@ -298,6 +302,8 @@ const admin = cli.command('admin')
 admin.command('clear')
   .description('Clear all accounts')
   .action(actions.admin.clear)
+
+// ------------------------------------------
 
 cli.command('*', { isDefault: true, hidden: true })
   .action(() => {

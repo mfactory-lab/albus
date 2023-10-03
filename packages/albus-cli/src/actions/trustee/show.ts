@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import Table from 'cli-table3'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
@@ -55,13 +56,29 @@ export async function showAll(opts: AllOpts) {
 
   const trustees = await client.trustee.find(opts)
 
-  log.info('--------------------------------------------------------------------------')
-  log.info(`Found ${trustees.length} accounts`)
-  log.info('--------------------------------------------------------------------------')
+  log.info(`Found ${trustees.length} account(s)`)
 
-  for (const trustee of trustees) {
-    log.info(`Address: ${trustee.pubkey}`)
-    log.info(trustee.data?.pretty())
-    log.info('--------------------------------------------------------------------------')
+  const table = new Table({
+    head: ['Address', 'Name', 'Email', 'Website', 'Revealed', 'Verified', 'Created'],
+  })
+
+  for (const { pubkey, data } of trustees) {
+    table.push([
+      pubkey.toString(),
+      String(data?.name),
+      String(data?.email),
+      String(data?.website),
+      Number(data?.revealedShareCount ?? 0),
+      Boolean(data?.isVerified),
+      String(new Date(Number(data!.createdAt) * 1000).toISOString()),
+    ])
   }
+
+  console.log(table.toString())
+
+  // for (const trustee of trustees) {
+  //   log.info(`Address: ${trustee.pubkey}`)
+  //   log.info(trustee.data?.pretty())
+  //   log.info('--------------------------------------------------------------------------')
+  // }
 }

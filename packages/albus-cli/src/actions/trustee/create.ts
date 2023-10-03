@@ -63,6 +63,6 @@ export async function create(name: string, opts: Opts) {
 
   log.info('\nDone')
   log.info(`Signature: ${signature}`)
-  log.info(`\nAddress: ${address}`)
-  log.info(`\nKey: ${key}`)
+  log.info(`Address: ${address}`)
+  log.info(`Key: ${key}`)
 }

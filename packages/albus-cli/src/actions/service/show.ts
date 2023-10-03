@@ -41,12 +41,10 @@ export async function show(code: string) {
     serviceProviderAddr = client.pda.serviceProvider(code)[0]
   }
 
-  const sp = await client.service.load(serviceProviderAddr)
+  const service = await client.service.load(serviceProviderAddr)
 
-  log.info('--------------------------------------------------------------------------')
   log.info(`Address: ${serviceProviderAddr}`)
-  log.info(sp.pretty())
-  log.info('--------------------------------------------------------------------------')
+  log.info(service.pretty())
 }
 
 export async function showAll(opts: { authority?: string }) {
@@ -57,11 +55,19 @@ export async function showAll(opts: { authority?: string }) {
   })
 
   const table = new Table({
-    head: ['Address', 'Code', 'Name', 'Request count'],
+    head: ['Address', 'Code', 'Name', 'Trustee count', 'Policy count', 'Request count'],
   })
 
   for (const { pubkey, data } of items) {
-    table.push([pubkey.toString(), data?.code, data?.name, Number(data?.proofRequestCount)])
+    table.push([
+      pubkey.toString(),
+      String(data?.code),
+      String(data?.name),
+      // String(data?.authority),
+      Number(data?.trustees.length ?? 0),
+      Number(data?.policyCount),
+      Number(data?.proofRequestCount),
+    ])
   }
 
   console.log(table.toString())

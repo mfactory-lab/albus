@@ -39,7 +39,7 @@ interface Opts {
   trustees?: string[]
 }
 
-export async function add(opts: Opts) {
+export async function create(opts: Opts) {
   const { client } = useContext()
 
   const { signature } = await client.service.create(opts)
