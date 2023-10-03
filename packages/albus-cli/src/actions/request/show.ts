@@ -27,28 +27,26 @@
  */
 
 import { ProofRequestStatus } from '@mfactory-lab/albus-sdk'
-import type { PublicKey } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import Table from 'cli-table3'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
 export async function show(addr: string | PublicKey) {
   const { client } = useContext()
-
   const proofRequest = await client.proofRequest.load(addr)
-
-  log.info('--------------------------------------------------------------------------')
-  log.info(JSON.stringify({
-    address: addr,
-    ...proofRequest.pretty(),
-  }, null, 2))
-  log.info('--------------------------------------------------------------------------')
+  log.info(JSON.stringify({ address: addr, ...proofRequest.pretty() }, null, 2))
 }
 
 interface ShowAllOpts {
   service?: string
+  serviceCode?: string
   circuit?: string
-  status?: string
+  circuitCode?: string
+  policy?: string
+  policyId?: string
+  status?: ProofRequestStatus
+  user?: string
 }
 
 export async function showAll(opts: ShowAllOpts) {
@@ -58,9 +56,14 @@ export async function showAll(opts: ShowAllOpts) {
   const circuits = await client.circuit.findMapped()
 
   const items = await client.proofRequest.find({
+    user: opts.user ? new PublicKey(opts.user) : undefined,
     serviceProvider: opts.service,
+    serviceProviderCode: opts.serviceCode,
     circuit: opts.circuit,
-    status: opts.status ? ProofRequestStatus[opts.status] : undefined,
+    circuitCode: opts.circuitCode,
+    policy: opts.policy,
+    policyId: opts.policyId,
+    status: opts.status,
   })
 
   const table = new Table({

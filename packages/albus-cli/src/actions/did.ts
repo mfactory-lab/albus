@@ -36,7 +36,7 @@ export async function generate(_opts: Opts) {
   const { config } = useContext()
 
   const issuerKeypair = Keypair.fromSecretKey(Uint8Array.from(config.issuerSecretKey))
-  const did = await utils.generateDid(issuerKeypair)
+  const did = utils.generateDid(issuerKeypair)
 
   console.log(JSON.stringify(did))
 }

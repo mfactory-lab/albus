@@ -26,5 +26,39 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './show'
-export * from './verify'
+import type { PublicKey } from '@solana/web3.js'
+import Table from 'cli-table3'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+export async function show(addr: string | PublicKey) {
+  const { client } = useContext()
+  const circuit = await client.circuit.load(addr)
+  log.info({ address: addr, ...circuit.pretty() })
+  // log.info(JSON.stringify({ address: addr, ...circuit.pretty() }, null, 2))
+}
+
+export async function showAll() {
+  const { client } = useContext()
+
+  const circuits = await client.circuit.find()
+
+  log.info(`Found ${circuits.length} circuits`)
+
+  const table = new Table({
+    head: ['#', 'Address', 'Code', 'Name', 'Created'],
+  })
+
+  let i = 0
+  for (const { pubkey, data } of circuits) {
+    table.push([
+      String(++i),
+      String(pubkey),
+      String(data.code),
+      String(data.name),
+      String(new Date(Number(data!.createdAt) * 1000).toISOString()),
+    ])
+  }
+
+  console.log(table.toString())
+}

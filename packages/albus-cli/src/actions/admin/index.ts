@@ -32,10 +32,6 @@ import { Transaction } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-export * as circuit from './circuit'
-export * as request from './request'
-export * as service from './service'
-
 export async function clear(_opts: any) {
   const { client } = useContext()
 

@@ -45,7 +45,7 @@ interface Opts {
 }
 
 /**
- * Create new Circuit
+ * Create a new Circuit
  */
 export async function add(circuitId: string, opts: Opts) {
   const { metaplex, client, config } = useContext()

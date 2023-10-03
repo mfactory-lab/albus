@@ -27,7 +27,7 @@
  */
 
 export default {
-  circuitPath: '../../circuits',
+  circuitPath: '../circuits',
   nftExternalUrl: 'https://albus.finance',
   nftSymbol: 'ALBUS',
   nftCreators: [],
