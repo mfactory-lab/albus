@@ -1,33 +1,43 @@
 import path from 'node:path'
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import type { BuildOptions } from 'vite'
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 import Pages from 'vite-plugin-pages'
 import Layouts from 'vite-plugin-vue-layouts'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   // process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
+
   const isProd = mode === 'production'
 
-  const build: BuildOptions = {
-    manifest: isProd,
-    chunkSizeWarningLimit: 1024,
-    // target: ['es2020'],
-    // rollupOptions: {
-    //   plugins: [
-    //     inject({ Buffer: ['buffer', 'Buffer'] }) as any,
-    //   ],
-    // },
-  }
-
   return {
-    build,
+    build: {
+      target: 'esnext',
+      manifest: isProd,
+      minify: false,
+      chunkSizeWarningLimit: 1024,
+      // target: ['es2020'],
+      // rollupOptions: {
+      //   plugins: [
+      //     inject({ Buffer: ['buffer', 'Buffer'] }) as any,
+      //   ],
+      // },
+    },
     plugins: [
+      nodePolyfills({
+        protocolImports: true,
+        include: ['stream', 'crypto', 'constants'],
+        globals: {
+          Buffer: true,
+          global: true,
+          process: true,
+        },
+      }),
       vue({
         template: { transformAssetUrls },
       }),
@@ -67,33 +77,50 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     resolve: {
-      // preserveSymlinks: true,
       alias: {
         '~/': `${path.resolve(__dirname, 'src')}/`,
         '@/': `${path.resolve(__dirname, 'src')}/`,
-        // 'crypto': 'crypto-browserify',
       },
-      // dedupe: [
-      //  'bn.js',
-      // 'bs58',
-      // 'lodash',
-      // 'buffer-layout',
-      // '@solana/web3.js',
-      // '@solana/buffer-layout',
-      // ],
+      dedupe: [
+        '@metaplex-foundation/beet',
+        'tweetnacl',
+        'brorand',
+        'bn.js',
+      ],
     },
 
-    // css: {
-    //   preprocessorOptions: {
-    //     scss: {
-    //       additionalData: '@use "~/assets/styles/variables.scss" as *;',
-    //     },
-    //   },
+    css: {
+      preprocessorOptions: {
+        //     scss: {
+        //       additionalData: '@use "~/assets/styles/variables.scss" as *;',
+        //     },
+        sass: {
+          quietDeps: true,
+          // Logger warn override is a workaround for deprecation warning spam. See
+          // https://github.com/sass/sass/issues/3065#issuecomment-868302160.
+          // `quietDeps` is supposed to have the same effect, but doesn't work.
+          logger: {
+            warn(message: string, options: any) {
+              if (
+                (options.deprecation && options.stack?.includes('node_modules'))
+                || message.includes('repetitive deprecation')
+              ) {
+                return
+              }
+              console.warn(
+                `\x1B[33mSASS WARNING\x1B[0m: ${message}\n${options.stack === 'null' ? '' : options.stack
+                }\n`,
+              )
+            },
+          },
+        },
+      },
+    },
+
+    // define: {
+    //   'process.env': {},
+    //   'process.browser': true,
     // },
-
-    define: {
-      'process.env': {},
-    },
 
     optimizeDeps: {
       include: [
@@ -104,19 +131,11 @@ export default defineConfig(({ mode }) => {
         'axios',
         'pinia',
         'lodash',
+        'Buffer',
+        'process',
+        '@bundlr-network/client',
       ],
       exclude: ['ethereum-cryptography', 'vue-demi'],
-      esbuildOptions: {
-        define: {
-          global: 'globalThis',
-        },
-        plugins: [
-          NodeGlobalsPolyfillPlugin({
-            process: true,
-            buffer: true,
-          }),
-        ],
-      },
     },
   }
 })

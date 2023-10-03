@@ -26,29 +26,30 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as u8a from 'uint8arrays'
+import { fromString, toString } from 'uint8arrays'
 
-export function hexToBytes(s: string, minLength?: number): Uint8Array {
-  let input = s.startsWith('0x') ? s.substring(2) : s
+export function hexToString(hex: string): string {
+  return new TextDecoder().decode(hexToBytes(hex))
+}
 
+export function hexToBytes(hex: string, minLength?: number): Uint8Array {
+  let input = hex.startsWith('0x') ? hex.substring(2) : hex
   if (input.length % 2 !== 0) {
     input = `0${input}`
   }
-
   if (minLength) {
     const paddedLength = Math.max(input.length, minLength * 2)
     input = input.padStart(paddedLength, '00')
   }
-
-  return u8a.fromString(input.toLowerCase(), 'base16')
+  return fromString(input.toLowerCase(), 'base16')
 }
 
 export function bytesToHex(b: Uint8Array): string {
-  return u8a.toString(b, 'base16')
+  return toString(b, 'base16')
 }
 
 export function bytesToBigInt(b: ArrayLike<number>): bigint {
-  return BigInt(`0x${u8a.toString(Uint8Array.from(b), 'base16')}`)
+  return BigInt(`0x${toString(Uint8Array.from(b), 'base16')}`)
 }
 
 export function bigintToBytes(n: bigint, minLength?: number): Uint8Array {
@@ -56,33 +57,33 @@ export function bigintToBytes(n: bigint, minLength?: number): Uint8Array {
 }
 
 export function base64ToBytes(s: string): Uint8Array {
-  return u8a.fromString(s, 'base64pad')
+  return fromString(s, 'base64pad')
 }
 
 export function bytesToBase64(b: Uint8Array): string {
-  return u8a.toString(b, 'base64pad')
+  return toString(b, 'base64pad')
 }
 
 export function base64urlToBytes(s: string): Uint8Array {
-  return u8a.fromString(s, 'base64url')
+  return fromString(s, 'base64url')
 }
 
 export function bytesToBase64url(b: Uint8Array): string {
-  return u8a.toString(b, 'base64url')
+  return toString(b, 'base64url')
 }
 
 export function stringToBytes(s: string): Uint8Array {
-  return u8a.fromString(s)
+  return fromString(s)
 }
 
 export function bytesToString(s: Uint8Array): string {
-  return u8a.toString(s)
+  return toString(s)
 }
 
 export function base58ToBytes(s: string): Uint8Array {
-  return u8a.fromString(s, 'base58btc')
+  return fromString(s, 'base58btc')
 }
 
 export function bytesToBase58(b: Uint8Array): string {
-  return u8a.toString(b, 'base58btc')
+  return toString(b, 'base58btc')
 }

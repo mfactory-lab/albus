@@ -48,9 +48,9 @@ export async function issue(opts: Opts) {
   // Issue new Verifiable Credential
   const vc = await credential.createVerifiableCredential(claims, {
     issuerSecretKey: config.issuerSecretKey,
+    encryptionKey: keypair.publicKey,
     encrypt: opts.encrypt,
-    holder: keypair.publicKey,
-    aud: [config.issuerDid],
+    // aud: [config.issuerDid],
   })
 
   // Generate new VC-NFT

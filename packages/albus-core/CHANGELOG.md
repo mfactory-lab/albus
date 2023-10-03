@@ -1,11 +1,12 @@
 # Changelog
 
-## 0.1.0 (2023-09-15)
+## 0.1.0 (2023-09-21)
 
 
 ### 🐞 Bug Fixes
 
 * **albus-sdk:** new program integration, global improvements ([5a20a82](https://github.com/mfactory-lab/albus/commit/5a20a82f44902c7d0a9e9ce458bd13b652421fb3))
+* **circuits:** remove `birthDate` from secret generation ([fdd4002](https://github.com/mfactory-lab/albus/commit/fdd4002ccad00465d430f729372c5da5d1ec9df7))
 * **cli:** global improvements ([f38a7ca](https://github.com/mfactory-lab/albus/commit/f38a7ca37befcd5c7f8a8473e828c3b888272cda))
 * **cli:** global improvements ([c0c6b3c](https://github.com/mfactory-lab/albus/commit/c0c6b3c5a0b2c6842f98924752f4312649d88bc5))
 * **core:** add `claimsTree`, code refactored ([0ccca4c](https://github.com/mfactory-lab/albus/commit/0ccca4c0dce05d437b04338377ee7558c35e8244))
@@ -32,6 +33,7 @@
 * **core:** rename zk helpers ([a7c71ad](https://github.com/mfactory-lab/albus/commit/a7c71ad63cf91a88fd28a4c2211200a9f1b97ae3))
 * **core:** tests ([5d88d12](https://github.com/mfactory-lab/albus/commit/5d88d1281b844bf173cf0c14288f45c04cd0128f))
 * **core:** utils fixes, add did helpers ([7a574e0](https://github.com/mfactory-lab/albus/commit/7a574e07da87ca886673607e0d0613a7de15b20f))
+* decrease `uint8arrays` to ^3.1 to support `cjs` ([f15ae31](https://github.com/mfactory-lab/albus/commit/f15ae319c1f0bfda6868490de0158dbc463724c9))
 * disable package prepare ([2928277](https://github.com/mfactory-lab/albus/commit/29282777db15d409f6c8a7469089f8b582d6a4bb))
 * global improvements ([305fc70](https://github.com/mfactory-lab/albus/commit/305fc7066827396774f6b6e38a157a0efc3a522c))
 * rename packages, release improvements ([f635c6b](https://github.com/mfactory-lab/albus/commit/f635c6b6ea78fcc8cd4430530aaef94a13510db0))
@@ -41,6 +43,7 @@
 ### 🌟 Features
 
 * **core:** add `credential` helper ([9191bc0](https://github.com/mfactory-lab/albus/commit/9191bc0ae4cd1024b5ac1687bd38a44265043839))
+* **core:** add `multibase` util ([d0d4cc7](https://github.com/mfactory-lab/albus/commit/d0d4cc775c84f7c2643cad6a2da47bf80ff794e0))
 * **core:** add `vc` helpers ([c1fea80](https://github.com/mfactory-lab/albus/commit/c1fea803f31d70494bf3651c22f345d5a064e519))
 * **core:** add more tests ([670f474](https://github.com/mfactory-lab/albus/commit/670f474bf2514b0ce6b95f45fea90cf664ea73c4))
 * **core:** add shamir tools ([b742976](https://github.com/mfactory-lab/albus/commit/b74297622b5f1885a780101982d624371b9cede5))
@@ -51,3 +54,5 @@
 
 * clean comments ([ae5347e](https://github.com/mfactory-lab/albus/commit/ae5347ec8165238ae82874a359780a09779364f3))
 * **core:** crypto module fixes ([32ef094](https://github.com/mfactory-lab/albus/commit/32ef094863ac953e39f5e50ae92f25d3f059e4bc))
+* **core:** global improvements ([91725e9](https://github.com/mfactory-lab/albus/commit/91725e9c894d306ae9ea925dec0045f4d1192b15))
+* **core:** new hex utils ([4cf533a](https://github.com/mfactory-lab/albus/commit/4cf533a6027f9d2007f1b49f00a3cf2176cebe28))

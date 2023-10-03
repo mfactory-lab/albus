@@ -1,24 +1,66 @@
 {
-  "version": "0.0.12",
+  "version": "0.0.14",
   "name": "albus",
   "instructions": [
     {
-      "name": "createInvestigationRequest",
+      "name": "mintCredential",
       "accounts": [
         {
-          "name": "investigationRequest",
+          "name": "albusAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "proofRequest",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Destination token account (required for pNFT).",
+            ""
+          ]
         },
         {
-          "name": "serviceProvider",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenRecord",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Token record (required for pNFT).",
+            ""
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Mint account of the NFT.",
+            "The account will be initialized if necessary.",
+            "",
+            "Must be a signer if:",
+            "* the mint account does not exist.",
+            ""
+          ]
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Metadata account of the NFT.",
+            "This account must be uninitialized.",
+            ""
+          ]
+        },
+        {
+          "name": "editionAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Master edition account of the NFT.",
+            "The account will be initialized if necessary.",
+            ""
+          ]
         },
         {
           "name": "authority",
@@ -26,37 +68,96 @@
           "isSigner": true
         },
         {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL Token program."
+          ]
+        },
+        {
+          "name": "ataProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL Associated Token program."
+          ]
+        },
+        {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Token Metadata program.",
+            ""
+          ]
+        },
+        {
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Instructions sysvar account.",
+            ""
+          ]
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "System program."
+          ]
         }
       ],
       "args": [
         {
           "name": "data",
           "type": {
-            "defined": "CreateInvestigationRequestData"
+            "defined": "MintCredentialData"
           }
         }
       ]
     },
     {
-      "name": "revealSecretShare",
+      "name": "updateCredential",
       "accounts": [
         {
-          "name": "investigationRequestShare",
+          "name": "albusAuthority",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "investigationRequest",
-          "isMut": true,
-          "isSigner": false
+          "name": "tokenAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Destination token account (required for pNFT).",
+            ""
+          ]
         },
         {
-          "name": "trustee",
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint account of the NFT.",
+            "The account will be initialized if necessary.",
+            "",
+            "Must be a signer if:",
+            "* the mint account does not exist.",
+            ""
+          ]
+        },
+        {
+          "name": "metadataAccount",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "Metadata account of the NFT.",
+            "This account must be uninitialized.",
+            ""
+          ]
         },
         {
           "name": "authority",
@@ -64,27 +165,90 @@
           "isSigner": true
         },
         {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Token Metadata program.",
+            ""
+          ]
+        },
+        {
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Instructions sysvar account.",
+            ""
+          ]
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "System program."
+          ]
         }
       ],
       "args": [
         {
           "name": "data",
           "type": {
-            "defined": "RevealSecretShareData"
+            "defined": "UpdateCredentialData"
           }
         }
       ]
     },
     {
-      "name": "createTrustee",
+      "name": "revokeCredential",
       "accounts": [
         {
-          "name": "trustee",
+          "name": "albusAuthority",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Destination token account (required for pNFT).",
+            ""
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Mint account of the NFT.",
+            "The account will be initialized if necessary.",
+            "",
+            "Must be a signer if:",
+            "* the mint account does not exist.",
+            ""
+          ]
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Metadata account of the NFT.",
+            "This account must be uninitialized.",
+            ""
+          ]
+        },
+        {
+          "name": "editionAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Master edition account of the NFT.",
+            "The account will be initialized if necessary.",
+            ""
+          ]
         },
         {
           "name": "authority",
@@ -92,86 +256,38 @@
           "isSigner": true
         },
         {
-          "name": "systemProgram",
+          "name": "metadataProgram",
           "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "data",
-          "type": {
-            "defined": "CreateTrusteeData"
-          }
-        }
-      ]
-    },
-    {
-      "name": "updateTrustee",
-      "accounts": [
-        {
-          "name": "trustee",
-          "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "Token Metadata program.",
+            ""
+          ]
         },
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
+          "name": "tokenProgram",
           "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "data",
-          "type": {
-            "defined": "UpdateTrusteeData"
-          }
-        }
-      ]
-    },
-    {
-      "name": "verifyTrustee",
-      "accounts": [
-        {
-          "name": "trustee",
-          "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "SPL Token program."
+          ]
         },
         {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Instructions sysvar account.",
+            ""
+          ]
         },
         {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "deleteTrustee",
-      "accounts": [
-        {
-          "name": "trustee",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "System program."
+          ]
         }
       ],
       "args": []
@@ -304,7 +420,7 @@
         {
           "name": "data",
           "type": {
-            "defined": "UpdateServiceData"
+            "defined": "UpdateServiceProviderData"
           }
         }
       ]
@@ -369,6 +485,39 @@
       ]
     },
     {
+      "name": "updatePolicy",
+      "accounts": [
+        {
+          "name": "policy",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "serviceProvider",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdatePolicyData"
+          }
+        }
+      ]
+    },
+    {
       "name": "deletePolicy",
       "accounts": [
         {
@@ -378,6 +527,104 @@
         },
         {
           "name": "policy",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createTrustee",
+      "accounts": [
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateTrusteeData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateTrustee",
+      "accounts": [
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdateTrusteeData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verifyTrustee",
+      "accounts": [
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deleteTrustee",
+      "accounts": [
+        {
+          "name": "trustee",
           "isMut": true,
           "isSigner": false
         },
@@ -515,6 +762,82 @@
           "name": "data",
           "type": {
             "defined": "VerifyProofRequestData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "createInvestigationRequest",
+      "accounts": [
+        {
+          "name": "investigationRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "proofRequest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "serviceProvider",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateInvestigationRequestData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "revealSecretShare",
+      "accounts": [
+        {
+          "name": "investigationRequestShare",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "investigationRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "trustee",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "RevealSecretShareData"
           }
         }
       ]
@@ -1202,224 +1525,6 @@
       }
     },
     {
-      "name": "CreateInvestigationRequestData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "encryptionKey",
-            "type": "publicKey"
-          },
-          {
-            "name": "trustees",
-            "type": {
-              "vec": "publicKey"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "CreatePolicyData",
-      "docs": [
-        "Data required to create a new proof request"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "code",
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "description",
-            "type": "string"
-          },
-          {
-            "name": "expirationPeriod",
-            "type": "u32"
-          },
-          {
-            "name": "retentionPeriod",
-            "type": "u32"
-          },
-          {
-            "name": "rules",
-            "type": {
-              "vec": {
-                "defined": "PolicyRule"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "CreateProofRequestData",
-      "docs": [
-        "Data required to create a new proof request"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "expiresIn",
-            "docs": [
-              "Time in seconds until the request expires"
-            ],
-            "type": "u32"
-          },
-          {
-            "name": "maxPublicInputs",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "CreateServiceProviderData",
-      "docs": [
-        "Data required to add a new service provider"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "code",
-            "docs": [
-              "The unique code representing the service"
-            ],
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "docs": [
-              "The name of the service"
-            ],
-            "type": "string"
-          },
-          {
-            "name": "website",
-            "type": "string"
-          },
-          {
-            "name": "contactInfo",
-            "type": {
-              "option": {
-                "defined": "ContactInfo"
-              }
-            }
-          },
-          {
-            "name": "authority",
-            "docs": [
-              "Service authority"
-            ],
-            "type": {
-              "option": "publicKey"
-            }
-          },
-          {
-            "name": "secretShareThreshold",
-            "docs": [
-              "Required number of shares used to reconstruct the secret"
-            ],
-            "type": {
-              "option": "u8"
-            }
-          },
-          {
-            "name": "trustees",
-            "type": {
-              "option": {
-                "vec": "publicKey"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "CreateTrusteeData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "email",
-            "type": "string"
-          },
-          {
-            "name": "website",
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ProveData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "proof",
-            "type": {
-              "option": {
-                "defined": "ProofData"
-              }
-            }
-          },
-          {
-            "name": "publicInputs",
-            "type": {
-              "vec": {
-                "array": [
-                  "u8",
-                  32
-                ]
-              }
-            }
-          },
-          {
-            "name": "reset",
-            "type": "bool"
-          }
-        ]
-      }
-    },
-    {
-      "name": "RevealSecretShareData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "index",
-            "type": "u8"
-          },
-          {
-            "name": "share",
-            "type": "bytes"
-          }
-        ]
-      }
-    },
-    {
       "name": "UpdateCircuitVkData",
       "type": {
         "kind": "struct",
@@ -1489,7 +1594,280 @@
       }
     },
     {
-      "name": "UpdateServiceData",
+      "name": "MintCredentialData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateCredentialData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateInvestigationRequestData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "encryptionKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "trustees",
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RevealSecretShareData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "share",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreatePolicyData",
+      "docs": [
+        "Data required to create a new proof request"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "expirationPeriod",
+            "type": "u32"
+          },
+          {
+            "name": "retentionPeriod",
+            "type": "u32"
+          },
+          {
+            "name": "rules",
+            "type": {
+              "vec": {
+                "defined": "PolicyRule"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdatePolicyData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "description",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "expirationPeriod",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "retentionPeriod",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "rules",
+            "type": {
+              "option": {
+                "vec": {
+                  "defined": "PolicyRule"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateProofRequestData",
+      "docs": [
+        "Data required to create a new proof request"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "expiresIn",
+            "docs": [
+              "Time in seconds until the request expires"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "maxPublicInputs",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProveData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "proof",
+            "type": {
+              "option": {
+                "defined": "ProofData"
+              }
+            }
+          },
+          {
+            "name": "publicInputs",
+            "type": {
+              "vec": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          },
+          {
+            "name": "reset",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifyProofRequestData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "status",
+            "type": {
+              "defined": "ProofRequestStatus"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateServiceProviderData",
+      "docs": [
+        "Data required to add a new service provider"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "docs": [
+              "The unique code representing the service"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the service"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "website",
+            "type": "string"
+          },
+          {
+            "name": "contactInfo",
+            "type": {
+              "option": {
+                "defined": "ContactInfo"
+              }
+            }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Service authority"
+            ],
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "secretShareThreshold",
+            "docs": [
+              "Required number of shares used to reconstruct the secret"
+            ],
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "trustees",
+            "type": {
+              "option": {
+                "vec": "publicKey"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateServiceProviderData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1529,10 +1907,45 @@
       }
     },
     {
+      "name": "CreateTrusteeData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "website",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateTrusteeData",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "newAuthority",
+            "type": {
+              "option": "publicKey"
+            }
+          },
           {
             "name": "name",
             "type": {
@@ -1549,20 +1962,6 @@
             "name": "website",
             "type": {
               "option": "string"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "VerifyProofRequestData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "status",
-            "type": {
-              "defined": "ProofRequestStatus"
             }
           }
         ]
@@ -1933,7 +2332,7 @@
     }
   ],
   "metadata": {
-    "address": "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz",
+    "address": "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL",
     "origin": "anchor",
     "binaryVersion": "0.28.0",
     "libVersion": "0.28.0"

@@ -112,7 +112,7 @@ export class Policy implements PolicyArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz',
+      'ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL',
     ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, policyBeet)

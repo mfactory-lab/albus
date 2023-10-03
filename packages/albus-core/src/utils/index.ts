@@ -28,3 +28,4 @@
 
 export * from './did'
 export * from './nft'
+export * from './validators'

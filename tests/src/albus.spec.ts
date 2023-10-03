@@ -47,6 +47,37 @@ describe('albus', () => {
     Keypair.generate(),
   ]
 
+  const credential = {
+    '@context': [
+      'https://www.w3.org/2018/credentials/v1',
+    ],
+    'type': [
+      'VerifiableCredential',
+      'AlbusCredential',
+    ],
+    'issuer': 'did:web:albus.finance',
+    'issuanceDate': '2023-07-27T00:12:43.635Z',
+    'credentialSubject': {
+      birthDate: '19890101',
+      firstName: 'Alex',
+      country: 'US',
+    },
+    'proof': {
+      type: 'BJJSignature2021',
+      created: 1690416764498,
+      verificationMethod: 'did:web:albus.finance#keys-0',
+      rootHash: '11077866633106981791340789987944870806147307639065753995447310137530607758623',
+      proofValue: {
+        ax: '20841523997579262969290434121704327723902935194219264790567899027938554056663',
+        ay: '20678780156819015018034618985253893352998041677807437760911245092739191906558',
+        r8x: '21153906701456715004295579276500758430977318622340395655171725984189489403836',
+        r8y: '15484492519285437260388749074045005694239822857741052851485555393361224949130',
+        s: '1662767948258934355069791443487100820038153707701411290986741440889424297316',
+      },
+      proofPurpose: 'assertionMethod',
+    },
+  }
+
   const circuitData = {
     code: circuitCode,
     name: 'Age policy',
@@ -89,36 +120,7 @@ describe('albus', () => {
   }
 
   beforeAll(async () => {
-    vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve({
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-      ],
-      'type': [
-        'VerifiableCredential',
-        'AlbusCredential',
-      ],
-      'issuer': 'did:web:albus.finance',
-      'issuanceDate': '2023-07-27T00:12:43.635Z',
-      'credentialSubject': {
-        birthDate: '19890101',
-        firstName: 'Alex',
-        country: 'US',
-      },
-      'proof': {
-        type: 'BJJSignature2021',
-        created: 1690416764498,
-        verificationMethod: 'did:web:albus.finance#keys-0',
-        rootHash: '11077866633106981791340789987944870806147307639065753995447310137530607758623',
-        proofValue: {
-          ax: '20841523997579262969290434121704327723902935194219264790567899027938554056663',
-          ay: '20678780156819015018034618985253893352998041677807437760911245092739191906558',
-          r8x: '21153906701456715004295579276500758430977318622340395655171725984189489403836',
-          r8y: '15484492519285437260388749074045005694239822857741052851485555393361224949130',
-          s: '1662767948258934355069791443487100820038153707701411290986741440889424297316',
-        },
-        proofPurpose: 'assertionMethod',
-      },
-    } as any))
+    vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
 
     // airdrops
     await airdrop(payerKeypair.publicKey)
@@ -150,7 +152,7 @@ describe('albus', () => {
       assert.equal(circuit.vk.beta.length, 128)
       assert.equal(circuit.vk.gamma.length, 128)
       assert.equal(circuit.vk.delta.length, 128)
-      assert.equal(circuit.vk.ic.length, 41) // public signals count + 1
+      assert.equal(circuit.vk.ic.length, data.vk.IC.length)
     } catch (e) {
       console.log(e)
       assert.ok(false)
@@ -171,6 +173,9 @@ describe('albus', () => {
         }
         const { address, signature } = await newClient.trustee.create(data)
         assert.ok(!!signature)
+
+        // console.log(`trustee #${i}`, address.toString())
+
         const trustee = await newClient.trustee.load(address)
 
         const pk = Albus.zkp.unpackPubkey(Uint8Array.from(trustee.key))
@@ -190,7 +195,7 @@ describe('albus', () => {
     }
   })
 
-  it(`can verify ${trustees.length} trustees`, async () => {
+  it('can verify all trustees', async () => {
     try {
       const trustees = await client.trustee.find({ noData: true })
       for (const { pubkey } of trustees) {
@@ -215,6 +220,7 @@ describe('albus', () => {
       }
       const { address } = await newClient.trustee.update(data)
       const trustee = await newClient.trustee.load(address)
+      assert.deepEqual(address, client.pda.trustee(key)[0])
       assert.deepEqual(trustee.key, data.key)
       assert.equal(trustee.name, data.name)
       assert.equal(trustee.email, data.email)
@@ -357,7 +363,7 @@ describe('albus', () => {
     assert.ok(res)
   })
 
-  let investigationAddress
+  let investigationAddress: PublicKey
 
   it('can create investigation request', async () => {
     const newClient = new AlbusClient(newProvider(investigator))
@@ -422,6 +428,8 @@ describe('albus', () => {
       investigationRequest: investigationAddress,
       encryptionKey: investigator.secretKey,
     })
+    assert.equal(String(result.claims.birthDate.value), credential.credentialSubject.birthDate)
+    console.log(result)
   })
 
   it('can delete proof request', async () => {
@@ -443,32 +451,18 @@ describe('albus', () => {
     await client.service.delete({ code: serviceCode })
   })
 
+  // it('can delete investigation request', async () => {
+  // })
+
   it('can delete all trustees', async () => {
     for (const trustee of trustees) {
       const { key } = Albus.zkp.generateEncryptionKey(trustee)
-      await client.trustee.deleteByKey(key)
+      try {
+        await client.trustee.deleteByKey(key)
+      } catch (e) {
+        console.log(e)
+        assert.ok(false)
+      }
     }
   })
-
-  // describe('admin', () => {
-  //   it('can delete program accounts', async () => {
-  //     const s = await client.service.create({ code: serviceCode, name: serviceCode })
-  //     const c = await client.circuit.create(circuitData)
-  //     const p = await client.policy.create({ serviceCode, circuitCode: circuitData.code, code: 'x', name: 'x' })
-  //     const r = await client.proofRequest.create({ serviceCode, policyCode: 'x' })
-  //
-  //     for (const account of [r.address, p.address, c.address, s.address]) {
-  //       const ix = createAdminCloseAccountInstruction({
-  //         authority: provider.publicKey,
-  //         account,
-  //       })
-  //       await provider.sendAndConfirm(new Transaction().add(ix))
-  //     }
-  //
-  //     try {
-  //       await client.service.load(s.address)
-  //       assert.ok(false)
-  //     } catch (e) {}
-  //   })
-  // })
 })

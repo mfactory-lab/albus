@@ -69,7 +69,7 @@ export const createCircuitInstructionDiscriminator = [
 export function createCreateCircuitInstruction(
   accounts: CreateCircuitInstructionAccounts,
   args: CreateCircuitInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = createCircuitStruct.serialize({
     instructionDiscriminator: createCircuitInstructionDiscriminator,

@@ -29,60 +29,36 @@
 import { InMemoryDB, Merkletree, ZERO_HASH, str2Bytes } from '@iden3/js-merkletree'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import type { VerifyCredentialOptions } from 'did-jwt-vc'
-import { validateCredentialPayload, validatePresentationPayload } from 'did-jwt-vc'
-import type { ResolverRegistry } from 'did-resolver'
+import type { Resolvable, ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
 import { Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
-
-import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
-import { encodeDidKey } from './utils'
+import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
+import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
+import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
 
 const { bytesToBigInt, base58ToBytes } = utils
 
-export const DEFAULT_CONTEXT = 'https://www.w3.org/2018/credentials/v1'
+// https://www.w3.org/TR/vc-data-model-2.0
+export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
-export const DEFAULT_CLAIM_TREE_DEPTH = 6 // 2**6 = 64
-
-enum CredentialType {
-  AlbusCredential = 'AlbusCredential',
-}
-
-enum PresentationType {
-  AlbusPresentation = 'AlbusPresentation',
-}
-
-enum ProofType {
-  BJJSignature2021 = 'BJJSignature2021',
-}
-
-enum VerifyType {
-  EddsaBJJVerificationKey = 'EddsaBJJVerificationKey',
-}
-
-export type Claims = Record<string, any>
+export const DEFAULT_CLAIM_TREE_DEPTH = 6
 
 export interface CreateCredentialOpts {
-  // Used for encryption
-  holder: PublicKey
-  issuerSecretKey: number[] | Uint8Array
+  issuerSecretKey?: number[] | Uint8Array
   issuerDid?: string
   verificationMethod?: string
   encrypt?: boolean
-  // Used for ECDH
-  encryptionKey?: number[] | Uint8Array
-  nbf?: number
-  exp?: number
-  aud?: string[]
+  encryptionKey?: PublicKey
+  // Optional secret key. Ephemeral secret key used by default
+  encryptionSecretKey?: number[] | Uint8Array
+  customProof?: any
+  validFrom?: number
+  validUntil?: number
 }
-
-// const poseidonPromise = buildPoseidonOpt()
-// const babyJubPromise = buildBabyjub()
-// const eddsaPromise = buildEddsa()
 
 function normalizeClaims(claims: Claims) {
   for (const key in claims) {
@@ -100,43 +76,51 @@ function normalizeClaims(claims: Claims) {
 
 /**
  * Create new verifiable credential
- * @param claims
- * @param opts
  */
-export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts) {
-  claims = normalizeClaims(claims)
+export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts = {}) {
+  const normalizedClaims = normalizeClaims(claims)
 
   let credentialSubject: Claims = {}
-
   if (opts.encrypt) {
-    credentialSubject.encrypted = await XC20P.encrypt(JSON.stringify(claims), opts.holder, opts.encryptionKey)
+    if (!opts.encryptionKey) {
+      throw new Error('encryption key is required')
+    }
+    credentialSubject.encrypted = await XC20P.encrypt(
+      JSON.stringify(normalizedClaims),
+      opts.encryptionKey,
+      opts.encryptionSecretKey,
+    )
   } else {
-    credentialSubject = { ...claims }
+    credentialSubject = { ...normalizedClaims }
   }
 
-  const claimsTree = await createClaimsTree(claims)
-
-  // const issuerKeypair = Keypair.fromSecretKey(Uint8Array.from(opts.issuerSecretKey))
-  // const issuerDid = encodeDidKey(issuerKeypair.publicKey.toBytes())
-  const issuerDid = opts.issuerDid ?? DEFAULT_DID
-  const verificationMethod = opts.verificationMethod ?? `${issuerDid}#keys-0`
+  const claimsTree = await createClaimsTree(normalizedClaims)
 
   const vc: W3CCredential = {
     '@context': [DEFAULT_CONTEXT],
     'type': [DEFAULT_VC_TYPE, CredentialType.AlbusCredential],
-    'issuer': issuerDid,
+    'issuer': opts.issuerDid ?? DEFAULT_DID,
     'issuanceDate': new Date().toISOString(),
     'credentialSubject': credentialSubject,
   }
 
-  if (opts?.exp) {
-    vc.expirationDate = new Date(opts.exp * 1000).toISOString()
+  // vc.credentialStatus = {
+  //   id: 'https://example.edu/status/24',
+  //   type: 'CredentialStatusList2017',
+  // }
+
+  if (opts?.validFrom) {
+    vc.validFrom = new Date(opts.validFrom * 1000).toISOString()
   }
 
-  vc.proof = await createCredentialProof({
+  if (opts?.validUntil) {
+    vc.validUntil = new Date(opts.validUntil * 1000).toISOString()
+  }
+
+  vc.proof = opts.customProof ?? createCredentialProof({
     rootHash: claimsTree.root,
-    signerSecret: Uint8Array.from(opts.issuerSecretKey),
-    verificationMethod,
+    signerSecretKey: Uint8Array.from(opts.issuerSecretKey),
+    verificationMethod: opts.verificationMethod ?? `${vc.issuer}#eddsa-bjj`,
   })
 
   return vc as VerifiableCredential
@@ -224,7 +208,7 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
     'verifiableCredential': creds,
   }
 
-  vp.proof = await createPresentationProof({
+  vp.proof = createPresentationProof({
     signerSecret: holderKeypair.secretKey,
     challenge: opts.challenge,
   })
@@ -233,10 +217,8 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
 }
 
 export interface EncryptPresentationOpts {
-  // Used for presentation encryption (actually it is a shared key)
-  // if not selected, ephemeral key will be used instead
   pubkey: PublicKey
-  encryptionKey?: number[] | Uint8Array
+  esk?: number[] | Uint8Array
 }
 
 export async function encryptVerifiablePresentation(vp: VerifiablePresentation, opts: EncryptPresentationOpts) {
@@ -251,7 +233,7 @@ export async function encryptVerifiablePresentation(vp: VerifiablePresentation, 
             encrypted: await XC20P.encrypt(
               JSON.stringify(cred.credentialSubject),
               opts.pubkey,
-              opts.encryptionKey,
+              opts.esk,
             ),
           },
         }
@@ -265,15 +247,13 @@ export async function encryptVerifiablePresentation(vp: VerifiablePresentation, 
   return { ...vp, verifiableCredential }
 }
 
-export interface VerifyCredentialOpts extends VerifyCredentialOptions {
+export interface VerifyCredentialOpts {
   decryptionKey?: number[] | Uint8Array
-  resolver?: Resolver
+  resolver?: Resolvable
 }
 
 /**
  * Verify credential
- * @param vc
- * @param opts
  */
 export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCredentialOpts = {}): Promise<VerifiableCredential> {
   const resolver = opts.resolver ?? new Resolver({
@@ -297,7 +277,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   const issuerDid = vc.issuer?.id ?? vc.issuer
   const result = await resolver.resolve(issuerDid, { accept: 'application/did+json' })
   if (!result.didDocument?.verificationMethod) {
-    throw new Error('invalid issuer verification method')
+    throw new Error('invalid issuer, no verification methods found')
   }
 
   let issuerPubkey: Uint8Array | undefined
@@ -313,7 +293,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
     throw new Error(`unable to find \`${VerifyType.EddsaBJJVerificationKey}\` verification key`)
   }
 
-  if (!(await verifyCredentialProof(vc.proof as CredentialProof, issuerPubkey))) {
+  if (!(verifyCredentialProof(vc.proof as CredentialProof, issuerPubkey))) {
     throw new Error('proof verification failed')
   }
 
@@ -334,8 +314,6 @@ export interface VerifyPresentationOpts {
 
 /**
  * Verify presentation
- * @param vp
- * @param opts
  */
 export async function verifyPresentation(vp: VerifiablePresentation, opts: VerifyPresentationOpts = {}): Promise<VerifiablePresentation> {
   const resolver = opts.resolver ?? new Resolver({
@@ -362,7 +340,7 @@ export async function verifyPresentation(vp: VerifiablePresentation, opts: Verif
     throw new Error('unable to find `Ed25519VerificationKey2018` verification key')
   }
 
-  if (!(await verifyPresentationProof(vp.proof as PresentationProof, opts.challenge ?? pubKey))) {
+  if (!(verifyPresentationProof(vp.proof as PresentationProof, opts.challenge ?? pubKey))) {
     throw new Error('proof verification failed')
   }
 
@@ -404,7 +382,7 @@ interface PresentationProof extends BJJProof {
 
 export interface CreateCredentialProof {
   rootHash: bigint
-  signerSecret: Uint8Array
+  signerSecretKey: Uint8Array
   verificationMethod: string
   proofPurpose?: string
   extra?: { [key: string]: any }
@@ -412,13 +390,9 @@ export interface CreateCredentialProof {
 
 /**
  * Generate BabyJubJub proof for provided credential root hash
- * @param opts
  */
-export async function createCredentialProof(opts: CreateCredentialProof) {
-  // const babyJub = await babyJubPromise
-  // const eddsa = await eddsaPromise
-
-  const signer = Keypair.fromSecretKey(opts.signerSecret)
+export function createCredentialProof(opts: CreateCredentialProof): CredentialProof {
+  const signer = Keypair.fromSecretKey(opts.signerSecretKey)
   const signerPubkey = eddsa.prv2pub(signer.secretKey)
 
   const { R8, S } = eddsa.signPoseidon(signer.secretKey, opts.rootHash)
@@ -431,7 +405,7 @@ export async function createCredentialProof(opts: CreateCredentialProof) {
     type: ProofType.BJJSignature2021,
     created: createProofDate(),
     verificationMethod: opts.verificationMethod,
-    rootHash: opts.rootHash.toString(),
+    rootHash: String(opts.rootHash),
     proofValue: {
       ax: String(signerPubkey[0]),
       ay: String(signerPubkey[1]),
@@ -441,10 +415,10 @@ export async function createCredentialProof(opts: CreateCredentialProof) {
     },
     proofPurpose: opts.proofPurpose ?? 'assertionMethod',
     ...opts.extra,
-  } as CredentialProof
+  }
 }
 
-export async function verifyCredentialProof(proof: CredentialProof, pubKey: Uint8Array) {
+export function verifyCredentialProof(proof: CredentialProof, pubKey: Uint8Array) {
   switch (proof.type) {
     case ProofType.BJJSignature2021: {
       // const babyJub = await babyJubPromise
@@ -470,11 +444,7 @@ export interface CreatePresentationProof {
   extra?: { [key: string]: any }
 }
 
-export async function createPresentationProof(opts: CreatePresentationProof) {
-  // const babyJub = await babyJubPromise
-  // const eddsa = await eddsaPromise
-  // const poseidon = await poseidonPromise
-
+export function createPresentationProof(opts: CreatePresentationProof): PresentationProof {
   const signer = Keypair.fromSecretKey(opts.signerSecret)
   const signerPubkey = eddsa.prv2pub(signer.secretKey)
 
@@ -499,10 +469,10 @@ export async function createPresentationProof(opts: CreatePresentationProof) {
       s: String(S),
     },
     ...opts.extra,
-  } as PresentationProof
+  }
 }
 
-export async function verifyPresentationProof(proof: PresentationProof, challenge: Uint8Array) {
+export function verifyPresentationProof(proof: PresentationProof, challenge: Uint8Array) {
   switch (proof.type) {
     case ProofType.BJJSignature2021: {
       // const babyJub = await babyJubPromise
@@ -555,6 +525,7 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
     encodeKey,
     encodeVal,
     root: await tree.root().then(r => r.bigInt()),
+    // root: () => tree.root().then(r => r.bigInt()),
     proof: async (key: string) => {
       const encodedKey = encodeKey(key)
       const res = await tree.generateCircomVerifierProof(encodedKey, ZERO_HASH)

@@ -73,7 +73,7 @@ export const createProofRequestInstructionDiscriminator = [
 export function createCreateProofRequestInstruction(
   accounts: CreateProofRequestInstructionAccounts,
   args: CreateProofRequestInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = createProofRequestStruct.serialize({
     instructionDiscriminator: createProofRequestInstructionDiscriminator,

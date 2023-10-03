@@ -26,14 +26,30 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-type Extensible<T> = T & { [x: string]: any }
+export enum CredentialType {
+  AlbusCredential = 'AlbusCredential',
+}
 
-export type CredentialSubject = Record<string, any>
+export enum PresentationType {
+  AlbusPresentation = 'AlbusPresentation',
+}
+
+export enum ProofType {
+  BJJSignature2021 = 'BJJSignature2021',
+}
+
+export enum VerifyType {
+  EddsaBJJVerificationKey = 'EddsaBJJVerificationKey',
+}
+
+export type Claims = Record<string, any>
 
 export interface CredentialStatus {
   id: string
   type: string
 }
+
+type Extensible<T> = T & { [x: string]: any }
 
 /**
  * Represents a readonly representation of a verifiable object, including the {@link Proof}
@@ -42,6 +58,7 @@ export interface CredentialStatus {
 export type Verifiable<T> = Readonly<T> & { readonly proof: Proof }
 export type Proof = Extensible<{ type?: string }>
 export type IssuerType = Extensible<{ id: string }> | string
+export type DateType = string | Date
 
 export type W3CCredential = Extensible<{
   '@context': string[]
@@ -49,8 +66,9 @@ export type W3CCredential = Extensible<{
   type: string[]
   issuer: IssuerType
   issuanceDate: string
-  expirationDate?: string
-  credentialSubject: CredentialSubject // Extensible<{ id: string }>
+  validFrom?: string
+  validUntil?: string
+  credentialSubject: Claims // Extensible<{ id: string }>
   credentialStatus?: CredentialStatus
   evidence?: any
   termsOfUse?: any
@@ -64,7 +82,7 @@ export type W3CPresentation = Extensible<{
   holder: string
   verifier?: string[]
   issuanceDate?: string
-  expirationDate?: string
+  validFrom?: string
 }>
 
 /**

@@ -115,7 +115,7 @@ pub struct Circuit {
 }
 
 impl Circuit {
-    pub const SEED: &'_ [u8] = b"circuit";
+    pub const SEED: &'static [u8] = b"circuit";
     pub const MAX_SIGNAL_NAME_LEN: usize = 32;
 
     #[inline]
@@ -171,7 +171,7 @@ pub struct Policy {
 }
 
 impl Policy {
-    pub const SEED: &'_ [u8] = b"policy";
+    pub const SEED: &'static [u8] = b"policy";
 
     #[inline]
     pub fn space(rules_len: usize) -> usize {
@@ -250,7 +250,7 @@ pub struct ContactInfo {
 }
 
 impl ServiceProvider {
-    pub const SEED: &'_ [u8] = b"service-provider";
+    pub const SEED: &'static [u8] = b"service-provider";
 
     #[inline]
     pub fn space() -> usize {
@@ -286,7 +286,7 @@ pub struct Trustee {
 }
 
 impl Trustee {
-    pub const SEED: &'_ [u8] = b"trustee";
+    pub const SEED: &'static [u8] = b"trustee";
 
     #[inline]
     pub fn space() -> usize {
@@ -324,7 +324,7 @@ pub struct InvestigationRequest {
 }
 
 impl InvestigationRequest {
-    pub const SEED: &'_ [u8] = b"investigation-request";
+    pub const SEED: &'static [u8] = b"investigation-request";
 
     #[inline]
     pub fn space() -> usize {
@@ -378,7 +378,7 @@ pub enum RevelationStatus {
 }
 
 impl InvestigationRequestShare {
-    pub const SEED: &'_ [u8] = b"investigation-request-share";
+    pub const SEED: &'static [u8] = b"investigation-request-share";
 
     #[inline]
     pub fn space() -> usize {
@@ -421,7 +421,7 @@ pub struct ProofRequest {
 }
 
 impl ProofRequest {
-    pub const SEED: &'_ [u8] = b"proof-request";
+    pub const SEED: &'static [u8] = b"proof-request";
 
     #[inline]
     pub fn space(max_public_inputs: u8) -> usize {

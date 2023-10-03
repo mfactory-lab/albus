@@ -39,6 +39,7 @@ import {
   verifyCredentialProof,
   verifyPresentation,
 } from '../src/credential'
+import { generateDid } from '../src/utils'
 
 describe('credential', () => {
   const claims = {
@@ -67,12 +68,12 @@ describe('credential', () => {
     const claimsTree = await createClaimsTree(claims)
     const issuerKeypair = Keypair.generate()
     const pubkey = babyJub.packPoint(eddsa.prv2pub(issuerKeypair.secretKey))
-    const proof = await createCredentialProof({
+    const proof = createCredentialProof({
       rootHash: claimsTree.root,
-      signerSecret: issuerKeypair.secretKey,
+      signerSecretKey: issuerKeypair.secretKey,
       verificationMethod: '',
     })
-    const res = await verifyCredentialProof(proof, pubkey)
+    const res = verifyCredentialProof(proof, pubkey)
     assert.ok(res)
   })
 
@@ -80,7 +81,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const data = await createVerifiableCredential(claims, {
-      holder: holder.publicKey,
+      encryptionKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
@@ -92,8 +93,11 @@ describe('credential', () => {
 
     const vc = await verifyCredential(data, {
       decryptionKey: holder.secretKey,
-      // TODO: mock web resolver
-      // resolver: {}
+      resolver: {
+        resolve() {
+          return { didDocument: generateDid(issuerKeypair) } as any
+        },
+      },
     })
 
     // assert.ok('issuerPubkey' in vc)
@@ -105,7 +109,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const credential = await createVerifiableCredential(claims, {
-      holder: holder.publicKey,
+      encryptionKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
@@ -130,7 +134,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const credential = await createVerifiableCredential(claims, {
-      holder: holder.publicKey,
+      encryptionKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
@@ -181,4 +185,15 @@ describe('credential', () => {
     assert.equal((await tree.get('degree.university.name')).key, 2n)
     assert.equal((await tree.get('test2.0.name')).value, 1n)
   })
+
+  // it('resolver', async () => {
+  //   const resolver = new Resolver({
+  //     ...WebDidResolver.getResolver(),
+  //     ...KeyDidResolver.getResolver(),
+  //   } as ResolverRegistry)
+  //
+  //   const res = await resolver.resolve('did:web:issuer.albus.finance:sumsub')
+  //
+  //   console.log(res.didDocument.verificationMethod)
+  // })
 })

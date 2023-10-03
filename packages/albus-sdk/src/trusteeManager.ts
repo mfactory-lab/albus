@@ -50,8 +50,6 @@ export class TrusteeManager {
 
   /**
    * Load trustee by {@link addr}
-   * @param addr
-   * @param commitment
    */
   async load(addr: PublicKeyInitData, commitment?: Commitment) {
     return Trustee.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
@@ -59,8 +57,6 @@ export class TrusteeManager {
 
   /**
    * Load multiple trustees
-   * @param addrs
-   * @param commitmentOrConfig
    */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -70,8 +66,6 @@ export class TrusteeManager {
 
   /**
    * Load {@link Trustee} by key
-   * @param key
-   * @param commitment
    */
   async loadByKey(key: number[], commitment?: Commitment) {
     return Trustee.fromAccountAddress(this.provider.connection, this.pda.trustee(key)[0], commitment)
@@ -79,7 +73,6 @@ export class TrusteeManager {
 
   /**
    * Load {@link Trustee} by authority
-   * @param authority
    */
   async loadByAuthority(authority: PublicKeyInitData) {
     return this.find({ authority }).then(res => res[0])
@@ -87,7 +80,6 @@ export class TrusteeManager {
 
   /**
    * Find trustees
-   * @param props
    */
   async find(props: FindTrusteeProps = {}) {
     const builder = Trustee.gpaBuilder()
@@ -131,8 +123,6 @@ export class TrusteeManager {
 
   /**
    * Add new trustee
-   * @param props
-   * @param opts
    */
   async create(props: CreateTrusteeProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -159,8 +149,6 @@ export class TrusteeManager {
 
   /**
    * Update trustee
-   * @param props
-   * @param opts
    */
   async update(props: UpdateTrusteeProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -173,6 +161,7 @@ export class TrusteeManager {
         name: props.name ?? null,
         email: props.email ?? null,
         website: props.website ?? null,
+        newAuthority: props.newAuthority ?? null,
       },
     })
     try {
@@ -186,8 +175,6 @@ export class TrusteeManager {
 
   /**
    * Verify trustee
-   * @param trustee
-   * @param opts
    */
   async verify(trustee: PublicKeyInitData, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -206,8 +193,6 @@ export class TrusteeManager {
 
   /**
    * Delete trustee
-   * @param trustee
-   * @param opts
    */
   async delete(trustee: PublicKeyInitData, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -226,11 +211,12 @@ export class TrusteeManager {
   }
 
   async deleteByKey(key: ArrayLike<number>, opts?: ConfirmOptions) {
-    return this.delete(this.pda.trustee(key), opts)
+    return this.delete(this.pda.trustee(key)[0], opts)
   }
 }
 
 export interface CreateTrusteeProps extends CreateTrusteeData {}
+
 export interface UpdateTrusteeProps extends Partial<UpdateTrusteeData> {
   key: number[]
   // newKey: number[]

@@ -27,60 +27,52 @@
  */
 
 import type { Keypair } from '@solana/web3.js'
-import * as u8a from 'uint8arrays'
-import { babyJub, eddsa } from '../crypto'
+import { DEFAULT_DID } from '../credential'
+import { MultiBase, babyJub, eddsa } from '../crypto'
 import { bytesToBase58 } from '../crypto/utils'
-
-const ALBUS_DID = 'did:web:albus.finance'
+import { VerifyType } from '../types'
 
 export function encodeDidKey(publicKey: Uint8Array): string {
-  const bytes = new Uint8Array(publicKey.length + 2)
-  bytes[0] = 0xED // ed25519 multicodec
-  // The multicodec is encoded as a varint, so we need to add this.
-  // See js-multicodec for a general implementation
-  bytes[1] = 0x01
-  bytes.set(publicKey, 2)
-  return `did:key:z${u8a.toString(bytes, 'base58btc')}`
+  return `did:key:${MultiBase.encodePubkey(publicKey)}`
 }
 
 export function decodeDidKey(did: string): Uint8Array {
-  if (!did.startsWith('did:key:z')) {
+  if (!did.startsWith('did:key:')) {
     throw new Error('did:key invalid format')
   }
-  const bytes = u8a.fromString(did.slice(9), 'base58btc')
-  if (bytes[0] !== 0xED || bytes[1] !== 0x01) {
-    throw new Error('did:key is not valid ed25519 key')
-  }
-  return bytes.slice(2)
+  return MultiBase.decodePubkey(did.slice(8))
 }
 
-export function generateDid(keypair: Keypair) {
-  const id = ALBUS_DID
-  const pubkey = babyJub.packPoint(eddsa.prv2pub(keypair.secretKey))
+export function generateDid(keypair: Keypair, id = DEFAULT_DID) {
+  const bjPubkey = babyJub.packPoint(eddsa.prv2pub(keypair.secretKey))
 
   const verificationMethod = [
     {
-      id: '#keys-0',
-      type: 'EddsaBJJVerificationKey',
+      id: '#eddsa-bjj',
+      type: VerifyType.EddsaBJJVerificationKey,
       controller: id,
-      publicKeyBase58: bytesToBase58(pubkey),
+      publicKeyBase58: bytesToBase58(bjPubkey),
     },
     {
-      id: '#keys-1',
+      id: '#ed25519-2018',
       type: 'Ed25519VerificationKey2018',
       controller: id,
       publicKeyBase58: keypair.publicKey.toBase58(),
     },
     {
-      id: '#keys-2',
-      type: 'Ed25519VerificationKey2018',
+      id: '#ed25519-2020',
+      type: 'Ed25519VerificationKey2020',
       controller: encodeDidKey(keypair.publicKey.toBytes()),
-      publicKeyBase58: keypair.publicKey.toBase58(),
+      publicKeyMultibase: MultiBase.encodePubkey(keypair.publicKey.toBytes()),
     },
   ]
 
   return {
-    '@context': 'https://www.w3.org/ns/did/v1',
+    '@context': [
+      'https://www.w3.org/ns/did/v1',
+      'https://www.w3.org/ns/data-integrity/v1',
+      'https://w3id.org/security/multikey/v1',
+    ],
     'id': id,
     'verificationMethod': verificationMethod,
     'authentication': verificationMethod.map(m => m.id),

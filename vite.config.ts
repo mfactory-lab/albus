@@ -6,8 +6,25 @@ import type { BuildOptions, PluginOption, UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
+const inline: string[] = [
+  // TODO: fixme `key-did-resolver` doesn't support commonjs
+  'key-did-resolver',
+  'multiformats/bases/base58',
+  'multiformats/bases/base64',
+  'varint',
+  'bigint-mod-arith',
+  'nist-weierstrauss',
+]
+
 const isObject = (item: unknown): item is Record<string, unknown> => Boolean(item && typeof item === 'object' && !Array.isArray(item))
-const isExternal = (id: string) => !id.startsWith('.') && !id.startsWith('@/') && !id.startsWith('~/') && !isAbsolute(id)
+
+function isExternal(source: string) {
+  return !inline.includes(source)
+    && !source.startsWith('.')
+    && !source.startsWith('@/')
+    && !source.startsWith('~/')
+    && !isAbsolute(source)
+}
 
 function mergeDeep<T>(target: T, ...sources: T[]): T {
   if (!sources.length) {
@@ -45,8 +62,8 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
       lib: {
         name: `albus_${pkgName}`,
         entry: resolve(dir, 'src', 'index.ts'),
-        fileName: format => `index.${format}.js`,
-        formats: ['es', 'cjs'],
+        fileName: format => `index.${format === 'es' ? 'mjs' : 'cjs'}`,
+        formats: ['cjs', 'es'],
       },
       rollupOptions: {
         external: isExternal,

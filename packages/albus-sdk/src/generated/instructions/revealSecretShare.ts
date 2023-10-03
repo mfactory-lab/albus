@@ -73,7 +73,7 @@ export const revealSecretShareInstructionDiscriminator = [
 export function createRevealSecretShareInstruction(
   accounts: RevealSecretShareInstructionAccounts,
   args: RevealSecretShareInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = revealSecretShareStruct.serialize({
     instructionDiscriminator: revealSecretShareInstructionDiscriminator,

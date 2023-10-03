@@ -1,20 +1,19 @@
 {
   "name": "@mfactory-lab/albus-core",
-  "version": "0.1.0",
-  "type": "module",
+  "version": "0.1.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-core"
   },
   "sideEffects": false,
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.es.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -24,7 +23,9 @@
     "dev": "vite build --watch",
     "build": "vite build",
     "release": "release-it --ci",
-    "test": "vitest"
+    "release:dry": "release-it --ci --dry-run",
+    "test": "vitest",
+    "prepublishOnly": "vite build"
   },
   "dependencies": {
     "@iden3/js-merkletree": "^1.0.1",
@@ -36,14 +37,11 @@
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
-    "did-jwt-vc": "^3.2.5",
-    "did-jwt": "^7.2.5",
-    "did-resolver": "^4.1.0",
+    "did-resolver": "^3.2.2",
     "key-did-resolver": "^3.0.0",
     "web-did-resolver": "^2.0.27",
-    "circomlib": "^2.0.5",
     "snarkjs": "*",
-    "uint8arrays": "^4.0.6"
+    "uint8arrays": "^3.1.1"
   },
   "devDependencies": {
     "@mfactory-lab/release-it-config": "workspace:^",

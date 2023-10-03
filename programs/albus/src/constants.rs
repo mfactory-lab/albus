@@ -37,4 +37,7 @@ pub const AUTHORIZED_AUTHORITY: &[&str] = &[
 // pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
 pub const CURRENT_DATE_SIGNAL: &str = "currentDate";
 
+pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
+pub const VC_SYMBOL_CODE: &str = "VC";
+
 pub const DEFAULT_SECRET_SHARE_THRESHOLD: u8 = 2;

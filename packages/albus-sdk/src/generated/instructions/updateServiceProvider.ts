@@ -7,10 +7,10 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { UpdateServiceData } from '../types/UpdateServiceData'
+import type { UpdateServiceProviderData } from '../types/UpdateServiceProviderData'
 import {
-  updateServiceDataBeet,
-} from '../types/UpdateServiceData'
+  updateServiceProviderDataBeet,
+} from '../types/UpdateServiceProviderData'
 
 /**
  * @category Instructions
@@ -18,7 +18,7 @@ import {
  * @category generated
  */
 export interface UpdateServiceProviderInstructionArgs {
-  data: UpdateServiceData
+  data: UpdateServiceProviderData
 }
 /**
  * @category Instructions
@@ -32,7 +32,7 @@ export const updateServiceProviderStruct = new beet.FixableBeetArgsStruct<
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', updateServiceDataBeet],
+    ['data', updateServiceProviderDataBeet],
   ],
   'UpdateServiceProviderInstructionArgs',
 )
@@ -69,7 +69,7 @@ export const updateServiceProviderInstructionDiscriminator = [
 export function createUpdateServiceProviderInstruction(
   accounts: UpdateServiceProviderInstructionAccounts,
   args: UpdateServiceProviderInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = updateServiceProviderStruct.serialize({
     instructionDiscriminator: updateServiceProviderInstructionDiscriminator,

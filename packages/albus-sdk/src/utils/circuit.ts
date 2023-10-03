@@ -110,7 +110,7 @@ export class ProofInputBuilder {
   }
 
   /**
-   * Normalize a claim key by trimming whitespace.
+   * Normalize a claim key by trimming space.
    *
    * @param {string} s - The claim key to normalize.
    * @returns {string} The normalized claim key.
@@ -230,9 +230,9 @@ export function getSignals(symbols: string[], inputs: bigint[]): Record<string, 
   function assignValue(sig: ParseSignalResult): any {
     if (sig.next) {
       const result = Array(sig.size).fill(null).map(() => assignValue(sig.next!))
-      return sig.size === 1 ? result[0] : result
+      return sig.size <= 1 ? result[0] : result
     }
-    if (sig.size === 1) {
+    if (sig.size <= 1) {
       return inputs[idx++]
     }
     return Array(sig.size).fill(null).map(() => inputs[idx++])
@@ -248,18 +248,7 @@ export function getSignals(symbols: string[], inputs: bigint[]): Record<string, 
   return map
 }
 
-// /**
-//  * Parse a symbol with a name like 'symbol[5][3]' into its components.
-//  *
-//  * @param {string} s - The symbol name to parse.
-//  * @returns {[string, number, number]} An array containing the parsed signal name, size, and subsize.
-//  */
-// function parseSymbol(s: string): [string, number, number] {
-//   const r = s.match(/^(\w+)(?:\[(\d+)](?:\[(\d+)])?)?$/)
-//   return r ? [r[1]!, r[2] ? Number(r[2]) : 1, r[3] ? Number(r[3]) : 1] : ['', 0, 0]
-// }
-
-function parseSignal(signal: string): ParseSignalResult | null {
+export function parseSignal(signal: string): ParseSignalResult | null {
   if (signal.length === 0) {
     return null
   }
@@ -273,9 +262,9 @@ function parseSignal(signal: string): ParseSignalResult | null {
       const remaining = signal.slice(close + 1)
       return { name, size, next: parseSignal(remaining) }
     }
-    return { name, size: 1, next: null }
+    return { name, size: 0, next: null }
   }
-  return { name: signal, size: 1, next: null }
+  return { name: signal, size: 0, next: null }
 }
 
 interface ParseSignalResult {

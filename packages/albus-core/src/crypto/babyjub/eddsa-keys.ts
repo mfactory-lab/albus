@@ -1,4 +1,4 @@
-import { Hex } from '../hex'
+import { bytesToHex, hexToBytes } from '../utils'
 import { babyJub } from './babyjub'
 import { eddsa } from './eddsa'
 
@@ -31,7 +31,7 @@ export class Signature {
   }
 
   hex(): string {
-    return Hex.encodeString(this.compress())
+    return bytesToHex(this.compress())
   }
 }
 
@@ -55,7 +55,7 @@ export class PublicKey {
   }
 
   static newFromHex(hexStr: string): PublicKey {
-    const buff = Hex.decodeString(hexStr)
+    const buff = hexToBytes(hexStr)
     return PublicKey.newFromCompressed(buff)
   }
 
@@ -69,7 +69,7 @@ export class PublicKey {
   }
 
   hex(): string {
-    return Hex.encodeString(this.compress())
+    return bytesToHex(this.compress())
   }
 
   verifyPoseidon(msg: bigint, sig: Signature): boolean {
@@ -92,7 +92,7 @@ export class PrivateKey {
   }
 
   hex(): string {
-    return Hex.encodeString(this.sk)
+    return bytesToHex(this.sk)
   }
 
   public(): PublicKey {

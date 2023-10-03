@@ -3,6 +3,8 @@ import type { PublicKey } from '@solana/web3.js'
 
 const albus = useAlbus()
 
+const { createTestVC, isLoading } = useCredential()
+
 const proving = ref(false)
 async function prove(proofRequest: PublicKey) {
   proving.value = true
@@ -10,7 +12,7 @@ async function prove(proofRequest: PublicKey) {
     console.log('Start proving...')
     await albus.client.value.proofRequest.fullProve({
       proofRequest,
-      holderSecretKey: albus.state.holderSecretKey,
+      userPrivateKey: Uint8Array.from(albus.state.userPrivateKey),
       vc: albus.state.creds[0].address,
     })
   } finally {
@@ -41,9 +43,9 @@ async function prove(proofRequest: PublicKey) {
         <h3>Requests ({{ albus.state.requests.length }})</h3>
         <q-spinner v-if="albus.state.requestsLoading" size="50" />
         <div class="q-pa-md row items-start q-gutter-md">
-          <q-card v-for="req in albus.state.requests" :key="req.pubkey" flat bordered>
+          <q-card v-for="req in albus.state.requests" :key="String(req.pubkey)" flat bordered>
             <q-card-section>
-              <q-btn v-if="req.data.status === 0" :loading="proving" color="primary" rounded @click="prove(req.pubkey)">
+              <q-btn v-if="req.data?.status === 0" :loading="proving" color="primary" rounded @click="prove(req.pubkey)">
                 prove
               </q-btn>
               {{ req.pubkey }}
@@ -55,6 +57,9 @@ async function prove(proofRequest: PublicKey) {
           </q-card>
         </div>
       </div>
+    </div>
+    <div class="text-right">
+      <q-btn color="primary" :loading="isLoading" rounded @click="createTestVC">create vc</q-btn>
     </div>
   </div>
 </template>

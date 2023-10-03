@@ -26,9 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { Wallet } from '@coral-xyz/anchor'
-import { AnchorProvider } from '@coral-xyz/anchor'
-import type { ConfirmOptions, Connection } from '@solana/web3.js'
+import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
+import type { ConfirmOptions, Connection, Keypair } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { CircuitManager } from './circuitManager'
 import { CredentialManager } from './credentialManager'
@@ -76,6 +75,11 @@ export class AlbusClient {
 
   static factory(connection: Connection, wallet?: Wallet, opts: ConfirmOptions = {}) {
     wallet = wallet ?? { publicKey: PublicKey.default } as unknown as Wallet
+    return new this(new AnchorProvider(connection, wallet, opts))
+  }
+
+  static keypair(connection: Connection, keypair: Keypair, opts: ConfirmOptions = {}) {
+    const wallet = new Wallet(keypair)
     return new this(new AnchorProvider(connection, wallet, opts))
   }
 }
