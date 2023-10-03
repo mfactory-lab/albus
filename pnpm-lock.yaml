@@ -163,7 +163,7 @@ importers:
       '@solana/web3.js':
         specifier: ^1.77.3
         version: 1.77.3
-      lodash-es:
+      lodash:
         specifier: ^4.17.21
         version: 4.17.21
     devDependencies:
