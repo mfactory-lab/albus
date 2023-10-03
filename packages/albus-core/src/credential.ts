@@ -29,9 +29,8 @@
 import { InMemoryDB, Merkletree, ZERO_HASH, str2Bytes } from '@iden3/js-merkletree'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import type { ResolverRegistry } from 'did-resolver'
+import type { Resolvable, ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
-import type { Resolvable } from 'did-resolver/src/resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
 import { Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
@@ -42,24 +41,23 @@ import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } 
 const { bytesToBigInt, base58ToBytes } = utils
 
 // https://www.w3.org/TR/vc-data-model-2.0
-
 export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
-export const DEFAULT_CLAIM_TREE_DEPTH = 6 // 2**6 = 64
+export const DEFAULT_CLAIM_TREE_DEPTH = 6
 
 export interface CreateCredentialOpts {
-  userPublicKey: PublicKey
-  issuerSecretKey: number[] | Uint8Array
+  issuerSecretKey?: number[] | Uint8Array
   issuerDid?: string
   verificationMethod?: string
   encrypt?: boolean
-  // Ephemeral Secret Key
-  esk?: number[] | Uint8Array
+  encryptionKey?: PublicKey
+  // Optional secret key. Ephemeral secret key used by default
+  encryptionSecretKey?: number[] | Uint8Array
+  customProof?: any
   validFrom?: number
   validUntil?: number
-  aud?: string[]
 }
 
 function normalizeClaims(claims: Claims) {
@@ -79,26 +77,29 @@ function normalizeClaims(claims: Claims) {
 /**
  * Create new verifiable credential
  */
-export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts) {
-  claims = normalizeClaims(claims)
+export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts = {}) {
+  const normalizedClaims = normalizeClaims(claims)
 
   let credentialSubject: Claims = {}
-
   if (opts.encrypt) {
-    credentialSubject.encrypted = await XC20P.encrypt(JSON.stringify(claims), opts.userPublicKey, opts.esk)
+    if (!opts.encryptionKey) {
+      throw new Error('encryption key is required')
+    }
+    credentialSubject.encrypted = await XC20P.encrypt(
+      JSON.stringify(normalizedClaims),
+      opts.encryptionKey,
+      opts.encryptionSecretKey,
+    )
   } else {
-    credentialSubject = { ...claims }
+    credentialSubject = { ...normalizedClaims }
   }
 
-  const claimsTree = await createClaimsTree(claims)
-
-  const issuerDid = opts.issuerDid ?? DEFAULT_DID
-  const verificationMethod = opts.verificationMethod ?? `${issuerDid}#eddsa-bjj`
+  const claimsTree = await createClaimsTree(normalizedClaims)
 
   const vc: W3CCredential = {
     '@context': [DEFAULT_CONTEXT],
     'type': [DEFAULT_VC_TYPE, CredentialType.AlbusCredential],
-    'issuer': issuerDid,
+    'issuer': opts.issuerDid ?? DEFAULT_DID,
     'issuanceDate': new Date().toISOString(),
     'credentialSubject': credentialSubject,
   }
@@ -116,10 +117,10 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
     vc.validUntil = new Date(opts.validUntil * 1000).toISOString()
   }
 
-  vc.proof = createCredentialProof({
+  vc.proof = opts.customProof ?? createCredentialProof({
     rootHash: claimsTree.root,
     signerSecretKey: Uint8Array.from(opts.issuerSecretKey),
-    verificationMethod,
+    verificationMethod: opts.verificationMethod ?? `${vc.issuer}#eddsa-bjj`,
   })
 
   return vc as VerifiableCredential

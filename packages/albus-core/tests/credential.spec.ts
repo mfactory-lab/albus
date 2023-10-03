@@ -81,7 +81,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const data = await createVerifiableCredential(claims, {
-      userPublicKey: holder.publicKey,
+      encryptionKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
@@ -109,7 +109,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const credential = await createVerifiableCredential(claims, {
-      userPublicKey: holder.publicKey,
+      encryptionKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
@@ -134,7 +134,7 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const credential = await createVerifiableCredential(claims, {
-      userPublicKey: holder.publicKey,
+      encryptionKey: holder.publicKey,
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
