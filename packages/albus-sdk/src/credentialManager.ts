@@ -170,7 +170,6 @@ export class CredentialManager {
     }
 
     return Albus.credential.verifyCredential(nft.json.vc, {
-      // audience: ALBUS_DID,
       decryptionKey: props.decryptionKey,
     })
   }
@@ -194,7 +193,6 @@ export class CredentialManager {
     for (const account of accounts) {
       if (account.json?.vc !== undefined) {
         const credential = await Albus.credential.verifyCredential(account.json.vc, {
-          // audience: ALBUS_DID,
           decryptionKey: props.decryptionKey,
         })
         result.push({ address: account.mint, credential })
@@ -202,6 +200,22 @@ export class CredentialManager {
     }
 
     return result
+  }
+
+  /**
+   * Load pending VC-NFT accounts
+   */
+  async loadPendingNftAccounts(props?: { owner: PublicKey }) {
+    return getParsedNftAccountsByOwner(
+      this.provider.connection,
+      props?.owner ?? this.provider.publicKey,
+      {
+        uri: '', // pending VC has empty uri
+        symbol: `${NFT_SYMBOL_PREFIX}-${NFT_VC_SYMBOL}`,
+        updateAuthority: this.pda.authority()[0],
+        withJson: false,
+      },
+    )
   }
 
   /**

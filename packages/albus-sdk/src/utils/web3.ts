@@ -139,6 +139,7 @@ interface FindMetadataAccounts {
   updateAuthority?: PublicKeyInitData
   symbol?: string
   name?: string
+  uri?: string
   // default: 100
   chunkSize?: number
   withJson?: boolean
@@ -182,6 +183,11 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
     }
     if (props.name !== undefined) {
       valid &&= acc.data.name.includes(props.name)
+    }
+    if (props.uri) {
+      valid &&= acc.data.uri === props.uri
+    } else if (props.withJson) {
+      valid &&= acc.data.uri.trim() !== ''
     }
     return valid
   })
