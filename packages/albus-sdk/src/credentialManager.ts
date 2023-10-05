@@ -58,20 +58,19 @@ export class CredentialManager {
   /**
    * Create new Credential NFT
    */
-  async create(_props: CreateCredentialProps = {}, opts?: ConfirmOptions) {
+  async create(props?: CreateCredentialProps, opts?: ConfirmOptions) {
     const mint = Keypair.generate()
-
-    const token = getAssociatedTokenAddress(mint.publicKey, this.provider.publicKey)
+    const owner = props?.owner ? new PublicKey(props?.owner) : this.provider.publicKey
 
     const ix = createMintCredentialInstruction({
-      tokenAccount: token,
-      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
       mint: mint.publicKey,
+      tokenAccount: getAssociatedTokenAddress(mint.publicKey, owner),
       albusAuthority: this.pda.authority()[0],
       editionAccount: getMasterEditionPDA(mint.publicKey),
       metadataAccount: getMetadataPDA(mint.publicKey),
-      metadataProgram: METADATA_PROGRAM_ID,
       authority: this.provider.publicKey,
+      metadataProgram: METADATA_PROGRAM_ID,
+      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, {
       data: {
         uri: '',
@@ -90,22 +89,26 @@ export class CredentialManager {
   }
 
   /**
-   * Revoke credential and burn credential NFT
+   * Update credential data
+   * Require admin authority
    */
-  async revoke(props: RevokeCredentialProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
+  async update(props: UpdateCredentialProps, opts?: ConfirmOptions) {
     const mint = new PublicKey(props.mint)
-    const token = getAssociatedTokenAddress(mint, authority)
+    const owner = new PublicKey(props.owner)
 
-    const ix = createRevokeCredentialInstruction({
-      tokenAccount: token,
+    const ix = createUpdateCredentialInstruction({
       mint,
       albusAuthority: this.pda.authority()[0],
-      editionAccount: getMasterEditionPDA(mint),
+      tokenAccount: getAssociatedTokenAddress(mint, owner),
       metadataAccount: getMetadataPDA(mint),
+      authority: this.provider.publicKey,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-      authority,
+    }, {
+      data: {
+        name: props.name ?? DEFAULT_CREDENTIAL_NAME,
+        uri: props.uri,
+      },
     })
 
     try {
@@ -118,27 +121,20 @@ export class CredentialManager {
   }
 
   /**
-   * Update credential data
-   * Require admin authority
+   * Revoke credential and burn credential NFT
    */
-  async update(props: UpdateCredentialProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
+  async revoke(props: RevokeCredentialProps, opts?: ConfirmOptions) {
     const mint = new PublicKey(props.mint)
-    const token = getAssociatedTokenAddress(mint, authority)
 
-    const ix = createUpdateCredentialInstruction({
-      albusAuthority: this.pda.authority()[0],
+    const ix = createRevokeCredentialInstruction({
       mint,
-      tokenAccount: token,
+      tokenAccount: getAssociatedTokenAddress(mint, this.provider.publicKey),
+      albusAuthority: this.pda.authority()[0],
+      editionAccount: getMasterEditionPDA(mint),
       metadataAccount: getMetadataPDA(mint),
+      authority: this.provider.publicKey,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-      authority,
-    }, {
-      data: {
-        name: props.name ?? DEFAULT_CREDENTIAL_NAME,
-        uri: props.uri,
-      },
     })
 
     try {
@@ -251,10 +247,11 @@ export class CredentialManager {
 }
 
 export interface CreateCredentialProps {
-
+  owner?: PublicKeyInitData
 }
 
 export interface UpdateCredentialProps {
+  owner: PublicKeyInitData
   mint: PublicKeyInitData
   uri: string
   name?: string
