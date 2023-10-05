@@ -316,13 +316,7 @@ export class ProofRequestManager {
     }
   }
 
-  async generateVerifiablePresentation(props: any) {
-    interface CreateVpProps {
-      proofRequest: PublicKeyInitData
-      userPrivateKey: Uint8Array
-    }
-    props = props as CreateVpProps
-
+  async generateVerifiablePresentation(props: GenerateVerifiablePresentationProps) {
     const { proofRequest, circuit } = await this.loadFull(props.proofRequest, ['circuit'])
 
     if (!circuit) {
@@ -572,4 +566,8 @@ export interface ProveProps {
 export interface ChangeStatus {
   proofRequest: PublicKeyInitData
   status: ProofRequestStatus
+}
+interface GenerateVerifiablePresentationProps {
+  proofRequest: PublicKeyInitData
+  userPrivateKey: Uint8Array
 }
