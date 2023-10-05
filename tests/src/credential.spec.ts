@@ -27,6 +27,7 @@
  */
 
 import { AccountState } from '@solana/spl-token'
+import { Keypair } from '@solana/web3.js'
 import type { PublicKey } from '@solana/web3.js'
 import axios from 'axios'
 
@@ -37,7 +38,7 @@ import {
   getMasterEditionPDA,
   getMetadataPDA,
 } from '../../packages/albus-sdk/src'
-import { airdrop, netMetaplex, payerKeypair, provider } from './utils'
+import { airdrop, netMetaplex, newProvider, payerKeypair, provider } from './utils'
 
 const credential = {
   name: 'ALBUS Verifiable Credential',
@@ -74,20 +75,28 @@ const credential = {
 }
 
 describe('Albus credential', () => {
+  const holder = Keypair.generate()
+
   const client = new AlbusClient(provider)
+  const holderClient = new AlbusClient(newProvider(holder))
   const mx = netMetaplex(payerKeypair)
 
   const updateAuthority = client.pda.authority()[0]
 
+  console.log(`Payer: ${payerKeypair.publicKey}`)
+  console.log(`Holder: ${holder.publicKey}`)
+  console.log(`UpdateAuthority: ${updateAuthority}`)
+
   beforeAll(async () => {
     await airdrop(payerKeypair.publicKey)
+    await airdrop(holder.publicKey)
     await airdrop(updateAuthority)
   })
 
   let credentialMint: PublicKey
 
   it('can create credential', async () => {
-    const { signature, mintAddress } = await client.credential.create()
+    const { signature, mintAddress } = await holderClient.credential.create()
     console.log(`signature ${signature}`)
     console.log(`mintAddress ${mintAddress}`)
 
@@ -99,7 +108,7 @@ describe('Albus credential', () => {
 
     const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
       mint: mintAddress,
-      address: payerKeypair.publicKey,
+      address: holderClient.provider.publicKey,
       addressType: 'owner',
     })
 
@@ -110,6 +119,7 @@ describe('Albus credential', () => {
   it('can update credential', async () => {
     const data = {
       mint: credentialMint,
+      owner: holder.publicKey,
       uri: 'https://credential.json',
       name: 'Test Credential',
     }
@@ -131,7 +141,7 @@ describe('Albus credential', () => {
         }
       })
 
-    const vc = await client.credential.load(credentialMint)
+    const vc = await holderClient.credential.load(credentialMint)
 
     assert.deepEqual(vc, credential.vc)
   })
@@ -148,14 +158,14 @@ describe('Albus credential', () => {
         }
       })
 
-    const vc = await client.credential.loadAll()
+    const vc = await holderClient.credential.loadAll()
 
     assert.equal(vc.length, 1)
     assert.deepEqual(vc[0]?.credential, credential.vc)
   })
 
   it('can revoke credential', async () => {
-    await client.credential.revoke({
+    await holderClient.credential.revoke({
       mint: credentialMint,
     })
 
