@@ -61,17 +61,26 @@ export interface CreateCredentialOpts {
 }
 
 function normalizeClaims(claims: Claims) {
-  for (const key in claims) {
-    let value = String(claims[key]).trim()
+  const normalizedClaims: Record<string, any> = {}
 
-    // normalize date to integer format (2000-01-01 > 20000101)
-    if (key.toLowerCase().endsWith('date') && value.match(/\d{4}-\d{2}-\d{2}/)) {
-      value = value.split('-').join('')
+  for (const key in claims) {
+    let value = claims[key]
+
+    if (typeof value === 'object') {
+      value = normalizeClaims(value)
+    } else {
+      value = String(value).trim()
+
+      // normalize date to integer format (2000-01-01 > 20000101)
+      if (value.match(/\d{4}-\d{2}-\d{2}/)) {
+        value = value.split('-').join('')
+      }
     }
 
-    claims[key] = value
+    normalizedClaims[key] = value
   }
-  return claims
+
+  return normalizedClaims
 }
 
 /**
