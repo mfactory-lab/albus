@@ -185,9 +185,9 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
       valid &&= acc.data.name.includes(props.name)
     }
     if (props.uri) {
-      valid &&= acc.data.uri === props.uri
+      valid &&= sanitizeString(acc.data.uri) === props.uri
     } else if (props.withJson) {
-      valid &&= acc.data.uri.trim() !== ''
+      valid &&= sanitizeString(acc.data.uri) !== ''
     }
     return valid
   })
@@ -214,7 +214,9 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
  * like "\x0000" instead of usual spaces.
  * @param str
  */
-const sanitizeString = (str: string) => str.replace(/\0/g, '')
+function sanitizeString(str: string) {
+  return str.replace(/\0/g, '')
+}
 
 function sanitizeMetadata(tokenData: Metadata) {
   return ({
