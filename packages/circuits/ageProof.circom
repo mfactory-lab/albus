@@ -4,19 +4,17 @@ include "circomlib/circuits/gates.circom";
 include "circomlib/circuits/comparators.circom";
 
 template AgeProof() {
-  signal input birthYear;
-  signal input birthMonth;
-  signal input birthDay;
-
-  // public inputs
   signal input currentYear;
   signal input currentMonth;
   signal input currentDay;
 
+  signal input birthYear;
+  signal input birthMonth;
+  signal input birthDay;
+
   signal input minAge;
   signal input maxAge;
 
-  // final result
   signal output valid;
 
   var birth = birthYear * 10000 + birthMonth * 100 + birthDay;

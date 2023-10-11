@@ -36,39 +36,39 @@ import { loadFixture, setupCircuit } from './utils'
 describe('AgePolicy', async () => {
   const issuerKeypair = Keypair.generate()
   const holderKeypair = Keypair.generate()
-
-  const currentDate = 20230711
-  const claims = {
-    id: 0,
-    birthDate: 20050711,
-  }
+  const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
 
   const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
-  // const _holderPk = eddsa.prv2pub(holderKeypair.secretKey)
-
   const circuit = await setupCircuit('agePolicy')
 
-  it('valid verification', async () => {
+  const timestamp = 1697035401 // 2023-10-11 14:43
+
+  const claims = {
+    birthDate: 20051011,
+    expirationDate: timestamp + 1,
+  }
+
+  async function generateInput(claims: Record<string, any>, params: Record<string, any> = { minAge: 18, maxAge: 100 }) {
     const tree = await createClaimsTree(claims)
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
     const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
-
-    const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
+    const [expDateKey, ...expDateProof] = await tree.proof('expirationDate')
     const trusteeCount = 3
 
     const input = {
+      timestamp,
+      credentialRoot: tree.root,
+      expDate: claims.expirationDate,
+      expDateKey,
+      expDateProof,
       birthDate: claims.birthDate,
       birthDateProof,
       birthDateKey,
-      currentDate,
-      minAge: 18,
-      maxAge: 100,
-      credentialRoot: tree.root,
       issuerPk,
       issuerSignature: [...signature.R8, signature.S],
-      // secret: genRandomNonce(),
-      userPrivateKey,
       trusteePublicKey: [],
+      userPrivateKey,
+      ...params,
     } as any
 
     for (let i = 0; i < trusteeCount; i++) {
@@ -77,41 +77,20 @@ describe('AgePolicy', async () => {
       input.trusteePublicKey.push(trusteePublicKey)
     }
 
-    // console.log(input)
+    return input
+  }
 
+  it('valid verification', async () => {
+    const input = await generateInput(claims)
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, {})
   })
 
-  it('invalid verification', async () => {
-    // Tomorrow will be 18
-    claims.birthDate += 1
-    const tree = await createClaimsTree(claims)
-    const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
-    const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
-
-    const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
-    const trusteeCount = 3
-
-    const input = {
-      birthDate: claims.birthDate,
-      birthDateProof,
-      birthDateKey,
-      currentDate,
-      minAge: 18,
-      maxAge: 100,
-      credentialRoot: tree.root,
-      issuerPk,
-      issuerSignature: [...signature.R8, signature.S],
-      userPrivateKey,
-      trusteePublicKey: [],
-    } as any
-
-    for (let i = 0; i < trusteeCount; i++) {
-      const trusteeKeypair = Keypair.generate()
-      const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
-      input.trusteePublicKey.push(trusteePublicKey)
-    }
+  it('expired credential', async () => {
+    const input = await generateInput({
+      ...claims,
+      expirationDate: claims.expirationDate - 1,
+    })
 
     try {
       const witness = await circuit.calculateWitness(input, true)
@@ -119,7 +98,23 @@ describe('AgePolicy', async () => {
       assert.ok(false)
     } catch (e: any) {
       // console.log(e.message)
-      assert.include(e.message, 'Error in template AgePolicy_344')
+      assert.include(e.message, 'Error in template AgePolicy_271 line: 43')
+    }
+  })
+
+  it('invalid age', async () => {
+    const input = await generateInput({
+      ...claims,
+      birthDate: claims.birthDate + 1,
+    })
+
+    try {
+      const witness = await circuit.calculateWitness(input, true)
+      await circuit.assertOut(witness, {})
+      assert.ok(false)
+    } catch (e: any) {
+      // console.log(e.message)
+      assert.include(e.message, 'Error in template AgePolicy_271 line: 104')
     }
   })
 })
