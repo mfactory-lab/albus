@@ -69,6 +69,9 @@ cli
     process.exit()
   })
 
+const test = cli.command('test')
+test.command('credential').action(actions.test.credential)
+
 // ------------------------------------------
 // DID
 // ------------------------------------------
@@ -298,6 +301,10 @@ request.command('verify')
 // ------------------------------------------
 
 const admin = cli.command('admin')
+
+admin.command('fund')
+  .description('Fund albus authority balance')
+  .action(actions.admin.fund)
 
 admin.command('clear')
   .description('Clear all accounts')
