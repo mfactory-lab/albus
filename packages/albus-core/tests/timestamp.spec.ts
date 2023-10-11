@@ -26,40 +26,34 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { readFileSync } from 'node:fs'
-import type { WasmTester } from 'circom_tester'
-import { wasm as circomTester } from 'circom_tester'
+import { describe, it } from 'vitest'
+import { setupCircuit } from './utils'
 
-const FIXTURES_BASE_PATH = '../circuits'
+describe('dateToTimestamp', async () => {
+  const input = {
+    year: 2020,
+    month: 12,
+    day: 31,
+  }
 
-export function setupCircuit(name: string) {
-  return circomTester(`${FIXTURES_BASE_PATH}/${name}.circom`, {
-    include: ['../../node_modules'],
+  const circuit = await setupCircuit('test/dateToTimestamp')
+
+  it('valid', async () => {
+    const date = new Date(`${input.year}-${input.month}-${input.day}`)
+    const witness = await circuit.calculateWitness(input, true)
+    await circuit.assertOut(witness, { out: date.getTime() / 1000 })
   })
-}
+})
 
-export function loadFixture(name: string) {
-  return readFileSync(`${FIXTURES_BASE_PATH}/${name}`)
-}
-
-export async function calculateLabeledWitness(tester: WasmTester, input: unknown, sanityCheck: boolean) {
-  const witness = await tester.calculateWitness(input, sanityCheck)
-
-  if (!tester.symbols) {
-    await tester.loadSymbols()
+describe('timestampToDate', async () => {
+  const input = {
+    timestamp: 1697068800,
   }
 
-  const labels: { [label: string]: string | undefined } = {}
+  const circuit = await setupCircuit('test/timestampToDate')
 
-  for (const n in tester.symbols) {
-    let v: string
-    if (typeof witness[tester.symbols[n]!.varIdx] !== 'undefined') {
-      v = witness[tester.symbols[n]!.varIdx].toString()
-    } else {
-      v = 'undefined'
-    }
-    labels[n] = v
-  }
-
-  return labels
-}
+  it('valid', async () => {
+    const witness = await circuit.calculateWitness(input, true)
+    await circuit.assertOut(witness, { out: [2023, 10, 12] })
+  })
+})
