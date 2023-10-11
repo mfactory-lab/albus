@@ -37,10 +37,10 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   signal output userPublicKey[2];
 
   // Expiration date check
-  component exp = LessThan(32);
-  exp.in[0] <== timestamp;
-  exp.in[1] <== expDate;
-  exp.out === 1;
+  component isExpValid = LessThan(32);
+  isExpValid.in[0] <== timestamp;
+  isExpValid.in[1] <== expDate;
+  isExpValid.out * expDate === expDate;
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();

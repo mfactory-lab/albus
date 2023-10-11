@@ -34,18 +34,18 @@ import { formatPrivKeyForBabyJub, generateEcdhSharedKey, generateProof, verifyPr
 import { loadFixture, setupCircuit } from './utils'
 
 describe('AgePolicy', async () => {
-  const issuerKeypair = Keypair.generate()
   const holderKeypair = Keypair.generate()
   const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
 
+  const issuerKeypair = Keypair.generate()
   const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
+
   const circuit = await setupCircuit('agePolicy')
 
   const timestamp = 1697035401 // 2023-10-11 14:43
-
   const claims = {
     birthDate: 20051011,
-    expirationDate: timestamp + 1,
+    expirationDate: 0,
   }
 
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = { minAge: 18, maxAge: 100 }) {
@@ -80,16 +80,25 @@ describe('AgePolicy', async () => {
     return input
   }
 
-  it('valid verification', async () => {
+  it('valid age and no expiration', async () => {
     const input = await generateInput(claims)
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, {})
   })
 
-  it('expired credential', async () => {
+  it('valid age and valid expiration date', async () => {
     const input = await generateInput({
       ...claims,
-      expirationDate: claims.expirationDate - 1,
+      expirationDate: timestamp + 1,
+    })
+    const witness = await circuit.calculateWitness(input, true)
+    await circuit.assertOut(witness, {})
+  })
+
+  it('valid age and expired', async () => {
+    const input = await generateInput({
+      ...claims,
+      expirationDate: timestamp,
     })
 
     try {
@@ -114,16 +123,16 @@ describe('AgePolicy', async () => {
       assert.ok(false)
     } catch (e: any) {
       // console.log(e.message)
-      assert.include(e.message, 'Error in template AgePolicy_271 line: 104')
+      assert.include(e.message, 'Error in template AgePolicy_271 line: 101')
     }
   })
 })
 
-describe('Proof', async () => {
+describe('Proof AgePolicy', async () => {
   const issuerKeypair = Keypair.generate()
   const holderKeypair = Keypair.generate()
 
-  const currentDate = 20230711n
+  const timestamp = 1697035401
   const claims = {
     birthDate: '20050711',
     firstName: 'Alex',
@@ -162,7 +171,7 @@ describe('Proof', async () => {
       birthDate: claims.birthDate,
       birthDateProof,
       birthDateKey: birthDateKey!,
-      currentDate,
+      timestamp,
       minAge: 18,
       maxAge: 100,
       credentialRoot: tree.root,
@@ -200,7 +209,7 @@ describe('Proof', async () => {
         BigInt(publicSignals[i + 1]!),
         BigInt(publicSignals[i + 2]!),
         BigInt(publicSignals[i + 3]!),
-      ], sharedKey, 1, BigInt(input.currentDate))
+      ], sharedKey, 1, BigInt(input.timestamp))
       shares.push(share)
       i += 4
     }
@@ -213,7 +222,7 @@ describe('Proof', async () => {
     const userSecret = Poseidon.hash([
       input.userPrivateKey,
       input.credentialRoot,
-      input.currentDate,
+      BigInt(input.timestamp),
     ])
 
     assert.equal(decryptedSecret, userSecret)
@@ -223,7 +232,7 @@ describe('Proof', async () => {
       BigInt(publicSignals[1]!),
       BigInt(publicSignals[2]!),
       BigInt(publicSignals[3]!),
-    ], [BigInt(decryptedSecret), BigInt(decryptedSecret)], 1, BigInt(input.currentDate))
+    ], [BigInt(decryptedSecret), BigInt(decryptedSecret)], 1, BigInt(input.timestamp))
 
     // console.log('publicSignals', publicSignals)
     // console.log('sharedKeys', sharedKeys)
