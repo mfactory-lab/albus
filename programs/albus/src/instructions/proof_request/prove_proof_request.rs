@@ -28,9 +28,6 @@
 
 use anchor_lang::prelude::*;
 
-#[cfg(feature = "verify-on-chain")]
-use groth16_solana::{Groth16Verifier, Proof, VK};
-
 use crate::constants::{TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD};
 use crate::state::{Circuit, Policy, ProofData};
 use crate::utils::bytes_to_num;
@@ -43,7 +40,7 @@ use crate::{
 
 /// Proves the [ProofRequest] by validating the proof metadata and updating its status to `Proved`.
 /// Returns an error if the request has expired or if the proof metadata is invalid.
-pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
+pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> Result<()> {
     let circuit = &ctx.accounts.circuit;
     let policy = &ctx.accounts.policy;
     let req = &mut ctx.accounts.proof_request;
@@ -91,28 +88,6 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     req.proved_at = timestamp;
     req.proof = data.proof;
 
-    #[cfg(feature = "verify-on-chain")]
-    if data.verify {
-        let proof = req.proof.as_ref().expect("Invalid proof");
-        let proof = Proof::new(proof.a, proof.b, proof.c);
-
-        let vk = VK {
-            alpha: circuit.vk.alpha,
-            beta: circuit.vk.beta,
-            gamma: circuit.vk.gamma,
-            delta: circuit.vk.delta,
-            ic: circuit.vk.ic.to_owned(),
-        };
-
-        Groth16Verifier::new(&proof, &req.public_inputs, &vk)
-            .map_err(|_| AlbusError::InvalidPublicInputs)?
-            .verify()
-            .map_err(|_| AlbusError::ProofVerificationFailed)?;
-
-        req.status = ProofRequestStatus::Verified;
-        req.verified_at = timestamp;
-    }
-
     emit!(ProveEvent {
         proof_request: req.key(),
         service_provider: req.service_provider,
@@ -127,16 +102,15 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct ProveData {
+pub struct ProveProofRequestData {
     pub proof: Option<ProofData>,
     pub public_inputs: Vec<[u8; 32]>,
     pub reset: bool,
-    pub verify: bool,
 }
 
 #[derive(Accounts)]
-#[instruction(data: ProveData)]
-pub struct Prove<'info> {
+#[instruction(data: ProveProofRequestData)]
+pub struct ProveProofRequest<'info> {
     #[account(mut, has_one = policy, has_one = circuit)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
 

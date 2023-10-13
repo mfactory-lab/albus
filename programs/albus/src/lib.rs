@@ -54,7 +54,10 @@ pub mod albus {
         mint_credential::handler(ctx, data)
     }
 
-    pub fn update_credential(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
+    pub fn update_credential(
+        ctx: Context<UpdateCredential>,
+        data: UpdateCredentialData,
+    ) -> Result<()> {
         update_credential::handler(ctx, data)
     }
 
@@ -68,7 +71,10 @@ pub mod albus {
         create_circuit::handler(ctx, data)
     }
 
-    pub fn update_circuit_vk(ctx: Context<UpdateCircuitVk>, data: UpdateCircuitVkData) -> Result<()> {
+    pub fn update_circuit_vk(
+        ctx: Context<UpdateCircuitVk>,
+        data: UpdateCircuitVkData,
+    ) -> Result<()> {
         update_circuit_vk::handler(ctx, data)
     }
 
@@ -78,11 +84,17 @@ pub mod albus {
 
     // Service Provider
 
-    pub fn create_service_provider(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
+    pub fn create_service_provider(
+        ctx: Context<CreateServiceProvider>,
+        data: CreateServiceProviderData,
+    ) -> Result<()> {
         create_service_provider::handler(ctx, data)
     }
 
-    pub fn update_service_provider(ctx: Context<UpdateServiceProvider>, data: UpdateServiceProviderData) -> Result<()> {
+    pub fn update_service_provider(
+        ctx: Context<UpdateServiceProvider>,
+        data: UpdateServiceProviderData,
+    ) -> Result<()> {
         update_service_provider::handler(ctx, data)
     }
 
@@ -124,7 +136,10 @@ pub mod albus {
 
     // Proof Request
 
-    pub fn create_proof_request(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -> Result<()> {
+    pub fn create_proof_request(
+        ctx: Context<CreateProofRequest>,
+        data: CreateProofRequestData,
+    ) -> Result<()> {
         create_proof_request::handler(ctx, data)
     }
 
@@ -132,12 +147,23 @@ pub mod albus {
         delete_proof_request::handler(ctx)
     }
 
-    pub fn prove(ctx: Context<Prove>, data: ProveData) -> Result<()> {
+    pub fn prove_proof_request(
+        ctx: Context<ProveProofRequest>,
+        data: ProveProofRequestData,
+    ) -> Result<()> {
         prove_proof_request::handler(ctx, data)
     }
 
-    pub fn verify(ctx: Context<VerifyProofRequest>, data: VerifyProofRequestData) -> Result<()> {
-        verify_proof_request::handler(ctx, data)
+    #[cfg(feature = "verify-on-chain")]
+    pub fn verify_proof_request(ctx: Context<VerifyProofRequest>) -> Result<()> {
+        verify_proof_request::handler(ctx)
+    }
+
+    pub fn update_proof_request(
+        ctx: Context<UpdateProofRequest>,
+        data: UpdateProofRequestData,
+    ) -> Result<()> {
+        update_proof_request::handler(ctx, data)
     }
 
     // Investigation
@@ -149,7 +175,10 @@ pub mod albus {
         create_investigation_request::handler(ctx, data)
     }
 
-    pub fn reveal_secret_share(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> Result<()> {
+    pub fn reveal_secret_share(
+        ctx: Context<RevealSecretShare>,
+        data: RevealSecretShareData,
+    ) -> Result<()> {
         reveal_secret_share::handler(ctx, data)
     }
 

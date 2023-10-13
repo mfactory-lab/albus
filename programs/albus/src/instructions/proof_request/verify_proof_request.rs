@@ -28,76 +28,57 @@
 
 use anchor_lang::prelude::*;
 
+use groth16_solana::{Groth16Verifier, Proof, VK};
+
+use crate::state::Circuit;
 use crate::{
-    events::{RejectEvent, VerifyEvent},
+    events::VerifyEvent,
     state::{ProofRequest, ProofRequestStatus},
-    utils::assert_authorized,
     AlbusError,
 };
 
-/// Verifies the [ProofRequest] and updates its status accordingly.
-/// Returns an error if the authority is not authorized, the request has not been proved,
-/// the request has expired or the status is not valid.
-pub fn handler(ctx: Context<VerifyProofRequest>, data: VerifyProofRequestData) -> Result<()> {
+pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
     let req = &mut ctx.accounts.proof_request;
 
-    // Check that the authority is authorized to perform this action
-    assert_authorized(&ctx.accounts.authority.key())?;
+    let proof = req.proof.as_ref().ok_or(AlbusError::InvalidPublicInputs)?;
+    let proof = Proof::new(proof.a, proof.b, proof.c);
 
-    // Check that the request has already been proved
-    if req.status == ProofRequestStatus::Pending {
-        return Err(AlbusError::Unproved.into());
-    }
+    let circuit = &ctx.accounts.circuit;
+    let vk = VK {
+        alpha: circuit.vk.alpha,
+        beta: circuit.vk.beta,
+        gamma: circuit.vk.gamma,
+        delta: circuit.vk.delta,
+        ic: circuit.vk.ic.to_vec(),
+    };
+
+    Groth16Verifier::new(&proof, &req.public_inputs, &vk)
+        .map_err(|_| AlbusError::InvalidPublicInputs)?
+        .verify()
+        .map_err(|_| AlbusError::ProofVerificationFailed)?;
 
     let timestamp = Clock::get()?.unix_timestamp;
 
-    // Check that the request has not yet expired
-    if req.expired_at > 0 && req.expired_at < timestamp {
-        return Err(AlbusError::Expired.into());
-    }
-
-    req.status = data.status;
+    req.status = ProofRequestStatus::Verified;
     req.verified_at = timestamp;
 
-    match req.status {
-        ProofRequestStatus::Verified => {
-            emit!(VerifyEvent {
-                proof_request: req.key(),
-                service_provider: req.service_provider,
-                circuit: req.circuit,
-                owner: req.owner,
-                timestamp,
-            });
-            msg!("Verified!");
-        }
-        ProofRequestStatus::Rejected => {
-            emit!(RejectEvent {
-                proof_request: req.key(),
-                service_provider: req.service_provider,
-                circuit: req.circuit,
-                owner: req.owner,
-                timestamp,
-            });
-            msg!("Rejected!")
-        }
-        _ => {
-            msg!("Invalid status!");
-            return Err(AlbusError::InvalidData.into());
-        }
-    }
+    emit!(VerifyEvent {
+        proof_request: req.key(),
+        service_provider: req.service_provider,
+        circuit: circuit.key(),
+        owner: req.owner,
+        timestamp,
+    });
 
     Ok(())
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct VerifyProofRequestData {
-    pub status: ProofRequestStatus,
-}
-
 #[derive(Accounts)]
 pub struct VerifyProofRequest<'info> {
-    #[account(mut)]
+    #[account(mut, has_one = circuit)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
+
+    pub circuit: Box<Account<'info, Circuit>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
