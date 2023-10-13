@@ -106,9 +106,13 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
 
   const claimsTree = await createClaimsTree(normalizedClaims)
 
+  const vcType = [DEFAULT_VC_TYPE, CredentialType.AlbusCredential]
+  if (opts.credentialType) {
+    vcType.push(opts.credentialType)
+  }
   const vc: W3CCredential = {
     '@context': [DEFAULT_CONTEXT],
-    'type': [DEFAULT_VC_TYPE, opts.credentialType ?? CredentialType.AlbusCredential],
+    'type': vcType,
     'issuer': opts.issuerDid ?? DEFAULT_DID,
     'issuanceDate': new Date().toISOString(),
     'credentialSubject': credentialSubject,
