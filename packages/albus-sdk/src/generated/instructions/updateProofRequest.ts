@@ -7,72 +7,72 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { VerifyProofRequestData } from '../types/VerifyProofRequestData'
+import type { UpdateProofRequestData } from '../types/UpdateProofRequestData'
 import {
-  verifyProofRequestDataBeet,
-} from '../types/VerifyProofRequestData'
+  updateProofRequestDataBeet,
+} from '../types/UpdateProofRequestData'
 
 /**
  * @category Instructions
- * @category Verify
+ * @category UpdateProofRequest
  * @category generated
  */
-export interface VerifyInstructionArgs {
-  data: VerifyProofRequestData
+export interface UpdateProofRequestInstructionArgs {
+  data: UpdateProofRequestData
 }
 /**
  * @category Instructions
- * @category Verify
+ * @category UpdateProofRequest
  * @category generated
  */
-export const verifyStruct = new beet.BeetArgsStruct<
-  VerifyInstructionArgs & {
+export const updateProofRequestStruct = new beet.BeetArgsStruct<
+  UpdateProofRequestInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', verifyProofRequestDataBeet],
+    ['data', updateProofRequestDataBeet],
   ],
-  'VerifyInstructionArgs',
+  'UpdateProofRequestInstructionArgs',
 )
 /**
- * Accounts required by the _verify_ instruction
+ * Accounts required by the _updateProofRequest_ instruction
  *
  * @property [_writable_] proofRequest
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category Verify
+ * @category UpdateProofRequest
  * @category generated
  */
-export interface VerifyInstructionAccounts {
+export interface UpdateProofRequestInstructionAccounts {
   proofRequest: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const verifyInstructionDiscriminator = [
-  133, 161, 141, 48, 120, 198, 88, 150,
+export const updateProofRequestInstructionDiscriminator = [
+  248, 138, 24, 233, 171, 52, 72, 43,
 ]
 
 /**
- * Creates a _Verify_ instruction.
+ * Creates a _UpdateProofRequest_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category Verify
+ * @category UpdateProofRequest
  * @category generated
  */
-export function createVerifyInstruction(
-  accounts: VerifyInstructionAccounts,
-  args: VerifyInstructionArgs,
+export function createUpdateProofRequestInstruction(
+  accounts: UpdateProofRequestInstructionAccounts,
+  args: UpdateProofRequestInstructionArgs,
   programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
-  const [data] = verifyStruct.serialize({
-    instructionDiscriminator: verifyInstructionDiscriminator,
+  const [data] = updateProofRequestStruct.serialize({
+    instructionDiscriminator: updateProofRequestInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [

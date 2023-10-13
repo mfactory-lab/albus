@@ -11,7 +11,7 @@ import {
   proofRequestStatusBeet,
 } from './ProofRequestStatus'
 
-export interface VerifyProofRequestData {
+export interface UpdateProofRequestData {
   status: ProofRequestStatus
 }
 
@@ -19,8 +19,8 @@ export interface VerifyProofRequestData {
  * @category userTypes
  * @category generated
  */
-export const verifyProofRequestDataBeet
-  = new beet.BeetArgsStruct<VerifyProofRequestData>(
+export const updateProofRequestDataBeet
+  = new beet.BeetArgsStruct<UpdateProofRequestData>(
     [['status', proofRequestStatusBeet]],
-    'VerifyProofRequestData',
+    'UpdateProofRequestData',
   )

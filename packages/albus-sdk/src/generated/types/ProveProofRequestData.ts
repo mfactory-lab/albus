@@ -9,23 +9,22 @@ import * as beet from '@metaplex-foundation/beet'
 import type { ProofData } from './ProofData'
 import { proofDataBeet } from './ProofData'
 
-export interface ProveData {
+export interface ProveProofRequestData {
   proof: beet.COption<ProofData>
   publicInputs: number[] /* size: 32 */[]
   reset: boolean
-  verify: boolean
 }
 
 /**
  * @category userTypes
  * @category generated
  */
-export const proveDataBeet = new beet.FixableBeetArgsStruct<ProveData>(
-  [
-    ['proof', beet.coption(proofDataBeet)],
-    ['publicInputs', beet.array(beet.uniformFixedSizeArray(beet.u8, 32))],
-    ['reset', beet.bool],
-    ['verify', beet.bool],
-  ],
-  'ProveData',
-)
+export const proveProofRequestDataBeet
+  = new beet.FixableBeetArgsStruct<ProveProofRequestData>(
+    [
+      ['proof', beet.coption(proofDataBeet)],
+      ['publicInputs', beet.array(beet.uniformFixedSizeArray(beet.u8, 32))],
+      ['reset', beet.bool],
+    ],
+    'ProveProofRequestData',
+  )

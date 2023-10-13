@@ -48,8 +48,8 @@ import {
   ProofRequest,
   ServiceProvider,
   createCreateProofRequestInstruction,
-  createDeleteProofRequestInstruction, createProveInstruction, createVerifyInstruction,
-  errorFromCode, proofRequestDiscriminator,
+  createDeleteProofRequestInstruction, createProveProofRequestInstruction,
+  createUpdateProofRequestInstruction, createVerifyProofRequestInstruction, errorFromCode, proofRequestDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 import type { ServiceManager } from './serviceManager'
@@ -231,7 +231,7 @@ export class ProofRequestManager {
    * Require admin authority.
    */
   async changeStatus(props: ChangeStatus, opts?: ConfirmOptions) {
-    const instruction = createVerifyInstruction(
+    const instruction = createUpdateProofRequestInstruction(
       {
         proofRequest: new PublicKey(props.proofRequest),
         authority: this.provider.publicKey,
@@ -336,11 +336,6 @@ export class ProofRequestManager {
 
   /**
    * Prove a proof request by providing the necessary proof and public signals.
-   *
-   * @param {ProveProps} props - The properties for proving the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of proving the proof request, including the signature.
-   * @throws {Error} Throws an error if there is an issue during the proof process or if the transaction fails to confirm.
    */
   async prove(props: ProveProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -349,23 +344,11 @@ export class ProofRequestManager {
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
 
-    // const version = await this.provider.connection.getVersion()
-    const isVerifyOnChain = true // if version >= 16.0
-
-    // const chunkSize = Math.ceil((1232 /* max tx */ - 256 /* proof */ - 1 - 160 /* accounts */) / 32)
-    // TODO: calculate
-    const inputChunks = chunk(publicInputs, 19)
     const txs: { tx: Transaction }[] = []
 
-    for (let i = 0; i < inputChunks.length; i++) {
-      const inputs = inputChunks[i]!
-      const isFirst = i === 0
-      const isLast = i === inputChunks.length - 1
-
-      const tx = new Transaction()
-
-      tx.add(
-        createProveInstruction(
+    txs.push({
+      tx: new Transaction().add(
+        createProveProofRequestInstruction(
           {
             proofRequest: new PublicKey(props.proofRequest),
             circuit: proofRequest.circuit,
@@ -374,20 +357,50 @@ export class ProofRequestManager {
           },
           {
             data: {
-              reset: isFirst,
-              publicInputs: inputs,
-              proof: isLast ? proof : null,
-              verify: isVerifyOnChain,
+              reset: true,
+              publicInputs: publicInputs.slice(0, 20),
+              proof,
             },
           },
         ),
-      )
+      ),
+    })
 
-      // on-chain verification
-      if (isLast && isVerifyOnChain) {
-        tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }))
+    // extend public inputs if needed
+    if (publicInputs.length > 20) {
+      const inputChunks = chunk(publicInputs.slice(20), 28)
+      for (let i = 0; i < inputChunks.length; i++) {
+        const inputs = inputChunks[i]!
+        txs.push({
+          tx: new Transaction().add(
+            createProveProofRequestInstruction(
+              {
+                proofRequest: new PublicKey(props.proofRequest),
+                circuit: proofRequest.circuit,
+                policy: proofRequest.policy,
+                authority,
+              },
+              {
+                data: {
+                  reset: false,
+                  publicInputs: inputs,
+                  proof: null,
+                },
+              },
+            ),
+          ),
+        })
       }
+    }
 
+    if (props.verify) {
+      const tx = new Transaction()
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
+        .add(createVerifyProofRequestInstruction({
+          proofRequest: new PublicKey(props.proofRequest),
+          circuit: proofRequest.circuit,
+          authority,
+        }))
       txs.push({ tx })
     }
 
@@ -402,9 +415,6 @@ export class ProofRequestManager {
 
   /**
    * Perform a full proof generation process based on the provided properties.
-   *
-   * @param {FullProveProps} props - The properties for the full proof generation process.
-   * @throws {Error} Throws an error if there is an issue during any step of the proof generation process.
    */
   async fullProve(props: FullProveProps) {
     const { proofRequest, circuit, policy, serviceProvider }
@@ -441,38 +451,31 @@ export class ProofRequestManager {
       .withPolicy(policy)
       .build()
 
-    // try {
+    try {
+      const { proof, publicSignals } = await Albus.zkp.generateProof({
+        wasmFile: circuit.wasmUri,
+        zkeyFile: circuit.zkeyUri,
+        input: proofInput.data,
+      })
 
-    // console.log(proofInput.data)
+      const { signatures } = await this.prove({
+        proofRequest: props.proofRequest,
+        proofRequestData: proofRequest,
+        proof,
+        // @ts-expect-error readonly
+        publicSignals,
+        verify: true,
+      })
 
-    const { proof, publicSignals } = await Albus.zkp.generateProof({
-      wasmFile: circuit.wasmUri,
-      zkeyFile: circuit.zkeyUri,
-      input: proofInput.data,
-    })
-
-    console.log(publicSignals)
-
-    const { signatures } = await this.prove({
-      proofRequest: props.proofRequest,
-      proofRequestData: proofRequest,
-      proof,
-      // @ts-expect-error readonly
-      publicSignals,
-    })
-
-    return { signatures, proof, publicSignals }
-    // } catch (e: any) {
-    //   console.log(e)
-    //   throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
-    // }
+      return { signatures, proof, publicSignals }
+    } catch (e: any) {
+      console.log(e)
+      throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
+    }
   }
 
   /**
    * Validate a proof request to ensure it meets specific criteria.
-   *
-   * @param {ProofRequest} req - The proof request to validate.
-   * @throws {Error} Throws an error if the proof request fails validation based on specified criteria.
    */
   async validate(req: ProofRequest) {
     const slot = await this.provider.connection.getSlot()
@@ -483,9 +486,6 @@ export class ProofRequestManager {
     if (Number(req.expiredAt) > 0 && Number(req.expiredAt) < timestamp) {
       throw new Error('Proof request is expired')
     }
-    // if (!req.proof) {
-    //   throw new Error('Proof request is not proved yet')
-    // }
     if (Number(req.verifiedAt) <= 0) {
       throw new Error('Proof request is not verified')
     }
@@ -540,6 +540,7 @@ export interface ProveProps {
   proofRequestData?: ProofRequest
   proof: ProofData
   publicSignals: (string | number | bigint)[]
+  verify: boolean
 }
 
 export interface ChangeStatus {

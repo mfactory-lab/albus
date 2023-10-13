@@ -1,5 +1,5 @@
 {
-  "version": "0.0.16",
+  "version": "0.0.17",
   "name": "albus",
   "instructions": [
     {
@@ -701,7 +701,7 @@
       "args": []
     },
     {
-      "name": "prove",
+      "name": "proveProofRequest",
       "accounts": [
         {
           "name": "proofRequest",
@@ -733,13 +733,39 @@
         {
           "name": "data",
           "type": {
-            "defined": "ProveData"
+            "defined": "ProveProofRequestData"
           }
         }
       ]
     },
     {
-      "name": "verify",
+      "name": "verifyProofRequest",
+      "accounts": [
+        {
+          "name": "proofRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "circuit",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateProofRequest",
       "accounts": [
         {
           "name": "proofRequest",
@@ -761,7 +787,7 @@
         {
           "name": "data",
           "type": {
-            "defined": "VerifyProofRequestData"
+            "defined": "UpdateProofRequestData"
           }
         }
       ]
@@ -1759,7 +1785,7 @@
       }
     },
     {
-      "name": "ProveData",
+      "name": "ProveProofRequestData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1785,16 +1811,12 @@
           {
             "name": "reset",
             "type": "bool"
-          },
-          {
-            "name": "verify",
-            "type": "bool"
           }
         ]
       }
     },
     {
-      "name": "VerifyProofRequestData",
+      "name": "UpdateProofRequestData",
       "type": {
         "kind": "struct",
         "fields": [

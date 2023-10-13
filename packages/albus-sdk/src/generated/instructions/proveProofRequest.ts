@@ -7,45 +7,47 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { ProveData } from '../types/ProveData'
-import { proveDataBeet } from '../types/ProveData'
+import type { ProveProofRequestData } from '../types/ProveProofRequestData'
+import {
+  proveProofRequestDataBeet,
+} from '../types/ProveProofRequestData'
 
 /**
  * @category Instructions
- * @category Prove
+ * @category ProveProofRequest
  * @category generated
  */
-export interface ProveInstructionArgs {
-  data: ProveData
+export interface ProveProofRequestInstructionArgs {
+  data: ProveProofRequestData
 }
 /**
  * @category Instructions
- * @category Prove
+ * @category ProveProofRequest
  * @category generated
  */
-export const proveStruct = new beet.FixableBeetArgsStruct<
-  ProveInstructionArgs & {
+export const proveProofRequestStruct = new beet.FixableBeetArgsStruct<
+  ProveProofRequestInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', proveDataBeet],
+    ['data', proveProofRequestDataBeet],
   ],
-  'ProveInstructionArgs',
+  'ProveProofRequestInstructionArgs',
 )
 /**
- * Accounts required by the _prove_ instruction
+ * Accounts required by the _proveProofRequest_ instruction
  *
  * @property [_writable_] proofRequest
  * @property [] circuit
  * @property [] policy
  * @property [_writable_, **signer**] authority
  * @category Instructions
- * @category Prove
+ * @category ProveProofRequest
  * @category generated
  */
-export interface ProveInstructionAccounts {
+export interface ProveProofRequestInstructionAccounts {
   proofRequest: web3.PublicKey
   circuit: web3.PublicKey
   policy: web3.PublicKey
@@ -54,27 +56,27 @@ export interface ProveInstructionAccounts {
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const proveInstructionDiscriminator = [
-  52, 246, 26, 161, 211, 170, 86, 215,
+export const proveProofRequestInstructionDiscriminator = [
+  148, 131, 112, 65, 14, 251, 112, 208,
 ]
 
 /**
- * Creates a _Prove_ instruction.
+ * Creates a _ProveProofRequest_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category Prove
+ * @category ProveProofRequest
  * @category generated
  */
-export function createProveInstruction(
-  accounts: ProveInstructionAccounts,
-  args: ProveInstructionArgs,
+export function createProveProofRequestInstruction(
+  accounts: ProveProofRequestInstructionAccounts,
+  args: ProveProofRequestInstructionArgs,
   programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
-  const [data] = proveStruct.serialize({
-    instructionDiscriminator: proveInstructionDiscriminator,
+  const [data] = proveProofRequestStruct.serialize({
+    instructionDiscriminator: proveProofRequestInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
