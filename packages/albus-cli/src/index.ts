@@ -125,6 +125,11 @@ circuit.command('show')
   .argument('<address>', 'Circuit address')
   .action(actions.circuit.show)
 
+circuit.command('generate')
+  .description('Generate circuit zkey and vk files')
+  .argument('code', 'circuit code')
+  .action(actions.circuit.generate)
+
 circuit.command('create')
   .description('Create new circuit')
   .argument('code', 'circuit code')
