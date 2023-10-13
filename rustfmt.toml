@@ -1,5 +1,5 @@
 edition = "2021"
-max_width = 120
+max_width = 100
 imports_indent = "Block"
 imports_layout = "Mixed"
 imports_granularity = "Crate"
