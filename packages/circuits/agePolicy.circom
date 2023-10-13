@@ -10,18 +10,21 @@ include "encryptionProof.circom";
 include "merkleProof.circom";
 
 template AgePolicy(credentialDepth, shamirN, shamirK) {
+  // Current timestamp
   signal input timestamp; // unix timestamp
+
+  // Policy params
   signal input minAge;
   signal input maxAge;
 
   signal input credentialRoot;
 
-  // credential expiration date
+  // Credential expiration date and merkle proof
   signal input expirationDate; // unix timestamp
   signal input expirationDateKey;
   signal input expirationDateProof[credentialDepth];
 
-  // birthDate claim and proof
+  // Birth date and merkle proof
   signal input birthDate; // Ymd format. Example: 20010101
   signal input birthDateKey;
   signal input birthDateProof[credentialDepth];
@@ -32,14 +35,18 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   signal input userPrivateKey;
   signal input trusteePublicKey[shamirN][2];
 
+  // Encrypted claims
   signal output encryptedData[adjustToMultiple(1, 3) + 1];
+  // Encrypted secret shares
   signal output encryptedShare[shamirN][4];
+  // User public key, derived from `userPrivateKey`
   signal output userPublicKey[2];
 
   // Expiration date check
   component isExpValid = LessThan(32);
   isExpValid.in[0] <== timestamp;
   isExpValid.in[1] <== expirationDate;
+  // If the expiration date is zero, the validation should be skipped
   isExpValid.out * expirationDate === expirationDate;
 
   // Issuer signature check
