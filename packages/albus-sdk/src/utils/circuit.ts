@@ -52,25 +52,26 @@ type ClaimsTree = Awaited<ReturnType<typeof Albus.credential.createClaimsTree>>
  * A class for generating proof input data based on
  * provided credentials, policies, and signals.
  */
-export class ProofInputBuilder {
+export class ProofInputBuilder<T = Record<string, any>> {
   private claimsTree?: ClaimsTree
   private userPrivateKey?: bigint | string
   private trusteePublicKey?: (bigint | string)[][]
   private circuit?: Circuit
   private policy?: Policy
-  private now?: Date
+  // Unix timestamp
+  private timestamp?: number
 
   /**
    * Generated proof input data.
    * @readonly
    */
-  readonly data = {}
+  readonly data: T = {} as T
 
   constructor(private readonly credential: VerifiableCredential) {
   }
 
-  withNow(value: Date) {
-    this.now = value
+  withTimestamp(value: number) {
+    this.timestamp = value
     return this
   }
 
@@ -96,7 +97,10 @@ export class ProofInputBuilder {
 
   async build() {
     await this.initClaimsTree()
-    await Promise.all([this.applyPrivate(), this.applyPublic()])
+    await Promise.all([this.applyPrivateSignals(), this.applyPublicSignals()])
+
+    await this.applyCredentialSignal('expirationDate')
+
     return this
   }
 
@@ -124,44 +128,69 @@ export class ProofInputBuilder {
    *
    * @throws {Error} Throws an error if the claims tree is not initialized.
    */
-  private async applyPrivate() {
+  private async applyPrivateSignals() {
     if (!this.claimsTree) {
       throw new Error('claims tree is not initialized')
     }
     for (const signal of this.circuit?.privateSignals ?? []) {
+      // try to apply known signals
       if (this.applySignal(signal)) {
         continue
       }
-      const claim = this.normalizeClaimKey(signal)
-      if (this.credential.credentialSubject[claim] !== undefined) {
-        const [key, ...proof] = await this.claimsTree.proof(claim)
-        this.data[signal] = this.credential.credentialSubject[claim] ?? 0
-        this.data[`${signal}Proof`] = proof
-        this.data[`${signal}Key`] = key
-      }
+      // try to apply private credential signal
+      await this.applyCredentialSignal(signal)
     }
   }
 
   /**
    * Generate proof input data based on public signals defined in the circuit and policy rules.
    */
-  private async applyPublic() {
+  private async applyPublicSignals() {
     for (const signal of this.circuit?.publicSignals ?? []) {
-      if (!this.applySignal(signal)) {
-        const sig = parseSignal(signal)
-        if (sig === null) {
-          continue
-        }
-        // try to apply policy rules if is not known signal
-        const rules = this.policy?.rules
-          ?.filter(r => r.key === sig.name || r.key.startsWith(`${sig.name}.`)) ?? []
-        if (rules.length > 1 && sig.size > 1) {
-          this.data[sig.name] = rules.map(r => r.value)
-        } else if (rules[0] !== undefined) {
-          this.data[sig.name] = rules[0].value
-        }
+      // try to apply known signal
+      if (this.applySignal(signal)) {
+        continue
+      }
+      // try to apply public credential signal
+      // if (await this.applyCredentialSignal(signal)) {
+      //   continue
+      // }
+      // try to apply policy signal
+      this.applyPolicySignal(signal)
+    }
+  }
+
+  private applyPolicySignal(signal: string) {
+    const sig = parseSignal(signal)
+    if (sig !== null) {
+      const rules = this.policy?.rules
+        ?.filter(r => r.key === sig.name || r.key.startsWith(`${sig.name}.`)) ?? []
+      if (rules.length > 1 && sig.size > 1) {
+        this.data[sig.name] = rules.map(r => r.value)
+        return true
+      } else if (rules[0] !== undefined) {
+        this.data[sig.name] = rules[0].value
+        return true
       }
     }
+    return false
+  }
+
+  private async applyCredentialSignal(signal: string, throwIfUnknown = false) {
+    if (!this.claimsTree) {
+      throw new Error('claims tree is not initialized')
+    }
+    const claim = this.normalizeClaimKey(signal)
+    if (this.credential.credentialSubject[claim] !== undefined) {
+      const [key, ...proof] = await this.claimsTree.proof(claim)
+      this.data[signal] = this.credential.credentialSubject[claim] ?? 0
+      this.data[`${signal}Proof`] = proof
+      this.data[`${signal}Key`] = key
+      return true
+    } else if (throwIfUnknown) {
+      throw new Error(`Invalid claim "${claim}"`)
+    }
+    return false
   }
 
   /**
@@ -192,8 +221,8 @@ export class ProofInputBuilder {
         }
         this.data[name] = this.userPrivateKey
         return true
-      case KnownSignals.CurrentDate: {
-        this.data[name] = formatCircuitDate(this.now)
+      case KnownSignals.Timestamp: {
+        this.data[name] = this.timestamp
         return true
       }
       case KnownSignals.CredentialRoot:

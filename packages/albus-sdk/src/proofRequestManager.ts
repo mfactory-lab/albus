@@ -67,8 +67,6 @@ export class ProofRequestManager {
 
   /**
    * Load a proof request based on its public key address.
-   * @param addr
-   * @param commitment
    */
   async load(addr: PublicKeyInitData | ProofRequest, commitment?: Commitment) {
     if (addr instanceof ProofRequest) {
@@ -79,8 +77,6 @@ export class ProofRequestManager {
 
   /**
    * Load multiple proof requests
-   * @param addrs
-   * @param commitmentOrConfig
    */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -91,9 +87,6 @@ export class ProofRequestManager {
   /**
    * Load a full set of data associated with a proof request,
    * including the service, policy and circuit information.
-   * @param addr
-   * @param accounts
-   * @param commitmentOrConfig
    */
   async loadFull(
     addr: PublicKeyInitData | ProofRequest,
@@ -128,7 +121,6 @@ export class ProofRequestManager {
 
   /**
    * Find proof requests based on specified criteria.
-   * @param props
    */
   async find(props: FindProofRequestProps = {}) {
     const builder = ProofRequest.gpaBuilder()
@@ -179,11 +171,6 @@ export class ProofRequestManager {
 
   /**
    * Create a new proof request with the specified properties.
-   *
-   * @param {CreateProofRequestProps} props - The properties for creating the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string,address:PublicKey}>} A Promise that resolves to the result of creating the proof request, including its address and signature.
-   * @throws {Error} Throws an error if there is an issue during the creation process or if the transaction fails to confirm.
    */
   async create(props: CreateProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -192,7 +179,7 @@ export class ProofRequestManager {
     const [proofRequest] = this.pda.proofRequest(policy, authority)
 
     // TODO: load circuit, get maxPublicInputs
-    const maxPublicInputs = props.maxPublicInputs ?? 40
+    const maxPublicInputs = props.maxPublicInputs ?? 50
 
     const instruction = createCreateProofRequestInstruction(
       {
@@ -223,11 +210,6 @@ export class ProofRequestManager {
 
   /**
    * Delete a proof request based on the specified properties.
-   *
-   * @param {DeleteProofRequestProps} props - The properties for deleting the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of deleting the proof request, including its signature.
-   * @throws {Error} Throws an error if there is an issue during the deletion process or if the transaction fails to confirm.
    */
   async delete(props: DeleteProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -247,11 +229,6 @@ export class ProofRequestManager {
   /**
    * Change the status of a proof request by providing a new status value.
    * Require admin authority.
-   *
-   * @param {ChangeStatus} props - The properties for changing the status of the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of changing the status, including the signature.
-   * @throws {Error} Throws an error if there is an issue during the status change process or if the transaction fails to confirm.
    */
   async changeStatus(props: ChangeStatus, opts?: ConfirmOptions) {
     const instruction = createVerifyInstruction(
@@ -276,10 +253,6 @@ export class ProofRequestManager {
 
   /**
    * Verify a proof based on the provided properties.
-   *
-   * @param {VerifyProps} props - The properties for verifying the proof.
-   * @returns {Promise<boolean>} A Promise that resolves to a boolean indicating whether the proof is valid (true) or not (false).
-   * @throws {Error} Throws an error if there is an issue during the verification process or if the provided proof is not valid.
    */
   async verify(props: VerifyProps): Promise<boolean> {
     const proofRequest = await this.load(props.proofRequest)
@@ -295,7 +268,7 @@ export class ProofRequestManager {
 
   decryptData(props: { secret: bigint; signals: Record<string, any> }) {
     const { secret, signals } = props
-    const nonce = signals.currentDate as bigint
+    const nonce = signals.timestamp as bigint
     const encryptedData = (signals.encryptedData ?? []) as bigint[]
     // console.log('encryptedData', encryptedData)
 
@@ -331,7 +304,7 @@ export class ProofRequestManager {
     const secret = Albus.crypto.Poseidon.hash([
       Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey),
       signals.credentialRoot as bigint,
-      signals.currentDate as bigint,
+      signals.timestamp as bigint,
     ])
 
     const data = this.decryptData({ secret, signals })
@@ -404,6 +377,7 @@ export class ProofRequestManager {
               reset: isFirst,
               publicInputs: inputs,
               proof: isLast ? proof : null,
+              verify: isVerifyOnChain,
             },
           },
         ),
@@ -411,7 +385,7 @@ export class ProofRequestManager {
 
       // on-chain verification
       if (isLast && isVerifyOnChain) {
-        tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 500000 }))
+        tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }))
       }
 
       txs.push({ tx })
@@ -460,33 +434,38 @@ export class ProofRequestManager {
     })
 
     const proofInput = await new ProofInputBuilder(credential)
-      .withNow(await getSolanaTimestamp(this.provider.connection))
+      .withTimestamp(await getSolanaTimestamp(this.provider.connection))
       .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
       .withTrusteePublicKey(trusteePubKeys)
       .withCircuit(circuit)
       .withPolicy(policy)
       .build()
 
-    try {
-      const { proof, publicSignals } = await Albus.zkp.generateProof({
-        wasmFile: circuit.wasmUri,
-        zkeyFile: circuit.zkeyUri,
-        input: proofInput.data,
-      })
+    // try {
 
-      const { signatures } = await this.prove({
-        proofRequest: props.proofRequest,
-        proofRequestData: proofRequest,
-        proof,
-        // @ts-expect-error readonly
-        publicSignals,
-      })
+    // console.log(proofInput.data)
 
-      return { signatures, proof, publicSignals }
-    } catch (e: any) {
-      console.log(e)
-      throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
-    }
+    const { proof, publicSignals } = await Albus.zkp.generateProof({
+      wasmFile: circuit.wasmUri,
+      zkeyFile: circuit.zkeyUri,
+      input: proofInput.data,
+    })
+
+    console.log(publicSignals)
+
+    const { signatures } = await this.prove({
+      proofRequest: props.proofRequest,
+      proofRequestData: proofRequest,
+      proof,
+      // @ts-expect-error readonly
+      publicSignals,
+    })
+
+    return { signatures, proof, publicSignals }
+    // } catch (e: any) {
+    //   console.log(e)
+    //   throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
+    // }
   }
 
   /**

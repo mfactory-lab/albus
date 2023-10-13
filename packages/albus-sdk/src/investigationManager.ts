@@ -299,7 +299,7 @@ export class InvestigationManager {
 
     const userPublicKey = signals.userPublicKey as [bigint, bigint]
     const sharedKey = Albus.zkp.generateEcdhSharedKey(props.encryptionKey, userPublicKey)
-    const secretShare = Albus.crypto.Poseidon.decrypt(encryptedShare, sharedKey, 1, signals.currentDate as bigint)
+    const secretShare = Albus.crypto.Poseidon.decrypt(encryptedShare, sharedKey, 1, signals.timestamp as bigint)
     const newEncryptedShare = await Albus.crypto.XC20P.encryptBytes(
       Albus.crypto.utils.bigintToBytes(secretShare[0]),
       investigationRequest.encryptionKey,

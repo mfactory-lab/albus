@@ -1,5 +1,5 @@
 {
-  "version": "0.0.14",
+  "version": "0.0.16",
   "name": "albus",
   "instructions": [
     {
@@ -1784,6 +1784,10 @@
           },
           {
             "name": "reset",
+            "type": "bool"
+          },
+          {
+            "name": "verify",
             "type": "bool"
           }
         ]

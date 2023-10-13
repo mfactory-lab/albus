@@ -13,6 +13,7 @@ export interface ProveData {
   proof: beet.COption<ProofData>
   publicInputs: number[] /* size: 32 */[]
   reset: boolean
+  verify: boolean
 }
 
 /**
@@ -24,6 +25,7 @@ export const proveDataBeet = new beet.FixableBeetArgsStruct<ProveData>(
     ['proof', beet.coption(proofDataBeet)],
     ['publicInputs', beet.array(beet.uniformFixedSizeArray(beet.u8, 32))],
     ['reset', beet.bool],
+    ['verify', beet.bool],
   ],
   'ProveData',
 )

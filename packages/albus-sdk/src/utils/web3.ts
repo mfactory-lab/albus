@@ -38,8 +38,7 @@ import { NFT_SYMBOL_PREFIX } from '../constants'
 
 export async function getSolanaTimestamp(connection: Connection) {
   const slot = await connection.getSlot()
-  const timestamp = (await connection.getBlockTime(slot)) ?? 0
-  return new Date(timestamp * 1000)
+  return (await connection.getBlockTime(slot)) ?? 0
 }
 
 export interface ValidateNftProps {

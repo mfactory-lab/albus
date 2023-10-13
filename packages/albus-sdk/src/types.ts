@@ -30,7 +30,7 @@ export type PrivateKey = number[] | string | Uint8Array
 export type AlbusNftCode = 'VC' | 'ID'
 
 export enum KnownSignals {
-  CurrentDate = 'currentDate',
+  Timestamp = 'timestamp',
   CredentialRoot = 'credentialRoot',
   CredentialProof = 'credentialProof',
   CredentialKey = 'credentialKey',
