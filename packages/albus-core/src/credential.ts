@@ -45,7 +45,7 @@ export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
-export const DEFAULT_CLAIM_TREE_DEPTH = 6
+export const DEFAULT_CLAIM_TREE_DEPTH = 4 // 2^4 = 16 elements
 
 export interface CreateCredentialOpts {
   issuerSecretKey?: number[] | Uint8Array
@@ -56,7 +56,9 @@ export interface CreateCredentialOpts {
   // Optional secret key. Ephemeral secret key used by default
   encryptionSecretKey?: number[] | Uint8Array
   customProof?: any
+  // unix timestamp
   validFrom?: number
+  // unix timestamp
   validUntil?: number
   credentialType?: CredentialType
 }
@@ -90,11 +92,16 @@ function normalizeClaims(claims: Claims) {
 export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts = {}) {
   const normalizedClaims = normalizeClaims(claims)
 
+  // must be added to the claims for zk verification
+  normalizedClaims.expirationDate = opts.validUntil ?? 0
+
   let credentialSubject: Claims = {}
+
   if (opts.encrypt) {
     if (!opts.encryptionKey) {
       throw new Error('encryption key is required')
     }
+    credentialSubject.encryptionKey = opts.encryptionKey.toBase58()
     credentialSubject.encrypted = await XC20P.encrypt(
       JSON.stringify(normalizedClaims),
       opts.encryptionKey,
@@ -118,6 +125,7 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
     'credentialSubject': credentialSubject,
   }
 
+  // Revocation
   // vc.credentialStatus = {
   //   id: 'https://example.edu/status/24',
   //   type: 'CredentialStatusList2017',
