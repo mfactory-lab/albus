@@ -28,7 +28,6 @@
 
 use crate::utils::{num_to_bytes, Signals};
 use anchor_lang::prelude::*;
-use std::borrow::Cow;
 
 #[cfg(feature = "verify-on-chain")]
 use groth16_solana::{Proof, VK};
@@ -126,16 +125,16 @@ impl Circuit {
     }
 
     #[inline]
-    pub fn signals_count<'a, T>(signals: impl IntoIterator<Item = T>) -> usize
-    where
-        T: Into<Cow<'a, str>>,
-    {
+    pub fn signals_count<T: AsRef<str>>(signals: impl IntoIterator<Item = T>) -> usize {
         Signals::new(signals).len()
     }
 
     #[inline]
     pub fn signals(&self) -> Signals {
-        Signals::new([self.outputs.as_slice(), self.public_signals.as_slice()].concat())
+        let mut vec = Vec::with_capacity(self.outputs.len() + self.public_signals.len());
+        vec.extend_from_slice(self.outputs.as_slice());
+        vec.extend_from_slice(self.public_signals.as_slice());
+        Signals::new(vec)
     }
 }
 
@@ -183,9 +182,9 @@ impl Policy {
         for rule in &self.rules {
             let (name, idx) = rule.parse();
             if let Some(signal) = signals.get(name) {
-                let index = signal.0 + idx.unwrap_or_default() as usize;
+                let index = signal.index + idx.unwrap_or_default() as usize;
                 if let Some(i) = public_inputs.get_mut(index) {
-                    *i = num_to_bytes(rule.value);
+                    *i = num_to_bytes(rule.value as u64);
                 }
             }
         }
@@ -484,12 +483,12 @@ fn test_apply_rules() {
         ],
     };
 
-    let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"]);
+    let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"].to_vec());
     let mut public_inputs: PublicInputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
 
     policy.apply_rules(&mut public_inputs, &signals);
 
     for (i, rule) in policy.rules.iter().enumerate() {
-        assert_eq!(public_inputs[i], num_to_bytes(rule.value));
+        assert_eq!(public_inputs[i], num_to_bytes(rule.value as u64));
     }
 }

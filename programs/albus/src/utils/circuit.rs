@@ -26,73 +26,86 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::ops::Index;
-use time::OffsetDateTime;
 
-// (index, size)
-type Signal = (usize, usize);
+type SignalKey = String;
 
-pub struct Signals<'a> {
-    data: BTreeMap<Cow<'a, str>, Signal>,
+#[derive(Debug, PartialEq, Eq)]
+pub struct SignalValue {
+    pub index: usize,
+    pub size: usize,
+}
+
+pub struct Signals {
+    data: BTreeMap<SignalKey, SignalValue>,
     count: usize,
 }
 
-impl<'a, Idx: Into<Cow<'a, str>>> Index<Idx> for Signals<'a> {
-    type Output = Signal;
+impl Index<&str> for Signals {
+    type Output = SignalValue;
 
-    fn index(&self, index: Idx) -> &Self::Output {
-        self.data.index(&index.into())
+    fn index(&self, index: &str) -> &Self::Output {
+        self.data.index(index)
     }
 }
 
-impl<'a> Signals<'a> {
-    pub fn new<T>(signals: impl IntoIterator<Item = T>) -> Self
-    where
-        T: Into<Cow<'a, str>>,
-    {
-        let mut data = BTreeMap::new();
+impl Signals {
+    pub fn new<T: AsRef<str>, I: IntoIterator<Item = T>>(signals: I) -> Self {
         let mut count = 0;
 
-        for signal in signals {
-            let sig = signal.into();
-            let (name, len) = Self::parse_signal(&sig).unwrap_or((sig, 1));
-            data.insert(name, (count, len));
-            count += len;
-        }
+        let data = signals
+            .into_iter()
+            .map(|signal| {
+                let (name, size) = Self::parse_signal(signal.as_ref());
+                count += size;
+                (
+                    name.into(),
+                    SignalValue {
+                        index: count - size,
+                        size,
+                    },
+                )
+            })
+            .collect();
 
         Self { data, count }
     }
 
-    fn parse_signal(s: &str) -> Option<(Cow<'a, str>, usize)> {
-        if s.is_empty() {
-            return None;
-        }
+    #[inline]
+    fn parse_signal(s: &str) -> (&str, usize) {
         match (s.find('['), s.find(']')) {
             (Some(open), Some(close)) if open < close => {
-                let name = s[..open].to_owned();
+                let name = &s[..open];
                 if let Ok(n) = s[open + 1..close].parse::<usize>() {
-                    if let Some((_, m)) = Self::parse_signal(&s[close + 1..]) {
-                        Some((name.into(), n * m))
-                    } else {
-                        Some((name.into(), n))
-                    }
+                    let (_, m) = Self::parse_signal(&s[close + 1..]);
+                    (name, n * m)
                 } else {
-                    Some((name.into(), 1))
+                    (name, 1)
                 }
             }
-            _ => None,
-            // _ => Some((s.to_owned().into(), 1)),
+            _ => (s, 1),
         }
     }
 
-    pub fn get(&self, k: impl Into<Cow<'a, str>>) -> Option<&Signal> {
-        self.data.get(&k.into())
+    // fn parse_signal(s: &str) -> (&str, usize) {
+    //     let (name, rest) = s.split_once('[').unwrap_or((s, ""));
+    //     let size = if let Some((n, rest)) = rest.split_once(']') {
+    //         let n = n.parse::<usize>().unwrap_or(1);
+    //         let (_, m) = Self::parse_signal(rest);
+    //         n * m
+    //     } else {
+    //         1
+    //     };
+    //     (name, size)
+    // }
+
+    pub fn get(&self, k: &str) -> Option<&SignalValue> {
+        self.data.get(k)
     }
 
-    pub fn has(&self, k: impl Into<Cow<'a, str>>) -> bool {
-        self.data.contains_key(&k.into())
+    pub fn has(&self, k: &str) -> bool {
+        self.data.contains_key(k)
     }
 
     pub fn len(&self) -> usize {
@@ -100,52 +113,100 @@ impl<'a> Signals<'a> {
     }
 }
 
-/// Convert unix timestamp to [u8; 32] format
-pub fn format_circuit_date(ts: i64) -> Option<[u8; 32]> {
-    let d = OffsetDateTime::from_unix_timestamp(ts).ok()?.date();
-    let n = format!("{:+}{:02}{:02}", d.year(), d.month() as u8, d.day())
-        .parse::<u32>()
-        .ok()?;
-    Some(num_to_bytes(n))
+pub fn bytes_to_num(bytes: [u8; 32]) -> u64 {
+    u64::from_be_bytes(bytes[24..].try_into().unwrap())
 }
 
-pub fn num_to_bytes(n: u32) -> [u8; 32] {
+pub fn num_to_bytes(n: u64) -> [u8; 32] {
     let mut result = [0u8; 32];
     let u32_bytes = n.to_be_bytes();
-    result[28..].copy_from_slice(&u32_bytes[..4]);
+    result[24..].copy_from_slice(&u32_bytes[..8]);
     result
 }
 
-#[test]
-fn test_signals() {
-    let signals = Signals::new([
-        "currentDate",
-        "minAge",
-        "maxAge",
-        "credentialRoot",
-        "credentialProof[10]",
-        "credentialKey",
-        "issuerPk[2]",
-        "issuerSignature[3]",
-        "encryptedShare[3][4]",
-        "threeLevel[3][4][2]",
-    ]);
-    assert_eq!(signals["credentialRoot"], (3, 1));
-    assert_eq!(signals["credentialKey"], (14, 1));
-    assert_eq!(signals["issuerSignature"], (17, 3));
-    assert_eq!(signals["encryptedShare"], (20, 12));
-    assert_eq!(signals["threeLevel"], (32, 24));
-    assert_eq!(56, signals.len());
+// /// Convert unix timestamp to [u8; 32] format
+// pub fn format_circuit_date(ts: i64) -> Option<[u8; 32]> {
+//     let d = OffsetDateTime::from_unix_timestamp(ts).ok()?.date();
+//     let n = format!("{:+}{:02}{:02}", d.year(), d.month() as u8, d.day())
+//         .parse::<u32>()
+//         .ok()?;
+//     Some(num_to_bytes(n))
+// }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_byte_conversion() {
+        let n = 1697222619;
+        let bytes = num_to_bytes(n);
+        assert_eq!(bytes.len(), 32);
+        assert_eq!(bytes_to_num(bytes), n);
+    }
+
+    // #[test]
+    // fn test_sig2() {
+    //     let start_time = std::time::Instant::now();
+    //     let signals = Signals::new([
+    //         "encryptedData[4]",
+    //         "encryptedShare[3][4]",
+    //         "userPublicKey[2]",
+    //         "timestamp",
+    //     ]);
+    //     let elapsed_time = start_time.elapsed();
+    //     println!("Elapsed time: {:?}", elapsed_time);
+    //
+    //     //     println!("{:?}", signals.get("encryptedData"));
+    //     //     println!("{:?}", signals.get("encryptedShare"));
+    //     //     println!("{:?}", signals.get("userPublicKey"));
+    //     //     println!("{:?}", signals.get("timestamp"));
+    // }
+
+    #[test]
+    fn test_signals() {
+        let signals = Signals::new([
+            "currentDate",
+            "minAge",
+            "maxAge",
+            "credentialRoot",
+            "credentialProof[10]",
+            "credentialKey",
+            "issuerPk[2]",
+            "issuerSignature[3]",
+            "encryptedShare[3][4]",
+            "threeLevel[3][4][2]",
+        ]);
+        assert_eq!(signals["currentDate"], SignalValue { index: 0, size: 1 });
+        assert_eq!(signals["credentialRoot"], SignalValue { index: 3, size: 1 });
+        assert_eq!(signals["credentialKey"], SignalValue { index: 14, size: 1 });
+        assert_eq!(
+            signals["issuerSignature"],
+            SignalValue { index: 17, size: 3 }
+        );
+        assert_eq!(
+            signals["encryptedShare"],
+            SignalValue {
+                index: 20,
+                size: 12
+            }
+        );
+        assert_eq!(
+            signals["threeLevel"],
+            SignalValue {
+                index: 32,
+                size: 24
+            }
+        );
+        assert_eq!(56, signals.len());
+    }
 }
 
-#[test]
-fn test_format_circuit_date() {
-    let bytes = format_circuit_date(1690815541);
-    assert_eq!(
-        bytes,
-        Some([
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-            52, 178, 75
-        ])
-    );
-}
+// #[test]
+// fn test_format_circuit_date() {
+//     let bytes = format_circuit_date(1690815541);
+//     assert_eq!(
+//         bytes,
+//         Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 52, 178, 75])
+//     );
+// }

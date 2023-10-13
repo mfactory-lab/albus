@@ -43,11 +43,11 @@ pub fn handler(ctx: Context<MintCredential>, _data: MintCredentialData) -> Resul
     let signer_seeds = [ID.as_ref(), &[ctx.bumps["albus_authority"]]];
 
     CreateV1CpiBuilder::new(&ctx.accounts.metadata_program)
-        .metadata(&ctx.accounts.metadata_account)
         .name(name.into())
         .uri(Default::default())
         .symbol(format!("{}-{}", NFT_SYMBOL_PREFIX, VC_SYMBOL_CODE))
         .mint(&ctx.accounts.mint, true)
+        .metadata(&ctx.accounts.metadata_account)
         .master_edition(Some(&ctx.accounts.edition_account))
         .token_standard(TokenStandard::NonFungible)
         // .token_standard(TokenStandard::ProgrammableNonFungible)

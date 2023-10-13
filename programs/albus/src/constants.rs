@@ -35,7 +35,8 @@ pub const AUTHORIZED_AUTHORITY: &[&str] = &[
 /// Default Albus issuer public key
 // pub const ISSUER_PK: [u8; 64] = [0; 64];
 // pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
-pub const CURRENT_DATE_SIGNAL: &str = "currentDate";
+pub const TIMESTAMP_SIGNAL: &str = "timestamp";
+pub const TIMESTAMP_THRESHOLD: u16 = 30;
 
 pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
 pub const VC_SYMBOL_CODE: &str = "VC";

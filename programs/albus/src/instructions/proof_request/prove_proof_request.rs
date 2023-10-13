@@ -29,11 +29,11 @@
 use anchor_lang::prelude::*;
 
 #[cfg(feature = "verify-on-chain")]
-use groth16_solana::Groth16Verifier;
+use groth16_solana::{Groth16Verifier, Proof, VK};
 
-use crate::constants::CURRENT_DATE_SIGNAL;
+use crate::constants::{TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD};
 use crate::state::{Circuit, Policy, ProofData};
-use crate::utils::format_circuit_date;
+use crate::utils::bytes_to_num;
 use crate::{
     events::ProveEvent,
     state::{ProofRequest, ProofRequestStatus},
@@ -48,8 +48,6 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
     let policy = &ctx.accounts.policy;
     let req = &mut ctx.accounts.proof_request;
 
-    let timestamp = Clock::get()?.unix_timestamp;
-
     if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
         msg!("Error: Only request owner can prove it!");
         return Err(AlbusError::Unauthorized.into());
@@ -60,21 +58,28 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
         req.public_inputs.clear();
     }
 
-    req.public_inputs.extend(data.public_inputs);
+    if !data.public_inputs.is_empty() {
+        req.public_inputs.extend(data.public_inputs);
+    }
 
     if data.proof.is_none() {
         msg!("Public inputs was updated");
         return Ok(());
     }
 
+    let timestamp = Clock::get()?.unix_timestamp;
     let signals = circuit.signals();
 
-    // apply current date
-    if let Some(s) = signals.get(CURRENT_DATE_SIGNAL) {
-        req.public_inputs[s.0] = format_circuit_date(timestamp).expect("Failed to get current timestamp");
+    // validate timestamp
+    if let Some(s) = signals.get(TIMESTAMP_SIGNAL) {
+        let input_ts = bytes_to_num(req.public_inputs[s.index]);
+        if (input_ts as i64) < timestamp - TIMESTAMP_THRESHOLD as i64 {
+            msg!("Error: Invalid timestamp input");
+            return Err(AlbusError::InvalidData.into());
+        }
     }
 
-    // // apply issuer public key
+    // // validate issuer
     // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
     //     public_inputs[s.0] = <[u8; 32]>::try_from(&ISSUER_PK[..32]).unwrap();
     //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
@@ -82,24 +87,30 @@ pub fn handler(ctx: Context<Prove>, data: ProveData) -> Result<()> {
 
     policy.apply_rules(&mut req.public_inputs, &signals);
 
+    req.status = ProofRequestStatus::Proved;
     req.proved_at = timestamp;
+    req.proof = data.proof;
 
-    if cfg!(feature = "verify-on-chain") {
-        req.proof = data.proof.to_owned();
-        #[cfg(feature = "verify-on-chain")]
-        Groth16Verifier::new(
-            &data.proof.unwrap().into(),
-            &req.public_inputs,
-            &circuit.vk.to_owned().into(),
-        )
-        .map_err(|_| AlbusError::InvalidPublicInputs)?
-        .verify()
-        .map_err(|_| AlbusError::ProofVerificationFailed)?;
-        req.verified_at = timestamp;
+    #[cfg(feature = "verify-on-chain")]
+    if data.verify {
+        let proof = req.proof.as_ref().expect("Invalid proof");
+        let proof = Proof::new(proof.a, proof.b, proof.c);
+
+        let vk = VK {
+            alpha: circuit.vk.alpha,
+            beta: circuit.vk.beta,
+            gamma: circuit.vk.gamma,
+            delta: circuit.vk.delta,
+            ic: circuit.vk.ic.to_owned(),
+        };
+
+        Groth16Verifier::new(&proof, &req.public_inputs, &vk)
+            .map_err(|_| AlbusError::InvalidPublicInputs)?
+            .verify()
+            .map_err(|_| AlbusError::ProofVerificationFailed)?;
+
         req.status = ProofRequestStatus::Verified;
-    } else {
-        req.proof = data.proof;
-        req.status = ProofRequestStatus::Proved;
+        req.verified_at = timestamp;
     }
 
     emit!(ProveEvent {
@@ -120,6 +131,7 @@ pub struct ProveData {
     pub proof: Option<ProofData>,
     pub public_inputs: Vec<[u8; 32]>,
     pub reset: bool,
+    pub verify: bool,
 }
 
 #[derive(Accounts)]
@@ -128,7 +140,8 @@ pub struct Prove<'info> {
     #[account(mut, has_one = policy, has_one = circuit)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
 
-    pub circuit: Account<'info, Circuit>,
+    pub circuit: Box<Account<'info, Circuit>>,
+
     pub policy: Account<'info, Policy>,
 
     #[account(mut)]
