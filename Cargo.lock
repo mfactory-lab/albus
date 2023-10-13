@@ -78,7 +78,6 @@ dependencies = [
  "anchor-spl",
  "groth16-solana",
  "mpl-token-metadata",
- "time",
 ]
 
 [[package]]
@@ -823,12 +822,6 @@ dependencies = [
  "quote",
  "syn 2.0.26",
 ]
-
-[[package]]
-name = "deranged"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8810e7e2cf385b1e9b50d68264908ec367ba642c96d02edfe61c39e88e2a3c01"
 
 [[package]]
 name = "derivation-path"
@@ -2123,22 +2116,6 @@ dependencies = [
  "quote",
  "syn 2.0.26",
 ]
-
-[[package]]
-name = "time"
-version = "0.3.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b79eabcd964882a646b3584543ccabeae7869e9ac32a46f6f22b7a5bd405308b"
-dependencies = [
- "deranged",
- "time-core",
-]
-
-[[package]]
-name = "time-core"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7300fbefb4dadc1af235a9cef3737cea692a9d97e1b9cbcd4ebdae6f8868e6fb"
 
 [[package]]
 name = "tiny-bip39"
