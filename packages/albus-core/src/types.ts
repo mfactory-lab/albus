@@ -28,6 +28,12 @@
 
 export enum CredentialType {
   AlbusCredential = 'AlbusCredential',
+  IdCard = 'IdCard',
+  Passport = 'Passport',
+  ResidencePermit = 'ResidencePermit',
+  DriverLicense = 'DriverLicense',
+  ProofOfAttendance = 'ProofOfAttendance',
+  ProofOfLiveness = 'ProofOfLiveness',
 }
 
 export enum PresentationType {

@@ -58,6 +58,7 @@ export interface CreateCredentialOpts {
   customProof?: any
   validFrom?: number
   validUntil?: number
+  credentialType?: CredentialType
 }
 
 function normalizeClaims(claims: Claims) {
@@ -107,7 +108,7 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
 
   const vc: W3CCredential = {
     '@context': [DEFAULT_CONTEXT],
-    'type': [DEFAULT_VC_TYPE, CredentialType.AlbusCredential],
+    'type': [DEFAULT_VC_TYPE, opts.credentialType ?? CredentialType.AlbusCredential],
     'issuer': opts.issuerDid ?? DEFAULT_DID,
     'issuanceDate': new Date().toISOString(),
     'credentialSubject': credentialSubject,
