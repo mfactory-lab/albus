@@ -52,15 +52,15 @@ describe('AgePolicy', async () => {
     const tree = await createClaimsTree(claims)
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
     const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
-    const [expDateKey, ...expDateProof] = await tree.proof('expirationDate')
+    const [expirationDateKey, ...expirationDateProof] = await tree.proof('expirationDate')
     const trusteeCount = 3
 
     const input = {
       timestamp,
       credentialRoot: tree.root,
-      expDate: claims.expirationDate,
-      expDateKey,
-      expDateProof,
+      expirationDate: claims.expirationDate,
+      expirationDateKey,
+      expirationDateProof,
       birthDate: claims.birthDate,
       birthDateProof,
       birthDateKey,
