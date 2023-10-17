@@ -55,10 +55,10 @@ upgrade-mainnet: build ## Upgrade program (Mainnet)
 	anchor upgrade -p $(program_id) --provider.cluster mainnet ./target/deploy/$(PROGRAM).so
 
 show-buffers: ## Show program buffers
-	solana program show --buffers -k $(wallet)
+	solana program show --buffers -k $(wallet) -u $(NETWORK)
 
 close-buffers: ## Close program buffers
-	solana program close --buffers -k $(wallet)
+	solana program close --buffers -k $(wallet) -u $(NETWORK)
 
 clean:
 	rm -rf node_modules target .anchor
