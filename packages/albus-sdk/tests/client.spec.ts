@@ -77,6 +77,7 @@ describe('AlbusClient', async () => {
     ],
     privateSignals: [
       'birthDate',
+      'expirationDate',
       'userPrivateKey',
     ],
     publicSignals: [
@@ -84,7 +85,6 @@ describe('AlbusClient', async () => {
       'minAge',
       'maxAge',
       'credentialRoot',
-      'expirationDate',
       'expirationDateKey',
       'expirationDateProof[6]',
       'birthDateKey',
@@ -112,9 +112,14 @@ describe('AlbusClient', async () => {
   const now = Math.floor(Date.now() / 1000)
 
   const credential = await Albus.credential.createVerifiableCredential({
-    birthDate: '19890101',
-    firstName: 'Alex',
-    country: 'US',
+    givenName: 'Mikayla',
+    familyName: 'Halvorson',
+    gender: 'female',
+    birthDate: '19661002',
+    birthPlace: 'Westland',
+    nationality: 'MNE',
+    country: 'MNE',
+    countryOfBirth: 'MNE',
   }, {
     issuerSecretKey: payerKeypair.secretKey,
     validUntil: now + 86400, // 1 day
@@ -141,10 +146,10 @@ describe('AlbusClient', async () => {
 
     assert.equal(data.expirationDate, now + 86400)
     assert.equal(data.expirationDateKey, 3)
-    assert.equal(data.expirationDateProof.length, 6)
+    assert.equal(data.expirationDateProof.length, 4)
     assert.equal(data.birthDate, '19890101')
     assert.equal(data.birthDateKey, 0n)
-    assert.equal(data.birthDateProof.length, 6)
+    assert.equal(data.birthDateProof.length, 4)
     assert.equal(data.issuerPk.length, 2)
     assert.equal(data.issuerSignature.length, 3)
     assert.deepEqual(data.trusteePublicKey, [[1n, 2n], [1n, 2n], [1n, 2n]])
