@@ -2,4 +2,4 @@ pragma circom 2.1.4;
 
 include "../ageProof.circom";
 
-component main { public [currentYear, currentMonth, currentDay, minAge, maxAge] } = AgeProof();
+component main { public [currentDate, minAge, maxAge] } = AgeProof();

@@ -51,19 +51,19 @@ describe('AgePolicy', async () => {
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = { minAge: 18, maxAge: 100 }) {
     const tree = await createClaimsTree(claims)
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
-    const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
-    const [expirationDateKey, ...expirationDateProof] = await tree.proof('expirationDate')
+    const birthDateProof = await tree.get('birthDate')
+    const expDateProof = await tree.get('expirationDate')
     const trusteeCount = 3
 
     const input = {
       timestamp,
       credentialRoot: tree.root,
-      expirationDate: claims.expirationDate,
-      expirationDateKey,
-      expirationDateProof,
-      birthDate: claims.birthDate,
-      birthDateProof,
-      birthDateKey,
+      expirationDate: expDateProof.value,
+      expirationDateKey: expDateProof.key,
+      expirationDateProof: expDateProof.siblings,
+      birthDate: birthDateProof.value,
+      birthDateKey: birthDateProof.key,
+      birthDateProof: birthDateProof.siblings,
       issuerPk,
       issuerSignature: [...signature.R8, signature.S],
       trusteePublicKey: [],
@@ -107,7 +107,7 @@ describe('AgePolicy', async () => {
       assert.ok(false)
     } catch (e: any) {
       // console.log(e.message)
-      assert.include(e.message, 'Error in template AgePolicy_271 line: 43')
+      assert.include(e.message, 'Error in template AgePolicy_271 line: 50')
     }
   })
 
@@ -115,6 +115,7 @@ describe('AgePolicy', async () => {
     const input = await generateInput({
       ...claims,
       birthDate: claims.birthDate + 1,
+      expirationDate: timestamp + 1,
     })
 
     try {
@@ -123,7 +124,7 @@ describe('AgePolicy', async () => {
       assert.ok(false)
     } catch (e: any) {
       // console.log(e.message)
-      assert.include(e.message, 'Error in template AgePolicy_271 line: 101')
+      assert.include(e.message, 'Error in template AgePolicy_271 line: 95')
     }
   })
 })
@@ -162,18 +163,18 @@ describe('Proof AgePolicy', async () => {
 
     const tree = await createClaimsTree(claims)
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
-    const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
+    const birthDateProof = await tree.get('birthDate')
 
     const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
     const trusteeCount = 3
 
     const input = {
-      birthDate: claims.birthDate,
-      birthDateProof,
-      birthDateKey: birthDateKey!,
       timestamp,
       minAge: 18,
       maxAge: 100,
+      birthDate: birthDateProof.value,
+      birthDateKey: birthDateProof.key,
+      birthDateProof: birthDateProof.siblings,
       credentialRoot: tree.root,
       issuerPk: issuerPubkey,
       issuerSignature: [...signature.R8, signature.S],

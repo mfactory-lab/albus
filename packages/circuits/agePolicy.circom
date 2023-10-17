@@ -60,17 +60,11 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   eddsa.S <== issuerSignature[2];
 
   // Data integrity check
-  component mtpBirthDate = MerkleProof(credentialDepth);
-  mtpBirthDate.root <== credentialRoot;
-  mtpBirthDate.siblings <== birthDateProof;
-  mtpBirthDate.key <== birthDateKey;
-  mtpBirthDate.value <== birthDate;
-
-  component mtpExpDate = MerkleProof(credentialDepth);
-  mtpExpDate.root <== credentialRoot;
-  mtpExpDate.siblings <== expirationDateProof;
-  mtpExpDate.key <== expirationDateKey;
-  mtpExpDate.value <== expirationDate;
+  component mtp = MerkleProof(2, credentialDepth);
+  mtp.root <== credentialRoot;
+  mtp.siblings <== [birthDateProof, expirationDateProof];
+  mtp.key <== [birthDateKey, expirationDateKey];
+  mtp.value <== [birthDate, expirationDate];
 
   // Extracts the user public key from private key
   component upk = BabyPbk();
@@ -93,16 +87,9 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   encryptedShare <== enc.encryptedShare;
 
   // Age validation
-  var birth[3] = parseDate(birthDate);
-  var current[3] = timestampToDate(timestamp);
-
   component age = AgeProof();
-  age.birthYear <-- birth[0];
-  age.birthMonth <-- birth[1];
-  age.birthDay <-- birth[2];
-  age.currentYear <-- current[0];
-  age.currentMonth <-- current[1];
-  age.currentDay <-- current[2];
+  age.currentDate <-- timestampToDate(timestamp);
+  age.birthDate <-- numToDate(birthDate);
   age.minAge <== minAge;
   age.maxAge <== maxAge;
   age.valid === 1;
