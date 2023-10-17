@@ -30,8 +30,17 @@ import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-toke
 import type { VerifiableCredential } from '@mfactory-lab/albus-core'
 import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
-import type { ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
+import {
+  ComputeBudgetProgram,
+  Keypair,
+  PublicKey,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+  Transaction,
+} from '@solana/web3.js'
+import type {
+  ConfirmOptions, PublicKeyInitData,
+  Signer,
+} from '@solana/web3.js'
 import axios from 'axios'
 import { DEFAULT_CREDENTIAL_NAME, NFT_SYMBOL_PREFIX, NFT_VC_SYMBOL } from './constants'
 import {
@@ -58,7 +67,7 @@ export class CredentialManager {
   /**
    * Create new Credential NFT
    */
-  async create(props?: CreateCredentialProps, opts?: ConfirmOptions) {
+  async create(props?: CreateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
     const mint = Keypair.generate()
     const owner = props?.owner ? new PublicKey(props?.owner) : this.provider.publicKey
 
@@ -81,7 +90,14 @@ export class CredentialManager {
       const tx = new Transaction()
         .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
         .add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [mint], { ...this.provider.opts, ...opts })
+
+      const signers: Signer[] = [mint]
+      if (opts?.feePayer) {
+        tx.feePayer = opts.feePayer.publicKey
+        signers.push(opts.feePayer)
+      }
+
+      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
       return { mintAddress: mint.publicKey, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
