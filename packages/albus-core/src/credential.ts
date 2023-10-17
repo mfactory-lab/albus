@@ -139,11 +139,13 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
     vc.validUntil = new Date(opts.validUntil * 1000).toISOString()
   }
 
-  vc.proof = opts.customProof ?? createCredentialProof({
-    rootHash: claimsTree.root,
-    signerSecretKey: Uint8Array.from(opts.issuerSecretKey),
-    verificationMethod: opts.verificationMethod ?? `${vc.issuer}#eddsa-bjj`,
-  })
+  if (opts.customProof || opts.issuerSecretKey) {
+    vc.proof = opts.customProof ?? createCredentialProof({
+      rootHash: claimsTree.root,
+      signerSecretKey: Uint8Array.from(opts.issuerSecretKey),
+      verificationMethod: opts.verificationMethod ?? `${vc.issuer}#eddsa-bjj`,
+    })
+  }
 
   return vc as VerifiableCredential
 }
@@ -199,7 +201,8 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
       }
       if (flattenClaims[field] !== undefined) {
         exposedClaims[field] = flattenClaims[field]
-        credentialProof[field] = await claimsTree.proof(field)
+        const proof = await claimsTree.get(field)
+        credentialProof[field] = [proof.key, ...proof.siblings]
       }
     }
 
@@ -530,40 +533,40 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
   const tree = new Merkletree(sto, true, nLevels)
 
   const flattenClaims = flattenObject(claims)
-  const encodeKey = (k: string) => BigInt(Object.keys(flattenClaims).indexOf(k))
-  const encodeVal = (s: any) => {
-    try {
-      return BigInt(s)
-    } catch (e) {
-      return bytesToBigInt(new TextEncoder().encode(String(s)))
-    }
-  }
+  const flattenClaimKeys = Object.keys(flattenClaims)
 
-  for (const [key, val] of Object.entries(flattenClaims)) {
-    await tree.add(encodeKey(key), encodeVal(val))
+  const encodeKey = (k: string) => BigInt(flattenClaimKeys.indexOf(k))
+
+  for (const key of flattenClaimKeys) {
+    await tree.add(encodeKey(key), encodeClaimValue(flattenClaims[key]))
   }
 
   return {
     encodeKey,
-    encodeVal,
     root: await tree.root().then(r => r.bigInt()),
-    // root: () => tree.root().then(r => r.bigInt()),
-    proof: async (key: string) => {
-      const encodedKey = encodeKey(key)
-      const res = await tree.generateCircomVerifierProof(encodedKey, ZERO_HASH)
-      return [
-        encodedKey,
-        ...res.siblings.map(s => s.bigInt()),
-      ]
+    get: async (key: string) => {
+      const proof = await tree.generateCircomVerifierProof(encodeKey(key), ZERO_HASH)
+      return {
+        key: proof.key.bigInt(),
+        value: proof.value.bigInt(),
+        siblings: proof.siblings.map(s => s.bigInt()),
+      }
     },
-    get: (key: string) => tree.get(encodeKey(key)),
     delete: (key: string) => tree.delete(encodeKey(key)),
-    add: (key: string, val: any) => tree.add(encodeKey(key), encodeVal(val)),
-    update: (key: string, val: any) => tree.update(encodeKey(key), encodeVal(val)),
+    add: (key: string, val: any) => tree.add(encodeKey(key), encodeClaimValue(val)),
+    update: (key: string, val: any) => tree.update(encodeKey(key), encodeClaimValue(val)),
   }
 }
 
 // Helpers
+
+export function encodeClaimValue(s: string) {
+  try {
+    return BigInt(s)
+  } catch (e) {
+    return bytesToBigInt(new TextEncoder().encode(String(s)))
+  }
+}
 
 function flattenObject(obj: Record<string, any>, parentKey?: string) {
   let res: Record<string, any> = {}

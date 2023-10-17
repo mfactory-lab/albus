@@ -29,8 +29,6 @@ export function altBn128G1Neg(input: ArrayLike<number>) {
 
 /**
  * Generates a proof using the `groth16` proof system.
- * @param props
- * @returns {Promise<SNARK>} -
  */
 export async function generateProof(props: GenerateProofProps) {
   const wasmFile = await fetchBytes(props.wasmFile)
@@ -105,7 +103,7 @@ export function decodeProof(proof: {
 }
 
 /**
- * Encode snarkjs signals to bytes format
+ * Encode snarkjs signals to byte format
  * @param publicSignals
  */
 export function encodePublicSignals(publicSignals: Array<string | number | bigint>) {
@@ -227,7 +225,7 @@ function decodeG2(bytes: number[]) {
 
 /**
  * Format a private key to be compatible with the BabyJub curve.
- * This is the format which should be passed into the
+ * This is the format that should be passed into the
  * PubKey and other circuits.
  * @param prv
  */
