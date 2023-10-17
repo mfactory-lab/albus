@@ -163,9 +163,9 @@ function loadSignals(symData: string, nOutputs: number, nPubInputs: number, nPrv
     if (!sig?.name) {
       return
     }
-    if (idx < nOutputs) {
+    if (idx <= nOutputs) {
       sig.type = 'output'
-    } else if (idx < nPubInputs) {
+    } else if (idx <= nOutputs + nPubInputs) {
       sig.type = 'public'
     } else {
       sig.type = 'private'
