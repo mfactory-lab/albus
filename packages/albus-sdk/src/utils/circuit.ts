@@ -98,9 +98,6 @@ export class ProofInputBuilder<T = Record<string, any>> {
   async build() {
     await this.initClaimsTree()
     await Promise.all([this.applyPrivateSignals(), this.applyPublicSignals()])
-
-    await this.applyCredentialSignal('expirationDate')
-
     return this
   }
 
