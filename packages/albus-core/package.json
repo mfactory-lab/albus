@@ -9,6 +9,7 @@
   "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -28,7 +29,7 @@
     "prepublishOnly": "vite build"
   },
   "dependencies": {
-    "@iden3/js-merkletree": "^1.0.1",
+    "@iden3/js-merkletree": "1.0.1",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
     "@stablelib/random": "^1.0.2",
     "@stablelib/sha256": "^1.0.1",
