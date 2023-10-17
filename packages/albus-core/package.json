@@ -1,6 +1,6 @@
 {
   "name": "@mfactory-lab/albus-core",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
@@ -29,7 +29,6 @@
     "prepublishOnly": "vite build"
   },
   "dependencies": {
-    "@iden3/js-merkletree": "1.0.1",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
     "@stablelib/random": "^1.0.2",
     "@stablelib/sha256": "^1.0.1",
