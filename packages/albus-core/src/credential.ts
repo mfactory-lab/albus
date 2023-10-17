@@ -32,8 +32,7 @@ import type { Resolvable, ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
-import { Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
-import { SMT } from './crypto/smt'
+import { SMT, Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
@@ -45,7 +44,7 @@ export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
-export const DEFAULT_CLAIM_TREE_DEPTH = 4 // 2^4 = 16 elements
+export const DEFAULT_CLAIM_TREE_DEPTH = 5 // 2^4 = 16 elements
 
 export interface CreateCredentialOpts {
   issuerSecretKey?: number[] | Uint8Array
