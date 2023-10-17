@@ -184,13 +184,11 @@ describe('credential', () => {
       country3: 'US',
       country4: 'US',
       country5: 'US',
-      country6: 'US',
-      country7: 'US',
     }
 
     const tree = await createClaimsTree(claims)
 
-    console.log((await tree.get('degree.name')))
+    // console.log((await tree.get('degree.university.name')))
 
     assert.equal((await tree.get('birthDate')).key, 7n)
     assert.equal((await tree.get('degree.university.name')).key, 2n)

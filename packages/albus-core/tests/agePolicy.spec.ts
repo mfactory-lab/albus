@@ -44,7 +44,23 @@ describe('AgePolicy', async () => {
 
   const timestamp = 1697035401 // 2023-10-11 14:43
   const claims = {
-    birthDate: 20051011,
+    // givenName: 'Mikayla',
+    // familyName: 'Halvorson',
+    // gender: 'female',
+    birthDate: '19661002',
+    // birthPlace: 'Westland',
+    // nationality: 'MNE',
+    // country: 'MNE',
+    // countryOfBirth: 'MNE',
+    // address: {
+    //   street1: 'Long road 1',
+    //   street2: 'Long road 1',
+    //   street3: 'Long road 1',
+    //   street4: 'Long road 1',
+    //   state: 'Test',
+    //   city: 'Test',
+    //   house: 5,
+    // },
     expirationDate: 0,
   }
 

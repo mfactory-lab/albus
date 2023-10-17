@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { InMemoryDB, Merkletree, ZERO_HASH, str2Bytes } from '@iden3/js-merkletree'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import type { Resolvable, ResolverRegistry } from 'did-resolver'
@@ -34,6 +33,7 @@ import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
 import { Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
+import { SMT } from './crypto/smt'
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
@@ -532,15 +532,9 @@ export function verifyPresentationProof(proof: PresentationProof, challenge: Uin
  * Creates a claim's tree from the provided claims and returns an object with tree operations.
  */
 export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_TREE_DEPTH) {
-  const sto = new InMemoryDB(str2Bytes('albus'))
-
-  // +1 should be added to support 2 ^ `DEFAULT_CLAIM_TREE_DEPTH`,
-  // looks like this is a bug in @iden3/js-merkletree
-  const tree = new Merkletree(sto, true, nLevels + 1)
-
+  const tree = new SMT()
   const flattenClaims = flattenObject(claims)
   const flattenClaimKeys = Object.keys(flattenClaims)
-
   const encodeKey = (k: string) => BigInt(flattenClaimKeys.indexOf(k))
 
   for (const key of flattenClaimKeys) {
@@ -549,13 +543,17 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
 
   return {
     encodeKey,
-    root: (await tree.root()).bigInt(),
+    root: tree.root,
     get: async (key: string) => {
-      const proof = await tree.generateCircomVerifierProof(encodeKey(key), ZERO_HASH)
+      const proof = await tree.get(encodeKey(key))
+      const siblings = proof.siblings
+      while (siblings.length < nLevels) {
+        siblings.push(tree.F.zero)
+      }
       return {
-        key: proof.key.bigInt(),
-        value: proof.value.bigInt(),
-        siblings: proof.siblings.slice(0, -1).map(s => s.bigInt()),
+        key: proof.key,
+        value: proof.value,
+        siblings,
       }
     },
     delete: (key: string) => tree.delete(encodeKey(key)),

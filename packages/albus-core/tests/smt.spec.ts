@@ -26,15 +26,16 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as utils from './utils'
+import { describe, it } from 'vitest'
+import { SMT } from '../src/crypto/smt'
 
-export * from './babyjub'
-export * from './blake'
-export * from './poseidon'
-export * from './shamir'
-export * from './xc20p'
-export * from './multibase'
-export * from './smt'
-
-export { utils as ffUtils, Scalar, F1Field } from './ff'
-export { utils }
+describe('SMT', async () => {
+  it('build', async () => {
+    const smt = new SMT(4)
+    for (let i = 0; i < 7; i++) {
+      await smt.add(BigInt(i), BigInt(i))
+    }
+    // TODO: add tests
+    console.log(await smt.get(5))
+  })
+})
