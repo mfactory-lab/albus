@@ -38,7 +38,7 @@ import { CredentialType, PresentationType, ProofType, VerifyType } from './types
 import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
 
-const { bytesToBigInt, base58ToBytes } = utils
+const { base58ToBytes } = utils
 
 // https://www.w3.org/TR/vc-data-model-2.0
 export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
@@ -528,9 +528,15 @@ export function verifyPresentationProof(proof: PresentationProof, challenge: Uin
   }
 }
 
+/**
+ * Creates a claim's tree from the provided claims and returns an object with tree operations.
+ */
 export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_TREE_DEPTH) {
   const sto = new InMemoryDB(str2Bytes('albus'))
-  const tree = new Merkletree(sto, true, nLevels)
+
+  // +1 should be added to support 2 ^ `DEFAULT_CLAIM_TREE_DEPTH`,
+  // looks like this is a bug in @iden3/js-merkletree
+  const tree = new Merkletree(sto, true, nLevels + 1)
 
   const flattenClaims = flattenObject(claims)
   const flattenClaimKeys = Object.keys(flattenClaims)
@@ -543,13 +549,13 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
 
   return {
     encodeKey,
-    root: await tree.root().then(r => r.bigInt()),
+    root: (await tree.root()).bigInt(),
     get: async (key: string) => {
       const proof = await tree.generateCircomVerifierProof(encodeKey(key), ZERO_HASH)
       return {
         key: proof.key.bigInt(),
         value: proof.value.bigInt(),
-        siblings: proof.siblings.map(s => s.bigInt()),
+        siblings: proof.siblings.slice(0, -1).map(s => s.bigInt()),
       }
     },
     delete: (key: string) => tree.delete(encodeKey(key)),
@@ -564,7 +570,9 @@ export function encodeClaimValue(s: string) {
   try {
     return BigInt(s)
   } catch (e) {
-    return bytesToBigInt(new TextEncoder().encode(String(s)))
+    // this variant only supports max 32 byte string
+    // return bytesToBigInt(new TextEncoder().encode(String(s)))
+    return poseidon.hashBytes(new TextEncoder().encode(s))
   }
 }
 

@@ -172,7 +172,7 @@ describe('credential', () => {
         type: 'BachelorDegree',
         name: 'Bachelor of Science and Arts',
         university: {
-          name: 'test',
+          name: 'Stanford',
         },
       },
       test: [1, 2, 3],
@@ -180,6 +180,12 @@ describe('credential', () => {
       birthDate: '1989-01-01',
       firstName: 'Alex',
       country: 'US',
+      country2: 'US',
+      country3: 'US',
+      country4: 'US',
+      country5: 'US',
+      country6: 'US',
+      country7: 'US',
     }
 
     const tree = await createClaimsTree(claims)
