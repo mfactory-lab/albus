@@ -32,8 +32,8 @@ export enum CredentialType {
   Passport = 'Passport',
   ResidencePermit = 'ResidencePermit',
   DriverLicense = 'DriverLicense',
-  ProofOfAttendance = 'ProofOfAttendance',
-  ProofOfLiveness = 'ProofOfLiveness',
+  AttendanceProof = 'AttendanceProof',
+  LivenessProof = 'LivenessProof',
 }
 
 export enum PresentationType {
