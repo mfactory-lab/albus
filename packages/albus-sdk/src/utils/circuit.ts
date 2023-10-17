@@ -120,7 +120,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * @returns {string} The normalized claim key.
    */
   normalizeClaimKey(s: string): string {
-    return s.trim()
+    return s.trim().replace(/_/g, '.')
   }
 
   /**
@@ -160,7 +160,13 @@ export class ProofInputBuilder<T = Record<string, any>> {
     }
   }
 
-  private applyPolicySignal(signal: string) {
+  /**
+   * Applies a policy signal to the credential data.
+   *
+   * @param signal - The signal to apply.
+   * @returns {boolean} A boolean indicating whether the signal was successfully applied.
+   */
+  private applyPolicySignal(signal: string): boolean {
     const sig = parseSignal(signal)
     if (sig !== null) {
       const rules = this.policy?.rules
@@ -176,19 +182,29 @@ export class ProofInputBuilder<T = Record<string, any>> {
     return false
   }
 
-  private async applyCredentialSignal(signal: string, throwIfUnknown = false) {
+  /**
+   * Applies a credential signal to the credential data.
+   *
+   * @param signal - The signal to apply.
+   * @param throwIfUnknown - Whether to throw an error if the signal is not found in the credential.
+   * @returns {Promise<boolean>} A boolean indicating whether the signal was successfully applied.
+   * @throws An error if the claims tree is not initialized or if the signal is not found in the credential and `throwIfUnknown` is true.
+   */
+  private async applyCredentialSignal(signal: string, throwIfUnknown = false): Promise<boolean> {
     if (!this.claimsTree) {
       throw new Error('claims tree is not initialized')
     }
     const claim = this.normalizeClaimKey(signal)
-    if (this.credential.credentialSubject[claim] !== undefined) {
-      const [key, ...proof] = await this.claimsTree.proof(claim)
-      this.data[signal] = this.credential.credentialSubject[claim] ?? 0
-      this.data[`${signal}Proof`] = proof
-      this.data[`${signal}Key`] = key
+    try {
+      const proof = await this.claimsTree.get(claim)
+      this.data[signal] = proof.value
+      this.data[`${signal}Key`] = proof.key
+      this.data[`${signal}Proof`] = proof.siblings
       return true
-    } else if (throwIfUnknown) {
-      throw new Error(`Invalid claim "${claim}"`)
+    } catch (e) {
+      if (throwIfUnknown) {
+        throw new Error(`claim "${claim}" is not found in the credential`)
+      }
     }
     return false
   }
@@ -248,9 +264,6 @@ export class ProofInputBuilder<T = Record<string, any>> {
 
 /**
  * Generate signals map
- *
- * @param symbols
- * @param inputs
  */
 export function getSignals(symbols: string[], inputs: bigint[]): Record<string, bigint | bigint[] | bigint[][]> {
   let idx = 0
@@ -277,6 +290,12 @@ export function getSignals(symbols: string[], inputs: bigint[]): Record<string, 
   return map
 }
 
+/**
+ * Parses a signal string into its name, size, and next signal.
+ *
+ * @param {string} signal - The signal string to parse.
+ * @returns {ParseSignalResult | null} An object containing the name, size, and next signal, or null if the signal is invalid.
+ */
 export function parseSignal(signal: string): ParseSignalResult | null {
   if (signal.length === 0) {
     return null
