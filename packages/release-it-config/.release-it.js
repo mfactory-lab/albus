@@ -46,41 +46,41 @@ module.exports = {
     release: false,
     releaseName: `${packageName}-v${version}`,
     releaseNotes(context) {
-      // Remove the first, redundant line with version and date.
+      // Remove the first, redundant line with a version and date.
       return context.changelog.split('\n').slice(1).join('\n');
     }
   },
-  plugins: {
-    '@release-it/conventional-changelog': {
-      path: '.',
-      // ignoreRecommendedBump: false,
-      gitRawCommitsOpts: {
-        path: '.',
-      },
-      header: '# Changelog',
-      infile: 'CHANGELOG.md',
-      preset: {
-        name: "conventionalcommits",
-        types: [
-          { "type": "fix", "section": "🐞 Bug Fixes" },
-          { "type": "feat", "section": "🌟 Features" },
-          { "type": "infra", "section": "🏗 Internal improvements", "hidden": true },
-          { "type": "perf", "section": "⚡️ Performance enhancements" },
-          { "type": "chore", "section": "🧼 Chores", "hidden": true },
-          { "type": "test", "section": "✅ Test coverage", "hidden": true },
-          { "type": "docs", "section": "📚 Documentation" },
-          { "type": "refactor", "section": "♻️ Refactors" }
-        ]
-      },
-    },
-    // '@release-it-plugins/workspaces': {
-    //   // skipChecks: true,
-    //   workspaces: [
-    //     'packages/albus-core',
-    //     'packages/albus-sdk'
-    //   ]
-    // }
-  },
+  // plugins: {
+  //   '@release-it/conventional-changelog': {
+  //     path: '.',
+  //     // ignoreRecommendedBump: false,
+  //     gitRawCommitsOpts: {
+  //       path: '.',
+  //     },
+  //     header: '# Changelog',
+  //     infile: 'CHANGELOG.md',
+  //     preset: {
+  //       name: "conventionalcommits",
+  //       types: [
+  //         { "type": "fix", "section": "🐞 Bug Fixes" },
+  //         { "type": "feat", "section": "🌟 Features" },
+  //         { "type": "infra", "section": "🏗 Internal improvements", "hidden": true },
+  //         { "type": "perf", "section": "⚡️ Performance enhancements" },
+  //         { "type": "chore", "section": "🧼 Chores", "hidden": true },
+  //         { "type": "test", "section": "✅ Test coverage", "hidden": true },
+  //         { "type": "docs", "section": "📚 Documentation" },
+  //         { "type": "refactor", "section": "♻️ Refactors" }
+  //       ]
+  //     },
+  //   },
+  //   // '@release-it-plugins/workspaces': {
+  //   //   // skipChecks: true,
+  //   //   workspaces: [
+  //   //     'packages/albus-core',
+  //   //     'packages/albus-sdk'
+  //   //   ]
+  //   // }
+  // },
   hooks: {
     // release-it doesn't support `pnpm publish` only `npm publish`
     'after:bump': 'pnpm build && pnpm publish --no-git-checks',
