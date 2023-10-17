@@ -1,10 +1,17 @@
 pragma circom 2.1.4;
 
 /**
- * Parse numerical date `20220101` to { y: 2022, m: 1, d: 1 }
+ * Convert number date `20220101` to date array `[2022, 01, 01]`
  */
-function parseDate(date) {
+function numToDate(date) {
   return [(date \ 10000) | 0, ((date \ 100) % 100) | 0, (date % 100) | 0];
+}
+
+/**
+ * Convert date array `[2022, 01, 01]` to a number `20220101`
+ */
+function dateToNum(d) {
+  return d[0] * 10000 + d[1] * 100 + d[2];
 }
 
 /**
