@@ -19,12 +19,12 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
 
   signal input credentialRoot;
 
-  // Credential expiration date and merkle proof
+  // Credential expiration date
   signal input expirationDate; // unix timestamp
   signal input expirationDateKey;
   signal input expirationDateProof[credentialDepth];
 
-  // Birth date and merkle proof
+  // Birth date
   signal input birthDate; // Ymd format. Example: 20010101
   signal input birthDateKey;
   signal input birthDateProof[credentialDepth];
@@ -108,4 +108,4 @@ component main{public [
   issuerPk,
   issuerSignature,
   trusteePublicKey
-]} = AgePolicy(4, 3, 2);
+]} = AgePolicy(5, 3, 2);
