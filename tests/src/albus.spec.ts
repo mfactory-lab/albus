@@ -67,6 +67,7 @@ describe('Albus', async () => {
     ],
     privateSignals: [
       'birthDate',
+      'expirationDate',
       'userPrivateKey',
     ],
     publicSignals: [
@@ -74,7 +75,6 @@ describe('Albus', async () => {
       'minAge',
       'maxAge',
       'credentialRoot',
-      'expirationDate',
       'expirationDateKey',
       'expirationDateProof[4]',
       'birthDateKey',
