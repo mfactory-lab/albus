@@ -100,7 +100,7 @@ component main{public [
   minAge,
   maxAge,
   credentialRoot,
-  expirationDate,
+//  expirationDate,
   expirationDateKey,
   expirationDateProof,
   birthDateKey,
