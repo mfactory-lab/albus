@@ -86,9 +86,9 @@ describe('AlbusClient', async () => {
       'maxAge',
       'credentialRoot',
       'expirationDateKey',
-      'expirationDateProof[6]',
+      'expirationDateProof[5]',
       'birthDateKey',
-      'birthDateProof[6]',
+      'birthDateProof[5]',
       'issuerPk[2]',
       'issuerSignature[3]',
       'trusteePublicKey[3][2]',
@@ -122,7 +122,7 @@ describe('AlbusClient', async () => {
     countryOfBirth: 'MNE',
   }, {
     issuerSecretKey: payerKeypair.secretKey,
-    validUntil: now + 86400, // 1 day
+    // validUntil: now + 86400, // 1 day
   })
 
   it('can packPubkey and unpackPubkey', async () => {
