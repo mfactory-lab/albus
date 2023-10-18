@@ -48,7 +48,7 @@ pub struct AlbusCompliant<'a, 'info> {
     proof_request: &'a AccountInfo<'info>,
     /// (optional) Proof request owner address
     proof_request_owner: Option<Pubkey>,
-    /// Compliant policy address
+    /// (optional) Policy address
     policy: Option<Pubkey>,
 }
 
@@ -164,20 +164,20 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
 }
 
 #[repr(u8)]
-#[derive(Default, Eq, PartialEq, Clone)]
+pub enum VerificationError {
+    NotVerified,
+    Expired,
+    Pending,
+    Rejected,
+}
+
+#[repr(u8)]
+#[derive(Default, Debug, Eq, PartialEq, Clone)]
 pub enum ProofRequestStatus {
     #[default]
     Pending,
     Proved,
     Verified,
-    Rejected,
-}
-
-#[repr(u8)]
-pub enum VerificationError {
-    NotVerified,
-    Expired,
-    Pending,
     Rejected,
 }
 
@@ -348,20 +348,20 @@ mod test {
         fn build(&mut self) -> AccountInfo {
             self._data = [
                 PROOF_REQUEST_DISCRIMINATOR,
-                &Pubkey::new_unique().to_bytes(),
+                &Pubkey::new_unique().to_bytes(), //service
                 &self.policy.to_bytes(),
-                &Pubkey::new_unique().to_bytes(),
+                &Pubkey::new_unique().to_bytes(), // circuit
                 &self.owner.to_bytes(),
-                &0i64.to_le_bytes(),
+                &0u64.to_le_bytes(),
                 &0i64.to_le_bytes(),
                 &self.expired_at.to_le_bytes(),
                 &0i64.to_le_bytes(),
                 &0i64.to_le_bytes(),
                 &0i64.to_le_bytes(),
-                &self.status.to_le_bytes(),
-                &0u8.to_le_bytes(),
-                &[0u8; 256],
-                &[0u8; 28],
+                &[self.status],
+                &0u8.to_le_bytes(), // bump
+                &[0u8; 256],        // proof
+                &[0u8; 28],         // public_inputs
             ]
             .into_iter()
             .flatten()
