@@ -278,7 +278,7 @@ request.command('show')
   .argument('<address>', 'Proof Request address')
   .action(actions.request.show)
 
-request.command('find')
+request.command('find', { isDefault: true })
   .description('Find proof requests')
   .option('--serviceCode <string>', '(optional) service code')
   .option('--circuit <pubkey>', '(optional) circuit address')
@@ -314,6 +314,11 @@ admin.command('fund')
 admin.command('clear')
   .description('Clear all accounts')
   .action(actions.admin.clear)
+
+admin.command('close')
+  .argument('<pubkey>', 'Account address')
+  .description('Close and account')
+  .action(actions.admin.close)
 
 // ------------------------------------------
 

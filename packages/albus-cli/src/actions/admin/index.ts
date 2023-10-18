@@ -27,8 +27,7 @@
  */
 
 import { createAdminCloseAccountInstruction } from '@mfactory-lab/albus-sdk'
-import type { PublicKey } from '@solana/web3.js'
-import { Transaction } from '@solana/web3.js'
+import { PublicKey, Transaction } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
@@ -47,6 +46,11 @@ export async function clear(_opts: any) {
   for (const { pubkey } of accounts) {
     await closeAccount(pubkey)
   }
+}
+
+export async function close(address: string) {
+  await closeAccount(new PublicKey(address))
+  log.info('Done')
 }
 
 async function closeAccount(pubkey: PublicKey) {
