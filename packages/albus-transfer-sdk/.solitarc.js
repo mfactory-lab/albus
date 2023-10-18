@@ -1,10 +1,10 @@
 const os = require('os')
 const path = require('path')
 
-const programName = 'verified_transfer'
+const programName = 'albus_transfer'
 const programId = 'ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2'
 
-const programDir = path.join(__dirname, '..', '..', 'programs', 'verified_transfer')
+const programDir = path.join(__dirname, '..', '..', 'programs', 'albus-transfer')
 const idlGenerator = 'anchor'
 const idlDir = path.join(__dirname, 'idl')
 const sdkDir = path.join(__dirname, 'src', 'generated')

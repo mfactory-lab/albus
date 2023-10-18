@@ -1,6 +1,6 @@
 {
-  "version": "0.0.1",
-  "name": "verified_transfer",
+  "version": "0.0.2",
+  "name": "albus_transfer",
   "instructions": [
     {
       "name": "transfer",
@@ -16,7 +16,7 @@
           "isSigner": false
         },
         {
-          "name": "zkpRequest",
+          "name": "proofRequest",
           "isMut": false,
           "isSigner": false
         },
@@ -62,7 +62,7 @@
           "isSigner": false
         },
         {
-          "name": "zkpRequest",
+          "name": "proofRequest",
           "isMut": false,
           "isSigner": false
         },
@@ -88,7 +88,7 @@
   "metadata": {
     "address": "ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2",
     "origin": "anchor",
-    "binaryVersion": "0.27.0",
-    "libVersion": "0.27.0"
+    "binaryVersion": "0.29.0",
+    "libVersion": "0.29.0"
   }
 }
