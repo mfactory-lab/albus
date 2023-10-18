@@ -1,8 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-#  "programs/*",
-  "programs/albus",
+  "programs/*",
   "packages/solana-verifier",
   "packages/groth16-solana",
 ]

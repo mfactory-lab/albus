@@ -97,10 +97,19 @@ dependencies = [
 
 [[package]]
 name = "albus-solana-verifier"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "arrayref",
  "solana-program",
+]
+
+[[package]]
+name = "albus-transfer"
+version = "0.0.2"
+dependencies = [
+ "albus-solana-verifier",
+ "anchor-lang",
+ "anchor-spl",
 ]
 
 [[package]]
@@ -243,6 +252,7 @@ dependencies = [
  "solana-program",
  "spl-associated-token-account",
  "spl-token",
+ "spl-token-2022",
 ]
 
 [[package]]

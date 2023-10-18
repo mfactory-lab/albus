@@ -31,10 +31,10 @@ import { Buffer } from 'node:buffer'
 import { VerifiedStakeClient } from '@albus/verified-stake-sdk'
 import { VerifiedSwapClient } from '@albus/verified-swap-sdk'
 import { VerifiedStakePoolClient } from '@albus/verified-stake-pool-sdk'
-import { VerifiedTransferClient } from '@albus/verified-transfer-sdk'
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
+import { VerifiedTransferClient } from '../../albus-transfer-sdk'
 import { clusterUrl } from './utils'
 
 export interface Context {

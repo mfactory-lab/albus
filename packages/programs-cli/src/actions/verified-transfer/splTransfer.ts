@@ -55,7 +55,7 @@ export async function splTransfer(opts: Opts) {
       receiver,
       source: source.address,
       tokenMint,
-      zkpRequest: new PublicKey(opts.zkp),
+      proofRequest: new PublicKey(opts.zkp),
     })
 
     log.info(`Signature: ${signature}`)
