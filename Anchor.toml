@@ -8,7 +8,8 @@ skip-lint = false
 
 [workspace]
 members = [
-  "programs/*",
+  "programs/albus",
+  "programs/albus-transfer",
 ]
 
 [provider]
