@@ -31,7 +31,8 @@ export default {
   nftExternalUrl: 'https://albus.finance',
   nftSymbol: 'ALBUS',
   nftCreators: [],
-  logoUrl: 'https://arweave.net/hcbme7qK8G-aos2akxPub-nm7XGNaZ0Tr-sh7syqWxk',
+  // logoUrl: 'https://arweave.net/hcbme7qK8G-aos2akxPub-nm7XGNaZ0Tr-sh7syqWxk',
+  logoUrl: 'https://arweave.net/9vyw4mykUuxC9K0exvp4_pnG1xJdMbMGE4fFk6cuwzc',
   issuerDid: 'did:web:albus.finance',
   issuerSecretKey: [
     // 5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH

@@ -26,14 +26,24 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as admin from './admin'
-export * as asset from './asset'
-export * as circuit from './circuit'
-export * as did from './did'
-export * as identity from './identity'
-export * as test from './test'
-export * as vc from './vc'
-export * as policy from './policy'
-export * as request from './request'
-export * as service from './service'
-export * as trustee from './trustee'
+import fs from 'node:fs'
+import path from 'node:path'
+import { toMetaplexFile } from '@metaplex-foundation/js'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+interface Opts {
+  name?: string
+}
+
+export async function uploadFile(file: string, opts: Opts) {
+  const { metaplex } = useContext()
+
+  const buffer = fs.readFileSync(file)
+  const fileName = opts.name ?? path.basename(file)
+
+  log.info(`Uploading ${fileName}...`)
+  const uri = await metaplex.storage().upload(toMetaplexFile(buffer, fileName))
+
+  log.info(`Uri: ${uri}`)
+}

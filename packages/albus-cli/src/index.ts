@@ -257,7 +257,7 @@ trustee.command('all', { isDefault: true })
   .action(actions.trustee.showAll)
 
 // ------------------------------------------
-// Proof Requests
+// ProofRequest Management
 // ------------------------------------------
 
 const request = cli.command('request')
@@ -300,6 +300,17 @@ request.command('verify')
   .description('Verify Proof Request')
   .argument('<pubkey>', 'Proof Request address')
   .action(actions.request.verifyRequest)
+
+// ------------------------------------------
+// Asset Management
+// ------------------------------------------
+
+const asset = cli.command('asset')
+
+asset.command('upload')
+  .argument('<PATH>', 'Path to the file')
+  .description('Upload file')
+  .action(actions.asset.uploadFile)
 
 // ------------------------------------------
 // Admin Management
