@@ -28,6 +28,7 @@
 
 use std::str::FromStr;
 
+use arrayref::array_ref;
 use arrayref::array_refs;
 use solana_program::{
     account_info::AccountInfo,
@@ -39,19 +40,30 @@ use solana_program::{
     sysvar::Sysvar,
 };
 
-pub const ALBUS_PROGRAM_ID: &str = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz";
+pub const ALBUS_PROGRAM_ID: &str = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL";
 pub const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
 /// Returns the address of the Albus program.
+#[inline]
 pub fn program_id() -> Pubkey {
     Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap()
 }
 
 #[repr(u8)]
+#[derive(Default, Eq, PartialEq, Clone)]
 pub enum ProofRequestStatus {
+    #[default]
     Pending,
     Proved,
     Verified,
+    Rejected,
+}
+
+#[repr(u8)]
+pub enum VerificationError {
+    NotVerified,
+    Expired,
+    Pending,
     Rejected,
 }
 
@@ -73,24 +85,22 @@ pub fn check_compliant(
     proof_request: &AccountInfo,
     proof_request_owner: Option<Pubkey>,
 ) -> Result<(), ProgramError> {
-    let data = &proof_request
-        .data
-        .take()
-        .try_into()
-        .map_err(|_| ProgramError::InvalidAccountData)?;
-
-    let albus_program_id =
-        Pubkey::from_str(ALBUS_PROGRAM_ID).map_err(|_| ProgramError::IncorrectProgramId)?;
-
-    // Assert the account is owned by albus program
     if sol_memcmp(
         proof_request.owner.as_ref(),
-        albus_program_id.as_ref(),
+        program_id().as_ref(),
         PUBKEY_BYTES,
     ) != 0
     {
         return Err(ProgramError::IllegalOwner);
     }
+
+    if proof_request.data_is_empty() {
+        msg!("Error: ProofRequest account is empty");
+        return Err(ProgramError::UninitializedAccount);
+    }
+
+    let data = proof_request.data.borrow();
+    let data = array_ref![data, 0, 186];
 
     let (
         discriminator,
@@ -103,20 +113,21 @@ pub fn check_compliant(
         expired_at,
         _verified_at,
         _proved_at,
+        _retention_end_date,
         [status],
         _bump,
-        _vp_uri,
-    ) = array_refs![data, 8, 32, 32, 32, 32, 8, 8, 8, 8, 8, 1, 1, 200];
+        // _proof,
+        // _public_inputs,
+    ) = array_refs![data, 8, 32, 32, 32, 32, 8, 8, 8, 8, 8, 8, 1, 1];
 
     if discriminator != PROOF_REQUEST_DISCRIMINATOR {
-        msg!("Error: Invalid account discriminator!");
+        msg!("Error: Invalid account discriminator");
         return Err(ProgramError::InvalidAccountData);
     }
 
-    // Checks if the provided `zkp_request_owner` is equal to zkp request's `owner`.
     if let Some(key) = proof_request_owner {
         if sol_memcmp(key.as_ref(), owner, PUBKEY_BYTES) != 0 {
-            msg!("Error: Invalid request owner!");
+            msg!("Error: Invalid request owner");
             return Err(ProgramError::InvalidAccountData);
         }
     }
@@ -127,25 +138,25 @@ pub fn check_compliant(
 
     if expired_at > 0 && expired_at < timestamp {
         msg!("Expired!");
-        return Err(ProgramError::Custom(1));
+        return Err(ProgramError::Custom(VerificationError::Expired as u32));
     }
 
     match status {
+        ProofRequestStatus::Pending => {
+            msg!("Error: Proof request is pending");
+            Err(ProgramError::Custom(VerificationError::Pending as u32))
+        }
+        ProofRequestStatus::Proved => {
+            msg!("Error: Proof request is not verified");
+            Err(ProgramError::Custom(VerificationError::NotVerified as u32))
+        }
+        ProofRequestStatus::Rejected => {
+            msg!("Error: Proof request is rejected");
+            Err(ProgramError::Custom(VerificationError::Rejected as u32))
+        }
         ProofRequestStatus::Verified => {
             msg!("Verified!");
             Ok(())
-        }
-        ProofRequestStatus::Proved => {
-            msg!("Error: ZKP request is proved");
-            Err(ProgramError::Custom(2))
-        }
-        ProofRequestStatus::Pending => {
-            msg!("Error: ZKP request is pending");
-            Err(ProgramError::Custom(3))
-        }
-        ProofRequestStatus::Rejected => {
-            msg!("Error: ZKP request is rejected");
-            Err(ProgramError::Custom(4))
         }
     }
 }
@@ -217,7 +228,10 @@ mod test {
             0,
         );
 
-        assert_eq!(check_compliant(&acc, None), Err(ProgramError::Custom(1)));
+        assert_eq!(
+            check_compliant(&acc, None),
+            Err(ProgramError::Custom(VerificationError::Expired as u32))
+        );
     }
 
     #[test]
@@ -263,9 +277,11 @@ mod test {
             &expired_at.to_le_bytes(),
             &0i64.to_le_bytes(),
             &0i64.to_le_bytes(),
+            &0i64.to_le_bytes(),
             &(status as u8).to_le_bytes(),
             &0u8.to_le_bytes(),
-            &[0u8; 200],
+            &[0u8; 256],
+            &[0u8; 28],
         ]
         .into_iter()
         .flatten()

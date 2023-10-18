@@ -3,7 +3,7 @@ resolver = "2"
 members = [
 #  "programs/*",
   "programs/albus",
-#  "packages/solana-verifier",
+  "packages/solana-verifier",
   "packages/groth16-solana",
 ]
 

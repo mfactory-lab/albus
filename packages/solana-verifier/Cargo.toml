@@ -10,4 +10,4 @@ repository = "https://github.com/mfactory-lab/albus"
 
 [dependencies]
 arrayref = "^0.3.7"
-solana-program = "^1.14"
+solana-program = "^1.16"
