@@ -26,10 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Keypair, PublicKey } from '@solana/web3.js'
+import { BN } from '@coral-xyz/anchor'
+import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
+import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
 import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../packages/albus-sdk/src'
+import { AlbusTransferClient } from '../../packages/albus-transfer-sdk'
 import { airdrop, assertErrorCode, loadFixture, newProvider, payerKeypair, provider } from './utils'
 
 describe('Albus', async () => {
@@ -156,6 +159,8 @@ describe('Albus', async () => {
 
         // console.log(`trustee #${i}`, address.toString())
 
+        assert.equal(address.toString(), client.pda.trustee(key)[0].toString())
+
         const trustee = await newClient.trustee.load(address)
 
         const pk = Albus.zkp.unpackPubkey(Uint8Array.from(trustee.key))
@@ -231,9 +236,8 @@ describe('Albus', async () => {
     try {
       const [serviceProvider] = client.pda.serviceProvider(serviceCode)
       const data = {
-        trustees: trustees.map(kp => client.pda.trustee(
-          Albus.zkp.generateEncryptionKey(kp).key,
-        )[0]).slice(0, 3),
+        trustees: trustees.slice(0, 3)
+          .map(kp => client.pda.trustee(Albus.zkp.generateEncryptionKey(kp).key)[0]),
         serviceProvider,
       }
       const { signature } = await client.service.update(data)
@@ -312,6 +316,66 @@ describe('Albus', async () => {
     assert.ok(data.publicInputs.length > 0)
   })
 
+  it('can verify proof request', async () => {
+    const [service] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(service, policyCode)
+    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+    const res = await client.proofRequest.verify({ proofRequest })
+    assert.ok(res)
+  })
+
+  describe('AlbusTransfer', () => {
+    const albusTransferClient = new AlbusTransferClient(provider)
+    const receiver = Keypair.generate()
+
+    const [service] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(service, policyCode)
+    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+
+    it('can transfer SOL', async () => {
+      await albusTransferClient.transfer({
+        amount: new BN(LAMPORTS_PER_SOL),
+        receiver: receiver.publicKey,
+        proofRequest,
+      })
+    })
+
+    it('can transfer token', async () => {
+      const tokenMint = await createMint(
+        provider.connection,
+        payerKeypair,
+        payerKeypair.publicKey,
+        null,
+        9,
+      )
+
+      const source = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        payerKeypair,
+        tokenMint,
+        payerKeypair.publicKey,
+      )
+
+      const destination = await getOrCreateAssociatedTokenAccount(
+        provider.connection,
+        payerKeypair,
+        tokenMint,
+        receiver.publicKey,
+      )
+
+      await mintTo(provider.connection, payerKeypair, tokenMint, source.address, payerKeypair.publicKey, 100)
+
+      await albusTransferClient.transferToken({
+        destination: destination.address,
+        source: source.address,
+        tokenMint,
+        amount: new BN(10),
+        receiver: receiver.publicKey,
+        proofRequest,
+      })
+    })
+  })
+
   it('can change proof request status', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(service, policyCode)
@@ -336,81 +400,74 @@ describe('Albus', async () => {
     }
   })
 
-  it('can verify proof request', async () => {
-    const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(service, policyCode)
-    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
-    const res = await client.proofRequest.verify({ proofRequest })
-    assert.ok(res)
-  })
+  describe('Investigation', () => {
+    let investigationAddress: PublicKey
 
-  let investigationAddress: PublicKey
+    it('can create investigation request', async () => {
+      const newClient = new AlbusClient(newProvider(investigator))
 
-  it('can create investigation request', async () => {
-    const newClient = new AlbusClient(newProvider(investigator))
+      const [service] = client.pda.serviceProvider(serviceCode)
+      const [policy] = client.pda.policy(service, policyCode)
+      const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
-    const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(service, policyCode)
-    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
-
-    try {
-      const { address, selectedTrustees } = await newClient.investigation.create({
-        proofRequest,
-        // encryptionKey: ...
-      })
-      investigationAddress = address
-      const investigation = await newClient.investigation.load(address)
-      assert.equal(investigation.authority.toString(), investigator.publicKey.toString())
-      assert.equal(investigation.encryptionKey.toString(), investigator.publicKey.toString())
-      assert.equal(investigation.proofRequest.toString(), proofRequest.toString())
-      // assert.equal(investigation.proofRequestOwner.toString(), proofRequest.toString())
-      assert.equal(investigation.serviceProvider.toString(), service.toString())
-      assert.equal(investigation.requiredShareCount, 2)
-      assert.equal(investigation.status, InvestigationStatus.Pending)
-
-      let idx = 1
-      for (const selectedTrustee of selectedTrustees) {
-        const [shareAddr] = client.pda.investigationRequestShare(address, selectedTrustee)
-        const share = await newClient.investigation.loadShare(shareAddr)
-        assert.deepEqual(share.investigationRequest, address)
-        assert.deepEqual(share.proofRequestOwner, investigation.proofRequestOwner)
-        assert.equal(share.index, idx)
-        assert.equal(share.status, 0)
-        assert.ok(Array.from(share.share).length === 0)
-        idx++
-      }
-    } catch (e) {
-      console.log(e)
-      assert.ok(false)
-    }
-  })
-
-  it('can reveal secret key', async () => {
-    if (!investigationAddress) {
-      throw new Error('No investigation request found')
-    }
-    try {
-      for (let i = 0; i < 2; i++) {
-        const { secretShare } = await client.investigation.revealShare({
-          investigationRequest: investigationAddress,
-          encryptionKey: trustees[i]!.secretKey,
-          index: i + 1,
+      try {
+        const { address, selectedTrustees } = await newClient.investigation.create({
+          proofRequest,
+          // encryptionKey: ...
         })
-        console.log('secretShare', secretShare)
-      }
-    } catch (e) {
-      console.log(e)
-      assert.ok(false)
-    }
-  })
+        investigationAddress = address
+        const investigation = await newClient.investigation.load(address)
+        assert.equal(investigation.authority.toString(), investigator.publicKey.toString())
+        assert.equal(investigation.encryptionKey.toString(), investigator.publicKey.toString())
+        assert.equal(investigation.proofRequest.toString(), proofRequest.toString())
+        // assert.equal(investigation.proofRequestOwner.toString(), proofRequest.toString())
+        assert.equal(investigation.serviceProvider.toString(), service.toString())
+        assert.equal(investigation.requiredShareCount, 2)
+        assert.equal(investigation.status, InvestigationStatus.Pending)
 
-  it('can reconstruct secret key and decrypt data', async () => {
-    const result = await client.investigation.decryptData({
-      investigationRequest: investigationAddress,
-      encryptionKey: investigator.secretKey,
+        let idx = 1
+        for (const selectedTrustee of selectedTrustees) {
+          const [shareAddr] = client.pda.investigationRequestShare(address, selectedTrustee)
+          const share = await newClient.investigation.loadShare(shareAddr)
+          assert.deepEqual(share.investigationRequest, address)
+          assert.deepEqual(share.proofRequestOwner, investigation.proofRequestOwner)
+          assert.equal(share.index, idx)
+          assert.equal(share.status, 0)
+          assert.ok(Array.from(share.share).length === 0)
+          idx++
+        }
+      } catch (e) {
+        console.log(e)
+        assert.ok(false)
+      }
     })
-    assert.equal(String(result.claims.birthDate.value), credential.credentialSubject.birthDate)
-    console.log(result)
+
+    it('can reveal secret key', async () => {
+      if (!investigationAddress) {
+        throw new Error('No investigation request found')
+      }
+      try {
+        for (let i = 0; i < 2; i++) {
+          const { secretShare } = await client.investigation.revealShare({
+            investigationRequest: investigationAddress,
+            encryptionKey: trustees[i]!.secretKey,
+          })
+          assert.ok(secretShare.length > 0)
+        }
+      } catch (e) {
+        console.log(e)
+        assert.ok(false)
+      }
+    })
+
+    it('can reconstruct secret key and decrypt data', async () => {
+      const result = await client.investigation.decryptData({
+        investigationRequest: investigationAddress,
+        encryptionKey: investigator.secretKey,
+      })
+      assert.equal(String(result.claims.birthDate.value), credential.credentialSubject.birthDate)
+      console.log(result)
+    })
   })
 
   it('can delete proof request', async () => {

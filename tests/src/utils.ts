@@ -52,23 +52,13 @@ export function netMetaplex(payerKeypair: Keypair) {
     }))
 }
 
-export function newProvider(payerKeypair: Keypair) {
+export function newProvider(keypair: Keypair) {
   const opts = AnchorProvider.defaultOptions()
   return new AnchorProvider(
     new Connection('http://localhost:8899', opts),
-    new Wallet(payerKeypair),
+    new Wallet(keypair),
     opts,
   )
-}
-
-export async function mintNFT(metaplex: Metaplex, symbol: string) {
-  const { nft } = await metaplex.nfts().create({
-    uri: 'http://localhost/metadata.json',
-    name: 'ALBUS NFT',
-    symbol,
-    sellerFeeBasisPoints: 500,
-  })
-  return nft
 }
 
 export async function airdrop(addr: PublicKeyInitData, amount = 10) {
