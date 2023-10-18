@@ -47,7 +47,7 @@ pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()>
     policy.expiration_period = data.expiration_period;
     policy.retention_period = data.retention_period;
     policy.created_at = timestamp;
-    policy.bump = ctx.bumps["policy"];
+    policy.bump = ctx.bumps.policy;
 
     Ok(())
 }

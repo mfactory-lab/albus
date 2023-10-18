@@ -47,7 +47,7 @@ pub fn handler(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<(
     circuit.outputs = data.outputs;
     circuit.private_signals = data.private_signals;
     circuit.public_signals = data.public_signals;
-    circuit.bump = ctx.bumps["circuit"];
+    circuit.bump = ctx.bumps.circuit;
 
     Ok(())
 }

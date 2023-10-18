@@ -35,7 +35,7 @@ use mpl_token_metadata::instructions::{BurnV1CpiBuilder, ThawDelegatedAccountCpi
 
 pub fn handler(ctx: Context<RevokeCredential>) -> Result<()> {
     // assert_authorized(ctx.accounts.authority.key)?;
-    let signer_seeds = [ID.as_ref(), &[ctx.bumps["albus_authority"]]];
+    let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
 
     ThawDelegatedAccountCpiBuilder::new(&ctx.accounts.metadata_program)
         .mint(&ctx.accounts.mint)

@@ -37,7 +37,7 @@ use mpl_token_metadata::types::{Creator, Data};
 pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
     assert_authorized(ctx.accounts.authority.key)?;
 
-    let signer_seeds = [ID.as_ref(), &[ctx.bumps["albus_authority"]]];
+    let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
 
     UpdateV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .metadata(&ctx.accounts.metadata_account)

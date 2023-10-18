@@ -26,9 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-// TODO: fixed in https://github.com/coral-xyz/anchor/pull/2600
-#![allow(clippy::result_large_err)]
-
 mod constants;
 mod events;
 mod instructions;
@@ -91,8 +88,8 @@ pub mod albus {
         create_service_provider::handler(ctx, data)
     }
 
-    pub fn update_service_provider(
-        ctx: Context<UpdateServiceProvider>,
+    pub fn update_service_provider<'info>(
+        ctx: Context<'_, '_, 'info, 'info, UpdateServiceProvider<'info>>,
         data: UpdateServiceProviderData,
     ) -> Result<()> {
         update_service_provider::handler(ctx, data)
@@ -169,7 +166,7 @@ pub mod albus {
     // Investigation
 
     pub fn create_investigation_request<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateInvestigationRequest<'info>>,
+        ctx: Context<'_, '_, 'info, 'info, CreateInvestigationRequest<'info>>,
         data: CreateInvestigationRequestData,
     ) -> Result<()> {
         create_investigation_request::handler(ctx, data)

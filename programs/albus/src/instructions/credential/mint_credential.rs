@@ -40,7 +40,7 @@ use mpl_token_metadata::types::{PrintSupply, TokenStandard};
 pub fn handler(ctx: Context<MintCredential>, _data: MintCredentialData) -> Result<()> {
     let name = "Albus Verifiable Credential";
 
-    let signer_seeds = [ID.as_ref(), &[ctx.bumps["albus_authority"]]];
+    let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
 
     CreateV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .name(name.into())
