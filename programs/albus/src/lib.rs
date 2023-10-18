@@ -35,10 +35,10 @@ mod utils;
 use anchor_lang::prelude::*;
 use instructions::*;
 
-#[cfg(feature = "devnet")]
-declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
-
-#[cfg(not(feature = "devnet"))]
+// #[cfg(feature = "devnet")]
+// declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
+//
+// #[cfg(not(feature = "devnet"))]
 declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
 
 #[program]

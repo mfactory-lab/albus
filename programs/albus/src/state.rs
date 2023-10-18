@@ -81,6 +81,17 @@ impl From<VerificationKey> for VK {
     }
 }
 
+// #[account]
+// #[derive(InitSpace)]
+// pub struct Issuer {
+//     #[max_len(32)]
+//     pub name: String,
+//     pub key: [u8; 32],
+//     pub authority: Pubkey,
+//     /// PDA bump.
+//     pub bump: u8,
+// }
+
 #[account]
 #[derive(InitSpace)]
 pub struct Circuit {
@@ -195,7 +206,7 @@ impl Policy {
 pub struct PolicyRule {
     #[max_len(32)]
     pub key: String,
-    pub value: u32, // TODO: support > u32 ?
+    pub value: u32, // TODO: [u8; 32]
 }
 
 impl PolicyRule {

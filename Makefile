@@ -26,7 +26,7 @@ bump: ## Bump program version
 build:
 ifdef NETWORK
 	@echo "> Building programs for $(NETWORK)"
-	anchor build -p $(PROGRAM) --arch sbf -- --features $(NETWORK)
+	anchor build -p $(PROGRAM) --arch sbf
 else
 	anchor build -p $(PROGRAM) --arch sbf
 endif

@@ -26,6 +26,9 @@ albus_transfer = "J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c"
 albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
 albus_transfer = "J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c"
 
+[programs.mainnet]
+albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
+
 [registry]
 url = "https://api.apr.dev"
 

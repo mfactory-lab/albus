@@ -17,7 +17,7 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 verify-on-chain = ["groth16-solana"]
 default = ["verify-on-chain"]
-devnet = []
+#devnet = []
 
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
