@@ -27,7 +27,7 @@ template AttendanceProof(credentialDepth) {
   component eq = IsEqual();
   eq.in[0] <-- dateToNum(timestampToDate(date));
   eq.in[1] <-- dateToNum(timestampToDate(expectedDate));
-  eq.out === 1;
+  expectedDate * eq.out === expectedDate;
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();
