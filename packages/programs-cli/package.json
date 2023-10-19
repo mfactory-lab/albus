@@ -11,7 +11,7 @@
     "@albus/verified-stake-pool-sdk": "workspace:*",
     "@albus/verified-stake-sdk": "workspace:*",
     "@albus/verified-swap-sdk": "workspace:*",
-    "@albus/verified-transfer-sdk": "workspace:*",
+    "@mfactory-lab/albus-transfer-sdk": "workspace:*",
     "@solana/spl-token-swap": "^0.2.2",
     "commander": "^10.0.0",
     "chalk": "^4.1.2",
