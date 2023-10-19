@@ -151,7 +151,6 @@ pub mod albus {
         prove_proof_request::handler(ctx, data)
     }
 
-    #[cfg(feature = "verify-on-chain")]
     pub fn verify_proof_request(ctx: Context<VerifyProofRequest>) -> Result<()> {
         verify_proof_request::handler(ctx)
     }

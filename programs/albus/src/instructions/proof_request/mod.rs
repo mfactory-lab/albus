@@ -30,14 +30,10 @@ pub mod create_proof_request;
 pub mod delete_proof_request;
 pub mod prove_proof_request;
 pub mod update_proof_request;
-
-#[cfg(feature = "verify-on-chain")]
 pub mod verify_proof_request;
 
 pub use self::create_proof_request::*;
 pub use self::delete_proof_request::*;
 pub use self::prove_proof_request::*;
 pub use self::update_proof_request::*;
-
-#[cfg(feature = "verify-on-chain")]
 pub use self::verify_proof_request::*;
