@@ -32,16 +32,16 @@
     "@antfu/eslint-config": "^0.42.0",
     "@changesets/cli": "^2.26.0",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
-    "@rollup/plugin-inject": "^5.0.3",
+    "@rollup/plugin-inject": "^5.0.5",
     "@types/node": "^20.0.0",
-    "@vitest/ui": "^0.34.4",
+    "@vitest/ui": "^0.34.6",
     "buffer": "^6.0.3",
-    "eslint": "^8.49.0",
+    "eslint": "^8.51.0",
     "syncpack": "^11.2.1",
-    "typescript": "5.0.4",
-    "vite": "^4.4.9",
-    "vite-plugin-dts": "^3.5.3",
-    "vitest": "0.34.3"
+    "typescript": "5.2.2",
+    "vite": "^4.5.0",
+    "vite-plugin-dts": "^3.6.0",
+    "vitest": "0.34.6"
   },
   "pnpm": {
     "peerDependencyRules": {
