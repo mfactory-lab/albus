@@ -54,6 +54,7 @@ type ClaimsTree = Awaited<ReturnType<typeof Albus.credential.createClaimsTree>>
  */
 export class ProofInputBuilder<T = Record<string, any>> {
   private claimsTree?: ClaimsTree
+  private claimsTreeDepth?: number
   private userPrivateKey?: bigint | string
   private trusteePublicKey?: (bigint | string)[][]
   private circuit?: Circuit
@@ -95,10 +96,23 @@ export class ProofInputBuilder<T = Record<string, any>> {
     return this
   }
 
+  withClaimsTreeDepth(value?: number) {
+    this.claimsTreeDepth = value
+    return this
+  }
+
   async build() {
     await this.initClaimsTree()
     await Promise.all([this.applyPrivateSignals(), this.applyPublicSignals()])
     return this
+  }
+
+  private get publicSignals() {
+    return (this.circuit?.publicSignals ?? []).map(parseSignal)
+  }
+
+  private get privateSignals() {
+    return (this.circuit?.privateSignals ?? []).map(parseSignal)
   }
 
   /**
@@ -107,7 +121,11 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * @throws {Error} Throws an error if the claims tree initialization fails.
    */
   async initClaimsTree() {
-    this.claimsTree = await Albus.credential.createClaimsTree(this.credential.credentialSubject)
+    const treeDepth = this.claimsTreeDepth
+        // try to find merkle proof in the circuit public signals and get the merkle tree depth
+        ?? this.publicSignals.find(s => s?.name.endsWith('Proof') && s?.size > 1)?.size
+
+    this.claimsTree = await Albus.credential.createCredentialTree(this.credential, treeDepth)
   }
 
   /**
@@ -129,7 +147,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
     if (!this.claimsTree) {
       throw new Error('claims tree is not initialized')
     }
-    for (const signal of this.circuit?.privateSignals ?? []) {
+    for (const signal of this.privateSignals) {
       // try to apply known signals
       if (this.applySignal(signal)) {
         continue
@@ -143,7 +161,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * Generate proof input data based on public signals defined in the circuit and policy rules.
    */
   private async applyPublicSignals() {
-    for (const signal of this.circuit?.publicSignals ?? []) {
+    for (const signal of this.publicSignals) {
       // try to apply known signal
       if (this.applySignal(signal)) {
         continue
@@ -163,18 +181,15 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * @param signal - The signal to apply.
    * @returns {boolean} A boolean indicating whether the signal was successfully applied.
    */
-  private applyPolicySignal(signal: string): boolean {
-    const sig = parseSignal(signal)
-    if (sig !== null) {
-      const rules = this.policy?.rules
-        ?.filter(r => r.key === sig.name || r.key.startsWith(`${sig.name}.`)) ?? []
-      if (rules.length > 1 && sig.size > 1) {
-        this.data[sig.name] = rules.map(r => r.value)
-        return true
-      } else if (rules[0] !== undefined) {
-        this.data[sig.name] = rules[0].value
-        return true
-      }
+  private applyPolicySignal(signal: ParseSignalResult): boolean {
+    const rules = this.policy?.rules
+      ?.filter(r => r.key === signal.name || r.key.startsWith(`${signal.name}.`)) ?? []
+    if (rules.length > 1 && signal.size > 1) {
+      this.data[signal.name] = rules.map(r => r.value)
+      return true
+    } else if (rules[0] !== undefined) {
+      this.data[signal.name] = rules[0].value
+      return true
     }
     return false
   }
@@ -187,16 +202,16 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * @returns {Promise<boolean>} A boolean indicating whether the signal was successfully applied.
    * @throws An error if the claims tree is not initialized or if the signal is not found in the credential and `throwIfUnknown` is true.
    */
-  private async applyCredentialSignal(signal: string, throwIfUnknown = false): Promise<boolean> {
+  private async applyCredentialSignal(signal: ParseSignalResult, throwIfUnknown = false): Promise<boolean> {
     if (!this.claimsTree) {
       throw new Error('claims tree is not initialized')
     }
-    const claim = this.normalizeClaimKey(signal)
+    const claim = this.normalizeClaimKey(signal.name)
     try {
       const proof = await this.claimsTree.get(claim)
-      this.data[signal] = proof.value
-      this.data[`${signal}Key`] = proof.key
-      this.data[`${signal}Proof`] = proof.siblings
+      this.data[signal.name] = proof.value
+      this.data[`${signal.name}Key`] = proof.key
+      this.data[`${signal.name}Proof`] = proof.siblings
       return true
     } catch (e) {
       if (throwIfUnknown) {
@@ -209,15 +224,11 @@ export class ProofInputBuilder<T = Record<string, any>> {
   /**
    * Apply a known signal, such as TrusteePublicKey, UserPrivateKey, CurrentDate, etc.
    *
-   * @param {string} signal - The name of the known signal to apply.
+   * @param {ParseSignalResult} signal - The name of the known signal to apply.
    * @returns {boolean} True if the signal was successfully applied, false otherwise.
    */
-  private applySignal(signal: string): boolean {
-    const sig = parseSignal(signal)
-    if (!sig) {
-      return false
-    }
-    const { name, size } = sig
+  private applySignal(signal: ParseSignalResult): boolean {
+    const { name, size } = signal
     switch (name) {
       case KnownSignals.TrusteePublicKey:
         if (this.trusteePublicKey === undefined) {
@@ -293,10 +304,7 @@ export function getSignals(symbols: string[], inputs: bigint[]): Record<string, 
  * @param {string} signal - The signal string to parse.
  * @returns {ParseSignalResult | null} An object containing the name, size, and next signal, or null if the signal is invalid.
  */
-export function parseSignal(signal: string): ParseSignalResult | null {
-  if (signal.length === 0) {
-    return null
-  }
+export function parseSignal(signal: string): ParseSignalResult {
   const open = signal.indexOf('[')
   const close = signal.indexOf(']')
   if (open !== -1 && close !== -1 && open < close) {
