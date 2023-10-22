@@ -3,7 +3,7 @@
   "version": "0.0.6",
   "private": true,
   "description": "Albus Transfer SDK",
-  "type": "module",
+  "_type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
@@ -26,7 +26,7 @@
     "dev": "vite build --watch",
     "build": "vite build",
     "release": "release-it --ci",
-    "generate": "DEBUG='(solita|rustbin):(info|error)' solita"
+    "generate": "DEBUG='(solita|rustbin):(info|error)' solita && eslint --fix --ext .ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
