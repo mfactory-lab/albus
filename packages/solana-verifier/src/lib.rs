@@ -27,7 +27,7 @@
  */
 
 #[cfg(feature = "cpi")]
-mod cpi_utils;
+pub mod cpi_utils;
 
 #[cfg(feature = "cpi")]
 use cpi_utils::{cpi_verify_call, VerificationCpiCtx};
