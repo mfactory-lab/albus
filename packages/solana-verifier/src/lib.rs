@@ -26,6 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+#[cfg(feature = "cpi")]
+mod cpi_utils;
+
+#[cfg(feature = "cpi")]
+use cpi_utils::{cpi_verify_call, VerificationCpiCtx};
+
 use std::str::FromStr;
 
 use arrayref::array_ref;
@@ -69,6 +75,14 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
     pub fn with_user(mut self, addr: Pubkey) -> Self {
         self.proof_request_owner = Some(addr);
         self
+    }
+
+    #[cfg(feature = "cpi")]
+    pub fn call_verification(&self, ctx: VerificationCpiCtx) -> Result<(), ProgramError> {
+        match cpi_verify_call(ctx) {
+            Ok(()) => Ok(()),
+            Err(anchor_error) => Err(anchor_error.into()),
+        }
     }
 
     pub fn program_id() -> Pubkey {

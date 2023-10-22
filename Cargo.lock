@@ -99,6 +99,8 @@ dependencies = [
 name = "albus-solana-verifier"
 version = "0.1.2"
 dependencies = [
+ "albus",
+ "anchor-lang",
  "arrayref",
  "solana-program",
 ]
