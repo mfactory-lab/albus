@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::utils::{num_to_bytes, Signals};
+use crate::utils::Signals;
 use anchor_lang::prelude::*;
 
 #[cfg(feature = "verify-on-chain")]
@@ -193,7 +193,7 @@ impl Policy {
             if let Some(signal) = signals.get(name) {
                 let index = signal.index + idx.unwrap_or_default() as usize;
                 if let Some(i) = public_inputs.get_mut(index) {
-                    *i = num_to_bytes(rule.value as u64);
+                    *i = rule.value;
                 }
             }
         }
@@ -204,7 +204,10 @@ impl Policy {
 pub struct PolicyRule {
     #[max_len(32)]
     pub key: String,
-    pub value: u32, // TODO: [u8; 32]
+    /// Scalar Field
+    pub value: [u8; 32],
+    #[max_len(32)]
+    pub label: String,
 }
 
 impl PolicyRule {
@@ -459,45 +462,55 @@ pub enum ProofRequestStatus {
 //     pub created_at: i64,
 // }
 
-#[test]
-fn test_apply_rules() {
-    let policy = Policy {
-        service_provider: Default::default(),
-        circuit: Default::default(),
-        code: "".to_string(),
-        name: "".to_string(),
-        description: "".to_string(),
-        expiration_period: 0,
-        retention_period: 0,
-        proof_request_count: 0,
-        created_at: 0,
-        bump: 0,
-        rules: vec![
-            PolicyRule {
-                key: "minAge".to_string(),
-                value: 18,
-            },
-            PolicyRule {
-                key: "maxAge".to_string(),
-                value: 100,
-            },
-            PolicyRule {
-                key: "issuerPk.0".to_string(),
-                value: 1,
-            },
-            PolicyRule {
-                key: "issuerPk.1".to_string(),
-                value: 2,
-            },
-        ],
-    };
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::utils::num_to_bytes;
 
-    let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"].to_vec());
-    let mut public_inputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
+    #[test]
+    fn test_apply_rules() {
+        let policy = Policy {
+            service_provider: Default::default(),
+            circuit: Default::default(),
+            code: "".to_string(),
+            name: "".to_string(),
+            description: "".to_string(),
+            expiration_period: 0,
+            retention_period: 0,
+            proof_request_count: 0,
+            created_at: 0,
+            bump: 0,
+            rules: vec![
+                PolicyRule {
+                    key: "minAge".to_string(),
+                    value: num_to_bytes(18),
+                    label: "".to_string(),
+                },
+                PolicyRule {
+                    key: "maxAge".to_string(),
+                    value: num_to_bytes(100),
+                    label: "".to_string(),
+                },
+                PolicyRule {
+                    key: "issuerPk.0".to_string(),
+                    value: num_to_bytes(1),
+                    label: "".to_string(),
+                },
+                PolicyRule {
+                    key: "issuerPk.1".to_string(),
+                    value: num_to_bytes(2),
+                    label: "".to_string(),
+                },
+            ],
+        };
 
-    policy.apply_rules(&mut public_inputs, &signals);
+        let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"].to_vec());
+        let mut public_inputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
 
-    for (i, rule) in policy.rules.iter().enumerate() {
-        assert_eq!(public_inputs[i], num_to_bytes(rule.value as u64));
+        policy.apply_rules(&mut public_inputs, &signals);
+
+        for (i, rule) in policy.rules.iter().enumerate() {
+            assert_eq!(public_inputs[i], rule.value);
+        }
     }
 }
