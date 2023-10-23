@@ -2,7 +2,7 @@
 
 # Introduction
 
-Albus Protocol is an all-in-one Compliance-as-a-Service solution that facilitates AML compliance for transactions on public blockchains. Building on a self-sovereign identity (SSI) model, Albus harnesses the power of blockchain and zero-knowledge proof cryptography to enable verification of these transactions in a privacy-oriented manner. This approach brings together the strengths of two worlds: the steps involving human interaction ensure that the verification is conducted as per applicable legal requirements, while the cryptographic mechanisms allow for the results of this verification to be implemented at scale.
+Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their users. Building on Self-Sovereign Identity (SSI) model, Albus harnesses the power of blockchain and Zero-Knowledge Proofs to create a secure environment where Web3 protocols can KYC their users without accessing their private data. Albus also adds an extra layer of compliance by ensuring that user data can be made available to authorised entities with legitimate requests under data retention law.
 
 # Website and litepaper
 
@@ -11,12 +11,14 @@ Albus Protocol is an all-in-one Compliance-as-a-Service solution that facilitate
 
 # Full documentation
 
+![Albus logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/albus-logo.png)
+
 - [Introduction](https://github.com/mfactory-lab/albus/wiki)
 - [Albus diagrams](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams)
   - [Workflow overview](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-overview)
   - [Workflow diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-diagram)
   - [Architecture diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#architecture-diagram)
-  - [Legal request for access to PII](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#legal-request-for-access-to-pii)
+  - [Legal request for access to retained user data](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#legal-request-for-access-to-retained-user-data)
 - [Glossary](https://github.com/mfactory-lab/albus/wiki/Glossary)
   - [Entities and modules](https://github.com/mfactory-lab/albus/wiki/Glossary#entities-and-modules)
   - [General terms](https://github.com/mfactory-lab/albus/wiki/Glossary#general-terms)
@@ -24,11 +26,11 @@ Albus Protocol is an all-in-one Compliance-as-a-Service solution that facilitate
   - [Usage](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#usage)
   - [Commands](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#commands)
     - [Identity](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#identity)
-    - [Verifiable credentials (VC)](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#verifiable-credentials-vc)
-    - [Proving](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#proving)
+    - [Verifiable Credentials (VC)](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#verifiable-credentials-vc)
+    - [Proof generation](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#proof-generation)
     - [Verification](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#verification)
     - [Circuit management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#circuit-management)
-    - [DeFi Protocol management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#defi-service-management)
+    - [Web3 protocol management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#web3-service-management)
     - [Certificate Request management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#zkp-request-management)
 - [Integration](https://github.com/mfactory-lab/albus/wiki/Integration)
 - [Reference list](https://github.com/mfactory-lab/albus/wiki/Reference-list)
