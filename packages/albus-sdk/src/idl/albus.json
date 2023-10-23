@@ -2094,7 +2094,19 @@
           },
           {
             "name": "value",
-            "type": "u32"
+            "docs": [
+              "Scalar Field"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "label",
+            "type": "string"
           }
         ]
       }

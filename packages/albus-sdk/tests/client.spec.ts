@@ -77,16 +77,16 @@ describe('AlbusClient', async () => {
     ],
     privateSignals: [
       'birthDate',
-      'expirationDate',
       'userPrivateKey',
+      'meta_validUntil',
     ],
     publicSignals: [
       'timestamp',
       'minAge',
       'maxAge',
       'credentialRoot',
-      'expirationDateKey',
-      'expirationDateProof[5]',
+      'meta_validUntilKey',
+      'meta_validUntilProof[5]',
       'birthDateKey',
       'birthDateProof[5]',
       'issuerPk[2]',
@@ -104,8 +104,8 @@ describe('AlbusClient', async () => {
     expirationPeriod: 0,
     retentionPeriod: 0,
     rules: [
-      { key: 'minAge', value: 18 },
-      { key: 'maxAge', value: 100 },
+      { key: 'minAge', value: Array.from(Albus.zkp.finiteToBytes(18)) },
+      { key: 'maxAge', value: Array.from(Albus.zkp.finiteToBytes(100)) },
     ],
   } as Policy
 
@@ -122,7 +122,7 @@ describe('AlbusClient', async () => {
     countryOfBirth: 'MNE',
   }, {
     issuerSecretKey: payerKeypair.secretKey,
-    // validUntil: now + 86400, // 1 day
+    validUntil: now + 86400, // 1 day
   })
 
   it('can packPubkey and unpackPubkey', async () => {
@@ -144,12 +144,12 @@ describe('AlbusClient', async () => {
 
     const data = inputs.data
 
-    assert.equal(data.expirationDate, now + 86400)
-    assert.equal(data.expirationDateKey, 3)
-    assert.equal(data.expirationDateProof.length, 4)
-    assert.equal(data.birthDate, '19890101')
-    assert.equal(data.birthDateKey, 0n)
-    assert.equal(data.birthDateProof.length, 4)
+    assert.equal(data.meta_validUntil, now + 86400)
+    assert.equal(data.meta_validUntilKey, 2)
+    assert.equal(data.meta_validUntilProof.length, 5)
+    assert.equal(data.birthDate, '19661002')
+    assert.equal(data.birthDateKey, 7n)
+    assert.equal(data.birthDateProof.length, 5)
     assert.equal(data.issuerPk.length, 2)
     assert.equal(data.issuerSignature.length, 3)
     assert.deepEqual(data.trusteePublicKey, [[1n, 2n], [1n, 2n], [1n, 2n]])
@@ -233,9 +233,10 @@ describe('AlbusClient', async () => {
         expirationPeriod: 0,
         retentionPeriod: 0,
         rules: [
-          { key: 'expectedEvent', value: Albus.credential.encodeClaimValue('test1') },
-          { key: 'expectedDateFrom', value: 0 },
-          { key: 'expectedDateTo', value: 0 },
+          { key: 'expectedEvent', value: Array.from(Albus.zkp.finiteToBytes(Albus.credential.encodeClaimValue('test1'))) },
+          { key: 'maxAge', value: Array.from(Albus.zkp.finiteToBytes(100)) },
+          { key: 'expectedDateFrom', value: Array.from(Albus.zkp.finiteToBytes(0)) },
+          { key: 'expectedDateTo', value: Array.from(Albus.zkp.finiteToBytes(0)) },
         ],
       } as Policy
 

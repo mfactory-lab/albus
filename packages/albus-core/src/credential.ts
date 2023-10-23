@@ -156,16 +156,13 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
  * used for generate a claims tree
  */
 export function getCredentialMeta(credential: W3CCredential | VerifiableCredential) {
+  const parseDate = (value: number | string) => Math.floor(new Date(value).getTime() / 1000)
   const meta: Record<string, any> = {
     issuer: credential.issuer,
-    issuanceDate: Math.floor(new Date(credential.issuanceDate).getTime() / 1000),
+    issuanceDate: parseDate(credential.issuanceDate),
+    validUntil: credential.validUntil ? parseDate(credential.validUntil) : 0,
+    validFrom: credential.validFrom ? parseDate(credential.validFrom) : 0,
   }
-  // if (credential.validUntil) {
-  meta.validUntil = credential.validUntil ?? 0
-  // }
-  // if (credential.validFrom) {
-  meta.validFrom = credential.validFrom ?? 0
-  // }
   const type = credential.type.slice(-1)[0]
   if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
     meta.type = type
@@ -589,18 +586,20 @@ export async function createClaimsTree(claims: Claims, depth?: number) {
       }
     },
     delete: (key: string) => tree.delete(encodeKey(key)),
-    add: (key: string, val: any) => tree.add(encodeKey(key), encodeClaimValue(val)),
+    add: (key: string, val: any) => {
+      return tree.add(encodeKey(key), encodeClaimValue(val))
+    },
     update: (key: string, val: any) => tree.update(encodeKey(key), encodeClaimValue(val)),
   }
 }
 
 // Helpers
 
-export function encodeClaimValue(s: string) {
+export function encodeClaimValue(s: string | number | bigint) {
   try {
     return BigInt(s)
   } catch (e) {
-    return poseidon.hashBytes(new TextEncoder().encode(s))
+    return poseidon.hashBytes(new TextEncoder().encode(String(s)))
   }
 }
 

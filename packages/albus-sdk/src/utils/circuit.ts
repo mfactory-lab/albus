@@ -185,10 +185,10 @@ export class ProofInputBuilder<T = Record<string, any>> {
     const rules = this.policy?.rules
       ?.filter(r => r.key === signal.name || r.key.startsWith(`${signal.name}.`)) ?? []
     if (rules.length > 1 && signal.size > 1) {
-      this.data[signal.name] = rules.map(r => r.value)
+      this.data[signal.name] = rules.map(r => Albus.crypto.ffUtils.beBuff2int(Uint8Array.from(r.value)))
       return true
     } else if (rules[0] !== undefined) {
-      this.data[signal.name] = rules[0].value
+      this.data[signal.name] = Albus.crypto.ffUtils.beBuff2int(Uint8Array.from(rules[0].value))
       return true
     }
     return false

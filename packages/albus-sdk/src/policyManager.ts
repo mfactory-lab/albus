@@ -27,9 +27,9 @@
  */
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
+import * as Albus from '@mfactory-lab/albus-core'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
-import type { PolicyRule } from './generated'
 import {
   Policy,
   createCreatePolicyInstruction,
@@ -133,7 +133,7 @@ export class PolicyManager {
         description: props.description ?? '',
         expirationPeriod: props.expirationPeriod ?? 0,
         retentionPeriod: props.retentionPeriod ?? 0,
-        rules: props.rules ?? [],
+        rules: preparePolicyRules(props),
       },
     })
 
@@ -169,7 +169,7 @@ export class PolicyManager {
         description: props.description ?? null,
         expirationPeriod: props.expirationPeriod ?? null,
         retentionPeriod: props.retentionPeriod ?? null,
-        rules: props.rules ?? [],
+        rules: preparePolicyRules(props),
       },
     })
 
@@ -211,6 +211,19 @@ export class PolicyManager {
   }
 }
 
+function preparePolicyRules(props: UpdatePolicyProps) {
+  return props.rules?.map(r => ({
+    key: r.key,
+    label: r.label ?? '',
+    value: Array.from(
+      Albus.crypto.ffUtils.beInt2Buff(
+        Albus.credential.encodeClaimValue(r.value),
+        32,
+      ),
+    ),
+  })) ?? []
+}
+
 export interface CreatePolicyProps extends UpdatePolicyProps {
   circuitCode: string
   name: string
@@ -223,7 +236,11 @@ export interface UpdatePolicyProps {
   description?: string
   expirationPeriod?: number
   retentionPeriod?: number
-  rules?: PolicyRule[]
+  rules?: Array<{
+    key: string
+    value: string | number | bigint
+    label?: string
+  }>
 }
 
 export interface DeletePolicyProps {
