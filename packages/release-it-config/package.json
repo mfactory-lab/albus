@@ -1,0 +1,12 @@
+{
+  "name": "@mfactory-lab/release-it-config",
+  "version": "0.0.1",
+  "main": ".release-it.js",
+  "scripts": {
+    "release": "release-it --ci"
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^7.0.1",
+    "release-it": "^16.1.5"
+  }
+}

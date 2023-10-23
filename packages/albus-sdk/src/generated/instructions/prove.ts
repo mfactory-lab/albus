@@ -38,6 +38,8 @@ export const proveStruct = new beet.FixableBeetArgsStruct<
  * Accounts required by the _prove_ instruction
  *
  * @property [_writable_] proofRequest
+ * @property [] circuit
+ * @property [] policy
  * @property [_writable_, **signer**] authority
  * @category Instructions
  * @category Prove
@@ -45,6 +47,8 @@ export const proveStruct = new beet.FixableBeetArgsStruct<
  */
 export interface ProveInstructionAccounts {
   proofRequest: web3.PublicKey
+  circuit: web3.PublicKey
+  policy: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -67,7 +71,7 @@ export const proveInstructionDiscriminator = [
 export function createProveInstruction(
   accounts: ProveInstructionAccounts,
   args: ProveInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = proveStruct.serialize({
     instructionDiscriminator: proveInstructionDiscriminator,
@@ -77,6 +81,16 @@ export function createProveInstruction(
     {
       pubkey: accounts.proofRequest,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.circuit,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.policy,
+      isWritable: false,
       isSigner: false,
     },
     {

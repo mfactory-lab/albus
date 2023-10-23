@@ -1,0 +1,49 @@
+{
+  "name": "@albus/ui",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "serve": "vite --port 3333",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 vite build --mode production",
+    "build:staging": "vite build --mode staging",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.28.0",
+    "@metaplex-foundation/js": "^0.19.5",
+    "@mfactory-lab/albus-core": "workspace:^",
+    "@mfactory-lab/albus-sdk": "workspace:^",
+    "@quasar/extras": "^1.16.5",
+    "@solana/wallet-adapter-wallets": "^0.19.20",
+    "@solana/web3.js": "^1.77.3",
+    "@vueuse/core": "^10.3.0",
+    "@vueuse/head": "^1.1.26",
+    "lodash-es": "^4.17.21",
+    "mitt": "^3.0.1",
+    "pinia": "^2.1.6",
+    "quasar": "^2.12.7",
+    "solana-wallets-vue": "^0.6.0",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.42.0",
+    "@quasar/vite-plugin": "^1.4.1",
+    "@types/lodash-es": "^4.17.8",
+    "@types/node": "^20.0.0",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "eslint": "^8.49.0",
+    "sass": "^1.64.2",
+    "typescript": "5.0.4",
+    "unplugin-auto-import": "^0.16.6",
+    "unplugin-vue-components": "^0.25.1",
+    "vite": "^4.4.9",
+    "vite-plugin-pages": "^0.31.0",
+    "vite-plugin-vue-layouts": "^0.8.0",
+    "rollup-plugin-polyfill-node": "^0.12.0",
+    "vue-tsc": "^1.8.8"
+  }
+}

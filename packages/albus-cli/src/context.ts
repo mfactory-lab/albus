@@ -26,13 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import { readFileSync } from 'node:fs'
+import { Buffer } from 'node:buffer'
 import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import { AlbusClient } from '@albus/sdk'
+import { AlbusClient } from '@mfactory-lab/albus-sdk'
 import { clusterUrl } from './utils'
 import config from './config'
 
@@ -47,9 +47,11 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
   const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
   const connection = new web3.Connection(endpoint, opts.commitment)
 
-  const wallet = new Wallet(Keypair.fromSecretKey(Buffer.from(JSON.parse(
-    keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
-  ))))
+  const wallet = new Wallet(
+    Keypair.fromSecretKey(Buffer.from(JSON.parse(
+      keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
+    ))),
+  )
   const provider = new AnchorProvider(connection, wallet, opts)
   const client = new AlbusClient(provider)
   const metaplex = Metaplex.make(provider.connection)

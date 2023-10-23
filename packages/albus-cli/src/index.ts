@@ -28,6 +28,7 @@
 
 import type { Command } from 'commander'
 import { program as cli } from 'commander'
+import chalk from 'chalk'
 import log from 'loglevel'
 import { initContext } from '@/context'
 import * as actions from '@/actions'
@@ -36,6 +37,16 @@ const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
 const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet'
 const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
+
+const originFactory = log.methodFactory
+log.methodFactory = function (name, lvl, logger) {
+  const originMethod = originFactory(name, lvl, logger)
+  const colorMap = {
+    warn: chalk.hex('#FFA500'),
+    error: chalk.red,
+  }
+  return (...msg) => colorMap[name] ? originMethod(colorMap[name](...msg)) : originMethod(...msg)
+}
 
 cli
   .name('cli')
@@ -47,40 +58,195 @@ cli
   .hook('preAction', async (command: Command) => {
     const opts = command.opts() as any
     log.setLevel(opts.logLevel)
-    const { provider, cluster } = initContext(opts)
-    log.info(`# Version: ${VERSION}`)
-    log.info(`# Keypair: ${provider.wallet.publicKey}`)
-    log.info(`# Cluster: ${cluster}\n`)
+    const { provider, cluster, client } = initContext(opts)
+    console.log(chalk.dim(`# Version: ${VERSION}`))
+    console.log(chalk.dim(`# Program Address: ${client.programId}`))
+    console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
+    console.log(chalk.dim(`# Cluster: ${cluster}`))
+    console.log('\n')
   })
-  .hook('postAction', (_command: Command) => {
+  .hook('postAction', (_c: Command) => {
     process.exit()
   })
+
+// ------------------------------------------
+// DID
+// ------------------------------------------
+
+const did = cli.command('did')
+
+did.command('generate', { isDefault: true })
+  .description('Generate new issuer did')
+  .action(actions.did.generate)
 
 // ------------------------------------------
 // Identity
 // ------------------------------------------
 
-const id = cli.command('identity')
+const id = cli.command('id')
 
 id.command('new')
   .description('Create new identity')
   .action(actions.identity.create)
 
 // ------------------------------------------
-// Verifiable Credentials
+// VC Management
 // ------------------------------------------
 
 const vc = cli.command('vc')
 
 vc.command('all', { isDefault: true })
   .description('Show all issued VC`s')
+  .option('--owner <pubkey>', '(optional) nft owner address')
   .action(actions.vc.showAll)
 
 vc.command('issue')
   .description('Issue new VC')
-  .option('--provider <CODE>', 'KYC provider unique code')
-  .option('-e,--encrypt', 'Encrypt VC with holder public key')
+  .option('--provider <string>', 'KYC provider unique code')
+  .option('-e,--encrypt', '(optional) Encrypt VC with holder public key')
   .action(actions.vc.issue)
+
+///
+/// Circuit Management
+///
+
+const circuit = cli.command('circuit')
+  .description('Circuit Management')
+
+circuit.command('all', { isDefault: true })
+  .description('Show all circuits')
+  .action(actions.circuit.showAll)
+
+circuit.command('show')
+  .description('Show circuit data')
+  .argument('<address>', 'Circuit address')
+  .action(actions.circuit.show)
+
+circuit.command('create')
+  .description('Create new circuit')
+  .argument('code', 'circuit code')
+  .requiredOption('--name <string>', 'circuit name')
+  .option('--description <string>', '(optional) circuit short description')
+  .option('--zkey <uri>', '(optional) zkey file uri')
+  .option('--wasm <uri>', '(optional) wasm file uri')
+  .action(actions.circuit.create)
+
+circuit.command('delete')
+  .description('Delete circuit')
+  .argument('addr', 'circuit address')
+  .action(actions.circuit.remove)
+
+///
+/// Service Management
+///
+
+const service = cli.command('service')
+  .description('Service Management')
+
+service.command('create')
+  .description('Create new service')
+  .requiredOption('--code <string>', 'service code')
+  .requiredOption('--name <string>', 'service name')
+  .option('--website <string>', '(optional) service website')
+  .option('--authority <pubkey>', '(optional) service manager authority')
+  .option('-t, --trustee <trustee...>', '(optional) selected trustees')
+  .action(actions.service.create)
+
+service.command('update')
+  .description('Update service')
+  .argument('addr', 'service address')
+  .option('--name <string>', 'service name')
+  .option('--website <string>', 'service website')
+  .option('--secretShareThreshold <pubkey>', 'new Secret Share Threshold')
+  .option('--newAuthority <pubkey>', 'new authority')
+  .option('-t, --trustees <trustees...>', 'selected trustees')
+  .action(actions.service.update)
+
+service.command('delete')
+  .description('Delete service provider')
+  .argument('code', 'Service provider`s unique code')
+  .action(actions.service.remove)
+
+service.command('show')
+  .description('Show service provider`s info')
+  .argument('addr', 'Service provider PDA`s address')
+  .action(actions.service.show)
+
+service.command('all')
+  .description('Show all service providers')
+  .option('--authority', '(optional) filter by authority')
+  .action(actions.service.showAll)
+
+// ------------------------------------------
+// Policy Management
+// ------------------------------------------
+
+const policy = cli.command('policy')
+
+policy.command('all', { isDefault: true })
+  .description('Show all policies')
+  .option('-s, --serviceCode <string>', 'Filter by service code')
+  .option('-s, --circuitCode <string>', 'Filter by circuit code')
+  .action(actions.policy.showAll)
+
+policy.command('create')
+  .description('Create new policy')
+  .requiredOption('--code <string>', 'policy code')
+  .requiredOption('--name <string>', 'policy name')
+  .requiredOption('--serviceCode <string>', 'service code')
+  .requiredOption('--circuitCode <string>', 'circuit code')
+  .option('-d,--description <string>', '(optional) policy short description')
+  .option('-ep,--expirationPeriod <seconds>', '(optional) expiration period')
+  .option('-rp,--retentionPeriod <seconds>', '(optional) retention period')
+  .option('-r,--rules <rules...>', '(optional) policy rule, format: "key:value"')
+  .action(actions.policy.create)
+
+policy.command('update')
+  .description('Update a policy')
+  .argument('code', 'policy code')
+  .option('-n,--name <string>', 'policy name')
+  .option('-d,--description <string>', '(optional) policy short description')
+  .option('-ep,--expirationPeriod <seconds>', '(optional) expiration period')
+  .option('-rp,--retentionPeriod <seconds>', '(optional) retention period')
+  .option('-r,--rules <rules...>', '(optional) policy rule, format: "key:value"')
+  .action(actions.policy.update)
+
+policy.command('delete')
+  .description('Delete policy')
+  .argument('code', 'policy code')
+  .action(actions.policy.remove)
+
+// ------------------------------------------
+// Trustee Management
+// ------------------------------------------
+
+const trustee = cli.command('trustee')
+
+trustee.command('create')
+  .description('Create new Trustee')
+  .argument('name', 'The name of the trustee')
+  .option('--email <string>', '(optional) Email')
+  .option('--website <string>', '(optional) Website')
+  .option('--keypair <string>', '(optional) Encryption keypair')
+  .action(actions.trustee.create)
+
+trustee.command('verify')
+  .description('Verify a trustee')
+  .argument('addr', 'Trustee address')
+  .action(actions.trustee.verify)
+
+trustee.command('show')
+  .description('Show all trustees')
+  .argument('addr', 'Trustee address')
+  .action(actions.trustee.show)
+
+trustee.command('all', { isDefault: true })
+  .description('Show all trustees')
+  .option('--authority <string>', 'Filter by authority')
+  .option('--email <string>', 'Filter by email')
+  .option('--name <string>', 'Filter by name')
+  .option('--verified', 'Filter by verified')
+  .action(actions.trustee.showAll)
 
 // ------------------------------------------
 // Proof Requests
@@ -90,9 +256,8 @@ const request = cli.command('request')
 
 request.command('create')
   .description('Create proof request')
-  .requiredOption('--service <CODE>', 'Service provider`s unique code')
-  .requiredOption('--circuit <ADDR>', 'Circuit`s mint')
-  .option('--expires-in <SECONDS>', 'Expires in some time duration')
+  .argument('policy', 'Policy ID. Example: acme_p1')
+  .option('-e, --expiresIn <seconds>', '(optional) Expires in some time duration')
   .action(actions.request.create)
 
 request.command('delete')
@@ -101,34 +266,31 @@ request.command('delete')
   .action(actions.request.remove)
 
 request.command('show')
-  .description('Show proof request`s info')
-  .argument('<ADDRESS>', 'Proof Request address')
+  .description('Show proof request')
+  .argument('<address>', 'Proof Request address')
   .action(actions.request.show)
 
 request.command('find')
-  .description('Find proof request')
-  .requiredOption('--service <CODE>', 'Service provider code')
-  .requiredOption('--owner <ADDR>', 'Request creator')
-  .requiredOption('--circuit <ADDR>', 'Circuit`s mint')
-  .action(actions.request.find)
-
-request.command('all')
-  .description('Show all proof requests')
-  .option('--service <CODE>', 'Filter by Service provider')
-  .option('--circuit <ADDR>', 'Filter by Circuit mint')
-  .option('--status <STATUS>', 'Filter by Status')
+  .description('Find proof requests')
+  .option('--serviceCode <string>', '(optional) service code')
+  .option('--circuit <pubkey>', '(optional) circuit address')
+  .option('--circuitCode <string>', '(optional) circuit code')
+  .option('--policy <pubkey>', '(optional) policy address')
+  .option('--policyId <string>', '(optional) policy id. Example: acme_age')
+  .option('--status <string>', '(optional) status')
+  .option('--user <pubkey>', '(optional) user address. Default: current user')
   .action(actions.request.showAll)
 
 request.command('prove')
   .description('Create a zkp proof for selected proof proof')
   .argument('addr', 'Proof Request address')
-  .requiredOption('--vc <ADDR>', 'VC address')
-  .option('--force', 'Override existing prove')
+  .requiredOption('--vc <pubkey>', 'VC address')
+  .option('-d, --decryptionKey <keypath>', 'Path to the decryption key')
   .action(actions.request.proveRequest)
 
 request.command('verify')
   .description('Verify Proof Request')
-  .argument('addr', 'Proof Request address')
+  .argument('<pubkey>', 'Proof Request address')
   .action(actions.request.verifyRequest)
 
 // ------------------------------------------
@@ -137,65 +299,21 @@ request.command('verify')
 
 const admin = cli.command('admin')
 
-const adminCircuit = admin.command('circuit')
-  .description('Circuit Management')
+admin.command('clear')
+  .description('Clear all accounts')
+  .action(actions.admin.clear)
 
-adminCircuit.command('all', { isDefault: true })
-  .description('Show all circuits')
-  .action(actions.admin.circuit.showAll)
-
-adminCircuit.command('create')
-  .description('Create new circuit NFT')
-  .argument('name', 'Circuit name')
-  .action(actions.admin.circuit.create)
-
-adminCircuit.command('delete')
-  .description('Delete circuit')
-  .argument('addr', 'Circuit address')
-  .action(actions.admin.circuit.remove)
-
-const adminRequest = admin.command('request')
-  .description('Request Management')
-
-adminRequest.command('find')
-  .description('Find user proof requests')
-  .argument('userAddr', 'User address')
-  .option('--sp <SP_CODE>', 'Service provider code')
-  .option('--circuit <CIRCUIT_ADDR>', 'Circuit address')
-  .action(actions.admin.request.showAll)
-
-adminRequest.command('verify')
-  .description('Verify Proof Request')
-  .argument('addr', 'Proof Request address')
-  .action(actions.admin.request.verifyRequest)
-
-const adminSp = admin.command('sp')
-  .description('Service Provider Management')
-
-adminSp.command('add')
-  .description('Add service provider')
-  .requiredOption('--code <CODE>', 'Service provider`s unique code')
-  .requiredOption('--name <NAME>', 'Service provider`s name')
-  .action(actions.admin.sp.add)
-
-adminSp.command('delete')
-  .description('Delete service provider')
-  .argument('code', 'Service provider`s unique code')
-  .action(actions.admin.sp.remove)
-
-adminSp.command('show')
-  .description('Show service provider`s info')
-  .argument('addr', 'Service provider PDA`s address')
-  .action(actions.admin.sp.show)
-
-adminSp.command('all')
-  .description('Show all service providers')
-  .option('--authority', 'Filter by authority')
-  .action(actions.admin.sp.showAll)
+// ------------------------------------------
 
 cli.command('*', { isDefault: true, hidden: true })
   .action(() => {
     cli.help()
   })
 
-cli.parse()
+cli.parseAsync().catch((e) => {
+  log.error(e)
+  if (e.logs) {
+    log.error(JSON.stringify(e.logs, null, 2))
+  }
+  process.exit()
+})

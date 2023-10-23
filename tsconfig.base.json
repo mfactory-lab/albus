@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "lib": ["dom", "es2017", "es2018", "es2019", "es2020", "es2021"],
+    "lib": ["dom", "es6"],
     "noEmitOnError": true,
 
     "declaration": true,
@@ -23,11 +23,12 @@
 
     "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "noUnusedParameters": true,
-    "noUnusedLocals": true,
     "noUncheckedIndexedAccess": true,
     "useUnknownInCatchVariables": true,
     "preserveWatchOutput": true,
+
+    "noImplicitAny": false,
+
     "typeRoots": ["./node_modules/@types/", "./types", "./node_modules"],
     "types": ["node"]
   }

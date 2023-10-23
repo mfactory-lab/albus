@@ -1,0 +1,13 @@
+[package]
+name = "albus-solana-verifier"
+description = "Albus on-chain compliance check"
+version = "0.1.1"
+edition = "2021"
+license = "AGPL-3.0"
+keywords = ["albus", "kyc", "did"]
+repository = "https://github.com/mfactory-lab/albus"
+#readme = "README.md"
+
+[dependencies]
+arrayref = "^0.3.7"
+solana-program = "^1.14"

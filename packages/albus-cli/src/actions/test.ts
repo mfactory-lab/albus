@@ -61,7 +61,7 @@ export async function encryption(_opts: Opts) {
   // const msg: any[] = []
   //
   // for (const msgChunk of msgChunks) {
-  //   msg.push(arrayToBigInt(msgChunk))
+  //   msg.push(bytesToBigInt(msgChunk))
   // }
   //
   // console.log(msg)

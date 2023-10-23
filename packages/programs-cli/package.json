@@ -15,6 +15,6 @@
     "@solana/spl-token-swap": "^0.2.2",
     "commander": "^10.0.0",
     "chalk": "^4.1.2",
-    "loglevel": "^1.8.0"
+    "loglevel": "^1.8.1"
   }
 }

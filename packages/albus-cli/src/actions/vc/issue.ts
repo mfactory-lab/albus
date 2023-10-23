@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { vc } from '@albus/core'
+import { credential } from '@mfactory-lab/albus-core'
 import log from 'loglevel'
 import { generateCredentialSubject, mintVerifiableCredentialNFT } from './utils'
 import { useContext } from '@/context'
@@ -46,22 +46,17 @@ export async function issue(opts: Opts) {
   const claims = generateCredentialSubject()
 
   // Issue new Verifiable Credential
-  const res = await vc.createVerifiableCredential(claims, {
-    signerSecretKey: config.issuerSecretKey,
+  const vc = await credential.createVerifiableCredential(claims, {
+    issuerSecretKey: config.issuerSecretKey,
+    encryptionKey: keypair.publicKey,
     encrypt: opts.encrypt,
-    holder: keypair.publicKey,
-    aud: [config.issuerDid],
+    // aud: [config.issuerDid],
   })
 
   // Generate new VC-NFT
-  const nft = await mintVerifiableCredentialNFT({
-    credentialRoot: res.credentialRoot,
-    vc: res.payload,
-  })
+  const nft = await mintVerifiableCredentialNFT({ vc })
 
   log.info('Done')
   log.info(`Mint: ${nft.address}`)
   log.info(exploreAddress(nft.address))
-
-  process.exit(0)
 }

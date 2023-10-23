@@ -26,16 +26,16 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub mod add_service_provider;
-pub mod create_proof_request;
-pub mod delete_proof_request;
-pub mod delete_service_provider;
-pub mod prove;
-pub mod verify;
+mod admin;
+mod circuit;
+mod credential;
+mod investigation;
+mod policy;
+mod proof_request;
+mod service_provider;
+mod trustee;
 
-pub use add_service_provider::*;
-pub use create_proof_request::*;
-pub use delete_proof_request::*;
-pub use delete_service_provider::*;
-pub use prove::*;
-pub use verify::*;
+pub use self::{
+    admin::*, circuit::*, credential::*, investigation::*, policy::*, proof_request::*,
+    service_provider::*, trustee::*,
+};

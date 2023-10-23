@@ -12,8 +12,8 @@ import {
   ProofRequestStatus,
   proofRequestStatusBeet,
 } from '../types/ProofRequestStatus'
-import type { Proof } from '../types/Proof'
-import { proofBeet } from '../types/Proof'
+import type { ProofData } from '../types/ProofData'
+import { proofDataBeet } from '../types/ProofData'
 
 /**
  * Arguments used to create {@link ProofRequest}
@@ -22,15 +22,19 @@ import { proofBeet } from '../types/Proof'
  */
 export interface ProofRequestArgs {
   serviceProvider: web3.PublicKey
+  policy: web3.PublicKey
   circuit: web3.PublicKey
   owner: web3.PublicKey
+  identifier: beet.bignum
   createdAt: beet.bignum
   expiredAt: beet.bignum
   verifiedAt: beet.bignum
   provedAt: beet.bignum
+  retentionEndDate: beet.bignum
   status: ProofRequestStatus
   bump: number
-  proof: beet.COption<Proof>
+  proof: beet.COption<ProofData>
+  publicInputs: number[] /* size: 32 */[]
 }
 
 export const proofRequestDiscriminator = [78, 10, 176, 254, 231, 33, 111, 224]
@@ -44,15 +48,19 @@ export const proofRequestDiscriminator = [78, 10, 176, 254, 231, 33, 111, 224]
 export class ProofRequest implements ProofRequestArgs {
   private constructor(
     readonly serviceProvider: web3.PublicKey,
+    readonly policy: web3.PublicKey,
     readonly circuit: web3.PublicKey,
     readonly owner: web3.PublicKey,
+    readonly identifier: beet.bignum,
     readonly createdAt: beet.bignum,
     readonly expiredAt: beet.bignum,
     readonly verifiedAt: beet.bignum,
     readonly provedAt: beet.bignum,
+    readonly retentionEndDate: beet.bignum,
     readonly status: ProofRequestStatus,
     readonly bump: number,
-    readonly proof: beet.COption<Proof>,
+    readonly proof: beet.COption<ProofData>,
+    readonly publicInputs: number[] /* size: 32 */[],
   ) {}
 
   /**
@@ -61,15 +69,19 @@ export class ProofRequest implements ProofRequestArgs {
   static fromArgs(args: ProofRequestArgs) {
     return new ProofRequest(
       args.serviceProvider,
+      args.policy,
       args.circuit,
       args.owner,
+      args.identifier,
       args.createdAt,
       args.expiredAt,
       args.verifiedAt,
       args.provedAt,
+      args.retentionEndDate,
       args.status,
       args.bump,
       args.proof,
+      args.publicInputs,
     )
   }
 
@@ -113,7 +125,7 @@ export class ProofRequest implements ProofRequestArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz',
+      'ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL',
     ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, proofRequestBeet)
@@ -179,8 +191,20 @@ export class ProofRequest implements ProofRequestArgs {
   pretty() {
     return {
       serviceProvider: this.serviceProvider.toBase58(),
+      policy: this.policy.toBase58(),
       circuit: this.circuit.toBase58(),
       owner: this.owner.toBase58(),
+      identifier: (() => {
+        const x = <{ toNumber: () => number }> this.identifier
+        if (typeof x.toNumber === 'function') {
+          try {
+            return x.toNumber()
+          } catch (_) {
+            return x
+          }
+        }
+        return x
+      })(),
       createdAt: (() => {
         const x = <{ toNumber: () => number }> this.createdAt
         if (typeof x.toNumber === 'function') {
@@ -225,9 +249,21 @@ export class ProofRequest implements ProofRequestArgs {
         }
         return x
       })(),
+      retentionEndDate: (() => {
+        const x = <{ toNumber: () => number }> this.retentionEndDate
+        if (typeof x.toNumber === 'function') {
+          try {
+            return x.toNumber()
+          } catch (_) {
+            return x
+          }
+        }
+        return x
+      })(),
       status: `ProofRequestStatus.${ProofRequestStatus[this.status]}`,
       bump: this.bump,
       proof: this.proof,
+      publicInputs: this.publicInputs,
     }
   }
 }
@@ -245,15 +281,19 @@ export const proofRequestBeet = new beet.FixableBeetStruct<
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['serviceProvider', beetSolana.publicKey],
+    ['policy', beetSolana.publicKey],
     ['circuit', beetSolana.publicKey],
     ['owner', beetSolana.publicKey],
+    ['identifier', beet.u64],
     ['createdAt', beet.i64],
     ['expiredAt', beet.i64],
     ['verifiedAt', beet.i64],
     ['provedAt', beet.i64],
+    ['retentionEndDate', beet.i64],
     ['status', proofRequestStatusBeet],
     ['bump', beet.u8],
-    ['proof', beet.coption(proofBeet)],
+    ['proof', beet.coption(proofDataBeet)],
+    ['publicInputs', beet.array(beet.uniformFixedSizeArray(beet.u8, 32))],
   ],
   ProofRequest.fromArgs,
   'ProofRequest',

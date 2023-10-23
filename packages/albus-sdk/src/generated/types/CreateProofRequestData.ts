@@ -9,6 +9,7 @@ import * as beet from '@metaplex-foundation/beet'
 
 export interface CreateProofRequestData {
   expiresIn: number
+  maxPublicInputs: number
 }
 
 /**
@@ -17,6 +18,9 @@ export interface CreateProofRequestData {
  */
 export const createProofRequestDataBeet
   = new beet.BeetArgsStruct<CreateProofRequestData>(
-    [['expiresIn', beet.u32]],
+    [
+      ['expiresIn', beet.u32],
+      ['maxPublicInputs', beet.u8],
+    ],
     'CreateProofRequestData',
   )

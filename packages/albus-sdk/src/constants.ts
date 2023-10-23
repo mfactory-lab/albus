@@ -1,5 +1,6 @@
-export const NFT_AUTHORITY = '5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH'
+export const ALBUS_DID = 'did:web:albus.finance'
+
+export const DEFAULT_CREDENTIAL_NAME = 'Albus Verifiable Credential'
 
 export const NFT_SYMBOL_PREFIX = 'ALBUS'
-
-export const ALBUS_DID = 'did:web:albus.finance'
+export const NFT_VC_SYMBOL = 'VC'

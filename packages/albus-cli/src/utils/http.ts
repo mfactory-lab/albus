@@ -26,10 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import type { PathLike } from 'node:fs'
 import { createWriteStream } from 'node:fs'
 import axios from 'axios'
 
-export function downloadFile(url: string, filePath: string) {
+export function downloadFile(url: string, filePath: PathLike) {
   return axios({
     method: 'get',
     url,

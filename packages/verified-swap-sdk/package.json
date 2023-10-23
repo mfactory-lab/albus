@@ -13,6 +13,6 @@
     "@solana/web3.js": "^1.77.3"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.19.4"
+    "@metaplex-foundation/solita": "^0.20.0"
   }
 }

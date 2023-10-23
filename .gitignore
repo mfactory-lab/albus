@@ -32,8 +32,3 @@ target
 test-ledger
 .eslintcache
 /.secrets
-
-/circuits/*.ptau
-/circuits/*.r1cs
-/circuits/*.wasm
-/circuits/*.sym

@@ -49,7 +49,7 @@ pnpm add @albus/sdk
 Example client initialization
 ```typescript
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
-import { AlbusClient } from '@albus/sdk'
+import { AlbusClient } from '@mfactory-lab/albus-sdk'
 
 // Initialize anchor provider
 const payerKeypair = Keypair.fromSecretKey([])

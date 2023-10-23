@@ -40,9 +40,8 @@ export const createProofRequestStruct = new beet.BeetArgsStruct<
  * Accounts required by the _createProofRequest_ instruction
  *
  * @property [_writable_] serviceProvider
+ * @property [_writable_] policy
  * @property [_writable_] proofRequest
- * @property [] circuitMint
- * @property [] circuitMetadata
  * @property [_writable_, **signer**] authority
  * @category Instructions
  * @category CreateProofRequest
@@ -50,9 +49,8 @@ export const createProofRequestStruct = new beet.BeetArgsStruct<
  */
 export interface CreateProofRequestInstructionAccounts {
   serviceProvider: web3.PublicKey
+  policy: web3.PublicKey
   proofRequest: web3.PublicKey
-  circuitMint: web3.PublicKey
-  circuitMetadata: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -75,7 +73,7 @@ export const createProofRequestInstructionDiscriminator = [
 export function createCreateProofRequestInstruction(
   accounts: CreateProofRequestInstructionAccounts,
   args: CreateProofRequestInstructionArgs,
-  programId = new web3.PublicKey('ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'),
+  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
   const [data] = createProofRequestStruct.serialize({
     instructionDiscriminator: createProofRequestInstructionDiscriminator,
@@ -88,18 +86,13 @@ export function createCreateProofRequestInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.proofRequest,
+      pubkey: accounts.policy,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.circuitMint,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.circuitMetadata,
-      isWritable: false,
+      pubkey: accounts.proofRequest,
+      isWritable: true,
       isSigner: false,
     },
     {

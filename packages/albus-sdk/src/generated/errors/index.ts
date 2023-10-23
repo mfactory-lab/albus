@@ -92,24 +92,24 @@ createErrorFromCodeLookup.set(0x1773, () => new ExpiredError())
 createErrorFromNameLookup.set('Expired', () => new ExpiredError())
 
 /**
- * WrongData: 'Wrong data'
+ * InvalidData: 'Invalid data'
  *
  * @category Errors
  * @category generated
  */
-export class WrongDataError extends Error {
+export class InvalidDataError extends Error {
   readonly code: number = 0x1774
-  readonly name: string = 'WrongData'
+  readonly name: string = 'InvalidData'
   constructor() {
-    super('Wrong data')
+    super('Invalid data')
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, WrongDataError)
+      Error.captureStackTrace(this, InvalidDataError)
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x1774, () => new WrongDataError())
-createErrorFromNameLookup.set('WrongData', () => new WrongDataError())
+createErrorFromCodeLookup.set(0x1774, () => new InvalidDataError())
+createErrorFromNameLookup.set('InvalidData', () => new InvalidDataError())
 
 /**
  * IncorrectOwner: 'Incorrect owner'
@@ -152,6 +152,52 @@ createErrorFromCodeLookup.set(0x1776, () => new InvalidMetadataError())
 createErrorFromNameLookup.set(
   'InvalidMetadata',
   () => new InvalidMetadataError(),
+)
+
+/**
+ * ProofVerificationFailed: 'Proof verification failed'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class ProofVerificationFailedError extends Error {
+  readonly code: number = 0x1777
+  readonly name: string = 'ProofVerificationFailed'
+  constructor() {
+    super('Proof verification failed')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, ProofVerificationFailedError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1777, () => new ProofVerificationFailedError())
+createErrorFromNameLookup.set(
+  'ProofVerificationFailed',
+  () => new ProofVerificationFailedError(),
+)
+
+/**
+ * InvalidPublicInputs: 'Invalid public inputs'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class InvalidPublicInputsError extends Error {
+  readonly code: number = 0x1778
+  readonly name: string = 'InvalidPublicInputs'
+  constructor() {
+    super('Invalid public inputs')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, InvalidPublicInputsError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1778, () => new InvalidPublicInputsError())
+createErrorFromNameLookup.set(
+  'InvalidPublicInputs',
+  () => new InvalidPublicInputsError(),
 )
 
 /**

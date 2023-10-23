@@ -1,23 +1,29 @@
-import { readFileSync } from 'node:fs'
-import { basename, dirname, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { BuildOptions, UserConfig } from 'vite'
-import { defineConfig } from 'vite'
 import inject from '@rollup/plugin-inject'
 
-import globalPackageJson from './package.json'
+import type { BuildOptions, PluginOption, UserConfig } from 'vite'
+import { defineConfig } from 'vite'
+import dts from 'vite-plugin-dts'
 
-const external = [
-  'tslib',
-  'snarkjs',
-  'circomlibjs',
-  '@albus/core',
+const inline: string[] = [
+  // TODO: fixme `key-did-resolver` doesn't support commonjs
+  'key-did-resolver',
+  'multiformats/bases/base58',
+  'multiformats/bases/base64',
+  'varint',
+  'bigint-mod-arith',
+  'nist-weierstrauss',
 ]
 
-export const libFileName = (format: string) => `index.${format}.js`
+const isObject = (item: unknown): item is Record<string, unknown> => Boolean(item && typeof item === 'object' && !Array.isArray(item))
 
-function isObject(item: unknown): item is Record<string, unknown> {
-  return Boolean(item && typeof item === 'object' && !Array.isArray(item))
+function isExternal(source: string) {
+  return !inline.includes(source)
+    && !source.startsWith('.')
+    && !source.startsWith('@/')
+    && !source.startsWith('~/')
+    && !isAbsolute(source)
 }
 
 function mergeDeep<T>(target: T, ...sources: T[]): T {
@@ -44,30 +50,29 @@ function mergeDeep<T>(target: T, ...sources: T[]): T {
 
 function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
   const dir = dirname(fileURLToPath(path))
-  const packageDirName = basename(dir)
+  const pkgName = basename(dir)
 
-  const packageJson = JSON.parse(readFileSync(resolve(dir, 'package.json'), { encoding: 'utf-8' }))
-  const deps = {
-    ...(packageJson.dependencies || {}),
-    ...(packageJson.devDependencies || {}),
-    ...(packageJson.peerDependencies || {}),
-    ...(globalPackageJson.devDependencies || {}),
-    // ...(globalPackageJson.dependencies || {}),
-  }
   return mergeDeep<BuildOptions>(
     {
       sourcemap: true,
+      manifest: true,
+      minify: true,
+      reportCompressedSize: true,
       emptyOutDir: false,
       lib: {
+        name: `albus_${pkgName}`,
         entry: resolve(dir, 'src', 'index.ts'),
-        name: `albus_${packageDirName}`,
-        fileName: libFileName,
-        formats: ['es', 'cjs'],
+        fileName: format => `index.${format === 'es' ? 'mjs' : 'cjs'}`,
+        formats: ['cjs', 'es'],
       },
       rollupOptions: {
-        external: Array.from(new Set([...Object.keys(deps), ...external])),
+        external: isExternal,
         plugins: [
-          inject({ Buffer: ['buffer', 'Buffer'] }),
+          dts({
+            rollupTypes: true,
+            // insertTypesEntry: true,
+          }),
+          inject({ Buffer: ['buffer', 'Buffer'] }) as PluginOption,
         ],
         output: {
           dir: resolve(dir, 'dist'),
@@ -88,20 +93,28 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
 export function pluginViteConfig(packageDirName: string, options: UserConfig = {}) {
   return defineConfig({
     ...options,
-    resolve: {
+    resolve: mergeDeep({
       alias: {
-        'assert': 'assert',
-        'node:crypto': 'crypto-browserify',
         'node:buffer': 'buffer',
       },
-    },
+    }, options.resolve),
     build: viteBuild(packageDirName, options.build),
-  })
+    test: {
+      globals: true,
+      // include: ['packages/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+      // environment: 'node',
+      // environment: 'jsdom',
+      testTimeout: 20000,
+    },
+  } as any)
 }
 
-export default defineConfig({
-  test: {
-    include: ['packages/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    environment: 'jsdom',
-  },
-})
+// export default defineConfig({
+//   test: {
+//     globals: true,
+//     include: ['packages/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+//     environment: 'node',
+//     // environment: 'jsdom',
+//     testTimeout: 20000,
+//   },
+// } as any)

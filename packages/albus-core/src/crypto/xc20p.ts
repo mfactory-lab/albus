@@ -26,21 +26,19 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
+import type { PublicKey } from '@solana/web3.js'
+import { hash } from '@stablelib/sha256'
+import type { KeyPair } from '@stablelib/x25519'
 import { randomBytes } from '@stablelib/random'
 import { generateKeyPair, scalarMultBase, sharedKey } from '@stablelib/x25519'
 import { convertPublicKeyToX25519, convertSecretKeyToX25519 } from '@stablelib/ed25519'
 import { NONCE_LENGTH, TAG_LENGTH, XChaCha20Poly1305 } from '@stablelib/xchacha20poly1305'
 import * as u8a from 'uint8arrays'
+import { concat } from 'uint8arrays'
 import { Keypair } from '@solana/web3.js'
-import type { PublicKey } from '@solana/web3.js'
-import type { KeyPair } from '@stablelib/x25519'
 import {
-  base58ToBytes,
-  base64ToBytes,
-  bytesToBase64,
-  bytesToString,
-  concatKDF,
+  base58ToBytes, base64ToBytes,
+  bytesToBase64, bytesToString,
   stringToBytes,
 } from './utils'
 
@@ -48,25 +46,9 @@ export const XC20P_IV_LENGTH = NONCE_LENGTH
 export const XC20P_TAG_LENGTH = TAG_LENGTH
 export const XC20P_EPK_LENGTH = 32
 
-// a 64-byte private key on the Ed25519 curve.
+// A 64-byte private key on the Ed25519 curve.
 // In string form it is base58-encoded
-export type PrivateKey = number[] | string | Buffer | Uint8Array
-
-/**
- * Create a Solana keypair object from a x25519 private key
- * @param privateKey
- */
-export function makeKeypair(privateKey: PrivateKey): Keypair {
-  if (Array.isArray(privateKey)) {
-    return Keypair.fromSecretKey(Buffer.from(privateKey))
-  }
-
-  if (typeof privateKey === 'string') {
-    return Keypair.fromSecretKey(base58ToBytes(privateKey))
-  }
-
-  return Keypair.fromSecretKey(privateKey)
-}
+type PrivateKey = number[] | string | Uint8Array
 
 const ECDH_ES_XC20PKW_ALG = 'ECDH-ES+XC20PKW'
 const ECDH_ES_XC20PKW_KEYLEN = 256
@@ -79,13 +61,93 @@ interface Envelope {
 }
 
 type Encrypter = (cleartext: Uint8Array, aad?: Uint8Array) => Envelope
+type Decrypter = (ciphertext: Uint8Array, tag: Uint8Array, iv: Uint8Array, aad?: Uint8Array) => Uint8Array | null
 
-type Decrypter = (
-  ciphertext: Uint8Array,
-  tag: Uint8Array,
-  iv: Uint8Array,
-  aad?: Uint8Array
-) => Uint8Array | null
+export class XC20P {
+  /**
+   * Encrypt bytes with a {@link pubKey}
+   */
+  static async encryptBytes(bytes: Uint8Array, pubKey: PublicKey, esk?: PrivateKey): Promise<Uint8Array> {
+    const ekp = esk ? convertSecretKeyToX25519Keypair(esk) : generateKeyPair()
+    const sharedSecret = sharedKey(ekp.secretKey, convertPublicKeyToX25519(pubKey.toBytes()))
+    const kek = concatKDF(
+      sharedSecret,
+      ECDH_ES_XC20PKW_KEYLEN,
+      ECDH_ES_XC20PKW_ALG,
+    )
+    const res = xc20pEncrypter(kek)(bytes)
+
+    return concat([
+      res.iv,
+      res.tag,
+      res.ciphertext,
+      ekp.publicKey,
+    ])
+  }
+
+  /**
+   * Encrypt a message with a {@link pubKey}
+   */
+  static async encrypt(message: string, pubKey: PublicKey, esk?: PrivateKey): Promise<string> {
+    return bytesToBase64(await this.encryptBytes(stringToBytes(message), pubKey, esk))
+  }
+
+  /**
+   * Decrypt an encrypted bytes with the {@link privateKey} that was used to encrypt it
+   */
+  static async decryptBytes(bytes: Uint8Array, privateKey: PrivateKey, epk?: Uint8Array): Promise<Uint8Array> {
+    const iv = bytes.subarray(0, XC20P_IV_LENGTH)
+    const tag = bytes.subarray(XC20P_IV_LENGTH, XC20P_IV_LENGTH + XC20P_TAG_LENGTH)
+    const ciphertext = bytes.subarray(XC20P_IV_LENGTH + XC20P_TAG_LENGTH, -XC20P_EPK_LENGTH)
+    const epkPub = epk ?? bytes.subarray(-XC20P_EPK_LENGTH)
+
+    // normalize the key into an uint array
+    const ed25519Key = makeKeypair(privateKey).secretKey
+
+    // convert ed25519Key to x25519Key
+    const curve25519Key = convertSecretKeyToX25519(ed25519Key)
+
+    const sharedSecret = sharedKey(curve25519Key, epkPub)
+
+    // Key Encryption Key
+    const kek = concatKDF(
+      sharedSecret,
+      ECDH_ES_XC20PKW_KEYLEN,
+      ECDH_ES_XC20PKW_ALG,
+    )
+
+    const binMessage = xc20pDecrypter(kek)(ciphertext, tag, iv)
+
+    if (binMessage === null) {
+      throw new Error('There was an error decoding the message!')
+    }
+
+    return binMessage
+  }
+
+  /**
+   * Decrypt an encrypted message with the {@link privateKey} that was used to encrypt it
+   */
+  static async decrypt(encryptedMessage: string, privateKey: PrivateKey, epk?: Uint8Array): Promise<string> {
+    return bytesToString(await this.decryptBytes(base64ToBytes(encryptedMessage), privateKey, epk))
+  }
+}
+
+/**
+ * Create a Solana keypair object from a x25519 private key
+ * @param privateKey
+ */
+export function makeKeypair(privateKey: PrivateKey): Keypair {
+  if (Array.isArray(privateKey)) {
+    return Keypair.fromSecretKey(Uint8Array.from(privateKey))
+  }
+
+  if (typeof privateKey === 'string') {
+    return Keypair.fromSecretKey(base58ToBytes(privateKey))
+  }
+
+  return Keypair.fromSecretKey(privateKey)
+}
 
 function xc20pEncrypter(key: Uint8Array): Encrypter {
   const cipher = new XChaCha20Poly1305(key)
@@ -107,7 +169,7 @@ function xc20pDecrypter(key: Uint8Array): Decrypter {
     tag: Uint8Array,
     iv: Uint8Array,
     aad?: Uint8Array,
-  ): Uint8Array | null => cipher.open(iv, u8a.concat([ciphertext, tag]), aad)
+  ): Uint8Array | null => cipher.open(iv, concat([ciphertext, tag]), aad)
 }
 
 function convertSecretKeyToX25519Keypair(privateKey: PrivateKey): KeyPair {
@@ -116,56 +178,35 @@ function convertSecretKeyToX25519Keypair(privateKey: PrivateKey): KeyPair {
   return { secretKey, publicKey }
 }
 
-/**
- * Encrypt a message with a {@link pubKey}
- */
-export async function encrypt(message: string, pubKey: PublicKey, ephemeralKey?: PrivateKey): Promise<string> {
-  const epk = ephemeralKey ? convertSecretKeyToX25519Keypair(ephemeralKey) : generateKeyPair()
-  const sharedSecret = sharedKey(epk.secretKey, convertPublicKeyToX25519(pubKey.toBytes()))
-  const kek = concatKDF(
-    sharedSecret,
-    ECDH_ES_XC20PKW_KEYLEN,
-    ECDH_ES_XC20PKW_ALG,
-  )
-  const res = xc20pEncrypter(kek)(stringToBytes(message))
+function writeUint32BE(value: number, array = new Uint8Array(4)): Uint8Array {
+  const encoded = u8a.fromString(value.toString(), 'base10')
+  array.set(encoded, 4 - encoded.length)
+  return array
+}
 
-  return bytesToBase64(
-    u8a.concat([
-      res.iv,
-      res.tag,
-      res.ciphertext,
-      epk.publicKey,
-    ]),
-  )
+function lengthAndInput(input: Uint8Array): Uint8Array {
+  return u8a.concat([writeUint32BE(input.length), input])
 }
 
 /**
- * Decrypt an encrypted message with the {@link privateKey} that was used to encrypt it
+ * Implementation from:
+ * https://github.com/decentralized-identity/did-jwt
  */
-export async function decrypt(encryptedMessage: string, privateKey: PrivateKey): Promise<string> {
-  const encMessage = base64ToBytes(encryptedMessage)
-  const iv = encMessage.subarray(0, XC20P_IV_LENGTH)
-  const tag = encMessage.subarray(XC20P_IV_LENGTH, XC20P_IV_LENGTH + XC20P_TAG_LENGTH)
-  const ciphertext = encMessage.subarray(XC20P_IV_LENGTH + XC20P_TAG_LENGTH, -XC20P_EPK_LENGTH)
-  const epkPub = encMessage.subarray(-XC20P_EPK_LENGTH)
-
-  // normalise the key into an uint array
-  const ed25519Key = makeKeypair(privateKey).secretKey
-  // convert ed25519Key to x25519Key
-  const curve25519Key = convertSecretKeyToX25519(ed25519Key)
-
-  const sharedSecret = sharedKey(curve25519Key, epkPub)
-  // Key Encryption Key
-  const kek = concatKDF(
-    sharedSecret,
-    ECDH_ES_XC20PKW_KEYLEN,
-    ECDH_ES_XC20PKW_ALG,
-  )
-  const binMessage = await xc20pDecrypter(kek)(ciphertext, tag, iv)
-
-  if (binMessage === null) {
-    throw new Error('There was an error decoding the message!')
+export function concatKDF(
+  secret: Uint8Array,
+  keyLen: number,
+  alg: string,
+): Uint8Array {
+  if (keyLen !== 256) {
+    throw new Error(`Unsupported key length: ${keyLen}`)
   }
-
-  return bytesToString(binMessage)
+  const value = u8a.concat([
+    lengthAndInput(u8a.fromString(alg)),
+    lengthAndInput(new Uint8Array(0)), // apu
+    lengthAndInput(new Uint8Array(0)), // apv
+    writeUint32BE(keyLen),
+  ])
+  // since our key length is 256, we only have to do one round
+  const roundNumber = 1
+  return hash(u8a.concat([writeUint32BE(roundNumber), secret, value]))
 }
