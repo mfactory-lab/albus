@@ -160,9 +160,12 @@ export function getCredentialMeta(credential: W3CCredential | VerifiableCredenti
     issuer: credential.issuer,
     issuanceDate: Math.floor(new Date(credential.issuanceDate).getTime() / 1000),
   }
-  if (credential.validUntil) {
-    meta.validUntil = credential.validUntil
-  }
+  // if (credential.validUntil) {
+  meta.validUntil = credential.validUntil ?? 0
+  // }
+  // if (credential.validFrom) {
+  meta.validFrom = credential.validFrom ?? 0
+  // }
   const type = credential.type.slice(-1)[0]
   if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
     meta.type = type
@@ -579,6 +582,7 @@ export async function createClaimsTree(claims: Claims, depth?: number) {
         siblings.push(tree.F.zero)
       }
       return {
+        found: proof.found,
         key: proof.key,
         value: proof.value,
         siblings,

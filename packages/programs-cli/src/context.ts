@@ -34,7 +34,7 @@ import { VerifiedStakePoolClient } from '@albus/verified-stake-pool-sdk'
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import { VerifiedTransferClient } from '../../albus-transfer-sdk'
+import { AlbusTransferClient } from '../../albus-transfer-sdk'
 import { clusterUrl } from './utils'
 
 export interface Context {
@@ -43,7 +43,7 @@ export interface Context {
   stakeClient: VerifiedStakeClient
   stakePoolClient: VerifiedStakePoolClient
   swapClient: VerifiedSwapClient
-  transferClient: VerifiedTransferClient
+  transferClient: AlbusTransferClient
   keypair: Keypair
 }
 
@@ -73,7 +73,7 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
   context.stakeClient = new VerifiedStakeClient(context.provider)
   context.stakePoolClient = new VerifiedStakePoolClient(context.provider)
   context.swapClient = new VerifiedSwapClient(context.provider)
-  context.transferClient = new VerifiedTransferClient(context.provider)
+  context.transferClient = new AlbusTransferClient(context.provider)
   context.keypair = walletKeypair
 
   return context

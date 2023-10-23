@@ -153,7 +153,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
         continue
       }
       // try to apply private credential signal
-      await this.applyCredentialSignal(signal)
+      await this.applyCredentialSignal(signal, true)
     }
   }
 
@@ -202,23 +202,18 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * @returns {Promise<boolean>} A boolean indicating whether the signal was successfully applied.
    * @throws An error if the claims tree is not initialized or if the signal is not found in the credential and `throwIfUnknown` is true.
    */
-  private async applyCredentialSignal(signal: ParseSignalResult, throwIfUnknown = false): Promise<boolean> {
+  private async applyCredentialSignal(signal: ParseSignalResult, throwIfUnknown = false) {
     if (!this.claimsTree) {
       throw new Error('claims tree is not initialized')
     }
     const claim = this.normalizeClaimKey(signal.name)
-    try {
-      const proof = await this.claimsTree.get(claim)
-      this.data[signal.name] = proof.value
-      this.data[`${signal.name}Key`] = proof.key
-      this.data[`${signal.name}Proof`] = proof.siblings
-      return true
-    } catch (e) {
-      if (throwIfUnknown) {
-        throw new Error(`claim "${claim}" is not found in the credential`)
-      }
+    const proof = await this.claimsTree.get(claim)
+    if (!proof.found && throwIfUnknown) {
+      throw new Error(`claim "${claim}" is not found in the credential`)
     }
-    return false
+    this.data[signal.name] = proof.value
+    this.data[`${signal.name}Key`] = proof.key
+    this.data[`${signal.name}Proof`] = proof.siblings
   }
 
   /**

@@ -7,30 +7,32 @@ include "merkleProof.circom";
 
 template LivenessProof(credentialDepth) {
   signal input timestamp;
-  signal input expectedStatus;
-
-  signal input status;
-  signal input statusKey;
-  signal input statusProof[credentialDepth];
-
-  signal input expirationDate; // unix timestamp
-  signal input expirationDateKey;
-  signal input expirationDateProof[credentialDepth];
+  signal input expectedType;
 
   signal input credentialRoot;
+
+  // Credential expiration date
+  signal input meta_validUntil; // unix timestamp
+  signal input meta_validUntilKey;
+  signal input meta_validUntilProof[credentialDepth];
+
+  // liveness type
+  signal input type;
+  signal input typeKey;
+  signal input typeProof[credentialDepth];
 
   signal input issuerPk[2]; // [Ax, Ay]
   signal input issuerSignature[3]; // [R8x, R8y, S]
 
-  // Liveness status check
-  status === expectedStatus;
+  // Liveness type check
+  type === expectedType;
 
   // Expiration date check
   component isExpValid = LessThan(32);
   isExpValid.in[0] <== timestamp;
-  isExpValid.in[1] <== expirationDate;
+  isExpValid.in[1] <== meta_validUntil;
   // If the expiration date is zero, the validation should be skipped
-  isExpValid.out * expirationDate === expirationDate;
+  isExpValid.out * meta_validUntil === meta_validUntil;
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();
@@ -45,18 +47,18 @@ template LivenessProof(credentialDepth) {
   // Data integrity check
   component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
-  mtp.siblings <== [statusProof, expirationDateProof];
-  mtp.key <== [statusKey, expirationDateKey];
-  mtp.value <== [status, expirationDate];
+  mtp.siblings <== [typeProof, meta_validUntilProof];
+  mtp.key <== [typeKey, meta_validUntilKey];
+  mtp.value <== [type, meta_validUntil];
 }
 
 component main{public [
   timestamp,
-  expectedStatus,
-  statusKey,
-  statusProof,
-  expirationDateKey,
-  expirationDateProof,
+  expectedType,
+  typeKey,
+  typeProof,
+  meta_validUntilKey,
+  meta_validUntilProof,
   credentialRoot,
   issuerPk,
   issuerSignature

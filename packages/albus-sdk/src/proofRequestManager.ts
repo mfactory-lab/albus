@@ -451,6 +451,8 @@ export class ProofRequestManager {
       .withPolicy(policy)
       .build()
 
+    console.log(proofInput.data)
+
     try {
       const { proof, publicSignals } = await Albus.zkp.generateProof({
         wasmFile: circuit.wasmUri,

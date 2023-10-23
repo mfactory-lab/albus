@@ -49,7 +49,7 @@ export async function splTransfer(opts: Opts) {
   const destination = await getOrCreateAssociatedTokenAccount(transferClient.connection, keypair, tokenMint, receiver)
 
   try {
-    const signature = await transferClient.splTransfer({
+    const signature = await transferClient.transferToken({
       amount: new BN(opts.amount),
       destination: destination.address,
       receiver,

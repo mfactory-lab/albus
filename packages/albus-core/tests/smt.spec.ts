@@ -31,11 +31,12 @@ import { SMT } from '../src/crypto/smt'
 
 describe('SMT', async () => {
   it('build', async () => {
-    const smt = new SMT(4)
-    for (let i = 0; i < 7; i++) {
+    const smt = new SMT()
+    for (let i = 0; i < 17; i++) {
       await smt.add(BigInt(i), BigInt(i))
+      console.log(`add ${i}`)
     }
     // TODO: add tests
-    console.log(await smt.get(5))
+    console.log(await smt.get(17))
   })
 })

@@ -41,8 +41,6 @@ use crate::{
 /// Proves the [ProofRequest] by validating the proof metadata and updating its status to `Proved`.
 /// Returns an error if the request has expired or if the proof metadata is invalid.
 pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> Result<()> {
-    let circuit = &ctx.accounts.circuit;
-    let policy = &ctx.accounts.policy;
     let req = &mut ctx.accounts.proof_request;
 
     if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
@@ -59,44 +57,43 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
         req.public_inputs.extend(data.public_inputs);
     }
 
-    if data.proof.is_none() {
-        msg!("Public inputs was updated");
-        return Ok(());
-    }
+    if data.proof.is_some() {
+        let timestamp = Clock::get()?.unix_timestamp;
 
-    let timestamp = Clock::get()?.unix_timestamp;
-    let signals = circuit.signals();
+        req.status = ProofRequestStatus::Proved;
+        req.proved_at = timestamp;
+        req.proof = data.proof;
 
-    // validate timestamp
-    if let Some(s) = signals.get(TIMESTAMP_SIGNAL) {
-        let input_ts = bytes_to_num(req.public_inputs[s.index]);
-        if (input_ts as i64) < timestamp - TIMESTAMP_THRESHOLD as i64 {
-            msg!("Error: Invalid timestamp input");
-            return Err(AlbusError::InvalidData.into());
+        let circuit = &ctx.accounts.circuit;
+        let signals = circuit.signals();
+
+        // validate timestamp
+        if let Some(s) = signals.get(TIMESTAMP_SIGNAL) {
+            let input_ts = bytes_to_num(req.public_inputs[s.index]);
+            if (input_ts as i64) < timestamp - TIMESTAMP_THRESHOLD as i64 {
+                msg!("Error: Invalid timestamp input");
+                return Err(AlbusError::InvalidData.into());
+            }
         }
+
+        // // validate issuer
+        // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
+        //     public_inputs[s.0] = <[u8; 32]>::try_from(&ISSUER_PK[..32]).unwrap();
+        //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
+        // }
+
+        // validate policy rules
+        let policy = &ctx.accounts.policy;
+        policy.apply_rules(&mut req.public_inputs, &signals);
+
+        emit!(ProveEvent {
+            proof_request: req.key(),
+            service_provider: req.service_provider,
+            circuit: req.circuit,
+            owner: req.owner,
+            timestamp,
+        });
     }
-
-    // // validate issuer
-    // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
-    //     public_inputs[s.0] = <[u8; 32]>::try_from(&ISSUER_PK[..32]).unwrap();
-    //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
-    // }
-
-    policy.apply_rules(&mut req.public_inputs, &signals);
-
-    req.status = ProofRequestStatus::Proved;
-    req.proved_at = timestamp;
-    req.proof = data.proof;
-
-    emit!(ProveEvent {
-        proof_request: req.key(),
-        service_provider: req.service_provider,
-        circuit: circuit.key(),
-        owner: req.owner,
-        timestamp,
-    });
-
-    msg!("Proved!");
 
     Ok(())
 }
@@ -111,12 +108,12 @@ pub struct ProveProofRequestData {
 #[derive(Accounts)]
 #[instruction(data: ProveProofRequestData)]
 pub struct ProveProofRequest<'info> {
-    #[account(mut, has_one = policy, has_one = circuit)]
+    #[account(mut)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
 
     pub circuit: Box<Account<'info, Circuit>>,
 
-    pub policy: Account<'info, Policy>,
+    pub policy: Box<Account<'info, Policy>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

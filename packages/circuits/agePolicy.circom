@@ -20,9 +20,9 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   signal input credentialRoot;
 
   // Credential expiration date
-  signal input expirationDate; // unix timestamp
-  signal input expirationDateKey;
-  signal input expirationDateProof[credentialDepth];
+  signal input meta_validUntil; // unix timestamp
+  signal input meta_validUntilKey;
+  signal input meta_validUntilProof[credentialDepth];
 
   // Birth date
   signal input birthDate; // Ymd format. Example: 20010101
@@ -45,9 +45,9 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   // Expiration date check
   component isExpValid = LessThan(32);
   isExpValid.in[0] <== timestamp;
-  isExpValid.in[1] <== expirationDate;
+  isExpValid.in[1] <== meta_validUntil;
   // If the expiration date is zero, the validation should be skipped
-  isExpValid.out * expirationDate === expirationDate;
+  isExpValid.out * meta_validUntil === meta_validUntil;
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();
@@ -62,9 +62,9 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   // Data integrity check
   component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
-  mtp.siblings <== [birthDateProof, expirationDateProof];
-  mtp.key <== [birthDateKey, expirationDateKey];
-  mtp.value <== [birthDate, expirationDate];
+  mtp.siblings <== [birthDateProof, meta_validUntilProof];
+  mtp.key <== [birthDateKey, meta_validUntilKey];
+  mtp.value <== [birthDate, meta_validUntil];
 
   // Extracts the user public key from private key
   component upk = BabyPbk();
@@ -100,9 +100,9 @@ component main{public [
   minAge,
   maxAge,
   credentialRoot,
-//  expirationDate,
-  expirationDateKey,
-  expirationDateProof,
+//  meta_validUntil,
+  meta_validUntilKey,
+  meta_validUntilProof,
   birthDateKey,
   birthDateProof,
   issuerPk,

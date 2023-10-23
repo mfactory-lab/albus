@@ -32,8 +32,6 @@ use anchor_lang::prelude::*;
 #[cfg(feature = "verify-on-chain")]
 use groth16_solana::{Proof, VK};
 
-pub type PublicInputs = Vec<[u8; 32]>;
-
 #[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct ProofData {
     pub a: [u8; 64],
@@ -189,7 +187,7 @@ impl Policy {
     }
 
     #[inline]
-    pub fn apply_rules(&self, public_inputs: &mut PublicInputs, signals: &Signals) {
+    pub fn apply_rules(&self, public_inputs: &mut [[u8; 32]], signals: &Signals) {
         for rule in &self.rules {
             let (name, idx) = rule.parse();
             if let Some(signal) = signals.get(name) {
@@ -495,7 +493,7 @@ fn test_apply_rules() {
     };
 
     let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"].to_vec());
-    let mut public_inputs: PublicInputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
+    let mut public_inputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
 
     policy.apply_rules(&mut public_inputs, &signals);
 

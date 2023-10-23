@@ -31,21 +31,21 @@ use anchor_lang::prelude::*;
 #[cfg(feature = "verify-on-chain")]
 use groth16_solana::{Groth16Verifier, Proof, VK};
 
-use crate::state::Circuit;
-use crate::{state::ProofRequest, AlbusError};
-
 #[cfg(feature = "verify-on-chain")]
 use crate::{events::VerifyEvent, state::ProofRequestStatus};
+
+use crate::state::Circuit;
+use crate::{state::ProofRequest, AlbusError};
 
 pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
     #[cfg(feature = "verify-on-chain")]
     {
         let req = &mut ctx.accounts.proof_request;
+        let circuit = &ctx.accounts.circuit;
 
         let proof = req.proof.as_ref().ok_or(AlbusError::InvalidPublicInputs)?;
         let proof = Proof::new(proof.a, proof.b, proof.c);
 
-        let circuit = &ctx.accounts.circuit;
         let vk = VK {
             alpha: circuit.vk.alpha,
             beta: circuit.vk.beta,
