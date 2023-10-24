@@ -1,0 +1,43 @@
+{
+  "name": "@mfactory-lab/albus-swap-sdk",
+  "version": "0.0.11",
+  "description": "Albus Swap SDK",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/albus-swap-sdk"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "release": "release-it --ci",
+    "api:gen": "DEBUG='(solita|rustbin):(info|error)' solita"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.28.0",
+    "@metaplex-foundation/beet": "^0.7.1",
+    "@solana/web3.js": "^1.77.3"
+  },
+  "devDependencies": {
+    "@mfactory-lab/release-it-config": "workspace:^",
+    "@metaplex-foundation/solita": "^0.20.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  }
+}

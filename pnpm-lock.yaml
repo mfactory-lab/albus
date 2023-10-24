@@ -268,6 +268,25 @@ importers:
         specifier: ^1.8.8
         version: 1.8.19(typescript@5.0.4)
 
+  packages/albus-swap-sdk:
+    dependencies:
+      '@coral-xyz/anchor':
+        specifier: ^0.28.0
+        version: 0.28.0
+      '@metaplex-foundation/beet':
+        specifier: ^0.7.1
+        version: 0.7.1
+      '@solana/web3.js':
+        specifier: ^1.77.3
+        version: 1.87.1
+    devDependencies:
+      '@metaplex-foundation/solita':
+        specifier: ^0.20.0
+        version: 0.20.0
+      '@mfactory-lab/release-it-config':
+        specifier: workspace:^
+        version: link:../release-it-config
+
   packages/albus-transfer-sdk:
     dependencies:
       '@coral-xyz/anchor':
@@ -304,9 +323,9 @@ importers:
       '@albus/verified-stake-sdk':
         specifier: workspace:*
         version: link:../verified-stake-sdk
-      '@albus/verified-swap-sdk':
+      '@mfactory-lab/albus-swap-sdk':
         specifier: workspace:*
-        version: link:../verified-swap-sdk
+        version: link:../albus-swap-sdk
       '@mfactory-lab/albus-transfer-sdk':
         specifier: workspace:*
         version: link:../albus-transfer-sdk
@@ -352,22 +371,6 @@ importers:
         version: 0.20.0
 
   packages/verified-stake-sdk:
-    dependencies:
-      '@coral-xyz/anchor':
-        specifier: ^0.28.0
-        version: 0.28.0
-      '@metaplex-foundation/beet':
-        specifier: ^0.7.1
-        version: 0.7.1
-      '@solana/web3.js':
-        specifier: ^1.77.3
-        version: 1.87.1
-    devDependencies:
-      '@metaplex-foundation/solita':
-        specifier: ^0.20.0
-        version: 0.20.0
-
-  packages/verified-swap-sdk:
     dependencies:
       '@coral-xyz/anchor':
         specifier: ^0.28.0
