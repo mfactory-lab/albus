@@ -1,7 +1,6 @@
 {
   "name": "@mfactory-lab/albus-transfer-sdk",
-  "version": "0.0.6",
-  "private": true,
+  "version": "0.0.10",
   "description": "Albus Transfer SDK",
   "type": "module",
   "repository": {
