@@ -40,5 +40,6 @@ pub const TIMESTAMP_THRESHOLD: u16 = 30;
 
 pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
 pub const VC_SYMBOL_CODE: &str = "VC";
+pub const VC_NAME: &str = "Albus Digital Credential";
 
 pub const DEFAULT_SECRET_SHARE_THRESHOLD: u8 = 2;
