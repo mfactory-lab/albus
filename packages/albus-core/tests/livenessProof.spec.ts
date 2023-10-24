@@ -89,7 +89,7 @@ describe('LivenessProof', async () => {
       await circuit.assertOut(witness, {})
       assert.ok(false)
     } catch (e: any) {
-      console.log(e.message)
+      // console.log(e.message)
       assert.include(e.message, 'Error in template LivenessProof_253 line: 35')
     }
   })

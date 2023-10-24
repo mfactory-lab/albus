@@ -64,206 +64,256 @@ describe('AlbusClient', async () => {
     ],
   } as ServiceProvider
 
-  const circuit = {
-    code: 'age',
-    name: 'Age',
-    vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('agePolicy.vk.json').toString())),
-    wasmUri: loadFixture('agePolicy.wasm'),
-    zkeyUri: loadFixture('agePolicy.zkey'),
-    outputs: [
-      'encryptedData[4]',
-      'encryptedShare[3][4]',
-      'userPublicKey[2]',
-    ],
-    privateSignals: [
-      'birthDate',
-      'userPrivateKey',
-      'meta_validUntil',
-    ],
-    publicSignals: [
-      'timestamp',
-      'minAge',
-      'maxAge',
-      'credentialRoot',
-      'meta_validUntilKey',
-      'meta_validUntilProof[5]',
-      'birthDateKey',
-      'birthDateProof[5]',
-      'issuerPk[2]',
-      'issuerSignature[3]',
-      'trusteePublicKey[3][2]',
-    ],
-  } as unknown as Circuit
+  describe('AgeProof', async () => {
+    const circuit = {
+      code: 'age',
+      name: 'Age',
+      vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('agePolicy.vk.json').toString())),
+      wasmUri: loadFixture('agePolicy.wasm'),
+      zkeyUri: loadFixture('agePolicy.zkey'),
+      outputs: [
+        'encryptedData[4]',
+        'encryptedShare[3][4]',
+        'userPublicKey[2]',
+      ],
+      privateSignals: [
+        'birthDate',
+        'userPrivateKey',
+        'meta_validUntil',
+      ],
+      publicSignals: [
+        'timestamp',
+        'minAge',
+        'maxAge',
+        'credentialRoot',
+        'meta_validUntilKey',
+        'meta_validUntilProof[5]',
+        'birthDateKey',
+        'birthDateProof[5]',
+        'issuerPk[2]',
+        'issuerSignature[3]',
+        'trusteePublicKey[3][2]',
+      ],
+    } as unknown as Circuit
 
-  const policy = {
-    serviceProvider: PublicKey.default,
-    circuit: PublicKey.default,
-    code: 'policy',
-    name: 'policy',
-    description: 'policy',
-    expirationPeriod: 0,
-    retentionPeriod: 0,
-    rules: [
-      { key: 'minAge', value: Array.from(Albus.zkp.finiteToBytes(18)) },
-      { key: 'maxAge', value: Array.from(Albus.zkp.finiteToBytes(100)) },
-    ],
-  } as Policy
+    const policy = {
+      serviceProvider: PublicKey.default,
+      circuit: PublicKey.default,
+      code: 'age',
+      name: 'age',
+      description: '',
+      expirationPeriod: 0,
+      retentionPeriod: 0,
+      rules: [
+        {
+          key: 'minAge',
+          value: Array.from(Albus.crypto.ffUtils.beInt2Buff(18n, 32)),
+        },
+        {
+          key: 'maxAge',
+          value: Array.from(Albus.crypto.ffUtils.beInt2Buff(100n, 32)),
+        },
+      ],
+    } as Policy
 
-  const now = Math.floor(Date.now() / 1000)
+    const now = Math.floor(Date.now() / 1000)
 
-  const credential = await Albus.credential.createVerifiableCredential({
-    givenName: 'Mikayla',
-    familyName: 'Halvorson',
-    gender: 'female',
-    birthDate: '19661002',
-    birthPlace: 'Westland',
-    nationality: 'MNE',
-    country: 'MNE',
-    countryOfBirth: 'MNE',
-  }, {
-    issuerSecretKey: payerKeypair.secretKey,
-    validUntil: now + 86400, // 1 day
-  })
-
-  it('can packPubkey and unpackPubkey', async () => {
-    const keypair = Keypair.generate()
-    const key = Albus.zkp.packPubkey(eddsa.prv2pub(keypair.secretKey))
-    assert.ok(Albus.zkp.unpackPubkey(key) !== null)
-  })
-
-  it('prepareInputs', async () => {
-    const user = Keypair.generate()
-    const prv = Albus.zkp.formatPrivKeyForBabyJub(user.secretKey)
-
-    const inputs = await new ProofInputBuilder(credential)
-      .withUserPrivateKey(prv)
-      .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
-      .withPolicy(policy)
-      .withCircuit(circuit)
-      .build()
-
-    const data = inputs.data
-
-    assert.equal(data.meta_validUntil, now + 86400)
-    assert.equal(data.meta_validUntilKey, 2)
-    assert.equal(data.meta_validUntilProof.length, 5)
-    assert.equal(data.birthDate, '19661002')
-    assert.equal(data.birthDateKey, 7n)
-    assert.equal(data.birthDateProof.length, 5)
-    assert.equal(data.issuerPk.length, 2)
-    assert.equal(data.issuerSignature.length, 3)
-    assert.deepEqual(data.trusteePublicKey, [[1n, 2n], [1n, 2n], [1n, 2n]])
-  })
-
-  it('prove', async () => {
-    vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
-    // vi.spyOn(client.circuit, 'load').mockReturnValue(Promise.resolve(circuit))
-    // vi.spyOn(client.policy, 'load').mockReturnValue(Promise.resolve(policy))
-
-    vi.spyOn(client.proofRequest, 'loadFull').mockReturnValue(Promise.resolve({
-      proofRequest: { circuit: PublicKey.default, policy: PublicKey.default },
-      circuit,
-      policy,
-      serviceProvider,
-    } as any))
-
-    const trusteeCount = 3
-    const trusteePublicKeys: [bigint, bigint][] = []
-    for (let i = 0; i < trusteeCount; i++) {
-      const trusteeKeypair = Keypair.generate()
-      const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
-      trusteePublicKeys.push(trusteePublicKey)
-    }
-
-    vi.spyOn(client.service, 'loadTrusteeKeys').mockReturnValue(Promise.resolve(trusteePublicKeys))
-    vi.spyOn(client.provider, 'sendAll').mockReturnValue(Promise.resolve(['abc123']))
-
-    const { signatures, proof, publicSignals } = await client.proofRequest.fullProve({
-      // exposedFields: circuit.privateSignals,
-      userPrivateKey: payerKeypair.secretKey,
-      proofRequest: PublicKey.default,
-      vc: PublicKey.default,
+    const credential = await Albus.credential.createVerifiableCredential({
+      givenName: 'Mikayla',
+      familyName: 'Halvorson',
+      gender: 'female',
+      birthDate: '19661002',
+      birthPlace: 'Westland',
+      nationality: 'MNE',
+      country: 'MNE',
+      countryOfBirth: 'MNE',
+    }, {
+      issuerSecretKey: payerKeypair.secretKey,
+      validUntil: now + 86400, // 1 day
     })
 
-    const isVerified = await Albus.zkp.verifyProof({
-      vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
-      proof,
-      // @ts-expect-error readonly
-      publicInput: publicSignals,
+    it('can packPubkey and unpackPubkey', async () => {
+      const keypair = Keypair.generate()
+      const key = Albus.zkp.packPubkey(eddsa.prv2pub(keypair.secretKey))
+      assert.ok(Albus.zkp.unpackPubkey(key) !== null)
     })
 
-    assert.ok(isVerified)
-    assert.equal(signatures[0], 'abc123')
-  })
+    it('prepareInputs', async () => {
+      const user = Keypair.generate()
+      const prv = Albus.zkp.formatPrivKeyForBabyJub(user.secretKey)
 
-  describe('AttendanceProof', () => {
-    const issuer = Keypair.generate()
-    const user = Keypair.generate()
-    const prv = Albus.zkp.formatPrivKeyForBabyJub(user.secretKey)
-
-    it ('is valid proof', async () => {
-      const circuit = {
-        code: 'attendance',
-        name: 'attendance',
-        vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('attendanceProof.vk.json').toString())),
-        wasmUri: loadFixture('attendanceProof.wasm'),
-        zkeyUri: loadFixture('attendanceProof.zkey'),
-        outputs: [],
-        privateSignals: ['event', 'meta_issuanceDate'],
-        publicSignals: [
-          'expectedEvent',
-          'expectedDateFrom',
-          'expectedDateTo',
-          'eventKey',
-          'eventProof[4]',
-          'meta_issuanceDateKey',
-          'meta_issuanceDateProof[4]',
-          'credentialRoot',
-          'issuerPk[2]',
-          'issuerSignature[3]',
-        ],
-      } as unknown as Circuit
-
-      const policy = {
-        serviceProvider: PublicKey.default,
-        circuit: PublicKey.default,
-        code: 'attendancePolicy',
-        name: 'attendancePolicy',
-        description: '',
-        expirationPeriod: 0,
-        retentionPeriod: 0,
-        rules: [
-          { key: 'expectedEvent', value: Array.from(Albus.zkp.finiteToBytes(Albus.credential.encodeClaimValue('test1'))) },
-          { key: 'maxAge', value: Array.from(Albus.zkp.finiteToBytes(100)) },
-          { key: 'expectedDateFrom', value: Array.from(Albus.zkp.finiteToBytes(0)) },
-          { key: 'expectedDateTo', value: Array.from(Albus.zkp.finiteToBytes(0)) },
-        ],
-      } as Policy
-
-      const credential = await Albus.credential.createVerifiableCredential({
-        event: 'test1',
-      }, {
-        issuerSecretKey: issuer.secretKey,
-        validUntil: Math.floor(Date.now() / 1000) + 86400,
-      })
-
-      const proofInput = await new ProofInputBuilder(credential)
+      const inputs = await new ProofInputBuilder(credential)
         .withUserPrivateKey(prv)
         .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
         .withPolicy(policy)
         .withCircuit(circuit)
         .build()
 
-      // console.log(proofInput.data)
+      const data = inputs.data
 
-      const { proof, publicSignals } = await Albus.zkp.generateProof({
-        wasmFile: circuit.wasmUri,
-        zkeyFile: circuit.zkeyUri,
-        input: proofInput.data,
+      assert.equal(data.meta_validUntil, now + 86400)
+      assert.equal(data.meta_validUntilKey, 2)
+      assert.equal(data.meta_validUntilProof.length, 5)
+      assert.equal(data.birthDate, '19661002')
+      assert.equal(data.birthDateKey, 7n)
+      assert.equal(data.birthDateProof.length, 5)
+      assert.equal(data.issuerPk.length, 2)
+      assert.equal(data.issuerSignature.length, 3)
+      assert.deepEqual(data.trusteePublicKey, [[1n, 2n], [1n, 2n], [1n, 2n]])
+    })
+
+    it('prove', async () => {
+      vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
+      // vi.spyOn(client.circuit, 'load').mockReturnValue(Promise.resolve(circuit))
+      // vi.spyOn(client.policy, 'load').mockReturnValue(Promise.resolve(policy))
+
+      vi.spyOn(client.proofRequest, 'loadFull').mockReturnValue(Promise.resolve({
+        proofRequest: {
+          circuit: PublicKey.default,
+          policy: PublicKey.default,
+        },
+        circuit,
+        policy,
+        serviceProvider,
+      } as any))
+
+      const trusteeCount = 3
+      const trusteePublicKeys: [bigint, bigint][] = []
+      for (let i = 0; i < trusteeCount; i++) {
+        const trusteeKeypair = Keypair.generate()
+        const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
+        trusteePublicKeys.push(trusteePublicKey)
+      }
+
+      vi.spyOn(client.service, 'loadTrusteeKeys').mockReturnValue(Promise.resolve(trusteePublicKeys))
+      vi.spyOn(client.provider, 'sendAll').mockReturnValue(Promise.resolve(['abc123']))
+
+      const {
+        signatures,
+        proof,
+        publicSignals,
+      } = await client.proofRequest.fullProve({
+        // exposedFields: circuit.privateSignals,
+        userPrivateKey: payerKeypair.secretKey,
+        proofRequest: PublicKey.default,
+        vc: PublicKey.default,
       })
 
-      console.log(proof)
-      console.log(publicSignals)
+      const isVerified = await Albus.zkp.verifyProof({
+        vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
+        proof,
+        // @ts-expect-error readonly
+        publicInput: publicSignals,
+      })
+
+      assert.ok(isVerified)
+      assert.equal(signatures[0], 'abc123')
+    })
+  })
+
+  describe('AttendanceProof', async () => {
+    const issuer = Keypair.generate()
+
+    const event = 'test1'
+
+    const circuit = {
+      code: 'attendance',
+      name: 'attendance',
+      vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('attendanceProof.vk.json').toString())),
+      wasmUri: loadFixture('attendanceProof.wasm'),
+      zkeyUri: loadFixture('attendanceProof.zkey'),
+      outputs: [],
+      privateSignals: ['event', 'meta_issuanceDate'],
+      publicSignals: [
+        'expectedEvent',
+        'expectedDateFrom',
+        'expectedDateTo',
+        'eventKey',
+        'eventProof[4]',
+        'meta_issuanceDateKey',
+        'meta_issuanceDateProof[4]',
+        'credentialRoot',
+        'issuerPk[2]',
+        'issuerSignature[3]',
+      ],
+    } as unknown as Circuit
+
+    const policy = {
+      serviceProvider: PublicKey.default,
+      circuit: PublicKey.default,
+      code: 'attendancePolicy',
+      name: 'attendancePolicy',
+      description: '',
+      expirationPeriod: 0,
+      retentionPeriod: 0,
+      rules: [
+        { key: 'expectedEvent', value: Array.from(Albus.crypto.ffUtils.beInt2Buff(Albus.credential.encodeClaimValue(event), 32)) },
+        { key: 'expectedDateFrom', value: Array.from(Albus.crypto.ffUtils.beInt2Buff(0n, 32)) },
+        { key: 'expectedDateTo', value: Array.from(Albus.crypto.ffUtils.beInt2Buff(0n, 32)) },
+      ],
+    } as Policy
+
+    const credential = await Albus.credential.createVerifiableCredential({
+      event,
+    }, {
+      issuerSecretKey: issuer.secretKey,
+      // validUntil: Math.floor(Date.now() / 1000) + 86400,
+    })
+
+    it ('is valid proof', async () => {
+      vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
+
+      vi.spyOn(client.proofRequest, 'loadFull').mockReturnValue(Promise.resolve({
+        proofRequest: { circuit: PublicKey.default, policy: PublicKey.default },
+        circuit,
+        policy,
+        serviceProvider,
+      } as any))
+
+      const trusteePublicKeys: [bigint, bigint][] = []
+      for (let i = 0; i < 3; i++) {
+        const trusteeKeypair = Keypair.generate()
+        const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
+        trusteePublicKeys.push(trusteePublicKey)
+      }
+
+      vi.spyOn(client.service, 'loadTrusteeKeys').mockReturnValue(Promise.resolve(trusteePublicKeys))
+      vi.spyOn(client.provider, 'sendAll').mockReturnValue(Promise.resolve(['abc123']))
+
+      const { signatures, proof, publicSignals } = await client.proofRequest.fullProve({
+        // exposedFields: circuit.privateSignals,
+        userPrivateKey: payerKeypair.secretKey,
+        proofRequest: PublicKey.default,
+        vc: PublicKey.default,
+      })
+
+      const isVerified = await Albus.zkp.verifyProof({
+        vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
+        proof,
+        // @ts-expect-error readonly
+        publicInput: publicSignals,
+      })
+
+      assert.ok(isVerified)
+      assert.equal(signatures[0], 'abc123')
+
+      // const proofInput = await new ProofInputBuilder(credential)
+      //   .withUserPrivateKey(prv)
+      //   .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
+      //   .withPolicy(policy)
+      //   .withCircuit(circuit)
+      //   .build()
+      //
+      // // console.log(proofInput.data)
+      //
+      // const { proof, publicSignals } = await Albus.zkp.generateProof({
+      //   wasmFile: circuit.wasmUri,
+      //   zkeyFile: circuit.zkeyUri,
+      //   input: proofInput.data,
+      // })
+      //
+      // console.log(proof)
+      // console.log(publicSignals)
     })
   })
 })
