@@ -1,10 +1,10 @@
 const os = require('os')
 const path = require('path')
 
-const programName = 'verified_swap'
+const programName = 'albus_swap'
 const programId = '8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'
 
-const programDir = path.join(__dirname, '..', '..', 'programs', 'verified_swap')
+const programDir = path.join(__dirname, '..', '..', 'programs', 'albus-swap')
 const idlGenerator = 'anchor'
 const idlDir = path.join(__dirname, 'idl')
 const sdkDir = path.join(__dirname, 'src', 'generated')

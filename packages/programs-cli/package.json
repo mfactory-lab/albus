@@ -10,7 +10,7 @@
   "dependencies": {
     "@albus/verified-stake-pool-sdk": "workspace:*",
     "@albus/verified-stake-sdk": "workspace:*",
-    "@albus/verified-swap-sdk": "workspace:*",
+    "@mfactory-lab/albus-swap-sdk": "workspace:*",
     "@mfactory-lab/albus-transfer-sdk": "workspace:*",
     "@solana/spl-token-swap": "^0.2.2",
     "commander": "^10.0.0",

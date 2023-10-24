@@ -10,7 +10,7 @@ import {
   createWithdrawSingleTokenInstruction,
 } from './generated'
 
-export class VerifiedSwapClient {
+export class AlbusSwapClient {
   programId = PROGRAM_ID
 
   constructor(private readonly provider: AnchorProvider) {}
