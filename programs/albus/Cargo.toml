@@ -1,6 +1,6 @@
 [package]
 name = "albus"
-version = "0.0.18"
+version = "0.0.19"
 description = "Albus Protocol on-chain program"
 homepage = "https://albus.finance"
 repository = "https://github.com/mfactory-lab/albus"
@@ -16,9 +16,10 @@ no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 verify-on-chain = ["groth16-solana"]
-#devnet = []
-#default = ["verify-on-chain"]
-default = []
+#devnet = ["verify-on-chain"]
+#mainnet = []
+default = ["verify-on-chain"]
+#default = []
 
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
