@@ -11,8 +11,6 @@ Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their
 
 # Full documentation
 
-![Albus logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/albus-logo.png)
-
 - [Introduction](https://github.com/mfactory-lab/albus/wiki)
 - [Albus diagrams](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams)
   - [Workflow overview](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-overview)
