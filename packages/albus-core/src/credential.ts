@@ -44,7 +44,7 @@ export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
-export const DEFAULT_CLAIM_TREE_DEPTH = 5 // 2^4 = 16 elements
+export const DEFAULT_CLAIM_TREE_DEPTH = 5 // 2^5-1 = 16 elements
 
 export interface CreateCredentialOpts {
   issuerSecretKey?: number[] | Uint8Array
@@ -59,6 +59,8 @@ export interface CreateCredentialOpts {
   validFrom?: number
   // unix timestamp
   validUntil?: number
+  // custom issuance date
+  timestamp?: number
   credentialType?: CredentialType
 }
 
@@ -91,9 +93,6 @@ function normalizeClaims(claims: Claims) {
 export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts = {}) {
   const normalizedClaims = normalizeClaims(claims)
 
-  // must be added to the claims for zk verification
-  normalizedClaims.expirationDate = opts.validUntil ?? 0
-
   let credentialSubject: Claims = {}
 
   if (opts.encrypt) {
@@ -110,17 +109,18 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
     credentialSubject = { ...normalizedClaims }
   }
 
-  const claimsTree = await createClaimsTree(normalizedClaims)
-
+  const now = opts?.timestamp ? new Date(opts.timestamp * 1000) : new Date()
   const vcType = [DEFAULT_VC_TYPE, CredentialType.AlbusCredential]
+
   if (opts.credentialType) {
     vcType.push(opts.credentialType)
   }
+
   const vc: W3CCredential = {
     '@context': [DEFAULT_CONTEXT],
     'type': vcType,
     'issuer': opts.issuerDid ?? DEFAULT_DID,
-    'issuanceDate': new Date().toISOString(),
+    'issuanceDate': now.toISOString(),
     'credentialSubject': credentialSubject,
   }
 
@@ -139,6 +139,8 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
   }
 
   if (opts.customProof || opts.issuerSecretKey) {
+    const meta = getCredentialMeta(vc)
+    const claimsTree = await createClaimsTree({ meta, ...normalizedClaims })
     vc.proof = opts.customProof ?? createCredentialProof({
       rootHash: claimsTree.root,
       signerSecretKey: Uint8Array.from(opts.issuerSecretKey),
@@ -147,6 +149,25 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
   }
 
   return vc as VerifiableCredential
+}
+
+/**
+ * Create metadata info from the credential
+ * used for generate a claims tree
+ */
+export function getCredentialMeta(credential: W3CCredential | VerifiableCredential) {
+  const parseDate = (value: number | string) => Math.floor(new Date(value).getTime() / 1000)
+  const meta: Record<string, any> = {
+    issuer: credential.issuer,
+    issuanceDate: parseDate(credential.issuanceDate),
+    validUntil: credential.validUntil ? parseDate(credential.validUntil) : 0,
+    validFrom: credential.validFrom ? parseDate(credential.validFrom) : 0,
+  }
+  const type = credential.type.slice(-1)[0]
+  if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
+    meta.type = type
+  }
+  return meta
 }
 
 export interface CreatePresentationOpts {
@@ -527,14 +548,22 @@ export function verifyPresentationProof(proof: PresentationProof, challenge: Uin
   }
 }
 
+export async function createCredentialTree(credential: VerifiableCredential, depth?: number) {
+  return createClaimsTree({
+    meta: getCredentialMeta(credential),
+    ...credential.credentialSubject,
+  }, depth)
+}
+
 /**
  * Creates a claim's tree from the provided claims and returns an object with tree operations.
  */
-export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_TREE_DEPTH) {
+export async function createClaimsTree(claims: Claims, depth?: number) {
   const tree = new SMT()
   const flattenClaims = flattenObject(claims)
   const flattenClaimKeys = Object.keys(flattenClaims)
   const encodeKey = (k: string) => BigInt(flattenClaimKeys.indexOf(k))
+  const treeDepth = depth ?? DEFAULT_CLAIM_TREE_DEPTH
 
   for (const key of flattenClaimKeys) {
     await tree.add(encodeKey(key), encodeClaimValue(flattenClaims[key]))
@@ -546,30 +575,31 @@ export async function createClaimsTree(claims: Claims, nLevels = DEFAULT_CLAIM_T
     get: async (key: string) => {
       const proof = await tree.get(encodeKey(key))
       const siblings = proof.siblings
-      while (siblings.length < nLevels) {
+      while (siblings.length < treeDepth) {
         siblings.push(tree.F.zero)
       }
       return {
+        found: proof.found,
         key: proof.key,
         value: proof.value,
         siblings,
       }
     },
     delete: (key: string) => tree.delete(encodeKey(key)),
-    add: (key: string, val: any) => tree.add(encodeKey(key), encodeClaimValue(val)),
+    add: (key: string, val: any) => {
+      return tree.add(encodeKey(key), encodeClaimValue(val))
+    },
     update: (key: string, val: any) => tree.update(encodeKey(key), encodeClaimValue(val)),
   }
 }
 
 // Helpers
 
-export function encodeClaimValue(s: string) {
+export function encodeClaimValue(s: string | number | bigint) {
   try {
     return BigInt(s)
   } catch (e) {
-    // this variant only supports max 32 byte string
-    // return bytesToBigInt(new TextEncoder().encode(String(s)))
-    return poseidon.hashBytes(new TextEncoder().encode(s))
+    return poseidon.hashBytes(new TextEncoder().encode(String(s)))
   }
 }
 

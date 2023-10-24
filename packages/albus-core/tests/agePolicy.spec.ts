@@ -52,22 +52,24 @@ describe('AgePolicy', async () => {
     nationality: 'MNE',
     country: 'MNE',
     countryOfBirth: 'MNE',
-    expirationDate: 0,
+    meta: {
+      validUntil: 0,
+    },
   }
 
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = { minAge: 18, maxAge: 100 }) {
     const tree = await createClaimsTree(claims)
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
     const birthDateProof = await tree.get('birthDate')
-    const expDateProof = await tree.get('expirationDate')
+    const validUntilProof = await tree.get('meta.validUntil')
     const trusteeCount = 3
 
     const input = {
       timestamp,
       credentialRoot: tree.root,
-      expirationDate: expDateProof.value,
-      expirationDateKey: expDateProof.key,
-      expirationDateProof: expDateProof.siblings,
+      meta_validUntil: validUntilProof.value,
+      meta_validUntilKey: validUntilProof.key,
+      meta_validUntilProof: validUntilProof.siblings,
       birthDate: birthDateProof.value,
       birthDateKey: birthDateProof.key,
       birthDateProof: birthDateProof.siblings,
@@ -105,7 +107,9 @@ describe('AgePolicy', async () => {
   it('valid age and expired', async () => {
     const input = await generateInput({
       ...claims,
-      expirationDate: timestamp,
+      meta: {
+        validUntil: timestamp,
+      },
     })
 
     try {

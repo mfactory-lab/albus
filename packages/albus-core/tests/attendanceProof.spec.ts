@@ -40,13 +40,15 @@ describe('AttendanceProof', async () => {
 
   const claims = {
     event: 'solana-breakpoint',
-    date: 1697035000,
+    meta: {
+      issuanceDate: 1697035000,
+    },
   }
 
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = {}) {
-    const tree = await createClaimsTree(claims)
+    const tree = await createClaimsTree(claims, 4)
     const eventProof = await tree.get('event')
-    const dateProof = await tree.get('date')
+    const dateProof = await tree.get('meta.issuanceDate')
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
 
     return {
@@ -54,9 +56,9 @@ describe('AttendanceProof', async () => {
       event: eventProof.value,
       eventKey: eventProof.key,
       eventProof: eventProof.siblings,
-      date: dateProof.value,
-      dateKey: dateProof.key,
-      dateProof: dateProof.siblings,
+      meta_issuanceDate: dateProof.value,
+      meta_issuanceDateKey: dateProof.key,
+      meta_issuanceDateProof: dateProof.siblings,
       issuerPk,
       issuerSignature: [...signature.R8, signature.S],
       ...params,
@@ -66,7 +68,8 @@ describe('AttendanceProof', async () => {
   it('valid', async () => {
     const input = await generateInput(claims, {
       expectedEvent: encodeClaimValue(claims.event),
-      expectedDate: claims.date,
+      expectedDateFrom: claims.meta.issuanceDate,
+      expectedDateTo: 0,
     })
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, {})
@@ -75,26 +78,45 @@ describe('AttendanceProof', async () => {
   it('invalid event code', async () => {
     const input = await generateInput(claims, {
       expectedEvent: encodeClaimValue('test'),
-      expectedDate: claims.date,
+      expectedDateFrom: 0,
+      expectedDateTo: 0,
     })
     try {
       const witness = await circuit.calculateWitness(input, true)
       await circuit.assertOut(witness, {})
+      assert.ok(false)
     } catch (e: any) {
-      assert.include(e.message, 'Error in template AttendanceProof_251 line: 27')
+      assert.include(e.message, 'Error in template AttendanceProof_255 line: 26')
     }
   })
 
-  it('invalid event date', async () => {
+  it('invalid from date', async () => {
     const input = await generateInput(claims, {
       expectedEvent: encodeClaimValue(claims.event),
-      expectedDate: claims.date + 86400,
+      expectedDateFrom: claims.meta.issuanceDate + 86400,
+      expectedDateTo: 0,
     })
     try {
       const witness = await circuit.calculateWitness(input, true)
       await circuit.assertOut(witness, {})
+      assert.ok(false)
     } catch (e: any) {
-      assert.include(e.message, 'Error in template AttendanceProof_251 line: 51')
+      assert.include(e.message, 'Error in template AttendanceProof_255 line: 33')
+    }
+  })
+
+  it('invalid to date', async () => {
+    const input = await generateInput(claims, {
+      expectedEvent: encodeClaimValue(claims.event),
+      expectedDateFrom: 0,
+      expectedDateTo: claims.meta.issuanceDate - 86400,
+    })
+    try {
+      const witness = await circuit.calculateWitness(input, true)
+      await circuit.assertOut(witness, {})
+      assert.ok(false)
+    } catch (e: any) {
+      assert.include(e.message, 'Error in template AttendanceProof_255 line: 38')
     }
   })
 })

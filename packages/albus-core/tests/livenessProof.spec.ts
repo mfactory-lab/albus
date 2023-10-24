@@ -40,25 +40,27 @@ describe('LivenessProof', async () => {
 
   const timestamp = 1697035401 // 2023-10-11 14:43
   const claims = {
-    status: 'sumsub:selfie',
-    expirationDate: 0,
+    type: 'sumsub:selfie',
+    meta: {
+      validUntil: 0,
+    },
   }
 
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = {}) {
     const tree = await createClaimsTree(claims, 2)
-    const statusProof = await tree.get('status')
-    const expDateProof = await tree.get('expirationDate')
+    const typeProof = await tree.get('type')
+    const validUntilProof = await tree.get('meta.validUntil')
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
 
     return {
       timestamp,
       credentialRoot: tree.root,
-      status: statusProof.value,
-      statusKey: statusProof.key,
-      statusProof: statusProof.siblings,
-      expirationDate: expDateProof.value,
-      expirationDateKey: expDateProof.key,
-      expirationDateProof: expDateProof.siblings,
+      type: typeProof.value,
+      typeKey: typeProof.key,
+      typeProof: typeProof.siblings,
+      meta_validUntil: validUntilProof.value,
+      meta_validUntilKey: validUntilProof.key,
+      meta_validUntilProof: validUntilProof.siblings,
       issuerPk,
       issuerSignature: [...signature.R8, signature.S],
       ...params,
@@ -67,7 +69,7 @@ describe('LivenessProof', async () => {
 
   it('valid', async () => {
     const input = await generateInput(claims, {
-      expectedStatus: encodeClaimValue(claims.status),
+      expectedType: encodeClaimValue(claims.type),
     })
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, {})
@@ -76,9 +78,11 @@ describe('LivenessProof', async () => {
   it('expired', async () => {
     const input = await generateInput({
       ...claims,
-      expirationDate: timestamp - 1,
+      meta: {
+        validUntil: timestamp,
+      },
     }, {
-      expectedStatus: encodeClaimValue(claims.status),
+      expectedType: encodeClaimValue(claims.type),
     })
     try {
       const witness = await circuit.calculateWitness(input, true)
@@ -86,7 +90,7 @@ describe('LivenessProof', async () => {
       assert.ok(false)
     } catch (e: any) {
       console.log(e.message)
-      assert.include(e.message, 'Error in template LivenessProof_253 line: 33')
+      assert.include(e.message, 'Error in template LivenessProof_253 line: 35')
     }
   })
 })

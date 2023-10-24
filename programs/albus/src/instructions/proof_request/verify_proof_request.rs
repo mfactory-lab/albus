@@ -28,49 +28,58 @@
 
 use anchor_lang::prelude::*;
 
+#[cfg(feature = "verify-on-chain")]
 use groth16_solana::{Groth16Verifier, Proof, VK};
 
+#[cfg(feature = "verify-on-chain")]
+use crate::{events::VerifyEvent, state::ProofRequestStatus};
+
 use crate::state::Circuit;
-use crate::{
-    events::VerifyEvent,
-    state::{ProofRequest, ProofRequestStatus},
-    AlbusError,
-};
+use crate::{state::ProofRequest, AlbusError};
 
 pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
-    let req = &mut ctx.accounts.proof_request;
+    #[cfg(feature = "verify-on-chain")]
+    {
+        let req = &mut ctx.accounts.proof_request;
+        let circuit = &ctx.accounts.circuit;
 
-    let proof = req.proof.as_ref().ok_or(AlbusError::InvalidPublicInputs)?;
-    let proof = Proof::new(proof.a, proof.b, proof.c);
+        let proof = req.proof.as_ref().ok_or(AlbusError::InvalidPublicInputs)?;
+        let proof = Proof::new(proof.a, proof.b, proof.c);
 
-    let circuit = &ctx.accounts.circuit;
-    let vk = VK {
-        alpha: circuit.vk.alpha,
-        beta: circuit.vk.beta,
-        gamma: circuit.vk.gamma,
-        delta: circuit.vk.delta,
-        ic: circuit.vk.ic.to_vec(),
-    };
+        let vk = VK {
+            alpha: circuit.vk.alpha,
+            beta: circuit.vk.beta,
+            gamma: circuit.vk.gamma,
+            delta: circuit.vk.delta,
+            ic: circuit.vk.ic.to_vec(),
+        };
 
-    Groth16Verifier::new(&proof, &req.public_inputs, &vk)
-        .map_err(|_| AlbusError::InvalidPublicInputs)?
-        .verify()
-        .map_err(|_| AlbusError::ProofVerificationFailed)?;
+        Groth16Verifier::new(&proof, &req.public_inputs, &vk)
+            .map_err(|_| AlbusError::InvalidPublicInputs)?
+            .verify()
+            .map_err(|_| AlbusError::ProofVerificationFailed)?;
 
-    let timestamp = Clock::get()?.unix_timestamp;
+        let timestamp = Clock::get()?.unix_timestamp;
 
-    req.status = ProofRequestStatus::Verified;
-    req.verified_at = timestamp;
+        req.status = ProofRequestStatus::Verified;
+        req.verified_at = timestamp;
 
-    emit!(VerifyEvent {
-        proof_request: req.key(),
-        service_provider: req.service_provider,
-        circuit: circuit.key(),
-        owner: req.owner,
-        timestamp,
-    });
+        emit!(VerifyEvent {
+            proof_request: req.key(),
+            service_provider: req.service_provider,
+            circuit: circuit.key(),
+            owner: req.owner,
+            timestamp,
+        });
 
-    Ok(())
+        Ok(())
+    }
+
+    #[cfg(not(feature = "verify-on-chain"))]
+    {
+        msg!("On-chain verification is disabled, available from solana v1.17.0");
+        Err(AlbusError::Unverified.into())
+    }
 }
 
 #[derive(Accounts)]

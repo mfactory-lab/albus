@@ -35,10 +35,6 @@ mod utils;
 use anchor_lang::prelude::*;
 use instructions::*;
 
-// #[cfg(feature = "devnet")]
-// declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
-//
-// #[cfg(not(feature = "devnet"))]
 declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
 
 #[program]
@@ -151,7 +147,6 @@ pub mod albus {
         prove_proof_request::handler(ctx, data)
     }
 
-    #[cfg(feature = "verify-on-chain")]
     pub fn verify_proof_request(ctx: Context<VerifyProofRequest>) -> Result<()> {
         verify_proof_request::handler(ctx)
     }

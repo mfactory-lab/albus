@@ -7,15 +7,16 @@ include "merkleProof.circom";
 
 template AttendanceProof(credentialDepth) {
   signal input expectedEvent;
-  signal input expectedDate; // unix timestamp
+  signal input expectedDateFrom; // unix timestamp
+  signal input expectedDateTo; // unix timestamp
 
   signal input event;
   signal input eventKey;
   signal input eventProof[credentialDepth];
 
-  signal input date; // unix timestamp
-  signal input dateKey;
-  signal input dateProof[credentialDepth];
+  signal input meta_issuanceDate; // unix timestamp
+  signal input meta_issuanceDateKey;
+  signal input meta_issuanceDateProof[credentialDepth];
 
   signal input credentialRoot;
 
@@ -24,10 +25,17 @@ template AttendanceProof(credentialDepth) {
 
   event === expectedEvent;
 
-  component eq = IsEqual();
-  eq.in[0] <-- dateToNum(timestampToDate(date));
-  eq.in[1] <-- dateToNum(timestampToDate(expectedDate));
-  expectedDate * eq.out === expectedDate;
+  var date = dateToNum(timestampToDate(meta_issuanceDate));
+
+  component isGreater = GreaterEqThan(32);
+  isGreater.in[0] <-- date;
+  isGreater.in[1] <-- dateToNum(timestampToDate(expectedDateFrom));
+  expectedDateFrom * isGreater.out === expectedDateFrom;
+
+  component isLess = LessEqThan(32);
+  isLess.in[0] <-- date;
+  isLess.in[1] <-- dateToNum(timestampToDate(expectedDateTo));
+  expectedDateTo * isLess.out === expectedDateTo;
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();
@@ -42,20 +50,19 @@ template AttendanceProof(credentialDepth) {
   // Data integrity check
   component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
-  mtp.siblings <== [eventProof, dateProof];
-  mtp.key <== [eventKey, dateKey];
-  mtp.value <== [event, date];
+  mtp.siblings <== [eventProof, meta_issuanceDateProof];
+  mtp.key <== [eventKey, meta_issuanceDateKey];
+  mtp.value <== [event, meta_issuanceDate];
 }
 
 component main{public [
   expectedEvent,
-  expectedDate,
-//  event,
+  expectedDateFrom,
+  expectedDateTo,
   eventKey,
   eventProof,
-//  date,
-  dateKey,
-  dateProof,
+  meta_issuanceDateKey,
+  meta_issuanceDateProof,
   credentialRoot,
   issuerPk,
   issuerSignature

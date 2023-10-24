@@ -46,23 +46,31 @@ function timestampToDate(timestamp) {
   var month = 1;
   var day = 1;
 
+  assert(timestamp < 4294967295);
+
   var secondsInDay = 86400;
 
   var _secondsInYear = 0;
   while (seconds >= _secondsInYear) {
-    _secondsInYear = secondsInYear(year);
-    seconds -= _secondsInYear;
-    year++;
+      _secondsInYear = secondsInYear(year);
+      if (seconds >= _secondsInYear) {
+        seconds -= _secondsInYear;
+        year++;
+      }
   }
 
   var _secondsInMonth = 0;
   while (seconds >= _secondsInMonth) {
-    _secondsInMonth = daysInMonth(month, year) * secondsInDay;
-    seconds -= _secondsInMonth;
-    month++;
+      _secondsInMonth = daysInMonth(month, year) * secondsInDay;
+      if (seconds >= _secondsInMonth) {
+        seconds -= _secondsInMonth;
+        month++;
+      }
   }
 
-  day = (seconds \ secondsInDay) + 1;
+  if (seconds >= secondsInDay) {
+      day = (seconds \ secondsInDay) + 1;
+  }
 
   return [year, month, day];
 }
