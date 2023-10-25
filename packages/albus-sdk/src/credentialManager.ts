@@ -108,7 +108,7 @@ export class CredentialManager {
    * Update credential data
    * Require admin authority
    */
-  async update(props: UpdateCredentialProps, opts?: ConfirmOptions) {
+  async update(props: UpdateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
     const mint = new PublicKey(props.mint)
     const owner = new PublicKey(props.owner)
 
@@ -129,7 +129,12 @@ export class CredentialManager {
 
     try {
       const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], { ...this.provider.opts, ...opts })
+      const signers: Signer[] = []
+      if (opts?.feePayer) {
+        tx.feePayer = opts.feePayer.publicKey
+        signers.push(opts.feePayer)
+      }
+      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -139,7 +144,7 @@ export class CredentialManager {
   /**
    * Revoke credential and burn credential NFT
    */
-  async revoke(props: RevokeCredentialProps, opts?: ConfirmOptions) {
+  async revoke(props: RevokeCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
     const mint = new PublicKey(props.mint)
 
     const ix = createRevokeCredentialInstruction({
@@ -155,7 +160,12 @@ export class CredentialManager {
 
     try {
       const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], { ...this.provider.opts, ...opts })
+      const signers: Signer[] = []
+      if (opts?.feePayer) {
+        tx.feePayer = opts.feePayer.publicKey
+        signers.push(opts.feePayer)
+      }
+      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
