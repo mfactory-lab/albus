@@ -211,7 +211,7 @@ export class CredentialManager {
       },
     )
 
-    const result: { address: PublicKey; credential: VerifiableCredential }[] = []
+    const result: { address: PublicKey; credential?: VerifiableCredential }[] = []
     for (const account of accounts) {
       if (account.json?.vc !== undefined) {
         try {
@@ -220,6 +220,7 @@ export class CredentialManager {
           })
           result.push({ address: account.mint, credential })
         } catch (e) {
+          result.push({ address: account.mint })
           console.log(`Credential Verification Error: ${e}`)
           if (props.throwError) {
             throw e
