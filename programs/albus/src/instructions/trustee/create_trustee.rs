@@ -42,7 +42,7 @@ pub fn handler(ctx: Context<CreateTrustee>, data: CreateTrusteeData) -> Result<(
     trustee.authority = ctx.accounts.authority.key();
     trustee.created_at = timestamp;
     trustee.is_verified = false;
-    trustee.bump = ctx.bumps["trustee"];
+    trustee.bump = ctx.bumps.trustee;
 
     Ok(())
 }

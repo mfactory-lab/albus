@@ -38,8 +38,7 @@ import { NFT_SYMBOL_PREFIX } from '../constants'
 
 export async function getSolanaTimestamp(connection: Connection) {
   const slot = await connection.getSlot()
-  const timestamp = (await connection.getBlockTime(slot)) ?? 0
-  return new Date(timestamp * 1000)
+  return (await connection.getBlockTime(slot)) ?? 0
 }
 
 export interface ValidateNftProps {
@@ -139,6 +138,7 @@ interface FindMetadataAccounts {
   updateAuthority?: PublicKeyInitData
   symbol?: string
   name?: string
+  uri?: string
   // default: 100
   chunkSize?: number
   withJson?: boolean
@@ -183,6 +183,11 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
     if (props.name !== undefined) {
       valid &&= acc.data.name.includes(props.name)
     }
+    if (props.uri) {
+      valid &&= sanitizeString(acc.data.uri) === props.uri
+    } else if (props.withJson) {
+      valid &&= sanitizeString(acc.data.uri) !== ''
+    }
     return valid
   })
 
@@ -208,7 +213,9 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
  * like "\x0000" instead of usual spaces.
  * @param str
  */
-const sanitizeString = (str: string) => str.replace(/\0/g, '')
+function sanitizeString(str: string) {
+  return str.replace(/\0/g, '')
+}
 
 function sanitizeMetadata(tokenData: Metadata) {
   return ({

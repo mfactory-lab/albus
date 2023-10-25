@@ -10,38 +10,44 @@ include "encryptionProof.circom";
 include "merkleProof.circom";
 
 template AgePolicy(credentialDepth, shamirN, shamirK) {
-  signal input currentDate; // Example: 20220101
+  // Current timestamp
+  signal input timestamp; // unix timestamp
+
+  // Policy params
   signal input minAge;
   signal input maxAge;
 
   signal input credentialRoot;
 
-  signal input birthDate; // Example: 20020101
-  signal input birthDateProof[credentialDepth];
+  // Credential expiration date
+  signal input meta_validUntil; // unix timestamp
+  signal input meta_validUntilKey;
+  signal input meta_validUntilProof[credentialDepth];
+
+  // Birth date
+  signal input birthDate; // Ymd format. Example: 20010101
   signal input birthDateKey;
+  signal input birthDateProof[credentialDepth];
 
   signal input issuerPk[2]; // [Ax, Ay]
   signal input issuerSignature[3]; // [R8x, R8y, S]
 
-//  signal input nonce;
   signal input userPrivateKey;
   signal input trusteePublicKey[shamirN][2];
 
+  // Encrypted claims
   signal output encryptedData[adjustToMultiple(1, 3) + 1];
+  // Encrypted secret shares
   signal output encryptedShare[shamirN][4];
+  // User public key, derived from `userPrivateKey`
   signal output userPublicKey[2];
 
-  // extracts the user public key from private key
-  component upk = BabyPbk();
-  upk.in <== userPrivateKey;
-  userPublicKey <== [upk.Ax, upk.Ay];
-
-  // Data integrity check
-  component smt = MerkleProof(credentialDepth);
-  smt.root <== credentialRoot;
-  smt.siblings <== birthDateProof;
-  smt.key <== birthDateKey;
-  smt.value <== birthDate;
+  // Expiration date check
+  component isExpValid = LessThan(32);
+  isExpValid.in[0] <== timestamp;
+  isExpValid.in[1] <== meta_validUntil;
+  // If the expiration date is zero, the validation should be skipped
+  isExpValid.out * meta_validUntil === meta_validUntil;
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();
@@ -53,48 +59,53 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   eddsa.R8y <== issuerSignature[1];
   eddsa.S <== issuerSignature[2];
 
+  // Data integrity check
+  component mtp = MerkleProof(2, credentialDepth);
+  mtp.root <== credentialRoot;
+  mtp.siblings <== [birthDateProof, meta_validUntilProof];
+  mtp.key <== [birthDateKey, meta_validUntilKey];
+  mtp.value <== [birthDate, meta_validUntil];
+
+  // Extracts the user public key from private key
+  component upk = BabyPbk();
+  upk.in <== userPrivateKey;
+  userPublicKey <== [upk.Ax, upk.Ay];
+
   // Derive secret key
   component secret = Poseidon(3);
-  secret.inputs <== [userPrivateKey, credentialRoot, currentDate];
+  secret.inputs <== [userPrivateKey, credentialRoot, timestamp];
 
   // Encrypt data and trustee shares
   component enc = EncryptionProof(1, shamirN, shamirK);
   enc.userPrivateKey <== userPrivateKey;
   enc.trusteePublicKey <== trusteePublicKey;
   enc.secret <== secret.out;
-  enc.nonce <== currentDate;
+  enc.nonce <== timestamp;
   enc.data <== [birthDate];
 
   encryptedData <== enc.encryptedData;
   encryptedShare <== enc.encryptedShare;
 
   // Age validation
-  component birth = ParseDate();
-  birth.date <== birthDate;
-
-  component current = ParseDate();
-  current.date <== currentDate;
-
   component age = AgeProof();
-  age.birthYear <== birth.y;
-  age.birthMonth <== birth.m;
-  age.birthDay <== birth.d;
-  age.currentYear <== current.y;
-  age.currentMonth <== current.m;
-  age.currentDay <== current.d;
+  age.currentDate <-- timestampToDate(timestamp);
+  age.birthDate <-- numToDate(birthDate);
   age.minAge <== minAge;
   age.maxAge <== maxAge;
   age.valid === 1;
 }
 
 component main{public [
-  currentDate,
+  timestamp,
   minAge,
   maxAge,
   credentialRoot,
-  birthDateProof,
+//  meta_validUntil,
+  meta_validUntilKey,
+  meta_validUntilProof,
   birthDateKey,
+  birthDateProof,
   issuerPk,
   issuerSignature,
   trusteePublicKey
-]} = AgePolicy(6, 3, 2);
+]} = AgePolicy(5, 3, 2);

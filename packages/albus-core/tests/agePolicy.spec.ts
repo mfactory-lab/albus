@@ -34,41 +34,50 @@ import { formatPrivKeyForBabyJub, generateEcdhSharedKey, generateProof, verifyPr
 import { loadFixture, setupCircuit } from './utils'
 
 describe('AgePolicy', async () => {
-  const issuerKeypair = Keypair.generate()
   const holderKeypair = Keypair.generate()
+  const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
 
-  const currentDate = 20230711
-  const claims = {
-    id: 0,
-    birthDate: 20050711,
-  }
-
+  const issuerKeypair = Keypair.generate()
   const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
-  // const _holderPk = eddsa.prv2pub(holderKeypair.secretKey)
 
   const circuit = await setupCircuit('agePolicy')
 
-  it('valid verification', async () => {
+  const timestamp = 1697035401 // 2023-10-11 14:43
+  const claims = {
+    givenName: 'Mikayla',
+    familyName: 'Halvorson',
+    gender: 'female',
+    birthDate: '19661002',
+    birthPlace: 'Westland',
+    nationality: 'MNE',
+    country: 'MNE',
+    countryOfBirth: 'MNE',
+    meta: {
+      validUntil: 0,
+    },
+  }
+
+  async function generateInput(claims: Record<string, any>, params: Record<string, any> = { minAge: 18, maxAge: 100 }) {
     const tree = await createClaimsTree(claims)
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
-    const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
-
-    const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
+    const birthDateProof = await tree.get('birthDate')
+    const validUntilProof = await tree.get('meta.validUntil')
     const trusteeCount = 3
 
     const input = {
-      birthDate: claims.birthDate,
-      birthDateProof,
-      birthDateKey,
-      currentDate,
-      minAge: 18,
-      maxAge: 100,
+      timestamp,
       credentialRoot: tree.root,
+      meta_validUntil: validUntilProof.value,
+      meta_validUntilKey: validUntilProof.key,
+      meta_validUntilProof: validUntilProof.siblings,
+      birthDate: birthDateProof.value,
+      birthDateKey: birthDateProof.key,
+      birthDateProof: birthDateProof.siblings,
       issuerPk,
       issuerSignature: [...signature.R8, signature.S],
-      // secret: genRandomNonce(),
-      userPrivateKey,
       trusteePublicKey: [],
+      userPrivateKey,
+      ...params,
     } as any
 
     for (let i = 0; i < trusteeCount; i++) {
@@ -77,41 +86,31 @@ describe('AgePolicy', async () => {
       input.trusteePublicKey.push(trusteePublicKey)
     }
 
-    // console.log(input)
+    return input
+  }
 
+  it('valid age and no expiration', async () => {
+    const input = await generateInput(claims)
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, {})
   })
 
-  it('invalid verification', async () => {
-    // Tomorrow will be 18
-    claims.birthDate += 1
-    const tree = await createClaimsTree(claims)
-    const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
-    const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
+  it('valid age and valid expiration date', async () => {
+    const input = await generateInput({
+      ...claims,
+      expirationDate: timestamp + 1,
+    })
+    const witness = await circuit.calculateWitness(input, true)
+    await circuit.assertOut(witness, {})
+  })
 
-    const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
-    const trusteeCount = 3
-
-    const input = {
-      birthDate: claims.birthDate,
-      birthDateProof,
-      birthDateKey,
-      currentDate,
-      minAge: 18,
-      maxAge: 100,
-      credentialRoot: tree.root,
-      issuerPk,
-      issuerSignature: [...signature.R8, signature.S],
-      userPrivateKey,
-      trusteePublicKey: [],
-    } as any
-
-    for (let i = 0; i < trusteeCount; i++) {
-      const trusteeKeypair = Keypair.generate()
-      const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
-      input.trusteePublicKey.push(trusteePublicKey)
-    }
+  it('valid age and expired', async () => {
+    const input = await generateInput({
+      ...claims,
+      meta: {
+        validUntil: timestamp,
+      },
+    })
 
     try {
       const witness = await circuit.calculateWitness(input, true)
@@ -119,16 +118,33 @@ describe('AgePolicy', async () => {
       assert.ok(false)
     } catch (e: any) {
       // console.log(e.message)
-      assert.include(e.message, 'Error in template AgePolicy_344')
+      assert.include(e.message, 'Error in template AgePolicy_271 line: 50')
+    }
+  })
+
+  it('invalid age', async () => {
+    const input = await generateInput({
+      ...claims,
+      birthDate: claims.birthDate + 1,
+      expirationDate: timestamp + 1,
+    })
+
+    try {
+      const witness = await circuit.calculateWitness(input, true)
+      await circuit.assertOut(witness, {})
+      assert.ok(false)
+    } catch (e: any) {
+      // console.log(e.message)
+      assert.include(e.message, 'Error in template AgePolicy_271 line: 95')
     }
   })
 })
 
-describe('Proof', async () => {
+describe('Proof AgePolicy', async () => {
   const issuerKeypair = Keypair.generate()
   const holderKeypair = Keypair.generate()
 
-  const currentDate = 20230711n
+  const timestamp = 1697035401
   const claims = {
     birthDate: '20050711',
     firstName: 'Alex',
@@ -158,18 +174,18 @@ describe('Proof', async () => {
 
     const tree = await createClaimsTree(claims)
     const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
-    const [birthDateKey, ...birthDateProof] = await tree.proof('birthDate')
+    const birthDateProof = await tree.get('birthDate')
 
     const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
     const trusteeCount = 3
 
     const input = {
-      birthDate: claims.birthDate,
-      birthDateProof,
-      birthDateKey: birthDateKey!,
-      currentDate,
+      timestamp,
       minAge: 18,
       maxAge: 100,
+      birthDate: birthDateProof.value,
+      birthDateKey: birthDateProof.key,
+      birthDateProof: birthDateProof.siblings,
       credentialRoot: tree.root,
       issuerPk: issuerPubkey,
       issuerSignature: [...signature.R8, signature.S],
@@ -205,7 +221,7 @@ describe('Proof', async () => {
         BigInt(publicSignals[i + 1]!),
         BigInt(publicSignals[i + 2]!),
         BigInt(publicSignals[i + 3]!),
-      ], sharedKey, 1, BigInt(input.currentDate))
+      ], sharedKey, 1, BigInt(input.timestamp))
       shares.push(share)
       i += 4
     }
@@ -218,7 +234,7 @@ describe('Proof', async () => {
     const userSecret = Poseidon.hash([
       input.userPrivateKey,
       input.credentialRoot,
-      input.currentDate,
+      BigInt(input.timestamp),
     ])
 
     assert.equal(decryptedSecret, userSecret)
@@ -228,7 +244,7 @@ describe('Proof', async () => {
       BigInt(publicSignals[1]!),
       BigInt(publicSignals[2]!),
       BigInt(publicSignals[3]!),
-    ], [BigInt(decryptedSecret), BigInt(decryptedSecret)], 1, BigInt(input.currentDate))
+    ], [BigInt(decryptedSecret), BigInt(decryptedSecret)], 1, BigInt(input.timestamp))
 
     // console.log('publicSignals', publicSignals)
     // console.log('sharedKeys', sharedKeys)

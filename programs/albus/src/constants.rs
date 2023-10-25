@@ -26,18 +26,24 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub const AUTHORIZED_AUTHORITY: &[&str] = &[
-    // test payer
-    "4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i",
-    "5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH",
+use solana_program::pubkey;
+use solana_program::pubkey::Pubkey;
+
+pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
+    #[cfg(feature = "testing")]
+    pubkey!("4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i"),
+    #[cfg(feature = "devnet")]
+    pubkey!("5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH"),
+    pubkey!("AuTHJvxjcr2wB8xfZbciwfHNn8n1H2HrBz5yD2F6onWH"),
 ];
 
-/// Default Albus issuer public key
-// pub const ISSUER_PK: [u8; 64] = [0; 64];
 // pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
-pub const CURRENT_DATE_SIGNAL: &str = "currentDate";
+
+pub const TIMESTAMP_SIGNAL: &str = "timestamp";
+pub const TIMESTAMP_THRESHOLD: u16 = 30;
 
 pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
-pub const VC_SYMBOL_CODE: &str = "VC";
+pub const CREDENTIAL_SYMBOL_CODE: &str = "DC";
+pub const CREDENTIAL_NAME: &str = "Albus Digital Credential";
 
 pub const DEFAULT_SECRET_SHARE_THRESHOLD: u8 = 2;

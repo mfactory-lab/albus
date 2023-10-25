@@ -28,9 +28,9 @@
 
 use anchor_lang::prelude::*;
 
+use crate::error::AlbusError;
 use crate::state::Policy;
 use crate::state::ServiceProvider;
-use crate::AlbusError;
 
 pub fn handler(_ctx: Context<DeletePolicy>) -> Result<()> {
     Ok(())

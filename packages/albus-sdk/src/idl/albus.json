@@ -1,5 +1,5 @@
 {
-  "version": "0.0.14",
+  "version": "0.0.19",
   "name": "albus",
   "instructions": [
     {
@@ -701,7 +701,7 @@
       "args": []
     },
     {
-      "name": "prove",
+      "name": "proveProofRequest",
       "accounts": [
         {
           "name": "proofRequest",
@@ -733,13 +733,39 @@
         {
           "name": "data",
           "type": {
-            "defined": "ProveData"
+            "defined": "ProveProofRequestData"
           }
         }
       ]
     },
     {
-      "name": "verify",
+      "name": "verifyProofRequest",
+      "accounts": [
+        {
+          "name": "proofRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "circuit",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateProofRequest",
       "accounts": [
         {
           "name": "proofRequest",
@@ -761,7 +787,7 @@
         {
           "name": "data",
           "type": {
-            "defined": "VerifyProofRequestData"
+            "defined": "UpdateProofRequestData"
           }
         }
       ]
@@ -924,6 +950,9 @@
           },
           {
             "name": "outputs",
+            "docs": [
+              "Output signals associated with the circuit"
+            ],
             "type": {
               "vec": "string"
             }
@@ -931,7 +960,7 @@
           {
             "name": "publicSignals",
             "docs": [
-              "Public signals associated with the circuit."
+              "Public signals associated with the circuit"
             ],
             "type": {
               "vec": "string"
@@ -940,7 +969,7 @@
           {
             "name": "privateSignals",
             "docs": [
-              "Private signals associated with the circuit."
+              "Private signals associated with the circuit"
             ],
             "type": {
               "vec": "string"
@@ -1759,7 +1788,7 @@
       }
     },
     {
-      "name": "ProveData",
+      "name": "ProveProofRequestData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1790,7 +1819,7 @@
       }
     },
     {
-      "name": "VerifyProofRequestData",
+      "name": "UpdateProofRequestData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2068,7 +2097,19 @@
           },
           {
             "name": "value",
-            "type": "u32"
+            "docs": [
+              "Scalar Field"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "label",
+            "type": "string"
           }
         ]
       }
@@ -2334,7 +2375,7 @@
   "metadata": {
     "address": "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL",
     "origin": "anchor",
-    "binaryVersion": "0.28.0",
-    "libVersion": "0.28.0"
+    "binaryVersion": "0.29.0",
+    "libVersion": "0.29.0"
   }
 }

@@ -26,7 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
+import type { Wallet } from '@coral-xyz/anchor'
+import { AnchorProvider } from '@coral-xyz/anchor'
 import type { ConfirmOptions, Connection, Keypair } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { CircuitManager } from './circuitManager'
@@ -39,6 +40,7 @@ import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
+import { NodeWallet } from './utils'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -79,7 +81,6 @@ export class AlbusClient {
   }
 
   static keypair(connection: Connection, keypair: Keypair, opts: ConfirmOptions = {}) {
-    const wallet = new Wallet(keypair)
-    return new this(new AnchorProvider(connection, wallet, opts))
+    return new this(new AnchorProvider(connection, new NodeWallet(keypair), opts))
   }
 }

@@ -69,6 +69,9 @@ cli
     process.exit()
   })
 
+const test = cli.command('test')
+test.command('credential').action(actions.test.credential)
+
 // ------------------------------------------
 // DID
 // ------------------------------------------
@@ -121,6 +124,11 @@ circuit.command('show')
   .description('Show circuit data')
   .argument('<address>', 'Circuit address')
   .action(actions.circuit.show)
+
+circuit.command('generate')
+  .description('Generate circuit zkey and vk files')
+  .argument('code', 'circuit code')
+  .action(actions.circuit.generate)
 
 circuit.command('create')
   .description('Create new circuit')
@@ -249,7 +257,7 @@ trustee.command('all', { isDefault: true })
   .action(actions.trustee.showAll)
 
 // ------------------------------------------
-// Proof Requests
+// ProofRequest Management
 // ------------------------------------------
 
 const request = cli.command('request')
@@ -270,7 +278,7 @@ request.command('show')
   .argument('<address>', 'Proof Request address')
   .action(actions.request.show)
 
-request.command('find')
+request.command('find', { isDefault: true })
   .description('Find proof requests')
   .option('--serviceCode <string>', '(optional) service code')
   .option('--circuit <pubkey>', '(optional) circuit address')
@@ -294,14 +302,34 @@ request.command('verify')
   .action(actions.request.verifyRequest)
 
 // ------------------------------------------
+// Asset Management
+// ------------------------------------------
+
+const asset = cli.command('asset')
+
+asset.command('upload')
+  .argument('<PATH>', 'Path to the file')
+  .description('Upload file')
+  .action(actions.asset.uploadFile)
+
+// ------------------------------------------
 // Admin Management
 // ------------------------------------------
 
 const admin = cli.command('admin')
 
+admin.command('fund')
+  .description('Fund albus authority balance')
+  .action(actions.admin.fund)
+
 admin.command('clear')
   .description('Clear all accounts')
   .action(actions.admin.clear)
+
+admin.command('close')
+  .argument('<pubkey>', 'Account address')
+  .description('Close and account')
+  .action(actions.admin.close)
 
 // ------------------------------------------
 

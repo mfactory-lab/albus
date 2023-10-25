@@ -30,10 +30,19 @@ import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-toke
 import type { VerifiableCredential } from '@mfactory-lab/albus-core'
 import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
-import type { ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
+import {
+  ComputeBudgetProgram,
+  Keypair,
+  PublicKey,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+  Transaction,
+} from '@solana/web3.js'
+import type {
+  ConfirmOptions, PublicKeyInitData,
+  Signer,
+} from '@solana/web3.js'
 import axios from 'axios'
-import { DEFAULT_CREDENTIAL_NAME, NFT_SYMBOL_PREFIX, NFT_VC_SYMBOL } from './constants'
+import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
   createMintCredentialInstruction, createRevokeCredentialInstruction, createUpdateCredentialInstruction,
   errorFromCode,
@@ -58,20 +67,19 @@ export class CredentialManager {
   /**
    * Create new Credential NFT
    */
-  async create(_props: CreateCredentialProps = {}, opts?: ConfirmOptions) {
+  async create(props?: CreateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
     const mint = Keypair.generate()
-
-    const token = getAssociatedTokenAddress(mint.publicKey, this.provider.publicKey)
+    const owner = props?.owner ? new PublicKey(props?.owner) : this.provider.publicKey
 
     const ix = createMintCredentialInstruction({
-      tokenAccount: token,
-      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
       mint: mint.publicKey,
+      tokenAccount: getAssociatedTokenAddress(mint.publicKey, owner),
       albusAuthority: this.pda.authority()[0],
       editionAccount: getMasterEditionPDA(mint.publicKey),
       metadataAccount: getMetadataPDA(mint.publicKey),
-      metadataProgram: METADATA_PROGRAM_ID,
       authority: this.provider.publicKey,
+      metadataProgram: METADATA_PROGRAM_ID,
+      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, {
       data: {
         uri: '',
@@ -82,36 +90,15 @@ export class CredentialManager {
       const tx = new Transaction()
         .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
         .add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [mint], { ...this.provider.opts, ...opts })
+
+      const signers: Signer[] = [mint]
+      if (opts?.feePayer) {
+        tx.feePayer = opts.feePayer.publicKey
+        signers.push(opts.feePayer)
+      }
+
+      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
       return { mintAddress: mint.publicKey, signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
-  }
-
-  /**
-   * Revoke credential and burn credential NFT
-   */
-  async revoke(props: RevokeCredentialProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
-    const mint = new PublicKey(props.mint)
-    const token = getAssociatedTokenAddress(mint, authority)
-
-    const ix = createRevokeCredentialInstruction({
-      tokenAccount: token,
-      mint,
-      albusAuthority: this.pda.authority()[0],
-      editionAccount: getMasterEditionPDA(mint),
-      metadataAccount: getMetadataPDA(mint),
-      metadataProgram: METADATA_PROGRAM_ID,
-      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-      authority,
-    })
-
-    try {
-      const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], { ...this.provider.opts, ...opts })
-      return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
@@ -121,29 +108,64 @@ export class CredentialManager {
    * Update credential data
    * Require admin authority
    */
-  async update(props: UpdateCredentialProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
+  async update(props: UpdateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
     const mint = new PublicKey(props.mint)
-    const token = getAssociatedTokenAddress(mint, authority)
+    const owner = new PublicKey(props.owner)
 
     const ix = createUpdateCredentialInstruction({
-      albusAuthority: this.pda.authority()[0],
       mint,
-      tokenAccount: token,
+      albusAuthority: this.pda.authority()[0],
+      tokenAccount: getAssociatedTokenAddress(mint, owner),
       metadataAccount: getMetadataPDA(mint),
+      authority: this.provider.publicKey,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-      authority,
     }, {
       data: {
-        name: props.name ?? DEFAULT_CREDENTIAL_NAME,
+        name: props.name ?? CREDENTIAL_NAME,
         uri: props.uri,
       },
     })
 
     try {
       const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], { ...this.provider.opts, ...opts })
+      const signers: Signer[] = []
+      if (opts?.feePayer) {
+        tx.feePayer = opts.feePayer.publicKey
+        signers.push(opts.feePayer)
+      }
+      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
+      return { signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  /**
+   * Revoke credential and burn credential NFT
+   */
+  async revoke(props: RevokeCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
+    const mint = new PublicKey(props.mint)
+
+    const ix = createRevokeCredentialInstruction({
+      mint,
+      tokenAccount: getAssociatedTokenAddress(mint, this.provider.publicKey),
+      albusAuthority: this.pda.authority()[0],
+      editionAccount: getMasterEditionPDA(mint),
+      metadataAccount: getMetadataPDA(mint),
+      authority: this.provider.publicKey,
+      metadataProgram: METADATA_PROGRAM_ID,
+      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+    })
+
+    try {
+      const tx = new Transaction().add(ix)
+      const signers: Signer[] = []
+      if (opts?.feePayer) {
+        tx.feePayer = opts.feePayer.publicKey
+        signers.push(opts.feePayer)
+      }
+      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -162,7 +184,7 @@ export class CredentialManager {
   async load(addr: PublicKeyInitData, props: LoadCredentialProps = {}) {
     const nft = await loadNft(this.provider.connection, addr, {
       authority: this.pda.authority()[0],
-      code: NFT_VC_SYMBOL,
+      code: CREDENTIAL_SYMBOL_CODE,
     })
 
     if (!nft.json?.vc) {
@@ -170,7 +192,6 @@ export class CredentialManager {
     }
 
     return Albus.credential.verifyCredential(nft.json.vc, {
-      // audience: ALBUS_DID,
       decryptionKey: props.decryptionKey,
     })
   }
@@ -184,24 +205,47 @@ export class CredentialManager {
       this.provider.connection,
       props.owner ?? this.provider.publicKey,
       {
-        symbol: `${NFT_SYMBOL_PREFIX}-${NFT_VC_SYMBOL}`,
+        symbol: `${NFT_SYMBOL_PREFIX}-${CREDENTIAL_SYMBOL_CODE}`,
         updateAuthority: this.pda.authority()[0],
         withJson: true,
       },
     )
 
-    const result: { address: PublicKey; credential: VerifiableCredential }[] = []
+    const result: { address: PublicKey; credential?: VerifiableCredential }[] = []
     for (const account of accounts) {
       if (account.json?.vc !== undefined) {
-        const credential = await Albus.credential.verifyCredential(account.json.vc, {
-          // audience: ALBUS_DID,
-          decryptionKey: props.decryptionKey,
-        })
-        result.push({ address: account.mint, credential })
+        try {
+          const credential = await Albus.credential.verifyCredential(account.json.vc, {
+            decryptionKey: props.decryptionKey,
+          })
+          result.push({ address: account.mint, credential })
+        } catch (e) {
+          result.push({ address: account.mint })
+          console.log(`Credential Verification Error: ${e}`)
+          if (props.throwError) {
+            throw e
+          }
+        }
       }
     }
 
     return result
+  }
+
+  /**
+   * Load pending VC-NFT accounts
+   */
+  async loadPendingNftAccounts(props?: { owner: PublicKey }) {
+    return getParsedNftAccountsByOwner(
+      this.provider.connection,
+      props?.owner ?? this.provider.publicKey,
+      {
+        uri: '', // pending VC has empty uri
+        symbol: `${NFT_SYMBOL_PREFIX}-${CREDENTIAL_SYMBOL_CODE}`,
+        updateAuthority: this.pda.authority()[0],
+        withJson: false,
+      },
+    )
   }
 
   /**
@@ -237,10 +281,11 @@ export class CredentialManager {
 }
 
 export interface CreateCredentialProps {
-
+  owner?: PublicKeyInitData
 }
 
 export interface UpdateCredentialProps {
+  owner: PublicKeyInitData
   mint: PublicKeyInitData
   uri: string
   name?: string
@@ -256,6 +301,7 @@ export interface LoadCredentialProps {
 
 export interface LoadAllCredentialProps extends LoadCredentialProps {
   owner?: PublicKey
+  throwError?: boolean
 }
 
 export interface LoadPresentationProps extends LoadCredentialProps {

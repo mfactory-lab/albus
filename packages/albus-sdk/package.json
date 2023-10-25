@@ -1,8 +1,8 @@
 {
   "name": "@mfactory-lab/albus-sdk",
-  "version": "0.1.1",
+  "version": "0.2.7",
   "description": "Albus Protocol SDK",
-  "type": "module",
+  "_type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@mfactory-lab/albus-core": "workspace:^",
-    "@coral-xyz/anchor": "^0.28.0",
+    "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",

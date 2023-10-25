@@ -26,10 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-// TODO: fixed in https://github.com/coral-xyz/anchor/pull/2600
-#![allow(clippy::result_large_err)]
-
 mod constants;
+pub mod error;
 mod events;
 mod instructions;
 mod state;
@@ -38,10 +36,6 @@ mod utils;
 use anchor_lang::prelude::*;
 use instructions::*;
 
-#[cfg(feature = "devnet")]
-declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
-
-#[cfg(not(feature = "devnet"))]
 declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
 
 #[program]
@@ -54,7 +48,10 @@ pub mod albus {
         mint_credential::handler(ctx, data)
     }
 
-    pub fn update_credential(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
+    pub fn update_credential(
+        ctx: Context<UpdateCredential>,
+        data: UpdateCredentialData,
+    ) -> Result<()> {
         update_credential::handler(ctx, data)
     }
 
@@ -68,7 +65,10 @@ pub mod albus {
         create_circuit::handler(ctx, data)
     }
 
-    pub fn update_circuit_vk(ctx: Context<UpdateCircuitVk>, data: UpdateCircuitVkData) -> Result<()> {
+    pub fn update_circuit_vk(
+        ctx: Context<UpdateCircuitVk>,
+        data: UpdateCircuitVkData,
+    ) -> Result<()> {
         update_circuit_vk::handler(ctx, data)
     }
 
@@ -78,11 +78,17 @@ pub mod albus {
 
     // Service Provider
 
-    pub fn create_service_provider(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
+    pub fn create_service_provider(
+        ctx: Context<CreateServiceProvider>,
+        data: CreateServiceProviderData,
+    ) -> Result<()> {
         create_service_provider::handler(ctx, data)
     }
 
-    pub fn update_service_provider(ctx: Context<UpdateServiceProvider>, data: UpdateServiceProviderData) -> Result<()> {
+    pub fn update_service_provider<'info>(
+        ctx: Context<'_, '_, 'info, 'info, UpdateServiceProvider<'info>>,
+        data: UpdateServiceProviderData,
+    ) -> Result<()> {
         update_service_provider::handler(ctx, data)
     }
 
@@ -124,7 +130,10 @@ pub mod albus {
 
     // Proof Request
 
-    pub fn create_proof_request(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -> Result<()> {
+    pub fn create_proof_request(
+        ctx: Context<CreateProofRequest>,
+        data: CreateProofRequestData,
+    ) -> Result<()> {
         create_proof_request::handler(ctx, data)
     }
 
@@ -132,24 +141,37 @@ pub mod albus {
         delete_proof_request::handler(ctx)
     }
 
-    pub fn prove(ctx: Context<Prove>, data: ProveData) -> Result<()> {
+    pub fn prove_proof_request(
+        ctx: Context<ProveProofRequest>,
+        data: ProveProofRequestData,
+    ) -> Result<()> {
         prove_proof_request::handler(ctx, data)
     }
 
-    pub fn verify(ctx: Context<VerifyProofRequest>, data: VerifyProofRequestData) -> Result<()> {
-        verify_proof_request::handler(ctx, data)
+    pub fn verify_proof_request(ctx: Context<VerifyProofRequest>) -> Result<()> {
+        verify_proof_request::handler(ctx)
+    }
+
+    pub fn update_proof_request(
+        ctx: Context<UpdateProofRequest>,
+        data: UpdateProofRequestData,
+    ) -> Result<()> {
+        update_proof_request::handler(ctx, data)
     }
 
     // Investigation
 
     pub fn create_investigation_request<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateInvestigationRequest<'info>>,
+        ctx: Context<'_, '_, 'info, 'info, CreateInvestigationRequest<'info>>,
         data: CreateInvestigationRequestData,
     ) -> Result<()> {
         create_investigation_request::handler(ctx, data)
     }
 
-    pub fn reveal_secret_share(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> Result<()> {
+    pub fn reveal_secret_share(
+        ctx: Context<RevealSecretShare>,
+        data: RevealSecretShareData,
+    ) -> Result<()> {
         reveal_secret_share::handler(ctx, data)
     }
 
@@ -158,26 +180,4 @@ pub mod albus {
     pub fn admin_close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
         close_account::close_account(ctx)
     }
-}
-
-#[error_code]
-pub enum AlbusError {
-    #[msg("Unauthorized action")]
-    Unauthorized,
-    #[msg("Unverified")]
-    Unverified,
-    #[msg("Unproved")]
-    Unproved,
-    #[msg("Expired")]
-    Expired,
-    #[msg("Invalid data")]
-    InvalidData,
-    #[msg("Incorrect owner")]
-    IncorrectOwner,
-    #[msg("Invalid metadata")]
-    InvalidMetadata,
-    #[msg("Proof verification failed")]
-    ProofVerificationFailed,
-    #[msg("Invalid public inputs")]
-    InvalidPublicInputs,
 }

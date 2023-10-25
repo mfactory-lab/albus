@@ -1,12 +1,15 @@
-anchor_version = "0.28.0"
+[toolchain]
+anchor_version = "0.29.0"
+solana_version = "1.16.17"
 
 [features]
 seeds = false
-skip-lint = false
+skip-lint = true
 
 [workspace]
 members = [
   "programs/albus",
+  "programs/albus-transfer",
 ]
 
 [provider]
@@ -17,14 +20,14 @@ wallet= "./.secrets/upgrade-authority.json"
 
 [programs.localnet]
 albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
+albus_transfer = "J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c"
 
 [programs.devnet]
 albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
+albus_transfer = "J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c"
 
-#verified-transfer = "ChfXD6UnExK5ihM1LJcnNGVJekVtHWms5cJu47pH9Fe2"
-#verified-swap = "8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR"
-#verified-stake = "CMev81L3acPrcTTevCFGdcNQnDypMGzuiAUgo8NBZJzr"
-#verified-stake-pool = "HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e"
+[programs.mainnet]
+albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
 
 [registry]
 url = "https://api.apr.dev"
@@ -38,10 +41,10 @@ startup_wait = 10000
 [test.validator]
 url = "https://api.mainnet-beta.solana.com"
 
-### MPL Token Metadata
+### Token Metadata
 [[test.validator.clone]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 
-#### SPL Token Program
+### Stake Pool
 #[[test.validator.clone]]
 #address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"

@@ -34,7 +34,7 @@ const FIXTURES_BASE_PATH = '../circuits'
 
 export function setupCircuit(name: string) {
   return circomTester(`${FIXTURES_BASE_PATH}/${name}.circom`, {
-    include: ['node_modules'],
+    include: ['../../node_modules'],
   })
 }
 

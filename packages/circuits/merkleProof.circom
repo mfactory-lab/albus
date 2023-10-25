@@ -2,22 +2,25 @@ pragma circom 2.1.4;
 
 include "circomlib/circuits/smt/smtverifier.circom";
 
-template MerkleProof(nLevels) {
-    signal input key;
-    signal input value;
+template MerkleProof(n, nLevels) {
     signal input root;
-    signal input siblings[nLevels];
+    signal input key[n];
+    signal input value[n];
+    signal input siblings[n][nLevels];
 
-    component smt = SMTVerifier(nLevels);
-    smt.enabled <== 1;
-    smt.fnc <== 0; // Inclusion
-    smt.root <== root;
-    smt.siblings <== siblings;
-    smt.oldKey <== 0;
-    smt.oldValue <== 0;
-    smt.isOld0 <== 0;
-    smt.key <== key;
-    smt.value <== value;
+    component smt[n];
+    for (var i = 0; i < n; i++) {
+      smt[i] = SMTVerifier(nLevels);
+      smt[i].enabled <== 1;
+      smt[i].fnc <== 0; // Inclusion
+      smt[i].root <== root;
+      smt[i].siblings <== siblings[i];
+      smt[i].oldKey <== 0;
+      smt[i].oldValue <== 0;
+      smt[i].isOld0 <== 0;
+      smt[i].key <== key[i];
+      smt[i].value <== value[i];
+    }
 }
 
 template NonMembershipProof(nLevels) {

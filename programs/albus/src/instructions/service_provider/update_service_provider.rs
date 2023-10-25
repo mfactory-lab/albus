@@ -29,9 +29,12 @@
 use anchor_lang::prelude::*;
 
 use crate::state::{ContactInfo, Trustee};
-use crate::{state::ServiceProvider, AlbusError};
+use crate::{error::AlbusError, state::ServiceProvider};
 
-pub fn handler(ctx: Context<UpdateServiceProvider>, data: UpdateServiceProviderData) -> Result<()> {
+pub fn handler<'info>(
+    ctx: Context<'_, '_, 'info, 'info, UpdateServiceProvider<'info>>,
+    data: UpdateServiceProviderData,
+) -> Result<()> {
     let service = &mut ctx.accounts.service_provider;
 
     if let Some(new_authority) = data.new_authority {

@@ -53,7 +53,7 @@ pub fn handler(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -
     req.verified_at = 0;
     req.created_at = timestamp;
     req.status = ProofRequestStatus::Pending;
-    req.bump = ctx.bumps["proof_request"];
+    req.bump = ctx.bumps.proof_request;
 
     if data.expires_in > 0 {
         req.expired_at = timestamp.saturating_add(data.expires_in as i64);

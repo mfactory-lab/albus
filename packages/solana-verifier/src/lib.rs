@@ -28,6 +28,7 @@
 
 use std::str::FromStr;
 
+use arrayref::array_ref;
 use arrayref::array_refs;
 use solana_program::{
     account_info::AccountInfo,
@@ -39,16 +40,141 @@ use solana_program::{
     sysvar::Sysvar,
 };
 
-pub const ALBUS_PROGRAM_ID: &str = "ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz";
+pub const ALBUS_PROGRAM_ID: &str = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL";
 pub const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
-/// Returns the address of the Albus program.
-pub fn program_id() -> Pubkey {
-    Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap()
+pub struct AlbusCompliant<'a, 'info> {
+    /// Proof request address
+    proof_request: &'a AccountInfo<'info>,
+    /// (optional) Proof request owner address
+    proof_request_owner: Option<Pubkey>,
+    /// (optional) Policy address
+    policy: Option<Pubkey>,
+}
+
+impl<'a, 'info> AlbusCompliant<'a, 'info> {
+    pub fn new(proof_request: &'a AccountInfo<'info>) -> AlbusCompliant<'a, 'info> {
+        Self {
+            proof_request,
+            policy: None,
+            proof_request_owner: None,
+        }
+    }
+
+    pub fn with_policy(mut self, addr: Pubkey) -> Self {
+        self.policy = Some(addr);
+        self
+    }
+
+    pub fn with_user(mut self, addr: Pubkey) -> Self {
+        self.proof_request_owner = Some(addr);
+        self
+    }
+
+    pub fn program_id() -> Pubkey {
+        Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap()
+    }
+
+    pub fn check(&self) -> Result<(), ProgramError> {
+        self.check_program_account(self.proof_request)?;
+        self.check_proof_request()?;
+        Ok(())
+    }
+
+    fn check_program_account(&self, acc: &AccountInfo) -> Result<(), ProgramError> {
+        if !cmp_pubkeys(acc.owner, Self::program_id()) {
+            return Err(ProgramError::IllegalOwner);
+        }
+        if acc.data_is_empty() {
+            msg!("Error: Program account {} is empty", acc.key);
+            return Err(ProgramError::UninitializedAccount);
+        }
+        Ok(())
+    }
+
+    fn check_proof_request(&self) -> Result<(), ProgramError> {
+        let data = self.proof_request.data.borrow();
+        let data = array_ref![data, 0, 186];
+
+        let (
+            discriminator,
+            _service,
+            policy,
+            _circuit,
+            owner,
+            _identifier,
+            _created_at,
+            expired_at,
+            _verified_at,
+            _proved_at,
+            _retention_end_date,
+            [status],
+            _bump,
+            // _proof,
+            // _public_inputs,
+        ) = array_refs![data, 8, 32, 32, 32, 32, 8, 8, 8, 8, 8, 8, 1, 1];
+
+        if discriminator != PROOF_REQUEST_DISCRIMINATOR {
+            msg!("Error: Invalid proof request discriminator");
+            return Err(ProgramError::InvalidAccountData);
+        }
+
+        if let Some(key) = self.policy {
+            if !cmp_pubkeys(key, policy) {
+                msg!("Error: Invalid proof request policy");
+                return Err(ProgramError::InvalidAccountData);
+            }
+        }
+
+        if let Some(key) = self.proof_request_owner {
+            if !cmp_pubkeys(key, owner) {
+                msg!("Error: Invalid proof request owner");
+                return Err(ProgramError::InvalidAccountData);
+            }
+        }
+
+        let expired_at = i64::from_le_bytes(*expired_at);
+        let status = ProofRequestStatus::try_from(*status)?;
+        let timestamp = Clock::get()?.unix_timestamp;
+
+        if expired_at > 0 && expired_at < timestamp {
+            msg!("Expired!");
+            return Err(ProgramError::Custom(VerificationError::Expired as u32));
+        }
+
+        match status {
+            ProofRequestStatus::Pending => {
+                msg!("Error: Proof request is pending");
+                Err(ProgramError::Custom(VerificationError::Pending as u32))
+            }
+            ProofRequestStatus::Proved => {
+                msg!("Error: Proof request is not verified");
+                Err(ProgramError::Custom(VerificationError::NotVerified as u32))
+            }
+            ProofRequestStatus::Rejected => {
+                msg!("Error: Proof request is rejected");
+                Err(ProgramError::Custom(VerificationError::Rejected as u32))
+            }
+            ProofRequestStatus::Verified => {
+                msg!("Verified!");
+                Ok(())
+            }
+        }
+    }
 }
 
 #[repr(u8)]
+pub enum VerificationError {
+    NotVerified,
+    Expired,
+    Pending,
+    Rejected,
+}
+
+#[repr(u8)]
+#[derive(Default, Debug, Eq, PartialEq, Clone)]
 pub enum ProofRequestStatus {
+    #[default]
     Pending,
     Proved,
     Verified,
@@ -69,85 +195,9 @@ impl TryFrom<u8> for ProofRequestStatus {
     }
 }
 
-pub fn check_compliant(
-    proof_request: &AccountInfo,
-    proof_request_owner: Option<Pubkey>,
-) -> Result<(), ProgramError> {
-    let data = &proof_request
-        .data
-        .take()
-        .try_into()
-        .map_err(|_| ProgramError::InvalidAccountData)?;
-
-    let albus_program_id =
-        Pubkey::from_str(ALBUS_PROGRAM_ID).map_err(|_| ProgramError::IncorrectProgramId)?;
-
-    // Assert the account is owned by albus program
-    if sol_memcmp(
-        proof_request.owner.as_ref(),
-        albus_program_id.as_ref(),
-        PUBKEY_BYTES,
-    ) != 0
-    {
-        return Err(ProgramError::IllegalOwner);
-    }
-
-    let (
-        discriminator,
-        _service,
-        _policy,
-        _circuit,
-        owner,
-        _identifier,
-        _created_at,
-        expired_at,
-        _verified_at,
-        _proved_at,
-        [status],
-        _bump,
-        _vp_uri,
-    ) = array_refs![data, 8, 32, 32, 32, 32, 8, 8, 8, 8, 8, 1, 1, 200];
-
-    if discriminator != PROOF_REQUEST_DISCRIMINATOR {
-        msg!("Error: Invalid account discriminator!");
-        return Err(ProgramError::InvalidAccountData);
-    }
-
-    // Checks if the provided `zkp_request_owner` is equal to zkp request's `owner`.
-    if let Some(key) = proof_request_owner {
-        if sol_memcmp(key.as_ref(), owner, PUBKEY_BYTES) != 0 {
-            msg!("Error: Invalid request owner!");
-            return Err(ProgramError::InvalidAccountData);
-        }
-    }
-
-    let expired_at = i64::from_le_bytes(*expired_at);
-    let status = ProofRequestStatus::try_from(*status)?;
-    let timestamp = Clock::get()?.unix_timestamp;
-
-    if expired_at > 0 && expired_at < timestamp {
-        msg!("Expired!");
-        return Err(ProgramError::Custom(1));
-    }
-
-    match status {
-        ProofRequestStatus::Verified => {
-            msg!("Verified!");
-            Ok(())
-        }
-        ProofRequestStatus::Proved => {
-            msg!("Error: ZKP request is proved");
-            Err(ProgramError::Custom(2))
-        }
-        ProofRequestStatus::Pending => {
-            msg!("Error: ZKP request is pending");
-            Err(ProgramError::Custom(3))
-        }
-        ProofRequestStatus::Rejected => {
-            msg!("Error: ZKP request is rejected");
-            Err(ProgramError::Custom(4))
-        }
-    }
+/// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`
+pub fn cmp_pubkeys(a: impl AsRef<[u8]>, b: impl AsRef<[u8]>) -> bool {
+    sol_memcmp(a.as_ref(), b.as_ref(), PUBKEY_BYTES) == 0
 }
 
 /// Generates the service provider program address for Albus Protocol
@@ -177,100 +227,158 @@ mod test {
     fn test_verified() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
-        let program_id = program_id();
-        let addr = Pubkey::new_unique();
-        let user = Pubkey::new_unique();
-        let lamp = &mut 0;
-        let mut data = get_proof_request(ProofRequestStatus::Verified, 0, user);
+        let policy = Pubkey::new_unique();
 
-        let acc = AccountInfo::new(
-            &addr,
-            false,
-            false,
-            lamp,
-            data.as_mut_slice(),
-            &program_id,
-            false,
-            0,
+        assert_eq!(
+            AlbusCompliant::new(
+                &ProofRequestBuilder::new()
+                    .with_status(ProofRequestStatus::Verified)
+                    .with_policy(policy)
+                    .build()
+            )
+            .with_policy(policy)
+            .check(),
+            Ok(())
         );
-
-        assert_eq!(check_compliant(&acc, Some(user)), Ok(()));
     }
 
     #[test]
     fn test_expired() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
-        let program_id = program_id();
-        let addr = Pubkey::new_unique();
-        let lamports = &mut 0;
-        let mut data = get_proof_request(ProofRequestStatus::Proved, 1, Pubkey::new_unique());
+        let policy = Pubkey::new_unique();
 
-        let acc = AccountInfo::new(
-            &addr,
-            false,
-            false,
-            lamports,
-            data.as_mut_slice(),
-            &program_id,
-            false,
-            0,
+        assert_eq!(
+            AlbusCompliant::new(
+                &ProofRequestBuilder::new()
+                    .with_status(ProofRequestStatus::Proved)
+                    .with_policy(policy)
+                    .with_expired_at(1)
+                    .build()
+            )
+            .with_policy(policy)
+            .check(),
+            Err(ProgramError::Custom(VerificationError::Expired as u32))
         );
-
-        assert_eq!(check_compliant(&acc, None), Err(ProgramError::Custom(1)));
     }
 
     #[test]
     fn test_ownership() {
         solana_program::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
 
-        let program_id = program_id();
-        let addr = Pubkey::new_unique();
         let owner = Pubkey::new_unique();
-        let lamports = &mut 0;
-        let mut data = get_proof_request(ProofRequestStatus::Verified, 0, owner);
+        let policy = Pubkey::new_unique();
 
-        let acc = AccountInfo::new(
-            &addr,
-            false,
-            false,
-            lamports,
-            data.as_mut_slice(),
-            &program_id,
-            false,
-            0,
+        assert_eq!(
+            AlbusCompliant::new(
+                &ProofRequestBuilder::new()
+                    .with_status(ProofRequestStatus::Verified)
+                    .with_policy(policy)
+                    .with_owner(owner)
+                    .build()
+            )
+            .with_policy(policy)
+            .with_user(owner)
+            .check(),
+            Ok(())
         );
-
-        // valid owner
-        assert_eq!(check_compliant(&acc, Some(owner)), Ok(()));
 
         // invalid owner
         assert_eq!(
-            check_compliant(&acc, Some(Pubkey::new_unique())),
+            AlbusCompliant::new(
+                &ProofRequestBuilder::new()
+                    .with_status(ProofRequestStatus::Verified)
+                    .with_policy(policy)
+                    .with_owner(owner)
+                    .build()
+            )
+            .with_policy(policy)
+            .with_user(Pubkey::new_unique())
+            .check(),
             Err(ProgramError::InvalidAccountData)
         );
     }
 
-    fn get_proof_request(status: ProofRequestStatus, expired_at: i64, owner: Pubkey) -> Vec<u8> {
-        [
-            PROOF_REQUEST_DISCRIMINATOR,
-            &Pubkey::new_unique().to_bytes(),
-            &Pubkey::new_unique().to_bytes(),
-            &Pubkey::new_unique().to_bytes(),
-            &owner.to_bytes(),
-            &0i64.to_le_bytes(),
-            &0i64.to_le_bytes(),
-            &expired_at.to_le_bytes(),
-            &0i64.to_le_bytes(),
-            &0i64.to_le_bytes(),
-            &(status as u8).to_le_bytes(),
-            &0u8.to_le_bytes(),
-            &[0u8; 200],
-        ]
-        .into_iter()
-        .flatten()
-        .copied()
-        .collect::<Vec<_>>()
+    struct ProofRequestBuilder {
+        expired_at: i64,
+        owner: Pubkey,
+        policy: Pubkey,
+        status: u8,
+        // --
+        _pk: Pubkey,
+        _owner: Pubkey,
+        _lamports: u64,
+        _data: Vec<u8>,
+    }
+
+    impl ProofRequestBuilder {
+        pub fn new() -> Self {
+            Self {
+                expired_at: 0,
+                owner: Default::default(),
+                policy: Default::default(),
+                status: 0,
+                _pk: Default::default(),
+                _owner: AlbusCompliant::program_id(),
+                _lamports: 0,
+                _data: vec![],
+            }
+        }
+
+        pub fn with_status(&mut self, status: ProofRequestStatus) -> &mut Self {
+            self.status = status as u8;
+            self
+        }
+
+        pub fn with_owner(&mut self, addr: Pubkey) -> &mut Self {
+            self.owner = addr;
+            self
+        }
+
+        pub fn with_policy(&mut self, addr: Pubkey) -> &mut Self {
+            self.policy = addr;
+            self
+        }
+
+        pub fn with_expired_at(&mut self, timestamp: i64) -> &mut Self {
+            self.expired_at = timestamp;
+            self
+        }
+
+        fn build(&mut self) -> AccountInfo {
+            self._data = [
+                PROOF_REQUEST_DISCRIMINATOR,
+                &Pubkey::new_unique().to_bytes(), //service
+                &self.policy.to_bytes(),
+                &Pubkey::new_unique().to_bytes(), // circuit
+                &self.owner.to_bytes(),
+                &0u64.to_le_bytes(),
+                &0i64.to_le_bytes(),
+                &self.expired_at.to_le_bytes(),
+                &0i64.to_le_bytes(),
+                &0i64.to_le_bytes(),
+                &0i64.to_le_bytes(),
+                &[self.status],
+                &0u8.to_le_bytes(), // bump
+                &[0u8; 256],        // proof
+                &[0u8; 28],         // public_inputs
+            ]
+            .into_iter()
+            .flatten()
+            .copied()
+            .collect::<Vec<_>>();
+
+            AccountInfo::new(
+                &self._pk,
+                false,
+                true,
+                &mut self._lamports,
+                &mut self._data,
+                &self._owner,
+                false,
+                0,
+            )
+        }
     }
 
     struct SyscallStubs {}

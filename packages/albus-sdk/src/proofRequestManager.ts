@@ -48,8 +48,8 @@ import {
   ProofRequest,
   ServiceProvider,
   createCreateProofRequestInstruction,
-  createDeleteProofRequestInstruction, createProveInstruction, createVerifyInstruction,
-  errorFromCode, proofRequestDiscriminator,
+  createDeleteProofRequestInstruction, createProveProofRequestInstruction,
+  createUpdateProofRequestInstruction, createVerifyProofRequestInstruction, errorFromCode, proofRequestDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 import type { ServiceManager } from './serviceManager'
@@ -67,8 +67,6 @@ export class ProofRequestManager {
 
   /**
    * Load a proof request based on its public key address.
-   * @param addr
-   * @param commitment
    */
   async load(addr: PublicKeyInitData | ProofRequest, commitment?: Commitment) {
     if (addr instanceof ProofRequest) {
@@ -79,8 +77,6 @@ export class ProofRequestManager {
 
   /**
    * Load multiple proof requests
-   * @param addrs
-   * @param commitmentOrConfig
    */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
@@ -91,9 +87,6 @@ export class ProofRequestManager {
   /**
    * Load a full set of data associated with a proof request,
    * including the service, policy and circuit information.
-   * @param addr
-   * @param accounts
-   * @param commitmentOrConfig
    */
   async loadFull(
     addr: PublicKeyInitData | ProofRequest,
@@ -128,7 +121,6 @@ export class ProofRequestManager {
 
   /**
    * Find proof requests based on specified criteria.
-   * @param props
    */
   async find(props: FindProofRequestProps = {}) {
     const builder = ProofRequest.gpaBuilder()
@@ -179,11 +171,6 @@ export class ProofRequestManager {
 
   /**
    * Create a new proof request with the specified properties.
-   *
-   * @param {CreateProofRequestProps} props - The properties for creating the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string,address:PublicKey}>} A Promise that resolves to the result of creating the proof request, including its address and signature.
-   * @throws {Error} Throws an error if there is an issue during the creation process or if the transaction fails to confirm.
    */
   async create(props: CreateProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -192,7 +179,7 @@ export class ProofRequestManager {
     const [proofRequest] = this.pda.proofRequest(policy, authority)
 
     // TODO: load circuit, get maxPublicInputs
-    const maxPublicInputs = props.maxPublicInputs ?? 40
+    const maxPublicInputs = props.maxPublicInputs ?? 50
 
     const instruction = createCreateProofRequestInstruction(
       {
@@ -223,11 +210,6 @@ export class ProofRequestManager {
 
   /**
    * Delete a proof request based on the specified properties.
-   *
-   * @param {DeleteProofRequestProps} props - The properties for deleting the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of deleting the proof request, including its signature.
-   * @throws {Error} Throws an error if there is an issue during the deletion process or if the transaction fails to confirm.
    */
   async delete(props: DeleteProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -247,14 +229,9 @@ export class ProofRequestManager {
   /**
    * Change the status of a proof request by providing a new status value.
    * Require admin authority.
-   *
-   * @param {ChangeStatus} props - The properties for changing the status of the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of changing the status, including the signature.
-   * @throws {Error} Throws an error if there is an issue during the status change process or if the transaction fails to confirm.
    */
   async changeStatus(props: ChangeStatus, opts?: ConfirmOptions) {
-    const instruction = createVerifyInstruction(
+    const instruction = createUpdateProofRequestInstruction(
       {
         proofRequest: new PublicKey(props.proofRequest),
         authority: this.provider.publicKey,
@@ -276,10 +253,6 @@ export class ProofRequestManager {
 
   /**
    * Verify a proof based on the provided properties.
-   *
-   * @param {VerifyProps} props - The properties for verifying the proof.
-   * @returns {Promise<boolean>} A Promise that resolves to a boolean indicating whether the proof is valid (true) or not (false).
-   * @throws {Error} Throws an error if there is an issue during the verification process or if the provided proof is not valid.
    */
   async verify(props: VerifyProps): Promise<boolean> {
     const proofRequest = await this.load(props.proofRequest)
@@ -295,7 +268,7 @@ export class ProofRequestManager {
 
   decryptData(props: { secret: bigint; signals: Record<string, any> }) {
     const { secret, signals } = props
-    const nonce = signals.currentDate as bigint
+    const nonce = signals.timestamp as bigint
     const encryptedData = (signals.encryptedData ?? []) as bigint[]
     // console.log('encryptedData', encryptedData)
 
@@ -316,13 +289,7 @@ export class ProofRequestManager {
     }
   }
 
-  async generateVerifiablePresentation(props: any) {
-    interface CreateVpProps {
-      proofRequest: PublicKeyInitData
-      userPrivateKey: Uint8Array
-    }
-    props = props as CreateVpProps
-
+  async generateVerifiablePresentation(props: GenerateVerifiablePresentationProps) {
     const { proofRequest, circuit } = await this.loadFull(props.proofRequest, ['circuit'])
 
     if (!circuit) {
@@ -337,7 +304,7 @@ export class ProofRequestManager {
     const secret = Albus.crypto.Poseidon.hash([
       Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey),
       signals.credentialRoot as bigint,
-      signals.currentDate as bigint,
+      signals.timestamp as bigint,
     ])
 
     const data = this.decryptData({ secret, signals })
@@ -369,11 +336,6 @@ export class ProofRequestManager {
 
   /**
    * Prove a proof request by providing the necessary proof and public signals.
-   *
-   * @param {ProveProps} props - The properties for proving the proof request.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature:string}>} A Promise that resolves to the result of proving the proof request, including the signature.
-   * @throws {Error} Throws an error if there is an issue during the proof process or if the transaction fails to confirm.
    */
   async prove(props: ProveProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -382,23 +344,11 @@ export class ProofRequestManager {
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
 
-    // const version = await this.provider.connection.getVersion()
-    const isVerifyOnChain = true // if version >= 16.0
-
-    // const chunkSize = Math.ceil((1232 /* max tx */ - 256 /* proof */ - 1 - 160 /* accounts */) / 32)
-    // TODO: calculate
-    const inputChunks = chunk(publicInputs, 19)
     const txs: { tx: Transaction }[] = []
 
-    for (let i = 0; i < inputChunks.length; i++) {
-      const inputs = inputChunks[i]!
-      const isFirst = i === 0
-      const isLast = i === inputChunks.length - 1
-
-      const tx = new Transaction()
-
-      tx.add(
-        createProveInstruction(
+    txs.push({
+      tx: new Transaction().add(
+        createProveProofRequestInstruction(
           {
             proofRequest: new PublicKey(props.proofRequest),
             circuit: proofRequest.circuit,
@@ -407,19 +357,50 @@ export class ProofRequestManager {
           },
           {
             data: {
-              reset: isFirst,
-              publicInputs: inputs,
-              proof: isLast ? proof : null,
+              reset: true,
+              publicInputs: publicInputs.slice(0, 20),
+              proof,
             },
           },
         ),
-      )
+      ),
+    })
 
-      // on-chain verification
-      if (isLast && isVerifyOnChain) {
-        tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 500000 }))
+    // extend public inputs if needed
+    if (publicInputs.length > 20) {
+      const inputChunks = chunk(publicInputs.slice(20), 28)
+      for (let i = 0; i < inputChunks.length; i++) {
+        const inputs = inputChunks[i]!
+        txs.push({
+          tx: new Transaction().add(
+            createProveProofRequestInstruction(
+              {
+                proofRequest: new PublicKey(props.proofRequest),
+                circuit: proofRequest.circuit,
+                policy: proofRequest.policy,
+                authority,
+              },
+              {
+                data: {
+                  reset: false,
+                  publicInputs: inputs,
+                  proof: null,
+                },
+              },
+            ),
+          ),
+        })
       }
+    }
 
+    if (props.verify) {
+      const tx = new Transaction()
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
+        .add(createVerifyProofRequestInstruction({
+          proofRequest: new PublicKey(props.proofRequest),
+          circuit: proofRequest.circuit,
+          authority,
+        }))
       txs.push({ tx })
     }
 
@@ -434,9 +415,6 @@ export class ProofRequestManager {
 
   /**
    * Perform a full proof generation process based on the provided properties.
-   *
-   * @param {FullProveProps} props - The properties for the full proof generation process.
-   * @throws {Error} Throws an error if there is an issue during any step of the proof generation process.
    */
   async fullProve(props: FullProveProps) {
     const { proofRequest, circuit, policy, serviceProvider }
@@ -466,7 +444,7 @@ export class ProofRequestManager {
     })
 
     const proofInput = await new ProofInputBuilder(credential)
-      .withNow(await getSolanaTimestamp(this.provider.connection))
+      .withTimestamp(await getSolanaTimestamp(this.provider.connection))
       .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
       .withTrusteePublicKey(trusteePubKeys)
       .withCircuit(circuit)
@@ -486,6 +464,7 @@ export class ProofRequestManager {
         proof,
         // @ts-expect-error readonly
         publicSignals,
+        verify: true,
       })
 
       return { signatures, proof, publicSignals }
@@ -497,9 +476,6 @@ export class ProofRequestManager {
 
   /**
    * Validate a proof request to ensure it meets specific criteria.
-   *
-   * @param {ProofRequest} req - The proof request to validate.
-   * @throws {Error} Throws an error if the proof request fails validation based on specified criteria.
    */
   async validate(req: ProofRequest) {
     const slot = await this.provider.connection.getSlot()
@@ -510,9 +486,6 @@ export class ProofRequestManager {
     if (Number(req.expiredAt) > 0 && Number(req.expiredAt) < timestamp) {
       throw new Error('Proof request is expired')
     }
-    // if (!req.proof) {
-    //   throw new Error('Proof request is not proved yet')
-    // }
     if (Number(req.verifiedAt) <= 0) {
       throw new Error('Proof request is not verified')
     }
@@ -567,9 +540,14 @@ export interface ProveProps {
   proofRequestData?: ProofRequest
   proof: ProofData
   publicSignals: (string | number | bigint)[]
+  verify: boolean
 }
 
 export interface ChangeStatus {
   proofRequest: PublicKeyInitData
   status: ProofRequestStatus
+}
+interface GenerateVerifiablePresentationProps {
+  proofRequest: PublicKeyInitData
+  userPrivateKey: Uint8Array
 }

@@ -23,16 +23,15 @@ help: ## Show this help
 bump: ## Bump program version
 	cd ./programs/$(PROGRAM)/ && cargo bump
 
-build:
-ifdef NETWORK
-	@echo "> Building programs for $(NETWORK)"
-	anchor build -p $(PROGRAM) --arch sbf -- --features $(NETWORK)
+build: ## Build program
+ifeq ($(NETWORK), devnet)
+	anchor build -p $(PROGRAM) --arch sbf -- --features devnet
 else
 	anchor build -p $(PROGRAM) --arch sbf
 endif
 
 test: ## Test integration (localnet)
-	anchor test --arch sbf --skip-lint --provider.cluster localnet
+	anchor test --arch sbf --skip-lint --provider.cluster localnet -- --features testing
 
 test-unit: ## Test unit
 	cargo clippy --all-features -- --allow clippy::result_large_err
@@ -45,20 +44,14 @@ deploy: build ## Deploy program
 	anchor deploy -p $(PROGRAM) --provider.cluster $(NETWORK)
 #	--program-keypair ./target/deploy/$(PROGRAM)-keypair-$(NETWORK).json
 
-deploy-mainnet: build ## Deploy program (mainnet)
-	anchor deploy -p $(PROGRAM) --provider.cluster mainnet
-
 upgrade: build ## Upgrade program
-	anchor upgrade -p $(program_id) ./target/deploy/$(PROGRAM).so
-
-upgrade-mainnet: build ## Upgrade program (Mainnet)
-	anchor upgrade -p $(program_id) --provider.cluster mainnet ./target/deploy/$(PROGRAM).so
+	anchor upgrade -p $(program_id) --provider.cluster $(NETWORK) ./target/deploy/$(PROGRAM).so
 
 show-buffers: ## Show program buffers
-	solana program show --buffers -k $(wallet)
+	solana program show --buffers -k $(wallet) -u $(NETWORK)
 
 close-buffers: ## Close program buffers
-	solana program close --buffers -k $(wallet)
+	solana program close --buffers -k $(wallet) -u $(NETWORK)
 
 clean:
 	rm -rf node_modules target .anchor

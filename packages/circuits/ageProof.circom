@@ -2,25 +2,17 @@ pragma circom 2.1.4;
 
 include "circomlib/circuits/gates.circom";
 include "circomlib/circuits/comparators.circom";
+include "utils/date.circom";
 
 template AgeProof() {
-  signal input birthYear;
-  signal input birthMonth;
-  signal input birthDay;
-
-  // public inputs
-  signal input currentYear;
-  signal input currentMonth;
-  signal input currentDay;
-
+  signal input currentDate[3];
+  signal input birthDate[3];
   signal input minAge;
   signal input maxAge;
-
-  // final result
   signal output valid;
 
-  var birth = birthYear * 10000 + birthMonth * 100 + birthDay;
-  var current = currentYear * 10000 + currentMonth * 100 + currentDay;
+  var current = dateToNum(currentDate);
+  var birth = dateToNum(birthDate);
 
   component isGreater = GreaterEqThan(32);
   isGreater.in[0] <== current;

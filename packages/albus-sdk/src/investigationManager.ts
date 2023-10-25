@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { Buffer } from 'node:buffer'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import * as Albus from '@mfactory-lab/albus-core'
 import type {
@@ -199,8 +200,6 @@ export class InvestigationManager {
 
   /**
    * Create new {@link InvestigationRequest}
-   * @param props
-   * @param opts
    */
   async create(props: CreateInvestigationProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
@@ -262,14 +261,8 @@ export class InvestigationManager {
 
   /**
    * Reveal a secret share for {@link InvestigationRequest}
-   * @param props
-   * @param opts
    */
   async revealShare(props: RevealShareProps, opts?: ConfirmOptions) {
-    if (Number(props.index) < 1) {
-      throw new Error('Invalid index. Must be greater than or equal to 1.')
-    }
-
     const authority = this.provider.publicKey
 
     const investigationRequest = await this.load(props.investigationRequest)
@@ -284,22 +277,28 @@ export class InvestigationManager {
       proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
     )
 
-    const trusteePubkey = (signals.trusteePublicKey as bigint[][] ?? [])[props.index - 1]
-    if (!trusteePubkey) {
-      throw new Error(`Unable to find a trustee pubkey with index ${props.index - 1}`)
+    const { key } = Albus.zkp.generateEncryptionKey(Keypair.fromSecretKey(props.encryptionKey))
+
+    const trusteePubKeys = (signals.trusteePublicKey as bigint[][] ?? []).map(pk => Albus.zkp.packPubkey(pk))
+
+    const index = trusteePubKeys.findIndex(pk => Buffer.compare(pk, key) === 0)
+
+    if (index < 0) {
+      throw new Error(`Unable to find a trustee pubkey with index ${index - 1}`)
     }
 
-    const trustee = this.pda.trustee(Albus.zkp.packPubkey(trusteePubkey))[0]
+    const [trustee] = this.pda.trustee(key)
     const [investigationRequestShare] = this.pda.investigationRequestShare(props.investigationRequest, trustee)
 
-    const encryptedShare = signals.encryptedShare?.[props.index - 1]
+    const encryptedShare = signals.encryptedShare?.[index - 1]
     if (!encryptedShare) {
-      throw new Error(`Unable to find an encrypted share with index ${props.index - 1}`)
+      throw new Error(`Unable to find an encrypted share with index ${index - 1}`)
     }
 
     const userPublicKey = signals.userPublicKey as [bigint, bigint]
     const sharedKey = Albus.zkp.generateEcdhSharedKey(props.encryptionKey, userPublicKey)
-    const secretShare = Albus.crypto.Poseidon.decrypt(encryptedShare, sharedKey, 1, signals.currentDate as bigint)
+
+    const secretShare = Albus.crypto.Poseidon.decrypt(encryptedShare, sharedKey, 1, signals.timestamp as bigint)
     const newEncryptedShare = await Albus.crypto.XC20P.encryptBytes(
       Albus.crypto.utils.bigintToBytes(secretShare[0]),
       investigationRequest.encryptionKey,
@@ -318,8 +317,8 @@ export class InvestigationManager {
       authority,
     }, {
       data: {
-        index: props.index,
         share: newEncryptedShare,
+        index,
       },
     })
 
@@ -404,7 +403,6 @@ export interface FindInvestigationShareProps {
 export interface RevealShareProps {
   investigationRequest: PublicKeyInitData
   encryptionKey: Uint8Array
-  index: number
 }
 
 export interface DecryptDataProps {

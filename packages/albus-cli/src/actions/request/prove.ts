@@ -26,8 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
-import fs from 'node:fs'
 import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
@@ -35,7 +33,7 @@ import { useContext } from '@/context'
 interface Opts {
   // Verifiable Credential Address
   vc: string
-  // Path to decryption key
+  // Path to a decryption key
   decryptionKey?: string
 }
 
@@ -45,12 +43,16 @@ interface Opts {
 export async function proveRequest(proofRequestAddr: string, opts: Opts) {
   const { client, keypair } = useContext()
 
-  let decryptionKey: any
-  if (opts.decryptionKey) {
-    decryptionKey = Keypair.fromSecretKey(
-      Buffer.from(JSON.parse(fs.readFileSync(opts.decryptionKey).toString())),
-    ).secretKey
-  }
+  // let decryptionKey: any
+  const decryptionKey = Keypair.fromSecretKey(
+    Uint8Array.from([82, 210, 173, 237, 232, 206, 53, 47, 105, 175, 25, 145, 120, 111, 202, 28, 236, 115, 136, 39, 132, 171, 124, 156, 2, 243, 158, 97, 113, 144, 247, 226, 250, 194, 250, 173, 237, 207, 89, 252, 47, 17, 128, 41, 6, 112, 13, 108, 202, 204, 69, 122, 134, 97, 193, 68, 205, 178, 218, 209, 98, 45, 231, 20]),
+  ).secretKey
+
+  // if (opts.decryptionKey) {
+  //   decryptionKey = Keypair.fromSecretKey(
+  //     Buffer.from(JSON.parse(fs.readFileSync(opts.decryptionKey).toString())),
+  //   ).secretKey
+  // }
 
   log.info('Generating proof...')
 

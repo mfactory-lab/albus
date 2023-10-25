@@ -31,12 +31,8 @@ import { setupCircuit } from './utils'
 
 describe('ageProof', async () => {
   const input = {
-    birthYear: 2005,
-    birthMonth: 7,
-    birthDay: 11,
-    currentYear: 2023,
-    currentMonth: 7,
-    currentDay: 11,
+    currentDate: [2023, 7, 11],
+    birthDate: [2005, 7, 11],
     minAge: 18,
     maxAge: 100,
   }
@@ -49,7 +45,7 @@ describe('ageProof', async () => {
   })
 
   it('decline invalid birth date', async () => {
-    input.birthDay += 1
+    input.birthDate[2] += 1
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, { valid: 0 })
   })

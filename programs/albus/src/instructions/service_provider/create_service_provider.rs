@@ -49,7 +49,7 @@ pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderD
         .unwrap_or(DEFAULT_SECRET_SHARE_THRESHOLD);
 
     service.created_at = timestamp;
-    service.bump = ctx.bumps["service_provider"];
+    service.bump = ctx.bumps.service_provider;
 
     if let Some(trustees) = data.trustees {
         service.trustees = trustees;

@@ -27,5 +27,6 @@
  */
 
 export * from './create'
+export * from './generate'
 export * from './remove'
 export * from './show'

@@ -69,7 +69,7 @@ export default defineConfig(async ({ mode }) => {
         dirs: ['src/hooks/**', 'src/stores/**'],
       }),
       Components({
-        // allow to autoload markdown components under `./src/components/`
+        // allow autoload markdown components under `./src/components/`
         extensions: ['vue', 'md', 'jsx', 'tsx'],
         // allow auto import and register components used in markdown
         include: [/\.vue$/, /\.vue\?vue/, /\.md$/, /\.jsx$/, /\.tsx$/],

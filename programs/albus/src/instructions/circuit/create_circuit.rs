@@ -47,7 +47,7 @@ pub fn handler(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<(
     circuit.outputs = data.outputs;
     circuit.private_signals = data.private_signals;
     circuit.public_signals = data.public_signals;
-    circuit.bump = ctx.bumps["circuit"];
+    circuit.bump = ctx.bumps.circuit;
 
     Ok(())
 }
@@ -73,9 +73,9 @@ pub struct CreateCircuit<'info> {
         bump,
         payer = authority,
         space = Circuit::space(
-            Circuit::signals_count(&data.outputs) +
-            Circuit::signals_count(&data.public_signals),
-            Circuit::signals_count(&data.private_signals)
+            Circuit::signals_count(data.outputs) +
+            Circuit::signals_count(data.public_signals),
+            Circuit::signals_count(data.private_signals)
         )
     )]
     pub circuit: Box<Account<'info, Circuit>>,

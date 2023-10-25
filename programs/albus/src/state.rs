@@ -26,14 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::utils::{num_to_bytes, Signals};
+use crate::utils::Signals;
 use anchor_lang::prelude::*;
-use std::borrow::Cow;
 
 #[cfg(feature = "verify-on-chain")]
 use groth16_solana::{Proof, VK};
-
-pub type PublicInputs = Vec<[u8; 32]>;
 
 #[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct ProofData {
@@ -82,6 +79,24 @@ impl From<VerificationKey> for VK {
     }
 }
 
+// #[account]
+// #[derive(InitSpace)]
+// pub struct Issuer {
+//     #[max_len(32)]
+//     pub name: String,
+//     pub key: [u8; 32],
+//     pub authority: Pubkey,
+//     /// PDA bump.
+//     pub bump: u8,
+// }
+
+// #[account]
+// #[derive(InitSpace)]
+// pub struct ProgramConfig {
+//     #[max_len(3)]
+//     pub authority: Vec<Pubkey>,
+// }
+
 #[account]
 #[derive(InitSpace)]
 pub struct Circuit {
@@ -104,12 +119,13 @@ pub struct Circuit {
     pub bump: u8,
     /// Verification key
     pub vk: VerificationKey,
+    /// Output signals associated with the circuit
     #[max_len(0, 0)]
     pub outputs: Vec<String>,
-    /// Public signals associated with the circuit.
+    /// Public signals associated with the circuit
     #[max_len(0, 0)]
     pub public_signals: Vec<String>,
-    /// Private signals associated with the circuit.
+    /// Private signals associated with the circuit
     #[max_len(0, 0)]
     pub private_signals: Vec<String>,
 }
@@ -126,16 +142,16 @@ impl Circuit {
     }
 
     #[inline]
-    pub fn signals_count<'a, T>(signals: impl IntoIterator<Item = T>) -> usize
-    where
-        T: Into<Cow<'a, str>>,
-    {
+    pub fn signals_count<T: AsRef<str>>(signals: impl IntoIterator<Item = T>) -> usize {
         Signals::new(signals).len()
     }
 
     #[inline]
     pub fn signals(&self) -> Signals {
-        Signals::new([self.outputs.as_slice(), self.public_signals.as_slice()].concat())
+        let mut vec = Vec::with_capacity(self.outputs.len() + self.public_signals.len());
+        vec.extend_from_slice(self.outputs.as_slice());
+        vec.extend_from_slice(self.public_signals.as_slice());
+        Signals::new(vec)
     }
 }
 
@@ -179,13 +195,13 @@ impl Policy {
     }
 
     #[inline]
-    pub fn apply_rules(&self, public_inputs: &mut PublicInputs, signals: &Signals) {
+    pub fn apply_rules(&self, public_inputs: &mut [[u8; 32]], signals: &Signals) {
         for rule in &self.rules {
             let (name, idx) = rule.parse();
             if let Some(signal) = signals.get(name) {
-                let index = signal.0 + idx.unwrap_or_default() as usize;
+                let index = signal.index + idx.unwrap_or_default() as usize;
                 if let Some(i) = public_inputs.get_mut(index) {
-                    *i = num_to_bytes(rule.value);
+                    *i = rule.value;
                 }
             }
         }
@@ -196,7 +212,10 @@ impl Policy {
 pub struct PolicyRule {
     #[max_len(32)]
     pub key: String,
-    pub value: u32, // TODO: support > u32 ?
+    /// Scalar Field
+    pub value: [u8; 32],
+    #[max_len(32)]
+    pub label: String,
 }
 
 impl PolicyRule {
@@ -451,45 +470,55 @@ pub enum ProofRequestStatus {
 //     pub created_at: i64,
 // }
 
-#[test]
-fn test_apply_rules() {
-    let policy = Policy {
-        service_provider: Default::default(),
-        circuit: Default::default(),
-        code: "".to_string(),
-        name: "".to_string(),
-        description: "".to_string(),
-        expiration_period: 0,
-        retention_period: 0,
-        proof_request_count: 0,
-        created_at: 0,
-        bump: 0,
-        rules: vec![
-            PolicyRule {
-                key: "minAge".to_string(),
-                value: 18,
-            },
-            PolicyRule {
-                key: "maxAge".to_string(),
-                value: 100,
-            },
-            PolicyRule {
-                key: "issuerPk.0".to_string(),
-                value: 1,
-            },
-            PolicyRule {
-                key: "issuerPk.1".to_string(),
-                value: 2,
-            },
-        ],
-    };
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::utils::num_to_bytes;
 
-    let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"]);
-    let mut public_inputs: PublicInputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
+    #[test]
+    fn test_apply_rules() {
+        let policy = Policy {
+            service_provider: Default::default(),
+            circuit: Default::default(),
+            code: "".to_string(),
+            name: "".to_string(),
+            description: "".to_string(),
+            expiration_period: 0,
+            retention_period: 0,
+            proof_request_count: 0,
+            created_at: 0,
+            bump: 0,
+            rules: vec![
+                PolicyRule {
+                    key: "minAge".to_string(),
+                    value: num_to_bytes(18),
+                    label: "".to_string(),
+                },
+                PolicyRule {
+                    key: "maxAge".to_string(),
+                    value: num_to_bytes(100),
+                    label: "".to_string(),
+                },
+                PolicyRule {
+                    key: "issuerPk.0".to_string(),
+                    value: num_to_bytes(1),
+                    label: "".to_string(),
+                },
+                PolicyRule {
+                    key: "issuerPk.1".to_string(),
+                    value: num_to_bytes(2),
+                    label: "".to_string(),
+                },
+            ],
+        };
 
-    policy.apply_rules(&mut public_inputs, &signals);
+        let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"].to_vec());
+        let mut public_inputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
 
-    for (i, rule) in policy.rules.iter().enumerate() {
-        assert_eq!(public_inputs[i], num_to_bytes(rule.value));
+        policy.apply_rules(&mut public_inputs, &signals);
+
+        for (i, rule) in policy.rules.iter().enumerate() {
+            assert_eq!(public_inputs[i], rule.value);
+        }
     }
 }

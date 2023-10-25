@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::AlbusError;
+use crate::error::AlbusError;
 use anchor_lang::prelude::*;
 use anchor_lang::Discriminator;
 
@@ -37,7 +37,7 @@ use crate::state::{
 use crate::utils::{cmp_pubkeys, initialize_account, BpfWriter};
 
 pub fn handler<'info>(
-    ctx: Context<'_, '_, '_, 'info, CreateInvestigationRequest<'info>>,
+    ctx: Context<'_, '_, 'info, 'info, CreateInvestigationRequest<'info>>,
     data: CreateInvestigationRequestData,
 ) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
@@ -61,7 +61,7 @@ pub fn handler<'info>(
     req.required_share_count = service.secret_share_threshold;
     req.status = InvestigationStatus::Pending;
     req.created_at = timestamp;
-    req.bump = ctx.bumps["investigation_request"];
+    req.bump = ctx.bumps.investigation_request;
 
     // Try to initialize share accounts
     if !ctx.remaining_accounts.is_empty() {
