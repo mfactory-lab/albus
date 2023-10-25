@@ -23,16 +23,15 @@ help: ## Show this help
 bump: ## Bump program version
 	cd ./programs/$(PROGRAM)/ && cargo bump
 
-build:
-ifdef NETWORK
-	@echo "> Building programs for $(NETWORK)"
-	anchor build -p $(PROGRAM) --arch sbf
+build: ## Build program
+ifeq ($(NETWORK), devnet)
+	anchor build -p $(PROGRAM) --arch sbf -- --features devnet
 else
 	anchor build -p $(PROGRAM) --arch sbf
 endif
 
 test: ## Test integration (localnet)
-	anchor test --arch sbf --skip-lint --provider.cluster localnet
+	anchor test --arch sbf --skip-lint --provider.cluster localnet -- --features testing
 
 test-unit: ## Test unit
 	cargo clippy --all-features -- --allow clippy::result_large_err
