@@ -41,10 +41,10 @@ startup_wait = 10000
 [test.validator]
 url = "https://api.mainnet-beta.solana.com"
 
-### MPL Token Metadata
+### Token Metadata
 [[test.validator.clone]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 
-#### SPL Token Program
+### Stake Pool
 #[[test.validator.clone]]
 #address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"
