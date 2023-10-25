@@ -15,16 +15,15 @@ no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
+default = []
 verify-on-chain = ["groth16-solana"]
-#devnet = ["verify-on-chain"]
-#mainnet = []
-default = ["verify-on-chain"]
-#default = []
+testing = ["verify-on-chain"]
+devnet = ["verify-on-chain"]
 
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }
 anchor-spl = { version = "0.29.0", default-features = false, features = ["token", "associated_token"] }
 groth16-solana = { path = "../../packages/groth16-solana", optional = true }
 mpl-token-metadata = "3.1.0"
-#time = { version = "0.3.23", default-features = false }
-#num-traits = "0.2.16"
+solana-program = "*"
+
