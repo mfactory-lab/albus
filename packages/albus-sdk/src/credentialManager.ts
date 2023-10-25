@@ -214,10 +214,17 @@ export class CredentialManager {
     const result: { address: PublicKey; credential: VerifiableCredential }[] = []
     for (const account of accounts) {
       if (account.json?.vc !== undefined) {
-        const credential = await Albus.credential.verifyCredential(account.json.vc, {
-          decryptionKey: props.decryptionKey,
-        })
-        result.push({ address: account.mint, credential })
+        try {
+          const credential = await Albus.credential.verifyCredential(account.json.vc, {
+            decryptionKey: props.decryptionKey,
+          })
+          result.push({ address: account.mint, credential })
+        } catch (e) {
+          console.log(`Credential Verification Error: ${e}`)
+          if (props.throwError) {
+            throw e
+          }
+        }
       }
     }
 
@@ -293,6 +300,7 @@ export interface LoadCredentialProps {
 
 export interface LoadAllCredentialProps extends LoadCredentialProps {
   owner?: PublicKey
+  throwError?: boolean
 }
 
 export interface LoadPresentationProps extends LoadCredentialProps {
