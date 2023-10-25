@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::constants::{NFT_SYMBOL_PREFIX, VC_SYMBOL_CODE};
+use crate::constants::{CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX};
 use crate::utils::assert_authorized;
 use crate::ID;
 use anchor_lang::prelude::*;
@@ -49,7 +49,7 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
         .system_program(&ctx.accounts.system_program)
         .data(Data {
             name: data.name,
-            symbol: format!("{}-{}", NFT_SYMBOL_PREFIX, VC_SYMBOL_CODE),
+            symbol: format!("{}-{}", NFT_SYMBOL_PREFIX, CREDENTIAL_SYMBOL_CODE),
             uri: data.uri,
             seller_fee_basis_points: 0,
             creators: Some(vec![
