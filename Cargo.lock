@@ -87,7 +87,7 @@ dependencies = [
 
 [[package]]
 name = "albus"
-version = "0.0.19"
+version = "0.0.20"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
