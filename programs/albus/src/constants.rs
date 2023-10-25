@@ -32,6 +32,8 @@ use solana_program::pubkey::Pubkey;
 pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
     #[cfg(feature = "testing")]
     pubkey!("4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i"),
+    #[cfg(feature = "devnet")]
+    pubkey!("5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH"),
     pubkey!("AuTHJvxjcr2wB8xfZbciwfHNn8n1H2HrBz5yD2F6onWH"),
 ];
 
