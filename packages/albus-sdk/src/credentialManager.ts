@@ -42,7 +42,7 @@ import type {
   Signer,
 } from '@solana/web3.js'
 import axios from 'axios'
-import { DEFAULT_CREDENTIAL_NAME, NFT_SYMBOL_PREFIX, NFT_VC_SYMBOL } from './constants'
+import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
   createMintCredentialInstruction, createRevokeCredentialInstruction, createUpdateCredentialInstruction,
   errorFromCode,
@@ -122,7 +122,7 @@ export class CredentialManager {
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, {
       data: {
-        name: props.name ?? DEFAULT_CREDENTIAL_NAME,
+        name: props.name ?? CREDENTIAL_NAME,
         uri: props.uri,
       },
     })
@@ -174,7 +174,7 @@ export class CredentialManager {
   async load(addr: PublicKeyInitData, props: LoadCredentialProps = {}) {
     const nft = await loadNft(this.provider.connection, addr, {
       authority: this.pda.authority()[0],
-      code: NFT_VC_SYMBOL,
+      code: CREDENTIAL_SYMBOL_CODE,
     })
 
     if (!nft.json?.vc) {
@@ -195,7 +195,7 @@ export class CredentialManager {
       this.provider.connection,
       props.owner ?? this.provider.publicKey,
       {
-        symbol: `${NFT_SYMBOL_PREFIX}-${NFT_VC_SYMBOL}`,
+        symbol: `${NFT_SYMBOL_PREFIX}-${CREDENTIAL_SYMBOL_CODE}`,
         updateAuthority: this.pda.authority()[0],
         withJson: true,
       },
@@ -223,7 +223,7 @@ export class CredentialManager {
       props?.owner ?? this.provider.publicKey,
       {
         uri: '', // pending VC has empty uri
-        symbol: `${NFT_SYMBOL_PREFIX}-${NFT_VC_SYMBOL}`,
+        symbol: `${NFT_SYMBOL_PREFIX}-${CREDENTIAL_SYMBOL_CODE}`,
         updateAuthority: this.pda.authority()[0],
         withJson: false,
       },

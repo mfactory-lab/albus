@@ -27,7 +27,7 @@
  */
 
 export type PrivateKey = number[] | string | Uint8Array
-export type AlbusNftCode = 'VC' | 'ID'
+export type AlbusNftCode = 'DC' | 'ID'
 
 export enum KnownSignals {
   Timestamp = 'timestamp',
