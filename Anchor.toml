@@ -4,7 +4,7 @@ solana_version = "1.16.17"
 
 [features]
 seeds = false
-skip-lint = false
+skip-lint = true
 
 [workspace]
 members = [

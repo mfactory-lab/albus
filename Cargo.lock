@@ -93,6 +93,7 @@ dependencies = [
  "anchor-spl",
  "groth16-solana",
  "mpl-token-metadata",
+ "solana-program",
 ]
 
 [[package]]

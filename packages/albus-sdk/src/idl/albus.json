@@ -950,6 +950,9 @@
           },
           {
             "name": "outputs",
+            "docs": [
+              "Output signals associated with the circuit"
+            ],
             "type": {
               "vec": "string"
             }
@@ -957,7 +960,7 @@
           {
             "name": "publicSignals",
             "docs": [
-              "Public signals associated with the circuit."
+              "Public signals associated with the circuit"
             ],
             "type": {
               "vec": "string"
@@ -966,7 +969,7 @@
           {
             "name": "privateSignals",
             "docs": [
-              "Private signals associated with the circuit."
+              "Private signals associated with the circuit"
             ],
             "type": {
               "vec": "string"
