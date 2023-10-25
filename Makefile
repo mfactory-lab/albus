@@ -44,14 +44,8 @@ deploy: build ## Deploy program
 	anchor deploy -p $(PROGRAM) --provider.cluster $(NETWORK)
 #	--program-keypair ./target/deploy/$(PROGRAM)-keypair-$(NETWORK).json
 
-deploy-mainnet: build ## Deploy program (mainnet)
-	anchor deploy -p $(PROGRAM) --provider.cluster mainnet
-
 upgrade: build ## Upgrade program
-	anchor upgrade -p $(program_id) ./target/deploy/$(PROGRAM).so
-
-upgrade-mainnet: build ## Upgrade program (Mainnet)
-	anchor upgrade -p $(program_id) --provider.cluster mainnet ./target/deploy/$(PROGRAM).so
+	anchor upgrade -p $(program_id) --provider.cluster $(NETWORK) ./target/deploy/$(PROGRAM).so
 
 show-buffers: ## Show program buffers
 	solana program show --buffers -k $(wallet) -u $(NETWORK)
