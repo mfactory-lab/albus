@@ -29,10 +29,10 @@
 use anchor_lang::prelude::*;
 
 use crate::{
+    error::AlbusError,
     events::{RejectEvent, VerifyEvent},
     state::{ProofRequest, ProofRequestStatus},
     utils::assert_authorized,
-    AlbusError,
 };
 
 /// Update the [ProofRequest] status.

@@ -26,8 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use std::str::FromStr;
-
 use anchor_lang::{
     prelude::*,
     solana_program::{program_memory::sol_memcmp, pubkey::PUBKEY_BYTES},
@@ -35,7 +33,8 @@ use anchor_lang::{
 
 // use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
 
-use crate::{constants::AUTHORIZED_AUTHORITY, AlbusError};
+use crate::constants::AUTHORIZED_AUTHORITY;
+use crate::error::AlbusError;
 
 /// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`
 pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {
@@ -44,11 +43,11 @@ pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {
 
 /// Check that the `authority` key is authorized
 pub fn assert_authorized(authority: &Pubkey) -> Result<()> {
-    if !AUTHORIZED_AUTHORITY.is_empty()
-        && !AUTHORIZED_AUTHORITY
-            .iter()
-            .any(|a| Pubkey::from_str(a).unwrap() == *authority)
-    {
+    if !AUTHORIZED_AUTHORITY.is_empty() && !AUTHORIZED_AUTHORITY.iter().any(|&a| a == *authority) {
+        msg!(
+            "The {} account is not allowed to perform this action",
+            authority
+        );
         Err(AlbusError::Unauthorized.into())
     } else {
         Ok(())

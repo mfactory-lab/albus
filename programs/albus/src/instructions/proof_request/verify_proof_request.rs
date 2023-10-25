@@ -35,7 +35,7 @@ use groth16_solana::{Groth16Verifier, Proof, VK};
 use crate::{events::VerifyEvent, state::ProofRequestStatus};
 
 use crate::state::Circuit;
-use crate::{state::ProofRequest, AlbusError};
+use crate::{error::AlbusError, state::ProofRequest};
 
 pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
     #[cfg(feature = "verify-on-chain")]

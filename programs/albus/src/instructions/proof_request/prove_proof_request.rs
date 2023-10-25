@@ -32,10 +32,10 @@ use crate::constants::{TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD};
 use crate::state::{Circuit, Policy, ProofData};
 use crate::utils::bytes_to_num;
 use crate::{
+    error::AlbusError,
     events::ProveEvent,
     state::{ProofRequest, ProofRequestStatus},
     utils::cmp_pubkeys,
-    AlbusError,
 };
 
 /// Proves the [ProofRequest] by validating the proof metadata and updating its status to `Proved`.

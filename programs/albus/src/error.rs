@@ -26,22 +26,26 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use solana_program::pubkey;
-use solana_program::pubkey::Pubkey;
+use anchor_lang::error_code;
 
-pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
-    #[cfg(feature = "testing")]
-    pubkey!("4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i"),
-    pubkey!("AuTHJvxjcr2wB8xfZbciwfHNn8n1H2HrBz5yD2F6onWH"),
-];
-
-// pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
-
-pub const TIMESTAMP_SIGNAL: &str = "timestamp";
-pub const TIMESTAMP_THRESHOLD: u16 = 30;
-
-pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
-pub const CREDENTIAL_SYMBOL_CODE: &str = "DC";
-pub const CREDENTIAL_NAME: &str = "Albus Digital Credential";
-
-pub const DEFAULT_SECRET_SHARE_THRESHOLD: u8 = 2;
+#[error_code]
+pub enum AlbusError {
+    #[msg("Unauthorized action")]
+    Unauthorized,
+    #[msg("Unverified")]
+    Unverified,
+    #[msg("Unproved")]
+    Unproved,
+    #[msg("Expired")]
+    Expired,
+    #[msg("Invalid data")]
+    InvalidData,
+    #[msg("Incorrect owner")]
+    IncorrectOwner,
+    #[msg("Invalid metadata")]
+    InvalidMetadata,
+    #[msg("Proof verification failed")]
+    ProofVerificationFailed,
+    #[msg("Invalid public inputs")]
+    InvalidPublicInputs,
+}

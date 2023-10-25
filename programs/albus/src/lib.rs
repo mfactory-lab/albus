@@ -27,6 +27,7 @@
  */
 
 mod constants;
+pub mod error;
 mod events;
 mod instructions;
 mod state;
@@ -179,26 +180,4 @@ pub mod albus {
     pub fn admin_close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
         close_account::close_account(ctx)
     }
-}
-
-#[error_code]
-pub enum AlbusError {
-    #[msg("Unauthorized action")]
-    Unauthorized,
-    #[msg("Unverified")]
-    Unverified,
-    #[msg("Unproved")]
-    Unproved,
-    #[msg("Expired")]
-    Expired,
-    #[msg("Invalid data")]
-    InvalidData,
-    #[msg("Incorrect owner")]
-    IncorrectOwner,
-    #[msg("Invalid metadata")]
-    InvalidMetadata,
-    #[msg("Proof verification failed")]
-    ProofVerificationFailed,
-    #[msg("Invalid public inputs")]
-    InvalidPublicInputs,
 }

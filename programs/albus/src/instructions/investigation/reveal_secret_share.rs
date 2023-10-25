@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::AlbusError;
+use crate::error::AlbusError;
 use anchor_lang::prelude::*;
 
 use crate::state::{InvestigationRequest, InvestigationRequestShare, RevelationStatus, Trustee};

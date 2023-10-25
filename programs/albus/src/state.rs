@@ -90,6 +90,13 @@ impl From<VerificationKey> for VK {
 //     pub bump: u8,
 // }
 
+// #[account]
+// #[derive(InitSpace)]
+// pub struct ProgramConfig {
+//     #[max_len(3)]
+//     pub authority: Vec<Pubkey>,
+// }
+
 #[account]
 #[derive(InitSpace)]
 pub struct Circuit {
@@ -112,12 +119,13 @@ pub struct Circuit {
     pub bump: u8,
     /// Verification key
     pub vk: VerificationKey,
+    /// Output signals associated with the circuit
     #[max_len(0, 0)]
     pub outputs: Vec<String>,
-    /// Public signals associated with the circuit.
+    /// Public signals associated with the circuit
     #[max_len(0, 0)]
     pub public_signals: Vec<String>,
-    /// Private signals associated with the circuit.
+    /// Private signals associated with the circuit
     #[max_len(0, 0)]
     pub private_signals: Vec<String>,
 }
