@@ -432,16 +432,14 @@ export class ProofRequestManager {
       throw new Error(`Unable to find Service account at ${proofRequest.serviceProvider}`)
     }
 
-    if (serviceProvider.trustees.length < 3) {
-      throw new Error('Service account does not contains required trustee count')
-    }
-
-    const trusteePubKeys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
-      .filter(p => p !== null) as [bigint, bigint][]
-
     const credential = await this.credential.load(props.vc, {
       decryptionKey: props.decryptionKey ?? props.userPrivateKey,
     })
+
+    const trusteePubKeys = serviceProvider.trustees.length > 0
+      ? (await this.service.loadTrusteeKeys(serviceProvider.trustees))
+          .filter(p => p !== null) as [bigint, bigint][]
+      : []
 
     const proofInput = await new ProofInputBuilder(credential)
       .withTimestamp(await getSolanaTimestamp(this.provider.connection))
