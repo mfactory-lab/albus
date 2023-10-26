@@ -337,6 +337,7 @@ describe('Albus', async () => {
         amount: new BN(LAMPORTS_PER_SOL),
         receiver: receiver.publicKey,
         proofRequest,
+        policy,
       })
     })
 
@@ -372,6 +373,7 @@ describe('Albus', async () => {
         amount: new BN(10),
         receiver: receiver.publicKey,
         proofRequest,
+        policy,
       })
     })
   })

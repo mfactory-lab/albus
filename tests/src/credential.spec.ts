@@ -41,38 +41,22 @@ import {
 import { airdrop, netMetaplex, newProvider, payerKeypair, provider } from './utils'
 
 const credential = {
-  name: 'ALBUS Verifiable Credential',
-  image: 'https://arweave.net/hcbme7qK8G-aos2akxPub-nm7XGNaZ0Tr-sh7syqWxk',
+  name: 'ALBUS Digital Credential',
+  image: 'https://arweave.net/-RX1vgX0qdH-IdhovS0KuJCtqC1Eh3uM9UfSZBBZVVE',
   external_url: 'https://albus.finance',
   vc: {
-    '@context': [
-      'https://www.w3.org/ns/credentials/v2',
-    ],
-    'type': [
-      'VerifiableCredential',
-      'AlbusCredential',
-    ],
+    '@context': ['https://www.w3.org/ns/credentials/v2'],
+    'type': ['VerifiableCredential', 'AlbusCredential', 'Passport'],
     'issuer': 'did:web:issuer.albus.finance:fake',
-    'issuanceDate': '2023-10-02T18:59:11.425Z',
+    'issuanceDate': '2023-10-26T21:05:10.470Z',
     'credentialSubject': {
-      encrypted: 'W5xvhgbJDiEaFYwJaS+OR5kYfZ957CxXoqsdsZc9lSgRYh36+X4ee//t1ZEtfeiDsycY//rNPZCzmWT1csfhzL3q3v9DXmM5RFDvSWpMJ9PBYUGnDcA6VL9vDpc9rhVbqnT5+RaPSO/KBZkr3r4Hj5N27WdBQCWVTD53l8F0iWM0rZqex7Vq/JILOV6JRAeqfOpNzOloOfeu3nGHcvavra55UBGxQpy8IUzynHMneEpMkflRJGyeboQVRt0xxt7lzNTujukvl7z809OmoU6qqkg4NamQxeLgaZBgJ6OsGGtWkn/Vk2GtyWSkLJwBErANMvdzYg==',
+      encryptionKey: 'CwsF2xtpVkSizj8E3aNfj4L6sfVmuhk1Ewv58iTRF3Lb',
+      encrypted: 'Y4QBctqBZHgsr6LdydlB/fgPG87q2YXJYA6Kvu6NQB1MM8k4TUKHUnSf/eoMZJdzNwzDKJ54SKGxc3z3PXFrSH5OmOpk+BM1ssqk1/kLG6Rlxv8rSSFipOmT4lhJ5ovCP5q4XEhcpds++ffLVPQM38u5fNEjm8wBOJOuTGaiE2d4o22etMflgmDu6Xxicgh/NsMdjLT5rp/b/rGfhQFGyVboUB6yUD2eVolNG55h150zHvcpXuXIZzvkyGLQ6knQXmZD10iEanLco2iF1o30PCTCK/Lk+/VfIeyMNqcnCHKhTJwukPz8QVNdmCcSKWI=',
     },
-    'proof': {
-      type: 'BJJSignature2021',
-      created: 1696273151721,
-      verificationMethod: 'did:web:issuer.albus.finance:fake#eddsa-bjj',
-      rootHash: '13734296669612465157065630684375000547574498367020126210327710078244046279320',
-      proofValue: {
-        ax: '17281608414500272942926857538904179701981623683161575728981126685887789130748',
-        ay: '15375967852937051010384309239440519791525886180615377470153101980457579998366',
-        r8x: '13752946170795660522212744808413559627947178088732602814020765250952213206748',
-        r8y: '438153240054645829900098164755628400290372863044956388237821033323841734115',
-        s: '2349542200687397301602429863181401276929629554567127558810400042014053165114',
-      },
-      proofPurpose: 'assertionMethod',
-    },
+    'proof': { type: 'BJJSignature2021', created: 1698354310758, verificationMethod: 'did:web:issuer.albus.finance:fake#eddsa-bjj', rootHash: '8418696509132575644783365087890757754482467717073743620809994498242667101387', proofValue: { ax: '12279242631152480922448440387665898145185461262650789258320537467533451473248', ay: '562652728416453518865033172714223342104200904426339863473937692826883086980', r8x: '20215271862370783154637155562451401714868816530380434349250343595863447538890', r8y: '13679675971479620294460361170758237082770683984891545014480931165078200499192', s: '49356083573453035125553711262287700869914163322839993196255457345136248925' }, proofPurpose: 'assertionMethod' },
   },
 }
+// decryptionKey: ["expose","excuse","beef","left","cradle","bean","awesome","draw","curtain","like","boring","patch"]
 
 describe('Albus credential', () => {
   const holder = Keypair.generate()
@@ -159,6 +143,8 @@ describe('Albus credential', () => {
       })
 
     const vc = await holderClient.credential.loadAll()
+
+    console.log(vc)
 
     assert.equal(vc.length, 1)
     assert.deepEqual(vc[0]?.credential, credential.vc)
