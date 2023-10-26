@@ -266,6 +266,9 @@ export class ProofRequestManager {
     return Albus.zkp.verifyProof({ vk, proof, publicInput })
   }
 
+  /**
+   * Decrypts data using the provided secret and signals.
+   */
   decryptData(props: { secret: bigint; signals: Record<string, any> }) {
     const { secret, signals } = props
     const nonce = signals.timestamp as bigint
