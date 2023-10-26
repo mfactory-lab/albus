@@ -464,7 +464,7 @@ export class ProofRequestManager {
         proof,
         // @ts-expect-error readonly
         publicSignals,
-        verify: true,
+        verify: props.verify ?? true,
       })
 
       return { signatures, proof, publicSignals }
@@ -529,6 +529,8 @@ export interface FullProveProps {
   userPrivateKey: Uint8Array
   // Credential decryption key
   decryptionKey?: Uint8Array
+  // On-chain verification. Default: true
+  verify?: boolean
 }
 
 export interface VerifyProps {
