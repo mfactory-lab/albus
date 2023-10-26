@@ -343,32 +343,12 @@ export class ProofRequestManager {
 
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
-
+    const limits = { withProof: 20, withoutProof: 28 }
     const txs: { tx: Transaction }[] = []
 
-    txs.push({
-      tx: new Transaction().add(
-        createProveProofRequestInstruction(
-          {
-            proofRequest: new PublicKey(props.proofRequest),
-            circuit: proofRequest.circuit,
-            policy: proofRequest.policy,
-            authority,
-          },
-          {
-            data: {
-              reset: true,
-              publicInputs: publicInputs.slice(0, 20),
-              proof,
-            },
-          },
-        ),
-      ),
-    })
-
     // extend public inputs if needed
-    if (publicInputs.length > 20) {
-      const inputChunks = chunk(publicInputs.slice(20), 28)
+    if (publicInputs.length > limits.withProof) {
+      const inputChunks = chunk(publicInputs.slice(0, -limits.withProof), limits.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
         const inputs = inputChunks[i]!
         txs.push({
@@ -382,7 +362,7 @@ export class ProofRequestManager {
               },
               {
                 data: {
-                  reset: false,
+                  reset: i === 0,
                   publicInputs: inputs,
                   proof: null,
                 },
@@ -393,15 +373,36 @@ export class ProofRequestManager {
       }
     }
 
+    txs.push({
+      tx: new Transaction().add(
+        createProveProofRequestInstruction(
+          {
+            proofRequest: new PublicKey(props.proofRequest),
+            circuit: proofRequest.circuit,
+            policy: proofRequest.policy,
+            authority,
+          },
+          {
+            data: {
+              reset: false,
+              publicInputs: publicInputs.slice(-limits.withProof),
+              proof,
+            },
+          },
+        ),
+      ),
+    })
+
     if (props.verify) {
-      const tx = new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
-        .add(createVerifyProofRequestInstruction({
-          proofRequest: new PublicKey(props.proofRequest),
-          circuit: proofRequest.circuit,
-          authority,
-        }))
-      txs.push({ tx })
+      txs.push({
+        tx: new Transaction()
+          .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
+          .add(createVerifyProofRequestInstruction({
+            proofRequest: new PublicKey(props.proofRequest),
+            circuit: proofRequest.circuit,
+            authority,
+          })),
+      })
     }
 
     try {

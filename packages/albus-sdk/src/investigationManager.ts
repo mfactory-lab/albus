@@ -284,15 +284,15 @@ export class InvestigationManager {
     const index = trusteePubKeys.findIndex(pk => Buffer.compare(pk, key) === 0)
 
     if (index < 0) {
-      throw new Error(`Unable to find a trustee pubkey with index ${index - 1}`)
+      throw new Error('Unable to find a trustee pubkey...')
     }
 
     const [trustee] = this.pda.trustee(key)
     const [investigationRequestShare] = this.pda.investigationRequestShare(props.investigationRequest, trustee)
 
-    const encryptedShare = signals.encryptedShare?.[index - 1]
+    const encryptedShare = signals.encryptedShare?.[index]
     if (!encryptedShare) {
-      throw new Error(`Unable to find an encrypted share with index ${index - 1}`)
+      throw new Error(`Unable to find an encrypted share with index ${index}`)
     }
 
     const userPublicKey = signals.userPublicKey as [bigint, bigint]
@@ -318,7 +318,7 @@ export class InvestigationManager {
     }, {
       data: {
         share: newEncryptedShare,
-        index,
+        index: index + 1,
       },
     })
 
