@@ -40,10 +40,8 @@ pub mod albus_transfer {
 
     pub fn transfer(ctx: Context<AlbusTransfer>, amount: u64) -> Result<()> {
         AlbusCompliant::new(&ctx.accounts.proof_request)
+            .with_policy(ctx.accounts.policy.key())
             .with_user(ctx.accounts.sender.key())
-            // TODO: implement `with_policy`
-            // .with_policy(...)
-            // .call_verification(...)?;
             .check()?;
 
         system_program::transfer(
@@ -62,10 +60,8 @@ pub mod albus_transfer {
 
     pub fn spl_transfer(ctx: Context<AlbusSplTransfer>, amount: u64) -> Result<()> {
         AlbusCompliant::new(&ctx.accounts.proof_request)
+            .with_policy(ctx.accounts.policy.key())
             .with_user(ctx.accounts.sender.key())
-            // TODO: implement `with_policy`
-            // .with_policy(...)
-            // .call_verification(...)?;
             .check()?;
 
         token::transfer(
@@ -91,6 +87,9 @@ pub mod albus_transfer {
         /// CHECK: account checked in CPI
         #[account(mut)]
         pub receiver: AccountInfo<'info>,
+
+        /// CHECK: account checked in [AlbusCompliant]
+        pub policy: AccountInfo<'info>,
 
         /// CHECK: account checked in [AlbusCompliant]
         pub proof_request: AccountInfo<'info>,
@@ -122,6 +121,9 @@ pub mod albus_transfer {
             associated_token::authority = receiver,
         )]
         pub destination: Account<'info, token::TokenAccount>,
+
+        /// CHECK: account checked in [AlbusCompliant]
+        pub policy: AccountInfo<'info>,
 
         /// CHECK: account checked in [AlbusCompliant]
         pub proof_request: AccountInfo<'info>,
