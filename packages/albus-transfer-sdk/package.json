@@ -1,8 +1,8 @@
 {
   "name": "@mfactory-lab/albus-transfer-sdk",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Albus Transfer SDK",
-  "_type": "module",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",

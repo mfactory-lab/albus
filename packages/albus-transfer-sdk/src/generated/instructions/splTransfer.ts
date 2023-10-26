@@ -41,6 +41,7 @@ export const splTransferStruct = new beet.BeetArgsStruct<
  * @property [] tokenMint
  * @property [_writable_] source
  * @property [_writable_] destination
+ * @property [] policy
  * @property [] proofRequest
  * @category Instructions
  * @category SplTransfer
@@ -52,6 +53,7 @@ export type SplTransferInstructionAccounts = {
   tokenMint: web3.PublicKey
   source: web3.PublicKey
   destination: web3.PublicKey
+  policy: web3.PublicKey
   proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -105,6 +107,11 @@ export function createSplTransferInstruction(
     {
       pubkey: accounts.destination,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.policy,
+      isWritable: false,
       isSigner: false,
     },
     {
