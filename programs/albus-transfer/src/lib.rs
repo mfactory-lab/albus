@@ -43,6 +43,7 @@ pub mod albus_transfer {
             .with_user(ctx.accounts.sender.key())
             // TODO: implement `with_policy`
             // .with_policy(...)
+            // .call_verification(...)?;
             .check()?;
 
         system_program::transfer(
@@ -64,6 +65,7 @@ pub mod albus_transfer {
             .with_user(ctx.accounts.sender.key())
             // TODO: implement `with_policy`
             // .with_policy(...)
+            // .call_verification(...)?;
             .check()?;
 
         token::transfer(
