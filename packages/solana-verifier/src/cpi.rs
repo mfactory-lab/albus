@@ -26,29 +26,31 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use std::str::FromStr;
 use anchor_lang::{
-    prelude::*,
     context::CpiContext,
+    prelude::*,
     solana_program::{account_info::AccountInfo, instruction::Instruction, program::invoke_signed},
 };
 
-use crate::ALBUS_PROGRAM_ID;
-
-const VERIFY_IX_DISCM: [u8; 8] = [134, 245, 92,  39, 75, 253, 56, 152];
-
-pub type VerificationCpiCtx<'a, 'b, 'c, 'info> = CpiContext<'a, 'b, 'c, 'info, VerifyProofRequest<'info>>;
+const VERIFY_IX_DISCRIMINATOR: [u8; 8] = [134, 245, 92, 39, 75, 253, 56, 152];
 
 /// Generates cpi call to Albus program, to verify proof request on-chain
-pub fn cpi_verify_call(ctx: VerificationCpiCtx) -> Result<()> {
-    let account_metas = vec![
-        AccountMeta::new(ctx.accounts.proof_request.key(), false),
-        AccountMeta::new_readonly(ctx.accounts.circuit.key(), false),
-        AccountMeta::new(ctx.accounts.authority.key(), true),
-        AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
-    ];
+pub fn verify<'info>(
+    accounts: VerifyProofRequest<'info>,
+    program: AccountInfo<'info>,
+) -> Result<()> {
+    let ctx = CpiContext::new(program.to_account_info(), accounts);
 
-    let ix = Instruction::new_with_bincode(Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap(), &VERIFY_IX_DISCM, account_metas);
+    let ix = Instruction::new_with_bincode(
+        program.key(),
+        &VERIFY_IX_DISCRIMINATOR,
+        vec![
+            AccountMeta::new(ctx.accounts.proof_request.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.circuit.key(), false),
+            AccountMeta::new(ctx.accounts.authority.key(), true),
+            AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
+        ],
+    );
 
     let account_infos = vec![
         ctx.accounts.proof_request,
@@ -56,17 +58,18 @@ pub fn cpi_verify_call(ctx: VerificationCpiCtx) -> Result<()> {
         ctx.accounts.authority,
         ctx.accounts.system_program,
     ];
+
     invoke_signed(&ix, &account_infos, ctx.signer_seeds).map_err(Into::into)
 }
 
 #[derive(Accounts)]
 pub struct VerifyProofRequest<'info> {
-    /// CHECK:
+    /// CHECK: account checked in CPI
     pub proof_request: AccountInfo<'info>,
-    /// CHECK:
+    /// CHECK: account checked in CPI
     pub circuit: AccountInfo<'info>,
-    /// CHECK:
+    /// CHECK: account checked in CPI
     pub authority: AccountInfo<'info>,
-    /// CHECK:
+    /// CHECK: account checked in CPI
     pub system_program: AccountInfo<'info>,
 }

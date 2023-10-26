@@ -27,10 +27,7 @@
  */
 
 #[cfg(feature = "cpi")]
-pub mod cpi_utils;
-
-#[cfg(feature = "cpi")]
-use cpi_utils::{cpi_verify_call, VerificationCpiCtx};
+pub mod cpi;
 
 use std::str::FromStr;
 
@@ -78,11 +75,12 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
     }
 
     #[cfg(feature = "cpi")]
-    pub fn call_verification(&self, ctx: VerificationCpiCtx) -> Result<(), ProgramError> {
-        match cpi_verify_call(ctx) {
-            Ok(()) => Ok(()),
-            Err(anchor_error) => Err(anchor_error.into()),
-        }
+    pub fn with_verification(&self, _ctx: cpi::VerifyProofRequest) -> Result<(), ProgramError> {
+        // match verify(ctx) {
+        //     Ok(()) => Ok(()),
+        //     Err(e) => Err(e.into()),
+        // }
+        todo!()
     }
 
     pub fn program_id() -> Pubkey {
