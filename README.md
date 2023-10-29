@@ -1,4 +1,18 @@
-<img src="https://github.com/mfactory-lab/albus/blob/main/docs/assets/albus-logo.png" width="200">
+<center>
+  <img style="margin-bottom:15px" src="https://albus.finance/assets/logo-4d4da835.svg" height="100px">
+  <h1><strong>Albus Protocol</strong></h1>
+  <p>
+    <strong>
+      Albus Protocol provides on-chain zkKYC infrastructure that creates new opportunities for Web3 businesses by equipping them with a capability to verify their users and by ensuring that the users' personal data remains private during the verification
+    </strong>
+  </p>
+  <p>
+    <!--<a href="https://github.com/mfactory-lab/albus/actions"><img alt="Build Status" src="https://github.com/mfactory-lab/albus/actions/workflows/test.yaml/badge.svg" /></a>-->
+    <a target="_blank" href="https://discord.gg/albusProtocol"><img alt="Discord Chat" src="https://img.shields.io/badge/chat-discord-blueviolet" /></a>
+    <a target="_blank" href="https://github.com/mfactory-lab/albus/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/coral-xyz/xnft?color=red" /></a>
+    <a target="_blank" href="https://mfactory-lab.github.io/albus"><img alt="Docs" src="https://img.shields.io/badge/docs-albus-blue" /></a>
+  </p>
+</center>
 
 # Introduction
 
