@@ -14,24 +14,30 @@ Check compliance
 use albus_solana_verifier::AlbusCompliant;
 
 AlbusCompliant::new(&ctx.accounts.proof_request)
-  // Optional verify policy
+  // Optional verify policy address
   .with_policy(ctx.accounts.policy.key())
-  // Optional verify proof request owner
+  // Optional verify proof request owner address
   .with_user(ctx.accounts.sender.key())
   .check()?;
 ```
 
 Find proof request address
 ```rust
-let policy = Pubkey::new();
 let user = Pubkey::new();
+let policy = Pubkey::new();
+// or find policy address by service address and policy code
+let (policy, _) = albus_solana_verifier::find_policy_address(&service, "<CODE>");
+
 let (proof_request, _) = albus_solana_verifier::find_proof_request_address(&policy, &user);
 ```
 
 Find policy address
 ```rust
 let service = Pubkey::new();
-let (proof_request, _) = albus_solana_verifier::find_policy_address(&service, "<CODE>");
+// or find service address by code
+let (service, _) = find_service_provider_address("code");
+
+let (policy, _) = albus_solana_verifier::find_policy_address(&service, "<CODE>");
 ```
 
 Find service address
