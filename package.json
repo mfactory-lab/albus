@@ -1,17 +1,11 @@
 {
-  "name": "@albus/monorepo",
-  "version": "0.1.0",
-  "license": "AGPL-3.0",
-  "packageManager": "pnpm@8.6.2",
   "private": true,
-  "engines": {
-    "node": ">=16",
-    "pnpm": ">=8"
-  },
+  "license": "AGPL-3.0",
   "scripts": {
     "cli": "pnpm -F @mfactory-lab/albus-cli run cli",
     "cli:run": "pnpm -F @mfactory-lab/albus-cli run run",
     "dev": "pnpm -r --parallel -F ./packages/** run dev",
+    "docs": "docsify serve ./docs",
     "ui:dev": "pnpm -F @albus/ui serve",
     "gen:sdk": "pnpm -F @mfactory-lab/albus-sdk generate && eslint --fix --ext .ts ./packages/albus-sdk",
     "build:core": "pnpm -F @mfactory-lab/albus-core build",
@@ -38,13 +32,15 @@
     "@types/node": "^20.0.0",
     "@vitest/ui": "^0.34.6",
     "buffer": "^6.0.3",
-    "eslint": "^8.51.0",
+    "docsify-cli": "^4.4.4",
+    "eslint": "^8.52.0",
     "syncpack": "^11.2.1",
     "typescript": "5.2.2",
     "vite": "^4.5.0",
-    "vite-plugin-dts": "^3.6.0",
+    "vite-plugin-dts": "^3.6.1",
     "vitest": "0.34.6"
   },
+  "packageManager": "pnpm@8.6.2",
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
