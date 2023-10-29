@@ -27,7 +27,7 @@
  */
 
 mod constants;
-pub mod error;
+mod errors;
 mod events;
 mod instructions;
 mod state;
@@ -37,6 +37,16 @@ use anchor_lang::prelude::*;
 use instructions::*;
 
 declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
+
+#[cfg(not(feature = "no-entrypoint"))]
+security_txt! {
+    name: "Albus",
+    project_url: "https://albus.finance",
+    contacts: "email:info@albus.finance,twitter:@AlbusProtocol",
+    policy: "https://github.com/mfactory-lab/albus/blob/master/SECURITY.md",
+    preferred_languages: "en",
+    source_code: "https://github.com/mfactory-lab/albus"
+}
 
 #[program]
 pub mod albus {

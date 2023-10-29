@@ -32,7 +32,7 @@ use crate::constants::{TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD};
 use crate::state::{Circuit, Policy, ProofData};
 use crate::utils::bytes_to_num;
 use crate::{
-    error::AlbusError,
+    errors::AlbusError,
     events::ProveEvent,
     state::{ProofRequest, ProofRequestStatus},
     utils::cmp_pubkeys,

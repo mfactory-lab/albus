@@ -29,7 +29,7 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    error::AlbusError,
+    errors::AlbusError,
     events::{RejectEvent, VerifyEvent},
     state::{ProofRequest, ProofRequestStatus},
     utils::assert_authorized,
