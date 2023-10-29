@@ -29,8 +29,6 @@
 #[cfg(feature = "cpi")]
 pub mod cpi;
 
-use std::str::FromStr;
-
 use arrayref::array_ref;
 use arrayref::array_refs;
 use solana_program::{
@@ -39,17 +37,18 @@ use solana_program::{
     msg,
     program_error::ProgramError,
     program_memory::sol_memcmp,
+    pubkey,
     pubkey::{Pubkey, PUBKEY_BYTES},
     sysvar::Sysvar,
 };
 
-pub const ALBUS_PROGRAM_ID: &str = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL";
+pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
 pub const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
 pub struct AlbusCompliant<'a, 'info> {
     /// Proof request address
     proof_request: &'a AccountInfo<'info>,
-    /// (optional) Proof request owner address
+    /// (optional) Proof request owner's address
     proof_request_owner: Option<Pubkey>,
     /// (optional) Policy address
     policy: Option<Pubkey>,
@@ -83,18 +82,15 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
         todo!()
     }
 
-    pub fn program_id() -> Pubkey {
-        Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap()
-    }
-
     pub fn check(&self) -> Result<(), ProgramError> {
         self.check_program_account(self.proof_request)?;
         self.check_proof_request()?;
         Ok(())
     }
 
+    /// Checks if the provided account is a valid program account
     fn check_program_account(&self, acc: &AccountInfo) -> Result<(), ProgramError> {
-        if !cmp_pubkeys(acc.owner, Self::program_id()) {
+        if !cmp_pubkeys(acc.owner, ALBUS_PROGRAM_ID) {
             return Err(ProgramError::IllegalOwner);
         }
         if acc.data_is_empty() {
@@ -331,7 +327,7 @@ mod test {
                 policy: Default::default(),
                 status: 0,
                 _pk: Default::default(),
-                _owner: AlbusCompliant::program_id(),
+                _owner: ALBUS_PROGRAM_ID,
                 _lamports: 0,
                 _data: vec![],
             }
