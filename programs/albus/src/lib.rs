@@ -39,7 +39,7 @@ use instructions::*;
 declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
 
 #[cfg(not(feature = "no-entrypoint"))]
-security_txt! {
+solana_security_txt::security_txt! {
     name: "Albus",
     project_url: "https://albus.finance",
     contacts: "email:info@albus.finance,twitter:@AlbusProtocol",
