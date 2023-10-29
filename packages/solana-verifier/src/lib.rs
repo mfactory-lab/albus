@@ -43,7 +43,7 @@ use solana_program::{
 };
 
 pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
-pub const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
+const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
 pub struct AlbusCompliant<'a, 'info> {
     /// Proof request address
@@ -209,19 +209,23 @@ pub fn cmp_pubkeys(a: impl AsRef<[u8]>, b: impl AsRef<[u8]>) -> bool {
 }
 
 /// Generates the service provider program address for Albus Protocol
-pub fn find_service_provider_address(program_id: &Pubkey, code: &str) -> (Pubkey, u8) {
-    Pubkey::find_program_address(&[b"service-provider", code.as_bytes()], program_id)
+pub fn find_service_provider_address(code: &str) -> (Pubkey, u8) {
+    Pubkey::find_program_address(&[b"service-provider", code.as_bytes()], &ALBUS_PROGRAM_ID)
+}
+
+/// Generates the policy program address for Albus Protocol
+pub fn find_policy_address(service_provider: &Pubkey, code: &str) -> (Pubkey, u8) {
+    Pubkey::find_program_address(
+        &[b"policy", service_provider.as_ref(), code.as_bytes()],
+        &ALBUS_PROGRAM_ID,
+    )
 }
 
 /// Generates the proof request program address for the Albus protocol
-pub fn find_proof_request_address(
-    program_id: &Pubkey,
-    policy: &Pubkey,
-    user: &Pubkey,
-) -> (Pubkey, u8) {
+pub fn find_proof_request_address(policy: &Pubkey, user: &Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(
-        &[b"proof-request", &policy.to_bytes(), &user.to_bytes()],
-        program_id,
+        &[b"proof-request", policy.as_ref(), user.as_ref()],
+        &ALBUS_PROGRAM_ID,
     )
 }
 
