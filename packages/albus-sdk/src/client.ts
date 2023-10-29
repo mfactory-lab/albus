@@ -41,6 +41,7 @@ import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
 import { NodeWallet } from './utils'
+import idl from './idl/albus.json'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -59,7 +60,8 @@ export class AlbusClient {
     readonly provider: AnchorProvider,
   ) {
     this.pda = new PdaManager()
-    this.eventManager = new EventManager(this)
+    // TODO: ts idl
+    this.eventManager = new EventManager(this, idl as any)
     this.circuit = new CircuitManager(this.provider, this.pda)
     this.policy = new PolicyManager(this.provider, this.pda)
     this.service = new ServiceManager(this.provider, this.pda)
