@@ -34,7 +34,7 @@ describe('ageProof', async () => {
     currentDate: [2023, 7, 11],
     birthDate: [2005, 7, 11],
     minAge: 18,
-    maxAge: 100,
+    maxAge: 0,
   }
 
   const circuit = await setupCircuit('test/ageProof')
@@ -44,9 +44,20 @@ describe('ageProof', async () => {
     await circuit.assertOut(witness, { valid: 1 })
   })
 
-  it('decline invalid birth date', async () => {
-    input.birthDate[2] += 1
-    const witness = await circuit.calculateWitness(input, true)
+  it('decline large birth date', async () => {
+    const witness = await circuit.calculateWitness({
+      ...input,
+      birthDate: [2003, 7, 10],
+      maxAge: 20,
+    }, true)
+    await circuit.assertOut(witness, { valid: 0 })
+  })
+
+  it('decline small birth date', async () => {
+    const witness = await circuit.calculateWitness({
+      ...input,
+      birthDate: [2005, 7, 12],
+    }, true)
     await circuit.assertOut(witness, { valid: 0 })
   })
 })
