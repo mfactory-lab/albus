@@ -44,8 +44,8 @@ export function hexToBytes(hex: string, minLength?: number): Uint8Array {
   return fromString(input.toLowerCase(), 'base16')
 }
 
-export function bytesToHex(b: Uint8Array): string {
-  return toString(b, 'base16')
+export function bytesToHex(b: ArrayLike<number>): string {
+  return toString(Uint8Array.from(b), 'base16')
 }
 
 export function bytesToBigInt(b: ArrayLike<number>): bigint {
@@ -60,30 +60,30 @@ export function base64ToBytes(s: string): Uint8Array {
   return fromString(s, 'base64pad')
 }
 
-export function bytesToBase64(b: Uint8Array): string {
-  return toString(b, 'base64pad')
+export function bytesToBase64(b: ArrayLike<number>): string {
+  return toString(Uint8Array.from(b), 'base64pad')
 }
 
 export function base64urlToBytes(s: string): Uint8Array {
   return fromString(s, 'base64url')
 }
 
-export function bytesToBase64url(b: Uint8Array): string {
-  return toString(b, 'base64url')
+export function bytesToBase64url(b: ArrayLike<number>): string {
+  return toString(Uint8Array.from(b), 'base64url')
 }
 
 export function stringToBytes(s: string): Uint8Array {
   return fromString(s)
 }
 
-export function bytesToString(s: Uint8Array): string {
-  return toString(s)
+export function bytesToString(b: ArrayLike<number>): string {
+  return toString(Uint8Array.from(b))
 }
 
 export function base58ToBytes(s: string): Uint8Array {
   return fromString(s, 'base58btc')
 }
 
-export function bytesToBase58(b: Uint8Array): string {
-  return toString(b, 'base58btc')
+export function bytesToBase58(b: ArrayLike<number>): string {
+  return toString(Uint8Array.from(b), 'base58btc')
 }
