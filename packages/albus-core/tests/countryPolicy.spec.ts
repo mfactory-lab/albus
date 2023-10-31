@@ -27,30 +27,106 @@
  */
 
 import { Keypair } from '@solana/web3.js'
-import { describe, it } from 'vitest'
+import { assert, describe, it } from 'vitest'
+import { createClaimsTree } from '../src/credential'
 import { eddsa } from '../src/crypto'
+import { bytesToBigInt } from '../src/crypto/utils'
 import { setupCircuit } from './utils'
+import countries from './countries'
+
+/**
+ * Retrieve country index by iso3 code
+ */
+function countryIdx(code: string) {
+  const idx = countries.findIndex(c => c.code3 === code)
+  return idx > 0 ? idx + 1 : -1
+}
 
 describe('CountryPolicy', async () => {
   const issuerKeypair = Keypair.generate()
-  // const holderKeypair = Keypair.generate()
+  const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
 
-  const currentDate = 20230711
   const claims = {
-    id: 0,
-    birthDate: 20050711,
+    givenName: 'Mikayla',
+    familyName: 'Halvorson',
+    gender: 'female',
+    birthDate: '19661002',
+    birthPlace: 'Westland',
+    nationality: 'QAT',
+    country: 'QAT',
+    countryOfBirth: 'QAT',
+    meta: {
+      validUntil: 0,
+    },
   }
 
-  const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
-  // const _holderPk = edDSA.prv2pub(holderKeypair.secretKey)
+  async function generateInput(claims: Record<string, any>, params: Record<string, any> = {}) {
+    const tree = await createClaimsTree(claims)
+    const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
+    const countryProof = await tree.get('country')
 
-  const circuit = await setupCircuit('agePolicy')
+    return {
+      credentialRoot: tree.root,
+      country: countryProof.value,
+      countryKey: countryProof.key,
+      countryProof: countryProof.siblings,
+      issuerPk,
+      issuerSignature: [...signature.R8, signature.S],
+      ...params,
+    }
+  }
+
+  const circuit = await setupCircuit('countryPolicy')
+
+  it('invalid country code', async () => {
+    const input = await generateInput({
+      ...claims,
+      country: 'XXX',
+    }, {
+      countryLookup: [bytesToBigInt([1, 255]), 0n],
+    })
+    try {
+      const witness = await circuit.calculateWitness(input, true)
+      await circuit.assertOut(witness, {})
+    } catch (e: any) {
+      assert.include(e.message, 'Error in template CountryPolicy_258 line: 53')
+    }
+  })
 
   it('valid verification', async () => {
-    // ...
+    const input = await generateInput(claims, {
+      countryLookup: [
+        bytesToBigInt([1, 2, 191, 180, 15, 33, 44, 153]),
+        bytesToBigInt([countryIdx('QAT')]), // QAT
+      ],
+    })
+    const witness = await circuit.calculateWitness(input, true)
+    await circuit.assertOut(witness, {})
   })
 
-  it('invalid verification', async () => {
-    // ...
+  it('first 64 countries', async () => {
+    const bytes: number[] = []
+    for (let i = 0; i < 64; i++) {
+      bytes[i] = i + 1
+    }
+    const input = await generateInput({
+      ...claims,
+      country: 'ERI', // index: 64
+      // country: 'SVK', // index: 65
+    }, {
+      countryLookup: [
+        bytesToBigInt(bytes.slice(0, 32)),
+        bytesToBigInt(bytes.slice(32)),
+      ],
+    })
+    await circuit.calculateWitness(input, true)
   })
+
+  // it('_', async () => {
+  //   console.log('[')
+  //   for (const c of countries) {
+  //     console.log(`0x${bytesToHex(bigintToBytes(encodeClaimValue(c.code3)))}, // ${c.code3}`)
+  //   }
+  //   console.log(']')
+  // })
 })
