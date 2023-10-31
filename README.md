@@ -12,11 +12,12 @@ Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their
 # Full documentation
 
 - [Introduction](https://github.com/mfactory-lab/albus/wiki)
-- [Albus diagrams](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams)
-  - [Workflow overview](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-overview)
-  - [Workflow diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#workflow-diagram)
-  - [Architecture diagram](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#architecture-diagram)
-  - [Legal request for access to retained user data](https://github.com/mfactory-lab/albus/wiki/Albus-diagrams#legal-request-for-access-to-retained-user-data)
+- [User workflows](https://github.com/mfactory-lab/albus/wiki/user-workflows)
+  - [Business user workflow](https://github.com/mfactory-lab/albus/wiki/user-workflows#business-user-workflow)
+  - [End user workflow](https://github.com/mfactory-lab/albus/wiki/user-workflows#end-user-workflows)
+    - [Wizard](https://github.com/mfactory-lab/albus/wiki/user-workflows#wizard)
+    - [Request for Certificate](https://github.com/mfactory-lab/albus/wiki/user-workflows#request-for-certificate)
+    - [Document digitisation](https://github.com/mfactory-lab/albus/wiki/user-workflows#document-digitisation)
 - [Glossary](https://github.com/mfactory-lab/albus/wiki/Glossary)
   - [Entities and modules](https://github.com/mfactory-lab/albus/wiki/Glossary#entities-and-modules)
   - [General terms](https://github.com/mfactory-lab/albus/wiki/Glossary#general-terms)
