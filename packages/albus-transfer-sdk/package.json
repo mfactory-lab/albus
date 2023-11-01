@@ -22,7 +22,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "vite build --watch",
+    "_dev": "vite build --watch",
     "build": "vite build",
     "release": "release-it --ci",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita && eslint --fix --ext .ts"

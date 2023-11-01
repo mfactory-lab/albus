@@ -226,6 +226,8 @@ export class CredentialManager {
             throw e
           }
         }
+      } else {
+        result.push({ address: account.mint })
       }
     }
 
