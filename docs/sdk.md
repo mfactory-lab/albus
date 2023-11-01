@@ -35,6 +35,7 @@ Load certificates(for service)
 ```typescript
 client.proofRequest.find({ serviceProvider: PublicKeyInitData, skipUser: boolean })
 ```
+
 **Example**
 ```typescript
 const serviceProvider = service.address // your service address  
@@ -42,7 +43,7 @@ const serviceProvider = service.address // your service address
 client.proofRequest.find({ serviceProvider, skipUser: true })
 ```
 
-Сreate сertificate
+Create certificate
 ```typescript
 client.proofRequest.create({ serviceCode: string, policyCode: string })
 ```
@@ -55,7 +56,7 @@ const policyCode = policy.data.code
 client.proofRequest.create({ serviceCode, policyCode })
 ```
 
-Proved сertificate
+Proved certificate
 ```typescript
 const props = {
   proofRequest: PublicKeyInitData,
@@ -108,7 +109,7 @@ Load credentials
 const credentials = client.credential.loadAll({ decryptionKey: number[] | Uint8Array })
 ```
 
-> `decryptionKey` is a `secretKey` which is used to encrypt and decrypt credentials (random generated)
+> `decryptionKey` is a `secretKey` which is used to encrypt and decrypt credentials (randomly generated)
 
 **Example**
 ```typescript
@@ -150,16 +151,16 @@ const service = services.filter(s => s.data?.authority.toBase58() === publicKey.
 Update service
 ```typescript
 const props = {
-        name: string,
-        website: string, 
-        secretShareThreshold: number,
-        trustees: PublicKeyInitData[],
-        contactInfo: {
-          kind: number,
-          value: string,
-        },
-        serviceProvider: PublicKeyInitData,
-        newAuthority: PublicKeyInitData,
+  name: string,
+  website: string, 
+  secretShareThreshold: number,
+  trustees: PublicKeyInitData[],
+  contactInfo: {
+    kind: number,
+    value: string,
+  },
+  serviceProvider: PublicKeyInitData,
+  newAuthority: PublicKeyInitData,
 }
 
 client.service.update(props)
@@ -167,16 +168,16 @@ client.service.update(props)
 **Example**
 ```typescript
 const props = {
-        name: 'Test Defi',
-        website: 'https://app.albus.finance/',
-        secretShareThreshold: 2,
-        contactInfo: {
-          kind: 1,
-          value: 'test@email',
-        },
-        serviceProvider: "ArrNHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8",
-        newAuthority: '7dkvaBTSHxqUHc9uvN7VBeL1yKHUngStv7C96dgkzXAK',
-        trustees: ['6GkdHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8', 'nRg3aBTSHxqUHc9uvN7VBeL1yKHUngStv7C96dgkzXAK']
+  name: 'Test Defi',
+  website: 'https://app.albus.finance/',
+  secretShareThreshold: 2,
+  contactInfo: {
+    kind: 1,
+    value: 'test@email',
+  },
+  serviceProvider: "ArrNHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8",
+  newAuthority: '7dkvaBTSHxqUHc9uvN7VBeL1yKHUngStv7C96dgkzXAK',
+  trustees: ['6GkdHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8', 'nRg3aBTSHxqUHc9uvN7VBeL1yKHUngStv7C96dgkzXAK']
 }
 
 client.service.update(props)
@@ -246,10 +247,10 @@ const props = {
   name: string,
   retentionPeriod: number,
   rules: Array<{
-        key: string;
-        value: string | number | bigint;
-        label?: string;
-    }>,
+    key: string;
+    value: string | number | bigint;
+    label?: string;
+  }>,
   serviceCode: string
 }
 
@@ -306,10 +307,10 @@ const props = {
   name: string,
   retentionPeriod: number,
   rules: Array<{
-        key: string;
-        value: string | number | bigint;
-        label?: string;
-    }>,
+    key: string;
+    value: string | number | bigint;
+    label?: string;
+  }>,
   serviceCode: string
 }
 
