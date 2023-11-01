@@ -6,8 +6,9 @@ Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their
 
 # Website and litepaper
 
-- [Albus website](https://albus.finance/)
-- [Albus litepaper](https://albus.finance/assets/Albus%20Protocol%20Litepaper%2008.08.23-c8206a29.pdf)
+- [Albus landing page](https://albus.finance/)
+- [Albus application website](https://app.albus.finance/)
+- [Albus litepaper](https://albus.finance/assets/ALBUS%20LITEPAPER%20v2.02%20Sep23-86978e72.pdf)
 
 # Full documentation
 
