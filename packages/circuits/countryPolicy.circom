@@ -5,8 +5,8 @@ include "circomlib/circuits/eddsaposeidon.circom";
 include "MerkleProof.circom";
 
 template CountryPolicy(credentialDepth, lookupN) {
-  // Policy params
-  signal input countryLookup[lookupN];
+  signal input selectionMode; // 1 - inclusion, 0 - exclusion
+  signal input countryLookup[lookupN]; // every field has max 32 country ids
 
   signal input country; // poseidon(ISO-3)
   signal input countryKey;
@@ -16,6 +16,10 @@ template CountryPolicy(credentialDepth, lookupN) {
 
   signal input issuerPk[2]; // [Ax, Ay]
   signal input issuerSignature[3]; // [R8x, R8y, S]
+
+  var lookupSize = 32;
+
+  assert(selectionMode <= 1);
 
   // Data integrity check
   component mtp = MerkleProof(1, credentialDepth);
@@ -34,15 +38,14 @@ template CountryPolicy(credentialDepth, lookupN) {
   eddsa.R8y<==issuerSignature[1];
   eddsa.S<==issuerSignature[2];
 
-  var size = 32;
-  component res = IN(size * lookupN);
+  component res = IN(lookupSize * lookupN);
   component countrySet[lookupN];
 
   for (var i = 0; i < lookupN; i++) {
-    countrySet[i] = Num2Bytes(size);
+    countrySet[i] = Num2Bytes(lookupSize);
     countrySet[i].in <== countryLookup[i];
-    for (var j = 0; j < size; j++) {
-      res.value[i * size + j] <== countrySet[i].out[j];
+    for (var j = 0; j < lookupSize; j++) {
+      res.value[i * lookupSize + j] <== countrySet[i].out[j];
     }
   }
 
@@ -50,7 +53,7 @@ template CountryPolicy(credentialDepth, lookupN) {
   countryIndex.in <== country;
 
   res.in <== countryIndex.out;
-  res.out === 1;
+  res.out === 1 * selectionMode;
 }
 
 template CountryIndexLookup() {
@@ -316,12 +319,12 @@ template CountryIndexLookup() {
   var index = -1;
   for (var i = 0; i < n; i++) {
       eq[i] = IsEqual();
-      eq[i].in[0] <== lookup[i];
-      eq[i].in[1] <== in;
+      eq[i].in[0] <-- lookup[i];
+      eq[i].in[1] <-- in;
       index += eq[i].out * (i + 2);
   }
 
-  out <== index;
+  out <-- index;
 }
 
 template Num2Bytes(n) {
@@ -368,6 +371,7 @@ template IN (n) {
 }
 
 component main{public [
+  selectionMode,
   countryLookup,
   credentialRoot,
   countryKey,

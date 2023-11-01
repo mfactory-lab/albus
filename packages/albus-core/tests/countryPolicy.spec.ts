@@ -42,6 +42,11 @@ function countryIdx(code: string) {
   return idx > 0 ? idx + 1 : -1
 }
 
+enum SelectionMode {
+  Inclusion = 1,
+  Exclusion = 0,
+}
+
 describe('CountryPolicy', async () => {
   const issuerKeypair = Keypair.generate()
   const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
@@ -84,20 +89,38 @@ describe('CountryPolicy', async () => {
       country: 'XXX',
     }, {
       countryLookup: [bytesToBigInt([1, 255]), 0n],
+      selectionMode: SelectionMode.Inclusion,
     })
     try {
       const witness = await circuit.calculateWitness(input, true)
       await circuit.assertOut(witness, {})
     } catch (e: any) {
-      assert.include(e.message, 'Error in template CountryPolicy_258 line: 53')
+      assert.include(e.message, 'Error in template CountryPolicy_258 line: 56')
+    }
+  })
+
+  it('valid exclusion proof', async () => {
+    const input = await generateInput({
+      ...claims,
+      country: 'UKR', // 240
+    }, {
+      selectionMode: SelectionMode.Exclusion,
+      countryLookup: [bytesToBigInt([240, 241, 1, 2, 3]), 0n],
+    })
+    try {
+      const witness = await circuit.calculateWitness(input, true)
+      await circuit.assertOut(witness, {})
+    } catch (e: any) {
+      assert.include(e.message, 'Error in template CountryPolicy_258 line: 56')
     }
   })
 
   it('valid verification', async () => {
     const input = await generateInput(claims, {
+      selectionMode: SelectionMode.Inclusion,
       countryLookup: [
         bytesToBigInt([1, 2, 191, 180, 15, 33, 44, 153]),
-        bytesToBigInt([countryIdx('QAT')]), // QAT
+        bytesToBigInt([countryIdx(claims.country)]),
       ],
     })
     const witness = await circuit.calculateWitness(input, true)
@@ -114,6 +137,7 @@ describe('CountryPolicy', async () => {
       country: 'ERI', // index: 64
       // country: 'SVK', // index: 65
     }, {
+      selectionMode: SelectionMode.Inclusion,
       countryLookup: [
         bytesToBigInt(bytes.slice(0, 32)),
         bytesToBigInt(bytes.slice(32)),
