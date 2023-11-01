@@ -14,7 +14,7 @@ npm install @mfactory-lab/albus-sdk@0.2.12
 "@mfactory-lab/albus-sdk": "0.2.12"
 ```
 
-#### Init client
+### Init client
 ```typescript
 import { useAnchorWallet } from 'solana-wallets-vue'
 // solana connection
@@ -23,7 +23,118 @@ const connection = new Connection(clusterApiUrl("mainnet-beta"))
 const wallet = useAnchorWallet()
 const client = AlbusClient.factory(connection, wallet)
 ```
-#### Work with services
+
+### Certificates API
+
+Load certificates(for user)
+```typescript
+const certificates = client.proofRequest.find()
+```
+
+Load certificates(for service)
+```typescript
+client.proofRequest.find({ serviceProvider: PublicKeyInitData, skipUser: boolean })
+```
+**Example**
+```typescript
+const serviceProvider = service.address // your service address  
+
+client.proofRequest.find({ serviceProvider, skipUser: true })
+```
+
+Сreate сertificate
+```typescript
+client.proofRequest.create({ serviceCode: string, policyCode: string })
+```
+
+**Example**
+```typescript
+const serviceCode = service.data.code 
+const policyCode = policy.data.code
+
+client.proofRequest.create({ serviceCode, policyCode })
+```
+
+Proved сertificate
+```typescript
+const props = {
+  proofRequest: PublicKeyInitData,
+  vc: PublicKeyInitData,
+  userPrivateKey: Uint8Array,
+}
+client.proofRequest.fullProve(props)
+```
+
+**Example**
+```typescript
+const certificate = certificates[0] // for example, let's take the first certificate
+const proofRequest = certificate.address
+
+const credential = credentials[0] // for example, take the first credential
+const vc = credential.address
+
+const props = {
+  proofRequest,
+  vc,
+  userPrivateKey,
+}
+client.proofRequest.fullProve(props)
+```
+
+**Props**
+Data that is passed to the `fullProve` method:
+- `proofRequest`: address of the certificate you will validate
+- `vc`: credential address that will be used to validate the certificate
+- `userPrivateKey`: Key for decrypting a credential (each credential is stored in encrypted form)
+
+Delete certificate
+```typescript
+client.proofRequest.delete({ proofRequest: PublicKeyInitData})
+```
+
+**Example**
+```typescript
+const certificate = certificates[0] // for example, let's take the first certificate
+const proofRequest = certificate.address
+
+client.proofRequest.delete({ proofRequest})
+```
+
+#### Credentials API
+
+Load credentials
+
+```typescript
+const credentials = client.credential.loadAll({ decryptionKey: number[] | Uint8Array })
+```
+
+> `decryptionKey` is a `secretKey` which is used to encrypt and decrypt credentials (random generated)
+
+**Example**
+```typescript
+import { Keypair } from '@solana/web3.js'
+
+const payer = new Keypair()
+const decryptionKey = payer.secretKey
+client.credential.loadAll({ decryptionKey })
+```
+Revoke credential
+
+```typescript
+client.credential.revoke({ mint: PublicKeyInitData })
+```
+> NFT credentials can only be deleted using the `revoke` method
+
+**Example**
+```typescript
+const credential = credentials[0] // for example, take the first credential
+const mint = credential.address
+
+client.credential.revoke({ mint })
+```
+
+
+### Services API
 
 Load services
 ```typescript
@@ -87,8 +198,8 @@ Data that is passed to the `update` method:
 >- `1`: Email
 >- `2`: Discord
 
-#### Work with trustees
-Load trustees
+### Trustees API
+Load trustees 
 ```typescript
 const trustees = client.trustee.find()
 ```
@@ -111,13 +222,13 @@ Data that is passed to the `update` method:
 
 
 
-#### Work with circuits
+### Circuits API
 Circuits
 ```typescript
 client.circuit.find()
 ```
 
-#### Work with policies
+### Policies API
 Load policies
 ```typescript
 const policies = client.policy.find({ serviceCode: string })
@@ -225,111 +336,3 @@ const props = {
 client.policy.delete(props)
 ```
 
-#### Work with credentials
-
-Load credentials
-
-```typescript
-const credentials = client.credential.loadAll({ decryptionKey: number[] | Uint8Array })
-```
-
-> `decryptionKey` is a `secretKey` which is used to encrypt and decrypt credentials (random generated)
-
-**Example**
-```typescript
-import { Keypair } from '@solana/web3.js'
-
-const payer = new Keypair()
-const decryptionKey = payer.secretKey
-client.credential.loadAll({ decryptionKey })
-```
-Revoke credential
-
-```typescript
-client.credential.revoke({ mint: PublicKeyInitData })
-```
-> NFT credentials can only be deleted using the `revoke` method
-
-**Example**
-```typescript
-const credential = credentials[0] // for example, take the first credential
-const mint = credential.address
-
-client.credential.revoke({ mint })
-```
-
-#### Work with certificates
-
-Load certificates(for user)
-```typescript
-const certificates = client.proofRequest.find()
-```
-
-Load certificates(for service)
-```typescript
-client.proofRequest.find({ serviceProvider: PublicKeyInitData, skipUser: boolean })
-```
-**Example**
-```typescript
-const serviceProvider = service.address // your service address  
-
-client.proofRequest.find({ serviceProvider, skipUser: true })
-```
-
-Сreate сertificate
-```typescript
-client.proofRequest.create({ serviceCode: string, policyCode: string })
-```
-
-**Example**
-```typescript
-const serviceCode = service.data.code 
-const policyCode = policy.data.code
-
-client.proofRequest.create({ serviceCode, policyCode })
-```
-
-Proved сertificate
-```typescript
-const props = {
-     proofRequest: PublicKeyInitData,
-     vc: PublicKeyInitData,
-     userPrivateKey: Uint8Array,
-  }
-client.proofRequest.fullProve(props)
-```
-
-**Example**
-```typescript
-const certificate = certificates[0] // for example, let's take the first certificate
-const proofRequest = certificate.address
-
-const credential = credentials[0] // for example, take the first credential
-const vc = credential.address
-
-const props = {
-     proofRequest,
-     vc,
-     userPrivateKey,
-  }
-client.proofRequest.fullProve(props)
-```
-
-**Props**
-Data that is passed to the `fullProve` method:
-- `proofRequest`: address of the certificate you will validate
-- `vc`: credential address that will be used to validate the certificate
-- `userPrivateKey`: Key for decrypting a credential (each credential is stored in encrypted form)
-
-Delete certificate
-```typescript
-client.proofRequest.delete({ proofRequest: PublicKeyInitData})
-```
-
-**Example**
-```typescript
-const certificate = certificates[0] // for example, let's take the first certificate
-const proofRequest = certificate.address
-
-client.proofRequest.delete({ proofRequest})
-```
