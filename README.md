@@ -18,7 +18,7 @@
 
 # Introduction
 
-Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their users. Building on Self-Sovereign Identity (SSI) model, Albus harnesses the power of blockchain and Zero-Knowledge Proofs to create a secure environment where Web3 protocols can KYC their users without accessing their private data. Albus also adds an extra layer of compliance by ensuring that user data can be made available to authorised entities with legitimate requests under data retention law.
+Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their users. Building on a Self-Sovereign Identity (SSI) model, Albus harnesses the power of blockchain and Zero-Knowledge Proofs to create a secure environment where Web3 protocols can KYC their users without accessing their private data. Albus also adds an extra layer of compliance by ensuring that user data can be made available to authorized entities with legitimate requests under data retention law.
 
 # Website and litepaper
 
