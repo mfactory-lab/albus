@@ -11,15 +11,9 @@
 
 <p align="center">
   <!--<a href="https://github.com/mfactory-lab/albus/actions"><img alt="Build Status" src="https://github.com/mfactory-lab/albus/actions/workflows/test.yaml/badge.svg" /></a>-->
-  <a target="_blank" href="https://github.com/mfactory-lab/albus/blob/master/LICENSE">
-    <img alt="License" src="https://img.shields.io/github/license/coral-xyz/xnft?color=red" />
-  </a>
-  <a target="_blank" href="https://discord.gg/albusProtocol">
-    <img src="https://img.shields.io/discord/732892373507375164?color=6A7EC2&logo=discord&logoColor=ffffff&labelColor=6A7EC2&label=Discord" />
-  </a>
-  <a target="_blank" href="https://mfactory-lab.github.io/albus">
-    <img alt="Docs" src="https://img.shields.io/badge/docs-Albus-blue" />
-  </a>
+  <a target="_blank" href="https://github.com/mfactory-lab/albus/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/coral-xyz/xnft?color=red" /></a>
+  <a target="_blank" href="https://discord.gg/albusProtocol"><img src="https://img.shields.io/discord/732892373507375164?color=6A7EC2&logo=discord&logoColor=ffffff&labelColor=6A7EC2&label=Discord" /></a>
+  <a target="_blank" href="https://github.com/mfactory-lab/albus/wiki"><img alt="Docs" src="https://img.shields.io/badge/docs-Albus-blue" /></a>
 </p>
 
 # Introduction
