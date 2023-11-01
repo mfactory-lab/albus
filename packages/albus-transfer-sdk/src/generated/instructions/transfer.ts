@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category Transfer
  * @category generated
  */
-export type TransferInstructionArgs = {
+export interface TransferInstructionArgs {
   amount: beet.bignum
 }
 /**
@@ -30,7 +30,7 @@ export const transferStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['amount', beet.u64],
   ],
-  'TransferInstructionArgs'
+  'TransferInstructionArgs',
 )
 /**
  * Accounts required by the _transfer_ instruction
@@ -43,7 +43,7 @@ export const transferStruct = new beet.BeetArgsStruct<
  * @category Transfer
  * @category generated
  */
-export type TransferInstructionAccounts = {
+export interface TransferInstructionAccounts {
   sender: web3.PublicKey
   receiver: web3.PublicKey
   policy: web3.PublicKey
@@ -69,7 +69,7 @@ export const transferInstructionDiscriminator = [
 export function createTransferInstruction(
   accounts: TransferInstructionAccounts,
   args: TransferInstructionArgs,
-  programId = new web3.PublicKey('J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c')
+  programId = new web3.PublicKey('J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c'),
 ) {
   const [data] = transferStruct.serialize({
     instructionDiscriminator: transferInstructionDiscriminator,

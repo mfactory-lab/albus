@@ -10,7 +10,7 @@
 export function debounceAsync<CB extends (...args: any[]) => Promise<R>, R>(
   callback: CB,
   wait = 100,
-  { leading = false, maxWait = Infinity } = {},
+  { leading = false, maxWait = Number.POSITIVE_INFINITY } = {},
 ) {
   let started = 0 // latest callback invocation
   let runningCallback: Promise<R> | undefined // latest callback invocation result

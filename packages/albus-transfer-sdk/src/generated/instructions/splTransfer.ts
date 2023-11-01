@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category SplTransfer
  * @category generated
  */
-export type SplTransferInstructionArgs = {
+export interface SplTransferInstructionArgs {
   amount: beet.bignum
 }
 /**
@@ -31,7 +31,7 @@ export const splTransferStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['amount', beet.u64],
   ],
-  'SplTransferInstructionArgs'
+  'SplTransferInstructionArgs',
 )
 /**
  * Accounts required by the _splTransfer_ instruction
@@ -47,7 +47,7 @@ export const splTransferStruct = new beet.BeetArgsStruct<
  * @category SplTransfer
  * @category generated
  */
-export type SplTransferInstructionAccounts = {
+export interface SplTransferInstructionAccounts {
   sender: web3.PublicKey
   receiver: web3.PublicKey
   tokenMint: web3.PublicKey
@@ -77,7 +77,7 @@ export const splTransferInstructionDiscriminator = [
 export function createSplTransferInstruction(
   accounts: SplTransferInstructionAccounts,
   args: SplTransferInstructionArgs,
-  programId = new web3.PublicKey('J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c')
+  programId = new web3.PublicKey('J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c'),
 ) {
   const [data] = splTransferStruct.serialize({
     instructionDiscriminator: splTransferInstructionDiscriminator,

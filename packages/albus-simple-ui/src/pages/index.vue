@@ -59,7 +59,9 @@ async function prove(proofRequest: PublicKey) {
       </div>
     </div>
     <div class="text-right">
-      <q-btn color="primary" :loading="isLoading" rounded @click="createTestVC">create vc</q-btn>
+      <q-btn color="primary" :loading="isLoading" rounded @click="createTestVC">
+        create vc
+      </q-btn>
     </div>
   </div>
 </template>
