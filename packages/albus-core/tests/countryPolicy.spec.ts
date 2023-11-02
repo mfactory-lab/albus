@@ -105,6 +105,8 @@ describe('CountryPolicy', async () => {
       country: 'UKR', // 240
     }, {
       selectionMode: SelectionMode.Exclusion,
+      // max 32 countries in one array [240, 241, ...]
+      // 0n required, if select countries length < 32
       countryLookup: [bytesToBigInt([240, 241, 1, 2, 3]), 0n],
     })
     try {
