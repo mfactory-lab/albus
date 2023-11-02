@@ -20,7 +20,7 @@ declare_id!("J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea");
 pub mod albus_swap {
     use super::*;
     use crate::curve::calculator::{RoundDirection, TradeDirection};
-    use albus_solana_verifier::AlbusCompliant;
+    use albus_solana_verifier::AlbusVerifier;
 
     pub fn initialize(
         ctx: Context<Initialize>,
@@ -35,28 +35,29 @@ pub mod albus_swap {
             &[&ctx.accounts.token_swap.key().to_bytes()],
             ctx.program_id,
         );
+
         let seeds = &[&ctx.accounts.token_swap.key().to_bytes(), &[bump_seed][..]];
 
-        if *ctx.accounts.authority.key != swap_authority {
+        if !cmp_pubkeys(ctx.accounts.authority.key, swap_authority) {
             return Err(SwapError::InvalidProgramAddress.into());
         }
-        if *ctx.accounts.authority.key != ctx.accounts.token_a.owner {
+        if !cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.token_a.owner) {
             return Err(SwapError::InvalidOwner.into());
         }
-        if *ctx.accounts.authority.key != ctx.accounts.token_b.owner {
+        if !cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.token_b.owner) {
             return Err(SwapError::InvalidOwner.into());
         }
-        if *ctx.accounts.authority.key == ctx.accounts.destination.owner {
+        if !cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.destination.owner) {
             return Err(SwapError::InvalidOutputOwner.into());
         }
-        if *ctx.accounts.authority.key == ctx.accounts.fee_account.owner {
+        if cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.fee_account.owner) {
             return Err(SwapError::InvalidOutputOwner.into());
         }
         if COption::Some(*ctx.accounts.authority.key) != ctx.accounts.pool_mint.mint_authority {
             return Err(SwapError::InvalidOwner.into());
         }
 
-        if ctx.accounts.token_a.mint == ctx.accounts.token_b.mint {
+        if cmp_pubkeys(ctx.accounts.token_a.mint, ctx.accounts.token_b.mint) {
             return Err(SwapError::RepeatedMint.into());
         }
 
@@ -64,15 +65,19 @@ pub mod albus_swap {
         curve
             .calculator
             .validate_supply(ctx.accounts.token_a.amount, ctx.accounts.token_b.amount)?;
+
         if ctx.accounts.token_a.delegate.is_some() {
             return Err(SwapError::InvalidDelegate.into());
         }
+
         if ctx.accounts.token_b.delegate.is_some() {
             return Err(SwapError::InvalidDelegate.into());
         }
+
         if ctx.accounts.token_a.close_authority.is_some() {
             return Err(SwapError::InvalidCloseAuthority.into());
         }
+
         if ctx.accounts.token_b.close_authority.is_some() {
             return Err(SwapError::InvalidCloseAuthority.into());
         }
@@ -80,12 +85,15 @@ pub mod albus_swap {
         if ctx.accounts.pool_mint.supply != 0 {
             return Err(SwapError::InvalidSupply.into());
         }
+
         if ctx.accounts.pool_mint.freeze_authority.is_some() {
             return Err(SwapError::InvalidFreezeAuthority.into());
         }
-        if *ctx.accounts.pool_mint.to_account_info().key != ctx.accounts.fee_account.mint {
+
+        if !cmp_pubkeys(ctx.accounts.pool_mint.key(), ctx.accounts.fee_account.mint) {
             return Err(SwapError::IncorrectPoolMint.into());
         }
+
         let fees = build_fees(&fees_input).unwrap();
 
         if let Some(swap_constraints) = SWAP_CONSTRAINTS {
@@ -99,6 +107,7 @@ pub mod albus_swap {
             swap_constraints.validate_curve(&curve)?;
             swap_constraints.validate_fees(&fees)?;
         }
+
         fees.validate()?;
         curve.calculator.validate()?;
 
@@ -137,54 +146,67 @@ pub mod albus_swap {
         //     return Err(ProgramError::IncorrectProgramId.into());
         // }
 
-        AlbusCompliant::new(&ctx.accounts.proof_request)
-            .with_policy(token_swap.policy.unwrap())
-            .with_user(ctx.accounts.user_transfer_authority.key())
-            .check()?;
+        if let Some(policy) = token_swap.policy {
+            AlbusVerifier::new(&ctx.accounts.proof_request)
+                .check_policy(policy)
+                .check_owner(ctx.accounts.user_transfer_authority.key())
+                .run()?;
+        }
 
-        if *ctx.accounts.authority.key
-            != authority_id(ctx.program_id, &token_swap.key(), token_swap.bump_seed)?
-        {
+        if !cmp_pubkeys(
+            ctx.accounts.authority.key,
+            authority_id(ctx.program_id, &token_swap.key(), token_swap.bump_seed)?,
+        ) {
             return Err(SwapError::InvalidProgramAddress.into());
         }
-        if !(*ctx.accounts.swap_source.to_account_info().key == token_swap.token_a
-            || *ctx.accounts.swap_source.to_account_info().key == token_swap.token_b)
+
+        if !(cmp_pubkeys(ctx.accounts.swap_source.key(), token_swap.token_a)
+            || cmp_pubkeys(ctx.accounts.swap_source.key(), token_swap.token_b))
         {
             return Err(SwapError::IncorrectSwapAccount.into());
         }
-        if !(*ctx.accounts.swap_destination.to_account_info().key == token_swap.token_a
-            || *ctx.accounts.swap_destination.to_account_info().key == token_swap.token_b)
+
+        if !(cmp_pubkeys(ctx.accounts.swap_destination.key(), token_swap.token_a)
+            || cmp_pubkeys(ctx.accounts.swap_destination.key(), token_swap.token_b))
         {
             return Err(SwapError::IncorrectSwapAccount.into());
         }
-        if *ctx.accounts.swap_source.to_account_info().key
-            == *ctx.accounts.swap_destination.to_account_info().key
-        {
+
+        if cmp_pubkeys(
+            ctx.accounts.swap_source.key(),
+            ctx.accounts.swap_destination.key(),
+        ) {
             return Err(SwapError::InvalidInput.into());
         }
-        if ctx.accounts.swap_source.to_account_info().key == ctx.accounts.source_info.key {
+
+        if cmp_pubkeys(ctx.accounts.swap_source.key(), ctx.accounts.source_info.key) {
             return Err(SwapError::InvalidInput.into());
         }
-        if ctx.accounts.swap_destination.to_account_info().key == ctx.accounts.destination_info.key
-        {
+
+        if cmp_pubkeys(
+            ctx.accounts.swap_destination.key(),
+            ctx.accounts.destination_info.key,
+        ) {
             return Err(SwapError::InvalidInput.into());
         }
-        if *ctx.accounts.pool_mint.to_account_info().key != token_swap.pool_mint {
+
+        if !cmp_pubkeys(ctx.accounts.pool_mint.key(), token_swap.pool_mint) {
             return Err(SwapError::IncorrectPoolMint.into());
         }
-        if *ctx.accounts.fee_account.to_account_info().key != token_swap.pool_fee_account {
+
+        if !cmp_pubkeys(ctx.accounts.fee_account.key(), token_swap.pool_fee_account) {
             return Err(SwapError::IncorrectFeeAccount.into());
         }
-        if *ctx.accounts.token_program.key != token_swap.token_program_id {
+
+        if !cmp_pubkeys(ctx.accounts.token_program.key, token_swap.token_program_id) {
             return Err(SwapError::IncorrectTokenProgramId.into());
         }
 
-        let trade_direction =
-            if *ctx.accounts.swap_source.to_account_info().key == token_swap.token_a {
-                TradeDirection::AtoB
-            } else {
-                TradeDirection::BtoA
-            };
+        let trade_direction = if cmp_pubkeys(ctx.accounts.swap_source.key(), token_swap.token_a) {
+            TradeDirection::AtoB
+        } else {
+            TradeDirection::BtoA
+        };
 
         let curve = build_curve(&token_swap.curve).unwrap();
         let fees = build_fees(&token_swap.fees).unwrap();
