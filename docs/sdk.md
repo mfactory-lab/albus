@@ -26,21 +26,9 @@ const client = AlbusClient.factory(connection, wallet)
 
 ### Certificates API
 
-Load certificates(for user)
+Load certificates
 ```typescript
 const certificates = client.proofRequest.find()
-```
-
-Load certificates(for service)
-```typescript
-client.proofRequest.find({ serviceProvider: PublicKeyInitData, skipUser: boolean })
-```
-
-**Example**
-```typescript
-const serviceProvider = service.address // your service address  
-
-client.proofRequest.find({ serviceProvider, skipUser: true })
 ```
 
 Create certificate
@@ -50,8 +38,17 @@ client.proofRequest.create({ serviceCode: string, policyCode: string })
 
 **Example**
 ```typescript
-const serviceCode = service.data.code 
-const policyCode = policy.data.code
+import { SERVICE_CODE, POLICY_CODE } from '@/config'
+
+// to find out the service code, you can download all services and find your service in them, or immediately add the service code from the config
+const services = await client.service.find()
+const service = services.find(s => s.data.code === <SERVICE_CODE>) // You can search by other parameters, for example name or address
+const serviceCode = service?.data?.code ?? SERVICE_CODE
+
+// to find out the policy code, you can download all service policies and find your policy in them, or immediately add the policy code from the config
+const policies = await albus.client.policy.find({ serviceCode })
+const policy = policies.find(p => p.data.code === <POLICY_CODE>) // You can search by other parameters, for example name or address
+const policyCode = policy.data.code ?? POLICY_CODE
 
 client.proofRequest.create({ serviceCode, policyCode })
 ```
@@ -68,9 +65,14 @@ client.proofRequest.fullProve(props)
 
 **Example**
 ```typescript
+const certificates = await client.proofRequest.find()
 const certificate = certificates[0] // for example, let's take the first certificate
 const proofRequest = certificate.address
 
+const payer = Keypair.fromSeed(seed) //Seed phrase that was used to create the encryption key when creating the credential
+const decryptionKey = payer.secretKey
+
+const credentials = await client.credential.loadAll({ decryptionKey }) // load all user credentials
 const credential = credentials[0] // for example, take the first credential
 const vc = credential.address
 
@@ -81,6 +83,11 @@ const props = {
 }
 client.proofRequest.fullProve(props)
 ```
+
+>**Important**
+>>**credential**: *Each certificate has a set of policies according to which the verification takes place, so not every credential will be suitable.*
+>
+>>**decryptionKey**: *The encryption key with which the credentials were encrypted when they were created. If the key does not match, then you will not be able to verify the certificate*
 
 **Props**
 Data that is passed to the `fullProve` method:
@@ -115,7 +122,7 @@ const credentials = client.credential.loadAll({ decryptionKey: number[] | Uint8A
 ```typescript
 import { Keypair } from '@solana/web3.js'
 
-const payer = new Keypair()
+const payer = Keypair.fromSeed(seed) //Seed phrase that was used to create the encryption key when creating the credential
 const decryptionKey = payer.secretKey
 client.credential.loadAll({ decryptionKey })
 ```
