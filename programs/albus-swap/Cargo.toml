@@ -1,6 +1,6 @@
 [package]
-name = "albus-transfer"
-version = "0.0.2"
+name = "albus-swap"
+version = "0.0.1"
 homepage = "https://albus.finance"
 repository = "https://github.com/mfactory-lab/albus"
 license = "AGPL-3.0"
@@ -14,9 +14,21 @@ no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
+production = []
 testing = []
+fuzz = ["arbitrary", "roots"]
 
 [dependencies]
 albus-solana-verifier = { path = "../../packages/solana-verifier" }
 anchor-lang = { version = "0.29.0"}
 anchor-spl = { version = "0.29.0" }
+arrayref = "0.3.6"
+solana-program = "^1.16"
+spl-math = { version = "0.2", features = ["no-entrypoint"] }
+spl-token = { version = "4.0.0", features = ["no-entrypoint"] }
+arbitrary = { version = "1.3", features = ["derive"], optional = true }
+roots = { version = "0.0.8", optional = true }
+
+[dev-dependencies]
+proptest = "1.3"
+roots = "0.0.8"
