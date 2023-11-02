@@ -45,7 +45,7 @@ use solana_program::{
 pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
 const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
-pub struct AlbusCompliant<'a, 'info> {
+pub struct AlbusVerifier<'a, 'info> {
     /// Proof request address
     proof_request: &'a AccountInfo<'info>,
     /// (optional) Proof request owner's address
@@ -54,8 +54,8 @@ pub struct AlbusCompliant<'a, 'info> {
     policy: Option<Pubkey>,
 }
 
-impl<'a, 'info> AlbusCompliant<'a, 'info> {
-    pub fn new(proof_request: &'a AccountInfo<'info>) -> AlbusCompliant<'a, 'info> {
+impl<'a, 'info> AlbusVerifier<'a, 'info> {
+    pub fn new(proof_request: &'a AccountInfo<'info>) -> AlbusVerifier<'a, 'info> {
         Self {
             proof_request,
             policy: None,
@@ -63,18 +63,18 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
         }
     }
 
-    pub fn with_policy(mut self, addr: Pubkey) -> Self {
+    pub fn check_policy(mut self, addr: Pubkey) -> Self {
         self.policy = Some(addr);
         self
     }
 
-    pub fn with_user(mut self, addr: Pubkey) -> Self {
+    pub fn check_owner(mut self, addr: Pubkey) -> Self {
         self.proof_request_owner = Some(addr);
         self
     }
 
     #[cfg(feature = "cpi")]
-    pub fn with_verification(&self, _ctx: cpi::VerifyProofRequest) -> Result<(), ProgramError> {
+    pub fn cpi_call(&self, _ctx: cpi::VerifyProofRequest) -> Result<(), ProgramError> {
         // match verify(ctx) {
         //     Ok(()) => Ok(()),
         //     Err(e) => Err(e.into()),
@@ -82,7 +82,7 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
         todo!()
     }
 
-    pub fn check(&self) -> Result<(), ProgramError> {
+    pub fn run(&self) -> Result<(), ProgramError> {
         self.check_program_account(self.proof_request)?;
         self.check_proof_request()?;
         Ok(())
@@ -242,14 +242,14 @@ mod test {
         let policy = Pubkey::new_unique();
 
         assert_eq!(
-            AlbusCompliant::new(
+            AlbusVerifier::new(
                 &ProofRequestBuilder::new()
                     .with_status(ProofRequestStatus::Verified)
                     .with_policy(policy)
                     .build()
             )
-            .with_policy(policy)
-            .check(),
+            .check_policy(policy)
+            .run(),
             Ok(())
         );
     }
@@ -261,15 +261,15 @@ mod test {
         let policy = Pubkey::new_unique();
 
         assert_eq!(
-            AlbusCompliant::new(
+            AlbusVerifier::new(
                 &ProofRequestBuilder::new()
                     .with_status(ProofRequestStatus::Proved)
                     .with_policy(policy)
                     .with_expired_at(1)
                     .build()
             )
-            .with_policy(policy)
-            .check(),
+            .check_policy(policy)
+            .run(),
             Err(ProgramError::Custom(VerificationError::Expired as u32))
         );
     }
@@ -282,31 +282,31 @@ mod test {
         let policy = Pubkey::new_unique();
 
         assert_eq!(
-            AlbusCompliant::new(
+            AlbusVerifier::new(
                 &ProofRequestBuilder::new()
                     .with_status(ProofRequestStatus::Verified)
                     .with_policy(policy)
                     .with_owner(owner)
                     .build()
             )
-            .with_policy(policy)
-            .with_user(owner)
-            .check(),
+            .check_policy(policy)
+            .check_owner(owner)
+            .run(),
             Ok(())
         );
 
         // invalid owner
         assert_eq!(
-            AlbusCompliant::new(
+            AlbusVerifier::new(
                 &ProofRequestBuilder::new()
                     .with_status(ProofRequestStatus::Verified)
                     .with_policy(policy)
                     .with_owner(owner)
                     .build()
             )
-            .with_policy(policy)
-            .with_user(Pubkey::new_unique())
-            .check(),
+            .check_policy(policy)
+            .check_owner(Pubkey::new_unique())
+            .run(),
             Err(ProgramError::InvalidAccountData)
         );
     }
