@@ -1,13 +1,13 @@
 import type { AnchorProvider, BN } from '@coral-xyz/anchor'
-import type { ConfirmOptions, PublicKey } from '@solana/web3.js'
-import { Transaction } from '@solana/web3.js'
+import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
+import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
+import type {
+  CurveInfo,
+  FeesInfo,
+} from './generated'
 import {
   PROGRAM_ID,
-  createDepositAllTokenTypesInstruction,
-  createDepositSingleTokenInstruction,
-  createSwapInstruction,
-  createWithdrawAllTokenTypesInstruction,
-  createWithdrawSingleTokenInstruction,
+  TokenSwap, createInitializeInstruction, createSwapInstruction,
 } from './generated'
 
 export class AlbusSwapClient {
@@ -19,23 +19,91 @@ export class AlbusSwapClient {
     return this.provider.connection
   }
 
+  swapAuthority(addr: PublicKey) {
+    return PublicKey.findProgramAddressSync(
+      [addr.toBuffer()],
+      this.programId,
+    )[0]
+  }
+
+  /**
+   * Initialize Token Swap Pool
+   */
+  async init(props: InitProps, opts?: ConfirmOptions) {
+    const tx = new Transaction()
+
+    const pool = props.pool ?? Keypair.generate()
+
+    const space = TokenSwap.byteSize({
+      bumpSeed: 0,
+      curve: props.curve,
+      fees: props.fees,
+      isInitialized: false,
+      policy: PublicKey.default,
+      poolFeeAccount: PublicKey.default,
+      poolMint: PublicKey.default,
+      tokenA: PublicKey.default,
+      tokenAMint: PublicKey.default,
+      tokenB: PublicKey.default,
+      tokenBMint: PublicKey.default,
+      tokenProgramId: PublicKey.default,
+    })
+
+    const lamports = await this.connection.getMinimumBalanceForRentExemption(space)
+
+    tx.add(
+      SystemProgram.createAccount({
+        fromPubkey: this.provider.publicKey,
+        newAccountPubkey: pool.publicKey,
+        programId: this.programId,
+        lamports,
+        space,
+      }),
+    )
+
+    tx.add(
+      createInitializeInstruction(
+        {
+          authority: this.swapAuthority(pool.publicKey),
+          tokenSwap: pool.publicKey,
+          destination: props.destination,
+          feeAccount: props.feeAccount,
+          poolMint: props.poolMint,
+          tokenA: props.tokenA,
+          tokenB: props.tokenB,
+        },
+        {
+          feesInput: props.fees,
+          curveInput: props.curve,
+        },
+      ),
+    )
+
+    const signature = await this.provider.sendAndConfirm(tx, [pool], opts)
+
+    return {
+      pool: pool.publicKey,
+      signature,
+    }
+  }
+
   /**
    * Swap tokens
    */
   async swap(props: SwapProps, opts?: ConfirmOptions) {
     const instruction = createSwapInstruction(
       {
-        authority: props.authority,
-        destination: props.destination,
+        authority: this.swapAuthority(props.pool),
+        userTransferAuthority: this.provider.publicKey,
+        userSource: props.userSource,
+        userDestination: props.userDestination,
+        tokenSwap: props.pool,
         poolFee: props.poolFee,
         poolMint: props.poolMint,
-        source: props.source,
-        splTokenSwapProgram: props.splTokenSwapProgram,
-        swap: props.swap,
-        swapDestination: props.swapDestination,
-        swapSource: props.swapSource,
-        userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
+        poolSource: props.poolSource,
+        poolDestination: props.poolDestination,
+        proofRequest: props.proofRequest,
+        hostFeeAccount: props.hostFeeAccount,
       },
       {
         amountIn: props.amountIn,
@@ -44,197 +112,52 @@ export class AlbusSwapClient {
     )
 
     const tx = new Transaction().add(instruction)
-    return await this.provider.sendAndConfirm(tx, [], opts)
+    return this.provider.sendAndConfirm(tx, [], opts)
   }
 
   /**
-   * Deposit single token type tokens
+   * Load token swap by address
    */
-  async depositSingle(props: DepositSingleProps, opts?: ConfirmOptions) {
-    const instruction = createDepositSingleTokenInstruction(
-      {
-        authority: props.authority,
-        destination: props.destination,
-        poolMint: props.poolMint,
-        sourceToken: props.sourceToken,
-        splTokenSwapProgram: props.splTokenSwapProgram,
-        swap: props.swap,
-        swapTokenA: props.swapTokenA,
-        swapTokenB: props.swapTokenB,
-        userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
-      },
-      {
-        minimumPoolTokenAmount: props.minimumPoolTokenAmount,
-        sourceTokenAmount: props.sourceTokenAmount,
-      },
-    )
-
-    const tx = new Transaction().add(instruction)
-    return await this.provider.sendAndConfirm(tx, [], opts)
+  async load(addr: PublicKeyInitData, commitment?: Commitment) {
+    return TokenSwap.fromAccountAddress(this.provider.connection, new PublicKey(addr), commitment)
   }
 
-  /**
-   * Withdraw single token type tokens
-   */
-  async withdrawSingle(props: WithdrawSingleProps, opts?: ConfirmOptions) {
-    const instruction = createWithdrawSingleTokenInstruction(
-      {
-        feeAccount: props.feeAccount,
-        poolTokenSource: props.poolTokenSource,
-        swapTokenA: props.swapTokenA,
-        swapTokenB: props.swapTokenB,
-        authority: props.authority,
-        destination: props.destination,
-        poolMint: props.poolMint,
-        splTokenSwapProgram: props.splTokenSwapProgram,
-        swap: props.swap,
-        userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
-      },
-      {
-        destinationTokenAmount: props.destinationTokenAmount,
-        maximumPoolTokenAmount: props.maximumPoolTokenAmount,
-      },
-    )
-
-    const tx = new Transaction().add(instruction)
-    return await this.provider.sendAndConfirm(tx, [], opts)
+  async loadAll() {
+    // ...
   }
+}
 
-  /**
-   * Deposit all token types
-   */
-  async depositAll(props: DepositAllProps, opts?: ConfirmOptions) {
-    const instruction = createDepositAllTokenTypesInstruction(
-      {
-        authority: props.authority,
-        depositTokenA: props.depositTokenA,
-        depositTokenB: props.depositTokenB,
-        destination: props.destination,
-        poolMint: props.poolMint,
-        splTokenSwapProgram: props.splTokenSwapProgram,
-        swap: props.swap,
-        swapTokenA: props.swapTokenA,
-        swapTokenB: props.swapTokenB,
-        userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
-      },
-      {
-        maximumTokenAAmount: props.maximumTokenAAmount,
-        maximumTokenBAmount: props.maximumTokenBAmount,
-        poolTokenAmount: props.poolTokenAmount,
-      },
-    )
-
-    const tx = new Transaction().add(instruction)
-    return await this.provider.sendAndConfirm(tx, [], opts)
-  }
-
-  /**
-   * Withdraw all token types
-   */
-  async withdrawAll(props: WithdrawAllProps, opts?: ConfirmOptions) {
-    const instruction = createWithdrawAllTokenTypesInstruction(
-      {
-        authority: props.authority,
-        destinationTokenA: props.destinationTokenA,
-        destinationTokenB: props.destinationTokenB,
-        feeAccount: props.feeAccount,
-        poolMint: props.poolMint,
-        source: props.source,
-        splTokenSwapProgram: props.splTokenSwapProgram,
-        swap: props.swap,
-        swapTokenA: props.swapTokenA,
-        swapTokenB: props.swapTokenB,
-        userTransferAuthority: this.provider.publicKey,
-        zkpRequest: props.zkpRequest,
-      },
-      {
-        minimumTokenAAmount: props.minimumTokenAAmount,
-        minimumTokenBAmount: props.minimumTokenBAmount,
-        poolTokenAmount: props.poolTokenAmount,
-      },
-    )
-
-    const tx = new Transaction().add(instruction)
-    return await this.provider.sendAndConfirm(tx, [], opts)
-  }
+export interface InitProps {
+  /// Optional pool keypair
+  pool?: Keypair
+  /// Pool Token Mint. Must be empty, owned by swap authority.
+  poolMint: PublicKey
+  /// Pool Token Account to deposit trading and withdraw fees.
+  /// Must be empty, not owned by swap authority
+  feeAccount: PublicKey
+  /// Pool Token Account to deposit the initial pool token
+  destination: PublicKey
+  /// Token "A" Account. Must be non-zero, owned by swap authority.
+  tokenA: PublicKey
+  /// Token "B" Account. Must be non-zero, owned by swap authority.
+  tokenB: PublicKey
+  /// Curve params
+  curve: CurveInfo
+  /// Fees
+  fees: FeesInfo
 }
 
 export interface SwapProps {
-  destination: PublicKey
+  proofRequest: PublicKey
+  authority: PublicKey
+  userSource: PublicKey
+  userDestination: PublicKey
+  pool: PublicKey
   poolFee: PublicKey
   poolMint: PublicKey
-  source: PublicKey
-  splTokenSwapProgram: PublicKey
-  swap: PublicKey
-  swapDestination: PublicKey
-  swapSource: PublicKey
-  authority: PublicKey
-  zkpRequest: PublicKey
+  poolDestination: PublicKey
+  poolSource: PublicKey
+  hostFeeAccount?: PublicKey
   amountIn: BN
   minimumAmountOut: BN
-}
-
-export interface DepositSingleProps {
-  authority: PublicKey
-  destination: PublicKey
-  poolMint: PublicKey
-  sourceToken: PublicKey
-  splTokenSwapProgram: PublicKey
-  swap: PublicKey
-  swapTokenA: PublicKey
-  swapTokenB: PublicKey
-  zkpRequest: PublicKey
-  minimumPoolTokenAmount: BN
-  sourceTokenAmount: BN
-}
-
-export interface WithdrawSingleProps {
-  authority: PublicKey
-  destination: PublicKey
-  poolMint: PublicKey
-  feeAccount: PublicKey
-  splTokenSwapProgram: PublicKey
-  swap: PublicKey
-  swapTokenA: PublicKey
-  swapTokenB: PublicKey
-  poolTokenSource: PublicKey
-  zkpRequest: PublicKey
-  destinationTokenAmount: BN
-  maximumPoolTokenAmount: BN
-}
-
-export interface DepositAllProps {
-  authority: PublicKey
-  depositTokenA: PublicKey
-  depositTokenB: PublicKey
-  destination: PublicKey
-  poolMint: PublicKey
-  splTokenSwapProgram: PublicKey
-  swapTokenA: PublicKey
-  swapTokenB: PublicKey
-  swap: PublicKey
-  zkpRequest: PublicKey
-  maximumTokenAAmount: BN
-  maximumTokenBAmount: BN
-  poolTokenAmount: BN
-}
-
-export interface WithdrawAllProps {
-  authority: PublicKey
-  destinationTokenA: PublicKey
-  destinationTokenB: PublicKey
-  feeAccount: PublicKey
-  poolMint: PublicKey
-  source: PublicKey
-  swapTokenA: PublicKey
-  swapTokenB: PublicKey
-  swap: PublicKey
-  splTokenSwapProgram: PublicKey
-  zkpRequest: PublicKey
-  minimumTokenAAmount: BN
-  minimumTokenBAmount: BN
-  poolTokenAmount: BN
 }

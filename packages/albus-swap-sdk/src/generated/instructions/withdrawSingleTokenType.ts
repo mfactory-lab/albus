@@ -11,88 +11,86 @@ import * as web3 from '@solana/web3.js'
 
 /**
  * @category Instructions
- * @category DepositSingleToken
+ * @category WithdrawSingleTokenType
  * @category generated
  */
-export interface DepositSingleTokenInstructionArgs {
-  sourceTokenAmount: beet.bignum
-  minimumPoolTokenAmount: beet.bignum
+export interface WithdrawSingleTokenTypeInstructionArgs {
+  destinationTokenAmount: beet.bignum
+  maximumPoolTokenAmount: beet.bignum
 }
 /**
  * @category Instructions
- * @category DepositSingleToken
+ * @category WithdrawSingleTokenType
  * @category generated
  */
-export const depositSingleTokenStruct = new beet.BeetArgsStruct<
-  DepositSingleTokenInstructionArgs & {
+export const withdrawSingleTokenTypeStruct = new beet.BeetArgsStruct<
+  WithdrawSingleTokenTypeInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['sourceTokenAmount', beet.u64],
-    ['minimumPoolTokenAmount', beet.u64],
+    ['destinationTokenAmount', beet.u64],
+    ['maximumPoolTokenAmount', beet.u64],
   ],
-  'DepositSingleTokenInstructionArgs',
+  'WithdrawSingleTokenTypeInstructionArgs',
 )
 /**
- * Accounts required by the _depositSingleToken_ instruction
+ * Accounts required by the _withdrawSingleTokenType_ instruction
  *
- * @property [] swap
+ * @property [] tokenSwap
  * @property [] authority
- * @property [**signer**] userTransferAuthority
- * @property [_writable_] sourceToken
+ * @property [**signer**] userTransferAuthorityInfo
+ * @property [_writable_] source
  * @property [_writable_] swapTokenA
  * @property [_writable_] swapTokenB
  * @property [_writable_] poolMint
  * @property [_writable_] destination
- * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [_writable_] feeAccount
  * @category Instructions
- * @category DepositSingleToken
+ * @category WithdrawSingleTokenType
  * @category generated
  */
-export interface DepositSingleTokenInstructionAccounts {
-  swap: web3.PublicKey
+export interface WithdrawSingleTokenTypeInstructionAccounts {
+  tokenSwap: web3.PublicKey
   authority: web3.PublicKey
-  userTransferAuthority: web3.PublicKey
-  sourceToken: web3.PublicKey
+  userTransferAuthorityInfo: web3.PublicKey
+  source: web3.PublicKey
   swapTokenA: web3.PublicKey
   swapTokenB: web3.PublicKey
   poolMint: web3.PublicKey
   destination: web3.PublicKey
-  splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  feeAccount: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const depositSingleTokenInstructionDiscriminator = [
-  166, 136, 166, 47, 199, 192, 86, 169,
+export const withdrawSingleTokenTypeInstructionDiscriminator = [
+  111, 171, 21, 77, 237, 181, 241, 56,
 ]
 
 /**
- * Creates a _DepositSingleToken_ instruction.
+ * Creates a _WithdrawSingleTokenType_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category DepositSingleToken
+ * @category WithdrawSingleTokenType
  * @category generated
  */
-export function createDepositSingleTokenInstruction(
-  accounts: DepositSingleTokenInstructionAccounts,
-  args: DepositSingleTokenInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+export function createWithdrawSingleTokenTypeInstruction(
+  accounts: WithdrawSingleTokenTypeInstructionAccounts,
+  args: WithdrawSingleTokenTypeInstructionArgs,
+  programId = new web3.PublicKey('J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea'),
 ) {
-  const [data] = depositSingleTokenStruct.serialize({
-    instructionDiscriminator: depositSingleTokenInstructionDiscriminator,
+  const [data] = withdrawSingleTokenTypeStruct.serialize({
+    instructionDiscriminator: withdrawSingleTokenTypeInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.swap,
+      pubkey: accounts.tokenSwap,
       isWritable: false,
       isSigner: false,
     },
@@ -102,12 +100,12 @@ export function createDepositSingleTokenInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.userTransferAuthority,
+      pubkey: accounts.userTransferAuthorityInfo,
       isWritable: false,
       isSigner: true,
     },
     {
-      pubkey: accounts.sourceToken,
+      pubkey: accounts.source,
       isWritable: true,
       isSigner: false,
     },
@@ -132,13 +130,8 @@ export function createDepositSingleTokenInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.splTokenSwapProgram,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.zkpRequest,
-      isWritable: false,
+      pubkey: accounts.feeAccount,
+      isWritable: true,
       isSigner: false,
     },
     {

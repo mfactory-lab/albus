@@ -8,108 +8,99 @@
 import * as splToken from '@solana/spl-token'
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
+import type { FeesInfo } from '../types/FeesInfo'
+import { feesInfoBeet } from '../types/FeesInfo'
+import type { CurveInfo } from '../types/CurveInfo'
+import { curveInfoBeet } from '../types/CurveInfo'
 
 /**
  * @category Instructions
- * @category WithdrawAllTokenTypes
+ * @category Initialize
  * @category generated
  */
-export interface WithdrawAllTokenTypesInstructionArgs {
-  poolTokenAmount: beet.bignum
-  minimumTokenAAmount: beet.bignum
-  minimumTokenBAmount: beet.bignum
+export interface InitializeInstructionArgs {
+  feesInput: FeesInfo
+  curveInput: CurveInfo
 }
 /**
  * @category Instructions
- * @category WithdrawAllTokenTypes
+ * @category Initialize
  * @category generated
  */
-export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
-  WithdrawAllTokenTypesInstructionArgs & {
+export const initializeStruct = new beet.BeetArgsStruct<
+  InitializeInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['poolTokenAmount', beet.u64],
-    ['minimumTokenAAmount', beet.u64],
-    ['minimumTokenBAmount', beet.u64],
+    ['feesInput', feesInfoBeet],
+    ['curveInput', curveInfoBeet],
   ],
-  'WithdrawAllTokenTypesInstructionArgs',
+  'InitializeInstructionArgs',
 )
 /**
- * Accounts required by the _withdrawAllTokenTypes_ instruction
+ * Accounts required by the _initialize_ instruction
  *
- * @property [] tokenSwap
  * @property [] authority
- * @property [**signer**] userTransferAuthorityInfo
- * @property [_writable_] sourceInfo
+ * @property [_writable_, **signer**] tokenSwap
+ * @property [_writable_] poolMint
  * @property [_writable_] tokenA
  * @property [_writable_] tokenB
- * @property [_writable_] poolMint
- * @property [_writable_] destTokenAInfo
- * @property [_writable_] destTokenBInfo
  * @property [_writable_] feeAccount
+ * @property [_writable_] destination
  * @category Instructions
- * @category WithdrawAllTokenTypes
+ * @category Initialize
  * @category generated
  */
-export interface WithdrawAllTokenTypesInstructionAccounts {
-  tokenSwap: web3.PublicKey
+export interface InitializeInstructionAccounts {
   authority: web3.PublicKey
-  userTransferAuthorityInfo: web3.PublicKey
-  sourceInfo: web3.PublicKey
+  tokenSwap: web3.PublicKey
+  poolMint: web3.PublicKey
   tokenA: web3.PublicKey
   tokenB: web3.PublicKey
-  poolMint: web3.PublicKey
-  destTokenAInfo: web3.PublicKey
-  destTokenBInfo: web3.PublicKey
   feeAccount: web3.PublicKey
+  destination: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const withdrawAllTokenTypesInstructionDiscriminator = [
-  189, 254, 156, 174, 210, 9, 164, 216,
+export const initializeInstructionDiscriminator = [
+  175, 175, 109, 31, 13, 152, 155, 237,
 ]
 
 /**
- * Creates a _WithdrawAllTokenTypes_ instruction.
+ * Creates a _Initialize_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
  * @category Instructions
- * @category WithdrawAllTokenTypes
+ * @category Initialize
  * @category generated
  */
-export function createWithdrawAllTokenTypesInstruction(
-  accounts: WithdrawAllTokenTypesInstructionAccounts,
-  args: WithdrawAllTokenTypesInstructionArgs,
+export function createInitializeInstruction(
+  accounts: InitializeInstructionAccounts,
+  args: InitializeInstructionArgs,
   programId = new web3.PublicKey('J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea'),
 ) {
-  const [data] = withdrawAllTokenTypesStruct.serialize({
-    instructionDiscriminator: withdrawAllTokenTypesInstructionDiscriminator,
+  const [data] = initializeStruct.serialize({
+    instructionDiscriminator: initializeInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
-    {
-      pubkey: accounts.tokenSwap,
-      isWritable: false,
-      isSigner: false,
-    },
     {
       pubkey: accounts.authority,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: accounts.userTransferAuthorityInfo,
-      isWritable: false,
+      pubkey: accounts.tokenSwap,
+      isWritable: true,
       isSigner: true,
     },
     {
-      pubkey: accounts.sourceInfo,
+      pubkey: accounts.poolMint,
       isWritable: true,
       isSigner: false,
     },
@@ -124,22 +115,12 @@ export function createWithdrawAllTokenTypesInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.poolMint,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.destTokenAInfo,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.destTokenBInfo,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
       pubkey: accounts.feeAccount,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.destination,
       isWritable: true,
       isSigner: false,
     },

@@ -2,7 +2,7 @@ const os = require('os')
 const path = require('path')
 
 const programName = 'albus_swap'
-const programId = '8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'
+const programId = 'J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea'
 
 const programDir = path.join(__dirname, '..', '..', 'programs', 'albus-swap')
 const idlGenerator = 'anchor'
