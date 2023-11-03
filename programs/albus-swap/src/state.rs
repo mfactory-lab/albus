@@ -26,7 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+use crate::curve::base::SwapCurve;
+use crate::curve::fees::Fees;
 use anchor_lang::prelude::*;
+use solana_program::program_pack::Pack;
 
 #[account]
 pub struct TokenSwap {
@@ -62,18 +65,18 @@ pub struct TokenSwap {
     pub pool_fee_account: Pubkey,
 
     /// All fee information
-    pub fees: TokenSwapFees,
+    pub fees: FeesInfo,
 
     /// Swap curve parameters, to be unpacked and used by the SwapCurve, which
     /// calculates swaps, deposits, and withdrawals
-    pub curve: TokenSwapCurve,
+    pub curve: CurveInfo,
 
     /// Albus policy
     pub policy: Option<Pubkey>,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
-pub struct TokenSwapFees {
+#[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]
+pub struct FeesInfo {
     pub trade_fee_numerator: u64,
     pub trade_fee_denominator: u64,
     pub owner_trade_fee_numerator: u64,
@@ -84,8 +87,31 @@ pub struct TokenSwapFees {
     pub host_fee_denominator: u64,
 }
 
+impl From<FeesInfo> for Fees {
+    fn from(value: FeesInfo) -> Self {
+        Self {
+            trade_fee_numerator: value.trade_fee_numerator,
+            trade_fee_denominator: value.trade_fee_denominator,
+            owner_trade_fee_numerator: value.owner_trade_fee_numerator,
+            owner_trade_fee_denominator: value.owner_trade_fee_denominator,
+            owner_withdraw_fee_numerator: value.owner_withdraw_fee_numerator,
+            owner_withdraw_fee_denominator: value.owner_withdraw_fee_denominator,
+            host_fee_numerator: value.host_fee_numerator,
+            host_fee_denominator: value.host_fee_denominator,
+        }
+    }
+}
+
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Default)]
-pub struct TokenSwapCurve {
+pub struct CurveInfo {
     pub curve_type: u8,
-    pub curve_parameters: u64,
+    pub curve_parameters: [u8; 32],
+}
+
+impl TryFrom<CurveInfo> for SwapCurve {
+    type Error = ProgramError;
+
+    fn try_from(value: CurveInfo) -> std::result::Result<Self, Self::Error> {
+        SwapCurve::unpack_from_slice(&[&[value.curve_type], &value.curve_parameters[..]].concat())
+    }
 }

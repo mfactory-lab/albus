@@ -106,7 +106,7 @@ pub enum SwapError {
     #[msg("Fee calculation failed due to overflow, underflow, or unexpected 0")]
     FeeCalculationFailure,
     // ConversionFailure
-    #[msg("Conversion to u64 failed with an overflow or underflow")]
+    #[msg("Conversion to u64/u128 failed with an overflow or underflow")]
     ConversionFailure,
     // The provided fee does not match the program owner's constraints
     #[msg("The provided fee does not match the program owner's constraints")]

@@ -19,13 +19,15 @@ declare_id!("J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea");
 #[program]
 pub mod albus_swap {
     use super::*;
+    use crate::curve::base::SwapCurve;
     use crate::curve::calculator::{RoundDirection, TradeDirection};
+    use crate::curve::fees::Fees;
     use albus_solana_verifier::AlbusVerifier;
 
     pub fn initialize(
         ctx: Context<Initialize>,
-        fees_input: TokenSwapFees,
-        curve_input: TokenSwapCurve,
+        fees_input: FeesInfo,
+        curve_input: CurveInfo,
     ) -> Result<()> {
         if ctx.accounts.token_swap.is_initialized {
             return Err(SwapError::AlreadyInUse.into());
@@ -61,7 +63,8 @@ pub mod albus_swap {
             return Err(SwapError::RepeatedMint.into());
         }
 
-        let curve = build_curve(&curve_input).unwrap();
+        let curve = SwapCurve::try_from(curve_input.clone())?;
+
         curve
             .calculator
             .validate_supply(ctx.accounts.token_a.amount, ctx.accounts.token_b.amount)?;
@@ -94,7 +97,7 @@ pub mod albus_swap {
             return Err(SwapError::IncorrectPoolMint.into());
         }
 
-        let fees = build_fees(&fees_input).unwrap();
+        let fees = fees_input.into();
 
         if let Some(swap_constraints) = SWAP_CONSTRAINTS {
             let owner_key = swap_constraints
@@ -136,15 +139,8 @@ pub mod albus_swap {
         Ok(())
     }
 
-    pub fn swap<'info>(
-        ctx: Context<'_, '_, 'info, 'info, Swap<'info>>,
-        amount_in: u64,
-        minimum_amount_out: u64,
-    ) -> Result<()> {
+    pub fn swap(ctx: Context<Swap>, amount_in: u64, minimum_amount_out: u64) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
-        // if token_swap.to_account_info().owner != ctx.program_id {
-        //     return Err(ProgramError::IncorrectProgramId.into());
-        // }
 
         if let Some(policy) = token_swap.policy {
             AlbusVerifier::new(&ctx.accounts.proof_request)
@@ -160,32 +156,32 @@ pub mod albus_swap {
             return Err(SwapError::InvalidProgramAddress.into());
         }
 
-        if !(cmp_pubkeys(ctx.accounts.swap_source.key(), token_swap.token_a)
-            || cmp_pubkeys(ctx.accounts.swap_source.key(), token_swap.token_b))
+        if !(cmp_pubkeys(ctx.accounts.pool_source.key(), token_swap.token_a)
+            || cmp_pubkeys(ctx.accounts.pool_source.key(), token_swap.token_b))
         {
             return Err(SwapError::IncorrectSwapAccount.into());
         }
 
-        if !(cmp_pubkeys(ctx.accounts.swap_destination.key(), token_swap.token_a)
-            || cmp_pubkeys(ctx.accounts.swap_destination.key(), token_swap.token_b))
+        if !(cmp_pubkeys(ctx.accounts.pool_destination.key(), token_swap.token_a)
+            || cmp_pubkeys(ctx.accounts.pool_destination.key(), token_swap.token_b))
         {
             return Err(SwapError::IncorrectSwapAccount.into());
         }
 
         if cmp_pubkeys(
-            ctx.accounts.swap_source.key(),
-            ctx.accounts.swap_destination.key(),
+            ctx.accounts.pool_source.key(),
+            ctx.accounts.pool_destination.key(),
         ) {
             return Err(SwapError::InvalidInput.into());
         }
 
-        if cmp_pubkeys(ctx.accounts.swap_source.key(), ctx.accounts.source_info.key) {
+        if cmp_pubkeys(ctx.accounts.pool_source.key(), ctx.accounts.user_source.key) {
             return Err(SwapError::InvalidInput.into());
         }
 
         if cmp_pubkeys(
-            ctx.accounts.swap_destination.key(),
-            ctx.accounts.destination_info.key,
+            ctx.accounts.pool_destination.key(),
+            ctx.accounts.user_destination.key,
         ) {
             return Err(SwapError::InvalidInput.into());
         }
@@ -194,7 +190,7 @@ pub mod albus_swap {
             return Err(SwapError::IncorrectPoolMint.into());
         }
 
-        if !cmp_pubkeys(ctx.accounts.fee_account.key(), token_swap.pool_fee_account) {
+        if !cmp_pubkeys(ctx.accounts.pool_fee.key(), token_swap.pool_fee_account) {
             return Err(SwapError::IncorrectFeeAccount.into());
         }
 
@@ -202,25 +198,29 @@ pub mod albus_swap {
             return Err(SwapError::IncorrectTokenProgramId.into());
         }
 
-        let trade_direction = if cmp_pubkeys(ctx.accounts.swap_source.key(), token_swap.token_a) {
+        let trade_direction = if cmp_pubkeys(ctx.accounts.pool_source.key(), token_swap.token_a) {
             TradeDirection::AtoB
         } else {
             TradeDirection::BtoA
         };
 
-        let curve = build_curve(&token_swap.curve).unwrap();
-        let fees = build_fees(&token_swap.fees).unwrap();
+        let curve = SwapCurve::try_from(token_swap.curve.clone())?;
+        let fees = token_swap.fees.into();
 
         let result = curve
             .swap(
-                u128::try_from(amount_in).unwrap(),
-                u128::try_from(ctx.accounts.swap_source.amount).unwrap(),
-                u128::try_from(ctx.accounts.swap_destination.amount).unwrap(),
+                u128::try_from(amount_in).map_err(|_| SwapError::ConversionFailure)?,
+                u128::try_from(ctx.accounts.pool_source.amount)
+                    .map_err(|_| SwapError::ConversionFailure)?,
+                u128::try_from(ctx.accounts.pool_destination.amount)
+                    .map_err(|_| SwapError::ConversionFailure)?,
                 trade_direction,
                 &fees,
             )
             .ok_or(SwapError::ZeroTradingTokens)?;
-        if result.destination_amount_swapped < u128::try_from(minimum_amount_out).unwrap() {
+        if result.destination_amount_swapped
+            < u128::try_from(minimum_amount_out).map_err(|_| SwapError::ConversionFailure)?
+        {
             return Err(SwapError::ExceededSlippage.into());
         }
 
@@ -241,7 +241,8 @@ pub mod albus_swap {
             ctx.accounts
                 .into_transfer_to_swap_source_context()
                 .with_signer(&[&seeds[..]]),
-            u64::try_from(result.source_amount_swapped).unwrap(),
+            u64::try_from(result.source_amount_swapped)
+                .map_err(|_| SwapError::ConversionFailure)?,
         )?;
 
         let mut pool_token_amount = curve
@@ -249,7 +250,8 @@ pub mod albus_swap {
                 result.owner_fee,
                 swap_token_a_amount,
                 swap_token_b_amount,
-                u128::try_from(ctx.accounts.pool_mint.supply).unwrap(),
+                u128::try_from(ctx.accounts.pool_mint.supply)
+                    .map_err(|_| SwapError::ConversionFailure)?,
                 trade_direction,
                 &fees,
             )
@@ -257,10 +259,10 @@ pub mod albus_swap {
 
         if pool_token_amount > 0 {
             // Allow error to fall through
-            // if *ctx.accounts.host_fee_account.key != Pubkey::default() {
-            if !ctx.remaining_accounts.is_empty() {
-                let host_info = next_account_info(&mut ctx.remaining_accounts.iter())?;
-                let host = Account::<TokenAccount>::try_from(host_info)?;
+            if let Some(host_info) = &ctx.accounts.host_fee_account {
+                let ref_data = host_info.try_borrow_data()?;
+                let mut account_data: &[u8] = &ref_data;
+                let host = TokenAccount::try_deserialize(&mut account_data)?;
 
                 if !cmp_pubkeys(ctx.accounts.pool_mint.key(), host.mint) {
                     return Err(SwapError::IncorrectPoolMint.into());
@@ -277,7 +279,7 @@ pub mod albus_swap {
                         ctx.accounts
                             .into_mint_to_host_context(host_info)
                             .with_signer(&[&seeds[..]]),
-                        u64::try_from(host_fee).unwrap(),
+                        u64::try_from(host_fee).map_err(|_| SwapError::ConversionFailure)?,
                     )?;
                 }
             }
@@ -285,7 +287,7 @@ pub mod albus_swap {
                 ctx.accounts
                     .into_mint_to_pool_context()
                     .with_signer(&[&seeds[..]]),
-                u64::try_from(pool_token_amount).unwrap(),
+                u64::try_from(pool_token_amount).map_err(|_| SwapError::ConversionFailure)?,
             )?;
         }
 
@@ -293,7 +295,8 @@ pub mod albus_swap {
             ctx.accounts
                 .into_transfer_to_destination_context()
                 .with_signer(&[&seeds[..]]),
-            u64::try_from(result.destination_amount_swapped).unwrap(),
+            u64::try_from(result.destination_amount_swapped)
+                .map_err(|_| SwapError::ConversionFailure)?,
         )?;
 
         Ok(())
@@ -308,7 +311,8 @@ pub mod albus_swap {
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
 
-        let curve = build_curve(&token_swap.curve).unwrap();
+        let curve = SwapCurve::try_from(token_swap.curve.clone())?;
+
         let calculator = curve.calculator;
         if !calculator.allows_deposits() {
             return Err(SwapError::UnsupportedCurveOperation.into());
@@ -399,9 +403,7 @@ pub mod albus_swap {
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
 
-        let curve = build_curve(&token_swap.curve).unwrap();
-        let fees = build_fees(&token_swap.fees).unwrap();
-
+        let curve = SwapCurve::try_from(token_swap.curve.clone())?;
         let calculator = curve.calculator;
         if !calculator.allows_deposits() {
             return Err(SwapError::UnsupportedCurveOperation.into());
@@ -425,6 +427,7 @@ pub mod albus_swap {
             // withdrawing from the fee account, don't assess withdraw fee
             0
         } else {
+            let fees: Fees = token_swap.fees.into();
             fees.owner_withdraw_fee(u128::try_from(pool_token_amount).unwrap())
                 .ok_or(SwapError::FeeCalculationFailure)?
         };
@@ -499,8 +502,8 @@ pub mod albus_swap {
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
 
-        let curve = build_curve(&token_swap.curve).unwrap();
-        let fees = build_fees(&token_swap.fees).unwrap();
+        let curve: SwapCurve = token_swap.curve.clone().try_into()?;
+        let fees = token_swap.fees.into();
 
         let trade_direction =
             if cmp_pubkeys(ctx.accounts.source.mint, ctx.accounts.swap_token_a.mint) {
@@ -588,9 +591,6 @@ pub mod albus_swap {
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
 
-        let curve = build_curve(&token_swap.curve).unwrap();
-        let fees = build_fees(&token_swap.fees).unwrap();
-
         let trade_direction = if cmp_pubkeys(
             ctx.accounts.destination.mint,
             ctx.accounts.swap_token_a.mint,
@@ -628,6 +628,9 @@ pub mod albus_swap {
         let pool_mint_supply = u128::try_from(ctx.accounts.pool_mint.supply).unwrap();
         let swap_token_a_amount = u128::try_from(ctx.accounts.swap_token_a.amount).unwrap();
         let swap_token_b_amount = u128::try_from(ctx.accounts.swap_token_b.amount).unwrap();
+
+        let curve = SwapCurve::try_from(token_swap.curve.clone())?;
+        let fees = Fees::from(token_swap.fees);
 
         let burn_pool_token_amount = curve
             .withdraw_single_token_type_exact_out(
@@ -699,51 +702,67 @@ pub mod albus_swap {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    /// CHECK: only for signing
+    /// CHECK: swap authority
     pub authority: AccountInfo<'info>,
     #[account(signer, zero)]
     pub token_swap: Box<Account<'info, TokenSwap>>,
+    /// Pool Token Mint. Must be empty, owned by swap authority.
     #[account(mut)]
     pub pool_mint: Account<'info, Mint>,
+    /// Token A Account. Must be non-zero, owned by swap authority.
     #[account(mut)]
     pub token_a: Account<'info, TokenAccount>,
+    /// Token B Account. Must be non-zero, owned by swap authority.
     #[account(mut)]
     pub token_b: Account<'info, TokenAccount>,
+    /// Pool Token Account to deposit trading and withdraw fees.
+    /// Must be empty, not owned by swap authority
     #[account(mut)]
     pub fee_account: Account<'info, TokenAccount>,
+    /// Pool Token Account to deposit the initial pool token
     #[account(mut)]
     pub destination: Account<'info, TokenAccount>,
-    /// SPL Token program.
+    /// Pool Token program id
     pub token_program: Program<'info, Token>,
 }
 
 #[derive(Accounts)]
 pub struct Swap<'info> {
-    /// CHECK: only for signing
-    pub authority: AccountInfo<'info>,
     /// CHECK: account checked in Albus
     pub proof_request: AccountInfo<'info>,
+    /// Token Swap Pool
     pub token_swap: Box<Account<'info, TokenSwap>>,
-    /// CHECK: safe
+    /// CHECK: swap authority
+    pub authority: AccountInfo<'info>,
+    /// CHECK: only for signing
     #[account(signer)]
     pub user_transfer_authority: AccountInfo<'info>,
+    /// SOURCE Account, amount is transferable by user transfer authority,
     /// CHECK: safe
     #[account(mut)]
-    pub source_info: AccountInfo<'info>,
+    pub user_source: AccountInfo<'info>,
+    /// DESTINATION Account assigned to USER as the owner.
     /// CHECK: safe
     #[account(mut)]
-    pub destination_info: AccountInfo<'info>,
+    pub user_destination: AccountInfo<'info>,
+    /// Base Account to swap FROM.  Must be the DESTINATION token.
     #[account(mut)]
-    pub swap_source: Account<'info, TokenAccount>,
+    pub pool_source: Account<'info, TokenAccount>,
+    /// Base Account to swap INTO. Must be the SOURCE token.
     #[account(mut)]
-    pub swap_destination: Account<'info, TokenAccount>,
+    pub pool_destination: Account<'info, TokenAccount>,
+    /// Pool token mint, to generate trading fees
     #[account(mut)]
     pub pool_mint: Account<'info, Mint>,
+    /// Fee account, to receive trading fees
     #[account(mut)]
-    pub fee_account: Account<'info, TokenAccount>,
-    // /// CHECK: safe
-    // pub host_fee_account: AccountInfo<'info>,
-    /// SPL Token program.
+    pub pool_fee: Account<'info, TokenAccount>,
+    /// Host fee account to receive additional trading fees
+    /// CHECK: safe
+    pub host_fee_account: Option<AccountInfo<'info>>,
+    // source_mint: AccountInfo<'info>,
+    // destination_mint: AccountInfo<'info>,
+    /// Pool Token program id
     pub token_program: Program<'info, Token>,
 }
 
@@ -1008,8 +1027,8 @@ impl<'info> Swap<'info> {
         &self,
     ) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
-            from: self.source_info.to_account_info(),
-            to: self.swap_source.to_account_info(),
+            from: self.user_source.to_account_info(),
+            to: self.pool_source.to_account_info(),
             authority: self.user_transfer_authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
@@ -1019,8 +1038,8 @@ impl<'info> Swap<'info> {
         &self,
     ) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
-            from: self.swap_destination.to_account_info(),
-            to: self.destination_info.to_account_info(),
+            from: self.pool_destination.to_account_info(),
+            to: self.user_destination.to_account_info(),
             authority: self.authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
@@ -1041,7 +1060,7 @@ impl<'info> Swap<'info> {
     fn into_mint_to_pool_context(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
         let cpi_accounts = MintTo {
             mint: self.pool_mint.to_account_info(),
-            to: self.fee_account.to_account_info(),
+            to: self.pool_fee.to_account_info(),
             authority: self.authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
