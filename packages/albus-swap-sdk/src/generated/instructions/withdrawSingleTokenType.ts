@@ -40,13 +40,13 @@ export const withdrawSingleTokenTypeStruct = new beet.BeetArgsStruct<
  *
  * @property [] tokenSwap
  * @property [] authority
- * @property [**signer**] userTransferAuthorityInfo
+ * @property [**signer**] userTransferAuthority
+ * @property [_writable_] poolMint
  * @property [_writable_] source
  * @property [_writable_] swapTokenA
  * @property [_writable_] swapTokenB
- * @property [_writable_] poolMint
  * @property [_writable_] destination
- * @property [_writable_] feeAccount
+ * @property [_writable_] poolFee
  * @category Instructions
  * @category WithdrawSingleTokenType
  * @category generated
@@ -54,13 +54,13 @@ export const withdrawSingleTokenTypeStruct = new beet.BeetArgsStruct<
 export interface WithdrawSingleTokenTypeInstructionAccounts {
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
-  userTransferAuthorityInfo: web3.PublicKey
+  userTransferAuthority: web3.PublicKey
+  poolMint: web3.PublicKey
   source: web3.PublicKey
   swapTokenA: web3.PublicKey
   swapTokenB: web3.PublicKey
-  poolMint: web3.PublicKey
   destination: web3.PublicKey
-  feeAccount: web3.PublicKey
+  poolFee: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -100,9 +100,14 @@ export function createWithdrawSingleTokenTypeInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.userTransferAuthorityInfo,
+      pubkey: accounts.userTransferAuthority,
       isWritable: false,
       isSigner: true,
+    },
+    {
+      pubkey: accounts.poolMint,
+      isWritable: true,
+      isSigner: false,
     },
     {
       pubkey: accounts.source,
@@ -120,17 +125,12 @@ export function createWithdrawSingleTokenTypeInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.poolMint,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
       pubkey: accounts.destination,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.feeAccount,
+      pubkey: accounts.poolFee,
       isWritable: true,
       isSigner: false,
     },

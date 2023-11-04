@@ -40,7 +40,7 @@ export const depositSingleTokenTypeStruct = new beet.BeetArgsStruct<
  *
  * @property [] tokenSwap
  * @property [] authority
- * @property [**signer**] userTransferAuthorityInfo
+ * @property [**signer**] userTransferAuthority
  * @property [_writable_] source
  * @property [_writable_] swapTokenA
  * @property [_writable_] swapTokenB
@@ -53,7 +53,7 @@ export const depositSingleTokenTypeStruct = new beet.BeetArgsStruct<
 export interface DepositSingleTokenTypeInstructionAccounts {
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
-  userTransferAuthorityInfo: web3.PublicKey
+  userTransferAuthority: web3.PublicKey
   source: web3.PublicKey
   swapTokenA: web3.PublicKey
   swapTokenB: web3.PublicKey
@@ -98,7 +98,7 @@ export function createDepositSingleTokenTypeInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.userTransferAuthorityInfo,
+      pubkey: accounts.userTransferAuthority,
       isWritable: false,
       isSigner: true,
     },

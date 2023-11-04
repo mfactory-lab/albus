@@ -42,11 +42,11 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
  *
  * @property [] tokenSwap
  * @property [] authority
- * @property [**signer**] userTransferAuthorityInfo
- * @property [_writable_] sourceAInfo
- * @property [_writable_] sourceBInfo
- * @property [_writable_] tokenA
- * @property [_writable_] tokenB
+ * @property [**signer**] userTransferAuthority
+ * @property [_writable_] userTokenA
+ * @property [_writable_] userTokenB
+ * @property [_writable_] swapTokenA
+ * @property [_writable_] swapTokenB
  * @property [_writable_] poolMint
  * @property [_writable_] destination
  * @category Instructions
@@ -56,11 +56,11 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
 export interface DepositAllTokenTypesInstructionAccounts {
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
-  userTransferAuthorityInfo: web3.PublicKey
-  sourceAInfo: web3.PublicKey
-  sourceBInfo: web3.PublicKey
-  tokenA: web3.PublicKey
-  tokenB: web3.PublicKey
+  userTransferAuthority: web3.PublicKey
+  userTokenA: web3.PublicKey
+  userTokenB: web3.PublicKey
+  swapTokenA: web3.PublicKey
+  swapTokenB: web3.PublicKey
   poolMint: web3.PublicKey
   destination: web3.PublicKey
   tokenProgram?: web3.PublicKey
@@ -102,27 +102,27 @@ export function createDepositAllTokenTypesInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.userTransferAuthorityInfo,
+      pubkey: accounts.userTransferAuthority,
       isWritable: false,
       isSigner: true,
     },
     {
-      pubkey: accounts.sourceAInfo,
+      pubkey: accounts.userTokenA,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.sourceBInfo,
+      pubkey: accounts.userTokenB,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.tokenA,
+      pubkey: accounts.swapTokenA,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.tokenB,
+      pubkey: accounts.swapTokenB,
       isWritable: true,
       isSigner: false,
     },

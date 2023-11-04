@@ -42,14 +42,14 @@ export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
  *
  * @property [] tokenSwap
  * @property [] authority
- * @property [**signer**] userTransferAuthorityInfo
- * @property [_writable_] sourceInfo
- * @property [_writable_] tokenA
- * @property [_writable_] tokenB
+ * @property [**signer**] userTransferAuthority
  * @property [_writable_] poolMint
- * @property [_writable_] destTokenAInfo
- * @property [_writable_] destTokenBInfo
- * @property [_writable_] feeAccount
+ * @property [_writable_] source
+ * @property [_writable_] swapTokenA
+ * @property [_writable_] swapTokenB
+ * @property [_writable_] destTokenA
+ * @property [_writable_] destTokenB
+ * @property [_writable_] poolFee
  * @category Instructions
  * @category WithdrawAllTokenTypes
  * @category generated
@@ -57,14 +57,14 @@ export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
 export interface WithdrawAllTokenTypesInstructionAccounts {
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
-  userTransferAuthorityInfo: web3.PublicKey
-  sourceInfo: web3.PublicKey
-  tokenA: web3.PublicKey
-  tokenB: web3.PublicKey
+  userTransferAuthority: web3.PublicKey
   poolMint: web3.PublicKey
-  destTokenAInfo: web3.PublicKey
-  destTokenBInfo: web3.PublicKey
-  feeAccount: web3.PublicKey
+  source: web3.PublicKey
+  swapTokenA: web3.PublicKey
+  swapTokenB: web3.PublicKey
+  destTokenA: web3.PublicKey
+  destTokenB: web3.PublicKey
+  poolFee: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -104,24 +104,9 @@ export function createWithdrawAllTokenTypesInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.userTransferAuthorityInfo,
+      pubkey: accounts.userTransferAuthority,
       isWritable: false,
       isSigner: true,
-    },
-    {
-      pubkey: accounts.sourceInfo,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.tokenA,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.tokenB,
-      isWritable: true,
-      isSigner: false,
     },
     {
       pubkey: accounts.poolMint,
@@ -129,17 +114,32 @@ export function createWithdrawAllTokenTypesInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.destTokenAInfo,
+      pubkey: accounts.source,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.destTokenBInfo,
+      pubkey: accounts.swapTokenA,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.feeAccount,
+      pubkey: accounts.swapTokenB,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.destTokenA,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.destTokenB,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.poolFee,
       isWritable: true,
       isSigner: false,
     },

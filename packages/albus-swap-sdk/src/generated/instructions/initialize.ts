@@ -47,7 +47,7 @@ export const initializeStruct = new beet.BeetArgsStruct<
  * @property [_writable_] poolMint
  * @property [_writable_] tokenA
  * @property [_writable_] tokenB
- * @property [_writable_] feeAccount
+ * @property [_writable_] poolFee
  * @property [_writable_] destination
  * @category Instructions
  * @category Initialize
@@ -59,7 +59,7 @@ export interface InitializeInstructionAccounts {
   poolMint: web3.PublicKey
   tokenA: web3.PublicKey
   tokenB: web3.PublicKey
-  feeAccount: web3.PublicKey
+  poolFee: web3.PublicKey
   destination: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -115,7 +115,7 @@ export function createInitializeInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.feeAccount,
+      pubkey: accounts.poolFee,
       isWritable: true,
       isSigner: false,
     },
