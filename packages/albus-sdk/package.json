@@ -1,6 +1,6 @@
 {
   "name": "@mfactory-lab/albus-sdk",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Albus Protocol SDK",
   "type": "module",
   "repository": {
