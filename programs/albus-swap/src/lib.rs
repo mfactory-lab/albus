@@ -52,7 +52,7 @@ pub mod albus_swap {
         if !cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.destination.owner) {
             return Err(SwapError::InvalidOutputOwner.into());
         }
-        if cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.fee_account.owner) {
+        if cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.pool_fee.owner) {
             return Err(SwapError::InvalidOutputOwner.into());
         }
         if COption::Some(*ctx.accounts.authority.key) != ctx.accounts.pool_mint.mint_authority {
@@ -93,7 +93,7 @@ pub mod albus_swap {
             return Err(SwapError::InvalidFreezeAuthority.into());
         }
 
-        if !cmp_pubkeys(ctx.accounts.pool_mint.key(), ctx.accounts.fee_account.mint) {
+        if !cmp_pubkeys(ctx.accounts.pool_mint.key(), ctx.accounts.pool_fee.mint) {
             return Err(SwapError::IncorrectPoolMint.into());
         }
 
@@ -104,7 +104,7 @@ pub mod albus_swap {
                 .owner_key
                 .parse::<Pubkey>()
                 .map_err(|_| SwapError::InvalidOwner)?;
-            if ctx.accounts.fee_account.owner != owner_key {
+            if ctx.accounts.pool_fee.owner != owner_key {
                 return Err(SwapError::InvalidOwner.into());
             }
             swap_constraints.validate_curve(&curve)?;
@@ -132,7 +132,7 @@ pub mod albus_swap {
         token_swap.pool_mint = ctx.accounts.pool_mint.key();
         token_swap.token_a_mint = ctx.accounts.token_a.mint;
         token_swap.token_b_mint = ctx.accounts.token_b.mint;
-        token_swap.pool_fee_account = ctx.accounts.fee_account.key();
+        token_swap.pool_fee_account = ctx.accounts.pool_fee.key();
         token_swap.fees = fees_input;
         token_swap.curve = curve_input;
 
@@ -323,12 +323,12 @@ pub mod albus_swap {
             ctx.program_id,
             &token_swap.to_account_info(),
             &ctx.accounts.authority,
-            &ctx.accounts.token_a.to_account_info(),
-            &ctx.accounts.token_b.to_account_info(),
+            &ctx.accounts.swap_token_a.to_account_info(),
+            &ctx.accounts.swap_token_b.to_account_info(),
             &ctx.accounts.pool_mint.to_account_info(),
             &ctx.accounts.token_program,
-            Some(&ctx.accounts.source_a_info),
-            Some(&ctx.accounts.source_b_info),
+            Some(&ctx.accounts.user_token_a),
+            Some(&ctx.accounts.user_token_b),
             None,
         )?;
 
@@ -346,8 +346,8 @@ pub mod albus_swap {
             .pool_tokens_to_trading_tokens(
                 pool_token_amount,
                 pool_mint_supply,
-                u128::try_from(ctx.accounts.token_a.amount).unwrap(),
-                u128::try_from(ctx.accounts.token_b.amount).unwrap(),
+                u128::try_from(ctx.accounts.swap_token_a.amount).unwrap(),
+                u128::try_from(ctx.accounts.swap_token_b.amount).unwrap(),
                 RoundDirection::Ceiling,
             )
             .ok_or(SwapError::ZeroTradingTokens)?;
@@ -414,16 +414,16 @@ pub mod albus_swap {
             ctx.program_id,
             &token_swap.to_account_info(),
             &ctx.accounts.authority,
-            &ctx.accounts.token_a.to_account_info(),
-            &ctx.accounts.token_b.to_account_info(),
+            &ctx.accounts.swap_token_a.to_account_info(),
+            &ctx.accounts.swap_token_b.to_account_info(),
             &ctx.accounts.pool_mint.to_account_info(),
             &ctx.accounts.token_program,
-            Some(&ctx.accounts.dest_token_a_info),
-            Some(&ctx.accounts.dest_token_b_info),
-            Some(&ctx.accounts.fee_account),
+            Some(&ctx.accounts.dest_token_a),
+            Some(&ctx.accounts.dest_token_b),
+            Some(&ctx.accounts.pool_fee),
         )?;
 
-        let withdraw_fee: u128 = if *ctx.accounts.fee_account.key == *ctx.accounts.source_info.key {
+        let withdraw_fee: u128 = if *ctx.accounts.pool_fee.key == *ctx.accounts.source.key {
             // withdrawing from the fee account, don't assess withdraw fee
             0
         } else {
@@ -431,6 +431,7 @@ pub mod albus_swap {
             fees.owner_withdraw_fee(u128::try_from(pool_token_amount).unwrap())
                 .ok_or(SwapError::FeeCalculationFailure)?
         };
+
         let pool_token_amount = u128::try_from(pool_token_amount)
             .unwrap()
             .checked_sub(withdraw_fee)
@@ -440,26 +441,26 @@ pub mod albus_swap {
             .pool_tokens_to_trading_tokens(
                 pool_token_amount,
                 u128::try_from(ctx.accounts.pool_mint.supply).unwrap(),
-                u128::try_from(ctx.accounts.token_a.amount).unwrap(),
-                u128::try_from(ctx.accounts.token_b.amount).unwrap(),
+                u128::try_from(ctx.accounts.swap_token_a.amount).unwrap(),
+                u128::try_from(ctx.accounts.swap_token_b.amount).unwrap(),
                 RoundDirection::Floor,
             )
             .ok_or(SwapError::ZeroTradingTokens)?;
 
         let token_a_amount = u64::try_from(results.token_a_amount).unwrap();
-        let token_a_amount = std::cmp::min(ctx.accounts.token_a.amount, token_a_amount);
+        let token_a_amount = std::cmp::min(ctx.accounts.swap_token_a.amount, token_a_amount);
         if token_a_amount < minimum_token_a_amount {
             return Err(SwapError::ExceededSlippage.into());
         }
-        if token_a_amount == 0 && ctx.accounts.token_a.amount != 0 {
+        if token_a_amount == 0 && ctx.accounts.swap_token_a.amount != 0 {
             return Err(SwapError::ZeroTradingTokens.into());
         }
         let token_b_amount = u64::try_from(results.token_b_amount).unwrap();
-        let token_b_amount = std::cmp::min(ctx.accounts.token_b.amount, token_b_amount);
+        let token_b_amount = std::cmp::min(ctx.accounts.swap_token_b.amount, token_b_amount);
         if token_b_amount < minimum_token_b_amount {
             return Err(SwapError::ExceededSlippage.into());
         }
-        if token_b_amount == 0 && ctx.accounts.token_b.amount != 0 {
+        if token_b_amount == 0 && ctx.accounts.swap_token_b.amount != 0 {
             return Err(SwapError::ZeroTradingTokens.into());
         }
 
@@ -483,6 +484,7 @@ pub mod albus_swap {
                 token_a_amount,
             )?;
         }
+
         if token_b_amount > 0 {
             token::transfer(
                 ctx.accounts
@@ -491,6 +493,7 @@ pub mod albus_swap {
                 token_a_amount,
             )?;
         }
+
         Ok(())
     }
 
@@ -622,7 +625,7 @@ pub mod albus_swap {
             &ctx.accounts.token_program,
             destination_a_info,
             destination_b_info,
-            Some(&ctx.accounts.fee_account.to_account_info()),
+            Some(&ctx.accounts.pool_fee.to_account_info()),
         )?;
 
         let pool_mint_supply = u128::try_from(ctx.accounts.pool_mint.supply).unwrap();
@@ -644,7 +647,7 @@ pub mod albus_swap {
             .ok_or(SwapError::ZeroTradingTokens)?;
 
         let withdraw_fee: u128 =
-            if cmp_pubkeys(ctx.accounts.fee_account.key, ctx.accounts.source.key()) {
+            if cmp_pubkeys(ctx.accounts.pool_fee.key, ctx.accounts.source.key()) {
                 // withdrawing from the fee account, don't assess withdraw fee
                 0
             } else {
@@ -702,8 +705,9 @@ pub mod albus_swap {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    /// CHECK: swap authority
+    /// CHECK: safe
     pub authority: AccountInfo<'info>,
+    /// Token-swap
     #[account(signer, zero)]
     pub token_swap: Box<Account<'info, TokenSwap>>,
     /// Pool Token Mint. Must be empty, owned by swap authority.
@@ -716,28 +720,29 @@ pub struct Initialize<'info> {
     #[account(mut)]
     pub token_b: Account<'info, TokenAccount>,
     /// Pool Token Account to deposit trading and withdraw fees.
-    /// Must be empty, not owned by swap authority
+    /// Must be empty, not owned by swap authority.
     #[account(mut)]
-    pub fee_account: Account<'info, TokenAccount>,
-    /// Pool Token Account to deposit the initial pool token
+    pub pool_fee: Account<'info, TokenAccount>,
+    /// Pool Token Account to deposit the initial pool token.
     #[account(mut)]
     pub destination: Account<'info, TokenAccount>,
-    /// Pool Token program id
+    /// Pool Token program id.
     pub token_program: Program<'info, Token>,
 }
 
+/// Swap the tokens in the pool.
 #[derive(Accounts)]
 pub struct Swap<'info> {
-    /// CHECK: account checked in Albus
+    /// CHECK: safe, checked in Albus
     pub proof_request: AccountInfo<'info>,
-    /// Token Swap Pool
+    /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
-    /// CHECK: swap authority
+    /// CHECK: safe
     pub authority: AccountInfo<'info>,
-    /// CHECK: only for signing
+    /// CHECK: safe
     #[account(signer)]
     pub user_transfer_authority: AccountInfo<'info>,
-    /// SOURCE Account, amount is transferable by user transfer authority,
+    /// SOURCE Account, amount is transferable by user transfer authority.
     /// CHECK: safe
     #[account(mut)]
     pub user_source: AccountInfo<'info>,
@@ -751,123 +756,162 @@ pub struct Swap<'info> {
     /// Base Account to swap INTO. Must be the SOURCE token.
     #[account(mut)]
     pub pool_destination: Account<'info, TokenAccount>,
-    /// Pool token mint, to generate trading fees
+    /// Pool token mint, to generate trading fees.
     #[account(mut)]
     pub pool_mint: Account<'info, Mint>,
-    /// Fee account, to receive trading fees
+    /// Fee account, to receive trading fees.
     #[account(mut)]
     pub pool_fee: Account<'info, TokenAccount>,
-    /// Host fee account to receive additional trading fees
+    /// Host fee account to receive additional trading fees.
     /// CHECK: safe
     pub host_fee_account: Option<AccountInfo<'info>>,
     // source_mint: AccountInfo<'info>,
     // destination_mint: AccountInfo<'info>,
-    /// Pool Token program id
+    /// Pool Token program id.
     pub token_program: Program<'info, Token>,
 }
 
+/// Deposit both types of tokens into the pool. The output is a "pool"
+/// token representing ownership in the pool. Inputs are converted to
+/// the current ratio.
 #[derive(Accounts)]
 pub struct DepositAllTokenTypes<'info> {
+    /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
     /// CHECK: safe
     pub authority: AccountInfo<'info>,
     /// CHECK: safe
     #[account(signer)]
-    pub user_transfer_authority_info: AccountInfo<'info>,
+    pub user_transfer_authority: AccountInfo<'info>,
+    /// token_a user transfer authority can transfer amount.
     /// CHECK: safe
     #[account(mut)]
-    pub source_a_info: AccountInfo<'info>,
+    pub user_token_a: AccountInfo<'info>,
+    /// token_b user transfer authority can transfer amount.
     /// CHECK: safe
     #[account(mut)]
-    pub source_b_info: AccountInfo<'info>,
+    pub user_token_b: AccountInfo<'info>,
+    /// token_a Base Account to deposit into.
     #[account(mut)]
-    pub token_a: Account<'info, TokenAccount>,
+    pub swap_token_a: Account<'info, TokenAccount>,
+    /// token_b Base Account to deposit into.
     #[account(mut)]
-    pub token_b: Account<'info, TokenAccount>,
+    pub swap_token_b: Account<'info, TokenAccount>,
+    /// Pool MINT account, swap authority is the owner.
     #[account(mut)]
     pub pool_mint: Account<'info, Mint>,
+    /// Pool Account to deposit the generated tokens, user is the owner.
     /// CHECK: safe
     #[account(mut)]
     pub destination: AccountInfo<'info>,
-    /// SPL Token program.
+    /// Pool Token program id.
     pub token_program: Program<'info, Token>,
 }
 
+/// Deposit one type of tokens into the pool. The output is a "pool" token
+/// representing ownership into the pool. Input token is converted as if
+/// a swap and deposit all token types were performed.
 #[derive(Accounts)]
 pub struct DepositSingleTokenType<'info> {
+    /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
     /// CHECK: safe
     pub authority: AccountInfo<'info>,
     /// CHECK: safe
     #[account(signer)]
-    pub user_transfer_authority_info: AccountInfo<'info>,
+    pub user_transfer_authority: AccountInfo<'info>,
+    /// token_(A|B) SOURCE Account, amount is transferable by user transfer authority.
     #[account(mut)]
     pub source: Account<'info, TokenAccount>,
+    /// token_a Swap Account, may deposit INTO.
     #[account(mut)]
     pub swap_token_a: Account<'info, TokenAccount>,
+    /// token_b Swap Account, may deposit INTO.
     #[account(mut)]
     pub swap_token_b: Account<'info, TokenAccount>,
+    /// Pool MINT account, swap authority is the owner.
     #[account(mut)]
     pub pool_mint: Account<'info, Mint>,
+    /// Pool Account to deposit the generated tokens, user is the owner.
     /// CHECK: safe
     #[account(mut)]
     pub destination: AccountInfo<'info>,
-    /// SPL Token program.
+    /// Pool Token program id.
     pub token_program: Program<'info, Token>,
 }
 
+/// Withdraw both types of tokens from the pool at the current ratio, given
+/// pool tokens. The pool tokens are burned in exchange for an equivalent
+/// amount of token A and B.
 #[derive(Accounts)]
 pub struct WithdrawAllTokenTypes<'info> {
+    /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
-    /// CHECK: only for signing
+    /// CHECK: safe
     pub authority: AccountInfo<'info>,
     /// CHECK: safe
     #[account(signer)]
-    pub user_transfer_authority_info: AccountInfo<'info>,
-    /// CHECK: safe
-    #[account(mut)]
-    pub source_info: AccountInfo<'info>,
-    #[account(mut)]
-    pub token_a: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub token_b: Account<'info, TokenAccount>,
+    pub user_transfer_authority: AccountInfo<'info>,
+    /// Pool mint account, swap authority is the owner.
     #[account(mut)]
     pub pool_mint: Account<'info, Mint>,
+    /// SOURCE Pool account, amount is transferable by user transfer authority.
     /// CHECK: safe
     #[account(mut)]
-    pub dest_token_a_info: AccountInfo<'info>,
+    pub source: AccountInfo<'info>,
+    /// token_a Swap Account to withdraw FROM.
+    #[account(mut)]
+    pub swap_token_a: Account<'info, TokenAccount>,
+    /// token_b Swap Account to withdraw FROM.
+    #[account(mut)]
+    pub swap_token_b: Account<'info, TokenAccount>,
+    /// token_a user Account to credit.
     /// CHECK: safe
     #[account(mut)]
-    pub dest_token_b_info: AccountInfo<'info>,
+    pub dest_token_a: AccountInfo<'info>,
+    /// token_b user Account to credit.
     /// CHECK: safe
     #[account(mut)]
-    pub fee_account: AccountInfo<'info>,
-    /// SPL Token program.
+    pub dest_token_b: AccountInfo<'info>,
+    /// Fee account, to receive withdrawal fees.
+    /// CHECK: safe
+    #[account(mut)]
+    pub pool_fee: AccountInfo<'info>,
+    /// Pool Token program id.
     pub token_program: Program<'info, Token>,
 }
 
+/// Withdraw one token type from the pool at the current ratio given the
+/// exact amount out expected.
 #[derive(Accounts)]
 pub struct WithdrawSingleTokenType<'info> {
+    /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
-    /// CHECK: only for signing
+    /// CHECK: safe
     pub authority: AccountInfo<'info>,
     /// CHECK: safe
     #[account(signer)]
-    pub user_transfer_authority_info: AccountInfo<'info>,
-    #[account(mut)]
-    pub source: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub swap_token_a: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub swap_token_b: Account<'info, TokenAccount>,
+    pub user_transfer_authority: AccountInfo<'info>,
+    /// Pool mint account, swap authority is the owner.
     #[account(mut)]
     pub pool_mint: Account<'info, Mint>,
+    /// SOURCE Pool account, amount is transferable by user transfer authority.
+    #[account(mut)]
+    pub source: Account<'info, TokenAccount>,
+    /// token_a Swap Account to potentially withdraw from.
+    #[account(mut)]
+    pub swap_token_a: Account<'info, TokenAccount>,
+    /// token_b Swap Account to potentially withdraw from.
+    #[account(mut)]
+    pub swap_token_b: Account<'info, TokenAccount>,
+    /// token_(A|B) User Account to credit.
     #[account(mut)]
     pub destination: Account<'info, TokenAccount>,
+    /// Fee account, to receive withdrawal fees.
     /// CHECK: safe
     #[account(mut)]
-    pub fee_account: AccountInfo<'info>,
-    /// SPL Token program.
+    pub pool_fee: AccountInfo<'info>,
+    /// Pool Token program id.
     pub token_program: Program<'info, Token>,
 }
 
@@ -887,18 +931,18 @@ impl<'info> Initialize<'info> {
 impl<'info> DepositAllTokenTypes<'info> {
     fn into_transfer_to_token_a_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
-            from: self.source_a_info.clone(),
-            to: self.token_a.to_account_info(),
-            authority: self.user_transfer_authority_info.clone(),
+            from: self.user_token_a.clone(),
+            to: self.swap_token_a.to_account_info(),
+            authority: self.user_transfer_authority.clone(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
     fn into_transfer_to_token_b_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
-            from: self.source_b_info.clone(),
-            to: self.token_b.to_account_info(),
-            authority: self.user_transfer_authority_info.clone(),
+            from: self.user_token_b.clone(),
+            to: self.swap_token_b.to_account_info(),
+            authority: self.user_transfer_authority.clone(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
@@ -918,7 +962,7 @@ impl<'info> DepositSingleTokenType<'info> {
         let cpi_accounts = Transfer {
             from: self.source.to_account_info(),
             to: self.swap_token_a.to_account_info(),
-            authority: self.user_transfer_authority_info.to_account_info(),
+            authority: self.user_transfer_authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
@@ -927,7 +971,7 @@ impl<'info> DepositSingleTokenType<'info> {
         let cpi_accounts = Transfer {
             from: self.source.to_account_info(),
             to: self.swap_token_b.to_account_info(),
-            authority: self.user_transfer_authority_info.to_account_info(),
+            authority: self.user_transfer_authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
@@ -947,9 +991,9 @@ impl<'info> WithdrawAllTokenTypes<'info> {
         &self,
     ) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
-            from: self.source_info.to_account_info(),
-            to: self.fee_account.to_account_info(),
-            authority: self.user_transfer_authority_info.to_account_info(),
+            from: self.source.to_account_info(),
+            to: self.pool_fee.to_account_info(),
+            authority: self.user_transfer_authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
@@ -957,16 +1001,16 @@ impl<'info> WithdrawAllTokenTypes<'info> {
     fn into_burn_context(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
         let cpi_accounts = Burn {
             mint: self.pool_mint.to_account_info(),
-            authority: self.user_transfer_authority_info.to_account_info(),
-            from: self.source_info.clone(),
+            authority: self.user_transfer_authority.to_account_info(),
+            from: self.source.clone(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
     fn into_transfer_to_token_a_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
-            from: self.token_a.to_account_info(),
-            to: self.dest_token_a_info.to_account_info(),
+            from: self.swap_token_a.to_account_info(),
+            to: self.dest_token_a.to_account_info(),
             authority: self.authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
@@ -974,8 +1018,8 @@ impl<'info> WithdrawAllTokenTypes<'info> {
 
     fn into_transfer_to_token_b_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
-            from: self.token_b.to_account_info(),
-            to: self.dest_token_b_info.to_account_info(),
+            from: self.swap_token_b.to_account_info(),
+            to: self.dest_token_b.to_account_info(),
             authority: self.authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
@@ -988,8 +1032,8 @@ impl<'info> WithdrawSingleTokenType<'info> {
     ) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.source.to_account_info(),
-            to: self.fee_account.to_account_info(),
-            authority: self.user_transfer_authority_info.to_account_info(),
+            to: self.pool_fee.to_account_info(),
+            authority: self.user_transfer_authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
@@ -998,7 +1042,7 @@ impl<'info> WithdrawSingleTokenType<'info> {
         let cpi_accounts = Burn {
             mint: self.pool_mint.to_account_info(),
             from: self.source.to_account_info(),
-            authority: self.user_transfer_authority_info.to_account_info(),
+            authority: self.user_transfer_authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
