@@ -5,7 +5,7 @@
 <h1 align="center"><strong>Albus Protocol</strong></h1>
 <p align="center">
   <strong>
-    Albus Protocol provides on-chain zkKYC infrastructure that creates new opportunities for Web3 businesses by equipping them with a capability to verify their users and by ensuring that the users' personal data remains private during the verification
+  Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their users. Building on a Self-Sovereign Identity (SSI) model, Albus harnesses the power of blockchain and Zero-Knowledge Proofs to create a secure environment where Web3 protocols can KYC their users without accessing their private data. Albus also adds an extra layer of compliance by ensuring that user data can be made available to authorized entities with legitimate requests under data retention law.
   </strong>
 </p>
 
@@ -13,12 +13,8 @@
   <!--<a href="https://github.com/mfactory-lab/albus/actions"><img alt="Build Status" src="https://github.com/mfactory-lab/albus/actions/workflows/test.yaml/badge.svg" /></a>-->
   <a target="_blank" href="https://github.com/mfactory-lab/albus/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/coral-xyz/xnft?color=red" /></a>
   <a target="_blank" href="https://discord.gg/albusProtocol"><img src="https://img.shields.io/discord/732892373507375164?color=6A7EC2&logo=discord&logoColor=ffffff&labelColor=6A7EC2&label=Discord" /></a>
-  <a target="_blank" href="https://github.com/mfactory-lab/albus/wiki"><img alt="Docs" src="https://img.shields.io/badge/docs-Albus-blue" /></a>
+  <a target="_blank" href="https://github.com/mfactory-lab/albus/wiki"><img alt="Docs" src="https://img.shields.io/badge/docs-wiki-blue" /></a>
 </p>
-
-# Introduction
-
-Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their users. Building on a Self-Sovereign Identity (SSI) model, Albus harnesses the power of blockchain and Zero-Knowledge Proofs to create a secure environment where Web3 protocols can KYC their users without accessing their private data. Albus also adds an extra layer of compliance by ensuring that user data can be made available to authorized entities with legitimate requests under data retention law.
 
 # Website and litepaper
 
