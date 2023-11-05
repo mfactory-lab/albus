@@ -11,14 +11,14 @@ albus-solana-verifier = "0.1.2"
 
 Check compliance
 ```rust
-use albus_solana_verifier::AlbusCompliant;
+use albus_solana_verifier::AlbusVerifier;
 
-AlbusCompliant::new(&ctx.accounts.proof_request)
+AlbusVerifier::new(&ctx.accounts.proof_request)
   // Optional verify policy address
-  .with_policy(ctx.accounts.policy.key())
+  .check_policy(ctx.accounts.policy.key())
   // Optional verify proof request owner address
-  .with_user(ctx.accounts.sender.key())
-  .check()?;
+  .check_owner(ctx.accounts.sender.key())
+  .run()?;
 ```
 
 Find proof request address
