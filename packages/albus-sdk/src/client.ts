@@ -77,9 +77,12 @@ export class AlbusClient {
     this.investigation = new InvestigationManager(this.provider, this.proofRequest, this.service, this.pda)
   }
 
-  static factory(connection: Connection, wallet?: Wallet, opts: ConfirmOptions = {}) {
-    wallet = wallet ?? { publicKey: PublicKey.default } as unknown as Wallet
-    return new this(new AnchorProvider(connection, wallet, opts))
+  static factory(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
+    return new this(new AnchorProvider(
+      connection,
+      wallet ?? { publicKey: PublicKey.default } as unknown as Wallet,
+      opts ?? {},
+    ))
   }
 
   static keypair(connection: Connection, keypair: Keypair, opts: ConfirmOptions = {}) {
