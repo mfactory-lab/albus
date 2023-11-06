@@ -6,8 +6,9 @@
  */
 
 import * as splToken from '@solana/spl-token'
-import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
+import * as beet from '@metaplex-foundation/beet'
+import * as beetSolana from '@metaplex-foundation/beet-solana'
 import type { FeesInfo } from '../types/FeesInfo'
 import { feesInfoBeet } from '../types/FeesInfo'
 import type { CurveInfo } from '../types/CurveInfo'
@@ -21,13 +22,14 @@ import { curveInfoBeet } from '../types/CurveInfo'
 export interface InitializeInstructionArgs {
   feesInput: FeesInfo
   curveInput: CurveInfo
+  policy: beet.COption<web3.PublicKey>
 }
 /**
  * @category Instructions
  * @category Initialize
  * @category generated
  */
-export const initializeStruct = new beet.BeetArgsStruct<
+export const initializeStruct = new beet.FixableBeetArgsStruct<
   InitializeInstructionArgs & {
     instructionDiscriminator: number[] /* size: 8 */
   }
@@ -36,6 +38,7 @@ export const initializeStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['feesInput', feesInfoBeet],
     ['curveInput', curveInfoBeet],
+    ['policy', beet.coption(beetSolana.publicKey)],
   ],
   'InitializeInstructionArgs',
 )

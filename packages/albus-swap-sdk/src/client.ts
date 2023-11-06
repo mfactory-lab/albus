@@ -2,10 +2,8 @@ import { BN } from '@coral-xyz/anchor'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
-import type {
-  CurveInfo,
-  FeesInfo,
-} from './generated'
+
+import type { CurveType } from './generated'
 import {
   PROGRAM_ID,
   TokenSwap,
@@ -14,8 +12,7 @@ import {
   createInitializeInstruction,
   createSwapInstruction,
   createWithdrawAllTokenTypesInstruction,
-  createWithdrawSingleTokenTypeInstruction,
-  tokenSwapDiscriminator,
+  createWithdrawSingleTokenTypeInstruction, tokenSwapDiscriminator,
 } from './generated'
 
 export class AlbusSwapClient {
@@ -27,9 +24,9 @@ export class AlbusSwapClient {
     return this.provider.connection
   }
 
-  swapAuthority(addr: PublicKey) {
+  swapAuthority(tokenSwap: PublicKey) {
     return PublicKey.findProgramAddressSync(
-      [addr.toBuffer()],
+      [tokenSwap.toBuffer()],
       this.programId,
     )[0]
   }
@@ -37,15 +34,35 @@ export class AlbusSwapClient {
   /**
    * Create a new Token Swap
    */
-  async init(props: InitProps, opts?: ConfirmOptions) {
+  async createTokenSwap(props: CreateTokenSwapProps, opts?: ConfirmOptions) {
     const tx = new Transaction()
 
     const tokenSwap = props.tokenSwap ?? Keypair.generate()
 
+    const curveParameters = Array.from<number>({ length: 32 })
+    const bytes = Array.from(props.curveParameters ?? [])
+    for (let i = 0; i < bytes.length; i++) {
+      curveParameters[i] = bytes[i]!
+    }
+
+    const curve = {
+      curveType: props.curveType,
+      curveParameters,
+    }
+
     const space = TokenSwap.byteSize({
       bumpSeed: 0,
-      curve: props.curve,
-      fees: props.fees,
+      curve,
+      fees: {
+        tradeFeeNumerator: 0,
+        tradeFeeDenominator: 0,
+        ownerTradeFeeNumerator: 0,
+        ownerTradeFeeDenominator: 0,
+        ownerWithdrawFeeNumerator: 0,
+        ownerWithdrawFeeDenominator: 0,
+        hostFeeNumerator: 0,
+        hostFeeDenominator: 0,
+      },
       isInitialized: false,
       policy: PublicKey.default,
       poolFeeAccount: PublicKey.default,
@@ -81,8 +98,18 @@ export class AlbusSwapClient {
           tokenB: props.tokenB,
         },
         {
-          feesInput: props.fees,
-          curveInput: props.curve,
+          feesInput: {
+            tradeFeeNumerator: new BN(props.fees.tradeFeeNumerator.toString()),
+            tradeFeeDenominator: new BN(props.fees.tradeFeeDenominator.toString()),
+            ownerTradeFeeNumerator: new BN(props.fees.ownerTradeFeeNumerator.toString()),
+            ownerTradeFeeDenominator: new BN(props.fees.ownerTradeFeeDenominator.toString()),
+            ownerWithdrawFeeNumerator: new BN(props.fees.ownerWithdrawFeeNumerator.toString()),
+            ownerWithdrawFeeDenominator: new BN(props.fees.ownerWithdrawFeeDenominator.toString()),
+            hostFeeNumerator: new BN(props.fees.hostFeeNumerator.toString()),
+            hostFeeDenominator: new BN(props.fees.hostFeeDenominator.toString()),
+          },
+          curveInput: curve,
+          policy: props.policy ?? null,
         },
       ),
     )
@@ -114,8 +141,8 @@ export class AlbusSwapClient {
         hostFeeAccount: props.hostFeeAccount,
       },
       {
-        amountIn: props.amountIn,
-        minimumAmountOut: props.minimumAmountOut,
+        amountIn: new BN(props.amountIn.toString()),
+        minimumAmountOut: new BN(props.minimumAmountOut.toString()),
       },
     )
 
@@ -286,7 +313,7 @@ export interface LoadAllProps {
   tokenBMint?: PublicKeyInitData
 }
 
-export interface InitProps {
+export interface CreateTokenSwapProps {
   /// Optional token-swap keypair
   tokenSwap?: Keypair
   /// Pool Token Mint. Must be empty, owned by swap authority.
@@ -300,15 +327,27 @@ export interface InitProps {
   tokenA: PublicKey
   /// Token "B" Account. Must be non-zero, owned by swap authority.
   tokenB: PublicKey
+  /// Albus policy address
+  policy?: PublicKey
   /// Swap curve info for pool, including CurveType and anything
   /// else that may be required
-  curve: CurveInfo
+  curveType: CurveType
+  curveParameters?: ArrayLike<number> /* 32 */
   /// All swap fees
-  fees: FeesInfo
+  fees: {
+    tradeFeeNumerator: bigint | number
+    tradeFeeDenominator: bigint | number
+    ownerTradeFeeNumerator: bigint | number
+    ownerTradeFeeDenominator: bigint | number
+    ownerWithdrawFeeNumerator: bigint | number
+    ownerWithdrawFeeDenominator: bigint | number
+    hostFeeNumerator: bigint | number
+    hostFeeDenominator: bigint | number
+  }
 }
 
 export interface SwapProps {
-  proofRequest: PublicKey
+  proofRequest?: PublicKey
   /// Token-swap authority
   authority: PublicKey
   /// Token-swap
@@ -328,9 +367,9 @@ export interface SwapProps {
   /// Host fee account to receive additional trading fees.
   hostFeeAccount?: PublicKey
   /// SOURCE amount to transfer, output to DESTINATION is based on the exchange rate
-  amountIn: BN
+  amountIn: bigint | number
   /// Minimum amount of DESTINATION token to output, prevents excessive slippage
-  minimumAmountOut: BN
+  minimumAmountOut: bigint | number
 }
 
 export interface DepositAllTokenTypesProps {
@@ -348,13 +387,13 @@ export interface DepositAllTokenTypesProps {
   swapTokenA: PublicKey
   /// token_b Base Account to deposit into.
   swapTokenB: PublicKey
-  /// Pool token amount to transfer. token_a and token_b amount are set by
+  /// Pool token amount to transfer. token_a and token_b amount is set by
   /// the current exchange rate and size of the pool
-  poolTokenAmount: bigint
+  poolTokenAmount: bigint | number
   /// Maximum token A amount to deposit, prevents excessive slippage
-  maximumTokenA: bigint
+  maximumTokenA: bigint | number
   /// Maximum token B amount to deposit, prevents excessive slippage
-  maximumTokenB: bigint
+  maximumTokenB: bigint | number
 }
 
 export interface WithdrawAllTokenTypesProps {
@@ -376,11 +415,11 @@ export interface WithdrawAllTokenTypesProps {
   swapTokenB: PublicKey
   /// Number of pool tokens to burn. User receives an output of token a
   /// and b based on the percentage of the pool tokens that are returned.
-  poolTokenAmount: bigint
+  poolTokenAmount: bigint | number
   /// Minimum amount of token A to receive, prevents excessive slippage
-  minimumTokenA: bigint
+  minimumTokenA: bigint | number
   /// Minimum amount of token B to receive, prevents excessive slippage
-  minimumTokenB: bigint
+  minimumTokenB: bigint | number
 }
 
 export interface DepositSingleTokenTypeExactAmountInProps {
@@ -397,10 +436,10 @@ export interface DepositSingleTokenTypeExactAmountInProps {
   /// token_b Swap Account, may deposit INTO.
   swapTokenB: PublicKey
   /// Token amount to deposit.
-  sourceTokenAmount: bigint
+  sourceTokenAmount: bigint | number
   /// Pool token amount to receive in exchange.
   /// The amount is set by the current exchange rate and size of the pool.
-  minimumPoolTokenAmount: bigint
+  minimumPoolTokenAmount: bigint | number
 }
 
 export interface WithdrawSingleTokenTypeExactAmountOutProps {
@@ -419,8 +458,8 @@ export interface WithdrawSingleTokenTypeExactAmountOutProps {
   /// token_b Swap Account to potentially withdraw from.
   swapTokenB: PublicKey
   /// Amount of token A or B to receive
-  destinationTokenAmount: bigint
+  destinationTokenAmount: bigint | number
   /// Maximum number of pool tokens to burn. User receives an output of token A
   /// or B based on the percentage of the pool tokens that are returned.
-  maximumPoolTokenAmount: bigint
+  maximumPoolTokenAmount: bigint | number
 }

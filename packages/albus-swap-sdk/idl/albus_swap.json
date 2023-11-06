@@ -80,6 +80,12 @@
           "type": {
             "defined": "CurveInfo"
           }
+        },
+        {
+          "name": "policy",
+          "type": {
+            "option": "publicKey"
+          }
         }
       ]
     },
@@ -89,7 +95,8 @@
         {
           "name": "proofRequest",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "isOptional": true
         },
         {
           "name": "tokenSwap",

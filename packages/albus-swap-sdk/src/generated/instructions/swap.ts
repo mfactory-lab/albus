@@ -38,7 +38,7 @@ export const swapStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _swap_ instruction
  *
- * @property [] proofRequest
+ * @property [] proofRequest (optional)
  * @property [] tokenSwap
  * @property [] authority
  * @property [**signer**] userTransferAuthority
@@ -54,7 +54,7 @@ export const swapStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export interface SwapInstructionAccounts {
-  proofRequest: web3.PublicKey
+  proofRequest?: web3.PublicKey
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -97,7 +97,7 @@ export function createSwapInstruction(
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.proofRequest,
+      pubkey: accounts.proofRequest ?? programId,
       isWritable: false,
       isSigner: false,
     },
