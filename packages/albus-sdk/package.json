@@ -1,6 +1,6 @@
 {
-  "name": "@mfactory-lab/albus-sdk",
-  "version": "0.2.13",
+  "name": "@albus-finance/sdk",
+  "version": "0.2.14",
   "description": "Albus Protocol SDK",
   "type": "module",
   "repository": {
@@ -29,7 +29,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@mfactory-lab/albus-core": "workspace:^",
+    "@albus-finance/core": "workspace:^",
     "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
@@ -38,14 +38,13 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@mfactory-lab/release-it-config": "workspace:^",
-    "@metaplex-foundation/solita": "^0.20.0"
+    "@metaplex-foundation/solita": "^0.20.0",
+    "release-it-config": "workspace:^"
   },
   "peerDependencies": {
     "snarkjs": "*"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   }
 }

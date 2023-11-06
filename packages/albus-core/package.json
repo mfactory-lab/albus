@@ -23,7 +23,7 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
-    "release": "release-it --ci",
+    "release": "release-it --ci --dry-run",
     "release:dry": "release-it --ci --dry-run",
     "test": "vitest",
     "prepublishOnly": "vite build"
@@ -44,8 +44,8 @@
     "uint8arrays": "^3.1.1"
   },
   "devDependencies": {
-    "@mfactory-lab/release-it-config": "workspace:^",
-    "circom_tester": "^0.0.20"
+    "circom_tester": "^0.0.20",
+    "release-it-config": "workspace:^"
   },
   "publishConfig": {
     "access": "public"

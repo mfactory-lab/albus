@@ -1,5 +1,5 @@
 {
-  "name": "@mfactory-lab/albus-swap-sdk",
+  "name": "@albus-finance/swap-sdk",
   "version": "0.0.11",
   "description": "Albus Swap SDK",
   "_type": "module",
@@ -28,16 +28,15 @@
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.28.0",
+    "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/beet": "^0.7.1",
     "@solana/web3.js": "^1.77.3"
   },
   "devDependencies": {
-    "@mfactory-lab/release-it-config": "workspace:^",
-    "@metaplex-foundation/solita": "^0.20.0"
+    "@metaplex-foundation/solita": "^0.20.0",
+    "release-it-config": "workspace:^"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   }
 }

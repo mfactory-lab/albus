@@ -1,5 +1,5 @@
 {
-  "name": "@mfactory-lab/albus-transfer-sdk",
+  "name": "@albus-finance/transfer-sdk",
   "version": "0.0.11",
   "description": "Albus Transfer SDK",
   "type": "module",
@@ -25,7 +25,7 @@
     "_dev": "vite build --watch",
     "build": "vite build",
     "release": "release-it --ci",
-    "generate": "DEBUG='(solita|rustbin):(info|error)' solita && eslint --fix --ext .ts"
+    "generate": "DEBUG='(solita|rustbin):(info|error)' solita"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
@@ -34,11 +34,10 @@
     "@solana/web3.js": "^1.77.3"
   },
   "devDependencies": {
-    "@mfactory-lab/release-it-config": "workspace:^",
-    "@metaplex-foundation/solita": "^0.20.0"
+    "@metaplex-foundation/solita": "^0.20.0",
+    "release-it-config": "workspace:^"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   }
 }

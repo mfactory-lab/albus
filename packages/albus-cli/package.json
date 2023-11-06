@@ -1,5 +1,5 @@
 {
-  "name": "@mfactory-lab/albus-cli",
+  "name": "@albus-finance/cli",
   "version": "0.0.5",
   "private": true,
   "type": "module",
@@ -28,10 +28,10 @@
     "directory": "packages/albus-cli"
   },
   "dependencies": {
+    "@albus-finance/core": "workspace:^",
+    "@albus-finance/sdk": "workspace:^",
     "@faker-js/faker": "^8.0.2",
     "@metaplex-foundation/js": "^0.19.4",
-    "@mfactory-lab/albus-core": "workspace:^",
-    "@mfactory-lab/albus-sdk": "workspace:^",
     "@coral-xyz/anchor": "^0.28.0",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",

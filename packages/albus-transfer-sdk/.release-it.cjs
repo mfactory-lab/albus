@@ -26,4 +26,4 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-module.exports = require('@mfactory-lab/release-it-config');
+module.exports = require('release-it-config');

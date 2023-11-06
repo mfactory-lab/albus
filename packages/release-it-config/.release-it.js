@@ -34,12 +34,14 @@ const scope = packageName.split('/')[1];
 module.exports = {
   verbose: true,
   git: {
-    push: true,
+    push: false,
     tagName: `${packageName}-v${version}`,
     commitsPath: '.',
     commitMessage: `release(${scope}): new version v${version} [no ci]`,
+    requireBranch: ['main', 'dev'],
     requireCommits: true,
     requireCommitsFail: false,
+    requireCleanWorkingDir: false,
   },
   github: {
     release: true,
@@ -53,9 +55,9 @@ module.exports = {
     '@release-it/conventional-changelog': {
       path: '.',
       // ignoreRecommendedBump: false,
-      // gitRawCommitsOpts: {
-      //   path: '.',
-      // },
+      gitRawCommitsOpts: {
+        path: '.',
+      },
       header: '# Changelog',
       infile: 'CHANGELOG.md',
       preset: {

@@ -1,5 +1,5 @@
 {
-  "name": "@mfactory-lab/release-it-config",
+  "name": "release-it-config",
   "version": "0.0.1",
   "main": ".release-it.js",
   "scripts": {

@@ -11,7 +11,7 @@ npm install @mfactory-lab/albus-sdk@0.2.12
 ```
 ### Install via package.json:
  ```npm
-"@mfactory-lab/albus-sdk": "0.2.12"
+"@albus-finance/albus-sdk": "^0.2"
 ```
 
 ### Init client
