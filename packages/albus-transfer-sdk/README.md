@@ -1,3 +1,3 @@
-# @mfactory-lab/albus-transfer-sdk
+# @albus-finance/transfer-sdk
 
 The transfer sdk module of [albus-protocol](https://albus.finance/).

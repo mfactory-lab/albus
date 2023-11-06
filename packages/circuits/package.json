@@ -1,5 +1,5 @@
 {
-  "name": "circuits",
+  "name": "@lbus-finance/circuits",
   "private": true,
   "dependencies": {
     "circomlib": "^2.0.5"
