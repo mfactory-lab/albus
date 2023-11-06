@@ -26,18 +26,14 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { BN } from '@coral-xyz/anchor'
-import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
 import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../packages/albus-sdk/src'
-import { AlbusTransferClient } from '../../packages/albus-transfer-sdk'
-import { airdrop, assertErrorCode, loadFixture, newProvider, payerKeypair, provider } from './utils'
+import { airdrop, assertErrorCode, loadFixture, newProvider, payer, provider } from './utils'
 
 describe('Albus', async () => {
   const client = new AlbusClient(provider)
-  // const metaplex = Metaplex.make(provider.connection).use(keypairIdentity(payerKeypair))
 
   const serviceCode = 'acme'
   const circuitCode = 'age'
@@ -55,7 +51,7 @@ describe('Albus', async () => {
     firstName: 'Alex',
     country: 'US',
   }, {
-    issuerSecretKey: payerKeypair.secretKey,
+    issuerSecretKey: payer.secretKey,
   })
 
   const circuitData = {
@@ -106,7 +102,7 @@ describe('Albus', async () => {
     vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
 
     // airdrops
-    await airdrop(payerKeypair.publicKey)
+    await airdrop(payer.publicKey)
     await airdrop(investigator.publicKey)
     for (const trusteeKeypair of trustees) {
       await airdrop(trusteeKeypair.publicKey)
@@ -222,7 +218,7 @@ describe('Albus', async () => {
       const data = { code: serviceCode, name: 'acme', website: 'https://example.com' }
       const { address } = await client.service.create(data)
       const service = await client.service.load(address)
-      assert.equal(service.authority.toString(), payerKeypair.publicKey.toString())
+      assert.equal(service.authority.toString(), payer.publicKey.toString())
       assert.equal(service.code, data.code)
       assert.equal(service.name, data.name)
       assert.equal(service.website, data.website)
@@ -304,7 +300,7 @@ describe('Albus', async () => {
     const { signatures } = await client.proofRequest.fullProve({
       proofRequest,
       vc: PublicKey.default, // mocked
-      userPrivateKey: payerKeypair.secretKey,
+      userPrivateKey: payer.secretKey,
     })
 
     assert.ok(signatures.length > 0)
@@ -322,60 +318,6 @@ describe('Albus', async () => {
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
     const res = await client.proofRequest.verify({ proofRequest })
     assert.ok(res)
-  })
-
-  describe('AlbusTransfer', () => {
-    const albusTransferClient = new AlbusTransferClient(provider)
-    const receiver = Keypair.generate()
-
-    const [service] = client.pda.serviceProvider(serviceCode)
-    const [policy] = client.pda.policy(service, policyCode)
-    const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
-
-    it('can transfer SOL', async () => {
-      await albusTransferClient.transfer({
-        amount: new BN(LAMPORTS_PER_SOL),
-        receiver: receiver.publicKey,
-        proofRequest,
-        policy,
-      })
-    })
-
-    it('can transfer token', async () => {
-      const tokenMint = await createMint(
-        provider.connection,
-        payerKeypair,
-        payerKeypair.publicKey,
-        null,
-        9,
-      )
-
-      const source = await getOrCreateAssociatedTokenAccount(
-        provider.connection,
-        payerKeypair,
-        tokenMint,
-        payerKeypair.publicKey,
-      )
-
-      const destination = await getOrCreateAssociatedTokenAccount(
-        provider.connection,
-        payerKeypair,
-        tokenMint,
-        receiver.publicKey,
-      )
-
-      await mintTo(provider.connection, payerKeypair, tokenMint, source.address, payerKeypair.publicKey, 100)
-
-      await albusTransferClient.transferToken({
-        destination: destination.address,
-        source: source.address,
-        tokenMint,
-        amount: new BN(10),
-        receiver: receiver.publicKey,
-        proofRequest,
-        policy,
-      })
-    })
   })
 
   it('can change proof request status', async () => {

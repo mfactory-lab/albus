@@ -38,7 +38,7 @@ import {
   getMasterEditionPDA,
   getMetadataPDA,
 } from '../../packages/albus-sdk/src'
-import { airdrop, netMetaplex, newProvider, payerKeypair, provider } from './utils'
+import { airdrop, netMetaplex, newProvider, payer, provider } from './utils'
 
 const credential = {
   name: 'ALBUS Digital Credential',
@@ -63,16 +63,16 @@ describe('Albus credential', () => {
 
   const client = new AlbusClient(provider)
   const holderClient = new AlbusClient(newProvider(holder))
-  const mx = netMetaplex(payerKeypair)
+  const mx = netMetaplex(payer)
 
   const updateAuthority = client.pda.authority()[0]
 
-  console.log(`Payer: ${payerKeypair.publicKey}`)
+  console.log(`Payer: ${payer.publicKey}`)
   console.log(`Holder: ${holder.publicKey}`)
   console.log(`UpdateAuthority: ${updateAuthority}`)
 
   beforeAll(async () => {
-    await airdrop(payerKeypair.publicKey)
+    await airdrop(payer.publicKey)
     await airdrop(holder.publicKey)
     await airdrop(updateAuthority)
   })
