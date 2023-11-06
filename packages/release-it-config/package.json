@@ -6,7 +6,7 @@
     "release": "release-it --ci"
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "^7.0.1",
-    "release-it": "^16.1.5"
+    "@release-it/conventional-changelog": "^7.0.2",
+    "release-it": "^16.2.1"
   }
 }
