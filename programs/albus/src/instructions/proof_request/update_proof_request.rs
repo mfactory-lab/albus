@@ -43,9 +43,9 @@ pub fn handler(ctx: Context<UpdateProofRequest>, data: UpdateProofRequestData) -
     assert_authorized(&ctx.accounts.authority.key())?;
 
     // Check that the request has already been proved
-    if req.status == ProofRequestStatus::Pending {
-        return Err(AlbusError::Unproved.into());
-    }
+    // if req.status == ProofRequestStatus::Pending {
+    //     return Err(AlbusError::Unproved.into());
+    // }
 
     let timestamp = Clock::get()?.unix_timestamp;
 
