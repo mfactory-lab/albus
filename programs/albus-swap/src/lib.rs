@@ -28,6 +28,7 @@ pub mod albus_swap {
         ctx: Context<Initialize>,
         fees_input: FeesInfo,
         curve_input: CurveInfo,
+        policy: Option<Pubkey>,
     ) -> Result<()> {
         if ctx.accounts.token_swap.is_initialized {
             return Err(SwapError::AlreadyInUse.into());
@@ -49,7 +50,7 @@ pub mod albus_swap {
         if !cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.token_b.owner) {
             return Err(SwapError::InvalidOwner.into());
         }
-        if !cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.destination.owner) {
+        if cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.destination.owner) {
             return Err(SwapError::InvalidOutputOwner.into());
         }
         if cmp_pubkeys(ctx.accounts.authority.key, ctx.accounts.pool_fee.owner) {
@@ -135,6 +136,7 @@ pub mod albus_swap {
         token_swap.pool_fee_account = ctx.accounts.pool_fee.key();
         token_swap.fees = fees_input;
         token_swap.curve = curve_input;
+        token_swap.policy = policy;
 
         Ok(())
     }
@@ -143,10 +145,15 @@ pub mod albus_swap {
         let token_swap = &mut ctx.accounts.token_swap;
 
         if let Some(policy) = token_swap.policy {
-            AlbusVerifier::new(&ctx.accounts.proof_request)
-                .check_policy(policy)
-                .check_owner(ctx.accounts.user_transfer_authority.key())
-                .run()?;
+            AlbusVerifier::new(
+                ctx.accounts
+                    .proof_request
+                    .as_ref()
+                    .expect("Prof request required"),
+            )
+            .check_policy(policy)
+            .check_owner(ctx.accounts.user_transfer_authority.key())
+            .run()?;
         }
 
         if !cmp_pubkeys(
@@ -734,7 +741,7 @@ pub struct Initialize<'info> {
 #[derive(Accounts)]
 pub struct Swap<'info> {
     /// CHECK: safe, checked in Albus
-    pub proof_request: AccountInfo<'info>,
+    pub proof_request: Option<AccountInfo<'info>>,
     /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
     /// CHECK: safe
