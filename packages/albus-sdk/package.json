@@ -24,9 +24,13 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
+    "test": "vitest",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
-    "release": "release-it --ci",
-    "test": "vitest"
+    "release": "release-it",
+    "release:ci": "release-it --ci -VV",
+    "release:dry": "release-it --ci --dry-run",
+    "release:pre": "release-it --preRelease=next",
+    "prepublishOnly": "vite build"
   },
   "dependencies": {
     "@albus-finance/core": "workspace:^",

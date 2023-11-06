@@ -23,9 +23,11 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
-    "release": "release-it --ci",
-    "release:dry": "release-it --ci --dry-run",
     "test": "vitest",
+    "release": "release-it",
+    "release:ci": "release-it --ci -VV",
+    "release:dry": "release-it --ci --dry-run",
+    "release:pre": "release-it --preRelease=next",
     "prepublishOnly": "vite build"
   },
   "dependencies": {

@@ -37,10 +37,7 @@ module.exports = {
     push: false,
     tagName: `${packageName}-v${version}`,
     commitsPath: '.',
-    commitMessage: `release(${scope}): new version v${version} [no ci]`,
-    requireBranch: ['main', 'dev'],
-    requireCommits: true,
-    requireCommitsFail: false,
+    commitMessage: `chore(${scope}): release ${version} [no ci]`,
     requireCleanWorkingDir: false,
   },
   github: {
@@ -63,8 +60,8 @@ module.exports = {
       preset: {
         name: "conventionalcommits",
         types: [
-          { "type": "fix", "section": "🐞 Bug Fixes" },
           { "type": "feat", "section": "🌟 Features" },
+          { "type": "fix", "section": "🐞 Bug Fixes" },
           { "type": "infra", "section": "🏗 Internal improvements", "hidden": true },
           { "type": "perf", "section": "⚡️ Performance enhancements" },
           { "type": "chore", "section": "🧼 Chores", "hidden": true },
@@ -76,7 +73,6 @@ module.exports = {
     },
   },
   hooks: {
-    // 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
     // release-it doesn't support `pnpm publish` only `npm publish`
     'after:bump': 'pnpm publish --access public --no-git-checks',
     "after:release": "echo 🥳 Successfully released ${name}:${version}"
