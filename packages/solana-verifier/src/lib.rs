@@ -123,20 +123,20 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
         ) = array_refs![data, 8, 32, 32, 32, 32, 8, 8, 8, 8, 8, 8, 1, 1];
 
         if discriminator != PROOF_REQUEST_DISCRIMINATOR {
-            msg!("Error: Invalid proof request discriminator");
+            msg!("AlbusVerifierError: Invalid proof request discriminator");
             return Err(ProgramError::InvalidAccountData);
         }
 
         if let Some(key) = self.policy {
             if !cmp_pubkeys(key, policy) {
-                msg!("Error: Invalid proof request policy");
+                msg!("AlbusVerifierError: Invalid proof request policy");
                 return Err(ProgramError::InvalidAccountData);
             }
         }
 
         if let Some(key) = self.proof_request_owner {
             if !cmp_pubkeys(key, owner) {
-                msg!("Error: Invalid proof request owner");
+                msg!("AlbusVerifierError: Invalid proof request owner");
                 return Err(ProgramError::InvalidAccountData);
             }
         }
@@ -146,27 +146,24 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
         let timestamp = Clock::get()?.unix_timestamp;
 
         if expired_at > 0 && expired_at < timestamp {
-            msg!("Expired!");
+            msg!("AlbusVerifierError: Expired!");
             return Err(ProgramError::Custom(VerificationError::Expired as u32));
         }
 
         match status {
             ProofRequestStatus::Pending => {
-                msg!("Error: Proof request is pending");
+                msg!("AlbusVerifierError: Proof request is pending");
                 Err(ProgramError::Custom(VerificationError::Pending as u32))
             }
             ProofRequestStatus::Proved => {
-                msg!("Error: Proof request is not verified");
+                msg!("AlbusVerifierError: Proof request is not verified");
                 Err(ProgramError::Custom(VerificationError::NotVerified as u32))
             }
             ProofRequestStatus::Rejected => {
-                msg!("Error: Proof request is rejected");
+                msg!("AlbusVerifierError: Proof request is rejected");
                 Err(ProgramError::Custom(VerificationError::Rejected as u32))
             }
-            ProofRequestStatus::Verified => {
-                msg!("Verified!");
-                Ok(())
-            }
+            ProofRequestStatus::Verified => Ok(()),
         }
     }
 }
