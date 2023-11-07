@@ -7,9 +7,6 @@ on:
       - packages/albus-core/src/**
   workflow_dispatch:
 
-env:
-  PACKAGE: @albus-finance/core
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -57,7 +54,7 @@ jobs:
           git config --global user.name "release-it-bot"
 
       - name: Run release
-        run: pnpm -F ${{ env.PACKAGE }} release
+        run: pnpm -F @albus-finance/core release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
