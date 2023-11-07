@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.0...@albus-finance/core-v0.3.2) (2023-11-07)
+
+
+### 🐞 Bug Fixes
+
+* ci ([e8f70cc](https://github.com/mfactory-lab/albus/commit/e8f70ccbf982fd4b09d4be1a8beb6ad5118f437a))
+* core version ([c02c697](https://github.com/mfactory-lab/albus/commit/c02c6975188d6ccc9ab489f9e492b1cdc9563c33))
+* **core:** add `changelog` ([24f0716](https://github.com/mfactory-lab/albus/commit/24f0716be7aa2248f2979427582d6bf58053bca9))
+
 ## 0.3.0 (2023-11-07)
 
 ### 🌟 Features
