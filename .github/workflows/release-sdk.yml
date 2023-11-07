@@ -11,4 +11,4 @@ jobs:
   release:
     uses: ./.github/workflows/release.yaml
     with:
-      package: @albus-finance/sdk
+      package: "@albus-finance/sdk"
