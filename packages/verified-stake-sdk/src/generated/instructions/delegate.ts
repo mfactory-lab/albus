@@ -34,7 +34,7 @@ export const delegateStruct = new beet.BeetArgsStruct<{
  * @category Delegate
  * @category generated
  */
-export interface DelegateInstructionAccounts {
+export type DelegateInstructionAccounts = {
   stake: web3.PublicKey
   vote: web3.PublicKey
   authorized: web3.PublicKey
@@ -47,7 +47,14 @@ export interface DelegateInstructionAccounts {
 }
 
 export const delegateInstructionDiscriminator = [
-  90, 147, 75, 178, 85, 88, 4, 137,
+  90,
+  147,
+  75,
+  178,
+  85,
+  88,
+  4,
+  137,
 ]
 
 /**

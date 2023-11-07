@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-const os = require('os');
-const path = require('path');
+const os = require('node:os')
+const path = require('node:path')
 
 const programName = 'albus'
 // const programId = 'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'
@@ -46,5 +46,5 @@ module.exports = {
   idlGenerator,
   idlDir,
   sdkDir,
-  binaryInstallDir
+  binaryInstallDir,
 }

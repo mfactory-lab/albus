@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category RedelegateWithSeed
  * @category generated
  */
-export interface RedelegateWithSeedInstructionArgs {
+export type RedelegateWithSeedInstructionArgs = {
   seed: string
 }
 /**
@@ -47,7 +47,7 @@ export const redelegateWithSeedStruct = new beet.FixableBeetArgsStruct<
  * @category RedelegateWithSeed
  * @category generated
  */
-export interface RedelegateWithSeedInstructionAccounts {
+export type RedelegateWithSeedInstructionAccounts = {
   uninitializedStake: web3.PublicKey
   stake: web3.PublicKey
   base: web3.PublicKey
@@ -61,7 +61,14 @@ export interface RedelegateWithSeedInstructionAccounts {
 }
 
 export const redelegateWithSeedInstructionDiscriminator = [
-  202, 113, 55, 187, 154, 141, 28, 164,
+  202,
+  113,
+  55,
+  187,
+  154,
+  141,
+  28,
+  164,
 ]
 
 /**

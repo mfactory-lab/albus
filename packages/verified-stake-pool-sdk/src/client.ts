@@ -7,7 +7,8 @@ import {
   createAddValidatorInstruction,
   createDepositSolInstruction,
   createDepositStakeInstruction,
-  createWithdrawSolInstruction, createWithdrawStakeInstruction,
+  createWithdrawSolInstruction,
+  createWithdrawStakeInstruction,
 } from './generated'
 
 export class VerifiedStakePoolClient {
@@ -210,7 +211,7 @@ export class VerifiedStakePoolClient {
   }
 }
 
-export interface DepositSolProps {
+export type DepositSolProps = {
   zkpRequest: PublicKey
   managerFeeAccount: PublicKey
   poolMint: PublicKey
@@ -224,7 +225,7 @@ export interface DepositSolProps {
   solDepositAuthority?: web3.Signer
 }
 
-export interface DepositStakeProps {
+export type DepositStakeProps = {
   zkpRequest: PublicKey
   managerFeeAccount: PublicKey
   poolMint: PublicKey
@@ -241,7 +242,7 @@ export interface DepositStakeProps {
   stakePoolDepositAuthoritySigner?: web3.Signer
 }
 
-export interface WithdrawSolProps {
+export type WithdrawSolProps = {
   zkpRequest: PublicKey
   managerFeeAccount: PublicKey
   poolMint: PublicKey
@@ -255,7 +256,7 @@ export interface WithdrawSolProps {
   solWithdrawAuthority?: web3.Signer
 }
 
-export interface WithdrawStakeProps {
+export type WithdrawStakeProps = {
   zkpRequest: PublicKey
   managerFeeAccount: PublicKey
   poolMint: PublicKey
@@ -270,7 +271,7 @@ export interface WithdrawStakeProps {
   amount: BN
 }
 
-export interface AddValidatorProps {
+export type AddValidatorProps = {
   zkpRequest: PublicKey
   stake: PublicKey
   staker: web3.Signer

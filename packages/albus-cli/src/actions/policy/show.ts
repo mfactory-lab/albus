@@ -29,7 +29,7 @@
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   circuitCode?: string
   serviceCode?: string
 }

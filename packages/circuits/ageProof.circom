@@ -5,8 +5,8 @@ include "circomlib/circuits/comparators.circom";
 include "utils/date.circom";
 
 template AgeProof() {
-  signal input currentDate[3];
-  signal input birthDate[3];
+  signal input currentDate[3]; // [Y,m,d]
+  signal input birthDate[3]; // [Y,m,d]
   signal input minAge;
   signal input maxAge;
   signal output valid;
@@ -16,11 +16,11 @@ template AgeProof() {
 
   component isGreater = GreaterEqThan(32);
   isGreater.in[0] <== current;
-  isGreater.in[1] <== birth + minAge * 10000;
+  isGreater.in[1] <-- minAge > 0 ? birth + minAge * 10000 : current;
 
   component isLess = LessEqThan(32);
   isLess.in[0] <== current;
-  isLess.in[1] <== birth + maxAge * 10000;
+  isLess.in[1] <-- maxAge > 0 ? birth + maxAge * 10000 : current;
 
   component result = AND();
   result.a <== isGreater.out;

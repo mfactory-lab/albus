@@ -30,13 +30,14 @@ export const transferStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['amount', beet.u64],
   ],
-  'TransferInstructionArgs'
+  'TransferInstructionArgs',
 )
 /**
  * Accounts required by the _transfer_ instruction
  *
  * @property [_writable_, **signer**] sender
  * @property [_writable_] receiver
+ * @property [] policy
  * @property [] proofRequest
  * @category Instructions
  * @category Transfer
@@ -45,13 +46,21 @@ export const transferStruct = new beet.BeetArgsStruct<
 export type TransferInstructionAccounts = {
   sender: web3.PublicKey
   receiver: web3.PublicKey
+  policy: web3.PublicKey
   proofRequest: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
 export const transferInstructionDiscriminator = [
-  163, 52, 200, 231, 140, 3, 69, 186,
+  163,
+  52,
+  200,
+  231,
+  140,
+  3,
+  69,
+  186,
 ]
 
 /**
@@ -67,7 +76,7 @@ export const transferInstructionDiscriminator = [
 export function createTransferInstruction(
   accounts: TransferInstructionAccounts,
   args: TransferInstructionArgs,
-  programId = new web3.PublicKey('J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c')
+  programId = new web3.PublicKey('J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c'),
 ) {
   const [data] = transferStruct.serialize({
     instructionDiscriminator: transferInstructionDiscriminator,
@@ -82,6 +91,11 @@ export function createTransferInstruction(
     {
       pubkey: accounts.receiver,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.policy,
+      isWritable: false,
       isSigner: false,
     },
     {

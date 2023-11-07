@@ -1,13 +1,15 @@
+import type { Idl, IdlEvents } from '@coral-xyz/anchor'
 import { EventManager as AnchorEventManager, BorshCoder } from '@coral-xyz/anchor'
 import type { AlbusClient } from './client'
-import idl from './idl/albus.json'
 
-export class EventManager {
+const SIMULATION_SIGNATURE = '1111111111111111111111111111111111111111111111111111111111111111'
+
+export class EventManager<IDL extends Idl = Idl> {
   _coder: BorshCoder
   _events: AnchorEventManager
 
-  constructor(readonly client: AlbusClient) {
-    this._coder = new BorshCoder(idl as any)
+  constructor(readonly client: AlbusClient, idl: IDL) {
+    this._coder = new BorshCoder(idl)
     this._events = new AnchorEventManager(client.programId, client.provider, this._coder)
   }
 
@@ -18,13 +20,12 @@ export class EventManager {
    * @param callback  The function to invoke whenever the event is emitted from
    *                  program logs.
    */
-  public addEventListener(
-    eventName: string,
-    callback: (event: any, slot: number, signature: string) => void,
+  public addEventListener<E extends keyof IdlEvents<IDL>>(
+    eventName: E,
+    callback: (event: IdlEvents<IDL>[E], slot: number, signature: string) => void,
   ): number {
     return this._events.addEventListener(eventName, (event: any, slot: number, signature: string) => {
-      // skip simulation signature
-      if (signature !== '1111111111111111111111111111111111111111111111111111111111111111') {
+      if (signature !== SIMULATION_SIGNATURE) {
         callback(event, slot, signature)
       }
     })
@@ -35,6 +36,6 @@ export class EventManager {
    * @param listener
    */
   public async removeEventListener(listener: number): Promise<void> {
-    return await this._events.removeEventListener(listener)
+    return this._events.removeEventListener(listener)
   }
 }

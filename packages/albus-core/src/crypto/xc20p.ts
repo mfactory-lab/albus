@@ -37,8 +37,10 @@ import * as u8a from 'uint8arrays'
 import { concat } from 'uint8arrays'
 import { Keypair } from '@solana/web3.js'
 import {
-  base58ToBytes, base64ToBytes,
-  bytesToBase64, bytesToString,
+  base58ToBytes,
+  base64ToBytes,
+  bytesToBase64,
+  bytesToString,
   stringToBytes,
 } from './utils'
 
@@ -53,7 +55,7 @@ type PrivateKey = number[] | string | Uint8Array
 const ECDH_ES_XC20PKW_ALG = 'ECDH-ES+XC20PKW'
 const ECDH_ES_XC20PKW_KEYLEN = 256
 
-interface Envelope {
+type Envelope = {
   ciphertext: Uint8Array
   tag: Uint8Array
   iv: Uint8Array

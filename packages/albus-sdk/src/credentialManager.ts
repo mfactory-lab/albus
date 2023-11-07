@@ -26,25 +26,17 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
-import type { VerifiableCredential } from '@mfactory-lab/albus-core'
-import * as Albus from '@mfactory-lab/albus-core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import {
-  ComputeBudgetProgram,
-  Keypair,
-  PublicKey,
-  SYSVAR_INSTRUCTIONS_PUBKEY,
-  Transaction,
-} from '@solana/web3.js'
-import type {
-  ConfirmOptions, PublicKeyInitData,
-  Signer,
-} from '@solana/web3.js'
-import axios from 'axios'
+import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
+import type { VerifiableCredential } from '@albus-finance/core'
+import * as Albus from '@albus-finance/core'
+import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
+import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
 import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
-  createMintCredentialInstruction, createRevokeCredentialInstruction, createUpdateCredentialInstruction,
+  createMintCredentialInstruction,
+  createRevokeCredentialInstruction,
+  createUpdateCredentialInstruction,
   errorFromCode,
 } from './generated'
 
@@ -173,7 +165,7 @@ export class CredentialManager {
   }
 
   /**
-   * Load a verifiable credential associated with a specified address.
+   * Load a credential associated with a specified address.
    * This function retrieves, verifies, and optionally decrypts the credential.
    *
    * @param {PublicKeyInitData} addr - The address associated with the verifiable credential.
@@ -197,7 +189,7 @@ export class CredentialManager {
   }
 
   /**
-   * Load all verifiable credentials
+   * Load all credentials for the provided owner.
    * @param props
    */
   async loadAll(props: LoadAllCredentialProps = {}) {
@@ -205,109 +197,86 @@ export class CredentialManager {
       this.provider.connection,
       props.owner ?? this.provider.publicKey,
       {
+        // pending credential has empty uri
+        uri: props.pending ? '' : undefined,
         symbol: `${NFT_SYMBOL_PREFIX}-${CREDENTIAL_SYMBOL_CODE}`,
         updateAuthority: this.pda.authority()[0],
-        withJson: true,
+        withJson: !props.pending,
       },
     )
 
-    const result: { address: PublicKey; credential?: VerifiableCredential }[] = []
+    const result: Array<CredentialInfo> = []
     for (const account of accounts) {
+      const acc: CredentialInfo = {
+        address: account.mint,
+        data: {},
+      }
+
+      // parse data uri "data:,status=rejected&iss=sumsub"
+      if (account.data.uri.startsWith('data:')) {
+        const qs = account.data.uri.split(',')[1] ?? ''
+        for (const p of qs.split('&')) {
+          const [k, v] = p.split('=')
+          if (k && v) {
+            acc.data[k] = v
+          }
+        }
+      }
+
       if (account.json?.vc !== undefined) {
         try {
-          const credential = await Albus.credential.verifyCredential(account.json.vc, {
+          acc.credential = await Albus.credential.verifyCredential(account.json.vc, {
             decryptionKey: props.decryptionKey,
           })
-          result.push({ address: account.mint, credential })
         } catch (e) {
-          result.push({ address: account.mint })
           console.log(`Credential Verification Error: ${e}`)
           if (props.throwError) {
             throw e
           }
         }
       }
+
+      result.push(acc)
     }
 
     return result
   }
-
-  /**
-   * Load pending VC-NFT accounts
-   */
-  async loadPendingNftAccounts(props?: { owner: PublicKey }) {
-    return getParsedNftAccountsByOwner(
-      this.provider.connection,
-      props?.owner ?? this.provider.publicKey,
-      {
-        uri: '', // pending VC has empty uri
-        symbol: `${NFT_SYMBOL_PREFIX}-${CREDENTIAL_SYMBOL_CODE}`,
-        updateAuthority: this.pda.authority()[0],
-        withJson: false,
-      },
-    )
-  }
-
-  /**
-   * Load a verifiable presentation from a specified URI, verify, and optionally decrypt it.
-   *
-   * @param {string} uri - The URI from which to retrieve the verifiable presentation.
-   * @param {LoadPresentationProps} [props] - Optional properties for loading and processing the presentation.
-   * @returns {Promise<object>} A Promise that resolves to the loaded, verified, and, if necessary, decrypted verifiable presentation.
-   * @throws {Error} Throws an error if there is an issue loading the presentation, if it fails verification, or if decryption fails.
-   */
-  async loadPresentation(uri: string, props: LoadPresentationProps = {}) {
-    const presentation = (await axios.get(uri)).data
-
-    await Albus.credential.verifyPresentation(presentation, {
-      decryptionKey: props.decryptionKey,
-    })
-
-    return presentation
-  }
-
-  /**
-   * Create a new verifiable presentation
-   * encrypted with a shared key
-   * @param props
-   */
-  async createPresentation(props: CreatePresentationProps) {
-    return Albus.credential.createVerifiablePresentation({
-      holderSecretKey: props.holderSecretKey,
-      exposedFields: props.exposedFields,
-      credentials: props.credentials,
-    })
-  }
 }
 
-export interface CreateCredentialProps {
+export type CredentialInfo = {
+  address: PublicKey
+  data: { [key: string]: string }
+  credential?: VerifiableCredential
+}
+
+export type CreateCredentialProps = {
   owner?: PublicKeyInitData
 }
 
-export interface UpdateCredentialProps {
+export type UpdateCredentialProps = {
   owner: PublicKeyInitData
   mint: PublicKeyInitData
   uri: string
   name?: string
 }
 
-export interface RevokeCredentialProps {
+export type RevokeCredentialProps = {
   mint: PublicKeyInitData
 }
 
-export interface LoadCredentialProps {
+export type LoadCredentialProps = {
   decryptionKey?: number[] | Uint8Array
 }
 
-export interface LoadAllCredentialProps extends LoadCredentialProps {
+export type LoadAllCredentialProps = {
   owner?: PublicKey
   throwError?: boolean
-}
+  pending?: boolean
+} & LoadCredentialProps
 
-export interface LoadPresentationProps extends LoadCredentialProps {
-}
+export type LoadPresentationProps = NonNullable<unknown> & LoadCredentialProps
 
-export interface CreatePresentationProps {
+export type CreatePresentationProps = {
   holderSecretKey: number[] | Uint8Array
   credentials: VerifiableCredential[]
   // Example: ['birthDate', 'degree.type']

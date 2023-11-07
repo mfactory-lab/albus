@@ -30,7 +30,7 @@ import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   // Verifiable Credential Address
   vc: string
   // Path to a decryption key

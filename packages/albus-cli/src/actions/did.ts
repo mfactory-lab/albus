@@ -26,11 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { utils } from '@mfactory-lab/albus-core'
+import { utils } from '@albus-finance/core'
 import { Keypair } from '@solana/web3.js'
 import { useContext } from '@/context'
 
-interface Opts {}
+type Opts = {}
 
 export async function generate(_opts: Opts) {
   const { config } = useContext()

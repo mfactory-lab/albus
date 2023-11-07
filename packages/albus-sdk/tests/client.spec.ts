@@ -27,7 +27,7 @@
  */
 
 import { readFileSync } from 'node:fs'
-import * as Albus from '@mfactory-lab/albus-core'
+import * as Albus from '@albus-finance/core'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
 import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import { afterEach, assert, describe, it, vi } from 'vitest'
@@ -36,12 +36,72 @@ import { AlbusClient } from '../src'
 import { ProofInputBuilder } from '../src/utils'
 
 const { eddsa } = Albus.crypto
-describe('AlbusClient', async () => {
+describe('albusClient', async () => {
   const payerKeypair = Keypair.fromSecretKey(Uint8Array.from([
-    46, 183, 156, 94, 55, 128, 248, 0, 49, 70, 183, 244, 178, 0, 0, 236, 212, 131,
-    76, 78, 112, 48, 25, 79, 249, 33, 43, 158, 199, 2, 168, 18, 55, 174, 166, 159,
-    57, 67, 197, 158, 255, 142, 177, 177, 47, 39, 35, 185, 148, 253, 191, 58, 219,
-    119, 104, 89, 225, 26, 244, 119, 160, 6, 156, 227,
+    46,
+    183,
+    156,
+    94,
+    55,
+    128,
+    248,
+    0,
+    49,
+    70,
+    183,
+    244,
+    178,
+    0,
+    0,
+    236,
+    212,
+    131,
+    76,
+    78,
+    112,
+    48,
+    25,
+    79,
+    249,
+    33,
+    43,
+    158,
+    199,
+    2,
+    168,
+    18,
+    55,
+    174,
+    166,
+    159,
+    57,
+    67,
+    197,
+    158,
+    255,
+    142,
+    177,
+    177,
+    47,
+    39,
+    35,
+    185,
+    148,
+    253,
+    191,
+    58,
+    219,
+    119,
+    104,
+    89,
+    225,
+    26,
+    244,
+    119,
+    160,
+    6,
+    156,
+    227,
   ]))
 
   const client = new AlbusClient(new AnchorProvider(
@@ -64,7 +124,7 @@ describe('AlbusClient', async () => {
     ],
   } as ServiceProvider
 
-  describe('AgeProof', async () => {
+  describe('ageProof', async () => {
     const circuit = {
       code: 'age',
       name: 'Age',
@@ -211,7 +271,7 @@ describe('AlbusClient', async () => {
     })
   })
 
-  describe('AttendanceProof', async () => {
+  describe('attendanceProof', async () => {
     const issuer = Keypair.generate()
 
     const event = 'test1'

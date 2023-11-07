@@ -1,4 +1,3 @@
-
 /*
  * This file is part of Albus code.
  *
@@ -26,81 +25,64 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-const path = require('path')
 
-const version = '${version}';
-const packageName = process.env.npm_package_name;
-const scope = packageName.split('/')[1];
+const version = '${version}'
+const packageName = process.env.npm_package_name
+const scope = packageName.split('/')[1]
 
 module.exports = {
-  git: false,
-  // git: {
-  //   push: true,
-  //   tagName: `${packageName}-v${version}`,
-  //   commitsPath: '.',
-  //   commitMessage: `release(${scope}): new version v${version} [no ci]`,
-  //   requireCommits: true,
-  //   requireCommitsFail: false,
-  // },
+  verbose: true,
+  git: {
+    push: false,
+    tagName: `${packageName}-v${version}`,
+    commitsPath: '.',
+    commitMessage: `chore(${scope}): release ${version} [no ci]`,
+    requireCleanWorkingDir: false,
+  },
   github: {
-    release: false,
+    release: true,
     releaseName: `${packageName}-v${version}`,
     releaseNotes(context) {
       // Remove the first, redundant line with a version and date.
-      return context.changelog.split('\n').slice(1).join('\n');
-    }
+      return context.changelog.split('\n').slice(1).join('\n')
+    },
   },
-  // plugins: {
-  //   '@release-it/conventional-changelog': {
-  //     path: '.',
-  //     // ignoreRecommendedBump: false,
-  //     gitRawCommitsOpts: {
-  //       path: '.',
-  //     },
-  //     header: '# Changelog',
-  //     infile: 'CHANGELOG.md',
-  //     preset: {
-  //       name: "conventionalcommits",
-  //       types: [
-  //         { "type": "fix", "section": "🐞 Bug Fixes" },
-  //         { "type": "feat", "section": "🌟 Features" },
-  //         { "type": "infra", "section": "🏗 Internal improvements", "hidden": true },
-  //         { "type": "perf", "section": "⚡️ Performance enhancements" },
-  //         { "type": "chore", "section": "🧼 Chores", "hidden": true },
-  //         { "type": "test", "section": "✅ Test coverage", "hidden": true },
-  //         { "type": "docs", "section": "📚 Documentation" },
-  //         { "type": "refactor", "section": "♻️ Refactors" }
-  //       ]
-  //     },
-  //   },
-  //   // '@release-it-plugins/workspaces': {
-  //   //   // skipChecks: true,
-  //   //   workspaces: [
-  //   //     'packages/albus-core',
-  //   //     'packages/albus-sdk'
-  //   //   ]
-  //   // }
-  // },
+  plugins: {
+    '@release-it/conventional-changelog': {
+      path: '.',
+      // ignoreRecommendedBump: false,
+      gitRawCommitsOpts: {
+        path: '.',
+      },
+      header: '# Changelog',
+      infile: 'CHANGELOG.md',
+      preset: {
+        name: 'conventionalcommits',
+        types: [
+          { type: 'feat', section: '🌟 Features' },
+          { type: 'fix', section: '🐞 Bug Fixes' },
+          { type: 'infra', section: '🏗 Internal improvements', hidden: true },
+          { type: 'perf', section: '⚡️ Performance enhancements' },
+          { type: 'chore', section: '🧼 Chores', hidden: true },
+          { type: 'test', section: '✅ Test coverage', hidden: true },
+          { type: 'docs', section: '📚 Documentation' },
+          { type: 'refactor', section: '♻️ Refactors' },
+        ],
+      },
+    },
+  },
   hooks: {
     // release-it doesn't support `pnpm publish` only `npm publish`
-    'after:bump': 'pnpm build && pnpm publish --no-git-checks',
-    // 'after:bump': 'pnpm install --lockfile-only'
-    "after:release": "echo Successfully released ${name}:${version}"
+    'after:bump': 'pnpm publish --access public --no-git-checks',
+    'after:release': 'echo 🥳 Successfully released ${name}:${version}',
   },
   npm: {
     publish: false,
     ignoreVersion: false,
+    // skipChecks: true,
   },
-  // npm: {
-  //   versionArgs: ['--workspaces false'],
-  //   // versionArgs: ['--allow-same-version', '--workspaces-update=false'],
-  //   // publishArgs: ['--access', 'public'],
-  //   // skipChecks: true,
-  //   publish: false
-  // },
-  publishConfig: {
-    access: 'public',
-    registry: 'https://npm.pkg.github.com',
-    // registry: 'https://registry.npmjs.org'
-  }
+  // publishConfig: {
+  //   access: 'public',
+  //   registry: 'https://npm.pkg.github.com',
+  // }
 }

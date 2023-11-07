@@ -26,7 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use std::str::FromStr;
+#[cfg(feature = "cpi")]
+pub mod cpi;
 
 use arrayref::array_ref;
 use arrayref::array_refs;
@@ -36,24 +37,25 @@ use solana_program::{
     msg,
     program_error::ProgramError,
     program_memory::sol_memcmp,
+    pubkey,
     pubkey::{Pubkey, PUBKEY_BYTES},
     sysvar::Sysvar,
 };
 
-pub const ALBUS_PROGRAM_ID: &str = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL";
-pub const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
+pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
+const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
-pub struct AlbusCompliant<'a, 'info> {
+pub struct AlbusVerifier<'a, 'info> {
     /// Proof request address
     proof_request: &'a AccountInfo<'info>,
-    /// (optional) Proof request owner address
+    /// (optional) Proof request owner's address
     proof_request_owner: Option<Pubkey>,
     /// (optional) Policy address
     policy: Option<Pubkey>,
 }
 
-impl<'a, 'info> AlbusCompliant<'a, 'info> {
-    pub fn new(proof_request: &'a AccountInfo<'info>) -> AlbusCompliant<'a, 'info> {
+impl<'a, 'info> AlbusVerifier<'a, 'info> {
+    pub fn new(proof_request: &'a AccountInfo<'info>) -> AlbusVerifier<'a, 'info> {
         Self {
             proof_request,
             policy: None,
@@ -61,28 +63,34 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
         }
     }
 
-    pub fn with_policy(mut self, addr: Pubkey) -> Self {
+    pub fn check_policy(mut self, addr: Pubkey) -> Self {
         self.policy = Some(addr);
         self
     }
 
-    pub fn with_user(mut self, addr: Pubkey) -> Self {
+    pub fn check_owner(mut self, addr: Pubkey) -> Self {
         self.proof_request_owner = Some(addr);
         self
     }
 
-    pub fn program_id() -> Pubkey {
-        Pubkey::from_str(ALBUS_PROGRAM_ID).unwrap()
+    #[cfg(feature = "cpi")]
+    pub fn cpi_call(&self, _ctx: cpi::VerifyProofRequest) -> Result<(), ProgramError> {
+        // match verify(ctx) {
+        //     Ok(()) => Ok(()),
+        //     Err(e) => Err(e.into()),
+        // }
+        todo!()
     }
 
-    pub fn check(&self) -> Result<(), ProgramError> {
+    pub fn run(&self) -> Result<(), ProgramError> {
         self.check_program_account(self.proof_request)?;
         self.check_proof_request()?;
         Ok(())
     }
 
+    /// Checks if the provided account is a valid program account
     fn check_program_account(&self, acc: &AccountInfo) -> Result<(), ProgramError> {
-        if !cmp_pubkeys(acc.owner, Self::program_id()) {
+        if !cmp_pubkeys(acc.owner, ALBUS_PROGRAM_ID) {
             return Err(ProgramError::IllegalOwner);
         }
         if acc.data_is_empty() {
@@ -115,20 +123,20 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
         ) = array_refs![data, 8, 32, 32, 32, 32, 8, 8, 8, 8, 8, 8, 1, 1];
 
         if discriminator != PROOF_REQUEST_DISCRIMINATOR {
-            msg!("Error: Invalid proof request discriminator");
+            msg!("AlbusVerifierError: Invalid proof request discriminator");
             return Err(ProgramError::InvalidAccountData);
         }
 
         if let Some(key) = self.policy {
             if !cmp_pubkeys(key, policy) {
-                msg!("Error: Invalid proof request policy");
+                msg!("AlbusVerifierError: Invalid proof request policy");
                 return Err(ProgramError::InvalidAccountData);
             }
         }
 
         if let Some(key) = self.proof_request_owner {
             if !cmp_pubkeys(key, owner) {
-                msg!("Error: Invalid proof request owner");
+                msg!("AlbusVerifierError: Invalid proof request owner");
                 return Err(ProgramError::InvalidAccountData);
             }
         }
@@ -138,27 +146,24 @@ impl<'a, 'info> AlbusCompliant<'a, 'info> {
         let timestamp = Clock::get()?.unix_timestamp;
 
         if expired_at > 0 && expired_at < timestamp {
-            msg!("Expired!");
+            msg!("AlbusVerifierError: Expired!");
             return Err(ProgramError::Custom(VerificationError::Expired as u32));
         }
 
         match status {
             ProofRequestStatus::Pending => {
-                msg!("Error: Proof request is pending");
+                msg!("AlbusVerifierError: Proof request is pending");
                 Err(ProgramError::Custom(VerificationError::Pending as u32))
             }
             ProofRequestStatus::Proved => {
-                msg!("Error: Proof request is not verified");
+                msg!("AlbusVerifierError: Proof request is not verified");
                 Err(ProgramError::Custom(VerificationError::NotVerified as u32))
             }
             ProofRequestStatus::Rejected => {
-                msg!("Error: Proof request is rejected");
+                msg!("AlbusVerifierError: Proof request is rejected");
                 Err(ProgramError::Custom(VerificationError::Rejected as u32))
             }
-            ProofRequestStatus::Verified => {
-                msg!("Verified!");
-                Ok(())
-            }
+            ProofRequestStatus::Verified => Ok(()),
         }
     }
 }
@@ -201,19 +206,23 @@ pub fn cmp_pubkeys(a: impl AsRef<[u8]>, b: impl AsRef<[u8]>) -> bool {
 }
 
 /// Generates the service provider program address for Albus Protocol
-pub fn find_service_provider_address(program_id: &Pubkey, code: &str) -> (Pubkey, u8) {
-    Pubkey::find_program_address(&[b"service-provider", code.as_bytes()], program_id)
+pub fn find_service_provider_address(code: &str) -> (Pubkey, u8) {
+    Pubkey::find_program_address(&[b"service-provider", code.as_bytes()], &ALBUS_PROGRAM_ID)
+}
+
+/// Generates the policy program address for Albus Protocol
+pub fn find_policy_address(service_provider: &Pubkey, code: &str) -> (Pubkey, u8) {
+    Pubkey::find_program_address(
+        &[b"policy", service_provider.as_ref(), code.as_bytes()],
+        &ALBUS_PROGRAM_ID,
+    )
 }
 
 /// Generates the proof request program address for the Albus protocol
-pub fn find_proof_request_address(
-    program_id: &Pubkey,
-    policy: &Pubkey,
-    user: &Pubkey,
-) -> (Pubkey, u8) {
+pub fn find_proof_request_address(policy: &Pubkey, user: &Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(
-        &[b"proof-request", &policy.to_bytes(), &user.to_bytes()],
-        program_id,
+        &[b"proof-request", policy.as_ref(), user.as_ref()],
+        &ALBUS_PROGRAM_ID,
     )
 }
 
@@ -230,14 +239,14 @@ mod test {
         let policy = Pubkey::new_unique();
 
         assert_eq!(
-            AlbusCompliant::new(
+            AlbusVerifier::new(
                 &ProofRequestBuilder::new()
                     .with_status(ProofRequestStatus::Verified)
                     .with_policy(policy)
                     .build()
             )
-            .with_policy(policy)
-            .check(),
+            .check_policy(policy)
+            .run(),
             Ok(())
         );
     }
@@ -249,15 +258,15 @@ mod test {
         let policy = Pubkey::new_unique();
 
         assert_eq!(
-            AlbusCompliant::new(
+            AlbusVerifier::new(
                 &ProofRequestBuilder::new()
                     .with_status(ProofRequestStatus::Proved)
                     .with_policy(policy)
                     .with_expired_at(1)
                     .build()
             )
-            .with_policy(policy)
-            .check(),
+            .check_policy(policy)
+            .run(),
             Err(ProgramError::Custom(VerificationError::Expired as u32))
         );
     }
@@ -270,31 +279,31 @@ mod test {
         let policy = Pubkey::new_unique();
 
         assert_eq!(
-            AlbusCompliant::new(
+            AlbusVerifier::new(
                 &ProofRequestBuilder::new()
                     .with_status(ProofRequestStatus::Verified)
                     .with_policy(policy)
                     .with_owner(owner)
                     .build()
             )
-            .with_policy(policy)
-            .with_user(owner)
-            .check(),
+            .check_policy(policy)
+            .check_owner(owner)
+            .run(),
             Ok(())
         );
 
         // invalid owner
         assert_eq!(
-            AlbusCompliant::new(
+            AlbusVerifier::new(
                 &ProofRequestBuilder::new()
                     .with_status(ProofRequestStatus::Verified)
                     .with_policy(policy)
                     .with_owner(owner)
                     .build()
             )
-            .with_policy(policy)
-            .with_user(Pubkey::new_unique())
-            .check(),
+            .check_policy(policy)
+            .check_owner(Pubkey::new_unique())
+            .run(),
             Err(ProgramError::InvalidAccountData)
         );
     }
@@ -319,7 +328,7 @@ mod test {
                 policy: Default::default(),
                 status: 0,
                 _pk: Default::default(),
-                _owner: AlbusCompliant::program_id(),
+                _owner: ALBUS_PROGRAM_ID,
                 _lamports: 0,
                 _data: vec![],
             }

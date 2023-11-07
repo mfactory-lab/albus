@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { ProofRequestStatus } from '@mfactory-lab/albus-sdk'
+import { ProofRequestStatus } from '@albus-finance/sdk'
 import { PublicKey } from '@solana/web3.js'
 import Table from 'cli-table3'
 import log from 'loglevel'
@@ -38,7 +38,7 @@ export async function show(addr: string | PublicKey) {
   log.info(JSON.stringify({ address: addr, ...proofRequest.pretty() }, null, 2))
 }
 
-interface ShowAllOpts {
+type ShowAllOpts = {
   service?: string
   serviceCode?: string
   circuit?: string

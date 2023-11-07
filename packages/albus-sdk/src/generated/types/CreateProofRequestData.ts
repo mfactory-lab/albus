@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface CreateProofRequestData {
+export type CreateProofRequestData = {
   expiresIn: number
   maxPublicInputs: number
 }

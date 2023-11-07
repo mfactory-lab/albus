@@ -16,7 +16,7 @@ import { contactInfoBeet } from '../types/ContactInfo'
  * @category Accounts
  * @category generated
  */
-export interface ServiceProviderArgs {
+export type ServiceProviderArgs = {
   authority: web3.PublicKey
   code: string
   name: string

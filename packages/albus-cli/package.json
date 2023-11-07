@@ -1,16 +1,21 @@
 {
-  "name": "@mfactory-lab/albus-cli",
+  "name": "@albus-finance/cli",
+  "type": "module",
   "version": "0.0.5",
   "private": true,
-  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/albus-cli"
+  },
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
   "bin": {
     "albus": "./dist/index.cjs"
   },
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -22,24 +27,19 @@
     "release": "pnpm build & release-it",
     "prepublishOnly": "pnpm build"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mfactory-lab/albus.git",
-    "directory": "packages/albus-cli"
-  },
   "dependencies": {
+    "@albus-finance/core": "workspace:^",
+    "@albus-finance/sdk": "workspace:^",
+    "@coral-xyz/anchor": "^0.28.0",
     "@faker-js/faker": "^8.0.2",
     "@metaplex-foundation/js": "^0.19.4",
-    "@mfactory-lab/albus-core": "workspace:^",
-    "@mfactory-lab/albus-sdk": "workspace:^",
-    "@coral-xyz/anchor": "^0.28.0",
     "@solana/web3.js": "^1.77.3",
     "axios": "^1.4.0",
+    "chalk": "^4.1.2",
     "cli-table3": "^0.6.3",
     "commander": "^10.0.0",
-    "chalk": "^4.1.2",
     "loglevel": "^1.8.1",
-    "snarkjs": "*"
+    "snarkjs": "^0.7.2"
   },
   "devDependencies": {
     "vite-node": "^0.34.1"

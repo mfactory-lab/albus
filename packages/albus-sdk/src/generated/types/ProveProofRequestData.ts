@@ -9,7 +9,7 @@ import * as beet from '@metaplex-foundation/beet'
 import type { ProofData } from './ProofData'
 import { proofDataBeet } from './ProofData'
 
-export interface ProveProofRequestData {
+export type ProveProofRequestData = {
   proof: beet.COption<ProofData>
   publicInputs: number[] /* size: 32 */[]
   reset: boolean

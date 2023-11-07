@@ -23,6 +23,7 @@ export class AlbusTransferClient {
     const instruction = createTransferInstruction(
       {
         proofRequest: props.proofRequest,
+        policy: props.policy,
         sender: this.provider.publicKey,
         receiver: props.receiver,
       },
@@ -42,6 +43,7 @@ export class AlbusTransferClient {
     const instruction = createSplTransferInstruction(
       {
         proofRequest: props.proofRequest,
+        policy: props.policy,
         sender: this.provider.publicKey,
         receiver: props.receiver,
         source: props.source,
@@ -58,17 +60,15 @@ export class AlbusTransferClient {
   }
 }
 
-export interface TransferProps {
+export type TransferProps = {
   receiver: PublicKey
   proofRequest: PublicKey
+  policy: PublicKey
   amount: BN
 }
 
-export interface SplTransferProps {
-  receiver: PublicKey
+export type SplTransferProps = {
   source: PublicKey
   destination: PublicKey
-  proofRequest: PublicKey
   tokenMint: PublicKey
-  amount: BN
-}
+} & TransferProps

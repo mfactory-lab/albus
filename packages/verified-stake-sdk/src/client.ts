@@ -1,6 +1,7 @@
 import type { AnchorProvider, BN } from '@coral-xyz/anchor'
 import type {
-  ConfirmOptions, Keypair,
+  ConfirmOptions,
+  Keypair,
   PublicKey,
 } from '@solana/web3.js'
 import {
@@ -234,14 +235,14 @@ export class VerifiedStakeClient {
   }
 }
 
-export interface SplitProps {
+export type SplitProps = {
   stake: PublicKey
   splitStake: Keypair
   zkpRequest: PublicKey
   lamports: BN
 }
 
-export interface SplitWithSeedProps {
+export type SplitWithSeedProps = {
   stake: PublicKey
   splitStake: Keypair
   zkpRequest: PublicKey
@@ -250,33 +251,33 @@ export interface SplitWithSeedProps {
   lamports: BN
 }
 
-export interface MergeProps {
+export type MergeProps = {
   destinationStake: PublicKey
   sourceStake: PublicKey
   zkpRequest: PublicKey
 }
 
-export interface WithdrawProps {
+export type WithdrawProps = {
   stake: PublicKey
   destination: PublicKey
   zkpRequest: PublicKey
   lamports: BN
 }
 
-export interface DelegateProps {
+export type DelegateProps = {
   stake: PublicKey
   vote: PublicKey
   zkpRequest: PublicKey
 }
 
-export interface RedelegateProps {
+export type RedelegateProps = {
   stake: PublicKey
   vote: PublicKey
   uninitializedStake: Keypair
   zkpRequest: PublicKey
 }
 
-export interface RedelegateWithSeedProps {
+export type RedelegateWithSeedProps = {
   stake: PublicKey
   vote: PublicKey
   base: Keypair
@@ -285,14 +286,14 @@ export interface RedelegateWithSeedProps {
   zkpRequest: PublicKey
 }
 
-export interface AuthorizeProps {
+export type AuthorizeProps = {
   stake: PublicKey
   newAuthorized: PublicKey
   stakeAuthorized: StakeAuthorize
   zkpRequest: PublicKey
 }
 
-export interface AuthorizeCheckedProps {
+export type AuthorizeCheckedProps = {
   stake: PublicKey
   newAuthorized: Keypair
   stakeAuthorized: StakeAuthorize

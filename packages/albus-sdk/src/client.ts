@@ -41,6 +41,7 @@ import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
 import { NodeWallet } from './utils'
+import idl from './idl/albus.json'
 
 export class AlbusClient {
   programId = PROGRAM_ID
@@ -59,7 +60,8 @@ export class AlbusClient {
     readonly provider: AnchorProvider,
   ) {
     this.pda = new PdaManager()
-    this.eventManager = new EventManager(this)
+    // TODO: ts idl
+    this.eventManager = new EventManager(this, idl as any)
     this.circuit = new CircuitManager(this.provider, this.pda)
     this.policy = new PolicyManager(this.provider, this.pda)
     this.service = new ServiceManager(this.provider, this.pda)
@@ -75,9 +77,12 @@ export class AlbusClient {
     this.investigation = new InvestigationManager(this.provider, this.proofRequest, this.service, this.pda)
   }
 
-  static factory(connection: Connection, wallet?: Wallet, opts: ConfirmOptions = {}) {
-    wallet = wallet ?? { publicKey: PublicKey.default } as unknown as Wallet
-    return new this(new AnchorProvider(connection, wallet, opts))
+  static factory(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
+    return new this(new AnchorProvider(
+      connection,
+      wallet ?? { publicKey: PublicKey.default } as unknown as Wallet,
+      opts ?? {},
+    ))
   }
 
   static keypair(connection: Connection, keypair: Keypair, opts: ConfirmOptions = {}) {

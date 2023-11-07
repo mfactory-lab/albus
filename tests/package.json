@@ -1,15 +1,13 @@
 {
   "name": "@albus/tests",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
   "scripts": {
     "test": "vitest --no-threads",
     "test:ui": "vitest --no-threads --ui",
     "test:debug": "DEBUG=vite-node:* vitest --no-threads"
   },
   "devDependencies": {
-    "@mfactory-lab/albus-core": "workspace:^",
-    "@mfactory-lab/albus-sdk": "workspace:^",
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/js": "^0.19.4",
     "@solana/spl-stake-pool": "mfactory-lab/jfactory-stake-pool",

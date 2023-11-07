@@ -33,7 +33,7 @@ export const redelegateStruct = new beet.BeetArgsStruct<{
  * @category Redelegate
  * @category generated
  */
-export interface RedelegateInstructionAccounts {
+export type RedelegateInstructionAccounts = {
   uninitializedStake: web3.PublicKey
   stake: web3.PublicKey
   vote: web3.PublicKey
@@ -46,7 +46,14 @@ export interface RedelegateInstructionAccounts {
 }
 
 export const redelegateInstructionDiscriminator = [
-  212, 82, 51, 160, 228, 80, 116, 35,
+  212,
+  82,
+  51,
+  160,
+  228,
+  80,
+  116,
+  35,
 ]
 
 /**

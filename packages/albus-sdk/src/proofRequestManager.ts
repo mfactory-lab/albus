@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as Albus from '@mfactory-lab/albus-core'
+import * as Albus from '@albus-finance/core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type {
   Commitment,
@@ -48,8 +48,12 @@ import {
   ProofRequest,
   ServiceProvider,
   createCreateProofRequestInstruction,
-  createDeleteProofRequestInstruction, createProveProofRequestInstruction,
-  createUpdateProofRequestInstruction, createVerifyProofRequestInstruction, errorFromCode, proofRequestDiscriminator,
+  createDeleteProofRequestInstruction,
+  createProveProofRequestInstruction,
+  createUpdateProofRequestInstruction,
+  createVerifyProofRequestInstruction,
+  errorFromCode,
+  proofRequestDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 import type { ServiceManager } from './serviceManager'
@@ -266,6 +270,9 @@ export class ProofRequestManager {
     return Albus.zkp.verifyProof({ vk, proof, publicInput })
   }
 
+  /**
+   * Decrypts data using the provided secret and signals.
+   */
   decryptData(props: { secret: bigint; signals: Record<string, any> }) {
     const { secret, signals } = props
     const nonce = signals.timestamp as bigint
@@ -343,32 +350,12 @@ export class ProofRequestManager {
 
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
-
+    const limits = { withProof: 20, withoutProof: 28 }
     const txs: { tx: Transaction }[] = []
 
-    txs.push({
-      tx: new Transaction().add(
-        createProveProofRequestInstruction(
-          {
-            proofRequest: new PublicKey(props.proofRequest),
-            circuit: proofRequest.circuit,
-            policy: proofRequest.policy,
-            authority,
-          },
-          {
-            data: {
-              reset: true,
-              publicInputs: publicInputs.slice(0, 20),
-              proof,
-            },
-          },
-        ),
-      ),
-    })
-
     // extend public inputs if needed
-    if (publicInputs.length > 20) {
-      const inputChunks = chunk(publicInputs.slice(20), 28)
+    if (publicInputs.length > limits.withProof) {
+      const inputChunks = chunk(publicInputs.slice(0, -limits.withProof), limits.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
         const inputs = inputChunks[i]!
         txs.push({
@@ -382,7 +369,7 @@ export class ProofRequestManager {
               },
               {
                 data: {
-                  reset: false,
+                  reset: i === 0,
                   publicInputs: inputs,
                   proof: null,
                 },
@@ -393,15 +380,36 @@ export class ProofRequestManager {
       }
     }
 
+    txs.push({
+      tx: new Transaction().add(
+        createProveProofRequestInstruction(
+          {
+            proofRequest: new PublicKey(props.proofRequest),
+            circuit: proofRequest.circuit,
+            policy: proofRequest.policy,
+            authority,
+          },
+          {
+            data: {
+              reset: false,
+              publicInputs: publicInputs.slice(-limits.withProof),
+              proof,
+            },
+          },
+        ),
+      ),
+    })
+
     if (props.verify) {
-      const tx = new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
-        .add(createVerifyProofRequestInstruction({
-          proofRequest: new PublicKey(props.proofRequest),
-          circuit: proofRequest.circuit,
-          authority,
-        }))
-      txs.push({ tx })
+      txs.push({
+        tx: new Transaction()
+          .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
+          .add(createVerifyProofRequestInstruction({
+            proofRequest: new PublicKey(props.proofRequest),
+            circuit: proofRequest.circuit,
+            authority,
+          })),
+      })
     }
 
     try {
@@ -432,16 +440,14 @@ export class ProofRequestManager {
       throw new Error(`Unable to find Service account at ${proofRequest.serviceProvider}`)
     }
 
-    if (serviceProvider.trustees.length < 3) {
-      throw new Error('Service account does not contains required trustee count')
-    }
-
-    const trusteePubKeys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
-      .filter(p => p !== null) as [bigint, bigint][]
-
     const credential = await this.credential.load(props.vc, {
       decryptionKey: props.decryptionKey ?? props.userPrivateKey,
     })
+
+    const trusteePubKeys = serviceProvider.trustees.length > 0
+      ? (await this.service.loadTrusteeKeys(serviceProvider.trustees))
+          .filter(p => p !== null) as [bigint, bigint][]
+      : []
 
     const proofInput = await new ProofInputBuilder(credential)
       .withTimestamp(await getSolanaTimestamp(this.provider.connection))
@@ -464,7 +470,7 @@ export class ProofRequestManager {
         proof,
         // @ts-expect-error readonly
         publicSignals,
-        verify: true,
+        verify: props.verify ?? true,
       })
 
       return { signatures, proof, publicSignals }
@@ -492,25 +498,25 @@ export class ProofRequestManager {
   }
 }
 
-interface LoadFullResult {
+type LoadFullResult = {
   proofRequest: ProofRequest
   circuit?: Circuit
   policy?: Policy
   serviceProvider?: ServiceProvider
 }
 
-export interface CreateProofRequestProps {
+export type CreateProofRequestProps = {
   serviceCode: string
   policyCode: string
   expiresIn?: number
   maxPublicInputs?: number
 }
 
-export interface DeleteProofRequestProps {
+export type DeleteProofRequestProps = {
   proofRequest: PublicKeyInitData
 }
 
-export interface FindProofRequestProps {
+export type FindProofRequestProps = {
   user?: PublicKeyInitData
   serviceProvider?: PublicKeyInitData
   serviceProviderCode?: string
@@ -523,19 +529,21 @@ export interface FindProofRequestProps {
   noData?: boolean
 }
 
-export interface FullProveProps {
+export type FullProveProps = {
   proofRequest: PublicKeyInitData
   vc: PublicKeyInitData
   userPrivateKey: Uint8Array
   // Credential decryption key
   decryptionKey?: Uint8Array
+  // On-chain verification. Default: true
+  verify?: boolean
 }
 
-export interface VerifyProps {
+export type VerifyProps = {
   proofRequest: PublicKeyInitData | ProofRequest
 }
 
-export interface ProveProps {
+export type ProveProps = {
   proofRequest: PublicKeyInitData
   proofRequestData?: ProofRequest
   proof: ProofData
@@ -543,11 +551,11 @@ export interface ProveProps {
   verify: boolean
 }
 
-export interface ChangeStatus {
+export type ChangeStatus = {
   proofRequest: PublicKeyInitData
   status: ProofRequestStatus
 }
-interface GenerateVerifiablePresentationProps {
+type GenerateVerifiablePresentationProps = {
   proofRequest: PublicKeyInitData
   userPrivateKey: Uint8Array
 }

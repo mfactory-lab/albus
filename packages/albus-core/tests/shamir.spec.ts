@@ -33,7 +33,7 @@ import { bytesToFinite, generateProof } from '../src/zkp'
 
 import { loadFixture, setupCircuit } from './utils'
 
-describe('Shamir', async () => {
+describe('shamir', async () => {
   const issuerKeypair = Keypair.generate()
   const circuit = await setupCircuit('test/shamirSecretSharing')
 

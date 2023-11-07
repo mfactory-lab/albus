@@ -29,7 +29,7 @@
 import type { Buffer } from 'node:buffer'
 import fs from 'node:fs'
 import { toMetaplexFile } from '@metaplex-foundation/js'
-import { parseSignal } from '@mfactory-lab/albus-sdk'
+import { parseSignal } from '@albus-finance/sdk'
 import axios from 'axios'
 import chalk from 'chalk'
 import log from 'loglevel'
@@ -37,7 +37,7 @@ import * as snarkjs from 'snarkjs'
 import { downloadFile } from '@/utils'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   name: string
   description?: string
   wasm?: string
@@ -122,8 +122,7 @@ export async function create(circuitId: string, opts: Opts) {
 
   log.info('Loading signals...')
   const symFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.sym`)
-  const signals = loadSignals(symFile.toString(),
-    r1csInfo.nOutputs, r1csInfo.nPubInputs, r1csInfo.nPrvInputs)
+  const signals = loadSignals(symFile.toString(), r1csInfo.nOutputs, r1csInfo.nPubInputs, r1csInfo.nPrvInputs)
 
   log.info('Creating circuit...')
   const { signature } = await client.circuit.create({

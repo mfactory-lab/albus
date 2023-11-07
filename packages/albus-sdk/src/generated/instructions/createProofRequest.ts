@@ -17,7 +17,7 @@ import {
  * @category CreateProofRequest
  * @category generated
  */
-export interface CreateProofRequestInstructionArgs {
+export type CreateProofRequestInstructionArgs = {
   data: CreateProofRequestData
 }
 /**
@@ -47,7 +47,7 @@ export const createProofRequestStruct = new beet.BeetArgsStruct<
  * @category CreateProofRequest
  * @category generated
  */
-export interface CreateProofRequestInstructionAccounts {
+export type CreateProofRequestInstructionAccounts = {
   serviceProvider: web3.PublicKey
   policy: web3.PublicKey
   proofRequest: web3.PublicKey
@@ -57,7 +57,14 @@ export interface CreateProofRequestInstructionAccounts {
 }
 
 export const createProofRequestInstructionDiscriminator = [
-  18, 176, 14, 175, 218, 24, 32, 130,
+  18,
+  176,
+  14,
+  175,
+  218,
+  24,
+  32,
+  130,
 ]
 
 /**

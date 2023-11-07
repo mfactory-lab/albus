@@ -33,7 +33,7 @@ export const mergeStruct = new beet.BeetArgsStruct<{
  * @category Merge
  * @category generated
  */
-export interface MergeInstructionAccounts {
+export type MergeInstructionAccounts = {
   destinationStake: web3.PublicKey
   authorized: web3.PublicKey
   sourceStake: web3.PublicKey
@@ -45,7 +45,14 @@ export interface MergeInstructionAccounts {
 }
 
 export const mergeInstructionDiscriminator = [
-  148, 141, 236, 47, 174, 126, 69, 111,
+  148,
+  141,
+  236,
+  47,
+  174,
+  126,
+  69,
+  111,
 ]
 
 /**

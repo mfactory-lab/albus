@@ -41,7 +41,7 @@ export async function getSolanaTimestamp(connection: Connection) {
   return (await connection.getBlockTime(slot)) ?? 0
 }
 
-export interface ValidateNftProps {
+export type ValidateNftProps = {
   authority: PublicKeyInitData
   code?: AlbusNftCode
   creators?: Creator[]
@@ -133,7 +133,7 @@ export async function getParsedNftAccountsByOwner(connection: Connection, owner:
   return findMetadataAccounts(connection, { ...filter, mints })
 }
 
-interface FindMetadataAccounts {
+type FindMetadataAccounts = {
   mints: PublicKey[]
   updateAuthority?: PublicKeyInitData
   symbol?: string
@@ -183,10 +183,9 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
     if (props.name !== undefined) {
       valid &&= acc.data.name.includes(props.name)
     }
-    if (props.uri) {
-      valid &&= sanitizeString(acc.data.uri) === props.uri
-    } else if (props.withJson) {
-      valid &&= sanitizeString(acc.data.uri) !== ''
+    if (props.uri !== undefined) {
+      const uri = sanitizeString(acc.data.uri)
+      valid &&= props.uri === '' ? uri === '' : uri.startsWith(props.uri)
     }
     return valid
   })
@@ -194,12 +193,14 @@ export async function findMetadataAccounts(connection: Connection, props: FindMe
   if (props.withJson) {
     return Promise.all(
       filteredAccounts
-        .map(acc => axios.get(acc.data.uri)
-          .then((r) => {
-            acc.json = r.data
-            return acc
-          })
-          .catch(_e => acc),
+        .map(acc => /^https?:\/\//.test(sanitizeString(acc.data.uri))
+          ? axios.get(acc.data.uri)
+            .then((r) => {
+              acc.json = r.data
+              return acc
+            })
+            .catch(_e => acc)
+          : Promise.resolve(acc),
         ),
     )
   }

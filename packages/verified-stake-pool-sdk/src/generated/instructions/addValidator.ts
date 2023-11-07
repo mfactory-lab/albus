@@ -39,7 +39,7 @@ export const addValidatorStruct = new beet.BeetArgsStruct<{
  * @category AddValidator
  * @category generated
  */
-export interface AddValidatorInstructionAccounts {
+export type AddValidatorInstructionAccounts = {
   zkpRequest: web3.PublicKey
   staker: web3.PublicKey
   funder: web3.PublicKey
@@ -59,7 +59,14 @@ export interface AddValidatorInstructionAccounts {
 }
 
 export const addValidatorInstructionDiscriminator = [
-  250, 113, 53, 54, 141, 117, 215, 185,
+  250,
+  113,
+  53,
+  54,
+  141,
+  117,
+  215,
+  185,
 ]
 
 /**

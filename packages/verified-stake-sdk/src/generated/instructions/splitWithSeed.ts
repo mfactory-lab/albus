@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category SplitWithSeed
  * @category generated
  */
-export interface SplitWithSeedInstructionArgs {
+export type SplitWithSeedInstructionArgs = {
   lamports: beet.bignum
   seed: string
 }
@@ -47,7 +47,7 @@ export const splitWithSeedStruct = new beet.FixableBeetArgsStruct<
  * @category SplitWithSeed
  * @category generated
  */
-export interface SplitWithSeedInstructionAccounts {
+export type SplitWithSeedInstructionAccounts = {
   splitStake: web3.PublicKey
   authorized: web3.PublicKey
   base: web3.PublicKey
@@ -59,7 +59,14 @@ export interface SplitWithSeedInstructionAccounts {
 }
 
 export const splitWithSeedInstructionDiscriminator = [
-  87, 149, 132, 167, 56, 137, 2, 0,
+  87,
+  149,
+  132,
+  167,
+  56,
+  137,
+  2,
+  0,
 ]
 
 /**

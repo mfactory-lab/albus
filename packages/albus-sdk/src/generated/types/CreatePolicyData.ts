@@ -9,7 +9,7 @@ import * as beet from '@metaplex-foundation/beet'
 import type { PolicyRule } from './PolicyRule'
 import { policyRuleBeet } from './PolicyRule'
 
-export interface CreatePolicyData {
+export type CreatePolicyData = {
   code: string
   name: string
   description: string

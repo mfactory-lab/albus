@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface UpdateCredentialData {
+export type UpdateCredentialData = {
   uri: string
   name: string
 }

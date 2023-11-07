@@ -31,7 +31,7 @@ export const splTransferStruct = new beet.BeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['amount', beet.u64],
   ],
-  'SplTransferInstructionArgs'
+  'SplTransferInstructionArgs',
 )
 /**
  * Accounts required by the _splTransfer_ instruction
@@ -41,6 +41,7 @@ export const splTransferStruct = new beet.BeetArgsStruct<
  * @property [] tokenMint
  * @property [_writable_] source
  * @property [_writable_] destination
+ * @property [] policy
  * @property [] proofRequest
  * @category Instructions
  * @category SplTransfer
@@ -52,6 +53,7 @@ export type SplTransferInstructionAccounts = {
   tokenMint: web3.PublicKey
   source: web3.PublicKey
   destination: web3.PublicKey
+  policy: web3.PublicKey
   proofRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -59,7 +61,14 @@ export type SplTransferInstructionAccounts = {
 }
 
 export const splTransferInstructionDiscriminator = [
-  67, 186, 237, 99, 235, 243, 166, 198,
+  67,
+  186,
+  237,
+  99,
+  235,
+  243,
+  166,
+  198,
 ]
 
 /**
@@ -75,7 +84,7 @@ export const splTransferInstructionDiscriminator = [
 export function createSplTransferInstruction(
   accounts: SplTransferInstructionAccounts,
   args: SplTransferInstructionArgs,
-  programId = new web3.PublicKey('J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c')
+  programId = new web3.PublicKey('J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c'),
 ) {
   const [data] = splTransferStruct.serialize({
     instructionDiscriminator: splTransferInstructionDiscriminator,
@@ -105,6 +114,11 @@ export function createSplTransferInstruction(
     {
       pubkey: accounts.destination,
       isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.policy,
+      isWritable: false,
       isSigner: false,
     },
     {

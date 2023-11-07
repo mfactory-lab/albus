@@ -9,7 +9,7 @@ import type * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 
-export interface UpdateTrusteeData {
+export type UpdateTrusteeData = {
   newAuthority: beet.COption<web3.PublicKey>
   name: beet.COption<string>
   email: beet.COption<string>

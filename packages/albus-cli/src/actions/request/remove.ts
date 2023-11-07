@@ -30,7 +30,7 @@ import log from 'loglevel'
 import { exploreTransaction } from '@/utils'
 import { useContext } from '@/context'
 
-interface Opts {}
+type Opts = {}
 
 export async function remove(addr: string, _opts: Opts) {
   const { client } = useContext()

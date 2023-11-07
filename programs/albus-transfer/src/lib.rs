@@ -32,18 +32,17 @@ declare_id!("J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c");
 
 #[program]
 pub mod albus_transfer {
-    use albus_solana_verifier::AlbusCompliant;
+    use albus_solana_verifier::AlbusVerifier;
     use anchor_lang::system_program;
     use anchor_spl::token;
 
     use super::*;
 
     pub fn transfer(ctx: Context<AlbusTransfer>, amount: u64) -> Result<()> {
-        AlbusCompliant::new(&ctx.accounts.proof_request)
-            .with_user(ctx.accounts.sender.key())
-            // TODO: implement `with_policy`
-            // .with_policy(...)
-            .check()?;
+        AlbusVerifier::new(&ctx.accounts.proof_request)
+            .check_policy(ctx.accounts.policy.key())
+            .check_owner(ctx.accounts.sender.key())
+            .run()?;
 
         system_program::transfer(
             CpiContext::new(
@@ -60,11 +59,10 @@ pub mod albus_transfer {
     }
 
     pub fn spl_transfer(ctx: Context<AlbusSplTransfer>, amount: u64) -> Result<()> {
-        AlbusCompliant::new(&ctx.accounts.proof_request)
-            .with_user(ctx.accounts.sender.key())
-            // TODO: implement `with_policy`
-            // .with_policy(...)
-            .check()?;
+        AlbusVerifier::new(&ctx.accounts.proof_request)
+            .check_policy(ctx.accounts.policy.key())
+            .check_owner(ctx.accounts.sender.key())
+            .run()?;
 
         token::transfer(
             CpiContext::new(
@@ -90,7 +88,10 @@ pub mod albus_transfer {
         #[account(mut)]
         pub receiver: AccountInfo<'info>,
 
-        /// CHECK: account checked in [AlbusCompliant]
+        /// CHECK: account checked in [AlbusVerifier]
+        pub policy: AccountInfo<'info>,
+
+        /// CHECK: account checked in [AlbusVerifier]
         pub proof_request: AccountInfo<'info>,
 
         pub system_program: Program<'info, System>,
@@ -121,7 +122,10 @@ pub mod albus_transfer {
         )]
         pub destination: Account<'info, token::TokenAccount>,
 
-        /// CHECK: account checked in [AlbusCompliant]
+        /// CHECK: account checked in [AlbusVerifier]
+        pub policy: AccountInfo<'info>,
+
+        /// CHECK: account checked in [AlbusVerifier]
         pub proof_request: AccountInfo<'info>,
 
         pub token_program: Program<'info, token::Token>,

@@ -29,9 +29,14 @@
 import { assert, describe, it } from 'vitest'
 import {
   altBn128G1Neg,
-  bytesToFinite, decodeG1, decodeProof, decodePublicSignals,
+  bytesToFinite,
+  decodeG1,
+  decodeProof,
+  decodePublicSignals,
   decodeVerifyingKey,
-  encodeG1, encodeProof, encodePublicSignals,
+  encodeG1,
+  encodeProof,
+  encodePublicSignals,
   encodeVerifyingKey,
   finiteToBytes,
 } from '../src/zkp'

@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category Swap
  * @category generated
  */
-export interface SwapInstructionArgs {
+export type SwapInstructionArgs = {
   amountIn: beet.bignum
   minimumAmountOut: beet.bignum
 }
@@ -38,43 +38,53 @@ export const swapStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _swap_ instruction
  *
- * @property [] swap
+ * @property [] proofRequest (optional)
+ * @property [] tokenSwap
  * @property [] authority
  * @property [**signer**] userTransferAuthority
- * @property [_writable_] source
- * @property [_writable_] swapSource
- * @property [_writable_] swapDestination
- * @property [_writable_] destination
+ * @property [_writable_] userSource
+ * @property [_writable_] userDestination
+ * @property [_writable_] poolSource
+ * @property [_writable_] poolDestination
  * @property [_writable_] poolMint
  * @property [_writable_] poolFee
- * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [] hostFeeAccount (optional)
  * @category Instructions
  * @category Swap
  * @category generated
  */
-export interface SwapInstructionAccounts {
-  swap: web3.PublicKey
+export type SwapInstructionAccounts = {
+  proofRequest?: web3.PublicKey
+  tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
-  source: web3.PublicKey
-  swapSource: web3.PublicKey
-  swapDestination: web3.PublicKey
-  destination: web3.PublicKey
+  userSource: web3.PublicKey
+  userDestination: web3.PublicKey
+  poolSource: web3.PublicKey
+  poolDestination: web3.PublicKey
   poolMint: web3.PublicKey
   poolFee: web3.PublicKey
-  splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  hostFeeAccount?: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
 export const swapInstructionDiscriminator = [
-  248, 198, 158, 145, 225, 117, 135, 200,
+  248,
+  198,
+  158,
+  145,
+  225,
+  117,
+  135,
+  200,
 ]
 
 /**
  * Creates a _Swap_ instruction.
+ *
+ * Optional accounts that are not provided default to the program ID since
+ * this was indicated in the IDL from which this instruction was generated.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
@@ -86,7 +96,7 @@ export const swapInstructionDiscriminator = [
 export function createSwapInstruction(
   accounts: SwapInstructionAccounts,
   args: SwapInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+  programId = new web3.PublicKey('J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea'),
 ) {
   const [data] = swapStruct.serialize({
     instructionDiscriminator: swapInstructionDiscriminator,
@@ -94,7 +104,12 @@ export function createSwapInstruction(
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.swap,
+      pubkey: accounts.proofRequest ?? programId,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.tokenSwap,
       isWritable: false,
       isSigner: false,
     },
@@ -109,22 +124,22 @@ export function createSwapInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.source,
+      pubkey: accounts.userSource,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.swapSource,
+      pubkey: accounts.userDestination,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.swapDestination,
+      pubkey: accounts.poolSource,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.destination,
+      pubkey: accounts.poolDestination,
       isWritable: true,
       isSigner: false,
     },
@@ -139,12 +154,7 @@ export function createSwapInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.splTokenSwapProgram,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.zkpRequest,
+      pubkey: accounts.hostFeeAccount ?? programId,
       isWritable: false,
       isSigner: false,
     },

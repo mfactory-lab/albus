@@ -379,7 +379,7 @@ export class SMTMemDb {
   }
 }
 
-export interface AddIntoSmtResponse {
+export type AddIntoSmtResponse = {
   oldRoot: bigint
   oldKey: bigint
   oldValue: bigint
@@ -388,7 +388,7 @@ export interface AddIntoSmtResponse {
   isOld0: boolean
 }
 
-export interface UpdateSmtResponse {
+export type UpdateSmtResponse = {
   oldRoot: bigint
   oldKey: bigint
   oldValue: bigint
@@ -398,7 +398,7 @@ export interface UpdateSmtResponse {
   newRoot: bigint
 }
 
-export interface DeleteFromSmtResponse {
+export type DeleteFromSmtResponse = {
   oldRoot: bigint
   oldKey: bigint
   oldValue: bigint
@@ -409,7 +409,7 @@ export interface DeleteFromSmtResponse {
   isOld0: boolean
 }
 
-export interface FindFromSmtResponse {
+export type FindFromSmtResponse = {
   found: boolean
   key: bigint
   value: bigint

@@ -28,7 +28,7 @@
 
 use anchor_lang::prelude::*;
 
-use crate::error::AlbusError;
+use crate::errors::AlbusError;
 use crate::state::Policy;
 use crate::state::ServiceProvider;
 

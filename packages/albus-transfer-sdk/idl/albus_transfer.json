@@ -16,6 +16,11 @@
           "isSigner": false
         },
         {
+          "name": "policy",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "proofRequest",
           "isMut": false,
           "isSigner": false
@@ -59,6 +64,11 @@
         {
           "name": "destination",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "policy",
+          "isMut": false,
           "isSigner": false
         },
         {

@@ -16,7 +16,7 @@ import { verificationKeyBeet } from '../types/VerificationKey'
  * @category Accounts
  * @category generated
  */
-export interface CircuitArgs {
+export type CircuitArgs = {
   code: string
   name: string
   description: string

@@ -17,7 +17,7 @@ import {
  * @category CreateInvestigationRequest
  * @category generated
  */
-export interface CreateInvestigationRequestInstructionArgs {
+export type CreateInvestigationRequestInstructionArgs = {
   data: CreateInvestigationRequestData
 }
 /**
@@ -47,7 +47,7 @@ export const createInvestigationRequestStruct = new beet.FixableBeetArgsStruct<
  * @category CreateInvestigationRequest
  * @category generated
  */
-export interface CreateInvestigationRequestInstructionAccounts {
+export type CreateInvestigationRequestInstructionAccounts = {
   investigationRequest: web3.PublicKey
   proofRequest: web3.PublicKey
   serviceProvider: web3.PublicKey
@@ -57,7 +57,14 @@ export interface CreateInvestigationRequestInstructionAccounts {
 }
 
 export const createInvestigationRequestInstructionDiscriminator = [
-  252, 6, 45, 22, 207, 47, 209, 212,
+  252,
+  6,
+  45,
+  22,
+  207,
+  47,
+  209,
+  212,
 ]
 
 /**

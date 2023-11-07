@@ -29,7 +29,7 @@
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {}
+type Opts = {}
 
 export async function remove(code: string, _opts: Opts) {
   const { client } = useContext()

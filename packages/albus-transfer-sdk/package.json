@@ -1,31 +1,34 @@
 {
-  "name": "@mfactory-lab/albus-transfer-sdk",
-  "version": "0.0.10",
-  "description": "Albus Transfer SDK",
+  "name": "@albus-finance/transfer-sdk",
   "type": "module",
+  "version": "0.0.11",
+  "description": "Albus Transfer SDK",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-transfer-sdk"
   },
   "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "dev": "vite build --watch",
+    "_dev": "vite build --watch",
     "build": "vite build",
-    "release": "release-it --ci",
-    "generate": "DEBUG='(solita|rustbin):(info|error)' solita"
+    "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
+    "release": "release-it",
+    "release:ci": "release-it --ci -VV",
+    "release:dry": "release-it --ci --dry-run",
+    "release:pre": "release-it --preRelease=next"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
@@ -34,11 +37,10 @@
     "@solana/web3.js": "^1.77.3"
   },
   "devDependencies": {
-    "@mfactory-lab/release-it-config": "workspace:^",
-    "@metaplex-foundation/solita": "^0.20.0"
+    "@metaplex-foundation/solita": "^0.20.0",
+    "release-it-config": "workspace:^"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   }
 }

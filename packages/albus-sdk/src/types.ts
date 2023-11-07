@@ -32,8 +32,6 @@ export type AlbusNftCode = 'DC' | 'ID'
 export enum KnownSignals {
   Timestamp = 'timestamp',
   CredentialRoot = 'credentialRoot',
-  CredentialProof = 'credentialProof',
-  CredentialKey = 'credentialKey',
   IssuerPublicKey = 'issuerPk',
   IssuerSignature = 'issuerSignature',
   UserPrivateKey = 'userPrivateKey',

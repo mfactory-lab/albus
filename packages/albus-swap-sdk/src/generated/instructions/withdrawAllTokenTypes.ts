@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawAllTokenTypes
  * @category generated
  */
-export interface WithdrawAllTokenTypesInstructionArgs {
+export type WithdrawAllTokenTypesInstructionArgs = {
   poolTokenAmount: beet.bignum
   minimumTokenAAmount: beet.bignum
   minimumTokenBAmount: beet.bignum
@@ -40,41 +40,44 @@ export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _withdrawAllTokenTypes_ instruction
  *
- * @property [] swap
+ * @property [] tokenSwap
  * @property [] authority
  * @property [**signer**] userTransferAuthority
- * @property [_writable_] destinationTokenA
- * @property [_writable_] destinationTokenB
- * @property [_writable_] swapTokenA
- * @property [_writable_] swapTokenB
  * @property [_writable_] poolMint
  * @property [_writable_] source
- * @property [_writable_] feeAccount
- * @property [] splTokenSwapProgram
- * @property [] zkpRequest
+ * @property [_writable_] swapTokenA
+ * @property [_writable_] swapTokenB
+ * @property [_writable_] destTokenA
+ * @property [_writable_] destTokenB
+ * @property [_writable_] poolFee
  * @category Instructions
  * @category WithdrawAllTokenTypes
  * @category generated
  */
-export interface WithdrawAllTokenTypesInstructionAccounts {
-  swap: web3.PublicKey
+export type WithdrawAllTokenTypesInstructionAccounts = {
+  tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
-  destinationTokenA: web3.PublicKey
-  destinationTokenB: web3.PublicKey
-  swapTokenA: web3.PublicKey
-  swapTokenB: web3.PublicKey
   poolMint: web3.PublicKey
   source: web3.PublicKey
-  feeAccount: web3.PublicKey
-  splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
+  swapTokenA: web3.PublicKey
+  swapTokenB: web3.PublicKey
+  destTokenA: web3.PublicKey
+  destTokenB: web3.PublicKey
+  poolFee: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
 export const withdrawAllTokenTypesInstructionDiscriminator = [
-  189, 254, 156, 174, 210, 9, 164, 216,
+  189,
+  254,
+  156,
+  174,
+  210,
+  9,
+  164,
+  216,
 ]
 
 /**
@@ -90,7 +93,7 @@ export const withdrawAllTokenTypesInstructionDiscriminator = [
 export function createWithdrawAllTokenTypesInstruction(
   accounts: WithdrawAllTokenTypesInstructionAccounts,
   args: WithdrawAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+  programId = new web3.PublicKey('J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea'),
 ) {
   const [data] = withdrawAllTokenTypesStruct.serialize({
     instructionDiscriminator: withdrawAllTokenTypesInstructionDiscriminator,
@@ -98,7 +101,7 @@ export function createWithdrawAllTokenTypesInstruction(
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.swap,
+      pubkey: accounts.tokenSwap,
       isWritable: false,
       isSigner: false,
     },
@@ -113,12 +116,12 @@ export function createWithdrawAllTokenTypesInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.destinationTokenA,
+      pubkey: accounts.poolMint,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.destinationTokenB,
+      pubkey: accounts.source,
       isWritable: true,
       isSigner: false,
     },
@@ -133,28 +136,18 @@ export function createWithdrawAllTokenTypesInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.poolMint,
+      pubkey: accounts.destTokenA,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.source,
+      pubkey: accounts.destTokenB,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.feeAccount,
+      pubkey: accounts.poolFee,
       isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.splTokenSwapProgram,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.zkpRequest,
-      isWritable: false,
       isSigner: false,
     },
     {

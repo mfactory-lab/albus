@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category DepositAllTokenTypes
  * @category generated
  */
-export interface DepositAllTokenTypesInstructionArgs {
+export type DepositAllTokenTypesInstructionArgs = {
   poolTokenAmount: beet.bignum
   maximumTokenAAmount: beet.bignum
   maximumTokenBAmount: beet.bignum
@@ -40,39 +40,42 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _depositAllTokenTypes_ instruction
  *
- * @property [] swap
+ * @property [] tokenSwap
  * @property [] authority
  * @property [**signer**] userTransferAuthority
- * @property [_writable_] depositTokenA
- * @property [_writable_] depositTokenB
+ * @property [_writable_] userTokenA
+ * @property [_writable_] userTokenB
  * @property [_writable_] swapTokenA
  * @property [_writable_] swapTokenB
  * @property [_writable_] poolMint
  * @property [_writable_] destination
- * @property [] splTokenSwapProgram
- * @property [] zkpRequest
  * @category Instructions
  * @category DepositAllTokenTypes
  * @category generated
  */
-export interface DepositAllTokenTypesInstructionAccounts {
-  swap: web3.PublicKey
+export type DepositAllTokenTypesInstructionAccounts = {
+  tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
-  depositTokenA: web3.PublicKey
-  depositTokenB: web3.PublicKey
+  userTokenA: web3.PublicKey
+  userTokenB: web3.PublicKey
   swapTokenA: web3.PublicKey
   swapTokenB: web3.PublicKey
   poolMint: web3.PublicKey
   destination: web3.PublicKey
-  splTokenSwapProgram: web3.PublicKey
-  zkpRequest: web3.PublicKey
   tokenProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
 export const depositAllTokenTypesInstructionDiscriminator = [
-  32, 95, 69, 60, 75, 79, 205, 238,
+  32,
+  95,
+  69,
+  60,
+  75,
+  79,
+  205,
+  238,
 ]
 
 /**
@@ -88,7 +91,7 @@ export const depositAllTokenTypesInstructionDiscriminator = [
 export function createDepositAllTokenTypesInstruction(
   accounts: DepositAllTokenTypesInstructionAccounts,
   args: DepositAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('8NHcjkbgyuZzcwryaGJ9zf7JRqKfsHipuNDQdhtk9giR'),
+  programId = new web3.PublicKey('J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea'),
 ) {
   const [data] = depositAllTokenTypesStruct.serialize({
     instructionDiscriminator: depositAllTokenTypesInstructionDiscriminator,
@@ -96,7 +99,7 @@ export function createDepositAllTokenTypesInstruction(
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.swap,
+      pubkey: accounts.tokenSwap,
       isWritable: false,
       isSigner: false,
     },
@@ -111,12 +114,12 @@ export function createDepositAllTokenTypesInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.depositTokenA,
+      pubkey: accounts.userTokenA,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.depositTokenB,
+      pubkey: accounts.userTokenB,
       isWritable: true,
       isSigner: false,
     },
@@ -138,16 +141,6 @@ export function createDepositAllTokenTypesInstruction(
     {
       pubkey: accounts.destination,
       isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.splTokenSwapProgram,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.zkpRequest,
-      isWritable: false,
       isSigner: false,
     },
     {
