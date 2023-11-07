@@ -28,7 +28,8 @@
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
     "release:dry": "release-it --ci --dry-run",
-    "release:pre": "release-it --preRelease=next"
+    "release:pre": "release-it --preRelease=next",
+    "prepublishOnly": "vite build"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
