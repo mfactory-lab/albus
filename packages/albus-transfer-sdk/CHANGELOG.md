@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/transfer-sdk-v0.2.0...@albus-finance/transfer-sdk-v0.2.1) (2023-11-07)
+
+
+### 🐞 Bug Fixes
+
+* **transfer-sdk:** create tokean account, calc fee ([a7596fa](https://github.com/mfactory-lab/albus/commit/a7596fa10009160c7c744587ce37f82c7a876ac7))
+
 ## 0.2.0 (2023-11-07)
 
 
