@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.1...@albus-finance/sdk-v0.2.2-next.1) (2023-11-07)
+
+
+### 🐞 Bug Fixes
+
+* ci ([1694191](https://github.com/mfactory-lab/albus/commit/1694191467636691b7d60051e235507bed88f382))
+* ci ([056818e](https://github.com/mfactory-lab/albus/commit/056818e6c226008e731087946c30bb32810c350a))
+
 ## [0.2.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.0...@albus-finance/sdk-v0.2.1) (2023-11-07)
 
 
