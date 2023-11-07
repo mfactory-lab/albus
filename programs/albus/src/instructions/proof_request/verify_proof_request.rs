@@ -55,9 +55,15 @@ pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
         };
 
         Groth16Verifier::new(&proof, &req.public_inputs, &vk)
-            .map_err(|_| AlbusError::InvalidPublicInputs)?
+            .map_err(|e| {
+                msg!("Groth16Verifier: {:?}", e);
+                AlbusError::InvalidPublicInputs
+            })?
             .verify()
-            .map_err(|_| AlbusError::ProofVerificationFailed)?;
+            .map_err(|e| {
+                msg!("Groth16Verifier: {:?}", e);
+                AlbusError::ProofVerificationFailed
+            })?;
 
         let timestamp = Clock::get()?.unix_timestamp;
 
