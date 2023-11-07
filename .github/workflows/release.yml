@@ -6,9 +6,17 @@ on:
       package:
         required: true
         type: string
+      github_token:
+        required: true
+        type: string
+      npm_token:
+        required: true
+        type: string
 
 env:
   PACKAGE: ${{ inputs.package }}
+  GITHUB_TOKEN: ${{ inputs.github_token }}
+  NPM_TOKEN: ${{ inputs.npm_token }}
 
 jobs:
   release:
@@ -50,7 +58,7 @@ jobs:
       - name: Initialize the NPM config
         run: pnpm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ env.NPM_TOKEN }}
 
       - name: Setup git
         run: |
@@ -64,6 +72,6 @@ jobs:
             pnpm -F ${{ env.PACKAGE }} release:pre
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ env.NPM_TOKEN }}
 

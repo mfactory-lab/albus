@@ -13,3 +13,5 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       package: "@albus-finance/sdk"
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+      npm_token: ${{ secrets.NPM_TOKEN }}
