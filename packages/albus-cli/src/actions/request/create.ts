@@ -31,7 +31,7 @@ import { show } from './show'
 import { useContext } from '@/context'
 import { exploreTransaction } from '@/utils'
 
-interface Opts {
+type Opts = {
   // Expires in seconds
   expiresIn?: number
 }

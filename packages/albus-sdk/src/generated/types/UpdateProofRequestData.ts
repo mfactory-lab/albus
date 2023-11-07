@@ -11,7 +11,7 @@ import {
   proofRequestStatusBeet,
 } from './ProofRequestStatus'
 
-export interface UpdateProofRequestData {
+export type UpdateProofRequestData = {
   status: ProofRequestStatus
 }
 

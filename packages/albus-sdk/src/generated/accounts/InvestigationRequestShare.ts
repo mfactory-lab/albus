@@ -18,7 +18,7 @@ import {
  * @category Accounts
  * @category generated
  */
-export interface InvestigationRequestShareArgs {
+export type InvestigationRequestShareArgs = {
   investigationRequest: web3.PublicKey
   proofRequestOwner: web3.PublicKey
   trustee: web3.PublicKey
@@ -31,7 +31,14 @@ export interface InvestigationRequestShareArgs {
 }
 
 export const investigationRequestShareDiscriminator = [
-  100, 72, 101, 243, 197, 9, 230, 18,
+  100,
+  72,
+  101,
+  243,
+  197,
+  9,
+  230,
+  18,
 ]
 /**
  * Holds the data for the {@link InvestigationRequestShare} Account and provides de/serialization

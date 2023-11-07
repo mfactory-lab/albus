@@ -47,7 +47,7 @@ enum SelectionMode {
   Exclusion = 0,
 }
 
-describe('CountryPolicy', async () => {
+describe('countryPolicy', async () => {
   const issuerKeypair = Keypair.generate()
   const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
 

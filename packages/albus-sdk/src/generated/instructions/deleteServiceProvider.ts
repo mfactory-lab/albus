@@ -28,7 +28,7 @@ export const deleteServiceProviderStruct = new beet.BeetArgsStruct<{
  * @category DeleteServiceProvider
  * @category generated
  */
-export interface DeleteServiceProviderInstructionAccounts {
+export type DeleteServiceProviderInstructionAccounts = {
   serviceProvider: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -36,7 +36,14 @@ export interface DeleteServiceProviderInstructionAccounts {
 }
 
 export const deleteServiceProviderInstructionDiscriminator = [
-  186, 177, 156, 65, 168, 2, 56, 128,
+  186,
+  177,
+  156,
+  65,
+  168,
+  2,
+  56,
+  128,
 ]
 
 /**

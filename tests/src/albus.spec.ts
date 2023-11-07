@@ -32,7 +32,7 @@ import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../packages/albus-sdk/src'
 import { airdrop, assertErrorCode, loadFixture, newProvider, payer, provider } from './utils'
 
-describe('Albus', async () => {
+describe('albus', async () => {
   const client = new AlbusClient(provider)
 
   const serviceCode = 'acme'
@@ -344,7 +344,7 @@ describe('Albus', async () => {
     }
   })
 
-  describe('Investigation', () => {
+  describe('investigation', () => {
     let investigationAddress: PublicKey
 
     it('can create investigation request', async () => {

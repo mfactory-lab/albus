@@ -13,7 +13,7 @@ import * as web3 from '@solana/web3.js'
  * @category Transfer
  * @category generated
  */
-export interface TransferInstructionArgs {
+export type TransferInstructionArgs = {
   amount: beet.bignum
 }
 /**
@@ -43,7 +43,7 @@ export const transferStruct = new beet.BeetArgsStruct<
  * @category Transfer
  * @category generated
  */
-export interface TransferInstructionAccounts {
+export type TransferInstructionAccounts = {
   sender: web3.PublicKey
   receiver: web3.PublicKey
   policy: web3.PublicKey
@@ -53,7 +53,14 @@ export interface TransferInstructionAccounts {
 }
 
 export const transferInstructionDiscriminator = [
-  163, 52, 200, 231, 140, 3, 69, 186,
+  163,
+  52,
+  200,
+  231,
+  140,
+  3,
+  69,
+  186,
 ]
 
 /**

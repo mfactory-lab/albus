@@ -18,7 +18,7 @@ import {
  * @category MintCredential
  * @category generated
  */
-export interface MintCredentialInstructionArgs {
+export type MintCredentialInstructionArgs = {
   data: MintCredentialData
 }
 /**
@@ -53,7 +53,7 @@ export const mintCredentialStruct = new beet.FixableBeetArgsStruct<
  * @category MintCredential
  * @category generated
  */
-export interface MintCredentialInstructionAccounts {
+export type MintCredentialInstructionAccounts = {
   albusAuthority: web3.PublicKey
   tokenAccount: web3.PublicKey
   tokenRecord?: web3.PublicKey
@@ -70,7 +70,14 @@ export interface MintCredentialInstructionAccounts {
 }
 
 export const mintCredentialInstructionDiscriminator = [
-  136, 108, 131, 240, 163, 102, 204, 13,
+  136,
+  108,
+  131,
+  240,
+  163,
+  102,
+  204,
+  13,
 ]
 
 /**

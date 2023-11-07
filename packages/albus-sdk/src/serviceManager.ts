@@ -27,7 +27,7 @@
  */
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import * as Albus from '@mfactory-lab/albus-core'
+import * as Albus from '@albus-finance/core'
 import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import type { UpdateServiceProviderData } from './generated'
@@ -36,7 +36,8 @@ import {
   createCreateServiceProviderInstruction,
   createDeleteServiceProviderInstruction,
   createUpdateServiceProviderInstruction,
-  errorFromCode, serviceProviderDiscriminator,
+  errorFromCode,
+  serviceProviderDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 
@@ -250,24 +251,24 @@ export enum ServiceContactType {
   Telegram = 3,
 }
 
-export interface ServiceContact {
+export type ServiceContact = {
   kind: ServiceContactType
   value: string
 }
 
-export interface CreateServiceProps extends Partial<UpdateServiceProviderData> {
+export type CreateServiceProps = {
   code: string
   name: string
   authority?: PublicKeyInitData
   trustees?: PublicKeyInitData[]
-}
+} & Partial<UpdateServiceProviderData>
 
-export interface UpdateServiceProps extends Partial<UpdateServiceProviderData> {
+export type UpdateServiceProps = {
   serviceProvider: PublicKeyInitData
   trustees?: PublicKeyInitData[]
-}
+} & Partial<UpdateServiceProviderData>
 
-export interface FindServicesProps {
+export type FindServicesProps = {
   authority?: PublicKeyInitData
   code?: string
   name?: string

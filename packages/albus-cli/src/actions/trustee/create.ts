@@ -28,12 +28,12 @@
 
 import { Buffer } from 'node:buffer'
 import { readFileSync } from 'node:fs'
-import * as Albus from '@mfactory-lab/albus-core'
+import * as Albus from '@albus-finance/core'
 import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   email?: string
   website?: string
   keypair?: string

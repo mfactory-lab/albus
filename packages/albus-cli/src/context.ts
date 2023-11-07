@@ -32,7 +32,7 @@ import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/j
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-import { AlbusClient } from '@mfactory-lab/albus-sdk'
+import { AlbusClient } from '@albus-finance/sdk'
 import { clusterUrl } from './utils'
 import config from './config'
 
@@ -67,7 +67,7 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
   return context = { keypair: wallet.payer, issuerKeypair, provider, client, cluster, config, metaplex }
 }
 
-export interface Context {
+export type Context = {
   cluster: Cluster
   provider: AnchorProvider
   keypair: Keypair

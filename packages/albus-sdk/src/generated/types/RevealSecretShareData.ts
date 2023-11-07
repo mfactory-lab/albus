@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface RevealSecretShareData {
+export type RevealSecretShareData = {
   index: number
   share: Uint8Array
 }

@@ -44,7 +44,7 @@ export const depositStakeStruct = new beet.BeetArgsStruct<{
  * @category DepositStake
  * @category generated
  */
-export interface DepositStakeInstructionAccounts {
+export type DepositStakeInstructionAccounts = {
   zkpRequest: web3.PublicKey
   authority: web3.PublicKey
   stakePool: web3.PublicKey
@@ -67,7 +67,14 @@ export interface DepositStakeInstructionAccounts {
 }
 
 export const depositStakeInstructionDiscriminator = [
-  160, 167, 9, 220, 74, 243, 228, 43,
+  160,
+  167,
+  9,
+  220,
+  74,
+  243,
+  228,
+  43,
 ]
 
 /**

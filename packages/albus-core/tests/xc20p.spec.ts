@@ -31,7 +31,7 @@ import { assert, describe, it } from 'vitest'
 import { XC20P } from '../src/crypto'
 import { bigintToBytes, bytesToBigInt } from '../src/crypto/utils'
 
-describe('XC20P', async () => {
+describe('xc20p', async () => {
   it('can encrypt and decrypt data', async () => {
     const user1 = Keypair.generate()
     const user2 = Keypair.generate()

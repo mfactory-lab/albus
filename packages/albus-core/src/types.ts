@@ -50,7 +50,7 @@ export enum VerifyType {
 
 export type Claims = Record<string, any>
 
-export interface CredentialStatus {
+export type CredentialStatus = {
   id: string
   type: string
 }

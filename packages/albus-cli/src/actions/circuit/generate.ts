@@ -33,7 +33,7 @@ import * as snarkjs from 'snarkjs'
 import { downloadFile } from '@/utils'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
 }
 
 /**

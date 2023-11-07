@@ -17,7 +17,7 @@ import {
  * @category UpdateCircuitVk
  * @category generated
  */
-export interface UpdateCircuitVkInstructionArgs {
+export type UpdateCircuitVkInstructionArgs = {
   data: UpdateCircuitVkData
 }
 /**
@@ -45,7 +45,7 @@ export const updateCircuitVkStruct = new beet.FixableBeetArgsStruct<
  * @category UpdateCircuitVk
  * @category generated
  */
-export interface UpdateCircuitVkInstructionAccounts {
+export type UpdateCircuitVkInstructionAccounts = {
   circuit: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -53,7 +53,14 @@ export interface UpdateCircuitVkInstructionAccounts {
 }
 
 export const updateCircuitVkInstructionDiscriminator = [
-  229, 19, 102, 93, 187, 107, 67, 117,
+  229,
+  19,
+  102,
+  93,
+  187,
+  107,
+  67,
+  117,
 ]
 
 /**

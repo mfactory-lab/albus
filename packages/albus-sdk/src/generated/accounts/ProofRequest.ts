@@ -20,7 +20,7 @@ import { proofDataBeet } from '../types/ProofData'
  * @category Accounts
  * @category generated
  */
-export interface ProofRequestArgs {
+export type ProofRequestArgs = {
   serviceProvider: web3.PublicKey
   policy: web3.PublicKey
   circuit: web3.PublicKey

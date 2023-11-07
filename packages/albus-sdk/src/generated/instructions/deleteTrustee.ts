@@ -28,7 +28,7 @@ export const deleteTrusteeStruct = new beet.BeetArgsStruct<{
  * @category DeleteTrustee
  * @category generated
  */
-export interface DeleteTrusteeInstructionAccounts {
+export type DeleteTrusteeInstructionAccounts = {
   trustee: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -36,7 +36,14 @@ export interface DeleteTrusteeInstructionAccounts {
 }
 
 export const deleteTrusteeInstructionDiscriminator = [
-  153, 117, 70, 131, 188, 92, 114, 219,
+  153,
+  117,
+  70,
+  131,
+  188,
+  92,
+  114,
+  219,
 ]
 
 /**

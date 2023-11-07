@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as Albus from '@mfactory-lab/albus-core'
+import * as Albus from '@albus-finance/core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
@@ -102,7 +102,7 @@ export class CircuitManager {
   }
 
   /**
-   * Create new circuit
+   * Create a new circuit
    * @param props
    * @param opts
    */
@@ -218,7 +218,7 @@ export class CircuitManager {
   }
 }
 
-export interface CreateCircuitProps {
+export type CreateCircuitProps = {
   code: string
   name: string
   description?: string
@@ -229,12 +229,12 @@ export interface CreateCircuitProps {
   publicSignals: string[]
 }
 
-export interface UpdateCircuitVkProps {
+export type UpdateCircuitVkProps = {
   code: string
   vk: VK
 }
 
-interface VK {
+type VK = {
   readonly nPublic: number
   readonly curve: string
   readonly vk_alpha_1: number[]

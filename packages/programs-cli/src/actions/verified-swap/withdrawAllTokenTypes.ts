@@ -34,7 +34,7 @@ import { TOKEN_SWAP_PROGRAM_ID, TokenSwap } from '@solana/spl-token-swap'
 import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
-interface Opts {
+type Opts = {
   zkp: string
   swap: string
   minA: string

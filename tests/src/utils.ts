@@ -27,12 +27,12 @@
  */
 
 import { readFileSync } from 'node:fs'
-import type { AlbusClient, ProofRequestStatus } from '@mfactory-lab/albus-sdk'
 import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { assert } from 'vitest'
+import type { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk'
 
 export const payer = Keypair.fromSecretKey(Uint8Array.from([
   46, 183, 156, 94, 55, 128, 248, 0, 49, 70, 183, 244, 178, 0, 0, 236,

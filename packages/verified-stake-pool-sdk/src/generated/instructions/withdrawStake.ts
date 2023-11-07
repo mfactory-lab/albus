@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawStake
  * @category generated
  */
-export interface WithdrawStakeInstructionArgs {
+export type WithdrawStakeInstructionArgs = {
   amount: beet.bignum
 }
 /**
@@ -54,7 +54,7 @@ export const withdrawStakeStruct = new beet.BeetArgsStruct<
  * @category WithdrawStake
  * @category generated
  */
-export interface WithdrawStakeInstructionAccounts {
+export type WithdrawStakeInstructionAccounts = {
   zkpRequest: web3.PublicKey
   authority: web3.PublicKey
   stakePool: web3.PublicKey
@@ -74,7 +74,14 @@ export interface WithdrawStakeInstructionAccounts {
 }
 
 export const withdrawStakeInstructionDiscriminator = [
-  153, 8, 22, 138, 105, 176, 87, 66,
+  153,
+  8,
+  22,
+  138,
+  105,
+  176,
+  87,
+  66,
 ]
 
 /**

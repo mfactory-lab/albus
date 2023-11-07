@@ -1,4 +1,3 @@
-
 /*
  * This file is part of Albus code.
  *
@@ -27,9 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-declare module "circom_tester" {
-  interface WasmTester {
-    symbols: { [key: string]: { labelIdx: number, varIdx: number, componentIdx: number } }
+declare module 'circom_tester' {
+  type WasmTester = {
+    symbols: { [key: string]: { labelIdx: number; varIdx: number; componentIdx: number } }
     calculateWitness<T>(witness: T, sanityCheck?: boolean): Promise<any>
     checkConstraints<T>(witness: T): Promise<any>
     assertOut(actualOut: any, expectedOut: unknown): Promise<void>
@@ -38,5 +37,5 @@ declare module "circom_tester" {
     release(): Promise<void>
     getDecoratedOutput<T>(witness: T): Promise<string>
   }
-  function wasm(filename: string, opts?: Object): Promise<WasmTester>
+  function wasm(filename: string, opts?: NonNullable<unknown>): Promise<WasmTester>
 }

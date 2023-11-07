@@ -1,35 +1,42 @@
 {
-  "name": "@mfactory-lab/albus-sdk",
-  "version": "0.2.13",
-  "description": "Albus Protocol SDK",
+  "name": "@albus-finance/sdk",
   "type": "module",
+  "version": "0.2.0",
+  "description": "Albus Protocol SDK",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-sdk"
   },
   "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
+    "test": "vitest",
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
-    "release": "release-it --ci",
-    "test": "vitest"
+    "release": "release-it",
+    "release:ci": "release-it --ci -VV",
+    "release:dry": "release-it --ci --dry-run",
+    "release:pre": "release-it --preRelease=next",
+    "prepublishOnly": "vite build"
+  },
+  "peerDependencies": {
+    "snarkjs": "*"
   },
   "dependencies": {
-    "@mfactory-lab/albus-core": "workspace:^",
+    "@albus-finance/core": "workspace:^",
     "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
@@ -38,14 +45,10 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@mfactory-lab/release-it-config": "workspace:^",
-    "@metaplex-foundation/solita": "^0.20.0"
-  },
-  "peerDependencies": {
-    "snarkjs": "*"
+    "@metaplex-foundation/solita": "^0.20.0",
+    "release-it-config": "workspace:^"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   }
 }

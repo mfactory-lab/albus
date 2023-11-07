@@ -58,7 +58,7 @@ const credential = {
 }
 // decryptionKey: ["expose","excuse","beef","left","cradle","bean","awesome","draw","curtain","like","boring","patch"]
 
-describe('Albus credential', () => {
+describe('albusCredential', () => {
   const holder = Keypair.generate()
 
   const client = new AlbusClient(provider)

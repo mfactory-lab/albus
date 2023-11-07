@@ -1,5 +1,5 @@
-const os = require('os')
-const path = require('path')
+const os = require('node:os')
+const path = require('node:path')
 
 const programName = 'verified_stake_pool'
 const programId = 'HN5hBpR28T8Mjkm1CB1D8Hj5z5rHQ7VkD2ZWmZtFk49e'

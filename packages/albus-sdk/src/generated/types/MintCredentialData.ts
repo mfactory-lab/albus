@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface MintCredentialData {
+export type MintCredentialData = {
   uri: string
 }
 

@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface CreateCircuitData {
+export type CreateCircuitData = {
   code: string
   name: string
   description: string

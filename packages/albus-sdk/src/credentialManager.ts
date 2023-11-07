@@ -28,8 +28,8 @@
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
-import type { VerifiableCredential } from '@mfactory-lab/albus-core'
-import * as Albus from '@mfactory-lab/albus-core'
+import type { VerifiableCredential } from '@albus-finance/core'
+import * as Albus from '@albus-finance/core'
 import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
 import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
 import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
@@ -243,41 +243,40 @@ export class CredentialManager {
   }
 }
 
-export interface CredentialInfo {
+export type CredentialInfo = {
   address: PublicKey
   data: { [key: string]: string }
   credential?: VerifiableCredential
 }
 
-export interface CreateCredentialProps {
+export type CreateCredentialProps = {
   owner?: PublicKeyInitData
 }
 
-export interface UpdateCredentialProps {
+export type UpdateCredentialProps = {
   owner: PublicKeyInitData
   mint: PublicKeyInitData
   uri: string
   name?: string
 }
 
-export interface RevokeCredentialProps {
+export type RevokeCredentialProps = {
   mint: PublicKeyInitData
 }
 
-export interface LoadCredentialProps {
+export type LoadCredentialProps = {
   decryptionKey?: number[] | Uint8Array
 }
 
-export interface LoadAllCredentialProps extends LoadCredentialProps {
+export type LoadAllCredentialProps = {
   owner?: PublicKey
   throwError?: boolean
   pending?: boolean
-}
+} & LoadCredentialProps
 
-export interface LoadPresentationProps extends LoadCredentialProps {
-}
+export type LoadPresentationProps = NonNullable<unknown> & LoadCredentialProps
 
-export interface CreatePresentationProps {
+export type CreatePresentationProps = {
   holderSecretKey: number[] | Uint8Array
   credentials: VerifiableCredential[]
   // Example: ['birthDate', 'degree.type']

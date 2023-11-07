@@ -30,7 +30,7 @@ import Table from 'cli-table3'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
 }
 
 export async function show(addr: string, _opts: Opts) {
@@ -42,7 +42,7 @@ export async function show(addr: string, _opts: Opts) {
   log.info(trustee.pretty())
 }
 
-interface AllOpts {
+type AllOpts = {
   name?: string
   email?: string
   authority?: string

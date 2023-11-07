@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category Swap
  * @category generated
  */
-export interface SwapInstructionArgs {
+export type SwapInstructionArgs = {
   amountIn: beet.bignum
   minimumAmountOut: beet.bignum
 }
@@ -53,7 +53,7 @@ export const swapStruct = new beet.BeetArgsStruct<
  * @category Swap
  * @category generated
  */
-export interface SwapInstructionAccounts {
+export type SwapInstructionAccounts = {
   proofRequest?: web3.PublicKey
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
@@ -70,7 +70,14 @@ export interface SwapInstructionAccounts {
 }
 
 export const swapInstructionDiscriminator = [
-  248, 198, 158, 145, 225, 117, 135, 200,
+  248,
+  198,
+  158,
+  145,
+  225,
+  117,
+  135,
+  200,
 ]
 
 /**

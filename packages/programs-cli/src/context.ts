@@ -37,7 +37,7 @@ import { AlbusTransferClient } from '../../albus-transfer-sdk'
 import { AlbusSwapClient } from '../../albus-swap-sdk'
 import { clusterUrl } from './utils'
 
-export interface Context {
+export type Context = {
   cluster: Cluster
   provider: AnchorProvider
   stakeClient: VerifiedStakeClient

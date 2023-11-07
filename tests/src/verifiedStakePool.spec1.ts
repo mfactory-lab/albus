@@ -31,7 +31,7 @@
 // import { BN } from '@coral-xyz/anchor'
 // import { TOKEN_PROGRAM_ID, createAssociatedTokenAccount, createMint } from '@solana/spl-token'
 // import * as web3 from '@solana/web3.js'
-// import { AlbusClient } from '@mfactory-lab/albus-sdk'
+// import { AlbusClient } from '@albus-finance/sdk'
 // import { VerifiedStakePoolClient } from '@albus/verified-stake-pool-sdk'
 // import { STAKE_POOL_PROGRAM_ID, addValidatorToPool, initialize } from '@solana/spl-stake-pool'
 // import { assert, describe, it } from 'vitest'

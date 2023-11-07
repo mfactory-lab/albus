@@ -1,3 +1,3 @@
-# @mfactory-lab/albus-core
+# @albus-finance/core
 
 The core module of [albus-protocol](https://albus.finance/).

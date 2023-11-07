@@ -27,9 +27,9 @@
  */
 
 import { describe, it } from 'vitest'
-import { SMT } from '../src/crypto/smt'
+import { SMT } from '../src/crypto'
 
-describe('SMT', async () => {
+describe('smt', async () => {
   it('build', async () => {
     const smt = new SMT()
     for (let i = 0; i < 17; i++) {

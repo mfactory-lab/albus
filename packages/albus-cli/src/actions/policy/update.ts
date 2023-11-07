@@ -26,11 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { PolicyRule } from '@mfactory-lab/albus-sdk'
+import type { PolicyRule } from '@albus-finance/sdk'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   name?: string
   description?: string
   expirationPeriod?: number

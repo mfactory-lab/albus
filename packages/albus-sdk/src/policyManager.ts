@@ -27,7 +27,7 @@
  */
 
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import * as Albus from '@mfactory-lab/albus-core'
+import * as Albus from '@albus-finance/core'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import {
@@ -35,7 +35,8 @@ import {
   createCreatePolicyInstruction,
   createDeletePolicyInstruction,
   createUpdatePolicyInstruction,
-  errorFromCode, policyDiscriminator,
+  errorFromCode,
+  policyDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 
@@ -224,12 +225,12 @@ function preparePolicyRules(props: UpdatePolicyProps) {
   })) ?? []
 }
 
-export interface CreatePolicyProps extends UpdatePolicyProps {
+export type CreatePolicyProps = {
   circuitCode: string
   name: string
-}
+} & UpdatePolicyProps
 
-export interface UpdatePolicyProps {
+export type UpdatePolicyProps = {
   serviceCode: string
   code: string
   name?: string
@@ -243,12 +244,12 @@ export interface UpdatePolicyProps {
   }>
 }
 
-export interface DeletePolicyProps {
+export type DeletePolicyProps = {
   serviceCode: string
   code: string
 }
 
-export interface FindPolicyProps {
+export type FindPolicyProps = {
   circuitCode?: string
   serviceCode?: string
   withoutData?: boolean

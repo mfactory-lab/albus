@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as Albus from '@mfactory-lab/albus-core'
+import * as Albus from '@albus-finance/core'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type {
   Commitment,
@@ -48,8 +48,12 @@ import {
   ProofRequest,
   ServiceProvider,
   createCreateProofRequestInstruction,
-  createDeleteProofRequestInstruction, createProveProofRequestInstruction,
-  createUpdateProofRequestInstruction, createVerifyProofRequestInstruction, errorFromCode, proofRequestDiscriminator,
+  createDeleteProofRequestInstruction,
+  createProveProofRequestInstruction,
+  createUpdateProofRequestInstruction,
+  createVerifyProofRequestInstruction,
+  errorFromCode,
+  proofRequestDiscriminator,
 } from './generated'
 import type { PdaManager } from './pda'
 import type { ServiceManager } from './serviceManager'
@@ -494,25 +498,25 @@ export class ProofRequestManager {
   }
 }
 
-interface LoadFullResult {
+type LoadFullResult = {
   proofRequest: ProofRequest
   circuit?: Circuit
   policy?: Policy
   serviceProvider?: ServiceProvider
 }
 
-export interface CreateProofRequestProps {
+export type CreateProofRequestProps = {
   serviceCode: string
   policyCode: string
   expiresIn?: number
   maxPublicInputs?: number
 }
 
-export interface DeleteProofRequestProps {
+export type DeleteProofRequestProps = {
   proofRequest: PublicKeyInitData
 }
 
-export interface FindProofRequestProps {
+export type FindProofRequestProps = {
   user?: PublicKeyInitData
   serviceProvider?: PublicKeyInitData
   serviceProviderCode?: string
@@ -525,7 +529,7 @@ export interface FindProofRequestProps {
   noData?: boolean
 }
 
-export interface FullProveProps {
+export type FullProveProps = {
   proofRequest: PublicKeyInitData
   vc: PublicKeyInitData
   userPrivateKey: Uint8Array
@@ -535,11 +539,11 @@ export interface FullProveProps {
   verify?: boolean
 }
 
-export interface VerifyProps {
+export type VerifyProps = {
   proofRequest: PublicKeyInitData | ProofRequest
 }
 
-export interface ProveProps {
+export type ProveProps = {
   proofRequest: PublicKeyInitData
   proofRequestData?: ProofRequest
   proof: ProofData
@@ -547,11 +551,11 @@ export interface ProveProps {
   verify: boolean
 }
 
-export interface ChangeStatus {
+export type ChangeStatus = {
   proofRequest: PublicKeyInitData
   status: ProofRequestStatus
 }
-interface GenerateVerifiablePresentationProps {
+type GenerateVerifiablePresentationProps = {
   proofRequest: PublicKeyInitData
   userPrivateKey: Uint8Array
 }

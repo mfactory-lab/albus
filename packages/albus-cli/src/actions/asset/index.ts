@@ -32,7 +32,7 @@ import { toMetaplexFile } from '@metaplex-foundation/js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   name?: string
 }
 

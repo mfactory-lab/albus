@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface PolicyRule {
+export type PolicyRule = {
   key: string
   value: number[] /* size: 32 */
   label: string

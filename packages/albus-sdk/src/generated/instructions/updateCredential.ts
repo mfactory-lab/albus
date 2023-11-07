@@ -17,7 +17,7 @@ import {
  * @category UpdateCredential
  * @category generated
  */
-export interface UpdateCredentialInstructionArgs {
+export type UpdateCredentialInstructionArgs = {
   data: UpdateCredentialData
 }
 /**
@@ -50,7 +50,7 @@ export const updateCredentialStruct = new beet.FixableBeetArgsStruct<
  * @category UpdateCredential
  * @category generated
  */
-export interface UpdateCredentialInstructionAccounts {
+export type UpdateCredentialInstructionAccounts = {
   albusAuthority: web3.PublicKey
   tokenAccount: web3.PublicKey
   mint: web3.PublicKey
@@ -63,7 +63,14 @@ export interface UpdateCredentialInstructionAccounts {
 }
 
 export const updateCredentialInstructionDiscriminator = [
-  96, 104, 180, 182, 200, 19, 178, 1,
+  96,
+  104,
+  180,
+  182,
+  200,
+  19,
+  178,
+  1,
 ]
 
 /**

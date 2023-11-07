@@ -9,7 +9,7 @@ import { bigintToBytes, bytesToBigInt } from './crypto/utils'
 const BN128_GROUP_ORDER = 21888242871839275222246405745257275088548364400416034343698204186575808495617n
 const BN128_PRIME_FIELD = 21888242871839275222246405745257275088696311157297823662689037894645226208583n
 
-interface GenerateProofProps {
+type GenerateProofProps = {
   wasmFile: string | Uint8Array
   zkeyFile: string | Uint8Array
   input?: Parameters<typeof groth16.fullProve>[0]
@@ -44,7 +44,7 @@ export async function generateProof(props: GenerateProofProps) {
   )
 }
 
-interface VerifyProofProps {
+type VerifyProofProps = {
   vk: VK
   publicInput?: (string | bigint)[]
   proof: ProofData
@@ -199,10 +199,7 @@ export function encodeG1(p) {
  * @param p
  */
 function encodeG2(p): number[] {
-  return p.reduce((a, b) =>
-    a.concat(Array.from(finiteToBytes(b[0])).concat(Array.from(finiteToBytes(b[1]))).reverse()),
-  [] as number[],
-  ).slice(0, 128)
+  return p.reduce((a, b) => a.concat(Array.from(finiteToBytes(b[0])).concat(Array.from(finiteToBytes(b[1]))).reverse()), [] as number[]).slice(0, 128)
 }
 
 export function decodeG1(bytes: number[]) {

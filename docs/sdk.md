@@ -7,11 +7,11 @@ First of all, install the `albus-sdk`.
 
 ### Install from the command line:
 ```shell
-npm install @mfactory-lab/albus-sdk@0.2.12
+npm install @albus-finance/sdk@^0.2
 ```
 ### Install via package.json:
  ```npm
-"@mfactory-lab/albus-sdk": "0.2.12"
+"@albus-finance/albus-sdk": "^0.2"
 ```
 
 ### Init client

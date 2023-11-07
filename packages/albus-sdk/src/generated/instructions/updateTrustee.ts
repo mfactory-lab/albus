@@ -17,7 +17,7 @@ import {
  * @category UpdateTrustee
  * @category generated
  */
-export interface UpdateTrusteeInstructionArgs {
+export type UpdateTrusteeInstructionArgs = {
   data: UpdateTrusteeData
 }
 /**
@@ -45,7 +45,7 @@ export const updateTrusteeStruct = new beet.FixableBeetArgsStruct<
  * @category UpdateTrustee
  * @category generated
  */
-export interface UpdateTrusteeInstructionAccounts {
+export type UpdateTrusteeInstructionAccounts = {
   trustee: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -53,7 +53,14 @@ export interface UpdateTrusteeInstructionAccounts {
 }
 
 export const updateTrusteeInstructionDiscriminator = [
-  53, 91, 92, 45, 24, 153, 197, 243,
+  53,
+  91,
+  92,
+  45,
+  24,
+  153,
+  197,
+  243,
 ]
 
 /**
