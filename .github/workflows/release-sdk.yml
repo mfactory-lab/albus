@@ -9,6 +9,6 @@ on:
 
 jobs:
   release:
-    uses: ./.github/workflows/release.yaml
+    uses: ./.github/workflows/release.yml
     with:
       package: "@albus-finance/sdk"
