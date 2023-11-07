@@ -3,6 +3,9 @@ name: Test(e2e)
 on:
   workflow_dispatch:
 
+env:
+  SOLANA_CLI_VERSION: 1.16.17
+
 jobs:
 
   test:
