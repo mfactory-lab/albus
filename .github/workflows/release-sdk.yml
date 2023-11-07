@@ -2,13 +2,14 @@ name: Release(sdk)
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ dev, main ]
     paths:
       - packages/albus-sdk/src/**
   workflow_dispatch:
 
 jobs:
   release:
+    name: Reusable
     uses: ./.github/workflows/release.yml
     with:
       package: "@albus-finance/sdk"
