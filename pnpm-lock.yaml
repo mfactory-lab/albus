@@ -63,7 +63,7 @@ importers:
         specifier: ^8.0.2
         version: 8.2.0
       '@metaplex-foundation/js':
-        specifier: ^0.19.4
+        specifier: ^0.19.5
         version: 0.19.5
       '@solana/web3.js':
         specifier: ^1.77.3
@@ -295,7 +295,7 @@ importers:
         specifier: ^0.28.0
         version: 0.28.0
       '@metaplex-foundation/js':
-        specifier: ^0.19.4
+        specifier: ^0.19.5
         version: 0.19.5
       '@solana/spl-stake-pool':
         specifier: mfactory-lab/jfactory-stake-pool
