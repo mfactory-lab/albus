@@ -54,7 +54,7 @@ jobs:
           git config --global user.name "release-it-bot"
 
       - name: Run release
-        run: pnpm -F @albus-finance/sdk release
+        run: pnpm -F @albus-finance/sdk release:ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

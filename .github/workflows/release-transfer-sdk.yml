@@ -1,10 +1,10 @@
-name: Release(core)
+name: Release(transfer-sdk)
 
 on:
   push:
     branches: [ main ]
     paths:
-      - packages/albus-core/src/**
+      - packages/albus-transfer-sdk/src/**
   workflow_dispatch:
 
 jobs:
@@ -54,7 +54,8 @@ jobs:
           git config --global user.name "release-it-bot"
 
       - name: Run release
-        run: pnpm -F @albus-finance/core release:ci
+        run: pnpm -F @albus-finance/transfer-sdk release:ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
