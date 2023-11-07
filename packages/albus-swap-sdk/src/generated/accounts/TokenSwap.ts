@@ -18,7 +18,7 @@ import { curveInfoBeet } from '../types/CurveInfo'
  * @category Accounts
  * @category generated
  */
-export interface TokenSwapArgs {
+export type TokenSwapArgs = {
   isInitialized: boolean
   bumpSeed: number
   tokenProgramId: web3.PublicKey

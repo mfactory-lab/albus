@@ -46,7 +46,7 @@ export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
 export const DEFAULT_CLAIM_TREE_DEPTH = 5 // 2^5-1 = 16 elements
 
-export interface CreateCredentialOpts {
+export type CreateCredentialOpts = {
   issuerSecretKey?: number[] | Uint8Array
   issuerDid?: string
   verificationMethod?: string
@@ -170,7 +170,7 @@ export function getCredentialMeta(credential: W3CCredential | VerifiableCredenti
   return meta
 }
 
-export interface CreatePresentationOpts {
+export type CreatePresentationOpts = {
   holderSecretKey: number[] | Uint8Array
   credentials: VerifiableCredential[]
   // By default, all credential fields will be exposed
@@ -261,7 +261,7 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
   return vp as VerifiablePresentation
 }
 
-export interface EncryptPresentationOpts {
+export type EncryptPresentationOpts = {
   pubkey: PublicKey
   esk?: number[] | Uint8Array
 }
@@ -292,7 +292,7 @@ export async function encryptVerifiablePresentation(vp: VerifiablePresentation, 
   return { ...vp, verifiableCredential }
 }
 
-export interface VerifyCredentialOpts {
+export type VerifyCredentialOpts = {
   decryptionKey?: number[] | Uint8Array
   resolver?: Resolvable
 }
@@ -348,7 +348,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   }
 }
 
-export interface VerifyPresentationOpts {
+export type VerifyPresentationOpts = {
   // Used to decrypt verifiable credential subject
   decryptionKey?: number[] | Uint8Array
   decryptionRethrow?: boolean
@@ -409,23 +409,23 @@ export async function verifyPresentation(vp: VerifiablePresentation, opts: Verif
   return { ...vp, verifiableCredential }
 }
 
-interface BJJProof extends Proof {
+type BJJProof = {
   type: ProofType.BJJSignature2021
   created: number
   verificationMethod?: string
   proofValue: { r8y: string; r8x: string; s: string; ax?: string; ay?: string }
   proofPurpose?: string
-}
+} & Proof
 
-interface CredentialProof extends BJJProof {
+type CredentialProof = {
   rootHash: string
-}
+} & BJJProof
 
-interface PresentationProof extends BJJProof {
+type PresentationProof = {
   challenge: string
-}
+} & BJJProof
 
-export interface CreateCredentialProof {
+export type CreateCredentialProof = {
   rootHash: bigint
   signerSecretKey: Uint8Array
   verificationMethod: string
@@ -483,7 +483,7 @@ export function verifyCredentialProof(proof: CredentialProof, pubKey: Uint8Array
   }
 }
 
-export interface CreatePresentationProof {
+export type CreatePresentationProof = {
   signerSecret: Uint8Array
   challenge?: Uint8Array
   extra?: { [key: string]: any }
@@ -619,12 +619,11 @@ function flattenObject(obj: Record<string, any>, parentKey?: string) {
 function unflattenObject(obj: Record<string, any>): Record<string, any> {
   return Object.keys(obj).reduce((res, k) => {
     k.split('.').reduce(
-      (acc, e, i, keys) =>
-        acc[e] || (acc[e] = Number.isNaN(Number(keys[i + 1]))
-          ? keys.length - 1 === i
-            ? obj[k]
-            : {}
-          : []),
+      (acc, e, i, keys) => acc[e] || (acc[e] = Number.isNaN(Number(keys[i + 1]))
+        ? keys.length - 1 === i
+          ? obj[k]
+          : {}
+        : []),
       res,
     )
     return res

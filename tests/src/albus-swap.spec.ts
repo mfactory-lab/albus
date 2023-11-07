@@ -26,18 +26,16 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { AlbusClient, ProofRequestStatus } from '@mfactory-lab/albus-sdk'
 import type { Account } from '@solana/spl-token'
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
-
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
+import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk'
 import { AlbusSwapClient, CurveType } from '../../packages/albus-swap-sdk/src'
-
 import { airdrop, createTestData, createTestProofRequest, deleteTestData, newProvider, payer, provider } from './utils'
 
-describe('AlbusSwap', async () => {
+describe('albusSwap', async () => {
   const user = Keypair.generate()
 
   const client = new AlbusClient(provider)

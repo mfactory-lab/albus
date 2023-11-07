@@ -9,7 +9,7 @@ import type * as web3 from '@solana/web3.js'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 import * as beet from '@metaplex-foundation/beet'
 
-export interface CreateInvestigationRequestData {
+export type CreateInvestigationRequestData = {
   encryptionKey: web3.PublicKey
   trustees: web3.PublicKey[]
 }

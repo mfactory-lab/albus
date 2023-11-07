@@ -26,13 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { credential } from '@mfactory-lab/albus-core'
+import { credential } from '@albus-finance/core'
 import log from 'loglevel'
 import { generateCredentialSubject, mintVerifiableCredentialNFT } from './utils'
 import { useContext } from '@/context'
 import { exploreAddress } from '@/utils'
 
-interface Opts {
+type Opts = {
   // provider: string
   encrypt: boolean
 }

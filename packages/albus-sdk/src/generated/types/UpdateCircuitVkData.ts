@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface UpdateCircuitVkData {
+export type UpdateCircuitVkData = {
   alpha: beet.COption<number[] /* size: 64 */>
   beta: beet.COption<number[] /* size: 128 */>
   gamma: beet.COption<number[] /* size: 128 */>

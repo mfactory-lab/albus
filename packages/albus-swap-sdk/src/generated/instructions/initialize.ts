@@ -19,7 +19,7 @@ import { curveInfoBeet } from '../types/CurveInfo'
  * @category Initialize
  * @category generated
  */
-export interface InitializeInstructionArgs {
+export type InitializeInstructionArgs = {
   feesInput: FeesInfo
   curveInput: CurveInfo
   policy: beet.COption<web3.PublicKey>
@@ -56,7 +56,7 @@ export const initializeStruct = new beet.FixableBeetArgsStruct<
  * @category Initialize
  * @category generated
  */
-export interface InitializeInstructionAccounts {
+export type InitializeInstructionAccounts = {
   authority: web3.PublicKey
   tokenSwap: web3.PublicKey
   poolMint: web3.PublicKey
@@ -69,7 +69,14 @@ export interface InitializeInstructionAccounts {
 }
 
 export const initializeInstructionDiscriminator = [
-  175, 175, 109, 31, 13, 152, 155, 237,
+  175,
+  175,
+  109,
+  31,
+  13,
+  152,
+  155,
+  237,
 ]
 
 /**

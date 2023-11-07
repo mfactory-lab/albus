@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface ProofData {
+export type ProofData = {
   a: number[] /* size: 64 */
   b: number[] /* size: 128 */
   c: number[] /* size: 64 */

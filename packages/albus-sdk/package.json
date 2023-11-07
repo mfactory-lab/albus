@@ -1,23 +1,23 @@
 {
   "name": "@albus-finance/sdk",
+  "type": "module",
   "version": "0.2.14",
   "description": "Albus Protocol SDK",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-sdk"
   },
   "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -32,6 +32,9 @@
     "release:pre": "release-it --preRelease=next",
     "prepublishOnly": "vite build"
   },
+  "peerDependencies": {
+    "snarkjs": "*"
+  },
   "dependencies": {
     "@albus-finance/core": "workspace:^",
     "@coral-xyz/anchor": "^0.29.0",
@@ -44,9 +47,6 @@
   "devDependencies": {
     "@metaplex-foundation/solita": "^0.20.0",
     "release-it-config": "workspace:^"
-  },
-  "peerDependencies": {
-    "snarkjs": "*"
   },
   "publishConfig": {
     "access": "public"

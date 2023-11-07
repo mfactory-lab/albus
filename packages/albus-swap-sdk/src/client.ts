@@ -12,7 +12,8 @@ import {
   createInitializeInstruction,
   createSwapInstruction,
   createWithdrawAllTokenTypesInstruction,
-  createWithdrawSingleTokenTypeInstruction, tokenSwapDiscriminator,
+  createWithdrawSingleTokenTypeInstruction,
+  tokenSwapDiscriminator,
 } from './generated'
 
 export class AlbusSwapClient {
@@ -225,7 +226,8 @@ export class AlbusSwapClient {
         destination: props.destination,
         swapTokenA: props.swapTokenA,
         swapTokenB: props.swapTokenB,
-      }, {
+      },
+      {
         sourceTokenAmount: new BN(props.sourceTokenAmount.toString()),
         minimumPoolTokenAmount: new BN(props.minimumPoolTokenAmount.toString()),
       },
@@ -253,7 +255,8 @@ export class AlbusSwapClient {
         destination: props.destination,
         swapTokenA: props.swapTokenA,
         swapTokenB: props.swapTokenB,
-      }, {
+      },
+      {
         destinationTokenAmount: new BN(props.destinationTokenAmount.toString()),
         maximumPoolTokenAmount: new BN(props.maximumPoolTokenAmount.toString()),
       },
@@ -305,7 +308,7 @@ export class AlbusSwapClient {
   }
 }
 
-export interface LoadAllProps {
+export type LoadAllProps = {
   noData?: boolean
   tokenProgramId?: PublicKeyInitData
   poolMint?: PublicKeyInitData
@@ -313,7 +316,7 @@ export interface LoadAllProps {
   tokenBMint?: PublicKeyInitData
 }
 
-export interface CreateTokenSwapProps {
+export type CreateTokenSwapProps = {
   /// Optional token-swap keypair
   tokenSwap?: Keypair
   /// Pool Token Mint. Must be empty, owned by swap authority.
@@ -346,7 +349,7 @@ export interface CreateTokenSwapProps {
   }
 }
 
-export interface SwapProps {
+export type SwapProps = {
   proofRequest?: PublicKey
   /// Token-swap authority
   authority: PublicKey
@@ -372,7 +375,7 @@ export interface SwapProps {
   minimumAmountOut: bigint | number
 }
 
-export interface DepositAllTokenTypesProps {
+export type DepositAllTokenTypesProps = {
   /// Token-swap
   tokenSwap: PublicKey
   /// Pool MINT account, swap authority is the owner.
@@ -396,7 +399,7 @@ export interface DepositAllTokenTypesProps {
   maximumTokenB: bigint | number
 }
 
-export interface WithdrawAllTokenTypesProps {
+export type WithdrawAllTokenTypesProps = {
   /// Token-swap
   tokenSwap: PublicKey
   /// Pool MINT account, swap authority is the owner.
@@ -422,7 +425,7 @@ export interface WithdrawAllTokenTypesProps {
   minimumTokenB: bigint | number
 }
 
-export interface DepositSingleTokenTypeExactAmountInProps {
+export type DepositSingleTokenTypeExactAmountInProps = {
   /// Token-swap
   tokenSwap: PublicKey
   /// Pool MINT account, swap authority is the owner.
@@ -442,7 +445,7 @@ export interface DepositSingleTokenTypeExactAmountInProps {
   minimumPoolTokenAmount: bigint | number
 }
 
-export interface WithdrawSingleTokenTypeExactAmountOutProps {
+export type WithdrawSingleTokenTypeExactAmountOutProps = {
   /// Token-swap
   tokenSwap: PublicKey
   /// Pool MINT account, swap authority is the owner.

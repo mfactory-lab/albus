@@ -60,15 +60,15 @@ export class AlbusTransferClient {
   }
 }
 
-export interface TransferProps {
+export type TransferProps = {
   receiver: PublicKey
   proofRequest: PublicKey
   policy: PublicKey
   amount: BN
 }
 
-export interface SplTransferProps extends TransferProps {
+export type SplTransferProps = {
   source: PublicKey
   destination: PublicKey
   tokenMint: PublicKey
-}
+} & TransferProps

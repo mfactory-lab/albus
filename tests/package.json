@@ -1,7 +1,7 @@
 {
   "name": "@albus/tests",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
   "scripts": {
     "test": "vitest --no-threads",
     "test:ui": "vitest --no-threads --ui",

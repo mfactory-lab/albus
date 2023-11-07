@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface ContactInfo {
+export type ContactInfo = {
   kind: number
   value: string
 }

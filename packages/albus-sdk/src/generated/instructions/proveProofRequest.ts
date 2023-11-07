@@ -17,7 +17,7 @@ import {
  * @category ProveProofRequest
  * @category generated
  */
-export interface ProveProofRequestInstructionArgs {
+export type ProveProofRequestInstructionArgs = {
   data: ProveProofRequestData
 }
 /**
@@ -47,7 +47,7 @@ export const proveProofRequestStruct = new beet.FixableBeetArgsStruct<
  * @category ProveProofRequest
  * @category generated
  */
-export interface ProveProofRequestInstructionAccounts {
+export type ProveProofRequestInstructionAccounts = {
   proofRequest: web3.PublicKey
   circuit: web3.PublicKey
   policy: web3.PublicKey
@@ -57,7 +57,14 @@ export interface ProveProofRequestInstructionAccounts {
 }
 
 export const proveProofRequestInstructionDiscriminator = [
-  148, 131, 112, 65, 14, 251, 112, 208,
+  148,
+  131,
+  112,
+  65,
+  14,
+  251,
+  112,
+  208,
 ]
 
 /**

@@ -17,7 +17,7 @@ import {
  * @category RevealSecretShare
  * @category generated
  */
-export interface RevealSecretShareInstructionArgs {
+export type RevealSecretShareInstructionArgs = {
   data: RevealSecretShareData
 }
 /**
@@ -47,7 +47,7 @@ export const revealSecretShareStruct = new beet.FixableBeetArgsStruct<
  * @category RevealSecretShare
  * @category generated
  */
-export interface RevealSecretShareInstructionAccounts {
+export type RevealSecretShareInstructionAccounts = {
   investigationRequestShare: web3.PublicKey
   investigationRequest: web3.PublicKey
   trustee: web3.PublicKey
@@ -57,7 +57,14 @@ export interface RevealSecretShareInstructionAccounts {
 }
 
 export const revealSecretShareInstructionDiscriminator = [
-  137, 113, 154, 99, 90, 161, 41, 235,
+  137,
+  113,
+  154,
+  99,
+  90,
+  161,
+  41,
+  235,
 ]
 
 /**

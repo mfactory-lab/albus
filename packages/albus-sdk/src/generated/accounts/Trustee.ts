@@ -14,7 +14,7 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
  * @category Accounts
  * @category generated
  */
-export interface TrusteeArgs {
+export type TrusteeArgs = {
   key: number[] /* size: 32 */
   authority: web3.PublicKey
   name: string

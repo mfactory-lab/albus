@@ -215,14 +215,14 @@ export class TrusteeManager {
   }
 }
 
-export interface CreateTrusteeProps extends CreateTrusteeData {}
+export type CreateTrusteeProps = {} & CreateTrusteeData
 
-export interface UpdateTrusteeProps extends Partial<UpdateTrusteeData> {
+export type UpdateTrusteeProps = {
   key: number[]
   // newKey: number[]
-}
+} & Partial<UpdateTrusteeData>
 
-export interface FindTrusteeProps {
+export type FindTrusteeProps = {
   name?: string
   email?: string
   authority?: PublicKeyInitData

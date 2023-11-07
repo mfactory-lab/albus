@@ -29,7 +29,7 @@
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
 }
 
 export async function verify(addr: string, _opts: Opts) {

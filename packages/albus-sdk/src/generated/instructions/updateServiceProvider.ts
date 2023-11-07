@@ -17,7 +17,7 @@ import {
  * @category UpdateServiceProvider
  * @category generated
  */
-export interface UpdateServiceProviderInstructionArgs {
+export type UpdateServiceProviderInstructionArgs = {
   data: UpdateServiceProviderData
 }
 /**
@@ -45,7 +45,7 @@ export const updateServiceProviderStruct = new beet.FixableBeetArgsStruct<
  * @category UpdateServiceProvider
  * @category generated
  */
-export interface UpdateServiceProviderInstructionAccounts {
+export type UpdateServiceProviderInstructionAccounts = {
   serviceProvider: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -53,7 +53,14 @@ export interface UpdateServiceProviderInstructionAccounts {
 }
 
 export const updateServiceProviderInstructionDiscriminator = [
-  16, 250, 215, 91, 184, 33, 51, 19,
+  16,
+  250,
+  215,
+  91,
+  184,
+  33,
+  51,
+  19,
 ]
 
 /**

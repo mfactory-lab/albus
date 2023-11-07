@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-const os = require('os')
-const path = require('path')
+const os = require('node:os')
+const path = require('node:path')
 
 const programName = 'albus_transfer'
 const programId = 'J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c'

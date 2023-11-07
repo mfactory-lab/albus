@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category WithdrawSingleTokenType
  * @category generated
  */
-export interface WithdrawSingleTokenTypeInstructionArgs {
+export type WithdrawSingleTokenTypeInstructionArgs = {
   destinationTokenAmount: beet.bignum
   maximumPoolTokenAmount: beet.bignum
 }
@@ -51,7 +51,7 @@ export const withdrawSingleTokenTypeStruct = new beet.BeetArgsStruct<
  * @category WithdrawSingleTokenType
  * @category generated
  */
-export interface WithdrawSingleTokenTypeInstructionAccounts {
+export type WithdrawSingleTokenTypeInstructionAccounts = {
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -66,7 +66,14 @@ export interface WithdrawSingleTokenTypeInstructionAccounts {
 }
 
 export const withdrawSingleTokenTypeInstructionDiscriminator = [
-  111, 171, 21, 77, 237, 181, 241, 56,
+  111,
+  171,
+  21,
+  77,
+  237,
+  181,
+  241,
+  56,
 ]
 
 /**

@@ -17,7 +17,7 @@ import {
  * @category CreateCircuit
  * @category generated
  */
-export interface CreateCircuitInstructionArgs {
+export type CreateCircuitInstructionArgs = {
   data: CreateCircuitData
 }
 /**
@@ -45,7 +45,7 @@ export const createCircuitStruct = new beet.FixableBeetArgsStruct<
  * @category CreateCircuit
  * @category generated
  */
-export interface CreateCircuitInstructionAccounts {
+export type CreateCircuitInstructionAccounts = {
   circuit: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -53,7 +53,14 @@ export interface CreateCircuitInstructionAccounts {
 }
 
 export const createCircuitInstructionDiscriminator = [
-  35, 7, 152, 132, 75, 65, 176, 162,
+  35,
+  7,
+  152,
+  132,
+  75,
+  65,
+  176,
+  162,
 ]
 
 /**

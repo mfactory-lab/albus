@@ -16,7 +16,7 @@ import { policyRuleBeet } from '../types/PolicyRule'
  * @category Accounts
  * @category generated
  */
-export interface PolicyArgs {
+export type PolicyArgs = {
   serviceProvider: web3.PublicKey
   circuit: web3.PublicKey
   code: string

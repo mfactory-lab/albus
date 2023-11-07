@@ -33,7 +33,7 @@ import { STAKE_POOL_PROGRAM_ID, stakePoolInfo } from '@solana/spl-stake-pool'
 import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
-interface Opts {
+type Opts = {
   zkp: string
   stakePool: string
   referrer: string

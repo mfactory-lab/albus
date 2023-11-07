@@ -28,7 +28,7 @@ export const deleteProofRequestStruct = new beet.BeetArgsStruct<{
  * @category DeleteProofRequest
  * @category generated
  */
-export interface DeleteProofRequestInstructionAccounts {
+export type DeleteProofRequestInstructionAccounts = {
   proofRequest: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -36,7 +36,14 @@ export interface DeleteProofRequestInstructionAccounts {
 }
 
 export const deleteProofRequestInstructionDiscriminator = [
-  34, 9, 125, 78, 113, 197, 126, 34,
+  34,
+  9,
+  125,
+  78,
+  113,
+  197,
+  126,
+  34,
 ]
 
 /**

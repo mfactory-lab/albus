@@ -26,12 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { AlbusClient } from '@mfactory-lab/albus-sdk'
+import { AlbusClient } from '@albus-finance/sdk'
 import { Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {}
+type Opts = {}
 
 export async function credential(_opts: Opts) {
   const { client, provider } = useContext()

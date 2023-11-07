@@ -15,7 +15,7 @@ import { stakeAuthorizeBeet } from '../types/StakeAuthorize'
  * @category AuthorizeChecked
  * @category generated
  */
-export interface AuthorizeCheckedInstructionArgs {
+export type AuthorizeCheckedInstructionArgs = {
   stakeAuthorize: StakeAuthorize
 }
 /**
@@ -47,7 +47,7 @@ export const authorizeCheckedStruct = new beet.BeetArgsStruct<
  * @category AuthorizeChecked
  * @category generated
  */
-export interface AuthorizeCheckedInstructionAccounts {
+export type AuthorizeCheckedInstructionAccounts = {
   stake: web3.PublicKey
   newAuthorized: web3.PublicKey
   authorized: web3.PublicKey
@@ -58,7 +58,14 @@ export interface AuthorizeCheckedInstructionAccounts {
 }
 
 export const authorizeCheckedInstructionDiscriminator = [
-  147, 97, 67, 26, 230, 107, 45, 242,
+  147,
+  97,
+  67,
+  26,
+  230,
+  107,
+  45,
+  242,
 ]
 
 /**

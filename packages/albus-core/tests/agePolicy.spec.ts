@@ -33,7 +33,7 @@ import { createClaimsTree } from '../src/credential'
 import { formatPrivKeyForBabyJub, generateEcdhSharedKey, generateProof, verifyProof } from '../src/zkp'
 import { loadFixture, setupCircuit } from './utils'
 
-describe('AgePolicy', async () => {
+describe('agePolicy', async () => {
   const holderKeypair = Keypair.generate()
   const userPrivateKey = formatPrivKeyForBabyJub(holderKeypair.secretKey)
 
@@ -140,7 +140,7 @@ describe('AgePolicy', async () => {
   })
 })
 
-describe('Proof AgePolicy', async () => {
+describe('proof AgePolicy', async () => {
   const issuerKeypair = Keypair.generate()
   const holderKeypair = Keypair.generate()
 

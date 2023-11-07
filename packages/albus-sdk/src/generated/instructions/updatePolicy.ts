@@ -17,7 +17,7 @@ import {
  * @category UpdatePolicy
  * @category generated
  */
-export interface UpdatePolicyInstructionArgs {
+export type UpdatePolicyInstructionArgs = {
   data: UpdatePolicyData
 }
 /**
@@ -46,7 +46,7 @@ export const updatePolicyStruct = new beet.FixableBeetArgsStruct<
  * @category UpdatePolicy
  * @category generated
  */
-export interface UpdatePolicyInstructionAccounts {
+export type UpdatePolicyInstructionAccounts = {
   policy: web3.PublicKey
   serviceProvider: web3.PublicKey
   authority: web3.PublicKey
@@ -55,7 +55,14 @@ export interface UpdatePolicyInstructionAccounts {
 }
 
 export const updatePolicyInstructionDiscriminator = [
-  212, 245, 246, 7, 163, 151, 18, 57,
+  212,
+  245,
+  246,
+  7,
+  163,
+  151,
+  18,
+  57,
 ]
 
 /**

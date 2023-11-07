@@ -17,7 +17,7 @@ import {
  * @category CreateTrustee
  * @category generated
  */
-export interface CreateTrusteeInstructionArgs {
+export type CreateTrusteeInstructionArgs = {
   data: CreateTrusteeData
 }
 /**
@@ -45,7 +45,7 @@ export const createTrusteeStruct = new beet.FixableBeetArgsStruct<
  * @category CreateTrustee
  * @category generated
  */
-export interface CreateTrusteeInstructionAccounts {
+export type CreateTrusteeInstructionAccounts = {
   trustee: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -53,7 +53,14 @@ export interface CreateTrusteeInstructionAccounts {
 }
 
 export const createTrusteeInstructionDiscriminator = [
-  227, 237, 106, 208, 206, 218, 80, 6,
+  227,
+  237,
+  106,
+  208,
+  206,
+  218,
+  80,
+  6,
 ]
 
 /**

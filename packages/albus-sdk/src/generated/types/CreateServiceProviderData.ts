@@ -11,7 +11,7 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
 import type { ContactInfo } from './ContactInfo'
 import { contactInfoBeet } from './ContactInfo'
 
-export interface CreateServiceProviderData {
+export type CreateServiceProviderData = {
   code: string
   name: string
   website: string

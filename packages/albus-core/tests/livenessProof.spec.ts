@@ -32,7 +32,7 @@ import { createClaimsTree, encodeClaimValue } from '../src/credential'
 import { eddsa } from '../src/crypto'
 import { setupCircuit } from './utils'
 
-describe('LivenessProof', async () => {
+describe('livenessProof', async () => {
   const issuerKeypair = Keypair.generate()
   const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
 

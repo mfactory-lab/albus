@@ -41,7 +41,7 @@ export async function getSolanaTimestamp(connection: Connection) {
   return (await connection.getBlockTime(slot)) ?? 0
 }
 
-export interface ValidateNftProps {
+export type ValidateNftProps = {
   authority: PublicKeyInitData
   code?: AlbusNftCode
   creators?: Creator[]
@@ -133,7 +133,7 @@ export async function getParsedNftAccountsByOwner(connection: Connection, owner:
   return findMetadataAccounts(connection, { ...filter, mints })
 }
 
-interface FindMetadataAccounts {
+type FindMetadataAccounts = {
   mints: PublicKey[]
   updateAuthority?: PublicKeyInitData
   symbol?: string

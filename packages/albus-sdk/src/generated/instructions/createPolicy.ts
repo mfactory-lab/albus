@@ -17,7 +17,7 @@ import {
  * @category CreatePolicy
  * @category generated
  */
-export interface CreatePolicyInstructionArgs {
+export type CreatePolicyInstructionArgs = {
   data: CreatePolicyData
 }
 /**
@@ -47,7 +47,7 @@ export const createPolicyStruct = new beet.FixableBeetArgsStruct<
  * @category CreatePolicy
  * @category generated
  */
-export interface CreatePolicyInstructionAccounts {
+export type CreatePolicyInstructionAccounts = {
   serviceProvider: web3.PublicKey
   circuit: web3.PublicKey
   policy: web3.PublicKey
@@ -57,7 +57,14 @@ export interface CreatePolicyInstructionAccounts {
 }
 
 export const createPolicyInstructionDiscriminator = [
-  27, 81, 33, 27, 196, 103, 246, 53,
+  27,
+  81,
+  33,
+  27,
+  196,
+  103,
+  246,
+  53,
 ]
 
 /**

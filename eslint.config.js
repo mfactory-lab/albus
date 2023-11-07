@@ -25,40 +25,19 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
+import antfu from '@antfu/eslint-config'
 
-import { PublicKey } from '@solana/web3.js'
-import { StakeAuthorize } from '@albus/verified-stake-sdk/src/generated'
-import log from 'loglevel'
-import { useContext } from '../../context'
-import { exploreTransaction } from '../../utils'
-
-type Opts = {
-  zkp: string
-  stake: string
-  newAuthorized: string
-  authorized: string
-}
-
-export async function authorize(opts: Opts) {
-  const { stakeClient } = useContext()
-
-  let authorized = StakeAuthorize.Staker
-
-  if (opts.authorized === 'w') {
-    authorized = StakeAuthorize.Withdrawer
-  }
-
-  try {
-    const signature = await stakeClient.authorize({
-      newAuthorized: new PublicKey(opts.newAuthorized),
-      stake: new PublicKey(opts.stake),
-      stakeAuthorized: authorized,
-      zkpRequest: new PublicKey(opts.zkp),
-    })
-
-    log.info(`Signature: ${signature}`)
-    log.info(exploreTransaction(signature))
-  } catch (e) {
-    log.error(e)
-  }
-}
+export default antfu({
+  stylistic: true, // enable stylistic formatting rules
+  typescript: true,
+  yml: false,
+  vue: false,
+  rules: {
+    'antfu/consistent-list-newline': 'off',
+    'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
+    'ts/consistent-type-definitions': ['error', 'type'],
+    'curly': ['error', 'all'],
+    // 'node/prefer-global/process': 'off',
+    'no-console': 'off',
+  },
+})

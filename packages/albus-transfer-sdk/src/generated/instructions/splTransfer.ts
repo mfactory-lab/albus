@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category SplTransfer
  * @category generated
  */
-export interface SplTransferInstructionArgs {
+export type SplTransferInstructionArgs = {
   amount: beet.bignum
 }
 /**
@@ -47,7 +47,7 @@ export const splTransferStruct = new beet.BeetArgsStruct<
  * @category SplTransfer
  * @category generated
  */
-export interface SplTransferInstructionAccounts {
+export type SplTransferInstructionAccounts = {
   sender: web3.PublicKey
   receiver: web3.PublicKey
   tokenMint: web3.PublicKey
@@ -61,7 +61,14 @@ export interface SplTransferInstructionAccounts {
 }
 
 export const splTransferInstructionDiscriminator = [
-  67, 186, 237, 99, 235, 243, 166, 198,
+  67,
+  186,
+  237,
+  99,
+  235,
+  243,
+  166,
+  198,
 ]
 
 /**

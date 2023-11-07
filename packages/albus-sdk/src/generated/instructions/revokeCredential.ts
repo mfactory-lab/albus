@@ -35,7 +35,7 @@ export const revokeCredentialStruct = new beet.BeetArgsStruct<{
  * @category RevokeCredential
  * @category generated
  */
-export interface RevokeCredentialInstructionAccounts {
+export type RevokeCredentialInstructionAccounts = {
   albusAuthority: web3.PublicKey
   tokenAccount: web3.PublicKey
   mint: web3.PublicKey
@@ -50,7 +50,14 @@ export interface RevokeCredentialInstructionAccounts {
 }
 
 export const revokeCredentialInstructionDiscriminator = [
-  38, 123, 95, 95, 223, 158, 169, 87,
+  38,
+  123,
+  95,
+  95,
+  223,
+  158,
+  169,
+  87,
 ]
 
 /**

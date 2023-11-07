@@ -28,7 +28,7 @@ export const adminCloseAccountStruct = new beet.BeetArgsStruct<{
  * @category AdminCloseAccount
  * @category generated
  */
-export interface AdminCloseAccountInstructionAccounts {
+export type AdminCloseAccountInstructionAccounts = {
   account: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -36,7 +36,14 @@ export interface AdminCloseAccountInstructionAccounts {
 }
 
 export const adminCloseAccountInstructionDiscriminator = [
-  131, 60, 75, 215, 109, 34, 157, 26,
+  131,
+  60,
+  75,
+  215,
+  109,
+  34,
+  157,
+  26,
 ]
 
 /**

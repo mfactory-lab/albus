@@ -17,7 +17,7 @@ import {
  * @category UpdateProofRequest
  * @category generated
  */
-export interface UpdateProofRequestInstructionArgs {
+export type UpdateProofRequestInstructionArgs = {
   data: UpdateProofRequestData
 }
 /**
@@ -45,7 +45,7 @@ export const updateProofRequestStruct = new beet.BeetArgsStruct<
  * @category UpdateProofRequest
  * @category generated
  */
-export interface UpdateProofRequestInstructionAccounts {
+export type UpdateProofRequestInstructionAccounts = {
   proofRequest: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -53,7 +53,14 @@ export interface UpdateProofRequestInstructionAccounts {
 }
 
 export const updateProofRequestInstructionDiscriminator = [
-  248, 138, 24, 233, 171, 52, 72, 43,
+  248,
+  138,
+  24,
+  233,
+  171,
+  52,
+  72,
+  43,
 ]
 
 /**

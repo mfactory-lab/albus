@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface FeesInfo {
+export type FeesInfo = {
   tradeFeeNumerator: beet.bignum
   tradeFeeDenominator: beet.bignum
   ownerTradeFeeNumerator: beet.bignum

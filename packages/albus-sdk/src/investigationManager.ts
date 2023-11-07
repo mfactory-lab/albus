@@ -28,7 +28,7 @@
 
 import { Buffer } from 'node:buffer'
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import * as Albus from '@mfactory-lab/albus-core'
+import * as Albus from '@albus-finance/core'
 import type {
   Commitment,
   ConfirmOptions,
@@ -224,8 +224,6 @@ export class InvestigationManager {
       proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
     )
 
-    console.log('signals.trusteePublicKey', (signals.trusteePublicKey as bigint[][] ?? []).length)
-
     const selectedTrustees = (signals.trusteePublicKey as bigint[][] ?? [])
       .map(p => this.pda.trustee(Albus.zkp.packPubkey(p))[0])
 
@@ -376,12 +374,12 @@ export class InvestigationManager {
   }
 }
 
-export interface CreateInvestigationProps {
+export type CreateInvestigationProps = {
   proofRequest: PublicKeyInitData | ProofRequest
   encryptionKey?: PublicKey
 }
 
-export interface FindInvestigationProps {
+export type FindInvestigationProps = {
   authority?: PublicKeyInitData
   serviceProvider?: PublicKeyInitData
   proofRequest?: PublicKeyInitData
@@ -391,7 +389,7 @@ export interface FindInvestigationProps {
   noData?: boolean
 }
 
-export interface FindInvestigationShareProps {
+export type FindInvestigationShareProps = {
   trustee?: PublicKeyInitData
   proofRequestOwner?: PublicKeyInitData
   investigationRequest?: PublicKeyInitData
@@ -400,12 +398,12 @@ export interface FindInvestigationShareProps {
   noData?: boolean
 }
 
-export interface RevealShareProps {
+export type RevealShareProps = {
   investigationRequest: PublicKeyInitData
   encryptionKey: Uint8Array
 }
 
-export interface DecryptDataProps {
+export type DecryptDataProps = {
   investigationRequest: PublicKeyInitData
   encryptionKey: Uint8Array
 }

@@ -11,7 +11,7 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
 import type { ContactInfo } from './ContactInfo'
 import { contactInfoBeet } from './ContactInfo'
 
-export interface UpdateServiceProviderData {
+export type UpdateServiceProviderData = {
   newAuthority: beet.COption<web3.PublicKey>
   name: beet.COption<string>
   website: beet.COption<string>

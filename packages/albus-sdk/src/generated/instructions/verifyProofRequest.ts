@@ -29,7 +29,7 @@ export const verifyProofRequestStruct = new beet.BeetArgsStruct<{
  * @category VerifyProofRequest
  * @category generated
  */
-export interface VerifyProofRequestInstructionAccounts {
+export type VerifyProofRequestInstructionAccounts = {
   proofRequest: web3.PublicKey
   circuit: web3.PublicKey
   authority: web3.PublicKey
@@ -38,7 +38,14 @@ export interface VerifyProofRequestInstructionAccounts {
 }
 
 export const verifyProofRequestInstructionDiscriminator = [
-  134, 245, 92, 39, 75, 253, 56, 152,
+  134,
+  245,
+  92,
+  39,
+  75,
+  253,
+  56,
+  152,
 ]
 
 /**

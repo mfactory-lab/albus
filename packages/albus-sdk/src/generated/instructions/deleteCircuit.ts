@@ -28,7 +28,7 @@ export const deleteCircuitStruct = new beet.BeetArgsStruct<{
  * @category DeleteCircuit
  * @category generated
  */
-export interface DeleteCircuitInstructionAccounts {
+export type DeleteCircuitInstructionAccounts = {
   circuit: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -36,7 +36,14 @@ export interface DeleteCircuitInstructionAccounts {
 }
 
 export const deleteCircuitInstructionDiscriminator = [
-  40, 92, 89, 94, 54, 92, 39, 91,
+  40,
+  92,
+  89,
+  94,
+  54,
+  92,
+  39,
+  91,
 ]
 
 /**

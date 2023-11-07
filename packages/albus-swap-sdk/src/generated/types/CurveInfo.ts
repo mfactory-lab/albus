@@ -7,7 +7,7 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export interface CurveInfo {
+export type CurveInfo = {
   curveType: number
   curveParameters: number[] /* size: 32 */
 }

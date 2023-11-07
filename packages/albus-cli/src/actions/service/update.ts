@@ -30,7 +30,7 @@ import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   name?: string
   website?: string
   secretShareThreshold?: number

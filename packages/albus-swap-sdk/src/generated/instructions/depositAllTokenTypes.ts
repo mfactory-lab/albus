@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category DepositAllTokenTypes
  * @category generated
  */
-export interface DepositAllTokenTypesInstructionArgs {
+export type DepositAllTokenTypesInstructionArgs = {
   poolTokenAmount: beet.bignum
   maximumTokenAAmount: beet.bignum
   maximumTokenBAmount: beet.bignum
@@ -53,7 +53,7 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
  * @category DepositAllTokenTypes
  * @category generated
  */
-export interface DepositAllTokenTypesInstructionAccounts {
+export type DepositAllTokenTypesInstructionAccounts = {
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -68,7 +68,14 @@ export interface DepositAllTokenTypesInstructionAccounts {
 }
 
 export const depositAllTokenTypesInstructionDiscriminator = [
-  32, 95, 69, 60, 75, 79, 205, 238,
+  32,
+  95,
+  69,
+  60,
+  75,
+  79,
+  205,
+  238,
 ]
 
 /**

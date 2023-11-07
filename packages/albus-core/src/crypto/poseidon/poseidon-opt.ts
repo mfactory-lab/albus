@@ -80,8 +80,7 @@ export class Poseidon {
     for (let r = 0; r < nRoundsF / 2 - 1; r++) {
       state = state.map(a => pow5(a))
       state = state.map((a, i) => F.add(a, C[(r + 1) * t + i]!))
-      state = state.map((_, i) =>
-        state.reduce((acc, a, j) => F.add(acc, F.mul(M[j]![i]!, a)), F.zero),
+      state = state.map((_, i) => state.reduce((acc, a, j) => F.add(acc, F.mul(M[j]![i]!, a)), F.zero),
       )
     }
     state = state.map(a => pow5(a))
@@ -102,8 +101,7 @@ export class Poseidon {
     for (let r = 0; r < nRoundsF / 2 - 1; r++) {
       state = state.map(a => pow5(a))
       state = state.map((a, i) => F.add(a, C[(nRoundsF / 2 + 1) * t + nRoundsP + r * t + i]!))
-      state = state.map((_, i) =>
-        state.reduce((acc, a, j) => F.add(acc, F.mul(M[j]![i]!, a)), F.zero),
+      state = state.map((_, i) => state.reduce((acc, a, j) => F.add(acc, F.mul(M[j]![i]!, a)), F.zero),
       )
     }
     state = state.map(a => pow5(a))
@@ -328,8 +326,7 @@ function poseidonStrategy(state) {
       state[0] = pow5(state[0])
     }
 
-    state = state.map((_, i) =>
-      state.reduce((acc, a, j) => F.add(acc, F.mul(M[t - 2][i][j], a)), F.zero),
+    state = state.map((_, i) => state.reduce((acc, a, j) => F.add(acc, F.mul(M[t - 2][i][j], a)), F.zero),
     )
   }
   return state.map(x => F.normalize(x))

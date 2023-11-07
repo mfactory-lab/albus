@@ -30,7 +30,7 @@ import log from 'loglevel'
 import { show } from './show'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   code: string
   name: string
   authority?: string

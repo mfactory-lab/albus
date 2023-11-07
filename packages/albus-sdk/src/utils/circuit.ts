@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { VerifiableCredential } from '@mfactory-lab/albus-core'
-import * as Albus from '@mfactory-lab/albus-core'
+import type { VerifiableCredential } from '@albus-finance/core'
+import * as Albus from '@albus-finance/core'
 import type { Circuit, Policy } from '../generated'
 import { KnownSignals } from '../types'
 
@@ -315,7 +315,7 @@ export function parseSignal(signal: string): ParseSignalResult {
   return { name: signal, size: 0, next: null }
 }
 
-interface ParseSignalResult {
+type ParseSignalResult = {
   name: string
   size: number
   next: ParseSignalResult | null

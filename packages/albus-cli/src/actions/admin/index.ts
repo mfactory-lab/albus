@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { createAdminCloseAccountInstruction } from '@mfactory-lab/albus-sdk'
+import { createAdminCloseAccountInstruction } from '@albus-finance/sdk'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'

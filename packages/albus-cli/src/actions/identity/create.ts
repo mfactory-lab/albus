@@ -31,7 +31,7 @@ import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-interface Opts {}
+type Opts = {}
 
 /**
  * Generate new Identity NFT

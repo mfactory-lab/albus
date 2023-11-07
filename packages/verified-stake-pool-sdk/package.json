@@ -2,8 +2,8 @@
   "name": "@albus/verified-stake-pool-sdk",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.ts",
   "sideEffects": false,
+  "main": "src/index.ts",
   "scripts": {
     "api:gen": "DEBUG='(solita|rustbin):(info|error)' solita"
   },

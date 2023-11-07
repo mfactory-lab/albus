@@ -33,7 +33,7 @@ import { getOrCreateAssociatedTokenAccount } from '@solana/spl-token'
 import { useContext } from '../../context'
 import { exploreTransaction } from '../../utils'
 
-interface Opts {
+type Opts = {
   zkp: string
   receiver: string
   amount: string

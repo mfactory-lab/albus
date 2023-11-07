@@ -33,7 +33,7 @@ import { downloadFile } from './http'
 
 type CircuitId = string
 
-interface Circuit {
+type Circuit = {
   id: CircuitId
   inputSignals: string[]
 }

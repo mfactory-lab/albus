@@ -30,7 +30,7 @@ import log from 'loglevel'
 import { PublicKey } from '@solana/web3.js'
 import { useContext } from '@/context'
 
-interface Opts {
+type Opts = {
   owner?: string
 }
 

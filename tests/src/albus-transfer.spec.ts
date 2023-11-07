@@ -27,17 +27,15 @@
  */
 
 import { BN } from '@coral-xyz/anchor'
-import { AlbusClient, ProofRequestStatus } from '@mfactory-lab/albus-sdk'
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js'
-
 import { beforeAll, describe, it } from 'vitest'
-
+import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk'
 import { AlbusTransferClient } from '../../packages/albus-transfer-sdk/src'
 import { airdrop, createTestData, createTestProofRequest, payer, provider } from './utils'
 
-describe('AlbusTransfer', () => {
+describe('albusTransfer', () => {
   const client = new AlbusClient(provider)
   const transferClient = new AlbusTransferClient(provider)
   const receiver = Keypair.generate()

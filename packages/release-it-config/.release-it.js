@@ -1,4 +1,3 @@
-
 /*
  * This file is part of Albus code.
  *
@@ -27,9 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-const version = '${version}';
-const packageName = process.env.npm_package_name;
-const scope = packageName.split('/')[1];
+const version = '${version}'
+const packageName = process.env.npm_package_name
+const scope = packageName.split('/')[1]
 
 module.exports = {
   verbose: true,
@@ -45,8 +44,8 @@ module.exports = {
     releaseName: `${packageName}-v${version}`,
     releaseNotes(context) {
       // Remove the first, redundant line with a version and date.
-      return context.changelog.split('\n').slice(1).join('\n');
-    }
+      return context.changelog.split('\n').slice(1).join('\n')
+    },
   },
   plugins: {
     '@release-it/conventional-changelog': {
@@ -58,24 +57,24 @@ module.exports = {
       header: '# Changelog',
       infile: 'CHANGELOG.md',
       preset: {
-        name: "conventionalcommits",
+        name: 'conventionalcommits',
         types: [
-          { "type": "feat", "section": "🌟 Features" },
-          { "type": "fix", "section": "🐞 Bug Fixes" },
-          { "type": "infra", "section": "🏗 Internal improvements", "hidden": true },
-          { "type": "perf", "section": "⚡️ Performance enhancements" },
-          { "type": "chore", "section": "🧼 Chores", "hidden": true },
-          { "type": "test", "section": "✅ Test coverage", "hidden": true },
-          { "type": "docs", "section": "📚 Documentation" },
-          { "type": "refactor", "section": "♻️ Refactors" }
-        ]
+          { type: 'feat', section: '🌟 Features' },
+          { type: 'fix', section: '🐞 Bug Fixes' },
+          { type: 'infra', section: '🏗 Internal improvements', hidden: true },
+          { type: 'perf', section: '⚡️ Performance enhancements' },
+          { type: 'chore', section: '🧼 Chores', hidden: true },
+          { type: 'test', section: '✅ Test coverage', hidden: true },
+          { type: 'docs', section: '📚 Documentation' },
+          { type: 'refactor', section: '♻️ Refactors' },
+        ],
       },
     },
   },
   hooks: {
     // release-it doesn't support `pnpm publish` only `npm publish`
     'after:bump': 'pnpm publish --access public --no-git-checks',
-    "after:release": "echo 🥳 Successfully released ${name}:${version}"
+    'after:release': 'echo 🥳 Successfully released ${name}:${version}',
   },
   npm: {
     publish: false,

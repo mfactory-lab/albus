@@ -14,7 +14,7 @@ import * as web3 from '@solana/web3.js'
  * @category DepositSol
  * @category generated
  */
-export interface DepositSolInstructionArgs {
+export type DepositSolInstructionArgs = {
   amount: beet.bignum
 }
 /**
@@ -50,7 +50,7 @@ export const depositSolStruct = new beet.BeetArgsStruct<
  * @category DepositSol
  * @category generated
  */
-export interface DepositSolInstructionAccounts {
+export type DepositSolInstructionAccounts = {
   zkpRequest: web3.PublicKey
   authority: web3.PublicKey
   stakePool: web3.PublicKey
@@ -67,7 +67,14 @@ export interface DepositSolInstructionAccounts {
 }
 
 export const depositSolInstructionDiscriminator = [
-  108, 81, 78, 117, 125, 155, 56, 200,
+  108,
+  81,
+  78,
+  117,
+  125,
+  155,
+  56,
+  200,
 ]
 
 /**
