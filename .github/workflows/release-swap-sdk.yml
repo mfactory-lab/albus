@@ -1,4 +1,4 @@
-name: Release(transfer-sdk)
+name: Release(swap-sdk)
 
 on:
   push:
