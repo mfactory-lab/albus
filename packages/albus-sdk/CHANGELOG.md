@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.0...@albus-finance/sdk-v0.2.1) (2023-11-07)
+
+
+### ♻️ Refactors
+
+* **sdk:** global client refactory ([16bd5c1](https://github.com/mfactory-lab/albus/commit/16bd5c146208449c43d221f2e4ff025e88b9be3d))
+
 ## 0.2.0 (2023-11-07)
 
 
