@@ -2,7 +2,7 @@ name: Release(core)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev, main ]
     paths:
       - packages/albus-core/src/**
   workflow_dispatch:
