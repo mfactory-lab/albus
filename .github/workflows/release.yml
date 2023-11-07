@@ -9,8 +9,6 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
-      GITHUB_TOKEN:
-        required: true
 
 env:
   PACKAGE: ${{ inputs.package }}
