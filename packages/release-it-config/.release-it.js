@@ -26,14 +26,16 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+// eslint-disable-next-line no-template-curly-in-string
 const version = '${version}'
+// eslint-disable-next-line node/prefer-global/process
 const packageName = process.env.npm_package_name
 const scope = packageName.split('/')[1]
 
 module.exports = {
   verbose: true,
   git: {
-    push: false,
+    push: true,
     tagName: `${packageName}-v${version}`,
     commitsPath: '.',
     commitMessage: `chore(${scope}): release ${version} [no ci]`,
@@ -74,6 +76,7 @@ module.exports = {
   hooks: {
     // release-it doesn't support `pnpm publish` only `npm publish`
     'after:bump': 'pnpm publish --access public --no-git-checks',
+    // eslint-disable-next-line no-template-curly-in-string
     'after:release': 'echo 🥳 Successfully released ${name}:${version}',
   },
   npm: {
