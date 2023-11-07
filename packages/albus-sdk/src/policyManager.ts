@@ -26,10 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import * as Albus from '@albus-finance/core'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import { BaseManager } from './base'
 import {
   Policy,
   createCreatePolicyInstruction,
@@ -38,17 +38,10 @@ import {
   errorFromCode,
   policyDiscriminator,
 } from './generated'
-import type { PdaManager } from './pda'
 
 const ID_SEPARATOR = '_'
 
-export class PolicyManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly pda: PdaManager,
-  ) {
-  }
-
+export class PolicyManager extends BaseManager {
   /**
    * Load a policy based on its public key address.
    *

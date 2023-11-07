@@ -27,7 +27,6 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import type {
   Commitment,
   ConfirmOptions,
@@ -36,8 +35,7 @@ import type {
 } from '@solana/web3.js'
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import chunk from 'lodash/chunk'
-import type { CircuitManager } from './circuitManager'
-import type { CredentialManager } from './credentialManager'
+import { BaseManager } from './base'
 import type {
   ProofData,
   ProofRequestStatus,
@@ -55,18 +53,19 @@ import {
   errorFromCode,
   proofRequestDiscriminator,
 } from './generated'
-import type { PdaManager } from './pda'
-import type { ServiceManager } from './serviceManager'
 import { ProofInputBuilder, getSignals, getSolanaTimestamp } from './utils'
 
-export class ProofRequestManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly circuit: CircuitManager,
-    readonly service: ServiceManager,
-    readonly credential: CredentialManager,
-    readonly pda: PdaManager,
-  ) {
+export class ProofRequestManager extends BaseManager {
+  private get service() {
+    return this.client.service
+  }
+
+  private get circuit() {
+    return this.client.circuit
+  }
+
+  private get credential() {
+    return this.client.credential
   }
 
   /**
@@ -350,12 +349,14 @@ export class ProofRequestManager {
 
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
-    const limits = { withProof: 20, withoutProof: 28 }
+    const inputsLimit = { withProof: 20, withoutProof: 28 }
     const txs: { tx: Transaction }[] = []
 
+    this.trace('prove', 'init', { proof, publicInputs })
+
     // extend public inputs if needed
-    if (publicInputs.length > limits.withProof) {
-      const inputChunks = chunk(publicInputs.slice(0, -limits.withProof), limits.withoutProof)
+    if (publicInputs.length > inputsLimit.withProof) {
+      const inputChunks = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
         const inputs = inputChunks[i]!
         txs.push({
@@ -392,7 +393,7 @@ export class ProofRequestManager {
           {
             data: {
               reset: false,
-              publicInputs: publicInputs.slice(-limits.withProof),
+              publicInputs: publicInputs.slice(-inputsLimit.withProof),
               proof,
             },
           },
@@ -401,6 +402,7 @@ export class ProofRequestManager {
     })
 
     if (props.verify) {
+      this.trace('prove', 'add verification instruction...')
       txs.push({
         tx: new Transaction()
           .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
@@ -413,7 +415,9 @@ export class ProofRequestManager {
     }
 
     try {
+      this.trace('prove', `sending ${txs.length} transactions...`)
       const signatures = await this.provider.sendAll(txs, opts)
+      this.trace('prove', { signatures })
       return { signatures }
     } catch (e: any) {
       // console.log(e)
@@ -450,12 +454,14 @@ export class ProofRequestManager {
       : []
 
     const proofInput = await new ProofInputBuilder(credential)
-      .withTimestamp(await getSolanaTimestamp(this.provider.connection))
+      .withTimestamp(await this.getTimestamp())
       .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
       .withTrusteePublicKey(trusteePubKeys)
       .withCircuit(circuit)
       .withPolicy(policy)
       .build()
+
+    this.trace('fullProve', { input: proofInput.data })
 
     try {
       const { proof, publicSignals } = await Albus.zkp.generateProof({
@@ -475,9 +481,16 @@ export class ProofRequestManager {
 
       return { signatures, proof, publicSignals }
     } catch (e: any) {
-      console.log(e)
+      if (props.throwOnError) {
+        throw e
+      }
+      this.trace('prove', e)
       throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
+  }
+
+  async getTimestamp() {
+    return getSolanaTimestamp(this.provider.connection)
   }
 
   /**
@@ -537,6 +550,7 @@ export type FullProveProps = {
   decryptionKey?: Uint8Array
   // On-chain verification. Default: true
   verify?: boolean
+  throwOnError?: boolean
 }
 
 export type VerifyProps = {

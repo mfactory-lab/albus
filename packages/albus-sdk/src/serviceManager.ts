@@ -26,10 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import * as Albus from '@albus-finance/core'
 import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import { BaseManager } from './base'
 import type { UpdateServiceProviderData } from './generated'
 import {
   ServiceProvider,
@@ -39,15 +39,8 @@ import {
   errorFromCode,
   serviceProviderDiscriminator,
 } from './generated'
-import type { PdaManager } from './pda'
 
-export class ServiceManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly pda: PdaManager,
-  ) {
-  }
-
+export class ServiceManager extends BaseManager {
   /**
    * Load {@link ServiceProvider} by {@link addr}
    * @param addr

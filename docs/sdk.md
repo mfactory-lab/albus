@@ -1,4 +1,4 @@
-# Albus SDK v.0.2.12
+# Albus SDK v0.2
 
 ## JavaScript integration
 
@@ -14,74 +14,76 @@ npm install @albus-finance/sdk@^0.2
 "@albus-finance/albus-sdk": "^0.2"
 ```
 
-### Init client
-```typescript
-import { useAnchorWallet } from 'solana-wallets-vue'
-// solana connection
-const connection = new Connection(clusterApiUrl("mainnet-beta"))
-// solana wallet
-const wallet = useAnchorWallet()
-const client = AlbusClient.factory(connection, wallet)
+### Init client (Browser)
+```ts
+const network = clusterApiUrl("devnet")
+const wallet = window.solana // Phantom
+const client = AlbusClient.fromWallet(new Connection(network), wallet)
+```
+
+### Init client (Node)
+```ts
+const network = clusterApiUrl("devnet")
+const keypair = Keypair.fromSecretCode('...')
+const client = AlbusClient.fromKeypair(new Connection(network), keypair)
 ```
 
 ### Certificates API
 
-Load certificates
-```typescript
-const certificates = client.proofRequest.find()
+Load all certificates by optional criteria
+```ts
+const certificates = client.proofRequest.find({
+  // find criteria
+})
 ```
 
 Create certificate
-```typescript
+```ts
 client.proofRequest.create({ serviceCode: string, policyCode: string })
 ```
 
 **Example**
-```typescript
+```ts
 import { SERVICE_CODE, POLICY_CODE } from '@/config'
 
 // to find out the service code, you can download all services and find your service in them, or immediately add the service code from the config
 const services = await client.service.find()
-const service = services.find(s => s.data.code === <SERVICE_CODE>) // You can search by other parameters, for example name or address
+const service = services.find(s => s.data.code === '<SERVICE_CODE>') // You can search by other parameters, for example name or address
 const serviceCode = service?.data?.code ?? SERVICE_CODE
 
 // to find out the policy code, you can download all service policies and find your policy in them, or immediately add the policy code from the config
 const policies = await albus.client.policy.find({ serviceCode })
-const policy = policies.find(p => p.data.code === <POLICY_CODE>) // You can search by other parameters, for example name or address
+const policy = policies.find(p => p.data.code === '<POLICY_CODE>') // You can search by other parameters, for example name or address
 const policyCode = policy.data.code ?? POLICY_CODE
 
-client.proofRequest.create({ serviceCode, policyCode })
+await client.proofRequest.create({ serviceCode, policyCode })
 ```
 
-Proved certificate
-```typescript
+Prove certificate
+```ts
 const props = {
-  proofRequest: PublicKeyInitData,
-  vc: PublicKeyInitData,
+  proofRequest: PublicKey,
+  vc: PublicKey,
   userPrivateKey: Uint8Array,
 }
-client.proofRequest.fullProve(props)
+await client.proofRequest.fullProve(props)
 ```
 
 **Example**
-```typescript
+```ts
 const certificates = await client.proofRequest.find()
 const certificate = certificates[0] // for example, let's take the first certificate
 const proofRequest = certificate.address
 
-const payer = Keypair.fromSeed(seed) //Seed phrase that was used to create the encryption key when creating the credential
-const decryptionKey = payer.secretKey
+const ekp = Keypair.fromSeed('seed phrase that was used to create the encryption key when creating the credential...')
+const decryptionKey = ekp.secretKey
 
 const credentials = await client.credential.loadAll({ decryptionKey }) // load all user credentials
 const credential = credentials[0] // for example, take the first credential
 const vc = credential.address
 
-const props = {
-  proofRequest,
-  vc,
-  userPrivateKey,
-}
-client.proofRequest.fullProve(props)
+const props = { proofRequest, vc, userPrivateKey }
+await client.proofRequest.fullProve(props)
 ```
 
 >**Important**
@@ -96,84 +98,92 @@ Data that is passed to the `fullProve` method:
 - `userPrivateKey`: Key for decrypting a credential (each credential is stored in encrypted form)
 
 Delete certificate
-```typescript
-client.proofRequest.delete({ proofRequest: PublicKeyInitData})
+```ts
+await client.proofRequest.delete({ proofRequest: PublicKeyInitData})
 ```
 
 **Example**
-```typescript
+```ts
 const certificate = certificates[0] // for example, let's take the first certificate
 const proofRequest = certificate.address
 
-client.proofRequest.delete({ proofRequest})
+await client.proofRequest.delete({ proofRequest })
 ```
 
 #### Credentials API
 
 Load credentials
 
-```typescript
-const credentials = client.credential.loadAll({ decryptionKey: number[] | Uint8Array })
+```ts
+const credentials = await client.credential.loadAll({ 
+  decryptionKey: [
+      // bytes
+  ],
+})
 ```
 
 > `decryptionKey` is a `secretKey` which is used to encrypt and decrypt credentials (randomly generated)
 
 **Example**
-```typescript
+```ts
 import { Keypair } from '@solana/web3.js'
 
-const payer = Keypair.fromSeed(seed) //Seed phrase that was used to create the encryption key when creating the credential
-const decryptionKey = payer.secretKey
-client.credential.loadAll({ decryptionKey })
+// Seed phrase that was used to create the encryption key when creating the credential
+const ekp = Keypair.fromSeed('seed phrase...')
+
+await client.credential.loadAll({ 
+  decryptionKey: ekp.secretKey,
+})
 ```
+
 Revoke credential
 
-```typescript
-client.credential.revoke({ mint: PublicKeyInitData })
+```ts
+await client.credential.revoke({ mint: PublicKeyInitData })
 ```
 > NFT credentials can only be deleted using the `revoke` method
 
 **Example**
-```typescript
+```ts
 const credential = credentials[0] // for example, take the first credential
 const mint = credential.address
 
-client.credential.revoke({ mint })
+await client.credential.revoke({ mint })
 ```
 
 
 ### Services API
 
 Load services
-```typescript
+```ts
 const services = await client.service.find()
 ```
 
 Own service
-```typescript
+```ts
 const { publicKey } = useAnchorWallet()
 const service = services.filter(s => s.data?.authority.toBase58() === publicKey.value?.toBase58())
 ```
 
 Update service
-```typescript
+```ts
 const props = {
-  name: string,
-  website: string, 
-  secretShareThreshold: number,
-  trustees: PublicKeyInitData[],
+  name: "acme",
+  website: "https://example.com", 
+  secretShareThreshold: 2,
+  trustees: [PublicKey.default()],
   contactInfo: {
-    kind: number,
-    value: string,
+    kind: 0,
+    value: "...",
   },
-  serviceProvider: PublicKeyInitData,
-  newAuthority: PublicKeyInitData,
+  serviceProvider: PublicKey.default(),
+  newAuthority: PublicKey.default(),
 }
 
-client.service.update(props)
+await client.service.update(props)
 ```
 **Example**
-```typescript
+```ts
 const props = {
   name: 'Test Defi',
   website: 'https://app.albus.finance/',
@@ -208,19 +218,23 @@ Data that is passed to the `update` method:
 
 ### Trustees API
 Load trustees 
-```typescript
-const trustees = client.trustee.find()
+```ts
+const trustees = await client.trustee.find()
 ```
 
 Add trustee to service
-```typescript
-client.service.update({ serviceProvider: PublicKeyInitData, trustees: PublicKeyInitData[] })
+```ts
+await client.service.update({ 
+  serviceProvider: PublicKey.default(), 
+  trustees: [
+      // public keys...
+  ],
+})
 ```
 
 **Example**
-```typescript
-const serviceProvider = service.pubkey
-client.service.update({ serviceProvider, trustees })
+```ts
+await client.service.update({ serviceProvider: PublicKey.default(), trustees })
 ```
 
 **Props**
@@ -229,42 +243,43 @@ Data that is passed to the `update` method:
 - `trustees` : Trustee service addresses
 
 
-
 ### Circuits API
 Circuits
-```typescript
-client.circuit.find()
+```ts
+await client.circuit.find()
 ```
 
 ### Policies API
 Load policies
-```typescript
-const policies = client.policy.find({ serviceCode: string })
+```ts
+const policies = client.policy.find({ serviceCode: "..." })
 ```
 > `serviceCode` can be found in the service entity
 
 
 Create Policy
-```typescript
+```ts
 const props = {
-  circuitCode: string,
-  code: string,
-  description: string,
-  expirationPeriod: number,
-  name: string,
-  retentionPeriod: number,
-  rules: Array<{
+  circuitCode: "agePolicy",
+  serviceCode: "acme",
+  code: "p1",
+  description: "",
+  expirationPeriod: 0,
+  name: "Age policy",
+  retentionPeriod: 0,
+  rules: [
+      // ...
+  ] as Array<{
     key: string;
     value: string | number | bigint;
     label?: string;
-  }>,
-  serviceCode: string
+  }>
 }
 
 client.policy.create(props)
 ```
 **Example**
-```typescript
+```ts
 const circuits = await client.circuit.find()
 const circuitCode = circuits.find(c => c.data.code === 'agePolicy')
 
@@ -305,7 +320,7 @@ Data that is passed to the `create` method:
 - `rules`: Circuit rules
 
 Update Policy
-```typescript
+```ts
 const props = {
   circuitCode: string,
   code: string,
@@ -327,7 +342,7 @@ client.policy.update(props)
 
 Delete policy
 
-```typescript
+```ts
 const serviceCode = service.data.code // service code
 const policy = policies[0] // for example we took the first policy
 const code = policy.data.code //policy code
@@ -336,7 +351,7 @@ client.policy.delete({ serviceCode: string, code: string })
 ```
 
 **Example**
-```typescript
+```ts
 const props = {
   serviceCode: 'testDefi',
   code: 'testDefiPolicy'

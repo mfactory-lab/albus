@@ -44,7 +44,7 @@ import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
 
 export class AlbusClient {
-  programId = PROGRAM_ID
+  static readonly programId = PROGRAM_ID
 
   pda: PdaManager
   circuit: CircuitManager
@@ -56,36 +56,46 @@ export class AlbusClient {
   proofRequest: ProofRequestManager
   eventManager: EventManager
 
-  constructor(
-    readonly provider: AnchorProvider,
-  ) {
+  constructor(readonly provider: AnchorProvider) {
     this.pda = new PdaManager()
-    // TODO: ts idl
     this.eventManager = new EventManager(this, idl as any)
-    this.circuit = new CircuitManager(this.provider, this.pda)
-    this.policy = new PolicyManager(this.provider, this.pda)
-    this.service = new ServiceManager(this.provider, this.pda)
-    this.credential = new CredentialManager(this.provider, this.pda)
-    this.proofRequest = new ProofRequestManager(
-      this.provider,
-      this.circuit,
-      this.service,
-      this.credential,
-      this.pda,
+    this.circuit = new CircuitManager(this)
+    this.policy = new PolicyManager(this)
+    this.service = new ServiceManager(this)
+    this.credential = new CredentialManager(this)
+    this.trustee = new TrusteeManager(this)
+    this.proofRequest = new ProofRequestManager(this)
+    this.investigation = new InvestigationManager(this)
+  }
+
+  /**
+   * Debug mode
+   * @type {boolean}
+   */
+  debug: boolean = false
+
+  withDebug(debug = true) {
+    this.debug = debug
+    return this
+  }
+
+  /**
+   * Initialize a new `AlbusClient` from the provided {@link wallet}.
+   */
+  static fromWallet(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
+    return new this(
+      new AnchorProvider(
+        connection,
+        wallet ?? { publicKey: PublicKey.default } as unknown as Wallet,
+        { ...AnchorProvider.defaultOptions(), ...opts },
+      ),
     )
-    this.trustee = new TrusteeManager(this.provider, this.pda)
-    this.investigation = new InvestigationManager(this.provider, this.proofRequest, this.service, this.pda)
   }
 
-  static factory(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
-    return new this(new AnchorProvider(
-      connection,
-      wallet ?? { publicKey: PublicKey.default } as unknown as Wallet,
-      opts ?? {},
-    ))
-  }
-
-  static keypair(connection: Connection, keypair: Keypair, opts: ConfirmOptions = {}) {
-    return new this(new AnchorProvider(connection, new NodeWallet(keypair), opts))
+  /**
+   * Initialize a new `AlbusClient` from the provided {@link keypair}.
+   */
+  static fromKeypair(connection: Connection, keypair: Keypair, opts?: ConfirmOptions) {
+    return AlbusClient.fromWallet(connection, new NodeWallet(keypair), opts)
   }
 }

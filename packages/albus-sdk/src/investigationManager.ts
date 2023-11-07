@@ -27,7 +27,6 @@
  */
 
 import { Buffer } from 'node:buffer'
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import * as Albus from '@albus-finance/core'
 import type {
   Commitment,
@@ -36,6 +35,7 @@ import type {
   PublicKeyInitData,
 } from '@solana/web3.js'
 import { Keypair, PublicKey, Transaction } from '@solana/web3.js'
+import { BaseManager } from './base'
 import type {
   InvestigationStatus,
   ProofRequest,
@@ -50,18 +50,11 @@ import {
   investigationRequestDiscriminator,
   investigationRequestShareDiscriminator,
 } from './generated'
-import type { PdaManager } from './pda'
-import type { ProofRequestManager } from './proofRequestManager'
-import type { ServiceManager } from './serviceManager'
 import { getSignals } from './utils'
 
-export class InvestigationManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly proofRequest: ProofRequestManager,
-    readonly service: ServiceManager,
-    readonly pda: PdaManager,
-  ) {
+export class InvestigationManager extends BaseManager {
+  private get proofRequest() {
+    return this.client.proofRequest
   }
 
   /**

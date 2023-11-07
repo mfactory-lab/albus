@@ -26,9 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import { BaseManager } from './base'
 import type { CreateTrusteeData, UpdateTrusteeData } from './generated'
 import {
   Trustee,
@@ -39,15 +39,8 @@ import {
   errorFromCode,
   trusteeDiscriminator,
 } from './generated'
-import type { PdaManager } from './pda'
 
-export class TrusteeManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly pda: PdaManager,
-  ) {
-  }
-
+export class TrusteeManager extends BaseManager {
   /**
    * Load trustee by {@link addr}
    */

@@ -26,12 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
 import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
 import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
+import { BaseManager } from './base'
 import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
   createMintCredentialInstruction,
@@ -40,7 +40,6 @@ import {
   errorFromCode,
 } from './generated'
 
-import type { PdaManager } from './pda'
 import {
   getAssociatedTokenAddress,
   getMasterEditionPDA,
@@ -49,15 +48,9 @@ import {
   loadNft,
 } from './utils'
 
-export class CredentialManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly pda: PdaManager,
-  ) {
-  }
-
+export class CredentialManager extends BaseManager {
   /**
-   * Create new Credential NFT
+   * Create new Credential NFT.
    */
   async create(props?: CreateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
     const mint = Keypair.generate()
@@ -97,7 +90,7 @@ export class CredentialManager {
   }
 
   /**
-   * Update credential data
+   * Update credential data.
    * Require admin authority
    */
   async update(props: UpdateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
@@ -134,7 +127,7 @@ export class CredentialManager {
   }
 
   /**
-   * Revoke credential and burn credential NFT
+   * Revoke credential and burn credential NFT.
    */
   async revoke(props: RevokeCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
     const mint = new PublicKey(props.mint)

@@ -284,9 +284,11 @@ describe('albus', async () => {
     const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
+    // mock wasmUri and zkeyUri
     vi.spyOn(client.proofRequest, 'loadFull')
       .mockImplementationOnce(async (addr, props) => {
         const res = await client.proofRequest.loadFull(addr, props)
+
         return {
           ...res,
           circuit: {
@@ -311,6 +313,32 @@ describe('albus', async () => {
     assert.ok(!!data.provedAt)
     assert.ok(data.publicInputs.length > 0)
   })
+
+  // it('can re-prove a proof request', async () => {
+  //   const [service] = client.pda.serviceProvider(serviceCode)
+  //   const [policy] = client.pda.policy(service, policyCode)
+  //   const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
+  //
+  //   // mock wasmUri and zkeyUri
+  //   vi.spyOn(client.proofRequest, 'loadFull')
+  //     .mockImplementationOnce(async (addr, props) => {
+  //       const res = await client.proofRequest.loadFull(addr, props)
+  //       return {
+  //         ...res,
+  //         circuit: {
+  //           ...res.circuit,
+  //           wasmUri: loadFixture('agePolicy.wasm'),
+  //           zkeyUri: loadFixture('agePolicy.zkey'),
+  //         },
+  //       } as any
+  //     })
+  //
+  //   const { signatures } = await client.proofRequest.fullProve({
+  //     proofRequest,
+  //     vc: PublicKey.default, // mocked
+  //     userPrivateKey: payer.secretKey,
+  //   })
+  // })
 
   it('can verify proof request', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
@@ -410,7 +438,7 @@ describe('albus', async () => {
         encryptionKey: investigator.secretKey,
       })
       assert.equal(String(result.claims.birthDate.value), credential.credentialSubject.birthDate)
-      console.log(result)
+      // console.log(result)
     })
   })
 
