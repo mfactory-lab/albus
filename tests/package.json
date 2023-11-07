@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.28.0",
-    "@metaplex-foundation/js": "^0.19.4",
+    "@metaplex-foundation/js": "^0.19.5",
     "@solana/spl-stake-pool": "mfactory-lab/jfactory-stake-pool",
     "@solana/spl-token": "^0.3.8",
     "@types/bn.js": "^5.1.1",
