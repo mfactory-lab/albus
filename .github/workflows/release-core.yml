@@ -49,15 +49,8 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: setup git
-        run: |
-          git config --global user.name "release-it-bot"
-
       - name: Run release
         run: pnpm -F @albus-finance/core release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-#      - name: 'do push'
-#        run: git push origin :${{ github.ref }}
