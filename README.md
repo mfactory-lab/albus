@@ -47,6 +47,12 @@
     - [Web3 protocol management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#web3-service-management)
     - [Certificate Request management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#zkp-request-management)
 - [Integration](https://github.com/mfactory-lab/albus/wiki/Integration)
+  - [On-chain component (Rust)](https://github.com/mfactory-lab/albus/wiki/Integration#on-chain-component-rust)
+    - [Installation](https://github.com/mfactory-lab/albus/wiki/Integration#installation)
+    - [Usage](https://github.com/mfactory-lab/albus/wiki/Integration#usage)
+  - [Off-chain component (TypeScript)](https://github.com/mfactory-lab/albus/wiki/Integration#off-chain-component-typescript)
+    - [Installation](https://github.com/mfactory-lab/albus/wiki/Integration#installation-1)
+    - [Usage](https://github.com/mfactory-lab/albus/wiki/Integration#usage-1)
 - [Reference list](https://github.com/mfactory-lab/albus/wiki/Reference-list)
 
 # Contacts
