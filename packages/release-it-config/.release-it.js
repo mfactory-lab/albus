@@ -42,7 +42,7 @@ module.exports = {
     requireCleanWorkingDir: false,
   },
   github: {
-    release: true,
+    release: false,
     releaseName: `${packageName}-v${version}`,
     releaseNotes(context) {
       // Remove the first, redundant line with a version and date.
