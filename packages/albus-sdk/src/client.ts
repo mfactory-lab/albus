@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { Wallet } from '@coral-xyz/anchor'
+import type { Provider, Wallet } from '@coral-xyz/anchor'
 import { AnchorProvider } from '@coral-xyz/anchor'
 import type { ConfirmOptions, Connection, Keypair } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
@@ -40,23 +40,39 @@ import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
+import type { WithRequired } from './types'
 import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
 
+export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'>
+
+export type ClientOptions = {
+  programId?: PublicKey
+  debug?: boolean
+}
+
 export class AlbusClient {
-  static readonly programId = PROGRAM_ID
+  readonly options: ClientOptions
+  readonly pda: PdaManager
+  readonly circuit: CircuitManager
+  readonly policy: PolicyManager
+  readonly service: ServiceManager
+  readonly credential: CredentialManager
+  readonly trustee: TrusteeManager
+  readonly investigation: InvestigationManager
+  readonly proofRequest: ProofRequestManager
+  readonly eventManager: EventManager
 
-  pda: PdaManager
-  circuit: CircuitManager
-  policy: PolicyManager
-  service: ServiceManager
-  credential: CredentialManager
-  trustee: TrusteeManager
-  investigation: InvestigationManager
-  proofRequest: ProofRequestManager
-  eventManager: EventManager
+  constructor(readonly provider: ClientProvider, options?: ClientOptions) {
+    if (!provider.publicKey) {
+      throw new Error('no public key found on the argued provider')
+    } else if (!provider.sendAndConfirm) {
+      throw new Error('no `sendAndConfirm` function found on the argued provider')
+    } else if (!provider.sendAll) {
+      throw new Error('no `sendAll` function found on the argued provider')
+    }
 
-  constructor(readonly provider: AnchorProvider) {
+    this.options = options ?? {}
     this.pda = new PdaManager()
     this.eventManager = new EventManager(this, idl as any)
     this.circuit = new CircuitManager(this)
@@ -68,14 +84,12 @@ export class AlbusClient {
     this.investigation = new InvestigationManager(this)
   }
 
-  /**
-   * Debug mode
-   * @type {boolean}
-   */
-  debug: boolean = false
+  get programId() {
+    return this.options.programId ?? PROGRAM_ID
+  }
 
-  withDebug(debug = true) {
-    this.debug = debug
+  configure<K extends keyof ClientOptions>(key: K, val: ClientOptions[K]) {
+    this.options[key] = val
     return this
   }
 
@@ -86,7 +100,8 @@ export class AlbusClient {
     return new this(
       new AnchorProvider(
         connection,
-        wallet ?? { publicKey: PublicKey.default } as unknown as Wallet,
+        // @ts-expect-error anonymous
+        wallet ?? { publicKey: PublicKey.default },
         { ...AnchorProvider.defaultOptions(), ...opts },
       ),
     )

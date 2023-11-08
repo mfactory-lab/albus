@@ -40,7 +40,7 @@ export abstract class BaseManager {
   }
 
   protected trace(...msg: any[]) {
-    if (!this.client.debug) {
+    if (!this.client.options.debug) {
       return
     }
     console.log(`[AlbusClient][${this.constructor.name}]`, ...msg)

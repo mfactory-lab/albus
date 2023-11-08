@@ -26,6 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
+
 export type PrivateKey = number[] | string | Uint8Array
 export type AlbusNftCode = 'DC' | 'ID'
 

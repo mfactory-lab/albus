@@ -53,7 +53,9 @@ export async function credential(_opts: Opts) {
     )
   }
 
-  const holderClient = AlbusClient.fromKeypair(provider.connection, holder).withDebug()
+  const holderClient = AlbusClient
+    .fromKeypair(provider.connection, holder)
+    .configure('debug', true)
 
   log.info('Creating new NFT...')
   const { mintAddress } = await holderClient.credential.create({})
