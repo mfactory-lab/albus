@@ -133,7 +133,10 @@ export class PolicyManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature, address: policy }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -169,7 +172,10 @@ export class PolicyManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature, address: policy }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -197,7 +203,10 @@ export class PolicyManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e

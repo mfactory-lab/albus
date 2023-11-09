@@ -133,7 +133,10 @@ export class TrusteeManager extends BaseManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { address: trustee, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -159,7 +162,10 @@ export class TrusteeManager extends BaseManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { address: trustee, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -177,7 +183,10 @@ export class TrusteeManager extends BaseManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -196,7 +205,10 @@ export class TrusteeManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -208,7 +220,7 @@ export class TrusteeManager extends BaseManager {
   }
 }
 
-export type CreateTrusteeProps = {} & CreateTrusteeData
+export type CreateTrusteeProps = NonNullable<unknown> & CreateTrusteeData
 
 export type UpdateTrusteeProps = {
   key: number[]

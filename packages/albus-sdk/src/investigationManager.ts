@@ -243,7 +243,10 @@ export class InvestigationManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { address: investigationRequest, selectedTrustees, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -315,7 +318,10 @@ export class InvestigationManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { address: investigationRequest, userPublicKey, secretShare, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e

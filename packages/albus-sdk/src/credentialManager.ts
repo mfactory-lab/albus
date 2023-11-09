@@ -52,7 +52,7 @@ export class CredentialManager extends BaseManager {
   /**
    * Create new Credential NFT.
    */
-  async create(props?: CreateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
+  async create(props?: CreateCredentialProps, opts?: TxOpts) {
     const mint = Keypair.generate()
     const owner = props?.owner ? new PublicKey(props?.owner) : this.provider.publicKey
 
@@ -93,7 +93,7 @@ export class CredentialManager extends BaseManager {
    * Update credential data.
    * Require admin authority
    */
-  async update(props: UpdateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
+  async update(props: UpdateCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
     const owner = new PublicKey(props.owner)
 
@@ -132,7 +132,7 @@ export class CredentialManager extends BaseManager {
   /**
    * Revoke credential and burn credential NFT.
    */
-  async revoke(props: RevokeCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
+  async revoke(props: RevokeCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
 
     const ix = createRevokeCredentialInstruction({
@@ -216,7 +216,7 @@ export class CredentialManager extends BaseManager {
     }
     return {
       data: parseUriData(nft.data.uri),
-    }
+    } as unknown as VerifiableCredential
   }
 }
 
@@ -237,9 +237,14 @@ function parseUriData(uri: string) {
   return data
 }
 
+export type TxOpts = {
+  confirm?: ConfirmOptions
+  feePayer?: Signer
+}
+
 export type CredentialInfo = {
   address: PublicKey
-  credential: VerifiableCredential | { data: Record<string, string> }
+  credential: VerifiableCredential & { data?: Record<string, string> }
 }
 
 export type CreateCredentialProps = {

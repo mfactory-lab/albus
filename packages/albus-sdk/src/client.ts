@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { Provider, Wallet } from '@coral-xyz/anchor'
+import type { Provider } from '@coral-xyz/anchor'
 import { AnchorProvider } from '@coral-xyz/anchor'
 import type { ConfirmOptions, Connection, Keypair } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
@@ -40,7 +40,7 @@ import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
-import type { WithRequired } from './types'
+import type { Wallet, WithRequired } from './types'
 import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
 

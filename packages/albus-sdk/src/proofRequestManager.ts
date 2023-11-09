@@ -201,7 +201,10 @@ export class ProofRequestManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return {
         address: proofRequest,
         signature,
@@ -222,7 +225,10 @@ export class ProofRequestManager extends BaseManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -247,7 +253,10 @@ export class ProofRequestManager extends BaseManager {
     )
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -416,7 +425,10 @@ export class ProofRequestManager extends BaseManager {
 
     try {
       this.trace('prove', `sending ${txs.length} transactions...`)
-      const signatures = await this.provider.sendAll(txs, opts)
+      const signatures = await this.provider.sendAll(txs, {
+        ...this.provider.opts,
+        ...opts,
+      })
       this.trace('prove', { signatures })
       return { signatures }
     } catch (e: any) {

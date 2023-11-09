@@ -121,7 +121,10 @@ export class CircuitManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature, address: circuit }
     } catch (e: any) {
       this.trace('create', e)
@@ -178,7 +181,10 @@ export class CircuitManager extends BaseManager {
     try {
       const signatures = await this.provider.sendAll(
         instructions.map(ix => ({ tx: new Transaction().add(ix) })),
-        opts,
+        {
+          ...this.provider.opts,
+          ...opts,
+        },
       )
       return { signatures }
     } catch (e: any) {
@@ -203,7 +209,10 @@ export class CircuitManager extends BaseManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
