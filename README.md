@@ -52,7 +52,9 @@
     - [Usage](https://github.com/mfactory-lab/albus/wiki/Integration#usage)
   - [Off-chain component (TypeScript)](https://github.com/mfactory-lab/albus/wiki/Integration#off-chain-component-typescript)
     - [Installation](https://github.com/mfactory-lab/albus/wiki/Integration#installation-1)
-    - [Usage](https://github.com/mfactory-lab/albus/wiki/Integration#usage-1)
+    - [Initialization](https://github.com/mfactory-lab/albus/wiki/Integration#initialization)
+    - [Methods available to Web3 businesses](https://github.com/mfactory-lab/albus/wiki/Integration#methods-available-to-web3-businesses)
+    - [Internal methods of Albus Protocol](https://github.com/mfactory-lab/albus/wiki/Integration#internal-methods-of-albus-protocol)
 - [Reference list](https://github.com/mfactory-lab/albus/wiki/Reference-list)
 
 # Contacts
