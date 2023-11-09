@@ -39,7 +39,7 @@ import {
   createUpdateCredentialInstruction,
   errorFromCode,
 } from './generated'
-
+import type { ExtendedMetadata } from './utils'
 import {
   getAssociatedTokenAddress,
   getMasterEditionPDA,
@@ -119,7 +119,10 @@ export class CredentialManager extends BaseManager {
         tx.feePayer = opts.feePayer.publicKey
         signers.push(opts.feePayer)
       }
-      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
+      const signature = await this.provider.sendAndConfirm(tx, signers, {
+        ...this.provider.opts,
+        ...opts?.confirm,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -150,7 +153,10 @@ export class CredentialManager extends BaseManager {
         tx.feePayer = opts.feePayer.publicKey
         signers.push(opts.feePayer)
       }
-      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
+      const signature = await this.provider.sendAndConfirm(tx, signers, {
+        ...this.provider.opts,
+        ...opts?.confirm,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -160,25 +166,13 @@ export class CredentialManager extends BaseManager {
   /**
    * Load a credential associated with a specified address.
    * This function retrieves, verifies, and optionally decrypts the credential.
-   *
-   * @param {PublicKeyInitData} addr - The address associated with the verifiable credential.
-   * @param {LoadCredentialProps} [props] - Optional properties for loading and processing the credential.
-   * @returns {Promise<VerifiableCredential>} A Promise that resolves to the verified and, if necessary, decrypted Verifiable Credential.
-   * @throws {Error} Throws an error if the loaded credential is invalid or does not contain the `vc` attribute in its metadata.
    */
-  async load(addr: PublicKeyInitData, props: LoadCredentialProps = {}) {
+  async load(addr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
     const nft = await loadNft(this.provider.connection, addr, {
       authority: this.pda.authority()[0],
       code: CREDENTIAL_SYMBOL_CODE,
     })
-
-    if (!nft.json?.vc) {
-      throw new Error('Invalid credential! Metadata does not contain `vc` attribute.')
-    }
-
-    return Albus.credential.verifyCredential(nft.json.vc, {
-      decryptionKey: props.decryptionKey,
-    })
+    return this.getCredentialInfo(nft, props)
   }
 
   /**
@@ -197,49 +191,55 @@ export class CredentialManager extends BaseManager {
         withJson: !props.pending,
       },
     )
-
     const result: Array<CredentialInfo> = []
     for (const account of accounts) {
-      const acc: CredentialInfo = {
+      result.push({
         address: account.mint,
-        data: {},
-      }
-
-      // parse data uri "data:,status=rejected&iss=sumsub"
-      if (account.data.uri.startsWith('data:')) {
-        const qs = account.data.uri.split(',')[1] ?? ''
-        for (const p of qs.split('&')) {
-          const [k, v] = p.split('=')
-          if (k && v) {
-            acc.data[k] = v
-          }
-        }
-      }
-
-      if (account.json?.vc !== undefined) {
-        try {
-          acc.credential = await Albus.credential.verifyCredential(account.json.vc, {
-            decryptionKey: props.decryptionKey,
-          })
-        } catch (e) {
-          console.log(`Credential Verification Error: ${e}`)
-          if (props.throwError) {
-            throw e
-          }
-        }
-      }
-
-      result.push(acc)
+        credential: await this.getCredentialInfo(account, props),
+      })
     }
-
     return result
   }
+
+  private async getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
+    if (nft.json?.vc !== undefined) {
+      try {
+        return Albus.credential.verifyCredential(nft.json.vc, {
+          decryptionKey: props?.decryptionKey,
+        })
+      } catch (e) {
+        console.log(`Credential Verification Error: ${e}`)
+        if (props?.throwOnError) {
+          throw e
+        }
+      }
+    }
+    return {
+      data: parseUriData(nft.data.uri),
+    }
+  }
+}
+
+/**
+ * Parse data uri like "data:,status=rejected&iss=sumsub"
+ */
+function parseUriData(uri: string) {
+  const data: Record<string, string> = {}
+  if (uri.startsWith('data:')) {
+    const qs = uri.split(',')[1] ?? ''
+    for (const p of qs.split('&')) {
+      const [k, v] = p.split('=')
+      if (k && v) {
+        data[k] = v
+      }
+    }
+  }
+  return data
 }
 
 export type CredentialInfo = {
   address: PublicKey
-  data: { [key: string]: string }
-  credential?: VerifiableCredential
+  credential: VerifiableCredential | { data: Record<string, string> }
 }
 
 export type CreateCredentialProps = {
@@ -259,11 +259,11 @@ export type RevokeCredentialProps = {
 
 export type LoadCredentialProps = {
   decryptionKey?: number[] | Uint8Array
+  throwOnError?: boolean
 }
 
 export type LoadAllCredentialProps = {
   owner?: PublicKey
-  throwError?: boolean
   pending?: boolean
 } & LoadCredentialProps
 

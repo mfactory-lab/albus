@@ -44,7 +44,7 @@ import type { WithRequired } from './types'
 import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
 
-export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'>
+export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> & { opts?: ConfirmOptions }
 
 export type ClientOptions = {
   programId?: PublicKey

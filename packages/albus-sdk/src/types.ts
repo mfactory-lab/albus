@@ -27,6 +27,7 @@
  */
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
+export type Writeable<T> = { -readonly [P in keyof T]: T[P] }
 
 export type PrivateKey = number[] | string | Uint8Array
 export type AlbusNftCode = 'DC' | 'ID'
