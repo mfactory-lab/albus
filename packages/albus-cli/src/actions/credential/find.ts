@@ -26,28 +26,35 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { getParsedNftAccountsByUpdateAuthority } from '@albus-finance/sdk'
 import log from 'loglevel'
-import { PublicKey } from '@solana/web3.js'
 import { useContext } from '@/context'
 
 type Opts = {
-  owner?: string
+  // ...
 }
 
-export async function showAll(opts: Opts) {
-  const { keypair, client } = useContext()
+export async function find(_opts: Opts) {
+  const { client } = useContext()
 
-  const credentials = await client.credential.loadAll({
-    decryptionKey: keypair.secretKey,
-    owner: opts.owner ? new PublicKey(opts.owner) : undefined,
-  })
+  log.info('Loading credentials owned by albus authority...')
 
-  for (const { address, credential } of credentials) {
-    log.info('Address:', address.toString())
-    log.info('Issuer:', credential.issuer)
-    log.info('IssuanceDate:', credential.issuanceDate)
-    log.info('ExpirationDate:', credential.expirationDate)
-    log.info('CredentialSubject:', credential.credentialSubject)
-    log.info('----------------------------------------------------------------')
-  }
+  const credentials = await getParsedNftAccountsByUpdateAuthority(
+    client.provider.connection,
+    client.pda.authority()[0],
+  )
+
+  const validCreds = credentials.filter(c =>
+    c.data.symbol === 'ALBUS-DC' && c.data.uri.startsWith('https://'))
+  log.info(`Found ${validCreds.length} credentials`)
+
+  // for (const { address, credential } of credentials) {
+  //   log.info('Address:', address.toString())
+  //   log.info('Issuer:', credential?.issuer)
+  //   log.info('IssuanceDate:', credential?.issuanceDate)
+  //   log.info('ValidUntil:', credential?.validUntil)
+  //   log.info('ValidFrom:', credential?.validFrom)
+  //   log.info('CredentialSubject:', credential?.credentialSubject)
+  //   log.info('----------------------------------------------------------------')
+  // }
 }

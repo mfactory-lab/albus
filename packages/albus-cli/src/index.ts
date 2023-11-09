@@ -36,6 +36,7 @@ import * as actions from '@/actions'
 const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
 const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet'
+// eslint-disable-next-line node/prefer-global/process
 const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
 
 const originFactory = log.methodFactory
@@ -66,6 +67,7 @@ cli
     console.log('\n')
   })
   .hook('postAction', (_c: Command) => {
+    // eslint-disable-next-line node/prefer-global/process
     process.exit()
   })
 
@@ -99,15 +101,19 @@ id.command('new')
 const vc = cli.command('vc')
 
 vc.command('all', { isDefault: true })
-  .description('Show all issued VC`s')
+  .description('Show all user credentials')
   .option('--owner <pubkey>', '(optional) nft owner address')
-  .action(actions.vc.showAll)
+  .action(actions.credential.showAll)
+
+vc.command('find')
+  .description('Find credentials')
+  .action(actions.credential.find)
 
 vc.command('issue')
   .description('Issue new VC')
   .option('--provider <string>', 'KYC provider unique code')
   .option('-e,--encrypt', '(optional) Encrypt VC with holder public key')
-  .action(actions.vc.issue)
+  .action(actions.credential.issue)
 
 ///
 /// Circuit Management

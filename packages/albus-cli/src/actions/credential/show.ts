@@ -26,14 +26,29 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as admin from './admin'
-export * as asset from './asset'
-export * as circuit from './circuit'
-export * as did from './did'
-export * as identity from './identity'
-export * as test from './test'
-export * as credential from './credential'
-export * as policy from './policy'
-export * as request from './request'
-export * as service from './service'
-export * as trustee from './trustee'
+import log from 'loglevel'
+import { PublicKey } from '@solana/web3.js'
+import { useContext } from '@/context'
+
+type Opts = {
+  owner?: string
+}
+
+export async function showAll(opts: Opts) {
+  const { keypair, client } = useContext()
+
+  const credentials = await client.credential.loadAll({
+    decryptionKey: keypair.secretKey,
+    owner: opts.owner ? new PublicKey(opts.owner) : undefined,
+  })
+
+  for (const { address, credential } of credentials) {
+    log.info('Address:', address.toString())
+    log.info('Issuer:', credential?.issuer)
+    log.info('IssuanceDate:', credential?.issuanceDate)
+    log.info('ValidUntil:', credential?.validUntil)
+    log.info('ValidFrom:', credential?.validFrom)
+    log.info('CredentialSubject:', credential?.credentialSubject)
+    log.info('----------------------------------------------------------------')
+  }
+}
