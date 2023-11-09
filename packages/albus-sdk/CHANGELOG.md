@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.2-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.2...@albus-finance/sdk-v0.2.2-next.3) (2023-11-09)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** credential manager improved ([be145c1](https://github.com/mfactory-lab/albus/commit/be145c179578e4a0416a0a1b5fd0970003651f95))
+
+
+### ♻️ Refactors
+
+* **sdk:** add `ClientOptions`, add abstract provider, improved types ([7e4fac7](https://github.com/mfactory-lab/albus/commit/7e4fac752e6395701bd6902861d834bbc7d13b7a))
+
 ## [0.2.2-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.1...@albus-finance/sdk-v0.2.2-next.2) (2023-11-07)
 
 ## [0.2.2-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.1...@albus-finance/sdk-v0.2.2-next.1) (2023-11-07)
