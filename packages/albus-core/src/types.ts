@@ -34,6 +34,7 @@ export enum CredentialType {
   DriverLicense = 'DriverLicense',
   AttendanceProof = 'AttendanceProof',
   LivenessProof = 'LivenessProof',
+  Geo = 'Geo'
 }
 
 export enum PresentationType {
