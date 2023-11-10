@@ -1,5 +1,5 @@
 import type { PublicKey } from '@solana/web3.js'
-import * as COUNTRIES_LIST from '@albus-finance/core/tests/countries'
+import { COUNTRIES_LIST } from '../countries'
 import { PolicyRule } from '../generated'
 
 const EVENTS = {
@@ -42,6 +42,42 @@ function secondsToMilliseconds(sec: number): number {
 
 function formatCamelCase(str: string) {
   return str.split(/(?=[A-Z])/).join(' ').toLowerCase()
+}
+
+function hasKey(rules: PolicyRule[], key: string) {
+  return !!rules.find(r => r.key === key)
+}
+
+function getCircuitByRules(rules: PolicyRule[]) {
+  if (
+    hasKey(rules, 'minAge')
+    && (
+      rules.length === 1
+      || (rules.length === 2 && hasKey(rules, 'maxAge'))
+    )
+  ) {
+    return 'age'
+  } else if (
+    rules.length === 3
+    && hasKey(rules, 'expectedEvent')
+    && hasKey(rules, 'expectedDateFrom')
+    && hasKey(rules, 'expectedDateTo')
+  ) {
+    return 'attendance'
+  } else if (
+    rules.length === 3
+    && hasKey(rules, 'selectionMode')
+    && hasKey(rules, 'countryLookup.0')
+    && hasKey(rules, 'countryLookup.1')
+  ) {
+    return 'liveness'
+  } else if (
+    rules.length === 1
+    && hasKey(rules, 'expectedType')
+  ) {
+    return 'country'
+  }
+  return ''
 }
 
 function normalizeRule({ key, label, value }: { key: string; label: string; value: number[] }): PolicyRuleNormalized {
@@ -87,14 +123,12 @@ export function normalizePolicyRules(props: PolicyRule[]): PolicyRuleNormalized[
 
 export function formatPolicyRules(data: { circuit: PublicKey; rules: PolicyRule[] }): string {
   const rules = normalizePolicyRules(data.rules)
-  switch (data.circuit.toBase58()) {
-    case '3xSYq61eaeUEnQex5iwh5Q4m9tBvwXygbudTnYqoQTNR': {
-      // age
+  switch (getCircuitByRules(data.rules)) {
+    case 'age': {
       const to = rules[1]?.value !== '100' ? `to ${rules[1]?.value}` : ''
       return `Age: from ${data.rules[0]?.label} ${to}`
     }
-    case '8gRMb2ZVuZiubDTix68KF1X9Cj7yvkGJbCwza8MB8XeX': {
-      // attendance
+    case 'attendance': {
       const expectedDateFrom = Number(rules[1]?.value)
       const expectedDateTo = Number(rules[2]?.value)
 
@@ -106,12 +140,10 @@ export function formatPolicyRules(data: { circuit: PublicKey; rules: PolicyRule[
       const event = rules[0]?.value
       return `Event: ${event}, Date: ${from} - ${to}`
     }
-    case '3ro9Jqy7o6DPGR982KfNWaQ1zVUeu4jLep2NtVxvhwtW': {
-      // liveness
+    case 'liveness': {
       return `Verifying issuer: ${rules[0]?.value}`
     }
-    case '8mRixW28XEPajVxCKy8zZ2bxmQecBvhTg4gw7AfocRHu': {
-      // country
+    case 'country': {
       return `Mode: ${rules[0]?.value}. Countries: ${rules[1]?.value}`
     }
     default:
