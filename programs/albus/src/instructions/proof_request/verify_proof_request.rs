@@ -83,7 +83,7 @@ pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
 
     #[cfg(not(feature = "verify-on-chain"))]
     {
-        msg!("On-chain verification is disabled, available from solana v1.17.0");
+        msg!("On-chain verification is disabled, available since v1.17.0");
         Err(AlbusError::Unverified.into())
     }
 }

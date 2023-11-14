@@ -29,6 +29,7 @@
 use solana_program::pubkey;
 use solana_program::pubkey::Pubkey;
 
+/// List of root authorities
 pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
     #[cfg(feature = "testing")]
     pubkey!("4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i"),
@@ -37,11 +38,14 @@ pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
     pubkey!("AuTHJvxjcr2wB8xfZbciwfHNn8n1H2HrBz5yD2F6onWH"),
 ];
 
-// pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
+/// Issuer signal name used in Albus circuits
+pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
 
+/// Timestamp signal name used in Albus circuits
 pub const TIMESTAMP_SIGNAL: &str = "timestamp";
 pub const TIMESTAMP_THRESHOLD: u16 = 30;
 
+/// Albus NFT symbols begin with this prefix
 pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
 pub const CREDENTIAL_SYMBOL_CODE: &str = "DC";
 pub const CREDENTIAL_NAME: &str = "Albus Digital Credential";
