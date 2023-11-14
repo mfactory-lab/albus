@@ -363,11 +363,10 @@ export class ProofRequestManager extends BaseManager {
 
     this.trace('prove', 'init', { proof, publicInputs })
 
-    // extend public inputs if needed
+    // extending public inputs, length more than 20 does not fit into one transaction
     if (publicInputs.length > inputsLimit.withProof) {
       const inputChunks = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
-        const inputs = inputChunks[i]!
         txs.push({
           tx: new Transaction().add(
             createProveProofRequestInstruction(
@@ -380,7 +379,7 @@ export class ProofRequestManager extends BaseManager {
               {
                 data: {
                   reset: i === 0,
-                  publicInputs: inputs,
+                  publicInputs: inputChunks[i],
                   proof: null,
                 },
               },
@@ -411,7 +410,7 @@ export class ProofRequestManager extends BaseManager {
     })
 
     if (props.verify) {
-      this.trace('prove', 'add verification instruction...')
+      this.trace('prove', 'createVerifyProofRequestInstruction (setComputeUnitLimit: 400_000)')
       txs.push({
         tx: new Transaction()
           .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
@@ -473,14 +472,15 @@ export class ProofRequestManager extends BaseManager {
       .withPolicy(policy)
       .build()
 
-    this.trace('fullProve', { input: proofInput.data })
-
     try {
-      const { proof, publicSignals } = await Albus.zkp.generateProof({
+      const proofData = {
         wasmFile: circuit.wasmUri,
         zkeyFile: circuit.zkeyUri,
         input: proofInput.data,
-      })
+      }
+
+      this.trace('fullProve', proofData)
+      const { proof, publicSignals } = await Albus.zkp.generateProof(proofData)
 
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
@@ -496,7 +496,7 @@ export class ProofRequestManager extends BaseManager {
       if (props.throwOnError) {
         throw e
       }
-      this.trace('prove', e)
+      this.trace('fullProve', e)
       throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
   }
