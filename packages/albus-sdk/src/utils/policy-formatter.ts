@@ -2,6 +2,13 @@ import type { PublicKey } from '@solana/web3.js'
 import { COUNTRIES_LIST } from '../countries'
 import { PolicyRule } from '../generated'
 
+export enum Circuit {
+  Age = 'age',
+  Attendance = 'attendance',
+  Liveness = 'liveness',
+  Country = 'country',
+}
+
 const EVENTS = {
   cacf: 'Crypto assets conference, Frankfurt',
   sb2023a: 'Solana breakpoint 2023, Amsterdam',
@@ -48,7 +55,7 @@ function hasKey(rules: PolicyRule[], key: string) {
   return !!rules.find(r => r.key === key)
 }
 
-function getCircuitByRules(rules: PolicyRule[]) {
+function getCircuitByRules(rules: PolicyRule[]): Circuit | null {
   if (
     hasKey(rules, 'minAge')
     && (
@@ -56,28 +63,28 @@ function getCircuitByRules(rules: PolicyRule[]) {
       || (rules.length === 2 && hasKey(rules, 'maxAge'))
     )
   ) {
-    return 'age'
+    return Circuit.Age
   } else if (
     rules.length === 3
     && hasKey(rules, 'expectedEvent')
     && hasKey(rules, 'expectedDateFrom')
     && hasKey(rules, 'expectedDateTo')
   ) {
-    return 'attendance'
+    return Circuit.Attendance
   } else if (
     rules.length === 3
     && hasKey(rules, 'selectionMode')
     && hasKey(rules, 'countryLookup.0')
     && hasKey(rules, 'countryLookup.1')
   ) {
-    return 'liveness'
+    return Circuit.Liveness
   } else if (
     rules.length === 1
     && hasKey(rules, 'expectedType')
   ) {
-    return 'country'
+    return Circuit.Country
   }
-  return ''
+  return null
 }
 
 function normalizeRule({ key, label, value }: { key: string; label: string; value: number[] }): PolicyRuleNormalized {
@@ -124,11 +131,11 @@ export function normalizePolicyRules(props: PolicyRule[]): PolicyRuleNormalized[
 export function formatPolicyRules(data: { circuit: PublicKey; rules: PolicyRule[] }): string {
   const rules = normalizePolicyRules(data.rules)
   switch (getCircuitByRules(data.rules)) {
-    case 'age': {
+    case Circuit.Age: {
       const to = rules[1]?.value !== '100' ? `to ${rules[1]?.value}` : ''
       return `Age: from ${data.rules[0]?.label} ${to}`
     }
-    case 'attendance': {
+    case Circuit.Attendance: {
       const expectedDateFrom = Number(rules[1]?.value)
       const expectedDateTo = Number(rules[2]?.value)
 
@@ -140,10 +147,10 @@ export function formatPolicyRules(data: { circuit: PublicKey; rules: PolicyRule[
       const event = rules[0]?.value
       return `Event: ${event}, Date: ${from} - ${to}`
     }
-    case 'liveness': {
+    case Circuit.Liveness: {
       return `Verifying issuer: ${rules[0]?.value}`
     }
-    case 'country': {
+    case Circuit.Country: {
       return `Mode: ${rules[0]?.value}. Countries: ${rules[1]?.value}`
     }
     default:
