@@ -36,14 +36,7 @@ export type DeleteProofRequestInstructionAccounts = {
 }
 
 export const deleteProofRequestInstructionDiscriminator = [
-  34,
-  9,
-  125,
-  78,
-  113,
-  197,
-  126,
-  34,
+  34, 9, 125, 78, 113, 197, 126, 34,
 ]
 
 /**

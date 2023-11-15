@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { RevealSecretShareData } from '../types/RevealSecretShareData'
+import type {
+  RevealSecretShareData } from '../types/RevealSecretShareData'
 import {
   revealSecretShareDataBeet,
 } from '../types/RevealSecretShareData'
@@ -57,14 +58,7 @@ export type RevealSecretShareInstructionAccounts = {
 }
 
 export const revealSecretShareInstructionDiscriminator = [
-  137,
-  113,
-  154,
-  99,
-  90,
-  161,
-  41,
-  235,
+  137, 113, 154, 99, 90, 161, 41, 235,
 ]
 
 /**

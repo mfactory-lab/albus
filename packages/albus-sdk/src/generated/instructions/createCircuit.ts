@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { CreateCircuitData } from '../types/CreateCircuitData'
+import type {
+  CreateCircuitData } from '../types/CreateCircuitData'
 import {
   createCircuitDataBeet,
 } from '../types/CreateCircuitData'
@@ -53,14 +54,7 @@ export type CreateCircuitInstructionAccounts = {
 }
 
 export const createCircuitInstructionDiscriminator = [
-  35,
-  7,
-  152,
-  132,
-  75,
-  65,
-  176,
-  162,
+  35, 7, 152, 132, 75, 65, 176, 162,
 ]
 
 /**

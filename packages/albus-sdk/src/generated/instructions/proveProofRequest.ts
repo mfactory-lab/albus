@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { ProveProofRequestData } from '../types/ProveProofRequestData'
+import type {
+  ProveProofRequestData } from '../types/ProveProofRequestData'
 import {
   proveProofRequestDataBeet,
 } from '../types/ProveProofRequestData'
@@ -42,6 +43,7 @@ export const proveProofRequestStruct = new beet.FixableBeetArgsStruct<
  * @property [_writable_] proofRequest
  * @property [] circuit
  * @property [] policy
+ * @property [] issuer (optional)
  * @property [_writable_, **signer**] authority
  * @category Instructions
  * @category ProveProofRequest
@@ -51,24 +53,21 @@ export type ProveProofRequestInstructionAccounts = {
   proofRequest: web3.PublicKey
   circuit: web3.PublicKey
   policy: web3.PublicKey
+  issuer?: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
 export const proveProofRequestInstructionDiscriminator = [
-  148,
-  131,
-  112,
-  65,
-  14,
-  251,
-  112,
-  208,
+  148, 131, 112, 65, 14, 251, 112, 208,
 ]
 
 /**
  * Creates a _ProveProofRequest_ instruction.
+ *
+ * Optional accounts that are not provided default to the program ID since
+ * this was indicated in the IDL from which this instruction was generated.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
@@ -99,6 +98,11 @@ export function createProveProofRequestInstruction(
     },
     {
       pubkey: accounts.policy,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.issuer ?? programId,
       isWritable: false,
       isSigner: false,
     },

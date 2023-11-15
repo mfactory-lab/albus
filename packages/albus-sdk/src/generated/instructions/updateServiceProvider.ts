@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { UpdateServiceProviderData } from '../types/UpdateServiceProviderData'
+import type {
+  UpdateServiceProviderData } from '../types/UpdateServiceProviderData'
 import {
   updateServiceProviderDataBeet,
 } from '../types/UpdateServiceProviderData'
@@ -53,14 +54,7 @@ export type UpdateServiceProviderInstructionAccounts = {
 }
 
 export const updateServiceProviderInstructionDiscriminator = [
-  16,
-  250,
-  215,
-  91,
-  184,
-  33,
-  51,
-  19,
+  16, 250, 215, 91, 184, 33, 51, 19,
 ]
 
 /**

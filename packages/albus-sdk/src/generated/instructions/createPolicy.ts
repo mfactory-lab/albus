@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { CreatePolicyData } from '../types/CreatePolicyData'
+import type {
+  CreatePolicyData } from '../types/CreatePolicyData'
 import {
   createPolicyDataBeet,
 } from '../types/CreatePolicyData'
@@ -57,14 +58,7 @@ export type CreatePolicyInstructionAccounts = {
 }
 
 export const createPolicyInstructionDiscriminator = [
-  27,
-  81,
-  33,
-  27,
-  196,
-  103,
-  246,
-  53,
+  27, 81, 33, 27, 196, 103, 246, 53,
 ]
 
 /**

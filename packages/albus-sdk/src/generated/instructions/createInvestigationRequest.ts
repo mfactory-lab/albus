@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { CreateInvestigationRequestData } from '../types/CreateInvestigationRequestData'
+import type {
+  CreateInvestigationRequestData } from '../types/CreateInvestigationRequestData'
 import {
   createInvestigationRequestDataBeet,
 } from '../types/CreateInvestigationRequestData'
@@ -57,14 +58,7 @@ export type CreateInvestigationRequestInstructionAccounts = {
 }
 
 export const createInvestigationRequestInstructionDiscriminator = [
-  252,
-  6,
-  45,
-  22,
-  207,
-  47,
-  209,
-  212,
+  252, 6, 45, 22, 207, 47, 209, 212,
 ]
 
 /**

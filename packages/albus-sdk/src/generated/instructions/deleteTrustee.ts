@@ -36,14 +36,7 @@ export type DeleteTrusteeInstructionAccounts = {
 }
 
 export const deleteTrusteeInstructionDiscriminator = [
-  153,
-  117,
-  70,
-  131,
-  188,
-  92,
-  114,
-  219,
+  153, 117, 70, 131, 188, 92, 114, 219,
 ]
 
 /**
