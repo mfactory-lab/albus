@@ -461,17 +461,15 @@ export class ProofRequestManager extends BaseManager {
       decryptionKey: props.decryptionKey ?? props.userPrivateKey,
     })
 
-    const trusteePubKeys = serviceProvider.trustees.length > 0
-      ? (await this.service.loadTrusteeKeys(serviceProvider.trustees))
-          .filter(p => p !== null) as [bigint, bigint][]
-      : []
-
     const proofInput = await new ProofInputBuilder(credential)
-      .withTimestamp(await this.getTimestamp())
       .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
-      .withTrusteePublicKey(trusteePubKeys)
       .withCircuit(circuit)
       .withPolicy(policy)
+      .withTimestampLoader(this.getTimestamp)
+      .withTrusteeLoader(async () => {
+        const keys = await this.service.loadTrusteeKeys(serviceProvider.trustees)
+        return keys.filter(p => p !== null) as [bigint, bigint][]
+      })
       .build()
 
     // try to find a valid issuer by credential proof signer

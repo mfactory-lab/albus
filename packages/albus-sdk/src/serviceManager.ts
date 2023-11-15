@@ -78,6 +78,10 @@ export class ServiceManager extends BaseManager {
    * @param trustees
    */
   async loadTrusteeKeys(trustees: PublicKey[]) {
+    if (trustees.length === 0) {
+      return []
+    }
+
     const accounts = await this.provider.connection
       .getMultipleAccountsInfo(trustees, {
         dataSlice: {
