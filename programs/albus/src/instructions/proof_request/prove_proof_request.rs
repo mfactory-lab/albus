@@ -49,9 +49,10 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
     }
 
     if data.reset {
+        req.status = ProofRequestStatus::Pending;
+        req.proved_at = 0;
         req.proof = None;
-        // req.public_inputs.clear();
-        req.public_inputs = Default::default();
+        req.public_inputs.clear();
     }
 
     if !data.public_inputs.is_empty() {
@@ -81,11 +82,11 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
         if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
             match &ctx.accounts.issuer {
                 None => {
-                    msg!("Error: Unknown issuer");
+                    msg!("Error: Issuer required");
                     return Err(AlbusError::InvalidData.into());
                 }
                 Some(iss) => {
-                    if iss.is_disabled {
+                    if iss.is_disabled() {
                         msg!("Error: This issuer is inactive");
                         return Err(AlbusError::Unauthorized.into());
                     }
@@ -122,7 +123,7 @@ pub struct ProveProofRequestData {
 #[derive(Accounts)]
 #[instruction(data: ProveProofRequestData)]
 pub struct ProveProofRequest<'info> {
-    #[account(mut)]
+    #[account(mut, has_one = circuit, has_one = policy)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
 
     pub circuit: Box<Account<'info, Circuit>>,

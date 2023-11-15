@@ -83,6 +83,7 @@ pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
 
     #[cfg(not(feature = "verify-on-chain"))]
     {
+        let _req = &mut ctx.accounts.proof_request;
         msg!("On-chain verification is disabled, available since v1.17.0");
         Err(AlbusError::Unverified.into())
     }
