@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2-next.7](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.6...@albus-finance/sdk-v0.2.2-next.7) (2023-11-15)
+
+
+### 🐞 Bug Fixes
+
+* **circuits:** `livenessProof` credentialDepth=4 ([460e3d3](https://github.com/mfactory-lab/albus/commit/460e3d3c24cb8772f5f4911b3e101e4aca9da1be))
+* **sdk:** global improvements ([98e87cf](https://github.com/mfactory-lab/albus/commit/98e87cf5203d9a9e37074bd053a5d313a35a2d38))
+
 ## [0.2.2-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.5...@albus-finance/sdk-v0.2.2-next.6) (2023-11-15)
 
 
