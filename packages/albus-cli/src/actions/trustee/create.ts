@@ -48,8 +48,8 @@ export async function create(name: string, opts: Opts) {
   } else {
     keypair = Keypair.generate()
     log.info('New encryption keypair was generated!')
-    log.info(`SecretKey: [${keypair.secretKey}]`)
-    log.info(`PublicKey: ${keypair.publicKey}`)
+    log.info(`|- SecretKey: [${keypair.secretKey}]`)
+    log.info(`|- PublicKey: ${keypair.publicKey}`)
   }
 
   const { key } = Albus.zkp.generateEncryptionKey(keypair)

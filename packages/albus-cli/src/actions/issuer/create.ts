@@ -26,15 +26,42 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as admin from './admin'
-export * as asset from './asset'
-export * as circuit from './circuit'
-export * as did from './did'
-export * as identity from './identity'
-export * as issuer from './issuer'
-export * as test from './test'
-export * as credential from './credential'
-export * as policy from './policy'
-export * as request from './request'
-export * as service from './service'
-export * as trustee from './trustee'
+import { Buffer } from 'node:buffer'
+import { readFileSync } from 'node:fs'
+import { Keypair } from '@solana/web3.js'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+type Opts = {
+  name: string
+  description?: string
+  keypair: string
+}
+
+/**
+ * Create a new Issuer
+ */
+export async function create(code: string, opts: Opts) {
+  const { client } = useContext()
+
+  let keypair: Keypair
+  if (opts.keypair) {
+    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.keypair).toString())))
+  } else {
+    keypair = Keypair.generate()
+    log.info('New signer keypair was generated!')
+    log.info(`|- SecretKey: [${keypair.secretKey}]`)
+    log.info(`|- PublicKey: ${keypair.publicKey}`)
+  }
+
+  const { signature, address } = await client.issuer.create({
+    code,
+    name: opts.name,
+    description: opts.description,
+    keypair,
+  })
+
+  log.info('\nDone')
+  log.info(`Signature: ${signature}`)
+  log.info(`Address: ${address}`)
+}

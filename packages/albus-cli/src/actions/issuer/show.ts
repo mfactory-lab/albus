@@ -26,15 +26,38 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as admin from './admin'
-export * as asset from './asset'
-export * as circuit from './circuit'
-export * as did from './did'
-export * as identity from './identity'
-export * as issuer from './issuer'
-export * as test from './test'
-export * as credential from './credential'
-export * as policy from './policy'
-export * as request from './request'
-export * as service from './service'
-export * as trustee from './trustee'
+import type { PublicKey } from '@solana/web3.js'
+import Table from 'cli-table3'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+export async function show(addr: string | PublicKey) {
+  const { client } = useContext()
+  const issuer = await client.issuer.load(addr)
+  log.info({ address: addr, ...issuer.pretty() })
+}
+
+export async function showAll() {
+  const { client } = useContext()
+
+  const accounts = await client.issuer.find()
+
+  log.info(`Found ${accounts.length} accounts`)
+
+  const table = new Table({
+    head: ['#', 'Address', 'Code', 'Name', 'Created'],
+  })
+
+  let i = 0
+  for (const { pubkey, data } of accounts) {
+    table.push([
+      String(++i),
+      String(pubkey),
+      String(data!.code),
+      String(data!.name),
+      String(new Date(Number(data!.createdAt) * 1000).toISOString()),
+    ])
+  }
+
+  console.log(table.toString())
+}

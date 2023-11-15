@@ -79,6 +79,7 @@ test.command('credential').action(actions.test.credential)
 // ------------------------------------------
 
 const did = cli.command('did')
+  .description('DID Management')
 
 did.command('generate', { isDefault: true })
   .description('Generate new issuer did')
@@ -89,6 +90,7 @@ did.command('generate', { isDefault: true })
 // ------------------------------------------
 
 const id = cli.command('id')
+  .description('Identity Management')
 
 id.command('new')
   .description('Create new identity')
@@ -99,6 +101,7 @@ id.command('new')
 // ------------------------------------------
 
 const vc = cli.command('vc')
+  .description('Credential Management')
 
 vc.command('all', { isDefault: true })
   .description('Show all user credentials')
@@ -114,6 +117,35 @@ vc.command('issue')
   .option('--provider <string>', 'KYC provider unique code')
   .option('-e,--encrypt', '(optional) Encrypt VC with holder public key')
   .action(actions.credential.issue)
+
+///
+/// Issuer Management
+///
+
+const issuer = cli.command('issuer')
+  .description('Issuer Management')
+
+issuer.command('all', { isDefault: true })
+  .description('Show all issuers')
+  .action(actions.issuer.showAll)
+
+issuer.command('show')
+  .description('Show issuer data')
+  .argument('<address>', 'Issuer address')
+  .action(actions.issuer.show)
+
+issuer.command('create')
+  .description('Create new issuer')
+  .argument('code', 'Issuer code')
+  .requiredOption('--name <string>', 'Issuer name')
+  .option('--keypair <string>', '(optional) Path to the signer keypair file')
+  .option('--description <string>', '(optional) Short description')
+  .action(actions.issuer.create)
+
+issuer.command('delete')
+  .description('Delete issuer')
+  .argument('code', 'issuer code')
+  .action(actions.issuer.remove)
 
 ///
 /// Circuit Management
@@ -196,6 +228,7 @@ service.command('all')
 // ------------------------------------------
 
 const policy = cli.command('policy')
+  .description('Policy Management')
 
 policy.command('all', { isDefault: true })
   .description('Show all policies')
@@ -235,6 +268,7 @@ policy.command('delete')
 // ------------------------------------------
 
 const trustee = cli.command('trustee')
+  .description('Trustee Management')
 
 trustee.command('create')
   .description('Create new Trustee')
@@ -267,6 +301,7 @@ trustee.command('all', { isDefault: true })
 // ------------------------------------------
 
 const request = cli.command('request')
+  .description('Proof Request Management')
 
 request.command('create')
   .description('Create proof request')
@@ -312,6 +347,7 @@ request.command('verify')
 // ------------------------------------------
 
 const asset = cli.command('asset')
+  .description('Assets')
 
 asset.command('upload')
   .argument('<PATH>', 'Path to the file')
@@ -323,6 +359,7 @@ asset.command('upload')
 // ------------------------------------------
 
 const admin = cli.command('admin')
+  .description('Admin Management')
 
 admin.command('fund')
   .description('Fund albus authority balance')
@@ -349,5 +386,6 @@ cli.parseAsync().catch((e) => {
   if (e.logs) {
     log.error(JSON.stringify(e.logs, null, 2))
   }
+  // eslint-disable-next-line node/prefer-global/process
   process.exit()
 })

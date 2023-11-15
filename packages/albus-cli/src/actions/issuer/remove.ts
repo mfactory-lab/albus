@@ -26,15 +26,14 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * as admin from './admin'
-export * as asset from './asset'
-export * as circuit from './circuit'
-export * as did from './did'
-export * as identity from './identity'
-export * as issuer from './issuer'
-export * as test from './test'
-export * as credential from './credential'
-export * as policy from './policy'
-export * as request from './request'
-export * as service from './service'
-export * as trustee from './trustee'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+export async function remove(code: string) {
+  const { client } = useContext()
+
+  const [issuer] = client.pda.issuer(code)
+  const { signature } = await client.issuer.delete({ issuer })
+
+  log.info(`Signature: ${signature}`)
+}
