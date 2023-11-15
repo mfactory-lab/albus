@@ -317,6 +317,103 @@ describe('albusClient', async () => {
       // console.log(publicSignals)
     })
   })
+
+  describe('livenessProof', () => {
+    const credential = {
+      '@context': [
+        'https://www.w3.org/ns/credentials/v2',
+      ],
+      'type': [
+        'VerifiableCredential',
+        'AlbusCredential',
+        'LivenessProof',
+      ],
+      'issuer': 'did:web:issuer.albus.finance:sumsub',
+      'issuanceDate': '2023-10-25T16:42:27.642Z',
+      'credentialSubject': {
+        type: 'sumsub:selfie',
+      },
+      'proof': {
+        type: 'BJJSignature2021',
+        created: 1698252147857,
+        verificationMethod: 'did:web:issuer.albus.finance:sumsub#eddsa-bjj',
+        rootHash: '7384168670000218909495559690876868525986254131057443973562604756255281925274',
+        proofValue: {
+          ax: '12279242631152480922448440387665898145185461262650789258320537467533451473248',
+          ay: '562652728416453518865033172714223342104200904426339863473937692826883086980',
+          r8x: '2851062159973030482641259574782771657093068370484615714955983721583034367029',
+          r8y: '15202688401997695193545614335173659064939108058226998945381729092286514966694',
+          s: '70776040370476481594455779101978946705154142135311648660435454303144753412',
+        },
+        proofPurpose: 'assertionMethod',
+      },
+    }
+
+    const expectedType = 'sumsub:selfie'
+
+    const circuit = {
+      code: 'liveness',
+      name: 'liveness',
+      vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('livenessProof.vk.json').toString())),
+      wasmUri: loadFixture('livenessProof.wasm'),
+      zkeyUri: loadFixture('livenessProof.zkey'),
+      outputs: [],
+      privateSignals: ['meta_validUntil', 'type'],
+      publicSignals: [
+        'timestamp',
+        'expectedType',
+        'credentialRoot',
+        'meta_validUntilKey',
+        'meta_validUntilProof[4]',
+        'typeKey',
+        'typeProof[4]',
+        'issuerPk[2]',
+        'issuerSignature[3]',
+      ],
+    } as unknown as Circuit
+
+    const policy = {
+      serviceProvider: PublicKey.default,
+      circuit: PublicKey.default,
+      code: 'livenessProof',
+      name: 'livenessProof',
+      description: '',
+      expirationPeriod: 0,
+      retentionPeriod: 0,
+      rules: [
+        { key: 'expectedType', value: Array.from(Albus.crypto.ffUtils.beInt2Buff(Albus.credential.encodeClaimValue(expectedType), 32)) },
+      ],
+    } as Policy
+
+    it('valid', async () => {
+      vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
+      vi.spyOn(client.proofRequest, 'getTimestamp').mockReturnValue(Promise.resolve(1697035401))
+      vi.spyOn(client.proofRequest, 'loadFull').mockReturnValue(Promise.resolve({
+        proofRequest: { circuit: PublicKey.default, policy: PublicKey.default },
+        circuit,
+        policy,
+        serviceProvider,
+      } as any))
+
+      vi.spyOn(client.provider, 'sendAll').mockReturnValue(Promise.resolve(['abc123']))
+
+      const { signatures, proof, publicSignals } = await client.proofRequest.fullProve({
+        userPrivateKey: payerKeypair.secretKey,
+        proofRequest: PublicKey.default,
+        vc: PublicKey.default,
+      })
+
+      const isVerified = await Albus.zkp.verifyProof({
+        vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
+        proof,
+        // @ts-expect-error readonly
+        publicInput: publicSignals,
+      })
+
+      assert.ok(isVerified)
+      assert.equal(signatures[0], 'abc123')
+    })
+  })
 })
 
 export function loadFixture(name: string) {
