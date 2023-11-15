@@ -35,7 +35,7 @@ import { useContext } from '@/context'
 export async function show(addr: string | PublicKey) {
   const { client } = useContext()
   const proofRequest = await client.proofRequest.load(addr)
-  log.info(JSON.stringify({ address: addr, ...proofRequest.pretty() }, null, 2))
+  log.info({ address: addr, ...proofRequest.pretty() })
 }
 
 type ShowAllOpts = {
