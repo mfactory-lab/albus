@@ -33,9 +33,9 @@ import log from 'loglevel'
 import { useContext } from '@/context'
 
 type Opts = {
-  name: string
+  name?: string
   description?: string
-  keypair: string
+  signerKeypair?: string
 }
 
 /**
@@ -45,8 +45,8 @@ export async function create(code: string, opts: Opts) {
   const { client } = useContext()
 
   let keypair: Keypair
-  if (opts.keypair) {
-    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.keypair).toString())))
+  if (opts.signerKeypair) {
+    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.signerKeypair).toString())))
   } else {
     keypair = Keypair.generate()
     log.info('New signer keypair was generated!')
@@ -56,7 +56,7 @@ export async function create(code: string, opts: Opts) {
 
   const { signature, address } = await client.issuer.create({
     code,
-    name: opts.name,
+    name: opts.name ?? code,
     description: opts.description,
     keypair,
   })
