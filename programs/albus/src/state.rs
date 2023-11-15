@@ -82,29 +82,46 @@ impl From<VerificationKey> for VK {
 #[account]
 #[derive(InitSpace)]
 pub struct Issuer {
+    /// Uniq code of the issuer
+    #[max_len(32)]
+    pub code: String,
     /// The name of the issuer
     #[max_len(32)]
     pub name: String,
     /// Short description
     #[max_len(64)]
     pub description: String,
-    /// Public key used to sign credentials
-    pub pk: Pubkey,
-    /// Public key on babyjub curve
-    pub pk_bjj: [u8; 64],
+    /// Signer Public key
+    pub pubkey: Pubkey,
+    /// Public key (babyjub curve)
+    pub pubkey_bjj: [u8; 64],
     /// Authority account of the issuer
     pub authority: Pubkey,
     /// Issuer status
     pub is_disabled: bool,
+    /// Creation date
+    pub created_at: i64,
     /// PDA bump.
     pub bump: u8,
 }
 
 impl Issuer {
+    pub const SEED: &'static [u8] = b"issuer";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
+
+    #[inline]
+    pub fn is_disabled(&self) -> bool {
+        self.is_disabled
+    }
+
     pub fn bjj_pubkey(&self) -> ([u8; 32], [u8; 32]) {
         (
-            self.pk_bjj[..32].try_into().unwrap(),
-            self.pk_bjj[32..].try_into().unwrap(),
+            self.pubkey_bjj[..32].try_into().unwrap(),
+            self.pubkey_bjj[32..].try_into().unwrap(),
         )
     }
 }

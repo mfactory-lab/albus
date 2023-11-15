@@ -26,17 +26,22 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-mod admin;
-mod circuit;
-mod credential;
-mod investigation;
-mod issuer;
-mod policy;
-mod proof_request;
-mod service_provider;
-mod trustee;
+use anchor_lang::prelude::*;
 
-pub use self::{
-    admin::*, circuit::*, credential::*, investigation::*, issuer::*, policy::*, proof_request::*,
-    service_provider::*, trustee::*,
-};
+use crate::state::Issuer;
+use crate::utils::assert_authorized;
+
+pub fn handler(ctx: Context<DeleteIssuer>) -> Result<()> {
+    assert_authorized(ctx.accounts.authority.key)
+}
+
+#[derive(Accounts)]
+pub struct DeleteIssuer<'info> {
+    #[account(mut, close = authority)]
+    pub issuer: Box<Account<'info, Issuer>>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
