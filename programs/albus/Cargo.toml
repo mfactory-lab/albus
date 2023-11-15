@@ -1,6 +1,6 @@
 [package]
 name = "albus"
-version = "0.0.21"
+version = "0.0.22"
 description = "Albus Protocol on-chain program"
 homepage = "https://albus.finance"
 repository = "https://github.com/mfactory-lab/albus"
