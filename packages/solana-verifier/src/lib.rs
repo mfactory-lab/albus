@@ -102,13 +102,14 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
 
     fn check_proof_request(&self) -> Result<(), ProgramError> {
         let data = self.proof_request.data.borrow();
-        let data = array_ref![data, 0, 186];
+        let data = array_ref![data, 0, 218];
 
         let (
             discriminator,
             _service,
             policy,
             _circuit,
+            _issuer,
             owner,
             _identifier,
             _created_at,
@@ -120,7 +121,7 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
             _bump,
             // _proof,
             // _public_inputs,
-        ) = array_refs![data, 8, 32, 32, 32, 32, 8, 8, 8, 8, 8, 8, 1, 1];
+        ) = array_refs![data, 8, 32, 32, 32, 32, 32, 8, 8, 8, 8, 8, 8, 1, 1];
 
         if discriminator != PROOF_REQUEST_DISCRIMINATOR {
             msg!("AlbusVerifierError: Invalid proof request discriminator");
