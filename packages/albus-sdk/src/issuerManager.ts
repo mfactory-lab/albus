@@ -31,14 +31,18 @@ import type {
   Commitment,
   ConfirmOptions,
   GetMultipleAccountsConfig,
-  PublicKeyInitData, Signer,
+  PublicKeyInitData,
+  Signer,
 } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import { BaseManager } from './base'
 
 import {
   Issuer,
-  createCreateIssuerInstruction, createDeleteIssuerInstruction, errorFromCode, issuerDiscriminator,
+  createCreateIssuerInstruction,
+  createDeleteIssuerInstruction,
+  errorFromCode,
+  issuerDiscriminator,
 } from './generated'
 
 export class IssuerManager extends BaseManager {
@@ -63,6 +67,37 @@ export class IssuerManager extends BaseManager {
     return this.load(this.pda.issuer(id)[0], commitment)
   }
 
+  /**
+   * Load issuer by ed25519 pubkey
+   */
+  async loadByPubkey(pubkey: PublicKeyInitData, noData?: boolean) {
+    const accounts = await this.find({
+      pubkey,
+      noData,
+    })
+    if (accounts.length === 0) {
+      throw new Error(`Unable to find Issuer account by provided pubkey`)
+    }
+    return accounts[0]!
+  }
+
+  /**
+   * Load issuer by zk pubkey (babyjub curve)
+   */
+  async loadByZkPubkey(pubkey: [bigint, bigint], noData?: boolean) {
+    const accounts = await this.find({
+      zkPubkey: this.zkPubkeyToBytes(pubkey),
+      noData,
+    })
+    if (accounts.length === 0) {
+      throw new Error(`Unable to find Issuer account by provided pubkey`)
+    }
+    return accounts[0]!
+  }
+
+  /**
+   * Load multiple issuers
+   */
   async loadMultiple(addrs: PublicKey[], commitmentOrConfig?: Commitment | GetMultipleAccountsConfig) {
     return (await this.provider.connection.getMultipleAccountsInfo(addrs, commitmentOrConfig))
       .filter(acc => acc !== null)
@@ -77,13 +112,6 @@ export class IssuerManager extends BaseManager {
     const builder = Issuer.gpaBuilder()
       .addFilter('accountDiscriminator', issuerDiscriminator)
 
-    if (props.noData) {
-      builder.config.dataSlice = {
-        offset: 0,
-        length: 0,
-      }
-    }
-
     if (props.authority) {
       builder.addFilter('authority', new PublicKey(props.authority))
     }
@@ -92,12 +120,23 @@ export class IssuerManager extends BaseManager {
       builder.addFilter('pubkey', new PublicKey(props.pubkey))
     }
 
+    if (props.zkPubkey) {
+      builder.addFilter('zkPubkey', Array.from(props.zkPubkey))
+    }
+
     if (props.code) {
       builder.addFilter('code', props.code)
     }
 
     if (props.active) {
       builder.addFilter('isDisabled', false)
+    }
+
+    if (props.noData) {
+      builder.config.dataSlice = {
+        offset: 0,
+        length: 0,
+      }
     }
 
     return (await builder.run(this.provider.connection))
@@ -116,12 +155,6 @@ export class IssuerManager extends BaseManager {
     const authority = this.provider.publicKey
     const [issuer] = this.pda.issuer(props.code)
 
-    const pubkey = props.keypair.publicKey
-    const pubkeyBjj = Albus.crypto.eddsa.prv2pub(props.keypair.secretKey).reduce((acc: number[], i) => {
-      const n = Albus.crypto.utils.bigintToBytes(i)
-      return [...acc, ...n]
-    }, [])
-
     const instruction = createCreateIssuerInstruction(
       {
         issuer,
@@ -132,8 +165,8 @@ export class IssuerManager extends BaseManager {
           code: props.code,
           name: props.name,
           description: props.description ?? '',
-          pubkey,
-          pubkeyBjj,
+          pubkey: props.keypair.publicKey,
+          zkPubkey: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.keypair.secretKey)),
         },
       },
     )
@@ -175,12 +208,19 @@ export class IssuerManager extends BaseManager {
       throw errorFromCode(e.code) ?? e
     }
   }
+
+  private zkPubkeyToBytes(pubkey: [bigint, bigint]) {
+    return pubkey.reduce((bytes: number[], i) => {
+      return [...bytes, ...Albus.crypto.utils.bigintToBytes(BigInt(i), 32)]
+    }, [])
+  }
 }
 
 export type FindIssuerProps = {
   code?: string
   authority?: PublicKeyInitData
   pubkey?: PublicKeyInitData
+  zkPubkey?: Iterable<number>
   active?: boolean
   noData?: boolean
 }

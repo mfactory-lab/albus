@@ -14,7 +14,7 @@ export type CreateIssuerData = {
   name: string
   description: string
   pubkey: web3.PublicKey
-  pubkeyBjj: number[] /* size: 64 */
+  zkPubkey: number[] /* size: 64 */
 }
 
 /**
@@ -28,7 +28,7 @@ export const createIssuerDataBeet
       ['name', beet.utf8String],
       ['description', beet.utf8String],
       ['pubkey', beetSolana.publicKey],
-      ['pubkeyBjj', beet.uniformFixedSizeArray(beet.u8, 64)],
+      ['zkPubkey', beet.uniformFixedSizeArray(beet.u8, 64)],
     ],
     'CreateIssuerData',
   )

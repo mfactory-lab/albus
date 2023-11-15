@@ -1,5 +1,5 @@
 {
-  "version": "0.0.21",
+  "version": "0.0.22",
   "name": "albus",
   "instructions": [
     {
@@ -952,27 +952,6 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "code",
-            "docs": [
-              "Uniq code of the issuer"
-            ],
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "docs": [
-              "The name of the issuer"
-            ],
-            "type": "string"
-          },
-          {
-            "name": "description",
-            "docs": [
-              "Short description"
-            ],
-            "type": "string"
-          },
-          {
             "name": "pubkey",
             "docs": [
               "Signer Public key"
@@ -980,7 +959,7 @@
             "type": "publicKey"
           },
           {
-            "name": "pubkeyBjj",
+            "name": "zkPubkey",
             "docs": [
               "Public key (babyjub curve)"
             ],
@@ -1018,6 +997,27 @@
               "PDA bump."
             ],
             "type": "u8"
+          },
+          {
+            "name": "code",
+            "docs": [
+              "Uniq code of the issuer"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the issuer"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "docs": [
+              "Short description"
+            ],
+            "type": "string"
           }
         ]
       }
@@ -1544,9 +1544,16 @@
             "type": "publicKey"
           },
           {
+            "name": "issuer",
+            "docs": [
+              "The [Issuer] used for proof generation"
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "owner",
             "docs": [
-              "Address of the request initiator"
+              "Proof request creator"
             ],
             "type": "publicKey"
           },
@@ -1837,7 +1844,7 @@
             "type": "publicKey"
           },
           {
-            "name": "pubkeyBjj",
+            "name": "zkPubkey",
             "type": {
               "array": [
                 "u8",

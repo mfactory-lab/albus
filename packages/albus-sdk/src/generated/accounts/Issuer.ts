@@ -15,15 +15,15 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
  * @category generated
  */
 export type IssuerArgs = {
-  code: string
-  name: string
-  description: string
   pubkey: web3.PublicKey
-  pubkeyBjj: number[] /* size: 64 */
+  zkPubkey: number[] /* size: 64 */
   authority: web3.PublicKey
   isDisabled: boolean
   createdAt: beet.bignum
   bump: number
+  code: string
+  name: string
+  description: string
 }
 
 export const issuerDiscriminator = [216, 19, 83, 230, 108, 53, 80, 14]
@@ -36,15 +36,15 @@ export const issuerDiscriminator = [216, 19, 83, 230, 108, 53, 80, 14]
  */
 export class Issuer implements IssuerArgs {
   private constructor(
-    readonly code: string,
-    readonly name: string,
-    readonly description: string,
     readonly pubkey: web3.PublicKey,
-    readonly pubkeyBjj: number[] /* size: 64 */,
+    readonly zkPubkey: number[] /* size: 64 */,
     readonly authority: web3.PublicKey,
     readonly isDisabled: boolean,
     readonly createdAt: beet.bignum,
     readonly bump: number,
+    readonly code: string,
+    readonly name: string,
+    readonly description: string,
   ) {}
 
   /**
@@ -52,15 +52,15 @@ export class Issuer implements IssuerArgs {
    */
   static fromArgs(args: IssuerArgs) {
     return new Issuer(
-      args.code,
-      args.name,
-      args.description,
       args.pubkey,
-      args.pubkeyBjj,
+      args.zkPubkey,
       args.authority,
       args.isDisabled,
       args.createdAt,
       args.bump,
+      args.code,
+      args.name,
+      args.description,
     )
   }
 
@@ -169,11 +169,8 @@ export class Issuer implements IssuerArgs {
    */
   pretty() {
     return {
-      code: this.code,
-      name: this.name,
-      description: this.description,
       pubkey: this.pubkey.toBase58(),
-      pubkeyBjj: this.pubkeyBjj,
+      zkPubkey: this.zkPubkey,
       authority: this.authority.toBase58(),
       isDisabled: this.isDisabled,
       createdAt: (() => {
@@ -188,6 +185,9 @@ export class Issuer implements IssuerArgs {
         return x
       })(),
       bump: this.bump,
+      code: this.code,
+      name: this.name,
+      description: this.description,
     }
   }
 }
@@ -204,15 +204,15 @@ export const issuerBeet = new beet.FixableBeetStruct<
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['code', beet.utf8String],
-    ['name', beet.utf8String],
-    ['description', beet.utf8String],
     ['pubkey', beetSolana.publicKey],
-    ['pubkeyBjj', beet.uniformFixedSizeArray(beet.u8, 64)],
+    ['zkPubkey', beet.uniformFixedSizeArray(beet.u8, 64)],
     ['authority', beetSolana.publicKey],
     ['isDisabled', beet.bool],
     ['createdAt', beet.i64],
     ['bump', beet.u8],
+    ['code', beet.utf8String],
+    ['name', beet.utf8String],
+    ['description', beet.utf8String],
   ],
   Issuer.fromArgs,
   'Issuer',

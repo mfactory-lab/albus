@@ -53,6 +53,7 @@ import {
   errorFromCode,
   proofRequestDiscriminator,
 } from './generated'
+import { KnownSignals } from './types'
 import { ProofInputBuilder, getSignals, getSolanaTimestamp } from './utils'
 
 export class ProofRequestManager extends BaseManager {
@@ -358,7 +359,7 @@ export class ProofRequestManager extends BaseManager {
 
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
-    const inputsLimit = { withProof: 20, withoutProof: 28 }
+    const inputsLimit = { withProof: 19, withoutProof: 28 }
     const txs: { tx: Transaction }[] = []
 
     this.trace('prove', 'init', { proof, publicInputs })
@@ -396,11 +397,12 @@ export class ProofRequestManager extends BaseManager {
             proofRequest: new PublicKey(props.proofRequest),
             circuit: proofRequest.circuit,
             policy: proofRequest.policy,
+            issuer: props.issuer,
             authority,
           },
           {
             data: {
-              reset: false,
+              reset: publicInputs.length <= inputsLimit.withProof,
               publicInputs: publicInputs.slice(-inputsLimit.withProof),
               proof,
             },
@@ -472,6 +474,16 @@ export class ProofRequestManager extends BaseManager {
       .withPolicy(policy)
       .build()
 
+    // try to find a valid issuer by credential proof signer
+    let issuer: PublicKey | undefined
+    if (proofInput.data[KnownSignals.IssuerPublicKey]) {
+      issuer = (await this.client.issuer.loadByZkPubkey(
+        proofInput.data[KnownSignals.IssuerPublicKey],
+        true,
+      ))?.pubkey
+      this.trace('fullProve', `use issuer ${issuer}`)
+    }
+
     try {
       const proofData = {
         wasmFile: circuit.wasmUri,
@@ -485,10 +497,11 @@ export class ProofRequestManager extends BaseManager {
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
         proofRequestData: proofRequest,
+        verify: props.verify ?? true,
         proof,
+        issuer,
         // @ts-expect-error readonly
         publicSignals,
-        verify: props.verify ?? true,
       })
 
       return { signatures, proof, publicSignals }
@@ -572,6 +585,7 @@ export type VerifyProps = {
 export type ProveProps = {
   proofRequest: PublicKeyInitData
   proofRequestData?: ProofRequest
+  issuer?: PublicKey
   proof: ProofData
   publicSignals: (string | number | bigint)[]
   verify: boolean
