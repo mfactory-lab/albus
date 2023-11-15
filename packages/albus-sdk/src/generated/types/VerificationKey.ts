@@ -6,7 +6,6 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-
 export type VerificationKey = {
   alpha: number[] /* size: 64 */
   beta: number[] /* size: 128 */

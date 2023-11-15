@@ -1,5 +1,5 @@
 {
-  "version": "0.0.19",
+  "version": "0.0.21",
   "name": "albus",
   "instructions": [
     {
@@ -288,6 +288,55 @@
           "docs": [
             "System program."
           ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateIssuerData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -719,6 +768,12 @@
           "isSigner": false
         },
         {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": true
@@ -891,6 +946,82 @@
     }
   ],
   "accounts": [
+    {
+      "name": "Issuer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "docs": [
+              "Uniq code of the issuer"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the issuer"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "docs": [
+              "Short description"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "pubkey",
+            "docs": [
+              "Signer Public key"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "pubkeyBjj",
+            "docs": [
+              "Public key (babyjub curve)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Authority account of the issuer"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "isDisabled",
+            "docs": [
+              "Issuer status"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "Circuit",
       "type": {
@@ -1680,6 +1811,39 @@
           {
             "name": "share",
             "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateIssuerData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "pubkeyBjj",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
           }
         ]
       }

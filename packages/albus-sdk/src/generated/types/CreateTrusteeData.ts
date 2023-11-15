@@ -6,7 +6,6 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-
 export type CreateTrusteeData = {
   key: number[] /* size: 32 */
   name: string

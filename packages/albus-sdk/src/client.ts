@@ -35,6 +35,7 @@ import { CredentialManager } from './credentialManager'
 import { EventManager } from './eventManager'
 import { PROGRAM_ID } from './generated'
 import { InvestigationManager } from './investigationManager'
+import { IssuerManager } from './issuerManager'
 import { PdaManager } from './pda'
 import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
@@ -59,6 +60,7 @@ export class AlbusClient {
   readonly service: ServiceManager
   readonly credential: CredentialManager
   readonly trustee: TrusteeManager
+  readonly issuer: IssuerManager
   readonly investigation: InvestigationManager
   readonly proofRequest: ProofRequestManager
   readonly eventManager: EventManager
@@ -75,6 +77,7 @@ export class AlbusClient {
     this.options = options ?? {}
     this.pda = new PdaManager()
     this.eventManager = new EventManager(this, idl as any)
+    this.issuer = new IssuerManager(this)
     this.circuit = new CircuitManager(this)
     this.policy = new PolicyManager(this)
     this.service = new ServiceManager(this)
