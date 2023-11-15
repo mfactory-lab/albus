@@ -82,6 +82,18 @@ impl From<VerificationKey> for VK {
 #[account]
 #[derive(InitSpace)]
 pub struct Issuer {
+    /// Signer Public key
+    pub pubkey: Pubkey,
+    /// Public key (babyjub curve)
+    pub zk_pubkey: [u8; 64],
+    /// Authority account of the issuer
+    pub authority: Pubkey,
+    /// Issuer status
+    pub is_disabled: bool,
+    /// Creation date
+    pub created_at: i64,
+    /// PDA bump.
+    pub bump: u8,
     /// Uniq code of the issuer
     #[max_len(32)]
     pub code: String,
@@ -91,18 +103,6 @@ pub struct Issuer {
     /// Short description
     #[max_len(64)]
     pub description: String,
-    /// Signer Public key
-    pub pubkey: Pubkey,
-    /// Public key (babyjub curve)
-    pub pubkey_bjj: [u8; 64],
-    /// Authority account of the issuer
-    pub authority: Pubkey,
-    /// Issuer status
-    pub is_disabled: bool,
-    /// Creation date
-    pub created_at: i64,
-    /// PDA bump.
-    pub bump: u8,
 }
 
 impl Issuer {
@@ -118,10 +118,10 @@ impl Issuer {
         self.is_disabled
     }
 
-    pub fn bjj_pubkey(&self) -> ([u8; 32], [u8; 32]) {
+    pub fn zk_pubkey(&self) -> ([u8; 32], [u8; 32]) {
         (
-            self.pubkey_bjj[..32].try_into().unwrap(),
-            self.pubkey_bjj[32..].try_into().unwrap(),
+            self.zk_pubkey[..32].try_into().unwrap(),
+            self.zk_pubkey[32..].try_into().unwrap(),
         )
     }
 }
@@ -443,7 +443,9 @@ pub struct ProofRequest {
     pub policy: Pubkey,
     /// The [Circuit] used for proof generation
     pub circuit: Pubkey,
-    /// Address of the request initiator
+    /// The [Issuer] used for proof generation
+    pub issuer: Pubkey,
+    /// Proof request creator
     pub owner: Pubkey,
     /// Auto-increment service specific identifier
     pub identifier: u64,

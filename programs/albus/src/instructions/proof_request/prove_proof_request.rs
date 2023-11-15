@@ -52,6 +52,7 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
         req.status = ProofRequestStatus::Pending;
         req.proved_at = 0;
         req.proof = None;
+        req.issuer = Default::default();
         req.public_inputs.clear();
     }
 
@@ -90,9 +91,10 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
                         msg!("Error: This issuer is inactive");
                         return Err(AlbusError::Unauthorized.into());
                     }
-                    let bjj_pubkey = iss.bjj_pubkey();
-                    req.public_inputs[s.index] = bjj_pubkey.0;
-                    req.public_inputs[s.index + 1] = bjj_pubkey.1;
+                    let zk_pubkey = iss.zk_pubkey();
+                    req.public_inputs[s.index] = zk_pubkey.0;
+                    req.public_inputs[s.index + 1] = zk_pubkey.1;
+                    req.issuer = iss.key();
                 }
             }
         }

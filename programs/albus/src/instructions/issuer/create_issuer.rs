@@ -42,7 +42,7 @@ pub fn handler(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()>
     issuer.name = data.name;
     issuer.description = data.description;
     issuer.pubkey = data.pubkey;
-    issuer.pubkey_bjj = data.pubkey_bjj;
+    issuer.zk_pubkey = data.zk_pubkey;
     issuer.created_at = timestamp;
     issuer.authority = ctx.accounts.authority.key();
     issuer.bump = ctx.bumps.issuer;
@@ -56,7 +56,7 @@ pub struct CreateIssuerData {
     pub name: String,
     pub description: String,
     pub pubkey: Pubkey,
-    pub pubkey_bjj: [u8; 64],
+    pub zk_pubkey: [u8; 64],
 }
 
 #[derive(Accounts)]
