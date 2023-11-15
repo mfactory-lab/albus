@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.2-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.4...@albus-finance/sdk-v0.2.2-next.5) (2023-11-15)
+
+
+### 🌟 Features
+
+* **sdk:** add issuer manager ([14b4ea4](https://github.com/mfactory-lab/albus/commit/14b4ea46e265130ab3aa7ba933438904ae821d3e))
+
+
+### ♻️ Refactors
+
+* **sdk:** `proofRequestManager` improvements ([8fc674c](https://github.com/mfactory-lab/albus/commit/8fc674cb2604f4a6d9e7cd87d3bce44b47f431bd))
+* **sdk:** code cleanup ([7e8df35](https://github.com/mfactory-lab/albus/commit/7e8df356fe2daef1584ff8768a9669d9f3cecfe2))
+
 ## [0.2.2-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.3...@albus-finance/sdk-v0.2.2-next.4) (2023-11-09)
 
 
