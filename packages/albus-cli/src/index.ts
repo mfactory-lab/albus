@@ -367,6 +367,8 @@ admin.command('fund')
 
 admin.command('clear')
   .description('Clear all accounts')
+  .option('-at, --accountType <string>', 'Account type: proofRequest,policy,trustee')
+  .option('-dr, --dryRun', 'Dry-run mode')
   .action(actions.admin.clear)
 
 admin.command('close')
