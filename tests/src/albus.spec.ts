@@ -33,8 +33,11 @@ import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../pack
 import { airdrop, assertErrorCode, loadFixture, newProvider, payer, provider } from './utils'
 
 describe('albus', async () => {
-  const client = new AlbusClient(provider)
+  const client = new AlbusClient(provider) // .configure('debug', true)
 
+  const issuer = Keypair.generate()
+
+  const issuerCode = 'sumsub'
   const serviceCode = 'acme'
   const circuitCode = 'age'
   const policyCode = 'age'
@@ -51,7 +54,7 @@ describe('albus', async () => {
     firstName: 'Alex',
     country: 'US',
   }, {
-    issuerSecretKey: payer.secretKey,
+    issuerSecretKey: issuer.secretKey,
   })
 
   const circuitData = {
@@ -106,6 +109,21 @@ describe('albus', async () => {
     await airdrop(investigator.publicKey)
     for (const trusteeKeypair of trustees) {
       await airdrop(trusteeKeypair.publicKey)
+    }
+  })
+
+  it('can create issuer', async () => {
+    try {
+      const { signature, address } = await client.issuer.create({
+        code: issuerCode,
+        name: issuerCode,
+        keypair: issuer,
+      })
+      assert.ok(!!signature)
+      assert.ok(!!address)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
     }
   })
 
@@ -314,32 +332,6 @@ describe('albus', async () => {
     assert.ok(data.publicInputs.length > 0)
   })
 
-  // it('can re-prove a proof request', async () => {
-  //   const [service] = client.pda.serviceProvider(serviceCode)
-  //   const [policy] = client.pda.policy(service, policyCode)
-  //   const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
-  //
-  //   // mock wasmUri and zkeyUri
-  //   vi.spyOn(client.proofRequest, 'loadFull')
-  //     .mockImplementationOnce(async (addr, props) => {
-  //       const res = await client.proofRequest.loadFull(addr, props)
-  //       return {
-  //         ...res,
-  //         circuit: {
-  //           ...res.circuit,
-  //           wasmUri: loadFixture('agePolicy.wasm'),
-  //           zkeyUri: loadFixture('agePolicy.zkey'),
-  //         },
-  //       } as any
-  //     })
-  //
-  //   const { signatures } = await client.proofRequest.fullProve({
-  //     proofRequest,
-  //     vc: PublicKey.default, // mocked
-  //     userPrivateKey: payer.secretKey,
-  //   })
-  // })
-
   it('can verify proof request', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(service, policyCode)
@@ -459,6 +451,11 @@ describe('albus', async () => {
 
   it('can delete service provider', async () => {
     await client.service.delete({ code: serviceCode })
+  })
+
+  it('can delete issuer', async () => {
+    const [issuer] = client.pda.issuer(issuerCode)
+    await client.issuer.delete({ issuer })
   })
 
   // it('can delete investigation request', async () => {
