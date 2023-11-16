@@ -56,7 +56,7 @@ export async function create(code: string, opts: Opts) {
 
   const { signature, address } = await client.issuer.create({
     code,
-    name: opts.name ?? code,
+    name: opts.name ?? capitalize(code),
     description: opts.description,
     keypair,
   })
@@ -64,4 +64,8 @@ export async function create(code: string, opts: Opts) {
   log.info('\nDone')
   log.info(`Signature: ${signature}`)
   log.info(`Address: ${address}`)
+}
+
+function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
