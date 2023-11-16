@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2-next.8](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.7...@albus-finance/sdk-v0.2.2-next.8) (2023-11-16)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix `getCredentialInfo` error catching ([9bbf635](https://github.com/mfactory-lab/albus/commit/9bbf6352ce49a0f24b31658eea3c6c2da7c68378))
+
 ## [0.2.2-next.7](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.6...@albus-finance/sdk-v0.2.2-next.7) (2023-11-15)
 
 
