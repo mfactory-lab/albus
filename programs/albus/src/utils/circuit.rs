@@ -117,6 +117,7 @@ pub fn bytes_to_num(bytes: [u8; 32]) -> u64 {
     u64::from_be_bytes(bytes[24..].try_into().unwrap())
 }
 
+#[allow(dead_code)]
 pub fn num_to_bytes(n: u64) -> [u8; 32] {
     let mut result = [0u8; 32];
     let u32_bytes = n.to_be_bytes();
