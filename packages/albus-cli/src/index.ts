@@ -275,7 +275,7 @@ trustee.command('create')
   .argument('name', 'The name of the trustee')
   .option('--email <string>', '(optional) Email')
   .option('--website <string>', '(optional) Website')
-  .option('--keypair <string>', '(optional) Encryption keypair')
+  .option('--encryptionKeypair <string>', '(optional) Path to he encryption keypair')
   .action(actions.trustee.create)
 
 trustee.command('verify')
