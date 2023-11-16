@@ -289,12 +289,8 @@ export class InvestigationManager extends BaseManager {
     this.trace('revealShare', 'trusteePublicKey:', signals.trusteePublicKey)
 
     const index = (signals.trusteePublicKey as bigint[][] ?? [])
-      .findIndex((pk) => {
-        console.log(String(pk), String(encryptionKey))
-        return String(pk) === String(encryptionKey)
-      })
+      .findIndex(pk => String(pk) === String(encryptionKey))
 
-    this.trace('revealShare', `found index ${index}`)
     if (index < 0) {
       throw new Error('Unable to find a trustee pubkey...')
     }
