@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.2-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.10...@albus-finance/sdk-v0.2.2-next.12) (2023-11-16)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add more tracing ([bf15ea7](https://github.com/mfactory-lab/albus/commit/bf15ea7f8da73cf0b1c7970f576742d250e90f22))
+* **sdk:** fix last npm version ([c12346e](https://github.com/mfactory-lab/albus/commit/c12346eeaf2513204f1ba00619f35fe9a838e324))
+* **sdk:** fixed investigation reveal share ([2e76150](https://github.com/mfactory-lab/albus/commit/2e76150bd1714241a34622f422444142bcf710e0))
+* **sdk:** improve trace ([ce7e7ff](https://github.com/mfactory-lab/albus/commit/ce7e7ff3bc5eeba86b37f63481e6d9cbb0e06d77))
+
 ## [0.2.2-next.10](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.9...@albus-finance/sdk-v0.2.2-next.10) (2023-11-16)
 
 
