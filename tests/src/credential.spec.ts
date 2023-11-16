@@ -32,6 +32,8 @@ import type { PublicKey } from '@solana/web3.js'
 import axios from 'axios'
 
 import { assert, beforeAll, describe, it, vi } from 'vitest'
+import * as Albus from '../../packages/albus-core'
+import { generateDid } from '../../packages/albus-core/src/utils'
 import {
   AlbusClient,
   getAssociatedTokenAddress,
@@ -40,25 +42,8 @@ import {
 } from '../../packages/albus-sdk/src'
 import { airdrop, netMetaplex, newProvider, payer, provider } from './utils'
 
-const credential = {
-  name: 'ALBUS Digital Credential',
-  image: 'https://arweave.net/-RX1vgX0qdH-IdhovS0KuJCtqC1Eh3uM9UfSZBBZVVE',
-  external_url: 'https://albus.finance',
-  vc: {
-    '@context': ['https://www.w3.org/ns/credentials/v2'],
-    'type': ['VerifiableCredential', 'AlbusCredential', 'Passport'],
-    'issuer': 'did:web:issuer.albus.finance:fake',
-    'issuanceDate': '2023-10-26T21:05:10.470Z',
-    'credentialSubject': {
-      encryptionKey: 'CwsF2xtpVkSizj8E3aNfj4L6sfVmuhk1Ewv58iTRF3Lb',
-      encrypted: 'Y4QBctqBZHgsr6LdydlB/fgPG87q2YXJYA6Kvu6NQB1MM8k4TUKHUnSf/eoMZJdzNwzDKJ54SKGxc3z3PXFrSH5OmOpk+BM1ssqk1/kLG6Rlxv8rSSFipOmT4lhJ5ovCP5q4XEhcpds++ffLVPQM38u5fNEjm8wBOJOuTGaiE2d4o22etMflgmDu6Xxicgh/NsMdjLT5rp/b/rGfhQFGyVboUB6yUD2eVolNG55h150zHvcpXuXIZzvkyGLQ6knQXmZD10iEanLco2iF1o30PCTCK/Lk+/VfIeyMNqcnCHKhTJwukPz8QVNdmCcSKWI=',
-    },
-    'proof': { type: 'BJJSignature2021', created: 1698354310758, verificationMethod: 'did:web:issuer.albus.finance:fake#eddsa-bjj', rootHash: '8418696509132575644783365087890757754482467717073743620809994498242667101387', proofValue: { ax: '12279242631152480922448440387665898145185461262650789258320537467533451473248', ay: '562652728416453518865033172714223342104200904426339863473937692826883086980', r8x: '20215271862370783154637155562451401714868816530380434349250343595863447538890', r8y: '13679675971479620294460361170758237082770683984891545014480931165078200499192', s: '49356083573453035125553711262287700869914163322839993196255457345136248925' }, proofPurpose: 'assertionMethod' },
-  },
-}
-// decryptionKey: ["expose","excuse","beef","left","cradle","bean","awesome","draw","curtain","like","boring","patch"]
-
-describe('albusCredential', () => {
+describe('albusCredential', async () => {
+  const issuer = Keypair.generate()
   const holder = Keypair.generate()
 
   const client = new AlbusClient(provider)
@@ -66,6 +51,17 @@ describe('albusCredential', () => {
   const mx = netMetaplex(payer)
 
   const updateAuthority = client.pda.authority()[0]
+
+  const credential = {
+    name: 'ALBUS Digital Credential',
+    image: 'https://arweave.net/-RX1vgX0qdH-IdhovS0KuJCtqC1Eh3uM9UfSZBBZVVE',
+    external_url: 'https://albus.finance',
+    vc: await Albus.credential.createVerifiableCredential({
+      name: 'test',
+    }, {
+      issuerSecretKey: issuer.secretKey,
+    }),
+  }
 
   console.log(`Payer: ${payer.publicKey}`)
   console.log(`Holder: ${holder.publicKey}`)
@@ -78,6 +74,12 @@ describe('albusCredential', () => {
   })
 
   let credentialMint: PublicKey
+
+  const resolver: any = {
+    resolve() {
+      return { didDocument: generateDid(issuer) } as any
+    },
+  }
 
   it('can create credential', async () => {
     const { signature, mintAddress } = await holderClient.credential.create()
@@ -125,7 +127,7 @@ describe('albusCredential', () => {
         }
       })
 
-    const vc = await holderClient.credential.load(credentialMint)
+    const vc = await holderClient.credential.load(credentialMint, { resolver })
 
     assert.deepEqual(vc, credential.vc)
   })
@@ -142,9 +144,7 @@ describe('albusCredential', () => {
         }
       })
 
-    const vc = await holderClient.credential.loadAll()
-
-    console.log(vc)
+    const vc = await holderClient.credential.loadAll({ resolver })
 
     assert.equal(vc.length, 1)
     assert.deepEqual(vc[0]?.credential, credential.vc)
