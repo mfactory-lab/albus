@@ -378,8 +378,12 @@ export class InvestigationManager extends BaseManager {
       decryptedShares.push([data?.index ?? 0, share])
     }
 
+    this.trace('decryptData', 'decryptedShares', decryptedShares)
+
     const secret = Albus.crypto.reconstructShamirSecret(Albus.crypto.babyJub.F, investigationRequest.requiredShareCount, decryptedShares)
     // console.log('decryptedSecret', secret)
+
+    this.trace('decryptData', 'secret', secret)
 
     const { proofRequest, circuit } = await this.proofRequest.loadFull(investigationRequest.proofRequest, ['circuit'])
 
