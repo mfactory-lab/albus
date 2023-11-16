@@ -204,7 +204,7 @@ export class CredentialManager extends BaseManager {
   private async getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
     if (nft.json?.vc !== undefined) {
       try {
-        return Albus.credential.verifyCredential(nft.json.vc, {
+        return await Albus.credential.verifyCredential(nft.json.vc, {
           decryptionKey: props?.decryptionKey,
         })
       } catch (e) {
