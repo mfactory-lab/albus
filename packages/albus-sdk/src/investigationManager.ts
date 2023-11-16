@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import * as Albus from '@albus-finance/core'
 import type {
   Commitment,
@@ -284,14 +283,18 @@ export class InvestigationManager extends BaseManager {
     }
 
     const { key } = Albus.zkp.generateEncryptionKey(Keypair.fromSecretKey(props.encryptionKey))
+    const encryptionKey = Albus.zkp.unpackPubkey(key)
 
-    this.trace('revealShare', 'encryptionKey:', Albus.zkp.unpackPubkey(key))
-    this.trace('revealShare', 'trusteePublicKey:', (signals.trusteePublicKey as bigint[][] ?? []))
+    this.trace('revealShare', 'encryptionKey:', encryptionKey)
+    this.trace('revealShare', 'trusteePublicKey:', signals.trusteePublicKey)
 
-    const trusteePubKeys = (signals.trusteePublicKey as bigint[][] ?? []).map(pk => Albus.zkp.packPubkey(pk))
+    const index = (signals.trusteePublicKey as bigint[][] ?? [])
+      .findIndex((pk) => {
+        console.log(String(pk), String(encryptionKey))
+        return String(pk) === String(encryptionKey)
+      })
 
-    const index = trusteePubKeys.findIndex(pk => Buffer.compare(pk, key) === 0)
-
+    this.trace('revealShare', `found index ${index}`)
     if (index < 0) {
       throw new Error('Unable to find a trustee pubkey...')
     }

@@ -26,7 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { Keypair } from '@solana/web3.js'
 import { assert, describe, it } from 'vitest'
+import * as Albus from '../src'
 import {
   altBn128G1Neg,
   bytesToFinite,
@@ -59,6 +61,37 @@ describe('misc', () => {
     const n = '1662767948258934355069791443487100820038153707701411290986741440889424297316'
     const bytes = finiteToBytes(n)
     assert.equal(n, bytesToFinite(bytes).toString())
+  })
+
+  it('test compare', async () => {
+    const encryptionSecretKey = [124, 100, 108, 67, 77, 61, 249, 134, 22, 154, 64, 108, 2, 246, 53, 158, 172, 44, 16, 116, 231, 182, 28, 184, 31, 51, 117, 142, 233, 199, 117, 213, 212, 99, 81, 99, 67, 91, 230, 98, 68, 75, 228, 69, 180, 160, 247, 107, 166, 140, 100, 238, 61, 153, 19, 147, 31, 207, 219, 3, 235, 72, 173, 245]
+
+    const { key } = Albus.zkp.generateEncryptionKey(Keypair.fromSecretKey(
+      Uint8Array.from(encryptionSecretKey),
+    ))
+
+    const eKey = Albus.zkp.unpackPubkey(key)!
+
+    const expectedKey = [
+      21445024676775299235117097310536621455923626808015872899660319022146837512678n,
+      6612804526409692163029166091239488934146450774166398393179624761633704062057n,
+    ]
+
+    console.log('key', key)
+    console.log('encryptionKey', eKey)
+
+    assert.equal(expectedKey[0], eKey[0])
+    assert.equal(expectedKey[1], eKey[1])
+
+    const trusteePublicKey = [
+      [4069497056063797148521512137474967852120620051596503008223641887102730434551n, 11840613167744537023027971014765461910516370168447590543458772800934855598335n],
+      [5630313477198784057403041433149372069096654358378326767242581674429488275661n, 6594000125982841949807854857318217685765835984310339780160547735947958060106n],
+      [21445024676775299235117097310536621455923626808015872899660319022146837512678n, 6612804526409692163029166091239488934146450774166398393179624761633704062057n],
+    ]
+
+    const index = trusteePublicKey.findIndex(pk => String(pk) === String(eKey))
+
+    console.log('index:', index)
   })
 
   it('test encode/decode public signals', async () => {
