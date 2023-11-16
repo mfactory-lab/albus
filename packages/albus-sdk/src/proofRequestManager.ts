@@ -465,7 +465,7 @@ export class ProofRequestManager extends BaseManager {
       .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
       .withCircuit(circuit)
       .withPolicy(policy)
-      .withTimestampLoader(this.getTimestamp)
+      .withTimestampLoader(() => this.getTimestamp())
       .withTrusteeLoader(async () => {
         const keys = await this.service.loadTrusteeKeys(serviceProvider.trustees)
         return keys.filter(p => p !== null) as [bigint, bigint][]

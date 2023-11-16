@@ -31,6 +31,7 @@ import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
 import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
 import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
+import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
 import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
@@ -206,6 +207,7 @@ export class CredentialManager extends BaseManager {
       try {
         return await Albus.credential.verifyCredential(nft.json.vc, {
           decryptionKey: props?.decryptionKey,
+          resolver: props?.resolver,
         })
       } catch (e) {
         console.log(`Credential Verification Error: ${e}`)
@@ -265,6 +267,7 @@ export type RevokeCredentialProps = {
 export type LoadCredentialProps = {
   decryptionKey?: number[] | Uint8Array
   throwOnError?: boolean
+  resolver?: Resolver
 }
 
 export type LoadAllCredentialProps = {
