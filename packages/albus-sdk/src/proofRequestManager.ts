@@ -36,12 +36,14 @@ import type {
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import chunk from 'lodash/chunk'
 import { BaseManager } from './base'
+import { ALBUS_DID } from './constants'
 import type {
   ProofData,
   ProofRequestStatus,
 } from './generated'
 import {
   Circuit,
+  Issuer,
   Policy,
   ProofRequest,
   ServiceProvider,
@@ -112,6 +114,9 @@ export class ProofRequestManager extends BaseManager {
               break
             case 'policy':
               result.policy = Policy.fromAccountInfo(accountInfo)[0]
+              break
+            case 'issuer':
+              result.issuer = Issuer.fromAccountInfo(accountInfo)[0]
               break
             case 'serviceProvider':
               result.serviceProvider = ServiceProvider.fromAccountInfo(accountInfo)[0]
@@ -331,7 +336,7 @@ export class ProofRequestManager extends BaseManager {
         type: 'BJJSignature2021',
         created: Number(new Date()),
         // TODO: fixme
-        verificationMethod: 'did:web:albus.finance#keys-0',
+        verificationMethod: `${ALBUS_DID}#keys-0`,
         rootHash: data.credentialRoot,
         proofValue: {
           ax: data.issuerPk[0],
@@ -544,6 +549,7 @@ type LoadFullResult = {
   proofRequest: ProofRequest
   circuit?: Circuit
   policy?: Policy
+  issuer?: Issuer
   serviceProvider?: ServiceProvider
 }
 

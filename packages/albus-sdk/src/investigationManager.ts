@@ -212,10 +212,18 @@ export class InvestigationManager extends BaseManager {
       throw new Error(`Unable to find Service account at ${proofRequest.serviceProvider}`)
     }
 
+    // if (!circuit) {
+    //   throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
+    // }
+
     const signals = getSignals(
       [...circuit?.outputs ?? [], ...circuit?.publicSignals ?? []],
       proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
     )
+
+    if (signals.encryptedShare === undefined) {
+      throw new Error(`The circuit ${circuit?.code} does not support data encryption...`)
+    }
 
     const selectedTrustees = (signals.trusteePublicKey as bigint[][] ?? [])
       .map(p => this.pda.trustee(Albus.zkp.packPubkey(p))[0])
@@ -271,6 +279,10 @@ export class InvestigationManager extends BaseManager {
       proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
     )
 
+    if (signals.encryptedShare === undefined) {
+      throw new Error(`The circuit "${circuit.code}" does not support data encryption...`)
+    }
+
     const { key } = Albus.zkp.generateEncryptionKey(Keypair.fromSecretKey(props.encryptionKey))
 
     const trusteePubKeys = (signals.trusteePublicKey as bigint[][] ?? []).map(pk => Albus.zkp.packPubkey(pk))
@@ -286,7 +298,7 @@ export class InvestigationManager extends BaseManager {
 
     const encryptedShare = signals.encryptedShare?.[index]
     if (!encryptedShare) {
-      throw new Error(`Unable to find an encrypted share with index ${index}`)
+      throw new Error(`Unable to find an encrypted share with index #${index}`)
     }
 
     const userPublicKey = signals.userPublicKey as [bigint, bigint]
