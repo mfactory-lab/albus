@@ -285,6 +285,9 @@ export class InvestigationManager extends BaseManager {
 
     const { key } = Albus.zkp.generateEncryptionKey(Keypair.fromSecretKey(props.encryptionKey))
 
+    this.trace('revealShare', 'encryptionKey:', Albus.zkp.unpackPubkey(key))
+    this.trace('revealShare', 'trusteePublicKey:', (signals.trusteePublicKey as bigint[][] ?? []))
+
     const trusteePubKeys = (signals.trusteePublicKey as bigint[][] ?? []).map(pk => Albus.zkp.packPubkey(pk))
 
     const index = trusteePubKeys.findIndex(pk => Buffer.compare(pk, key) === 0)
@@ -296,6 +299,9 @@ export class InvestigationManager extends BaseManager {
     const [trustee] = this.pda.trustee(key)
     const [investigationRequestShare] = this.pda.investigationRequestShare(props.investigationRequest, trustee)
 
+    this.trace('revealShare', `trusteeAddress: ${trustee}`)
+    this.trace('revealShare', `investigationRequestShareAddress: ${investigationRequestShare}`)
+
     const encryptedShare = signals.encryptedShare?.[index]
     if (!encryptedShare) {
       throw new Error(`Unable to find an encrypted share with index #${index}`)
@@ -304,7 +310,12 @@ export class InvestigationManager extends BaseManager {
     const userPublicKey = signals.userPublicKey as [bigint, bigint]
     const sharedKey = Albus.zkp.generateEcdhSharedKey(props.encryptionKey, userPublicKey)
 
+    this.trace('revealShare', `sharedKey:`, sharedKey)
+
     const secretShare = Albus.crypto.Poseidon.decrypt(encryptedShare, sharedKey, 1, signals.timestamp as bigint)
+
+    this.trace('revealShare', `secretShare:`, secretShare)
+
     const newEncryptedShare = await Albus.crypto.XC20P.encryptBytes(
       Albus.crypto.utils.bigintToBytes(secretShare[0]),
       investigationRequest.encryptionKey,
