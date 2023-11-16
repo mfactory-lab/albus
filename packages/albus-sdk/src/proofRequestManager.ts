@@ -364,7 +364,8 @@ export class ProofRequestManager extends BaseManager {
 
     this.trace('prove', 'init', { proof, publicInputs })
 
-    // extending public inputs, length more than 20 does not fit into one transaction
+    // extending public inputs, length more than 19 does not fit into one transaction
+    // a transaction's maximum size is 1,232 bytes
     if (publicInputs.length > inputsLimit.withProof) {
       const inputChunks = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
@@ -467,6 +468,7 @@ export class ProofRequestManager extends BaseManager {
       .withPolicy(policy)
       .withTimestampLoader(() => this.getTimestamp())
       .withTrusteeLoader(async () => {
+        this.trace('fullProve', `loading trustee accounts...`, serviceProvider.trustees.map(t => t.toBase58()))
         const keys = await this.service.loadTrusteeKeys(serviceProvider.trustees)
         return keys.filter(p => p !== null) as [bigint, bigint][]
       })
@@ -475,11 +477,12 @@ export class ProofRequestManager extends BaseManager {
     // try to find a valid issuer by credential proof signer
     let issuer: PublicKey | undefined
     if (proofInput.data[KnownSignals.IssuerPublicKey]) {
+      this.trace('fullProve', `trying to find an issuer...`)
       issuer = (await this.client.issuer.loadByZkPubkey(
         proofInput.data[KnownSignals.IssuerPublicKey],
         true,
-      ))?.pubkey
-      this.trace('fullProve', `use issuer ${issuer}`)
+      )).pubkey
+      this.trace('fullProve', `found issuer ${issuer}`)
     }
 
     try {
@@ -489,9 +492,10 @@ export class ProofRequestManager extends BaseManager {
         input: proofInput.data,
       }
 
-      this.trace('fullProve', proofData)
+      this.trace('fullProve', 'proving...', proofData)
       const { proof, publicSignals } = await Albus.zkp.generateProof(proofData)
 
+      this.trace('fullProve', 'sending transaction...')
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
         proofRequestData: proofRequest,
@@ -501,6 +505,8 @@ export class ProofRequestManager extends BaseManager {
         // @ts-expect-error readonly
         publicSignals,
       })
+
+      this.trace('fullProve', 'prove result', { signatures })
 
       return { signatures, proof, publicSignals }
     } catch (e: any) {
