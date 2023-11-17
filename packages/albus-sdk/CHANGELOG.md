@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.12...@albus-finance/sdk-v0.2.2-next.13) (2023-11-17)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed trustee share revealing, add more tracing ([4b7a571](https://github.com/mfactory-lab/albus/commit/4b7a571e5cc2b370d5edc9c9aaf6bc9223975835))
+* **sdk:** tracing refactory ([a50ecd3](https://github.com/mfactory-lab/albus/commit/a50ecd37a008df54aa3a53de4fa75594d7efe024))
+
 ## [0.2.2-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.10...@albus-finance/sdk-v0.2.2-next.12) (2023-11-16)
 
 
