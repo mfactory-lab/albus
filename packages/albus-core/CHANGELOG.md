@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.3-next.0...@albus-finance/core-v0.3.3) (2023-11-17)
+
+
+### 🐞 Bug Fixes
+
+* **core:** fix version ([64e096f](https://github.com/mfactory-lab/albus/commit/64e096f283d933844782e8b55ab43bc448fff157))
+* **core:** improved zkp helpers and eddsa keys ([9efde7d](https://github.com/mfactory-lab/albus/commit/9efde7d234a0bcc040c2057630543880bda0e450))
+* **sdk:** fixed investigation reveal share ([2e76150](https://github.com/mfactory-lab/albus/commit/2e76150bd1714241a34622f422444142bcf710e0))
+
+
+### ♻️ Refactors
+
+* code cleanup ([6903f11](https://github.com/mfactory-lab/albus/commit/6903f11247baf3da299f00252eeebe227e7febca))
+
 ## [0.3.3-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.2...@albus-finance/core-v0.3.3-next.0) (2023-11-10)
 
 
