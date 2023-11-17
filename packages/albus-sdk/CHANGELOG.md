@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.13...@albus-finance/sdk-v0.2.2) (2023-11-17)
+
 ## [0.2.2-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.12...@albus-finance/sdk-v0.2.2-next.13) (2023-11-17)
 
 
