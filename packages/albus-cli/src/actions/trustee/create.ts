@@ -49,13 +49,13 @@ export async function create(name: string, opts: Opts) {
     keypair = Keypair.generate()
     log.info('New encryption keypair was generated!')
     log.info(`|- SecretKey: [${keypair.secretKey}]`)
-    log.info(`|- PublicKey: ${keypair.publicKey}`)
   }
 
-  const { key } = Albus.zkp.generateEncryptionKey(keypair)
+  const encryptionKey = Albus.zkp.getBabyJubPrivateKey(keypair)
+  const key = encryptionKey.public().compress()
 
   const { signature, address } = await client.trustee.create({
-    key: Array.from(key),
+    key,
     name,
     email: opts.email ?? '',
     website: opts.website ?? '',

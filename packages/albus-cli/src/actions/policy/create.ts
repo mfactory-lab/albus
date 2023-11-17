@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { PolicyRule } from '@albus-finance/sdk'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
@@ -57,7 +56,7 @@ export async function create(opts: Opts) {
       if (rr.length < 2) {
         throw new Error('Invalid rule')
       }
-      return { key: String(rr[0]), value: Number(rr[2]) } as PolicyRule
+      return { key: String(rr[0]), value: Number(rr[2]) }
     }),
   })
 
