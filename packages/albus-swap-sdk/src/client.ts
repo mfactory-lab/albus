@@ -2,6 +2,7 @@ import { BN } from '@coral-xyz/anchor'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
+import { TokenAccountNotFoundError, TokenInvalidAccountOwnerError, createAssociatedTokenAccountInstruction, getAccount } from '@solana/spl-token'
 
 import type { CurveType } from './generated'
 import {
@@ -127,7 +128,26 @@ export class AlbusSwapClient {
    * Swap token A for token B
    */
   async swap(props: SwapProps, opts?: ConfirmOptions) {
-    const instruction = createSwapInstruction(
+    const tx = new Transaction()
+
+    try {
+      await getAccount(this.connection, props.userDestination)
+    } catch (error: unknown) {
+      if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+        if (props.receiver && props.destinationTokenMint) {
+          tx.add(
+            createAssociatedTokenAccountInstruction(
+              this.provider.publicKey,
+              props.userDestination,
+              props.receiver,
+              props.destinationTokenMint,
+            ),
+          )
+        }
+      }
+    }
+
+    tx.add(createSwapInstruction(
       {
         authority: this.swapAuthority(props.tokenSwap),
         userTransferAuthority: this.provider.publicKey,
@@ -145,9 +165,8 @@ export class AlbusSwapClient {
         amountIn: new BN(props.amountIn.toString()),
         minimumAmountOut: new BN(props.minimumAmountOut.toString()),
       },
-    )
+    ))
 
-    const tx = new Transaction().add(instruction)
     return this.provider.sendAndConfirm(tx, [], opts)
   }
 
@@ -373,6 +392,10 @@ export type SwapProps = {
   amountIn: bigint | number
   /// Minimum amount of DESTINATION token to output, prevents excessive slippage
   minimumAmountOut: bigint | number
+  /// User address
+  receiver?: PublicKey
+  /// Mint address of token that user will receive
+  destinationTokenMint?: PublicKey
 }
 
 export type DepositAllTokenTypesProps = {
