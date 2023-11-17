@@ -32,9 +32,14 @@ import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../packages/albus-sdk/src'
 import { airdrop, assertErrorCode, loadFixture, newProvider, payer, provider } from './utils'
 
-describe('albus', async () => {
-  const client = new AlbusClient(provider)
+const DEBUG = false
 
+describe('albus', async () => {
+  const client = new AlbusClient(provider).configure('debug', DEBUG)
+
+  const issuer = Keypair.generate()
+
+  const issuerCode = 'sumsub'
   const serviceCode = 'acme'
   const circuitCode = 'age'
   const policyCode = 'age'
@@ -51,7 +56,7 @@ describe('albus', async () => {
     firstName: 'Alex',
     country: 'US',
   }, {
-    issuerSecretKey: payer.secretKey,
+    issuerSecretKey: issuer.secretKey,
   })
 
   const circuitData = {
@@ -109,6 +114,21 @@ describe('albus', async () => {
     }
   })
 
+  it('can create issuer', async () => {
+    try {
+      const { signature, address } = await client.issuer.create({
+        code: issuerCode,
+        name: issuerCode,
+        keypair: issuer,
+      })
+      assert.ok(!!signature)
+      assert.ok(!!address)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
   it('can create circuit', async () => {
     try {
       const { signature, address } = await client.circuit.create(circuitData)
@@ -143,19 +163,19 @@ describe('albus', async () => {
       for (let i = 0; i < trustees.length; i++) {
         const trusteeKeypair = trustees[i]!
         const newClient = new AlbusClient(newProvider(trusteeKeypair))
-        const { key } = Albus.zkp.generateEncryptionKey(trusteeKeypair)
+        const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trusteeKeypair)
         const data = {
           name: `trustee${i}`,
           email: `trustee${i}@albus.finance`,
           website: `https://trustee${i}.albus.finance`,
-          key: Array.from(key),
+          key: Array.from(babyJubKey.public().compress()),
         }
         const { address, signature } = await newClient.trustee.create(data)
         assert.ok(!!signature)
 
         // console.log(`trustee #${i}`, address.toString())
 
-        assert.equal(address.toString(), client.pda.trustee(key)[0].toString())
+        assert.equal(address.toString(), client.pda.trustee(data.key)[0].toString())
 
         const trustee = await newClient.trustee.load(address)
 
@@ -192,16 +212,16 @@ describe('albus', async () => {
     try {
       const trusteeKeypair = trustees[0]!
       const newClient = new AlbusClient(newProvider(trusteeKeypair))
-      const { key } = Albus.zkp.generateEncryptionKey(trusteeKeypair)
+      const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trusteeKeypair)
       const data = {
-        key: Array.from(key),
+        key: Array.from(babyJubKey.public().compress()),
         name: 'trustee123',
         email: 'trustee123@albus.finance',
         website: 'https://trustee123.albus.finance',
       }
       const { address } = await newClient.trustee.update(data)
       const trustee = await newClient.trustee.load(address)
-      assert.deepEqual(address, client.pda.trustee(key)[0])
+      assert.deepEqual(address, client.pda.trustee(data.key)[0])
       assert.deepEqual(trustee.key, data.key)
       assert.equal(trustee.name, data.name)
       assert.equal(trustee.email, data.email)
@@ -233,7 +253,7 @@ describe('albus', async () => {
       const [serviceProvider] = client.pda.serviceProvider(serviceCode)
       const data = {
         trustees: trustees.slice(0, 3)
-          .map(kp => client.pda.trustee(Albus.zkp.generateEncryptionKey(kp).key)[0]),
+          .map(kp => client.pda.trustee(Albus.zkp.getBabyJubPrivateKey(kp).public().compress())[0]),
         serviceProvider,
       }
       const { signature } = await client.service.update(data)
@@ -284,9 +304,11 @@ describe('albus', async () => {
     const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
+    // mock wasmUri and zkeyUri
     vi.spyOn(client.proofRequest, 'loadFull')
       .mockImplementationOnce(async (addr, props) => {
         const res = await client.proofRequest.loadFull(addr, props)
+
         return {
           ...res,
           circuit: {
@@ -349,6 +371,7 @@ describe('albus', async () => {
 
     it('can create investigation request', async () => {
       const newClient = new AlbusClient(newProvider(investigator))
+        .configure('debug', client.options.debug)
 
       const [service] = client.pda.serviceProvider(serviceCode)
       const [policy] = client.pda.policy(service, policyCode)
@@ -357,7 +380,7 @@ describe('albus', async () => {
       try {
         const { address, selectedTrustees } = await newClient.investigation.create({
           proofRequest,
-          // encryptionKey: ...
+          // encryptionKey: ... // authority key used by default
         })
         investigationAddress = address
         const investigation = await newClient.investigation.load(address)
@@ -410,7 +433,7 @@ describe('albus', async () => {
         encryptionKey: investigator.secretKey,
       })
       assert.equal(String(result.claims.birthDate.value), credential.credentialSubject.birthDate)
-      console.log(result)
+      // console.log(result)
     })
   })
 
@@ -433,14 +456,19 @@ describe('albus', async () => {
     await client.service.delete({ code: serviceCode })
   })
 
+  it('can delete issuer', async () => {
+    const [issuer] = client.pda.issuer(issuerCode)
+    await client.issuer.delete({ issuer })
+  })
+
   // it('can delete investigation request', async () => {
   // })
 
   it('can delete all trustees', async () => {
     for (const trustee of trustees) {
-      const { key } = Albus.zkp.generateEncryptionKey(trustee)
+      const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trustee)
       try {
-        await client.trustee.deleteByKey(key)
+        await client.trustee.deleteByKey(babyJubKey.public().compress())
       } catch (e) {
         console.log(e)
         assert.ok(false)

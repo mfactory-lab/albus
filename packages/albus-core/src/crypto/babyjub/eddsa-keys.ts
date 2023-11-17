@@ -81,9 +81,9 @@ export class PrivateKey {
   sk: Uint8Array
 
   constructor(buf: Uint8Array) {
-    if (buf.length !== 32) {
-      throw new Error('buf must be 32 bytes')
-    }
+    // if (buf.length !== 32) {
+    //   throw new Error('buf must be 32 bytes')
+    // }
     this.sk = buf
   }
 

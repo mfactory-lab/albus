@@ -36,14 +36,7 @@ export type DeleteServiceProviderInstructionAccounts = {
 }
 
 export const deleteServiceProviderInstructionDiscriminator = [
-  186,
-  177,
-  156,
-  65,
-  168,
-  2,
-  56,
-  128,
+  186, 177, 156, 65, 168, 2, 56, 128,
 ]
 
 /**

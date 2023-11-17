@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { Wallet } from '@coral-xyz/anchor'
+import type { Provider } from '@coral-xyz/anchor'
 import { AnchorProvider } from '@coral-xyz/anchor'
 import type { ConfirmOptions, Connection, Keypair } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
@@ -35,57 +35,85 @@ import { CredentialManager } from './credentialManager'
 import { EventManager } from './eventManager'
 import { PROGRAM_ID } from './generated'
 import { InvestigationManager } from './investigationManager'
+import { IssuerManager } from './issuerManager'
 import { PdaManager } from './pda'
 import { PolicyManager } from './policyManager'
 import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
+import type { Wallet, WithRequired } from './types'
 import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
 
+export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> & { opts?: ConfirmOptions }
+
+export type ClientOptions = {
+  programId?: PublicKey
+  debug?: boolean
+}
+
 export class AlbusClient {
-  programId = PROGRAM_ID
+  readonly options: ClientOptions
+  readonly pda: PdaManager
+  readonly circuit: CircuitManager
+  readonly policy: PolicyManager
+  readonly service: ServiceManager
+  readonly credential: CredentialManager
+  readonly trustee: TrusteeManager
+  readonly issuer: IssuerManager
+  readonly investigation: InvestigationManager
+  readonly proofRequest: ProofRequestManager
+  readonly eventManager: EventManager
 
-  pda: PdaManager
-  circuit: CircuitManager
-  policy: PolicyManager
-  service: ServiceManager
-  credential: CredentialManager
-  trustee: TrusteeManager
-  investigation: InvestigationManager
-  proofRequest: ProofRequestManager
-  eventManager: EventManager
+  constructor(readonly provider: ClientProvider, options?: ClientOptions) {
+    if (!provider.publicKey) {
+      throw new Error('no public key found on the argued provider')
+    } else if (!provider.sendAndConfirm) {
+      throw new Error('no `sendAndConfirm` function found on the argued provider')
+    } else if (!provider.sendAll) {
+      throw new Error('no `sendAll` function found on the argued provider')
+    }
 
-  constructor(
-    readonly provider: AnchorProvider,
-  ) {
+    this.options = options ?? {}
     this.pda = new PdaManager()
-    // TODO: ts idl
     this.eventManager = new EventManager(this, idl as any)
-    this.circuit = new CircuitManager(this.provider, this.pda)
-    this.policy = new PolicyManager(this.provider, this.pda)
-    this.service = new ServiceManager(this.provider, this.pda)
-    this.credential = new CredentialManager(this.provider, this.pda)
-    this.proofRequest = new ProofRequestManager(
-      this.provider,
-      this.circuit,
-      this.service,
-      this.credential,
-      this.pda,
+    this.issuer = new IssuerManager(this)
+    this.circuit = new CircuitManager(this)
+    this.policy = new PolicyManager(this)
+    this.service = new ServiceManager(this)
+    this.credential = new CredentialManager(this)
+    this.trustee = new TrusteeManager(this)
+    this.proofRequest = new ProofRequestManager(this)
+    this.investigation = new InvestigationManager(this)
+  }
+
+  get programId() {
+    return this.options.programId ?? PROGRAM_ID
+  }
+
+  configure<K extends keyof ClientOptions>(key: K, val: ClientOptions[K]) {
+    this.options[key] = val
+    return this
+  }
+
+  /**
+   * Initialize a new `AlbusClient` from the provided {@link wallet}.
+   */
+  static fromWallet(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
+    return new this(
+      new AnchorProvider(
+        connection,
+        // @ts-expect-error anonymous
+        wallet ?? { publicKey: PublicKey.default },
+        { ...AnchorProvider.defaultOptions(), ...opts },
+      ),
     )
-    this.trustee = new TrusteeManager(this.provider, this.pda)
-    this.investigation = new InvestigationManager(this.provider, this.proofRequest, this.service, this.pda)
   }
 
-  static factory(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
-    return new this(new AnchorProvider(
-      connection,
-      wallet ?? { publicKey: PublicKey.default } as unknown as Wallet,
-      opts ?? {},
-    ))
-  }
-
-  static keypair(connection: Connection, keypair: Keypair, opts: ConfirmOptions = {}) {
-    return new this(new AnchorProvider(connection, new NodeWallet(keypair), opts))
+  /**
+   * Initialize a new `AlbusClient` from the provided {@link keypair}.
+   */
+  static fromKeypair(connection: Connection, keypair: Keypair, opts?: ConfirmOptions) {
+    return AlbusClient.fromWallet(connection, new NodeWallet(keypair), opts)
   }
 }

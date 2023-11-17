@@ -26,9 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import { BaseManager } from './base'
 import type { CreateTrusteeData, UpdateTrusteeData } from './generated'
 import {
   Trustee,
@@ -39,15 +39,8 @@ import {
   errorFromCode,
   trusteeDiscriminator,
 } from './generated'
-import type { PdaManager } from './pda'
 
-export class TrusteeManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly pda: PdaManager,
-  ) {
-  }
-
+export class TrusteeManager extends BaseManager {
   /**
    * Load trustee by {@link addr}
    */
@@ -140,7 +133,10 @@ export class TrusteeManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { address: trustee, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -166,7 +162,10 @@ export class TrusteeManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { address: trustee, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -184,7 +183,10 @@ export class TrusteeManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -203,7 +205,10 @@ export class TrusteeManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -215,10 +220,10 @@ export class TrusteeManager {
   }
 }
 
-export type CreateTrusteeProps = {} & CreateTrusteeData
+export type CreateTrusteeProps = NonNullable<unknown> & CreateTrusteeData
 
 export type UpdateTrusteeProps = {
-  key: number[]
+  key: ArrayLike<number>
   // newKey: number[]
 } & Partial<UpdateTrusteeData>
 

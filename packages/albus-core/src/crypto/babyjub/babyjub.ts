@@ -89,11 +89,7 @@ export class BabyJub {
     const x2 = F.square(P[0])
     const y2 = F.square(P[1])
 
-    if (!F.eq(F.add(F.mul(this.A, x2), y2), F.add(F.one, F.mul(F.mul(x2, y2), this.D)))) {
-      return false
-    }
-
-    return true
+    return F.eq(F.add(F.mul(this.A, x2), y2), F.add(F.one, F.mul(F.mul(x2, y2), this.D)))
   }
 
   packPoint(P: bigint[]): Uint8Array {

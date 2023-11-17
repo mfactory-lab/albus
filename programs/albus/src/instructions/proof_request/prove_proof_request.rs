@@ -28,8 +28,8 @@
 
 use anchor_lang::prelude::*;
 
-use crate::constants::{TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD};
-use crate::state::{Circuit, Policy, ProofData};
+use crate::constants::{ISSUER_PK_SIGNAL, TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD};
+use crate::state::{Circuit, Issuer, Policy, ProofData};
 use crate::utils::bytes_to_num;
 use crate::{
     errors::AlbusError,
@@ -39,7 +39,7 @@ use crate::{
 };
 
 /// Proves the [ProofRequest] by validating the proof metadata and updating its status to `Proved`.
-/// Returns an error if the request has expired or if the proof metadata is invalid.
+/// Returns an error the proof metadata is invalid.
 pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> Result<()> {
     let req = &mut ctx.accounts.proof_request;
 
@@ -49,7 +49,10 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
     }
 
     if data.reset {
+        req.status = ProofRequestStatus::Pending;
+        req.proved_at = 0;
         req.proof = None;
+        req.issuer = Default::default();
         req.public_inputs.clear();
     }
 
@@ -76,11 +79,25 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
             }
         }
 
-        // // validate issuer
-        // if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
-        //     public_inputs[s.0] = <[u8; 32]>::try_from(&ISSUER_PK[..32]).unwrap();
-        //     public_inputs[s.0 + 1] = <[u8; 32]>::try_from(&ISSUER_PK[32..]).unwrap();
-        // }
+        // validate issuer
+        if let Some(s) = signals.get(ISSUER_PK_SIGNAL) {
+            match &ctx.accounts.issuer {
+                None => {
+                    msg!("Error: Issuer required");
+                    return Err(AlbusError::InvalidData.into());
+                }
+                Some(iss) => {
+                    if iss.is_disabled() {
+                        msg!("Error: This issuer is inactive");
+                        return Err(AlbusError::Unauthorized.into());
+                    }
+                    let zk_pubkey = iss.zk_pubkey();
+                    req.public_inputs[s.index] = zk_pubkey.0;
+                    req.public_inputs[s.index + 1] = zk_pubkey.1;
+                    req.issuer = iss.key();
+                }
+            }
+        }
 
         // validate policy rules
         let policy = &ctx.accounts.policy;
@@ -108,12 +125,14 @@ pub struct ProveProofRequestData {
 #[derive(Accounts)]
 #[instruction(data: ProveProofRequestData)]
 pub struct ProveProofRequest<'info> {
-    #[account(mut)]
+    #[account(mut, has_one = circuit, has_one = policy)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
 
     pub circuit: Box<Account<'info, Circuit>>,
 
     pub policy: Box<Account<'info, Policy>>,
+
+    pub issuer: Option<Box<Account<'info, Issuer>>>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

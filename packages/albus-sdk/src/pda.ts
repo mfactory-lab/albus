@@ -40,6 +40,13 @@ export class PdaManager {
     return PublicKey.findProgramAddressSync([this.programId.toBuffer()], this.programId)
   }
 
+  issuer(code: string) {
+    return PublicKey.findProgramAddressSync([
+      this.encoder.encode('issuer'),
+      this.encoder.encode(code),
+    ], this.programId)
+  }
+
   circuit(code: string) {
     return PublicKey.findProgramAddressSync([
       this.encoder.encode('circuit'),

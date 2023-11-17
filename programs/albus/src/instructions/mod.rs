@@ -30,12 +30,13 @@ mod admin;
 mod circuit;
 mod credential;
 mod investigation;
+mod issuer;
 mod policy;
 mod proof_request;
 mod service_provider;
 mod trustee;
 
 pub use self::{
-    admin::*, circuit::*, credential::*, investigation::*, policy::*, proof_request::*,
+    admin::*, circuit::*, credential::*, investigation::*, issuer::*, policy::*, proof_request::*,
     service_provider::*, trustee::*,
 };

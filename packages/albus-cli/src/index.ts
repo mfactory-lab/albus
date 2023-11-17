@@ -36,6 +36,7 @@ import * as actions from '@/actions'
 const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
 const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet'
+// eslint-disable-next-line node/prefer-global/process
 const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
 
 const originFactory = log.methodFactory
@@ -66,6 +67,7 @@ cli
     console.log('\n')
   })
   .hook('postAction', (_c: Command) => {
+    // eslint-disable-next-line node/prefer-global/process
     process.exit()
   })
 
@@ -77,6 +79,7 @@ test.command('credential').action(actions.test.credential)
 // ------------------------------------------
 
 const did = cli.command('did')
+  .description('DID Management')
 
 did.command('generate', { isDefault: true })
   .description('Generate new issuer did')
@@ -87,6 +90,7 @@ did.command('generate', { isDefault: true })
 // ------------------------------------------
 
 const id = cli.command('id')
+  .description('Identity Management')
 
 id.command('new')
   .description('Create new identity')
@@ -97,17 +101,51 @@ id.command('new')
 // ------------------------------------------
 
 const vc = cli.command('vc')
+  .description('Credential Management')
 
 vc.command('all', { isDefault: true })
-  .description('Show all issued VC`s')
+  .description('Show all user credentials')
   .option('--owner <pubkey>', '(optional) nft owner address')
-  .action(actions.vc.showAll)
+  .action(actions.credential.showAll)
+
+vc.command('find')
+  .description('Find credentials')
+  .action(actions.credential.find)
 
 vc.command('issue')
   .description('Issue new VC')
   .option('--provider <string>', 'KYC provider unique code')
   .option('-e,--encrypt', '(optional) Encrypt VC with holder public key')
-  .action(actions.vc.issue)
+  .action(actions.credential.issue)
+
+///
+/// Issuer Management
+///
+
+const issuer = cli.command('issuer')
+  .description('Issuer Management')
+
+issuer.command('all', { isDefault: true })
+  .description('Show all issuers')
+  .action(actions.issuer.showAll)
+
+issuer.command('show')
+  .description('Show issuer data')
+  .argument('<address>', 'Issuer address')
+  .action(actions.issuer.show)
+
+issuer.command('create')
+  .description('Create new issuer')
+  .argument('code', 'Issuer code')
+  .option('--name <string>', 'Issuer name')
+  .option('--signerKeypair <string>', '(optional) Path to the signer keypair file')
+  .option('--description <string>', '(optional) Short description')
+  .action(actions.issuer.create)
+
+issuer.command('delete')
+  .description('Delete issuer')
+  .argument('code', 'issuer code')
+  .action(actions.issuer.remove)
 
 ///
 /// Circuit Management
@@ -190,6 +228,7 @@ service.command('all')
 // ------------------------------------------
 
 const policy = cli.command('policy')
+  .description('Policy Management')
 
 policy.command('all', { isDefault: true })
   .description('Show all policies')
@@ -229,13 +268,14 @@ policy.command('delete')
 // ------------------------------------------
 
 const trustee = cli.command('trustee')
+  .description('Trustee Management')
 
 trustee.command('create')
   .description('Create new Trustee')
   .argument('name', 'The name of the trustee')
   .option('--email <string>', '(optional) Email')
   .option('--website <string>', '(optional) Website')
-  .option('--keypair <string>', '(optional) Encryption keypair')
+  .option('--encryptionKeypair <string>', '(optional) Path to he encryption keypair')
   .action(actions.trustee.create)
 
 trustee.command('verify')
@@ -261,6 +301,7 @@ trustee.command('all', { isDefault: true })
 // ------------------------------------------
 
 const request = cli.command('request')
+  .description('Proof Request Management')
 
 request.command('create')
   .description('Create proof request')
@@ -306,6 +347,7 @@ request.command('verify')
 // ------------------------------------------
 
 const asset = cli.command('asset')
+  .description('Assets')
 
 asset.command('upload')
   .argument('<PATH>', 'Path to the file')
@@ -317,6 +359,7 @@ asset.command('upload')
 // ------------------------------------------
 
 const admin = cli.command('admin')
+  .description('Admin Management')
 
 admin.command('fund')
   .description('Fund albus authority balance')
@@ -324,6 +367,8 @@ admin.command('fund')
 
 admin.command('clear')
   .description('Clear all accounts')
+  .option('-at, --accountType <string>', 'Account type: proofRequest,policy,trustee')
+  .option('-dr, --dryRun', 'Dry-run mode')
   .action(actions.admin.clear)
 
 admin.command('close')
@@ -343,5 +388,6 @@ cli.parseAsync().catch((e) => {
   if (e.logs) {
     log.error(JSON.stringify(e.logs, null, 2))
   }
+  // eslint-disable-next-line node/prefer-global/process
   process.exit()
 })

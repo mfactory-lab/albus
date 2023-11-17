@@ -26,12 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
 import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
 import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
+import type { Resolver } from 'did-resolver'
+import { BaseManager } from './base'
 import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
   createMintCredentialInstruction,
@@ -39,8 +40,7 @@ import {
   createUpdateCredentialInstruction,
   errorFromCode,
 } from './generated'
-
-import type { PdaManager } from './pda'
+import type { ExtendedMetadata } from './utils'
 import {
   getAssociatedTokenAddress,
   getMasterEditionPDA,
@@ -49,17 +49,11 @@ import {
   loadNft,
 } from './utils'
 
-export class CredentialManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly pda: PdaManager,
-  ) {
-  }
-
+export class CredentialManager extends BaseManager {
   /**
-   * Create new Credential NFT
+   * Create new Credential NFT.
    */
-  async create(props?: CreateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
+  async create(props?: CreateCredentialProps, opts?: TxOpts) {
     const mint = Keypair.generate()
     const owner = props?.owner ? new PublicKey(props?.owner) : this.provider.publicKey
 
@@ -97,10 +91,10 @@ export class CredentialManager {
   }
 
   /**
-   * Update credential data
+   * Update credential data.
    * Require admin authority
    */
-  async update(props: UpdateCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
+  async update(props: UpdateCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
     const owner = new PublicKey(props.owner)
 
@@ -126,7 +120,10 @@ export class CredentialManager {
         tx.feePayer = opts.feePayer.publicKey
         signers.push(opts.feePayer)
       }
-      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
+      const signature = await this.provider.sendAndConfirm(tx, signers, {
+        ...this.provider.opts,
+        ...opts?.confirm,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -134,9 +131,9 @@ export class CredentialManager {
   }
 
   /**
-   * Revoke credential and burn credential NFT
+   * Revoke credential and burn credential NFT.
    */
-  async revoke(props: RevokeCredentialProps, opts?: { confirm: ConfirmOptions; feePayer: Signer }) {
+  async revoke(props: RevokeCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
 
     const ix = createRevokeCredentialInstruction({
@@ -157,7 +154,10 @@ export class CredentialManager {
         tx.feePayer = opts.feePayer.publicKey
         signers.push(opts.feePayer)
       }
-      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
+      const signature = await this.provider.sendAndConfirm(tx, signers, {
+        ...this.provider.opts,
+        ...opts?.confirm,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -167,25 +167,13 @@ export class CredentialManager {
   /**
    * Load a credential associated with a specified address.
    * This function retrieves, verifies, and optionally decrypts the credential.
-   *
-   * @param {PublicKeyInitData} addr - The address associated with the verifiable credential.
-   * @param {LoadCredentialProps} [props] - Optional properties for loading and processing the credential.
-   * @returns {Promise<VerifiableCredential>} A Promise that resolves to the verified and, if necessary, decrypted Verifiable Credential.
-   * @throws {Error} Throws an error if the loaded credential is invalid or does not contain the `vc` attribute in its metadata.
    */
-  async load(addr: PublicKeyInitData, props: LoadCredentialProps = {}) {
+  async load(addr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
     const nft = await loadNft(this.provider.connection, addr, {
       authority: this.pda.authority()[0],
       code: CREDENTIAL_SYMBOL_CODE,
     })
-
-    if (!nft.json?.vc) {
-      throw new Error('Invalid credential! Metadata does not contain `vc` attribute.')
-    }
-
-    return Albus.credential.verifyCredential(nft.json.vc, {
-      decryptionKey: props.decryptionKey,
-    })
+    return this.getCredentialInfo(nft, props)
   }
 
   /**
@@ -204,49 +192,61 @@ export class CredentialManager {
         withJson: !props.pending,
       },
     )
-
     const result: Array<CredentialInfo> = []
     for (const account of accounts) {
-      const acc: CredentialInfo = {
+      result.push({
         address: account.mint,
-        data: {},
-      }
-
-      // parse data uri "data:,status=rejected&iss=sumsub"
-      if (account.data.uri.startsWith('data:')) {
-        const qs = account.data.uri.split(',')[1] ?? ''
-        for (const p of qs.split('&')) {
-          const [k, v] = p.split('=')
-          if (k && v) {
-            acc.data[k] = v
-          }
-        }
-      }
-
-      if (account.json?.vc !== undefined) {
-        try {
-          acc.credential = await Albus.credential.verifyCredential(account.json.vc, {
-            decryptionKey: props.decryptionKey,
-          })
-        } catch (e) {
-          console.log(`Credential Verification Error: ${e}`)
-          if (props.throwError) {
-            throw e
-          }
-        }
-      }
-
-      result.push(acc)
+        credential: await this.getCredentialInfo(account, props),
+      })
     }
-
     return result
   }
+
+  private async getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
+    if (nft.json?.vc !== undefined) {
+      try {
+        return await Albus.credential.verifyCredential(nft.json.vc, {
+          decryptionKey: props?.decryptionKey,
+          resolver: props?.resolver,
+        })
+      } catch (e) {
+        console.log(`Credential Verification Error: ${e}`)
+        if (props?.throwOnError) {
+          throw e
+        }
+      }
+    }
+    return {
+      data: parseUriData(nft.data.uri),
+    } as unknown as VerifiableCredential
+  }
+}
+
+/**
+ * Parse data uri like "data:,status=rejected&iss=sumsub"
+ */
+function parseUriData(uri: string) {
+  const data: Record<string, string> = {}
+  if (uri.startsWith('data:')) {
+    const qs = uri.split(',')[1] ?? ''
+    for (const p of qs.split('&')) {
+      const [k, v] = p.split('=')
+      if (k && v) {
+        data[k] = v
+      }
+    }
+  }
+  return data
+}
+
+export type TxOpts = {
+  confirm?: ConfirmOptions
+  feePayer?: Signer
 }
 
 export type CredentialInfo = {
   address: PublicKey
-  data: { [key: string]: string }
-  credential?: VerifiableCredential
+  credential: VerifiableCredential & { data?: Record<string, string> }
 }
 
 export type CreateCredentialProps = {
@@ -266,11 +266,12 @@ export type RevokeCredentialProps = {
 
 export type LoadCredentialProps = {
   decryptionKey?: number[] | Uint8Array
+  throwOnError?: boolean
+  resolver?: Resolver
 }
 
 export type LoadAllCredentialProps = {
   owner?: PublicKey
-  throwError?: boolean
   pending?: boolean
 } & LoadCredentialProps
 

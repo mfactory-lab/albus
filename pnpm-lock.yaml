@@ -179,6 +179,9 @@ importers:
       '@metaplex-foundation/beet':
         specifier: ^0.7.1
         version: 0.7.1
+      '@solana/spl-token':
+        specifier: ^0.3.8
+        version: 0.3.8(@solana/web3.js@1.87.1)
       '@solana/web3.js':
         specifier: ^1.77.3
         version: 1.87.1

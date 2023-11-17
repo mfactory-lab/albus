@@ -1,5 +1,113 @@
 # Changelog
 
+## [0.2.2-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.12...@albus-finance/sdk-v0.2.2-next.13) (2023-11-17)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed trustee share revealing, add more tracing ([4b7a571](https://github.com/mfactory-lab/albus/commit/4b7a571e5cc2b370d5edc9c9aaf6bc9223975835))
+* **sdk:** tracing refactory ([a50ecd3](https://github.com/mfactory-lab/albus/commit/a50ecd37a008df54aa3a53de4fa75594d7efe024))
+
+## [0.2.2-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.10...@albus-finance/sdk-v0.2.2-next.12) (2023-11-16)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add more tracing ([bf15ea7](https://github.com/mfactory-lab/albus/commit/bf15ea7f8da73cf0b1c7970f576742d250e90f22))
+* **sdk:** fix last npm version ([c12346e](https://github.com/mfactory-lab/albus/commit/c12346eeaf2513204f1ba00619f35fe9a838e324))
+* **sdk:** fixed investigation reveal share ([2e76150](https://github.com/mfactory-lab/albus/commit/2e76150bd1714241a34622f422444142bcf710e0))
+* **sdk:** improve trace ([ce7e7ff](https://github.com/mfactory-lab/albus/commit/ce7e7ff3bc5eeba86b37f63481e6d9cbb0e06d77))
+
+## [0.2.2-next.10](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.9...@albus-finance/sdk-v0.2.2-next.10) (2023-11-16)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** investigation improvements ([e6dba39](https://github.com/mfactory-lab/albus/commit/e6dba391a79bf63bb4de9111bf754f9bbec46666))
+
+
+### ♻️ Refactors
+
+* **sdk:** improved tracing ([9f9de42](https://github.com/mfactory-lab/albus/commit/9f9de42e941485e507e80e5a15bbae500faeaabc))
+
+## [0.2.2-next.9](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.8...@albus-finance/sdk-v0.2.2-next.9) (2023-11-16)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** global improvements ([60ce5a9](https://github.com/mfactory-lab/albus/commit/60ce5a9c2d5bc5f3fd2fa43d90fb476d22a40190))
+
+## [0.2.2-next.8](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.7...@albus-finance/sdk-v0.2.2-next.8) (2023-11-16)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix `getCredentialInfo` error catching ([9bbf635](https://github.com/mfactory-lab/albus/commit/9bbf6352ce49a0f24b31658eea3c6c2da7c68378))
+
+## [0.2.2-next.7](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.6...@albus-finance/sdk-v0.2.2-next.7) (2023-11-15)
+
+
+### 🐞 Bug Fixes
+
+* **circuits:** `livenessProof` credentialDepth=4 ([460e3d3](https://github.com/mfactory-lab/albus/commit/460e3d3c24cb8772f5f4911b3e101e4aca9da1be))
+* **sdk:** global improvements ([98e87cf](https://github.com/mfactory-lab/albus/commit/98e87cf5203d9a9e37074bd053a5d313a35a2d38))
+
+## [0.2.2-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.5...@albus-finance/sdk-v0.2.2-next.6) (2023-11-15)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** global improvements, new idl ([2cbeeef](https://github.com/mfactory-lab/albus/commit/2cbeeeff3235a9fe88a4067774ede9924f9fdaa1))
+
+## [0.2.2-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.4...@albus-finance/sdk-v0.2.2-next.5) (2023-11-15)
+
+
+### 🌟 Features
+
+* **sdk:** add issuer manager ([14b4ea4](https://github.com/mfactory-lab/albus/commit/14b4ea46e265130ab3aa7ba933438904ae821d3e))
+
+
+### ♻️ Refactors
+
+* **sdk:** `proofRequestManager` improvements ([8fc674c](https://github.com/mfactory-lab/albus/commit/8fc674cb2604f4a6d9e7cd87d3bce44b47f431bd))
+* **sdk:** code cleanup ([7e8df35](https://github.com/mfactory-lab/albus/commit/7e8df356fe2daef1584ff8768a9669d9f3cecfe2))
+
+## [0.2.2-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.3...@albus-finance/sdk-v0.2.2-next.4) (2023-11-09)
+
+
+### ♻️ Refactors
+
+* **sdk:** global improvements ([3199711](https://github.com/mfactory-lab/albus/commit/3199711f534c1900b1cb7ba73e676d9464a0027a))
+
+## [0.2.2-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.2...@albus-finance/sdk-v0.2.2-next.3) (2023-11-09)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** credential manager improved ([be145c1](https://github.com/mfactory-lab/albus/commit/be145c179578e4a0416a0a1b5fd0970003651f95))
+
+
+### ♻️ Refactors
+
+* **sdk:** add `ClientOptions`, add abstract provider, improved types ([7e4fac7](https://github.com/mfactory-lab/albus/commit/7e4fac752e6395701bd6902861d834bbc7d13b7a))
+
+## [0.2.2-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.1...@albus-finance/sdk-v0.2.2-next.2) (2023-11-07)
+
+## [0.2.2-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.1...@albus-finance/sdk-v0.2.2-next.1) (2023-11-07)
+
+
+### 🐞 Bug Fixes
+
+* ci ([1694191](https://github.com/mfactory-lab/albus/commit/1694191467636691b7d60051e235507bed88f382))
+* ci ([056818e](https://github.com/mfactory-lab/albus/commit/056818e6c226008e731087946c30bb32810c350a))
+
+## [0.2.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.0...@albus-finance/sdk-v0.2.1) (2023-11-07)
+
+
+### ♻️ Refactors
+
+* **sdk:** global client refactory ([16bd5c1](https://github.com/mfactory-lab/albus/commit/16bd5c146208449c43d221f2e4ff025e88b9be3d))
+
 ## 0.2.0 (2023-11-07)
 
 

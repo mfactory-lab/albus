@@ -62,4 +62,4 @@ component main{public [
   credentialRoot,
   issuerPk,
   issuerSignature
-]} = LivenessProof(2);
+]} = LivenessProof(4);

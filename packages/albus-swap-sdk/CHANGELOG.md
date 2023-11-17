@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.1...@albus-finance/swap-sdk-v0.1.2-next.0) (2023-11-17)
+
+
+### 🐞 Bug Fixes
+
+* **swap:** create token account for user during swap ([f1c3258](https://github.com/mfactory-lab/albus/commit/f1c32588ede21c847a174a5878086184cab229ca))
+
 ## [0.1.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.0...@albus-finance/swap-sdk-v0.1.1) (2023-11-07)
 
 ## 0.1.0 (2023-11-07)

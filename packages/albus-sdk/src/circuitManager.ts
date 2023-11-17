@@ -27,10 +27,10 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import chunk from 'lodash/chunk'
+import { BaseManager } from './base'
 
 import {
   Circuit,
@@ -40,15 +40,8 @@ import {
   createUpdateCircuitVkInstruction,
   errorFromCode,
 } from './generated'
-import type { PdaManager } from './pda'
 
-export class CircuitManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly pda: PdaManager,
-  ) {
-  }
-
+export class CircuitManager extends BaseManager {
   /**
    * Load circuit by {@link addr}
    * @param addr
@@ -128,10 +121,13 @@ export class CircuitManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature, address: circuit }
     } catch (e: any) {
-      console.log(e)
+      this.trace('create', e)
       throw errorFromCode(e.code) ?? e
     }
   }
@@ -185,7 +181,10 @@ export class CircuitManager {
     try {
       const signatures = await this.provider.sendAll(
         instructions.map(ix => ({ tx: new Transaction().add(ix) })),
-        opts,
+        {
+          ...this.provider.opts,
+          ...opts,
+        },
       )
       return { signatures }
     } catch (e: any) {
@@ -210,7 +209,10 @@ export class CircuitManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e

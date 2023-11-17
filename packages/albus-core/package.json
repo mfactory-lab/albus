@@ -1,6 +1,6 @@
 {
   "name": "@albus-finance/core",
-  "version": "0.3.2",
+  "version": "0.3.3-next.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",

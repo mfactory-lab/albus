@@ -79,23 +79,52 @@ impl From<VerificationKey> for VK {
     }
 }
 
-// #[account]
-// #[derive(InitSpace)]
-// pub struct Issuer {
-//     #[max_len(32)]
-//     pub name: String,
-//     pub key: [u8; 32],
-//     pub authority: Pubkey,
-//     /// PDA bump.
-//     pub bump: u8,
-// }
+#[account]
+#[derive(InitSpace)]
+pub struct Issuer {
+    /// Signer Public key
+    pub pubkey: Pubkey,
+    /// Public key (babyjub curve)
+    pub zk_pubkey: [u8; 64],
+    /// Authority account of the issuer
+    pub authority: Pubkey,
+    /// Issuer status
+    pub is_disabled: bool,
+    /// Creation date
+    pub created_at: i64,
+    /// PDA bump.
+    pub bump: u8,
+    /// Uniq code of the issuer
+    #[max_len(32)]
+    pub code: String,
+    /// The name of the issuer
+    #[max_len(32)]
+    pub name: String,
+    /// Short description
+    #[max_len(64)]
+    pub description: String,
+}
 
-// #[account]
-// #[derive(InitSpace)]
-// pub struct ProgramConfig {
-//     #[max_len(3)]
-//     pub authority: Vec<Pubkey>,
-// }
+impl Issuer {
+    pub const SEED: &'static [u8] = b"issuer";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
+
+    #[inline]
+    pub fn is_disabled(&self) -> bool {
+        self.is_disabled
+    }
+
+    pub fn zk_pubkey(&self) -> ([u8; 32], [u8; 32]) {
+        (
+            self.zk_pubkey[..32].try_into().unwrap(),
+            self.zk_pubkey[32..].try_into().unwrap(),
+        )
+    }
+}
 
 #[account]
 #[derive(InitSpace)]
@@ -414,7 +443,9 @@ pub struct ProofRequest {
     pub policy: Pubkey,
     /// The [Circuit] used for proof generation
     pub circuit: Pubkey,
-    /// Address of the request initiator
+    /// The [Issuer] used for proof generation
+    pub issuer: Pubkey,
+    /// Proof request creator
     pub owner: Pubkey,
     /// Auto-increment service specific identifier
     pub identifier: u64,

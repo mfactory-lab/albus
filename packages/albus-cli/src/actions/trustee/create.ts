@@ -36,23 +36,23 @@ import { useContext } from '@/context'
 type Opts = {
   email?: string
   website?: string
-  keypair?: string
+  encryptionKeypair?: string
 }
 
 export async function create(name: string, opts: Opts) {
   const { client } = useContext()
 
   let keypair: Keypair
-  if (opts.keypair) {
-    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.keypair).toString())))
+  if (opts.encryptionKeypair) {
+    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.encryptionKeypair).toString())))
   } else {
     keypair = Keypair.generate()
     log.info('New encryption keypair was generated!')
-    log.info(`SecretKey: [${keypair.secretKey}]`)
-    log.info(`PublicKey: ${keypair.publicKey}`)
+    log.info(`|- SecretKey: [${keypair.secretKey}]`)
   }
 
-  const { key } = Albus.zkp.generateEncryptionKey(keypair)
+  const encryptionKey = Albus.zkp.getBabyJubPrivateKey(keypair)
+  const key = encryptionKey.public().compress()
 
   const { signature, address } = await client.trustee.create({
     key: Array.from(key),

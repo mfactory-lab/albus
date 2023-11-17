@@ -27,7 +27,6 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import type {
   Commitment,
   ConfirmOptions,
@@ -36,14 +35,15 @@ import type {
 } from '@solana/web3.js'
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import chunk from 'lodash/chunk'
-import type { CircuitManager } from './circuitManager'
-import type { CredentialManager } from './credentialManager'
+import { BaseManager } from './base'
+import { ALBUS_DID } from './constants'
 import type {
   ProofData,
   ProofRequestStatus,
 } from './generated'
 import {
   Circuit,
+  Issuer,
   Policy,
   ProofRequest,
   ServiceProvider,
@@ -55,18 +55,20 @@ import {
   errorFromCode,
   proofRequestDiscriminator,
 } from './generated'
-import type { PdaManager } from './pda'
-import type { ServiceManager } from './serviceManager'
+import { KnownSignals } from './types'
 import { ProofInputBuilder, getSignals, getSolanaTimestamp } from './utils'
 
-export class ProofRequestManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly circuit: CircuitManager,
-    readonly service: ServiceManager,
-    readonly credential: CredentialManager,
-    readonly pda: PdaManager,
-  ) {
+export class ProofRequestManager extends BaseManager {
+  private get service() {
+    return this.client.service
+  }
+
+  private get circuit() {
+    return this.client.circuit
+  }
+
+  private get credential() {
+    return this.client.credential
   }
 
   /**
@@ -112,6 +114,9 @@ export class ProofRequestManager {
               break
             case 'policy':
               result.policy = Policy.fromAccountInfo(accountInfo)[0]
+              break
+            case 'issuer':
+              result.issuer = Issuer.fromAccountInfo(accountInfo)[0]
               break
             case 'serviceProvider':
               result.serviceProvider = ServiceProvider.fromAccountInfo(accountInfo)[0]
@@ -202,7 +207,10 @@ export class ProofRequestManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return {
         address: proofRequest,
         signature,
@@ -223,7 +231,10 @@ export class ProofRequestManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -248,7 +259,10 @@ export class ProofRequestManager {
     )
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -277,7 +291,6 @@ export class ProofRequestManager {
     const { secret, signals } = props
     const nonce = signals.timestamp as bigint
     const encryptedData = (signals.encryptedData ?? []) as bigint[]
-    // console.log('encryptedData', encryptedData)
 
     const data = Albus.crypto.Poseidon.decrypt(encryptedData, [secret, secret], 1, nonce)
 
@@ -322,7 +335,7 @@ export class ProofRequestManager {
         type: 'BJJSignature2021',
         created: Number(new Date()),
         // TODO: fixme
-        verificationMethod: 'did:web:albus.finance#keys-0',
+        verificationMethod: `${ALBUS_DID}#keys-0`,
         rootHash: data.credentialRoot,
         proofValue: {
           ax: data.issuerPk[0],
@@ -350,14 +363,16 @@ export class ProofRequestManager {
 
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
-    const limits = { withProof: 20, withoutProof: 28 }
+    const inputsLimit = { withProof: 19, withoutProof: 28 }
     const txs: { tx: Transaction }[] = []
 
-    // extend public inputs if needed
-    if (publicInputs.length > limits.withProof) {
-      const inputChunks = chunk(publicInputs.slice(0, -limits.withProof), limits.withoutProof)
+    this.trace('prove', 'init', { proof, publicInputs })
+
+    // extending public inputs, length more than 19 does not fit into one transaction
+    // a transaction's maximum size is 1,232 bytes
+    if (publicInputs.length > inputsLimit.withProof) {
+      const inputChunks = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
-        const inputs = inputChunks[i]!
         txs.push({
           tx: new Transaction().add(
             createProveProofRequestInstruction(
@@ -370,7 +385,7 @@ export class ProofRequestManager {
               {
                 data: {
                   reset: i === 0,
-                  publicInputs: inputs,
+                  publicInputs: inputChunks[i],
                   proof: null,
                 },
               },
@@ -387,12 +402,13 @@ export class ProofRequestManager {
             proofRequest: new PublicKey(props.proofRequest),
             circuit: proofRequest.circuit,
             policy: proofRequest.policy,
+            issuer: props.issuer,
             authority,
           },
           {
             data: {
-              reset: false,
-              publicInputs: publicInputs.slice(-limits.withProof),
+              reset: publicInputs.length <= inputsLimit.withProof,
+              publicInputs: publicInputs.slice(-inputsLimit.withProof),
               proof,
             },
           },
@@ -401,6 +417,7 @@ export class ProofRequestManager {
     })
 
     if (props.verify) {
+      this.trace('prove', 'createVerifyProofRequestInstruction (setComputeUnitLimit: 400_000)')
       txs.push({
         tx: new Transaction()
           .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
@@ -413,7 +430,12 @@ export class ProofRequestManager {
     }
 
     try {
-      const signatures = await this.provider.sendAll(txs, opts)
+      this.trace('prove', `sending ${txs.length} transactions...`)
+      const signatures = await this.provider.sendAll(txs, {
+        ...this.provider.opts,
+        ...opts,
+      })
+      this.trace('prove', { signatures })
       return { signatures }
     } catch (e: any) {
       // console.log(e)
@@ -444,40 +466,70 @@ export class ProofRequestManager {
       decryptionKey: props.decryptionKey ?? props.userPrivateKey,
     })
 
-    const trusteePubKeys = serviceProvider.trustees.length > 0
-      ? (await this.service.loadTrusteeKeys(serviceProvider.trustees))
-          .filter(p => p !== null) as [bigint, bigint][]
-      : []
-
     const proofInput = await new ProofInputBuilder(credential)
-      .withTimestamp(await getSolanaTimestamp(this.provider.connection))
-      .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
-      .withTrusteePublicKey(trusteePubKeys)
+      .withUserPrivateKey(props.userPrivateKey)
       .withCircuit(circuit)
       .withPolicy(policy)
+      .withTimestampLoader(() => this.getTimestamp())
+      .withTrusteeLoader(async () => {
+        this.trace('fullProve', `loading trustee accounts...`, serviceProvider.trustees.map(t => t.toBase58()))
+        const keys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
+          .filter(p => p !== null) as [bigint, bigint][]
+
+        for (const key of keys) {
+          this.trace('fullProve', 'trustee sharedKey', Albus.zkp.generateEcdhSharedKey(props.userPrivateKey, key))
+        }
+
+        return keys
+      })
       .build()
 
+    // try to find a valid issuer by credential proof signer
+    let issuer: PublicKey | undefined
+    if (proofInput.data[KnownSignals.IssuerPublicKey]) {
+      this.trace('fullProve', `trying to find an issuer...`)
+      issuer = (await this.client.issuer.loadByZkPubkey(
+        proofInput.data[KnownSignals.IssuerPublicKey],
+        true,
+      )).pubkey
+      this.trace('fullProve', `found issuer ${issuer}`)
+    }
+
     try {
-      const { proof, publicSignals } = await Albus.zkp.generateProof({
+      const proofData = {
         wasmFile: circuit.wasmUri,
         zkeyFile: circuit.zkeyUri,
         input: proofInput.data,
-      })
+      }
 
+      this.trace('fullProve', 'proving...', proofData)
+      const { proof, publicSignals } = await Albus.zkp.generateProof(proofData)
+
+      this.trace('fullProve', 'sending transaction...')
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
         proofRequestData: proofRequest,
+        verify: props.verify ?? true,
         proof,
+        issuer,
         // @ts-expect-error readonly
         publicSignals,
-        verify: props.verify ?? true,
       })
+
+      this.trace('fullProve', 'prove result', { signatures })
 
       return { signatures, proof, publicSignals }
     } catch (e: any) {
-      console.log(e)
+      if (props.throwOnError) {
+        throw e
+      }
+      this.trace('fullProve', e)
       throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
+  }
+
+  async getTimestamp() {
+    return getSolanaTimestamp(this.provider.connection)
   }
 
   /**
@@ -502,6 +554,7 @@ type LoadFullResult = {
   proofRequest: ProofRequest
   circuit?: Circuit
   policy?: Policy
+  issuer?: Issuer
   serviceProvider?: ServiceProvider
 }
 
@@ -537,6 +590,7 @@ export type FullProveProps = {
   decryptionKey?: Uint8Array
   // On-chain verification. Default: true
   verify?: boolean
+  throwOnError?: boolean
 }
 
 export type VerifyProps = {
@@ -546,6 +600,7 @@ export type VerifyProps = {
 export type ProveProps = {
   proofRequest: PublicKeyInitData
   proofRequestData?: ProofRequest
+  issuer?: PublicKey
   proof: ProofData
   publicSignals: (string | number | bigint)[]
   verify: boolean

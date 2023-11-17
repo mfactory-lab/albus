@@ -32,14 +32,7 @@ export type InvestigationRequestArgs = {
 }
 
 export const investigationRequestDiscriminator = [
-  155,
-  75,
-  212,
-  176,
-  2,
-  184,
-  54,
-  19,
+  155, 75, 212, 176, 2, 184, 54, 19,
 ]
 /**
  * Holds the data for the {@link InvestigationRequest} Account and provides de/serialization

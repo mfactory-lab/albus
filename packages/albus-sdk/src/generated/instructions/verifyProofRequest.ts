@@ -38,14 +38,7 @@ export type VerifyProofRequestInstructionAccounts = {
 }
 
 export const verifyProofRequestInstructionDiscriminator = [
-  134,
-  245,
-  92,
-  39,
-  75,
-  253,
-  56,
-  152,
+  134, 245, 92, 39, 75, 253, 56, 152,
 ]
 
 /**

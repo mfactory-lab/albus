@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { UpdateCredentialData } from '../types/UpdateCredentialData'
+import type {
+  UpdateCredentialData } from '../types/UpdateCredentialData'
 import {
   updateCredentialDataBeet,
 } from '../types/UpdateCredentialData'
@@ -63,14 +64,7 @@ export type UpdateCredentialInstructionAccounts = {
 }
 
 export const updateCredentialInstructionDiscriminator = [
-  96,
-  104,
-  180,
-  182,
-  200,
-  19,
-  178,
-  1,
+  96, 104, 180, 182, 200, 19, 178, 1,
 ]
 
 /**

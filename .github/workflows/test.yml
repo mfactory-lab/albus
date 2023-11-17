@@ -3,11 +3,16 @@ name: Test(e2e)
 on:
   workflow_dispatch:
 
+env:
+  SOLANA_CLI_VERSION: 1.16.17
+  ANCHOR_VERSION: 0.29.0
+
 jobs:
 
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
+#    container: backpackapp/build:{{ env.ANCHOR_VERSION }}
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup-solana/
@@ -20,4 +25,15 @@ jobs:
           path: ./target
           key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
 
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - name: Install Anchor
+        run: pnpm add -g @coral-xyz/anchor-cli@${{ env.ANCHOR_VERSION }}
+
+      - run: pnpm i
       - run: make test
+

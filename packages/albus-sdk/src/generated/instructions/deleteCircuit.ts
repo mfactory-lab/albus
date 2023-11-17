@@ -36,14 +36,7 @@ export type DeleteCircuitInstructionAccounts = {
 }
 
 export const deleteCircuitInstructionDiscriminator = [
-  40,
-  92,
-  89,
-  94,
-  54,
-  92,
-  39,
-  91,
+  40, 92, 89, 94, 54, 92, 39, 91,
 ]
 
 /**

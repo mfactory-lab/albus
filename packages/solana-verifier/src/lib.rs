@@ -26,24 +26,19 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+mod constants;
 #[cfg(feature = "cpi")]
-pub mod cpi;
+mod cpi;
+mod utils;
 
+use crate::constants::{ALBUS_PROGRAM_ID, PROOF_REQUEST_DISCRIMINATOR};
+use crate::utils::cmp_pubkeys;
 use arrayref::array_ref;
 use arrayref::array_refs;
 use solana_program::{
-    account_info::AccountInfo,
-    clock::Clock,
-    msg,
-    program_error::ProgramError,
-    program_memory::sol_memcmp,
-    pubkey,
-    pubkey::{Pubkey, PUBKEY_BYTES},
+    account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, pubkey::Pubkey,
     sysvar::Sysvar,
 };
-
-pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
-const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
 pub struct AlbusVerifier<'a, 'info> {
     /// Proof request address
@@ -79,7 +74,7 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
         //     Ok(()) => Ok(()),
         //     Err(e) => Err(e.into()),
         // }
-        todo!()
+        unimplemented!()
     }
 
     pub fn run(&self) -> Result<(), ProgramError> {
@@ -102,13 +97,14 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
 
     fn check_proof_request(&self) -> Result<(), ProgramError> {
         let data = self.proof_request.data.borrow();
-        let data = array_ref![data, 0, 186];
+        let data = array_ref![data, 0, 218];
 
         let (
             discriminator,
             _service,
             policy,
             _circuit,
+            _issuer,
             owner,
             _identifier,
             _created_at,
@@ -120,7 +116,7 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
             _bump,
             // _proof,
             // _public_inputs,
-        ) = array_refs![data, 8, 32, 32, 32, 32, 8, 8, 8, 8, 8, 8, 1, 1];
+        ) = array_refs![data, 8, 32, 32, 32, 32, 32, 8, 8, 8, 8, 8, 8, 1, 1];
 
         if discriminator != PROOF_REQUEST_DISCRIMINATOR {
             msg!("AlbusVerifierError: Invalid proof request discriminator");
@@ -198,32 +194,6 @@ impl TryFrom<u8> for ProofRequestStatus {
             _ => Err(ProgramError::InvalidAccountData),
         }
     }
-}
-
-/// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`
-pub fn cmp_pubkeys(a: impl AsRef<[u8]>, b: impl AsRef<[u8]>) -> bool {
-    sol_memcmp(a.as_ref(), b.as_ref(), PUBKEY_BYTES) == 0
-}
-
-/// Generates the service provider program address for Albus Protocol
-pub fn find_service_provider_address(code: &str) -> (Pubkey, u8) {
-    Pubkey::find_program_address(&[b"service-provider", code.as_bytes()], &ALBUS_PROGRAM_ID)
-}
-
-/// Generates the policy program address for Albus Protocol
-pub fn find_policy_address(service_provider: &Pubkey, code: &str) -> (Pubkey, u8) {
-    Pubkey::find_program_address(
-        &[b"policy", service_provider.as_ref(), code.as_bytes()],
-        &ALBUS_PROGRAM_ID,
-    )
-}
-
-/// Generates the proof request program address for the Albus protocol
-pub fn find_proof_request_address(policy: &Pubkey, user: &Pubkey) -> (Pubkey, u8) {
-    Pubkey::find_program_address(
-        &[b"proof-request", policy.as_ref(), user.as_ref()],
-        &ALBUS_PROGRAM_ID,
-    )
 }
 
 #[cfg(test)]
@@ -311,6 +281,7 @@ mod test {
     struct ProofRequestBuilder {
         expired_at: i64,
         owner: Pubkey,
+        issuer: Pubkey,
         policy: Pubkey,
         status: u8,
         // --
@@ -324,6 +295,7 @@ mod test {
         pub fn new() -> Self {
             Self {
                 expired_at: 0,
+                issuer: Default::default(),
                 owner: Default::default(),
                 policy: Default::default(),
                 status: 0,
@@ -336,6 +308,11 @@ mod test {
 
         pub fn with_status(&mut self, status: ProofRequestStatus) -> &mut Self {
             self.status = status as u8;
+            self
+        }
+
+        pub fn with_issuer(&mut self, addr: Pubkey) -> &mut Self {
+            self.issuer = addr;
             self
         }
 
@@ -360,6 +337,7 @@ mod test {
                 &Pubkey::new_unique().to_bytes(), //service
                 &self.policy.to_bytes(),
                 &Pubkey::new_unique().to_bytes(), // circuit
+                &self.issuer.to_bytes(),
                 &self.owner.to_bytes(),
                 &0u64.to_le_bytes(),
                 &0i64.to_le_bytes(),

@@ -69,6 +69,16 @@ pub mod albus {
         revoke_credential::handler(ctx)
     }
 
+    // Issuer
+
+    pub fn create_issuer(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()> {
+        create_issuer::handler(ctx, data)
+    }
+
+    pub fn delete_issuer(ctx: Context<DeleteIssuer>) -> Result<()> {
+        delete_issuer::handler(ctx)
+    }
+
     // Circuit
 
     pub fn create_circuit(ctx: Context<CreateCircuit>, data: CreateCircuitData) -> Result<()> {

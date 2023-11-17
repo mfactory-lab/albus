@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { UpdateCircuitVkData } from '../types/UpdateCircuitVkData'
+import type {
+  UpdateCircuitVkData } from '../types/UpdateCircuitVkData'
 import {
   updateCircuitVkDataBeet,
 } from '../types/UpdateCircuitVkData'
@@ -53,14 +54,7 @@ export type UpdateCircuitVkInstructionAccounts = {
 }
 
 export const updateCircuitVkInstructionDiscriminator = [
-  229,
-  19,
-  102,
-  93,
-  187,
-  107,
-  67,
-  117,
+  229, 19, 102, 93, 187, 107, 67, 117,
 ]
 
 /**

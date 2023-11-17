@@ -133,6 +133,27 @@ export async function getParsedNftAccountsByOwner(connection: Connection, owner:
   return findMetadataAccounts(connection, { ...filter, mints })
 }
 
+export async function getParsedNftAccountsByUpdateAuthority(connection: Connection, updateAuthority: PublicKey) {
+  try {
+    const res = await connection.getProgramAccounts(METADATA_PROGRAM_ID, {
+      encoding: 'base64',
+      // dataSlice: { offset: 0, length: 0 },
+      filters: [
+        {
+          memcmp: {
+            offset: 1,
+            bytes: updateAuthority.toBase58(),
+          },
+        },
+      ],
+    })
+    return res.map(acc => sanitizeMetadata(Metadata.deserialize(acc.account.data)[0]))
+  } catch (err) {
+    console.error(err)
+    return []
+  }
+}
+
 type FindMetadataAccounts = {
   mints: PublicKey[]
   updateAuthority?: PublicKeyInitData
@@ -144,7 +165,7 @@ type FindMetadataAccounts = {
   withJson?: boolean
 }
 
-type ExtendedMetadata = Metadata & { json: Record<string, any> | null }
+export type ExtendedMetadata = Metadata & { json: Record<string, any> | null }
 
 /**
  * Load multiple metadata with selected {@link props.mints}

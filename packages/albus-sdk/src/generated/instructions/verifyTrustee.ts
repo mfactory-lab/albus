@@ -36,14 +36,7 @@ export type VerifyTrusteeInstructionAccounts = {
 }
 
 export const verifyTrusteeInstructionDiscriminator = [
-  55,
-  38,
-  74,
-  86,
-  185,
-  37,
-  255,
-  124,
+  55, 38, 74, 86, 185, 37, 255, 124,
 ]
 
 /**

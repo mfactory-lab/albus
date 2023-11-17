@@ -6,7 +6,8 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-import type { ProofRequestStatus } from './ProofRequestStatus'
+import type {
+  ProofRequestStatus } from './ProofRequestStatus'
 import {
   proofRequestStatusBeet,
 } from './ProofRequestStatus'

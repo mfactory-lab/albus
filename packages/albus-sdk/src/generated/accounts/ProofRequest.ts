@@ -24,6 +24,7 @@ export type ProofRequestArgs = {
   serviceProvider: web3.PublicKey
   policy: web3.PublicKey
   circuit: web3.PublicKey
+  issuer: web3.PublicKey
   owner: web3.PublicKey
   identifier: beet.bignum
   createdAt: beet.bignum
@@ -50,6 +51,7 @@ export class ProofRequest implements ProofRequestArgs {
     readonly serviceProvider: web3.PublicKey,
     readonly policy: web3.PublicKey,
     readonly circuit: web3.PublicKey,
+    readonly issuer: web3.PublicKey,
     readonly owner: web3.PublicKey,
     readonly identifier: beet.bignum,
     readonly createdAt: beet.bignum,
@@ -71,6 +73,7 @@ export class ProofRequest implements ProofRequestArgs {
       args.serviceProvider,
       args.policy,
       args.circuit,
+      args.issuer,
       args.owner,
       args.identifier,
       args.createdAt,
@@ -193,6 +196,7 @@ export class ProofRequest implements ProofRequestArgs {
       serviceProvider: this.serviceProvider.toBase58(),
       policy: this.policy.toBase58(),
       circuit: this.circuit.toBase58(),
+      issuer: this.issuer.toBase58(),
       owner: this.owner.toBase58(),
       identifier: (() => {
         const x = <{ toNumber: () => number }> this.identifier
@@ -283,6 +287,7 @@ export const proofRequestBeet = new beet.FixableBeetStruct<
     ['serviceProvider', beetSolana.publicKey],
     ['policy', beetSolana.publicKey],
     ['circuit', beetSolana.publicKey],
+    ['issuer', beetSolana.publicKey],
     ['owner', beetSolana.publicKey],
     ['identifier', beet.u64],
     ['createdAt', beet.i64],

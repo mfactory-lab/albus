@@ -31,7 +31,7 @@ import { Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-type Opts = {}
+type Opts = NonNullable<unknown>
 
 export async function credential(_opts: Opts) {
   const { client, provider } = useContext()
@@ -53,7 +53,9 @@ export async function credential(_opts: Opts) {
     )
   }
 
-  const holderClient = AlbusClient.keypair(provider.connection, holder)
+  const holderClient = AlbusClient
+    .fromKeypair(provider.connection, holder)
+    .configure('debug', true)
 
   log.info('Creating new NFT...')
   const { mintAddress } = await holderClient.credential.create({})

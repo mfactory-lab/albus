@@ -38,7 +38,7 @@ test-unit: ## Test unit
 	cargo test --all-features
 
 sdk: ## Generate new sdk
-	pnpm gen:sdk
+	pnpm -F @albus-finance/sdk generate
 
 deploy: build ## Deploy program
 	anchor deploy -p $(PROGRAM) --provider.cluster $(NETWORK)

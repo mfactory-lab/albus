@@ -50,14 +50,7 @@ export type RevokeCredentialInstructionAccounts = {
 }
 
 export const revokeCredentialInstructionDiscriminator = [
-  38,
-  123,
-  95,
-  95,
-  223,
-  158,
-  169,
-  87,
+  38, 123, 95, 95, 223, 158, 169, 87,
 ]
 
 /**

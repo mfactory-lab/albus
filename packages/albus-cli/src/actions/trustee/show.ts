@@ -28,9 +28,11 @@
 
 import Table from 'cli-table3'
 import log from 'loglevel'
+import * as Albus from '@albus-finance/core'
 import { useContext } from '@/context'
 
 type Opts = {
+  // ...
 }
 
 export async function show(addr: string, _opts: Opts) {
@@ -38,8 +40,14 @@ export async function show(addr: string, _opts: Opts) {
 
   const trustee = await client.trustee.load(addr)
 
+  const zkPubkey = Albus.zkp.unpackPubkey(Uint8Array.from(trustee.key))
+
   log.info('\n')
-  log.info(trustee.pretty())
+  log.info({
+    address: addr,
+    zkPubkey,
+    ...trustee.pretty(),
+  })
 }
 
 type AllOpts = {

@@ -26,8 +26,19 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import type { PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js'
+
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
+export type Writeable<T> = { -readonly [P in keyof T]: T[P] }
+
 export type PrivateKey = number[] | string | Uint8Array
 export type AlbusNftCode = 'DC' | 'ID'
+
+export type Wallet = {
+  publicKey: PublicKey
+  signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>
+  signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]>
+}
 
 export enum KnownSignals {
   Timestamp = 'timestamp',

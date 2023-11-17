@@ -1,7 +1,7 @@
 {
   "name": "@albus-finance/sdk",
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.2.2-next.13",
   "description": "Albus Protocol SDK",
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
     "release:dry": "release-it --ci --dry-run",
-    "release:pre": "release-it --preRelease=next",
+    "release:pre": "release-it --ci --preRelease=next",
     "prepublishOnly": "vite build"
   },
   "peerDependencies": {

@@ -38,14 +38,7 @@ export type DeletePolicyInstructionAccounts = {
 }
 
 export const deletePolicyInstructionDiscriminator = [
-  15,
-  80,
-  151,
-  21,
-  231,
-  64,
-  246,
-  198,
+  15, 80, 151, 21, 231, 64, 246, 198,
 ]
 
 /**

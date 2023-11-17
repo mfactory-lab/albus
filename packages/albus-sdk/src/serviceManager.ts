@@ -26,10 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { AnchorProvider } from '@coral-xyz/anchor'
 import * as Albus from '@albus-finance/core'
 import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import { BaseManager } from './base'
 import type { UpdateServiceProviderData } from './generated'
 import {
   ServiceProvider,
@@ -39,15 +39,8 @@ import {
   errorFromCode,
   serviceProviderDiscriminator,
 } from './generated'
-import type { PdaManager } from './pda'
 
-export class ServiceManager {
-  constructor(
-    readonly provider: AnchorProvider,
-    readonly pda: PdaManager,
-  ) {
-  }
-
+export class ServiceManager extends BaseManager {
   /**
    * Load {@link ServiceProvider} by {@link addr}
    * @param addr
@@ -85,6 +78,10 @@ export class ServiceManager {
    * @param trustees
    */
   async loadTrusteeKeys(trustees: PublicKey[]) {
+    if (trustees.length === 0) {
+      return []
+    }
+
     const accounts = await this.provider.connection
       .getMultipleAccountsInfo(trustees, {
         dataSlice: {
@@ -176,7 +173,10 @@ export class ServiceManager {
     })
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { address: serviceProvider, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -211,7 +211,10 @@ export class ServiceManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -237,7 +240,10 @@ export class ServiceManager {
 
     try {
       const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], opts)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e

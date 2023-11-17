@@ -8,7 +8,8 @@
 import * as splToken from '@solana/spl-token'
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { MintCredentialData } from '../types/MintCredentialData'
+import type {
+  MintCredentialData } from '../types/MintCredentialData'
 import {
   mintCredentialDataBeet,
 } from '../types/MintCredentialData'
@@ -70,14 +71,7 @@ export type MintCredentialInstructionAccounts = {
 }
 
 export const mintCredentialInstructionDiscriminator = [
-  136,
-  108,
-  131,
-  240,
-  163,
-  102,
-  204,
-  13,
+  136, 108, 131, 240, 163, 102, 204, 13,
 ]
 
 /**

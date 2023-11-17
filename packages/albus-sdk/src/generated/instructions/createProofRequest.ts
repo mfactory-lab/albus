@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { CreateProofRequestData } from '../types/CreateProofRequestData'
+import type {
+  CreateProofRequestData } from '../types/CreateProofRequestData'
 import {
   createProofRequestDataBeet,
 } from '../types/CreateProofRequestData'
@@ -57,14 +58,7 @@ export type CreateProofRequestInstructionAccounts = {
 }
 
 export const createProofRequestInstructionDiscriminator = [
-  18,
-  176,
-  14,
-  175,
-  218,
-  24,
-  32,
-  130,
+  18, 176, 14, 175, 218, 24, 32, 130,
 ]
 
 /**

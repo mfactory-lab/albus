@@ -26,13 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+use crate::constants::VERIFY_IX_DISCRIMINATOR;
 use anchor_lang::{
     context::CpiContext,
     prelude::*,
     solana_program::{account_info::AccountInfo, instruction::Instruction, program::invoke_signed},
 };
-
-const VERIFY_IX_DISCRIMINATOR: [u8; 8] = [134, 245, 92, 39, 75, 253, 56, 152];
 
 /// Generates cpi call to Albus program, to verify proof request on-chain
 pub fn verify<'info>(

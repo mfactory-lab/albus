@@ -26,7 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { createAdminCloseAccountInstruction } from '@albus-finance/sdk'
+import * as Albus from '@albus-finance/core'
+import {
+  createAdminCloseAccountInstruction,
+  policyDiscriminator,
+  proofRequestDiscriminator,
+  trusteeDiscriminator,
+} from '@albus-finance/sdk'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
@@ -39,12 +45,52 @@ export async function fund(_opts: any) {
   log.info(`Signature: ${signature}`)
 }
 
-export async function clear(_opts: any) {
+type ClearOpts = {
+  accountType?: string
+  dryRun?: boolean
+}
+
+export async function clear(opts: ClearOpts) {
   const { client } = useContext()
-  const accounts = await client.provider.connection.getProgramAccounts(client.programId)
+
+  const filters: any[] = []
+
+  if (opts.dryRun) {
+    log.info(`--- DRY-RUN MODE ---`)
+  }
+
+  if (opts.accountType) {
+    let discriminator: number[] = []
+    switch (opts.accountType) {
+      case 'proofRequest':
+        discriminator = proofRequestDiscriminator
+        break
+      case 'trustee':
+        discriminator = trusteeDiscriminator
+        break
+      case 'policy':
+        discriminator = policyDiscriminator
+        break
+      // ...
+    }
+    filters.push({
+      memcmp: {
+        offset: 0,
+        bytes: Albus.crypto.utils.bytesToBase58(discriminator),
+      },
+    })
+
+    log.info(`Filter by account type ${opts.accountType}`)
+  }
+
+  const accounts = await client.provider.connection
+    .getProgramAccounts(client.programId, { filters })
+
   log.info(`Found ${accounts.length} program accounts`)
   for (const { pubkey } of accounts) {
-    await closeAccount(pubkey)
+    if (!opts.dryRun) {
+      await closeAccount(pubkey)
+    }
   }
 }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.2...@albus-finance/core-v0.3.3-next.0) (2023-11-10)
+
+
+### 🐞 Bug Fixes
+
+* geo credential type ([de7b38d](https://github.com/mfactory-lab/albus/commit/de7b38d75682f1fed3f8b2942949504327cbb5b3))
+
 ## [0.3.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.0...@albus-finance/core-v0.3.2) (2023-11-07)
 
 

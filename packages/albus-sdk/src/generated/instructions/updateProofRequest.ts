@@ -7,7 +7,8 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type { UpdateProofRequestData } from '../types/UpdateProofRequestData'
+import type {
+  UpdateProofRequestData } from '../types/UpdateProofRequestData'
 import {
   updateProofRequestDataBeet,
 } from '../types/UpdateProofRequestData'
@@ -53,14 +54,7 @@ export type UpdateProofRequestInstructionAccounts = {
 }
 
 export const updateProofRequestInstructionDiscriminator = [
-  248,
-  138,
-  24,
-  233,
-  171,
-  52,
-  72,
-  43,
+  248, 138, 24, 233, 171, 52, 72, 43,
 ]
 
 /**

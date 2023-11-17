@@ -23,7 +23,7 @@ export class Eddsa {
 
   static signPoseidon(prv: Uint8Array, msg: bigint) {
     const h1 = new Blake512().update(prv).digest()
-    const sBuff = Eddsa.pruneBuffer(h1.slice(0, 32))
+    const sBuff = this.pruneBuffer(h1.slice(0, 32))
     const s = utils.leBuff2int(sBuff)
     const A = babyJub.mulPointEscalar(babyJub.Base8, Scalar.shr(s, 3n))
 
