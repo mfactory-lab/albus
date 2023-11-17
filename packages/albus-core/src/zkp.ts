@@ -3,7 +3,7 @@ import { Keypair } from '@solana/web3.js'
 import { randomBytes } from '@stablelib/random'
 import axios from 'axios'
 import { groth16 } from 'snarkjs'
-import { Blake512, F1Field, babyJub, eddsa, ffUtils } from './crypto'
+import { Blake512, F1Field, PrivateKey, Scalar, babyJub, eddsa, ffUtils } from './crypto'
 import { bigintToBytes, bytesToBigInt } from './crypto/utils'
 
 const BN128_GROUP_ORDER = 21888242871839275222246405745257275088548364400416034343698204186575808495617n
@@ -229,8 +229,17 @@ function decodeG2(bytes: number[]) {
  * @param prv
  */
 export function formatPrivKeyForBabyJub(prv: Uint8Array) {
-  const sBuff = eddsa.pruneBuffer(new Blake512().update(prv).digest().slice(0, 32))
-  return ffUtils.leBuff2int(sBuff) >> 3n
+  const sBuff = eddsa.pruneBuffer(new Blake512().update(prv).digest())
+  const s = Scalar.fromRprLE(sBuff, 0, 32)
+  return Scalar.shr(s, 3n)
+}
+
+/**
+ * Returns a BabyJub-compatible private key
+ * @param keypair
+ */
+export function getBabyJubPrivateKey(keypair?: Keypair) {
+  return new PrivateKey((keypair ?? Keypair.generate()).secretKey)
 }
 
 /**
@@ -242,16 +251,6 @@ export function formatPrivKeyForBabyJub(prv: Uint8Array) {
  */
 export function generateEcdhSharedKey(privKey: Uint8Array, pubKey: bigint[]) {
   return babyJub.mulPointEscalar(pubKey, formatPrivKeyForBabyJub(privKey))
-}
-
-/**
- * Generate encryption keypair
- * @param keypair
- */
-export function generateEncryptionKey(keypair?: Keypair) {
-  keypair ??= Keypair.generate()
-  const key = packPubkey(eddsa.prv2pub(keypair.secretKey))
-  return { keypair, key }
 }
 
 /**
