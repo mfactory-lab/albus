@@ -37,18 +37,17 @@ describe('encryptionProof', async () => {
 
   it('produces a witness with valid constraints', async () => {
     const userKeypair = Keypair.generate()
+    const userPublicKey = eddsa.prv2pub(userKeypair.secretKey)
     const userPrivateKey = formatPrivKeyForBabyJub(userKeypair.secretKey)
 
-    const trusteeKeypair = Keypair.generate()
-    const trusteePublicKey = eddsa.prv2pub(trusteeKeypair.secretKey)
-    const shared = generateEcdhSharedKey(userKeypair.secretKey, trusteePublicKey)
+    const trusteeKeypair = [Keypair.generate(), Keypair.generate(), Keypair.generate()]
 
     const data = {
       userPrivateKey,
       trusteePublicKey: [
-        trusteePublicKey,
-        trusteePublicKey,
-        trusteePublicKey,
+        eddsa.prv2pub(trusteeKeypair[0]!.secretKey),
+        eddsa.prv2pub(trusteeKeypair[1]!.secretKey),
+        eddsa.prv2pub(trusteeKeypair[2]!.secretKey),
       ],
       secret: Poseidon.genRandomNonce(),
       nonce: Poseidon.genRandomNonce(),
@@ -73,12 +72,13 @@ describe('encryptionProof', async () => {
 
     const shares: any[] = []
     for (let i = 0; i < 3; i++) {
+      const sharedKey = generateEcdhSharedKey(trusteeKeypair[i]!.secretKey, userPublicKey)
       const share = Poseidon.decrypt([
         BigInt(res[`main.encryptedShare[${i}][0]`]!),
         BigInt(res[`main.encryptedShare[${i}][1]`]!),
         BigInt(res[`main.encryptedShare[${i}][2]`]!),
         BigInt(res[`main.encryptedShare[${i}][3]`]!),
-      ], shared, 1, data.nonce)
+      ], sharedKey, 1, data.nonce)
       shares.push(share[0])
     }
 
