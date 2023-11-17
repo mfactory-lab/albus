@@ -140,10 +140,9 @@ describe('albusClient', async () => {
 
     it('prepareInputs', async () => {
       const user = Keypair.generate()
-      const prv = Albus.zkp.formatPrivKeyForBabyJub(user.secretKey)
 
       const inputs = await new ProofInputBuilder(credential)
-        .withUserPrivateKey(prv)
+        .withUserPrivateKey(user.secretKey)
         .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
         .withPolicy(policy)
         .withCircuit(circuit)

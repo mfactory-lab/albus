@@ -32,8 +32,10 @@ import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../packages/albus-sdk/src'
 import { airdrop, assertErrorCode, loadFixture, newProvider, payer, provider } from './utils'
 
+const DEBUG = false
+
 describe('albus', async () => {
-  const client = new AlbusClient(provider) // .configure('debug', true)
+  const client = new AlbusClient(provider).configure('debug', DEBUG)
 
   const issuer = Keypair.generate()
 
@@ -161,19 +163,19 @@ describe('albus', async () => {
       for (let i = 0; i < trustees.length; i++) {
         const trusteeKeypair = trustees[i]!
         const newClient = new AlbusClient(newProvider(trusteeKeypair))
-        const { key } = Albus.zkp.generateEncryptionKey(trusteeKeypair)
+        const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trusteeKeypair)
         const data = {
           name: `trustee${i}`,
           email: `trustee${i}@albus.finance`,
           website: `https://trustee${i}.albus.finance`,
-          key: Array.from(key),
+          key: Array.from(babyJubKey.public().compress()),
         }
         const { address, signature } = await newClient.trustee.create(data)
         assert.ok(!!signature)
 
         // console.log(`trustee #${i}`, address.toString())
 
-        assert.equal(address.toString(), client.pda.trustee(key)[0].toString())
+        assert.equal(address.toString(), client.pda.trustee(data.key)[0].toString())
 
         const trustee = await newClient.trustee.load(address)
 
@@ -210,16 +212,16 @@ describe('albus', async () => {
     try {
       const trusteeKeypair = trustees[0]!
       const newClient = new AlbusClient(newProvider(trusteeKeypair))
-      const { key } = Albus.zkp.generateEncryptionKey(trusteeKeypair)
+      const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trusteeKeypair)
       const data = {
-        key: Array.from(key),
+        key: Array.from(babyJubKey.public().compress()),
         name: 'trustee123',
         email: 'trustee123@albus.finance',
         website: 'https://trustee123.albus.finance',
       }
       const { address } = await newClient.trustee.update(data)
       const trustee = await newClient.trustee.load(address)
-      assert.deepEqual(address, client.pda.trustee(key)[0])
+      assert.deepEqual(address, client.pda.trustee(data.key)[0])
       assert.deepEqual(trustee.key, data.key)
       assert.equal(trustee.name, data.name)
       assert.equal(trustee.email, data.email)
@@ -251,7 +253,7 @@ describe('albus', async () => {
       const [serviceProvider] = client.pda.serviceProvider(serviceCode)
       const data = {
         trustees: trustees.slice(0, 3)
-          .map(kp => client.pda.trustee(Albus.zkp.generateEncryptionKey(kp).key)[0]),
+          .map(kp => client.pda.trustee(Albus.zkp.getBabyJubPrivateKey(kp).public().compress())[0]),
         serviceProvider,
       }
       const { signature } = await client.service.update(data)
@@ -369,6 +371,7 @@ describe('albus', async () => {
 
     it('can create investigation request', async () => {
       const newClient = new AlbusClient(newProvider(investigator))
+        .configure('debug', client.options.debug)
 
       const [service] = client.pda.serviceProvider(serviceCode)
       const [policy] = client.pda.policy(service, policyCode)
@@ -377,7 +380,7 @@ describe('albus', async () => {
       try {
         const { address, selectedTrustees } = await newClient.investigation.create({
           proofRequest,
-          // encryptionKey: ...
+          // encryptionKey: ... // authority key used by default
         })
         investigationAddress = address
         const investigation = await newClient.investigation.load(address)
@@ -463,9 +466,9 @@ describe('albus', async () => {
 
   it('can delete all trustees', async () => {
     for (const trustee of trustees) {
-      const { key } = Albus.zkp.generateEncryptionKey(trustee)
+      const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trustee)
       try {
-        await client.trustee.deleteByKey(key)
+        await client.trustee.deleteByKey(babyJubKey.public().compress())
       } catch (e) {
         console.log(e)
         assert.ok(false)
