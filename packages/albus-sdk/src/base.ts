@@ -31,6 +31,8 @@ import type { AlbusClient } from './client'
 export abstract class BaseManager {
   public constructor(readonly client: AlbusClient) {}
 
+  protected traceNamespace: string = this.constructor.name
+
   protected get provider() {
     return this.client.provider
   }
@@ -43,6 +45,6 @@ export abstract class BaseManager {
     if (!this.client.options.debug) {
       return
     }
-    console.log(`[AlbusClient][${this.constructor.name}]`, ...msg)
+    console.log(`[AlbusClient][${this.traceNamespace}]`, ...msg)
   }
 }
