@@ -94,8 +94,10 @@ export class ProofInputBuilder<T = Record<string, any>> {
     return this
   }
 
-  withUserPrivateKey(value?: bigint | string) {
-    this.userPrivateKey = value
+  withUserPrivateKey(value?: Uint8Array) {
+    if (value !== undefined) {
+      this.userPrivateKey = Albus.zkp.formatPrivKeyForBabyJub(value)
+    }
     return this
   }
 

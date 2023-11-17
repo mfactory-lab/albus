@@ -291,7 +291,6 @@ export class ProofRequestManager extends BaseManager {
     const { secret, signals } = props
     const nonce = signals.timestamp as bigint
     const encryptedData = (signals.encryptedData ?? []) as bigint[]
-    // console.log('encryptedData', encryptedData)
 
     const data = Albus.crypto.Poseidon.decrypt(encryptedData, [secret, secret], 1, nonce)
 
@@ -468,14 +467,20 @@ export class ProofRequestManager extends BaseManager {
     })
 
     const proofInput = await new ProofInputBuilder(credential)
-      .withUserPrivateKey(Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey))
+      .withUserPrivateKey(props.userPrivateKey)
       .withCircuit(circuit)
       .withPolicy(policy)
       .withTimestampLoader(() => this.getTimestamp())
       .withTrusteeLoader(async () => {
         this.trace('fullProve', `loading trustee accounts...`, serviceProvider.trustees.map(t => t.toBase58()))
-        const keys = await this.service.loadTrusteeKeys(serviceProvider.trustees)
-        return keys.filter(p => p !== null) as [bigint, bigint][]
+        const keys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
+          .filter(p => p !== null) as [bigint, bigint][]
+
+        for (const key of keys) {
+          this.trace('fullProve', 'trustee sharedKey', Albus.zkp.generateEcdhSharedKey(props.userPrivateKey, key))
+        }
+
+        return keys
       })
       .build()
 

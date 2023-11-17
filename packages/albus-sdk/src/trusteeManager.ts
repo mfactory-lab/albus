@@ -223,7 +223,7 @@ export class TrusteeManager extends BaseManager {
 export type CreateTrusteeProps = NonNullable<unknown> & CreateTrusteeData
 
 export type UpdateTrusteeProps = {
-  key: number[]
+  key: ArrayLike<number>
   // newKey: number[]
 } & Partial<UpdateTrusteeData>
 

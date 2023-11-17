@@ -229,6 +229,9 @@ export class InvestigationManager extends BaseManager {
 
     const [investigationRequest] = this.pda.investigationRequest(props.proofRequest, authority)
 
+    this.trace('create', `investigationRequest: ${investigationRequest}`)
+    this.trace('create', `selectedTrustees`, selectedTrustees.map(p => p.toString()))
+
     const ix = createCreateInvestigationRequestInstruction({
       investigationRequest,
       proofRequest: new PublicKey(props.proofRequest),
@@ -267,7 +270,8 @@ export class InvestigationManager extends BaseManager {
     const authority = this.provider.publicKey
 
     const investigationRequest = await this.load(props.investigationRequest)
-    const { proofRequest, circuit } = await this.proofRequest.loadFull(investigationRequest.proofRequest, ['circuit'])
+    const { proofRequest, circuit } = await this.proofRequest
+      .loadFull(investigationRequest.proofRequest, ['circuit'])
 
     if (!circuit) {
       throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
@@ -282,20 +286,20 @@ export class InvestigationManager extends BaseManager {
       throw new Error(`The circuit "${circuit.code}" does not support data encryption...`)
     }
 
-    const { key } = Albus.zkp.generateEncryptionKey(Keypair.fromSecretKey(props.encryptionKey))
-    const encryptionKey = Albus.zkp.unpackPubkey(key)
+    const babyJubKey = Albus.zkp.getBabyJubPrivateKey(Keypair.fromSecretKey(props.encryptionKey))
+    const ePk = babyJubKey.public().p
 
-    this.trace('revealShare', 'encryptionKey:', encryptionKey)
+    this.trace('revealShare', 'ePublicKey:', ePk)
     this.trace('revealShare', 'trusteePublicKey:', signals.trusteePublicKey)
 
     const index = (signals.trusteePublicKey as bigint[][] ?? [])
-      .findIndex(pk => String(pk) === String(encryptionKey))
+      .findIndex(pk => String(pk) === String(ePk))
 
     if (index < 0) {
       throw new Error('Unable to find a trustee pubkey...')
     }
 
-    const [trustee] = this.pda.trustee(key)
+    const [trustee] = this.pda.trustee(babyJubKey.public().compress())
     const [investigationRequestShare] = this.pda.investigationRequestShare(props.investigationRequest, trustee)
 
     this.trace('revealShare', `trusteeAddress: ${trustee}`)
@@ -309,6 +313,9 @@ export class InvestigationManager extends BaseManager {
     const userPublicKey = signals.userPublicKey as [bigint, bigint]
     const sharedKey = Albus.zkp.generateEcdhSharedKey(props.encryptionKey, userPublicKey)
 
+    this.trace('revealShare', `userPublicKey:`, userPublicKey)
+    this.trace('revealShare', `encryptionKey:`, props.encryptionKey)
+    this.trace('revealShare', `encryptedShare:`, encryptedShare)
     this.trace('revealShare', `sharedKey:`, sharedKey)
 
     const secretShare = Albus.crypto.Poseidon.decrypt(encryptedShare, sharedKey, 1, signals.timestamp as bigint)
@@ -319,12 +326,6 @@ export class InvestigationManager extends BaseManager {
       Albus.crypto.utils.bigintToBytes(secretShare[0]),
       investigationRequest.encryptionKey,
     )
-
-    // console.log('userPublicKey', userPublicKey)
-    // console.log('sharedKey', sharedKey)
-    // console.log('secretShare', secretShare)
-    // console.log('encryptionKey', investigationRequest.encryptionKey)
-    // console.log('newEncryptedShare', newEncryptedShare.length, newEncryptedShare)
 
     const ix = createRevealSecretShareInstruction({
       investigationRequestShare,
@@ -380,7 +381,6 @@ export class InvestigationManager extends BaseManager {
     this.trace('decryptData', 'decryptedShares', decryptedShares)
 
     const secret = Albus.crypto.reconstructShamirSecret(Albus.crypto.babyJub.F, investigationRequest.requiredShareCount, decryptedShares)
-    // console.log('decryptedSecret', secret)
 
     this.trace('decryptData', 'secret', secret)
 
