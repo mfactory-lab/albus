@@ -55,7 +55,7 @@ export async function create(name: string, opts: Opts) {
   const key = encryptionKey.public().compress()
 
   const { signature, address } = await client.trustee.create({
-    key,
+    key: Array.from(key),
     name,
     email: opts.email ?? '',
     website: opts.website ?? '',
