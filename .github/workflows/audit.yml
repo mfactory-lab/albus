@@ -1,0 +1,16 @@
+name: Soteria Audit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check-out the repository
+        uses: actions/checkout@v3
+      - name: Soteria Audit
+        continue-on-error: false # set to true if you don't want to fail jobs
+        uses: silas-x/soteria-action@main
+        with:
+          solana-version: "1.16.17"
