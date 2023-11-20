@@ -69,11 +69,7 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
     }
 
     #[cfg(feature = "cpi")]
-    pub fn cpi_call(&self, _ctx: cpi::VerifyProofRequest) -> Result<(), ProgramError> {
-        // match verify(ctx) {
-        //     Ok(()) => Ok(()),
-        //     Err(e) => Err(e.into()),
-        // }
+    fn cpi_call(&self, _ctx: cpi::VerifyProofRequest) -> Result<(), ProgramError> {
         unimplemented!()
     }
 

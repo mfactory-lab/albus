@@ -31,6 +31,7 @@ use solana_program::pubkey::Pubkey;
 
 pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
 
+pub const POLICY_DISCRIMINATOR: &[u8] = &[222, 135, 7, 163, 235, 177, 33, 68];
 pub const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];
 
 #[allow(dead_code)]

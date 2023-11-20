@@ -26,7 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::constants::ALBUS_PROGRAM_ID;
+#![allow(dead_code)]
+
+use crate::constants::{ALBUS_PROGRAM_ID, POLICY_DISCRIMINATOR, PROOF_REQUEST_DISCRIMINATOR};
+use arrayref::array_ref;
+use solana_program::account_info::AccountInfo;
 use solana_program::program_memory::sol_memcmp;
 use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 
@@ -54,4 +58,28 @@ pub fn find_proof_request_address(policy: &Pubkey, user: &Pubkey) -> (Pubkey, u8
         &[b"proof-request", policy.as_ref(), user.as_ref()],
         &ALBUS_PROGRAM_ID,
     )
+}
+
+fn is_valid_account(acc: &AccountInfo, discriminator: &[u8]) -> bool {
+    let data = acc.data.borrow();
+    let disc_bytes = array_ref![data, 0, 8];
+    sol_memcmp(disc_bytes, discriminator, 8) == 0
+}
+
+pub fn is_valid_policy_account(acc: &AccountInfo) -> bool {
+    is_valid_account(acc, POLICY_DISCRIMINATOR)
+}
+
+pub fn is_valid_proof_request_account(acc: &AccountInfo) -> bool {
+    is_valid_account(acc, PROOF_REQUEST_DISCRIMINATOR)
+}
+
+#[test]
+fn test_is_valid_account() {
+    let key = Pubkey::default();
+    let mut lamports = 0;
+    let mut data = vec![];
+    data.extend_from_slice(POLICY_DISCRIMINATOR);
+    let acc = AccountInfo::new(&key, false, true, &mut lamports, &mut data, &key, false, 0);
+    assert!(is_valid_account(&acc, POLICY_DISCRIMINATOR));
 }
