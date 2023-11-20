@@ -45,14 +45,14 @@ pub fn handler<'info>(
 
     // close all share accounts
     for acc in ctx.remaining_accounts {
-        if !investigation_request.trustees.contains(acc.key) {
-            msg!("Invalid trustee account");
-            return Err(AlbusError::InvalidData.into());
-        }
-        Account::<InvestigationRequestShare>::try_from(acc).map_err(|_e| {
+        let share = Account::<InvestigationRequestShare>::try_from(acc).map_err(|_e| {
             msg!("Invalid investigation request share account `{}`", acc.key);
             AlbusError::InvalidData
         })?;
+        if !investigation_request.trustees.contains(&share.trustee) {
+            msg!("Invalid trustee account");
+            return Err(AlbusError::InvalidData.into());
+        }
         close(
             acc.to_account_info(),
             ctx.accounts.authority.to_account_info(),
