@@ -39,6 +39,7 @@ test-unit: ## Test unit
 
 sdk: ## Generate new sdk
 	pnpm -F @albus-finance/sdk generate
+	pnpm lint:fix
 
 deploy: build ## Deploy program
 	anchor deploy -p $(PROGRAM) --provider.cluster $(NETWORK)
