@@ -41,6 +41,14 @@ pub fn handler(ctx: Context<DeleteProofRequest>) -> Result<()> {
 
     let timestamp = Clock::get()?.unix_timestamp;
 
+    if req.is_verified() && timestamp < req.retention_end_date {
+        msg!(
+            "Error: Retention period has not reached. The proof request may be deleted on {}",
+            req.retention_end_date
+        );
+        return Err(AlbusError::Unauthorized.into());
+    }
+
     emit!(DeleteProofRequestEvent {
         proof_request: req.key(),
         owner: req.owner,
