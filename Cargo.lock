@@ -108,7 +108,7 @@ dependencies = [
 
 [[package]]
 name = "albus-swap"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "albus-solana-verifier",
  "anchor-lang",
