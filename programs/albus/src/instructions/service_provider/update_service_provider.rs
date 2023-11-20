@@ -57,8 +57,11 @@ pub fn handler<'info>(
         service.secret_share_threshold = n;
     }
 
+    if data.clear_trustees || !ctx.remaining_accounts.is_empty() {
+        service.trustees.clear();
+    }
+
     if !ctx.remaining_accounts.is_empty() {
-        service.trustees = Vec::with_capacity(3);
         for acc in ctx.remaining_accounts {
             let trustee = Account::<Trustee>::try_from(acc).map_err(|_e| {
                 msg!("Invalid trustee account `{}`", acc.key);
@@ -82,6 +85,7 @@ pub struct UpdateServiceProviderData {
     pub website: Option<String>,
     pub contact_info: Option<ContactInfo>,
     pub secret_share_threshold: Option<u8>,
+    pub clear_trustees: bool,
 }
 
 #[derive(Accounts)]
