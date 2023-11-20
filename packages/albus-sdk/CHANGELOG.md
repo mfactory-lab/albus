@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.13...@albus-finance/sdk-v0.2.2-next.14) (2023-11-20)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** delete investigation request, improved `InvestigationManager` ([13bd15c](https://github.com/mfactory-lab/albus/commit/13bd15c131bdbfc0bd64a17b23be3b006d2adf3f))
+* **sdk:** service update with empty trustees ([46c5034](https://github.com/mfactory-lab/albus/commit/46c5034905f9d479ac41c8e6251a83735aba7d8b))
+
 ## [0.2.2-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.12...@albus-finance/sdk-v0.2.2-next.13) (2023-11-17)
 
 
