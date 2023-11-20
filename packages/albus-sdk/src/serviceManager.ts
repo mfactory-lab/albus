@@ -206,6 +206,7 @@ export class ServiceManager extends BaseManager {
         contactInfo: props.contactInfo ?? null,
         secretShareThreshold: props.secretShareThreshold ?? null,
         newAuthority: props.newAuthority ? new PublicKey(props.newAuthority) : null,
+        clearTrustees: props.trustees?.length === 0,
       },
     })
 
