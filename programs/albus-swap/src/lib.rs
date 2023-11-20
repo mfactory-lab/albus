@@ -24,6 +24,7 @@ pub mod albus_swap {
     use crate::curve::fees::Fees;
     use albus_solana_verifier::AlbusVerifier;
 
+    /// Processes an [Initialize](enum.Instruction.html).
     pub fn initialize(
         ctx: Context<Initialize>,
         fees_input: FeesInfo,
@@ -118,10 +119,8 @@ pub mod albus_swap {
         let initial_amount = curve.calculator.new_pool_supply();
 
         token::mint_to(
-            ctx.accounts
-                .into_mint_to_context()
-                .with_signer(&[&seeds[..]]),
-            u64::try_from(initial_amount).unwrap(),
+            ctx.accounts.mint_to_ctx().with_signer(&[&seeds[..]]),
+            to_u64(initial_amount)?,
         )?;
 
         let token_swap = &mut ctx.accounts.token_swap;
@@ -141,6 +140,7 @@ pub mod albus_swap {
         Ok(())
     }
 
+    /// Processes an [Swap](enum.Instruction.html).
     pub fn swap(ctx: Context<Swap>, amount_in: u64, minimum_amount_out: u64) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
 
@@ -205,6 +205,7 @@ pub mod albus_swap {
             return Err(SwapError::IncorrectTokenProgramId.into());
         }
 
+        // Calculate the trade amounts
         let trade_direction = if cmp_pubkeys(ctx.accounts.pool_source.key(), token_swap.token_a) {
             TradeDirection::AtoB
         } else {
@@ -216,18 +217,15 @@ pub mod albus_swap {
 
         let result = curve
             .swap(
-                u128::try_from(amount_in).map_err(|_| SwapError::ConversionFailure)?,
-                u128::try_from(ctx.accounts.pool_source.amount)
-                    .map_err(|_| SwapError::ConversionFailure)?,
-                u128::try_from(ctx.accounts.pool_destination.amount)
-                    .map_err(|_| SwapError::ConversionFailure)?,
+                to_u128(amount_in)?,
+                to_u128(ctx.accounts.pool_source.amount)?,
+                to_u128(ctx.accounts.pool_destination.amount)?,
                 trade_direction,
                 &fees,
             )
             .ok_or(SwapError::ZeroTradingTokens)?;
-        if result.destination_amount_swapped
-            < u128::try_from(minimum_amount_out).map_err(|_| SwapError::ConversionFailure)?
-        {
+
+        if result.destination_amount_swapped < to_u128(minimum_amount_out)? {
             return Err(SwapError::ExceededSlippage.into());
         }
 
@@ -246,31 +244,30 @@ pub mod albus_swap {
 
         token::transfer(
             ctx.accounts
-                .into_transfer_to_swap_source_context()
+                .transfer_to_swap_source_ctx()
                 .with_signer(&[&seeds[..]]),
-            u64::try_from(result.source_amount_swapped)
-                .map_err(|_| SwapError::ConversionFailure)?,
+            to_u64(result.source_amount_swapped)?,
         )?;
 
-        let mut pool_token_amount = curve
-            .withdraw_single_token_type_exact_out(
-                result.owner_fee,
-                swap_token_a_amount,
-                swap_token_b_amount,
-                u128::try_from(ctx.accounts.pool_mint.supply)
-                    .map_err(|_| SwapError::ConversionFailure)?,
-                trade_direction,
-                &fees,
-            )
-            .ok_or(SwapError::FeeCalculationFailure)?;
+        if result.owner_fee > 0 {
+            let mut pool_token_amount = curve
+                .calculator
+                .withdraw_single_token_type_exact_out(
+                    result.owner_fee,
+                    swap_token_a_amount,
+                    swap_token_b_amount,
+                    to_u128(ctx.accounts.pool_mint.supply)?,
+                    trade_direction,
+                    RoundDirection::Floor,
+                )
+                .ok_or(SwapError::FeeCalculationFailure)?;
 
-        if pool_token_amount > 0 {
-            // Allow error to fall through
             if let Some(host_info) = &ctx.accounts.host_fee_account {
                 let ref_data = host_info.try_borrow_data()?;
                 let mut account_data: &[u8] = &ref_data;
-                let host = TokenAccount::try_deserialize(&mut account_data)?;
 
+                // validate host mint
+                let host = TokenAccount::try_deserialize(&mut account_data)?;
                 if !cmp_pubkeys(ctx.accounts.pool_mint.key(), host.mint) {
                     return Err(SwapError::IncorrectPoolMint.into());
                 }
@@ -284,26 +281,24 @@ pub mod albus_swap {
                         .ok_or(SwapError::FeeCalculationFailure)?;
                     token::mint_to(
                         ctx.accounts
-                            .into_mint_to_host_context(host_info)
+                            .mint_to_host_ctx(host_info)
                             .with_signer(&[&seeds[..]]),
-                        u64::try_from(host_fee).map_err(|_| SwapError::ConversionFailure)?,
+                        to_u64(host_fee)?,
                     )?;
                 }
             }
+
             token::mint_to(
-                ctx.accounts
-                    .into_mint_to_pool_context()
-                    .with_signer(&[&seeds[..]]),
-                u64::try_from(pool_token_amount).map_err(|_| SwapError::ConversionFailure)?,
+                ctx.accounts.mint_to_pool_ctx().with_signer(&[&seeds[..]]),
+                to_u64(pool_token_amount)?,
             )?;
         }
 
         token::transfer(
             ctx.accounts
-                .into_transfer_to_destination_context()
+                .transfer_to_destination_ctx()
                 .with_signer(&[&seeds[..]]),
-            u64::try_from(result.destination_amount_swapped)
-                .map_err(|_| SwapError::ConversionFailure)?,
+            to_u64(result.destination_amount_swapped)?,
         )?;
 
         Ok(())
@@ -339,12 +334,9 @@ pub mod albus_swap {
             None,
         )?;
 
-        let current_pool_mint_supply = u128::try_from(ctx.accounts.pool_mint.supply).unwrap();
+        let current_pool_mint_supply = to_u128(ctx.accounts.pool_mint.supply)?;
         let (pool_token_amount, pool_mint_supply) = if current_pool_mint_supply > 0 {
-            (
-                u128::try_from(pool_token_amount).unwrap(),
-                current_pool_mint_supply,
-            )
+            (to_u128(pool_token_amount)?, current_pool_mint_supply)
         } else {
             (calculator.new_pool_supply(), calculator.new_pool_supply())
         };
@@ -353,19 +345,21 @@ pub mod albus_swap {
             .pool_tokens_to_trading_tokens(
                 pool_token_amount,
                 pool_mint_supply,
-                u128::try_from(ctx.accounts.swap_token_a.amount).unwrap(),
-                u128::try_from(ctx.accounts.swap_token_b.amount).unwrap(),
+                to_u128(ctx.accounts.swap_token_a.amount)?,
+                to_u128(ctx.accounts.swap_token_b.amount)?,
                 RoundDirection::Ceiling,
             )
             .ok_or(SwapError::ZeroTradingTokens)?;
-        let token_a_amount = u64::try_from(results.token_a_amount).unwrap();
+
+        let token_a_amount = to_u64(results.token_a_amount)?;
         if token_a_amount > maximum_token_a_amount {
             return Err(SwapError::ExceededSlippage.into());
         }
         if token_a_amount == 0 {
             return Err(SwapError::ZeroTradingTokens.into());
         }
-        let token_b_amount = u64::try_from(results.token_b_amount).unwrap();
+
+        let token_b_amount = to_u64(results.token_b_amount)?;
         if token_b_amount > maximum_token_b_amount {
             return Err(SwapError::ExceededSlippage.into());
         }
@@ -373,29 +367,27 @@ pub mod albus_swap {
             return Err(SwapError::ZeroTradingTokens.into());
         }
 
-        let pool_token_amount = u64::try_from(pool_token_amount).unwrap();
+        let pool_token_amount = to_u64(pool_token_amount)?;
 
         let seeds = &[&token_swap.key().to_bytes(), &[token_swap.bump_seed][..]];
 
         token::transfer(
             ctx.accounts
-                .into_transfer_to_token_a_context()
+                .transfer_to_token_a_ctx()
                 .with_signer(&[&seeds[..]]),
             token_a_amount,
         )?;
 
         token::transfer(
             ctx.accounts
-                .into_transfer_to_token_b_context()
+                .transfer_to_token_b_ctx()
                 .with_signer(&[&seeds[..]]),
             token_b_amount,
         )?;
 
         token::mint_to(
-            ctx.accounts
-                .into_mint_to_context()
-                .with_signer(&[&seeds[..]]),
-            u64::try_from(pool_token_amount).unwrap(),
+            ctx.accounts.mint_to_ctx().with_signer(&[&seeds[..]]),
+            pool_token_amount,
         )?;
 
         Ok(())
@@ -435,26 +427,25 @@ pub mod albus_swap {
             0
         } else {
             let fees: Fees = token_swap.fees.into();
-            fees.owner_withdraw_fee(u128::try_from(pool_token_amount).unwrap())
+            fees.owner_withdraw_fee(to_u128(pool_token_amount)?)
                 .ok_or(SwapError::FeeCalculationFailure)?
         };
 
-        let pool_token_amount = u128::try_from(pool_token_amount)
-            .unwrap()
+        let pool_token_amount = to_u128(pool_token_amount)?
             .checked_sub(withdraw_fee)
             .ok_or(SwapError::CalculationFailure)?;
 
         let results = calculator
             .pool_tokens_to_trading_tokens(
                 pool_token_amount,
-                u128::try_from(ctx.accounts.pool_mint.supply).unwrap(),
-                u128::try_from(ctx.accounts.swap_token_a.amount).unwrap(),
-                u128::try_from(ctx.accounts.swap_token_b.amount).unwrap(),
+                to_u128(ctx.accounts.pool_mint.supply)?,
+                to_u128(ctx.accounts.swap_token_a.amount)?,
+                to_u128(ctx.accounts.swap_token_b.amount)?,
                 RoundDirection::Floor,
             )
             .ok_or(SwapError::ZeroTradingTokens)?;
 
-        let token_a_amount = u64::try_from(results.token_a_amount).unwrap();
+        let token_a_amount = to_u64(results.token_a_amount)?;
         let token_a_amount = std::cmp::min(ctx.accounts.swap_token_a.amount, token_a_amount);
         if token_a_amount < minimum_token_a_amount {
             return Err(SwapError::ExceededSlippage.into());
@@ -462,7 +453,7 @@ pub mod albus_swap {
         if token_a_amount == 0 && ctx.accounts.swap_token_a.amount != 0 {
             return Err(SwapError::ZeroTradingTokens.into());
         }
-        let token_b_amount = u64::try_from(results.token_b_amount).unwrap();
+        let token_b_amount = to_u64(results.token_b_amount)?;
         let token_b_amount = std::cmp::min(ctx.accounts.swap_token_b.amount, token_b_amount);
         if token_b_amount < minimum_token_b_amount {
             return Err(SwapError::ExceededSlippage.into());
@@ -474,19 +465,16 @@ pub mod albus_swap {
         let seeds = &[&token_swap.key().to_bytes(), &[token_swap.bump_seed][..]];
         if withdraw_fee > 0 {
             token::transfer(
-                ctx.accounts.into_transfer_to_fee_account_context(),
-                u64::try_from(withdraw_fee).unwrap(),
+                ctx.accounts.transfer_to_fee_account_ctx(),
+                to_u64(withdraw_fee)?,
             )?;
         }
-        token::burn(
-            ctx.accounts.into_burn_context(),
-            u64::try_from(pool_token_amount).unwrap(),
-        )?;
+        token::burn(ctx.accounts.burn_ctx(), to_u64(pool_token_amount)?)?;
 
         if token_a_amount > 0 {
             token::transfer(
                 ctx.accounts
-                    .into_transfer_to_token_a_context()
+                    .transfer_to_token_a_ctx()
                     .with_signer(&[&seeds[..]]),
                 token_a_amount,
             )?;
@@ -495,7 +483,7 @@ pub mod albus_swap {
         if token_b_amount > 0 {
             token::transfer(
                 ctx.accounts
-                    .into_transfer_to_token_b_context()
+                    .transfer_to_token_b_ctx()
                     .with_signer(&[&seeds[..]]),
                 token_a_amount,
             )?;
@@ -544,13 +532,13 @@ pub mod albus_swap {
             None,
         )?;
 
-        let pool_mint_supply = u128::try_from(ctx.accounts.pool_mint.supply).unwrap();
+        let pool_mint_supply = to_u128(ctx.accounts.pool_mint.supply)?;
         let pool_token_amount = if pool_mint_supply > 0 {
             curve
                 .deposit_single_token_type(
-                    u128::try_from(source_token_amount).unwrap(),
-                    u128::try_from(ctx.accounts.swap_token_a.amount).unwrap(),
-                    u128::try_from(ctx.accounts.swap_token_b.amount).unwrap(),
+                    to_u128(source_token_amount).unwrap(),
+                    to_u128(ctx.accounts.swap_token_a.amount)?,
+                    to_u128(ctx.accounts.swap_token_b.amount)?,
                     pool_mint_supply,
                     trade_direction,
                     &fees,
@@ -561,7 +549,7 @@ pub mod albus_swap {
         };
 
         let seeds = &[&token_swap.key().to_bytes(), &[token_swap.bump_seed][..]];
-        let pool_token_amount = u64::try_from(pool_token_amount).unwrap();
+        let pool_token_amount = to_u64(pool_token_amount)?;
         if pool_token_amount < minimum_pool_token_amount {
             return Err(SwapError::ExceededSlippage.into());
         }
@@ -571,22 +559,14 @@ pub mod albus_swap {
 
         match trade_direction {
             TradeDirection::AtoB => {
-                token::transfer(
-                    ctx.accounts.into_transfer_to_token_a_context(),
-                    source_token_amount,
-                )?;
+                token::transfer(ctx.accounts.transfer_to_token_a_ctx(), source_token_amount)?;
             }
             TradeDirection::BtoA => {
-                token::transfer(
-                    ctx.accounts.into_transfer_to_token_b_context(),
-                    source_token_amount,
-                )?;
+                token::transfer(ctx.accounts.transfer_to_token_b_ctx(), source_token_amount)?;
             }
         }
         token::mint_to(
-            ctx.accounts
-                .into_mint_to_context()
-                .with_signer(&[&seeds[..]]),
+            ctx.accounts.mint_to_ctx().with_signer(&[&seeds[..]]),
             pool_token_amount,
         )?;
 
@@ -635,16 +615,16 @@ pub mod albus_swap {
             Some(&ctx.accounts.pool_fee.to_account_info()),
         )?;
 
-        let pool_mint_supply = u128::try_from(ctx.accounts.pool_mint.supply).unwrap();
-        let swap_token_a_amount = u128::try_from(ctx.accounts.swap_token_a.amount).unwrap();
-        let swap_token_b_amount = u128::try_from(ctx.accounts.swap_token_b.amount).unwrap();
+        let pool_mint_supply = to_u128(ctx.accounts.pool_mint.supply)?;
+        let swap_token_a_amount = to_u128(ctx.accounts.swap_token_a.amount)?;
+        let swap_token_b_amount = to_u128(ctx.accounts.swap_token_b.amount)?;
 
         let curve = SwapCurve::try_from(token_swap.curve.clone())?;
         let fees = Fees::from(token_swap.fees);
 
         let burn_pool_token_amount = curve
             .withdraw_single_token_type_exact_out(
-                u128::try_from(destination_token_amount).unwrap(),
+                to_u128(destination_token_amount)?,
                 swap_token_a_amount,
                 swap_token_b_amount,
                 pool_mint_supply,
@@ -666,7 +646,7 @@ pub mod albus_swap {
             .checked_add(withdraw_fee)
             .ok_or(SwapError::CalculationFailure)?;
 
-        if u64::try_from(pool_token_amount).unwrap() > maximum_pool_token_amount {
+        if to_u64(pool_token_amount)? > maximum_pool_token_amount {
             return Err(SwapError::ExceededSlippage.into());
         }
         if pool_token_amount == 0 {
@@ -677,21 +657,18 @@ pub mod albus_swap {
 
         if withdraw_fee > 0 {
             token::transfer(
-                ctx.accounts.into_transfer_to_fee_account_context(),
-                u64::try_from(withdraw_fee).unwrap(),
+                ctx.accounts.transfer_to_fee_account_ctx(),
+                to_u64(withdraw_fee)?,
             )?;
         }
 
-        token::burn(
-            ctx.accounts.into_burn_context(),
-            u64::try_from(burn_pool_token_amount).unwrap(),
-        )?;
+        token::burn(ctx.accounts.burn_ctx(), to_u64(burn_pool_token_amount)?)?;
 
         match trade_direction {
             TradeDirection::AtoB => {
                 token::transfer(
                     ctx.accounts
-                        .into_transfer_from_token_a_context()
+                        .transfer_from_token_a_ctx()
                         .with_signer(&[&seeds[..]]),
                     destination_token_amount,
                 )?;
@@ -699,7 +676,7 @@ pub mod albus_swap {
             TradeDirection::BtoA => {
                 token::transfer(
                     ctx.accounts
-                        .into_transfer_from_token_b_context()
+                        .transfer_from_token_b_ctx()
                         .with_signer(&[&seeds[..]]),
                     destination_token_amount,
                 )?;
@@ -925,7 +902,7 @@ pub struct WithdrawSingleTokenType<'info> {
 // Context
 
 impl<'info> Initialize<'info> {
-    fn into_mint_to_context(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
+    fn mint_to_ctx(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
         let cpi_accounts = MintTo {
             mint: self.pool_mint.to_account_info(),
             to: self.destination.to_account_info(),
@@ -936,7 +913,7 @@ impl<'info> Initialize<'info> {
 }
 
 impl<'info> DepositAllTokenTypes<'info> {
-    fn into_transfer_to_token_a_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_token_a_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.user_token_a.clone(),
             to: self.swap_token_a.to_account_info(),
@@ -945,7 +922,7 @@ impl<'info> DepositAllTokenTypes<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_transfer_to_token_b_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_token_b_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.user_token_b.clone(),
             to: self.swap_token_b.to_account_info(),
@@ -954,7 +931,7 @@ impl<'info> DepositAllTokenTypes<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_mint_to_context(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
+    fn mint_to_ctx(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
         let cpi_accounts = MintTo {
             mint: self.pool_mint.to_account_info(),
             to: self.destination.to_account_info(),
@@ -965,7 +942,7 @@ impl<'info> DepositAllTokenTypes<'info> {
 }
 
 impl<'info> DepositSingleTokenType<'info> {
-    fn into_transfer_to_token_a_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_token_a_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.source.to_account_info(),
             to: self.swap_token_a.to_account_info(),
@@ -974,7 +951,7 @@ impl<'info> DepositSingleTokenType<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_transfer_to_token_b_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_token_b_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.source.to_account_info(),
             to: self.swap_token_b.to_account_info(),
@@ -983,7 +960,7 @@ impl<'info> DepositSingleTokenType<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_mint_to_context(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
+    fn mint_to_ctx(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
         let cpi_accounts = MintTo {
             mint: self.pool_mint.to_account_info(),
             to: self.destination.to_account_info(),
@@ -994,9 +971,7 @@ impl<'info> DepositSingleTokenType<'info> {
 }
 
 impl<'info> WithdrawAllTokenTypes<'info> {
-    fn into_transfer_to_fee_account_context(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_fee_account_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.source.to_account_info(),
             to: self.pool_fee.to_account_info(),
@@ -1005,7 +980,7 @@ impl<'info> WithdrawAllTokenTypes<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_burn_context(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
+    fn burn_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
         let cpi_accounts = Burn {
             mint: self.pool_mint.to_account_info(),
             authority: self.user_transfer_authority.to_account_info(),
@@ -1014,7 +989,7 @@ impl<'info> WithdrawAllTokenTypes<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_transfer_to_token_a_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_token_a_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.swap_token_a.to_account_info(),
             to: self.dest_token_a.to_account_info(),
@@ -1023,7 +998,7 @@ impl<'info> WithdrawAllTokenTypes<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_transfer_to_token_b_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_token_b_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.swap_token_b.to_account_info(),
             to: self.dest_token_b.to_account_info(),
@@ -1034,9 +1009,7 @@ impl<'info> WithdrawAllTokenTypes<'info> {
 }
 
 impl<'info> WithdrawSingleTokenType<'info> {
-    fn into_transfer_to_fee_account_context(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_fee_account_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.source.to_account_info(),
             to: self.pool_fee.to_account_info(),
@@ -1045,7 +1018,7 @@ impl<'info> WithdrawSingleTokenType<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_burn_context(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
+    fn burn_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
         let cpi_accounts = Burn {
             mint: self.pool_mint.to_account_info(),
             from: self.source.to_account_info(),
@@ -1054,7 +1027,7 @@ impl<'info> WithdrawSingleTokenType<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_transfer_from_token_a_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_from_token_a_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.swap_token_a.to_account_info(),
             to: self.destination.to_account_info(),
@@ -1063,7 +1036,7 @@ impl<'info> WithdrawSingleTokenType<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_transfer_from_token_b_context(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_from_token_b_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.swap_token_b.to_account_info(),
             to: self.destination.to_account_info(),
@@ -1074,9 +1047,7 @@ impl<'info> WithdrawSingleTokenType<'info> {
 }
 
 impl<'info> Swap<'info> {
-    fn into_transfer_to_swap_source_context(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_swap_source_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.user_source.to_account_info(),
             to: self.pool_source.to_account_info(),
@@ -1085,9 +1056,7 @@ impl<'info> Swap<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_transfer_to_destination_context(
-        &self,
-    ) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+    fn transfer_to_destination_ctx(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         let cpi_accounts = Transfer {
             from: self.pool_destination.to_account_info(),
             to: self.user_destination.to_account_info(),
@@ -1096,7 +1065,7 @@ impl<'info> Swap<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_mint_to_host_context(
+    fn mint_to_host_ctx(
         &self,
         host: &AccountInfo<'info>,
     ) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
@@ -1108,7 +1077,7 @@ impl<'info> Swap<'info> {
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
     }
 
-    fn into_mint_to_pool_context(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
+    fn mint_to_pool_ctx(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
         let cpi_accounts = MintTo {
             mint: self.pool_mint.to_account_info(),
             to: self.pool_fee.to_account_info(),

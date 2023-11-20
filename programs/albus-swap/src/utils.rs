@@ -32,6 +32,14 @@ use anchor_lang::prelude::*;
 use solana_program::program_memory::sol_memcmp;
 use solana_program::pubkey::PUBKEY_BYTES;
 
+pub fn to_u128(val: u64) -> std::result::Result<u128, SwapError> {
+    val.try_into().map_err(|_| SwapError::ConversionFailure)
+}
+
+pub fn to_u64(val: u128) -> std::result::Result<u64, SwapError> {
+    val.try_into().map_err(|_| SwapError::ConversionFailure)
+}
+
 /// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`
 pub fn cmp_pubkeys(a: impl AsRef<[u8]>, b: impl AsRef<[u8]>) -> bool {
     sol_memcmp(a.as_ref(), b.as_ref(), PUBKEY_BYTES) == 0
