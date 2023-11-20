@@ -27,50 +27,45 @@
  */
 
 use crate::errors::AlbusError;
+use crate::events::RevealSecretShareEvent;
 use anchor_lang::prelude::*;
 
 use crate::state::{InvestigationRequest, InvestigationRequestShare, RevelationStatus, Trustee};
 use crate::utils::cmp_pubkeys;
 
 pub fn handler(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> Result<()> {
-    let timestamp = Clock::get()?.unix_timestamp;
+    let share = &mut ctx.accounts.investigation_request_share;
+    if share.revealed_at != 0 {
+        msg!("Error: Already revealed");
+        return Err(AlbusError::InvalidData.into());
+    }
 
+    let investigation_request = &mut ctx.accounts.investigation_request;
     let trustee = &mut ctx.accounts.trustee;
-    trustee.revealed_share_count += 1;
 
-    // let service = &mut ctx.accounts.service_provider;
-    // if !service
-    //     .trustees
-    //     .iter()
-    //     .any(|t| cmp_pubkeys(t, &trustee.key()))
-    // {
-    //     msg!("Error: Unauthorized trustee");
-    //     return Err(AlbusError::Unauthorized.into());
-    // }
-
-    let request = &mut ctx.accounts.investigation_request;
-
-    if request.revealed_share_count >= request.required_share_count {
+    if investigation_request.revealed_share_count >= investigation_request.required_share_count {
         msg!("Error: Revelation threshold reached");
         return Err(AlbusError::Unauthorized.into());
     }
 
-    request.revealed_share_count += 1;
+    investigation_request.revealed_share_count += 1;
 
     let authority = ctx.accounts.authority.key();
-    let share = &mut ctx.accounts.investigation_request_share;
 
-    if cmp_pubkeys(&request.proof_request_owner, &authority) {
+    if cmp_pubkeys(&investigation_request.proof_request_owner, &authority) {
         share.status = RevelationStatus::RevealedByUser;
-    } else if cmp_pubkeys(&trustee.key(), &authority) {
+    } else if cmp_pubkeys(&trustee.authority, &authority) {
+        trustee.revealed_share_count += 1;
         share.status = RevelationStatus::RevealedByTrustee;
     } else {
         msg!("Error: Only the trustee or the request owner can reveal a share.");
         return Err(AlbusError::Unauthorized.into());
     }
 
-    share.investigation_request = request.key();
-    share.proof_request_owner = request.proof_request_owner;
+    let timestamp = Clock::get()?.unix_timestamp;
+
+    share.investigation_request = investigation_request.key();
+    share.proof_request_owner = investigation_request.proof_request_owner;
     share.trustee = trustee.key();
 
     // TODO: don't update index if account already created?
@@ -81,6 +76,17 @@ pub fn handler(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> 
     if share.created_at == 0 {
         share.created_at = timestamp;
     }
+
+    emit!(RevealSecretShareEvent {
+        investigation_request: investigation_request.key(),
+        proof_request: investigation_request.proof_request,
+        proof_request_owner: investigation_request.proof_request_owner,
+        authority: investigation_request.authority,
+        trustee: trustee.key(),
+        index: data.index,
+        status: share.status.clone(),
+        timestamp,
+    });
 
     Ok(())
 }
@@ -112,8 +118,6 @@ pub struct RevealSecretShare<'info> {
     #[account(mut)]
     pub trustee: Box<Account<'info, Trustee>>,
 
-    // #[account(mut)]
-    // pub service_provider: Box<Account<'info, ServiceProvider>>,
     #[account(mut)]
     pub authority: Signer<'info>,
 

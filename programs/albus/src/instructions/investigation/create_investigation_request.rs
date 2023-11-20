@@ -27,6 +27,7 @@
  */
 
 use crate::errors::AlbusError;
+use crate::events::CreateInvestigationRequestEvent;
 use anchor_lang::prelude::*;
 use anchor_lang::Discriminator;
 
@@ -42,26 +43,17 @@ pub fn handler<'info>(
 ) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
 
-    // TODO: validate authority
+    // TODO: is authorized for investigation?
+    // TODO: does `data.trustees` exist in `proof_request.public_inputs`
 
-    let proof_request = &mut ctx.accounts.proof_request;
     let service = &mut ctx.accounts.service_provider;
+    let proof_request = &mut ctx.accounts.proof_request;
+    let investigation_request = &mut ctx.accounts.investigation_request;
 
-    if proof_request.proof.is_none() {
-        msg!("`ProofRequest` is not proved yet");
+    if !proof_request.is_proved() {
+        msg!("The proof request is not proved yet");
         return Err(AlbusError::Unproved.into());
     }
-
-    let req = &mut ctx.accounts.investigation_request;
-    req.authority = ctx.accounts.authority.key();
-    req.encryption_key = data.encryption_key;
-    req.proof_request = proof_request.key();
-    req.proof_request_owner = proof_request.owner;
-    req.service_provider = proof_request.service_provider;
-    req.required_share_count = service.secret_share_threshold;
-    req.status = InvestigationStatus::Pending;
-    req.created_at = timestamp;
-    req.bump = ctx.bumps.investigation_request;
 
     // Try to initialize share accounts
     if !ctx.remaining_accounts.is_empty() {
@@ -71,7 +63,10 @@ pub fn handler<'info>(
         // let rand = u8::random_within_range(slots, &mut offset, 1, 3);
 
         if data.trustees.len() != ctx.remaining_accounts.len() {
-            msg!("Invalid length of trustees");
+            msg!(
+                "Invalid length of provided trustees, expected {}",
+                data.trustees.len()
+            );
             return Err(AlbusError::InvalidData.into());
         }
 
@@ -80,7 +75,7 @@ pub fn handler<'info>(
             if acc.data_is_empty() {
                 let trustee = data.trustees[idx];
 
-                let investigation_request = req.key();
+                let investigation_request = investigation_request.key();
 
                 let (addr, bump) = Pubkey::find_program_address(
                     &[
@@ -130,6 +125,25 @@ pub fn handler<'info>(
         }
     }
 
+    investigation_request.authority = ctx.accounts.authority.key();
+    investigation_request.encryption_key = data.encryption_key;
+    investigation_request.proof_request = proof_request.key();
+    investigation_request.proof_request_owner = proof_request.owner;
+    investigation_request.service_provider = proof_request.service_provider;
+    investigation_request.required_share_count = service.secret_share_threshold;
+    investigation_request.status = InvestigationStatus::Pending;
+    investigation_request.created_at = timestamp;
+    investigation_request.bump = ctx.bumps.investigation_request;
+    investigation_request.trustees = data.trustees;
+
+    emit!(CreateInvestigationRequestEvent {
+        investigation_request: investigation_request.key(),
+        proof_request: proof_request.key(),
+        proof_request_owner: proof_request.owner,
+        authority: ctx.accounts.authority.key(),
+        timestamp,
+    });
+
     Ok(())
 }
 
@@ -151,7 +165,7 @@ pub struct CreateInvestigationRequest<'info> {
         ],
         bump,
         payer = authority,
-        space = InvestigationRequest::space()
+        space = InvestigationRequest::space(data.trustees.len())
     )]
     pub investigation_request: Box<Account<'info, InvestigationRequest>>,
 

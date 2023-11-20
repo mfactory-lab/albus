@@ -342,16 +342,12 @@ impl Trustee {
     }
 }
 
-// #[account]
-// #[derive(InitSpace)]
-// pub struct InvestigationService {}
-
 #[account]
 #[derive(InitSpace)]
 pub struct InvestigationRequest {
     /// Investigation service authority public key
     pub authority: Pubkey,
-    /// The key that is used for secret sharing encryption.
+    /// The key that is used for secret sharing encryption
     pub encryption_key: Pubkey,
     /// The [ProofRequest] associated with this request
     pub proof_request: Pubkey,
@@ -369,14 +365,17 @@ pub struct InvestigationRequest {
     pub created_at: i64,
     /// PDA bump
     pub bump: u8,
+    /// [Trustee] accounts that were used for secret sharing
+    #[max_len(0)]
+    pub trustees: Vec<Pubkey>,
 }
 
 impl InvestigationRequest {
     pub const SEED: &'static [u8] = b"investigation-request";
 
     #[inline]
-    pub fn space() -> usize {
-        8 + Self::INIT_SPACE
+    pub fn space(trustees_len: usize) -> usize {
+        8 + Self::INIT_SPACE + (trustees_len * 32)
     }
 }
 
@@ -476,6 +475,14 @@ impl ProofRequest {
     #[inline]
     pub fn space(max_public_inputs: u8) -> usize {
         8 + Self::INIT_SPACE + (max_public_inputs as usize * 32)
+    }
+
+    pub fn is_proved(&self) -> bool {
+        self.proof.is_some()
+    }
+
+    pub fn is_verified(&self) -> bool {
+        self.status == ProofRequestStatus::Verified
     }
 }
 

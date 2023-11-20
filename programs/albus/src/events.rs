@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+use crate::state::RevelationStatus;
 use crate::*;
 
 #[event]
@@ -75,5 +76,35 @@ pub struct RejectEvent {
     pub service_provider: Pubkey,
     pub circuit: Pubkey,
     pub owner: Pubkey,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct RevealSecretShareEvent {
+    pub investigation_request: Pubkey,
+    pub proof_request: Pubkey,
+    pub proof_request_owner: Pubkey,
+    pub authority: Pubkey,
+    pub trustee: Pubkey,
+    pub status: RevelationStatus,
+    pub index: u8,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct CreateInvestigationRequestEvent {
+    pub investigation_request: Pubkey,
+    pub proof_request: Pubkey,
+    pub proof_request_owner: Pubkey,
+    pub authority: Pubkey,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct DeleteInvestigationRequestEvent {
+    pub investigation_request: Pubkey,
+    pub proof_request: Pubkey,
+    pub proof_request_owner: Pubkey,
+    pub authority: Pubkey,
     pub timestamp: i64,
 }

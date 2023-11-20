@@ -188,6 +188,12 @@ pub mod albus {
         create_investigation_request::handler(ctx, data)
     }
 
+    pub fn delete_investigation_request<'info>(
+        ctx: Context<'_, '_, 'info, 'info, DeleteInvestigationRequest<'info>>,
+    ) -> Result<()> {
+        delete_investigation_request::handler(ctx)
+    }
+
     pub fn reveal_secret_share(
         ctx: Context<RevealSecretShare>,
         data: RevealSecretShareData,
