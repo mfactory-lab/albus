@@ -44,6 +44,7 @@ import {
   InvestigationRequest,
   InvestigationRequestShare,
   createCreateInvestigationRequestInstruction,
+  createDeleteInvestigationRequestInstruction,
   createRevealSecretShareInstruction,
   errorFromCode,
   investigationRequestDiscriminator,
@@ -188,6 +189,37 @@ export class InvestigationManager extends BaseManager {
           data: props.noData ? null : InvestigationRequestShare.fromAccountInfo(acc.account)[0],
         }
       })
+  }
+
+  /**
+   * Delete {@link InvestigationRequest}
+   * Only investigation creator can delete it
+   */
+  async delete(props: DeleteInvestigationProps, opts?: ConfirmOptions) {
+    const authority = this.provider.publicKey
+    const investigationRequestAddr = new PublicKey(props.investigationRequest)
+    const investigationRequest = await this.load(investigationRequestAddr)
+
+    const ix = createDeleteInvestigationRequestInstruction({
+      investigationRequest: new PublicKey(props.investigationRequest),
+      anchorRemainingAccounts: investigationRequest.trustees.map(pubkey => ({
+        pubkey: this.pda.investigationRequestShare(investigationRequestAddr, pubkey)[0],
+        isSigner: false,
+        isWritable: true,
+      })),
+      authority,
+    })
+
+    try {
+      const tx = new Transaction().add(ix)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
+      return { signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
   }
 
   /**
@@ -402,6 +434,10 @@ export class InvestigationManager extends BaseManager {
 export type CreateInvestigationProps = {
   proofRequest: PublicKeyInitData | ProofRequest
   encryptionKey?: PublicKey
+}
+
+export type DeleteInvestigationProps = {
+  investigationRequest: PublicKeyInitData
 }
 
 export type FindInvestigationProps = {

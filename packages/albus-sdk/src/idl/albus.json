@@ -886,6 +886,27 @@
       ]
     },
     {
+      "name": "deleteInvestigationRequest",
+      "accounts": [
+        {
+          "name": "investigationRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "revealSecretShare",
       "accounts": [
         {
@@ -1379,7 +1400,7 @@
           {
             "name": "encryptionKey",
             "docs": [
-              "The key that is used for secret sharing encryption."
+              "The key that is used for secret sharing encryption"
             ],
             "type": "publicKey"
           },
@@ -1440,6 +1461,15 @@
               "PDA bump"
             ],
             "type": "u8"
+          },
+          {
+            "name": "trustees",
+            "docs": [
+              "[Trustee] accounts that were used for secret sharing"
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
           }
         ]
       }
@@ -2102,6 +2132,10 @@
             "type": {
               "option": "u8"
             }
+          },
+          {
+            "name": "clearTrustees",
+            "type": "bool"
           }
         ]
       }
@@ -2485,6 +2519,113 @@
         },
         {
           "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RevealSecretShareEvent",
+      "fields": [
+        {
+          "name": "investigationRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequestOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "trustee",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "status",
+          "type": {
+            "defined": "RevelationStatus"
+          },
+          "index": false
+        },
+        {
+          "name": "index",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "CreateInvestigationRequestEvent",
+      "fields": [
+        {
+          "name": "investigationRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequestOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "DeleteInvestigationRequestEvent",
+      "fields": [
+        {
+          "name": "investigationRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequestOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
           "type": "publicKey",
           "index": false
         },

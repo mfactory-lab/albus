@@ -29,6 +29,7 @@ export type InvestigationRequestArgs = {
   status: InvestigationStatus
   createdAt: beet.bignum
   bump: number
+  trustees: web3.PublicKey[]
 }
 
 export const investigationRequestDiscriminator = [
@@ -53,6 +54,7 @@ export class InvestigationRequest implements InvestigationRequestArgs {
     readonly status: InvestigationStatus,
     readonly createdAt: beet.bignum,
     readonly bump: number,
+    readonly trustees: web3.PublicKey[],
   ) {}
 
   /**
@@ -70,6 +72,7 @@ export class InvestigationRequest implements InvestigationRequestArgs {
       args.status,
       args.createdAt,
       args.bump,
+      args.trustees,
     )
   }
 
@@ -142,34 +145,36 @@ export class InvestigationRequest implements InvestigationRequestArgs {
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link InvestigationRequest}
+   * {@link InvestigationRequest} for the provided args.
+   *
+   * @param args need to be provided since the byte size for this account
+   * depends on them
    */
-  static get byteSize() {
-    return investigationRequestBeet.byteSize
+  static byteSize(args: InvestigationRequestArgs) {
+    const instance = InvestigationRequest.fromArgs(args)
+    return investigationRequestBeet.toFixedFromValue({
+      accountDiscriminator: investigationRequestDiscriminator,
+      ...instance,
+    }).byteSize
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
    * {@link InvestigationRequest} data from rent
    *
+   * @param args need to be provided since the byte size for this account
+   * depends on them
    * @param connection used to retrieve the rent exemption information
    */
   static async getMinimumBalanceForRentExemption(
+    args: InvestigationRequestArgs,
     connection: web3.Connection,
     commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
-      InvestigationRequest.byteSize,
+      InvestigationRequest.byteSize(args),
       commitment,
     )
-  }
-
-  /**
-   * Determines if the provided {@link Buffer} has the correct byte size to
-   * hold {@link InvestigationRequest} data.
-   */
-  static hasCorrectByteSize(buf: Buffer, offset = 0) {
-    return buf.byteLength - offset === InvestigationRequest.byteSize
   }
 
   /**
@@ -198,6 +203,7 @@ export class InvestigationRequest implements InvestigationRequestArgs {
         return x
       })(),
       bump: this.bump,
+      trustees: this.trustees,
     }
   }
 }
@@ -206,7 +212,7 @@ export class InvestigationRequest implements InvestigationRequestArgs {
  * @category Accounts
  * @category generated
  */
-export const investigationRequestBeet = new beet.BeetStruct<
+export const investigationRequestBeet = new beet.FixableBeetStruct<
   InvestigationRequest,
   InvestigationRequestArgs & {
     accountDiscriminator: number[] /* size: 8 */
@@ -224,6 +230,7 @@ export const investigationRequestBeet = new beet.BeetStruct<
     ['status', investigationStatusBeet],
     ['createdAt', beet.i64],
     ['bump', beet.u8],
+    ['trustees', beet.array(beetSolana.publicKey)],
   ],
   InvestigationRequest.fromArgs,
   'InvestigationRequest',
