@@ -28,41 +28,41 @@
 
 import { Buffer } from 'node:buffer'
 import { readFileSync } from 'node:fs'
-import * as Albus from '@albus-finance/core'
 import { Keypair } from '@solana/web3.js'
+import type { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
 type Opts = {
-  email?: string
-  website?: string
   encryptionKey?: string
 }
 
-export async function create(name: string, opts: Opts) {
+export async function show(addr: string | PublicKey, opts: Opts) {
   const { client } = useContext()
+  const data = await client.investigation.load(addr)
 
-  let keypair: Keypair
-  if (opts.encryptionKey) {
-    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.encryptionKey).toString())))
-  } else {
-    keypair = Keypair.generate()
-    log.info('New encryption keypair was generated!')
-    log.info(`|- SecretKey: [${keypair.secretKey}]`)
-  }
+  log.info({ address: addr, ...data.pretty() })
 
-  const encryptionKey = Albus.zkp.getBabyJubPrivateKey(keypair)
-  const key = encryptionKey.public().compress()
-
-  const { signature, address } = await client.trustee.create({
-    key: Array.from(key),
-    name,
-    email: opts.email ?? '',
-    website: opts.website ?? '',
+  const shares = await client.investigation.findShares({
+    investigationRequest: addr,
   })
 
-  log.info('\nDone')
-  log.info(`Signature: ${signature}`)
-  log.info(`Address: ${address}`)
-  log.info(`Key: ${key}`)
+  log.info(`\n========= Shares (${shares.length}) =========\n`)
+
+  for (const share of shares) {
+    log.info({ address: share.pubkey, ...share.data?.pretty() })
+  }
+
+  if (opts.encryptionKey) {
+    log.info(`\n========= Encrypted Payload =========\n`)
+
+    const encryptionKey = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.encryptionKey).toString())))
+
+    const decryptedData = await client.investigation.decryptData({
+      investigationRequest: addr,
+      encryptionKey: encryptionKey.secretKey,
+    })
+
+    log.info(decryptedData)
+  }
 }
