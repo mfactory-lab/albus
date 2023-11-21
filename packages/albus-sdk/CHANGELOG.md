@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2-next.16](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.15...@albus-finance/sdk-v0.2.2-next.16) (2023-11-21)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix investigation `decryptData` ([f1c15b8](https://github.com/mfactory-lab/albus/commit/f1c15b8bf2a05ece880d39e8d176d7bf693a0228))
+
 ## [0.2.2-next.15](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.14...@albus-finance/sdk-v0.2.2-next.15) (2023-11-20)
 
 ## [0.2.2-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.13...@albus-finance/sdk-v0.2.2-next.14) (2023-11-20)
