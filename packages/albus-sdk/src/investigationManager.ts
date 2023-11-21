@@ -399,20 +399,28 @@ export class InvestigationManager extends BaseManager {
       throw new Error('Invalid encryption key')
     }
 
-    const decryptedShares: [number, bigint][] = []
-    for (const { data } of shares) {
+    const decryptedShares = new Map<number, bigint>()
+    for (const { data, pubkey } of shares) {
+      if (data === null || decryptedShares.has(data.index)) {
+        continue
+      }
       const encBytes = Uint8Array.from(data?.share ?? [])
       if (encBytes.length === 0) {
+        this.trace('decryptData', `skip empty ${pubkey}...`)
         continue
       }
       const shareBytes = await Albus.crypto.XC20P.decryptBytes(encBytes, encKeypair.secretKey)
       const share = Albus.crypto.utils.bytesToBigInt(shareBytes)
-      decryptedShares.push([data?.index ?? 0, share])
+      decryptedShares.set(data.index, share)
     }
 
-    this.trace('decryptData', 'decryptedShares', decryptedShares)
+    this.trace('decryptData', 'decryptedShares', Array.from(decryptedShares.entries()))
 
-    const secret = Albus.crypto.reconstructShamirSecret(Albus.crypto.babyJub.F, investigationRequest.requiredShareCount, decryptedShares)
+    const secret = Albus.crypto.reconstructShamirSecret(
+      Albus.crypto.babyJub.F,
+      investigationRequest.requiredShareCount,
+      Array.from(decryptedShares.entries()),
+    )
 
     this.trace('decryptData', 'secret', secret)
 
