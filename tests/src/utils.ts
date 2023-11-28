@@ -27,7 +27,7 @@
  */
 
 import { readFileSync } from 'node:fs'
-import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
+import { Metaplex, irysStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
@@ -46,8 +46,8 @@ export const provider = newProvider(payer)
 export function netMetaplex(payerKeypair: Keypair) {
   return Metaplex.make(provider.connection)
     .use(keypairIdentity(payerKeypair))
-    .use(bundlrStorage({
-      address: 'https://devnet.bundlr.network',
+    .use(irysStorage({
+      address: 'https://devnet.irys.xyz',
       providerUrl: provider.connection.rpcEndpoint,
       timeout: 60000,
     }))
