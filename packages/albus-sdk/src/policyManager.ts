@@ -28,14 +28,13 @@
 
 import * as Albus from '@albus-finance/core'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import {
   Policy,
   createCreatePolicyInstruction,
   createDeletePolicyInstruction,
   createUpdatePolicyInstruction,
-  errorFromCode,
   policyDiscriminator,
 } from './generated'
 
@@ -115,7 +114,7 @@ export class PolicyManager extends BaseManager {
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
     const [policy] = this.pda.policy(serviceProvider, props.code)
 
-    const instruction = createCreatePolicyInstruction({
+    const ix = createCreatePolicyInstruction({
       policy,
       circuit,
       serviceProvider,
@@ -131,16 +130,11 @@ export class PolicyManager extends BaseManager {
       },
     })
 
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature, address: policy }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { address: policy, signature }
   }
 
   /**
@@ -156,7 +150,7 @@ export class PolicyManager extends BaseManager {
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
     const [policy] = this.pda.policy(serviceProvider, props.code)
 
-    const instruction = createUpdatePolicyInstruction({
+    const ix = createUpdatePolicyInstruction({
       policy,
       serviceProvider,
       authority,
@@ -170,16 +164,11 @@ export class PolicyManager extends BaseManager {
       },
     })
 
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature, address: policy }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { address: policy, signature }
   }
 
   /**
@@ -195,22 +184,17 @@ export class PolicyManager extends BaseManager {
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
     const [policy] = this.pda.policy(serviceProvider, props.code)
 
-    const instruction = createDeletePolicyInstruction({
+    const ix = createDeletePolicyInstruction({
       policy,
       serviceProvider,
       authority,
     })
 
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { signature }
   }
 }
 

@@ -70,7 +70,7 @@ export const updateCircuitVkInstructionDiscriminator = [
 export function createUpdateCircuitVkInstruction(
   accounts: UpdateCircuitVkInstructionAccounts,
   args: UpdateCircuitVkInstructionArgs,
-  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
+  programId = new web3.PublicKey('ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'),
 ) {
   const [data] = updateCircuitVkStruct.serialize({
     instructionDiscriminator: updateCircuitVkInstructionDiscriminator,

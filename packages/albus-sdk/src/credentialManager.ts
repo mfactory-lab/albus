@@ -71,7 +71,7 @@ export class CredentialManager extends BaseManager {
       .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
       .addInstruction(ix)
       .addSigner(mint)
-      .sendAndConfirm(opts)
+      .sendAndConfirm(opts?.confirm, opts?.feePayer)
 
     return { mintAddress: mint.publicKey, signature }
   }
@@ -99,7 +99,10 @@ export class CredentialManager extends BaseManager {
       },
     })
 
-    const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts?.confirm, opts?.feePayer)
+
     return { signature }
   }
 
@@ -120,7 +123,10 @@ export class CredentialManager extends BaseManager {
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
 
-    const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts?.confirm, opts?.feePayer)
+
     return { signature }
   }
 
@@ -128,8 +134,8 @@ export class CredentialManager extends BaseManager {
    * Load a credential associated with a specified address.
    * This function retrieves, verifies, and optionally decrypts the credential.
    */
-  async load(addr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
-    const nft = await loadNft(this.provider.connection, addr, {
+  async load(mintAddr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
+    const nft = await loadNft(this.provider.connection, mintAddr, {
       authority: this.pda.authority()[0],
       code: CREDENTIAL_SYMBOL_CODE,
     })

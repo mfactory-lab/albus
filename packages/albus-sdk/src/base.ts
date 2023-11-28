@@ -57,39 +57,52 @@ export abstract class BaseManager {
 }
 
 export class TxBuilder {
-  tx = new Transaction()
-  signers: Signer[] = []
+  txs: Array<{ tx: Transaction; signers?: Signer[] }> = []
 
   constructor(readonly provider: ClientProvider) {
+    this.addTransaction(new Transaction(), [])
+  }
+
+  addTransaction(tx: Transaction, signers?: Signer[]) {
+    this.txs.push({ tx, signers })
+    return this
   }
 
   addInstruction(...items: Array<Transaction | TransactionInstruction | TransactionInstructionCtorFields>) {
-    this.tx.add(...items)
+    this.txs[0]?.tx.add(...items)
     return this
   }
 
   addSigner(signer: Signer) {
-    this.signers.push(signer)
+    this.txs[0]?.signers?.push(signer)
     return this
   }
 
-  async sendAndConfirm(opts?: TxOpts) {
+  async sendAll(opts?: ConfirmOptions) {
     try {
-      if (opts?.feePayer) {
-        this.tx.feePayer = opts.feePayer.publicKey
-        this.addSigner(opts.feePayer)
-      }
-      return await this.provider.sendAndConfirm(this.tx, this.signers, {
+      // skip empty transactions
+      const txs = this.txs.filter(({ tx }) => tx.instructions.length > 0)
+      return await this.provider.sendAll(txs, {
         ...this.provider.opts,
-        ...opts?.confirm,
+        ...opts,
       })
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
   }
-}
 
-export type TxOpts = {
-  confirm?: ConfirmOptions
-  feePayer?: Signer
+  async sendAndConfirm(opts?: ConfirmOptions, feePayer?: Signer) {
+    try {
+      if (feePayer !== undefined) {
+        this.txs[0]!.tx.feePayer = feePayer.publicKey
+        this.txs[0]!.signers?.push(feePayer)
+      }
+      return await this.provider.sendAndConfirm(this.txs[0]!.tx, this.txs[0]!.signers, {
+        ...this.provider.opts,
+        ...opts,
+      })
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
 }

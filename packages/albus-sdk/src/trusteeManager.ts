@@ -27,7 +27,7 @@
  */
 
 import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import type { CreateTrusteeData, UpdateTrusteeData } from './generated'
 import {
@@ -36,7 +36,6 @@ import {
   createDeleteTrusteeInstruction,
   createUpdateTrusteeInstruction,
   createVerifyTrusteeInstruction,
-  errorFromCode,
   trusteeDiscriminator,
 } from './generated'
 
@@ -120,7 +119,7 @@ export class TrusteeManager extends BaseManager {
   async create(props: CreateTrusteeProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const [trustee] = this.pda.trustee(props.key)
-    const instruction = createCreateTrusteeInstruction({
+    const ix = createCreateTrusteeInstruction({
       trustee,
       authority,
     }, {
@@ -131,16 +130,12 @@ export class TrusteeManager extends BaseManager {
         website: props.website,
       },
     })
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { address: trustee, signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { address: trustee, signature }
   }
 
   /**
@@ -149,7 +144,8 @@ export class TrusteeManager extends BaseManager {
   async update(props: UpdateTrusteeProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const [trustee] = this.pda.trustee(props.key)
-    const instruction = createUpdateTrusteeInstruction({
+
+    const ix = createUpdateTrusteeInstruction({
       trustee,
       authority,
     }, {
@@ -160,16 +156,12 @@ export class TrusteeManager extends BaseManager {
         newAuthority: props.newAuthority ?? null,
       },
     })
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { address: trustee, signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { address: trustee, signature }
   }
 
   /**
@@ -177,20 +169,16 @@ export class TrusteeManager extends BaseManager {
    */
   async verify(trustee: PublicKeyInitData, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const instruction = createVerifyTrusteeInstruction({
+    const ix = createVerifyTrusteeInstruction({
       trustee: new PublicKey(trustee),
       authority,
     })
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { signature }
   }
 
   /**
@@ -198,21 +186,16 @@ export class TrusteeManager extends BaseManager {
    */
   async delete(trustee: PublicKeyInitData, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const instruction = createDeleteTrusteeInstruction({
+    const ix = createDeleteTrusteeInstruction({
       trustee: new PublicKey(trustee),
       authority,
     })
 
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { signature }
   }
 
   async deleteByKey(key: ArrayLike<number>, opts?: ConfirmOptions) {

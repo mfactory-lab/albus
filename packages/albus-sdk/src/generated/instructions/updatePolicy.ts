@@ -72,7 +72,7 @@ export const updatePolicyInstructionDiscriminator = [
 export function createUpdatePolicyInstruction(
   accounts: UpdatePolicyInstructionAccounts,
   args: UpdatePolicyInstructionArgs,
-  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
+  programId = new web3.PublicKey('ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'),
 ) {
   const [data] = updatePolicyStruct.serialize({
     instructionDiscriminator: updatePolicyInstructionDiscriminator,

@@ -28,7 +28,7 @@
 
 import * as Albus from '@albus-finance/core'
 import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import type { UpdateServiceProviderData } from './generated'
 import {
@@ -36,7 +36,6 @@ import {
   createCreateServiceProviderInstruction,
   createDeleteServiceProviderInstruction,
   createUpdateServiceProviderInstruction,
-  errorFromCode,
   serviceProviderDiscriminator,
 } from './generated'
 
@@ -157,7 +156,8 @@ export class ServiceManager extends BaseManager {
   async create(props: CreateServiceProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.pda.serviceProvider(props.code)
-    const instruction = createCreateServiceProviderInstruction({
+
+    const ix = createCreateServiceProviderInstruction({
       serviceProvider,
       authority,
     }, {
@@ -171,16 +171,12 @@ export class ServiceManager extends BaseManager {
         authority: props.authority ? new PublicKey(props.authority) : null,
       },
     })
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { address: serviceProvider, signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { address: serviceProvider, signature }
   }
 
   /**
@@ -191,7 +187,7 @@ export class ServiceManager extends BaseManager {
    * @returns Promise<{signature:string}>
    */
   async update(props: UpdateServiceProps, opts?: ConfirmOptions) {
-    const instruction = createUpdateServiceProviderInstruction({
+    const ix = createUpdateServiceProviderInstruction({
       authority: this.provider.publicKey,
       serviceProvider: new PublicKey(props.serviceProvider),
       anchorRemainingAccounts: props.trustees?.map(pubkey => ({
@@ -210,16 +206,11 @@ export class ServiceManager extends BaseManager {
       },
     })
 
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { signature }
   }
 
   /**
@@ -234,21 +225,16 @@ export class ServiceManager extends BaseManager {
   async delete(props: { code: string }, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.pda.serviceProvider(props.code)
-    const instruction = createDeleteServiceProviderInstruction({
+    const ix = createDeleteServiceProviderInstruction({
       serviceProvider,
       authority,
     })
 
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { signature }
   }
 }
 

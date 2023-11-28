@@ -52,7 +52,6 @@ import {
   createProveProofRequestInstruction,
   createUpdateProofRequestInstruction,
   createVerifyProofRequestInstruction,
-  errorFromCode,
   proofRequestDiscriminator,
 } from './generated'
 import { KnownSignals } from './types'
@@ -190,7 +189,7 @@ export class ProofRequestManager extends BaseManager {
     // TODO: load circuit, get maxPublicInputs
     const maxPublicInputs = props.maxPublicInputs ?? 50
 
-    const instruction = createCreateProofRequestInstruction(
+    const ix = createCreateProofRequestInstruction(
       {
         serviceProvider,
         proofRequest,
@@ -205,18 +204,11 @@ export class ProofRequestManager extends BaseManager {
       },
     )
 
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return {
-        address: proofRequest,
-        signature,
-      }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
+    const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
+
+    return {
+      address: proofRequest,
+      signature,
     }
   }
 
@@ -225,20 +217,14 @@ export class ProofRequestManager extends BaseManager {
    */
   async delete(props: DeleteProofRequestProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const instruction = createDeleteProofRequestInstruction({
+    const ix = createDeleteProofRequestInstruction({
       proofRequest: new PublicKey(props.proofRequest),
       authority,
     })
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+
+    const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
+
+    return { signature }
   }
 
   /**
@@ -246,7 +232,7 @@ export class ProofRequestManager extends BaseManager {
    * Require admin authority.
    */
   async changeStatus(props: ChangeStatus, opts?: ConfirmOptions) {
-    const instruction = createUpdateProofRequestInstruction(
+    const ix = createUpdateProofRequestInstruction(
       {
         proofRequest: new PublicKey(props.proofRequest),
         authority: this.provider.publicKey,
@@ -257,16 +243,10 @@ export class ProofRequestManager extends BaseManager {
         },
       },
     )
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+
+    const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
+
+    return { signature }
   }
 
   /**
@@ -364,83 +344,74 @@ export class ProofRequestManager extends BaseManager {
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
     const inputsLimit = { withProof: 19, withoutProof: 28 }
-    const txs: { tx: Transaction }[] = []
 
     this.trace('prove', 'init', { proof, publicInputs })
+
+    const txBuilder = this.txBuilder
 
     // extending public inputs, length more than 19 does not fit into one transaction
     // a transaction's maximum size is 1,232 bytes
     if (publicInputs.length > inputsLimit.withProof) {
       const inputChunks = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
-        txs.push({
-          tx: new Transaction().add(
-            createProveProofRequestInstruction(
-              {
-                proofRequest: new PublicKey(props.proofRequest),
-                circuit: proofRequest.circuit,
-                policy: proofRequest.policy,
-                authority,
+        txBuilder.addTransaction(
+          new Transaction().add(createProveProofRequestInstruction(
+            {
+              proofRequest: new PublicKey(props.proofRequest),
+              circuit: proofRequest.circuit,
+              policy: proofRequest.policy,
+              authority,
+            },
+            {
+              data: {
+                reset: i === 0,
+                publicInputs: inputChunks[i],
+                proof: null,
               },
-              {
-                data: {
-                  reset: i === 0,
-                  publicInputs: inputChunks[i],
-                  proof: null,
-                },
-              },
-            ),
-          ),
-        })
+            },
+          )),
+        )
       }
     }
 
-    txs.push({
-      tx: new Transaction().add(
-        createProveProofRequestInstruction(
-          {
-            proofRequest: new PublicKey(props.proofRequest),
-            circuit: proofRequest.circuit,
-            policy: proofRequest.policy,
-            issuer: props.issuer,
-            authority,
+    txBuilder.addTransaction(
+      new Transaction().add(createProveProofRequestInstruction(
+        {
+          proofRequest: new PublicKey(props.proofRequest),
+          circuit: proofRequest.circuit,
+          policy: proofRequest.policy,
+          issuer: props.issuer,
+          authority,
+        },
+        {
+          data: {
+            reset: publicInputs.length <= inputsLimit.withProof,
+            publicInputs: publicInputs.slice(-inputsLimit.withProof),
+            proof,
           },
-          {
-            data: {
-              reset: publicInputs.length <= inputsLimit.withProof,
-              publicInputs: publicInputs.slice(-inputsLimit.withProof),
-              proof,
-            },
-          },
-        ),
-      ),
-    })
+        },
+      )),
+    )
 
     if (props.verify) {
       this.trace('prove', 'createVerifyProofRequestInstruction (setComputeUnitLimit: 400_000)')
-      txs.push({
-        tx: new Transaction()
+      txBuilder.addTransaction(
+        new Transaction()
           .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
           .add(createVerifyProofRequestInstruction({
             proofRequest: new PublicKey(props.proofRequest),
             circuit: proofRequest.circuit,
             authority,
-          })),
-      })
+          }),
+          ),
+      )
     }
 
-    try {
-      this.trace('prove', `sending ${txs.length} transactions...`)
-      const signatures = await this.provider.sendAll(txs, {
-        ...this.provider.opts,
-        ...opts,
-      })
-      this.trace('prove', { signatures })
-      return { signatures }
-    } catch (e: any) {
-      // console.log(e)
-      throw errorFromCode(e.code) ?? e
-    }
+    this.trace('prove', `sending ${txBuilder.txs.length} transactions...`)
+    const signatures = await txBuilder.sendAll(opts)
+    this.trace('prove', { signatures })
+
+    return { signatures }
   }
 
   /**

@@ -20,17 +20,17 @@ wallet= "./.secrets/upgrade-authority.json"
 #wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
+albus = "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi"
 albus_swap = "J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea"
 albus_transfer = "J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c"
 
 [programs.devnet]
-albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
+albus = "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi"
 albus_swap = "J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea"
 albus_transfer = "J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c"
 
 [programs.mainnet]
-albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
+albus = "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi"
 
 [registry]
 url = "https://api.apr.dev"
