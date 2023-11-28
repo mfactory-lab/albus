@@ -30,19 +30,19 @@
   "dependencies": {
     "@albus-finance/core": "workspace:^",
     "@albus-finance/sdk": "workspace:^",
-    "@coral-xyz/anchor": "^0.28.0",
-    "@faker-js/faker": "^8.0.2",
-    "@metaplex-foundation/js": "^0.19.5",
+    "@coral-xyz/anchor": "^0.29.0",
+    "@faker-js/faker": "^8.3.1",
+    "@metaplex-foundation/js": "^0.20.1",
     "@solana/web3.js": "^1.77.3",
-    "axios": "^1.4.0",
-    "chalk": "^4.1.2",
+    "axios": "^1.6.2",
+    "chalk": "^5.3.0",
     "cli-table3": "^0.6.3",
-    "commander": "^10.0.0",
+    "commander": "^11.1.0",
     "loglevel": "^1.8.1",
     "snarkjs": "^0.7.2"
   },
   "devDependencies": {
-    "vite-node": "^0.34.1"
+    "vite-node": "^0.34.6"
   },
   "release-it": {
     "git": false

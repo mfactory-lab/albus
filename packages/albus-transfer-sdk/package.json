@@ -34,11 +34,11 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/beet": "^0.7.1",
-    "@solana/spl-token": "^0.3.8",
+    "@solana/spl-token": "^0.3.9",
     "@solana/web3.js": "^1.77.3"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.20.0",
+    "@metaplex-foundation/solita": "^0.20.1",
     "release-it-config": "workspace:^"
   },
   "publishConfig": {

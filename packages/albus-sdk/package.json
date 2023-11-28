@@ -45,7 +45,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.20.0",
+    "@metaplex-foundation/solita": "^0.20.1",
     "release-it-config": "workspace:^"
   },
   "publishConfig": {
