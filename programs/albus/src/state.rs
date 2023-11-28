@@ -79,6 +79,10 @@ impl From<VerificationKey> for VK {
     }
 }
 
+pub const MAX_ISSUER_CODE_LEN: usize = 32;
+pub const MAX_ISSUER_NAME_LEN: usize = 32;
+pub const MAX_ISSUER_DESC_LEN: usize = 64;
+
 #[account]
 #[derive(InitSpace)]
 pub struct Issuer {
@@ -94,14 +98,16 @@ pub struct Issuer {
     pub created_at: i64,
     /// PDA bump.
     pub bump: u8,
+    /// Amount of issued credentials
+    pub credential_counter: u64,
     /// Uniq code of the issuer
-    #[max_len(32)]
+    #[max_len(MAX_ISSUER_CODE_LEN)]
     pub code: String,
     /// The name of the issuer
-    #[max_len(32)]
+    #[max_len(MAX_ISSUER_NAME_LEN)]
     pub name: String,
     /// Short description
-    #[max_len(64)]
+    #[max_len(MAX_ISSUER_DESC_LEN)]
     pub description: String,
 }
 
@@ -126,21 +132,26 @@ impl Issuer {
     }
 }
 
+pub const MAX_CIRCUIT_CODE_LEN: usize = 16;
+pub const MAX_CIRCUIT_NAME_LEN: usize = 32;
+pub const MAX_CIRCUIT_DESC_LEN: usize = 64;
+pub const MAX_CIRCUIT_URI_LEN: usize = 128;
+
 #[account]
 #[derive(InitSpace)]
 pub struct Circuit {
     /// Uniq code of the circuit
-    #[max_len(16)]
+    #[max_len(MAX_CIRCUIT_CODE_LEN)]
     pub code: String,
     /// Name of the circuit
-    #[max_len(32)]
+    #[max_len(MAX_CIRCUIT_NAME_LEN)]
     pub name: String,
     /// Short description
-    #[max_len(64)]
+    #[max_len(MAX_CIRCUIT_DESC_LEN)]
     pub description: String,
-    #[max_len(128)]
+    #[max_len(MAX_CIRCUIT_URI_LEN)]
     pub wasm_uri: String,
-    #[max_len(128)]
+    #[max_len(MAX_CIRCUIT_URI_LEN)]
     pub zkey_uri: String,
     /// Creation date
     pub created_at: i64,
@@ -184,6 +195,10 @@ impl Circuit {
     }
 }
 
+pub const MAX_POLICY_CODE_LEN: usize = 16;
+pub const MAX_POLICY_NAME_LEN: usize = 32;
+pub const MAX_POLICY_DESC_LEN: usize = 64;
+
 #[account]
 #[derive(InitSpace)]
 pub struct Policy {
@@ -192,13 +207,13 @@ pub struct Policy {
     /// The circuit associated with this policy
     pub circuit: Pubkey,
     /// Unique code of the policy (associated with the service)
-    #[max_len(16)]
+    #[max_len(MAX_POLICY_CODE_LEN)]
     pub code: String,
     /// Name of the policy
-    #[max_len(32)]
+    #[max_len(MAX_POLICY_NAME_LEN)]
     pub name: String,
     /// Short description
-    #[max_len(64)]
+    #[max_len(MAX_POLICY_DESC_LEN)]
     pub description: String,
     /// Request expiration period in seconds
     pub expiration_period: u32,
@@ -237,13 +252,16 @@ impl Policy {
     }
 }
 
+pub const MAX_POLICY_RULE_KEY_LEN: usize = 32;
+pub const MAX_POLICY_RULE_LABEL_LEN: usize = 32;
+
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
 pub struct PolicyRule {
-    #[max_len(32)]
+    #[max_len(MAX_POLICY_RULE_KEY_LEN)]
     pub key: String,
     /// Scalar Field
     pub value: [u8; 32],
-    #[max_len(32)]
+    #[max_len(MAX_POLICY_RULE_LABEL_LEN)]
     pub label: String,
 }
 
@@ -452,7 +470,7 @@ pub struct ProofRequest {
     pub created_at: i64,
     /// Timestamp for when the request will expire
     pub expired_at: i64,
-    /// Timestamp for when the proof was verified
+    /// Timestamp for when the `proof` was verified
     pub verified_at: i64,
     /// Timestamp for when the user was added the `proof`
     pub proved_at: i64,
@@ -496,17 +514,49 @@ pub enum ProofRequestStatus {
     Rejected,
 }
 
-// #[account]
-// #[derive(InitSpace)]
-// pub struct ProofRequestHistory {
-//     pub proof_request: Pubkey,
-//     pub owner: Pubkey,
-//     // pub proof: Option<ProofData>,
-//     #[max_len(0)]
-//     pub public_inputs: Vec<[u8; 32]>,
-//     pub proved_at: i64,
-//     pub created_at: i64,
-// }
+pub const MAX_CREDENTIAL_URI_LEN: usize = 128;
+pub const MAX_CREDENTIAL_STATUS_TEXT_LEN: usize = 200;
+
+#[account]
+#[derive(InitSpace)]
+pub struct Credential {
+    /// Authority of the credential
+    pub authority: Pubkey,
+    /// Credential's [Issuer]
+    pub issuer: Pubkey,
+    /// Creation date
+    pub created_at: i64,
+    /// Processing date
+    pub processed_at: i64,
+    /// PDA bump.
+    pub bump: u8,
+    /// Issuance status
+    pub status: CredentialStatus,
+    /// Issuance status text
+    #[max_len(MAX_CREDENTIAL_STATUS_TEXT_LEN)]
+    pub status_text: String,
+    /// Credential payload uri
+    #[max_len(MAX_CREDENTIAL_URI_LEN)]
+    pub uri: String,
+}
+
+impl Credential {
+    pub const SEED: &'static [u8] = b"credential";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
+}
+
+#[repr(u8)]
+#[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
+pub enum CredentialStatus {
+    #[default]
+    Pending,
+    Issued,
+    Rejected,
+}
 
 #[cfg(test)]
 mod test {

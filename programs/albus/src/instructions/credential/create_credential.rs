@@ -26,42 +26,55 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::state::{Credential, CredentialStatus, MAX_CREDENTIAL_URI_LEN};
-use crate::utils::assert_authorized;
+use crate::state::{Credential, Issuer, MAX_CREDENTIAL_URI_LEN};
 use anchor_lang::prelude::*;
 
-pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
-    assert_authorized(ctx.accounts.authority.key)?;
-
+pub fn handler(ctx: Context<CreateCredential>, data: CreateCredentialData) -> Result<()> {
     if data.uri.len() > MAX_CREDENTIAL_URI_LEN {
         msg!("Error: Max uri length is {}", MAX_CREDENTIAL_URI_LEN);
         return Err(ProgramError::InvalidArgument.into());
     }
 
-    let timestamp = Clock::get()?.unix_timestamp;
+    let authority = &ctx.accounts.authority;
+
+    let issuer = &mut ctx.accounts.issuer;
+    issuer.credential_counter += 1;
 
     let credential = &mut ctx.accounts.credential;
+
+    let timestamp = Clock::get()?.unix_timestamp;
+
     credential.uri = data.uri;
-    credential.status = data.status;
-    credential.status_text = data.status_text;
-    credential.processed_at = timestamp;
+    credential.issuer = issuer.key();
+    credential.authority = authority.key();
+    credential.created_at = timestamp;
+    credential.bump = ctx.bumps.credential;
 
     Ok(())
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct UpdateCredentialData {
+pub struct CreateCredentialData {
     pub uri: String,
-    pub status: CredentialStatus,
-    pub status_text: String,
 }
 
 #[derive(Accounts)]
-pub struct UpdateCredential<'info> {
-    #[account(mut)]
+pub struct CreateCredential<'info> {
+    #[account(
+        init,
+        seeds = [Credential::SEED, &issuer.credential_counter.to_le_bytes()],
+        bump,
+        payer = payer,
+        space = Credential::space()
+    )]
     pub credential: Box<Account<'info, Credential>>,
 
     #[account(mut)]
+    pub issuer: Box<Account<'info, Issuer>>,
+
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
     pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,

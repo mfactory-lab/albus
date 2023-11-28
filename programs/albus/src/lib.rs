@@ -54,8 +54,19 @@ pub mod albus {
 
     // Credentials
 
-    pub fn mint_credential(ctx: Context<MintCredential>, data: MintCredentialData) -> Result<()> {
-        mint_credential::handler(ctx, data)
+    // pub fn mint_credential(ctx: Context<MintCredential>, data: MintCredentialData) -> Result<()> {
+    //     mint_credential::handler(ctx, data)
+    // }
+    //
+    // pub fn revoke_credential(ctx: Context<RevokeCredential>) -> Result<()> {
+    //     revoke_credential::handler(ctx)
+    // }
+
+    pub fn create_credential(
+        ctx: Context<CreateCredential>,
+        data: CreateCredentialData,
+    ) -> Result<()> {
+        create_credential::handler(ctx, data)
     }
 
     pub fn update_credential(
@@ -65,8 +76,8 @@ pub mod albus {
         update_credential::handler(ctx, data)
     }
 
-    pub fn revoke_credential(ctx: Context<RevokeCredential>) -> Result<()> {
-        revoke_credential::handler(ctx)
+    pub fn delete_credential(ctx: Context<DeleteCredential>) -> Result<()> {
+        delete_credential::handler(ctx)
     }
 
     // Issuer
