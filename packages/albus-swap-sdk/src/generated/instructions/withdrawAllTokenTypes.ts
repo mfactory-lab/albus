@@ -93,7 +93,7 @@ export const withdrawAllTokenTypesInstructionDiscriminator = [
 export function createWithdrawAllTokenTypesInstruction(
   accounts: WithdrawAllTokenTypesInstructionAccounts,
   args: WithdrawAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea'),
+  programId = new web3.PublicKey('AsWaPFKSfQN7mJFzUVuJRmX2iEm2rMEvAX6NZAFvrUQM'),
 ) {
   const [data] = withdrawAllTokenTypesStruct.serialize({
     instructionDiscriminator: withdrawAllTokenTypesInstructionDiscriminator,
