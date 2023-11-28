@@ -26,7 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { AlbusClient } from './client'
+import { Transaction } from '@solana/web3.js'
+import type { ConfirmOptions, Signer, TransactionInstruction, TransactionInstructionCtorFields } from '@solana/web3.js'
+import type { AlbusClient, ClientProvider } from './client'
+import { errorFromCode } from './generated'
 
 export abstract class BaseManager {
   public constructor(readonly client: AlbusClient) {}
@@ -47,4 +50,46 @@ export abstract class BaseManager {
     }
     console.log(`[AlbusClient][${this.traceNamespace}]`, ...msg)
   }
+
+  protected get txBuilder() {
+    return new TxBuilder(this.provider)
+  }
+}
+
+export class TxBuilder {
+  tx = new Transaction()
+  signers: Signer[] = []
+
+  constructor(readonly provider: ClientProvider) {
+  }
+
+  addInstruction(...items: Array<Transaction | TransactionInstruction | TransactionInstructionCtorFields>) {
+    this.tx.add(...items)
+    return this
+  }
+
+  addSigner(signer: Signer) {
+    this.signers.push(signer)
+    return this
+  }
+
+  async sendAndConfirm(opts?: TxOpts) {
+    try {
+      if (opts?.feePayer) {
+        this.tx.feePayer = opts.feePayer.publicKey
+        this.addSigner(opts.feePayer)
+      }
+      return await this.provider.sendAndConfirm(this.tx, this.signers, {
+        ...this.provider.opts,
+        ...opts?.confirm,
+      })
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+}
+
+export type TxOpts = {
+  confirm?: ConfirmOptions
+  feePayer?: Signer
 }

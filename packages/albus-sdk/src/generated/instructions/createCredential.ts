@@ -8,38 +8,20 @@
 import * as splToken from '@solana/spl-token'
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
-import type {
-  MintCredentialData } from '../types/MintCredentialData'
-import {
-  mintCredentialDataBeet,
-} from '../types/MintCredentialData'
 
 /**
  * @category Instructions
- * @category MintCredential
+ * @category CreateCredential
  * @category generated
  */
-export type MintCredentialInstructionArgs = {
-  data: MintCredentialData
-}
-/**
- * @category Instructions
- * @category MintCredential
- * @category generated
- */
-export const mintCredentialStruct = new beet.FixableBeetArgsStruct<
-  MintCredentialInstructionArgs & {
-    instructionDiscriminator: number[] /* size: 8 */
-  }
->(
-  [
-    ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['data', mintCredentialDataBeet],
-  ],
-  'MintCredentialInstructionArgs',
+export const createCredentialStruct = new beet.BeetArgsStruct<{
+  instructionDiscriminator: number[] /* size: 8 */
+}>(
+  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
+  'CreateCredentialInstructionArgs',
 )
 /**
- * Accounts required by the _mintCredential_ instruction
+ * Accounts required by the _createCredential_ instruction
  *
  * @property [_writable_] albusAuthority
  * @property [_writable_] tokenAccount
@@ -51,10 +33,10 @@ export const mintCredentialStruct = new beet.FixableBeetArgsStruct<
  * @property [] metadataProgram
  * @property [] sysvarInstructions
  * @category Instructions
- * @category MintCredential
+ * @category CreateCredential
  * @category generated
  */
-export type MintCredentialInstructionAccounts = {
+export type CreateCredentialInstructionAccounts = {
   albusAuthority: web3.PublicKey
   tokenAccount: web3.PublicKey
   tokenRecord?: web3.PublicKey
@@ -70,31 +52,27 @@ export type MintCredentialInstructionAccounts = {
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const mintCredentialInstructionDiscriminator = [
-  136, 108, 131, 240, 163, 102, 204, 13,
+export const createCredentialInstructionDiscriminator = [
+  205, 74, 60, 212, 63, 198, 196, 109,
 ]
 
 /**
- * Creates a _MintCredential_ instruction.
+ * Creates a _CreateCredential_ instruction.
  *
  * Optional accounts that are not provided default to the program ID since
  * this was indicated in the IDL from which this instruction was generated.
  *
  * @param accounts that will be accessed while the instruction is processed
- * @param args to provide as instruction data to the program
- *
  * @category Instructions
- * @category MintCredential
+ * @category CreateCredential
  * @category generated
  */
-export function createMintCredentialInstruction(
-  accounts: MintCredentialInstructionAccounts,
-  args: MintCredentialInstructionArgs,
+export function createCreateCredentialInstruction(
+  accounts: CreateCredentialInstructionAccounts,
   programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
-  const [data] = mintCredentialStruct.serialize({
-    instructionDiscriminator: mintCredentialInstructionDiscriminator,
-    ...args,
+  const [data] = createCredentialStruct.serialize({
+    instructionDiscriminator: createCredentialInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {

@@ -41,7 +41,7 @@ export const createInvestigationRequestStruct = new beet.FixableBeetArgsStruct<
  * Accounts required by the _createInvestigationRequest_ instruction
  *
  * @property [_writable_] investigationRequest
- * @property [] proofRequest
+ * @property [_writable_] proofRequest
  * @property [] serviceProvider
  * @property [_writable_, **signer**] authority
  * @category Instructions
@@ -89,7 +89,7 @@ export function createCreateInvestigationRequestInstruction(
     },
     {
       pubkey: accounts.proofRequest,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {

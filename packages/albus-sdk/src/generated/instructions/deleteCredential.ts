@@ -11,17 +11,17 @@ import * as web3 from '@solana/web3.js'
 
 /**
  * @category Instructions
- * @category RevokeCredential
+ * @category DeleteCredential
  * @category generated
  */
-export const revokeCredentialStruct = new beet.BeetArgsStruct<{
+export const deleteCredentialStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'RevokeCredentialInstructionArgs',
+  'DeleteCredentialInstructionArgs',
 )
 /**
- * Accounts required by the _revokeCredential_ instruction
+ * Accounts required by the _deleteCredential_ instruction
  *
  * @property [_writable_] albusAuthority
  * @property [_writable_] tokenAccount
@@ -32,10 +32,10 @@ export const revokeCredentialStruct = new beet.BeetArgsStruct<{
  * @property [] metadataProgram
  * @property [] sysvarInstructions
  * @category Instructions
- * @category RevokeCredential
+ * @category DeleteCredential
  * @category generated
  */
-export type RevokeCredentialInstructionAccounts = {
+export type DeleteCredentialInstructionAccounts = {
   albusAuthority: web3.PublicKey
   tokenAccount: web3.PublicKey
   mint: web3.PublicKey
@@ -49,24 +49,24 @@ export type RevokeCredentialInstructionAccounts = {
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const revokeCredentialInstructionDiscriminator = [
-  38, 123, 95, 95, 223, 158, 169, 87,
+export const deleteCredentialInstructionDiscriminator = [
+  20, 216, 8, 226, 116, 228, 193, 12,
 ]
 
 /**
- * Creates a _RevokeCredential_ instruction.
+ * Creates a _DeleteCredential_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @category Instructions
- * @category RevokeCredential
+ * @category DeleteCredential
  * @category generated
  */
-export function createRevokeCredentialInstruction(
-  accounts: RevokeCredentialInstructionAccounts,
+export function createDeleteCredentialInstruction(
+  accounts: DeleteCredentialInstructionAccounts,
   programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
 ) {
-  const [data] = revokeCredentialStruct.serialize({
-    instructionDiscriminator: revokeCredentialInstructionDiscriminator,
+  const [data] = deleteCredentialStruct.serialize({
+    instructionDiscriminator: deleteCredentialInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {

@@ -151,7 +151,7 @@ describe('albusCredential', async () => {
   })
 
   it('can revoke credential', async () => {
-    await holderClient.credential.revoke({
+    await holderClient.credential.delete({
       mint: credentialMint,
     })
 

@@ -30,15 +30,14 @@ import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-toke
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
 import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
-import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
+import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js'
 import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
 import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
-  createMintCredentialInstruction,
-  createRevokeCredentialInstruction,
+  createCreateCredentialInstruction,
+  createDeleteCredentialInstruction,
   createUpdateCredentialInstruction,
-  errorFromCode,
 } from './generated'
 import type { ExtendedMetadata } from './utils'
 import {
@@ -57,7 +56,7 @@ export class CredentialManager extends BaseManager {
     const mint = Keypair.generate()
     const owner = props?.owner ? new PublicKey(props?.owner) : this.provider.publicKey
 
-    const ix = createMintCredentialInstruction({
+    const ix = createCreateCredentialInstruction({
       mint: mint.publicKey,
       tokenAccount: getAssociatedTokenAddress(mint.publicKey, owner),
       albusAuthority: this.pda.authority()[0],
@@ -66,28 +65,15 @@ export class CredentialManager extends BaseManager {
       authority: this.provider.publicKey,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-    }, {
-      data: {
-        uri: '',
-      },
     })
 
-    try {
-      const tx = new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
-        .add(ix)
+    const signature = await this.txBuilder
+      .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
+      .addInstruction(ix)
+      .addSigner(mint)
+      .sendAndConfirm(opts)
 
-      const signers: Signer[] = [mint]
-      if (opts?.feePayer) {
-        tx.feePayer = opts.feePayer.publicKey
-        signers.push(opts.feePayer)
-      }
-
-      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
-      return { mintAddress: mint.publicKey, signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    return { mintAddress: mint.publicKey, signature }
   }
 
   /**
@@ -113,30 +99,17 @@ export class CredentialManager extends BaseManager {
       },
     })
 
-    try {
-      const tx = new Transaction().add(ix)
-      const signers: Signer[] = []
-      if (opts?.feePayer) {
-        tx.feePayer = opts.feePayer.publicKey
-        signers.push(opts.feePayer)
-      }
-      const signature = await this.provider.sendAndConfirm(tx, signers, {
-        ...this.provider.opts,
-        ...opts?.confirm,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
+    return { signature }
   }
 
   /**
-   * Revoke credential and burn credential NFT.
+   * Delete credential and burn credential NFT.
    */
-  async revoke(props: RevokeCredentialProps, opts?: TxOpts) {
+  async delete(props: DeleteCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
 
-    const ix = createRevokeCredentialInstruction({
+    const ix = createDeleteCredentialInstruction({
       mint,
       tokenAccount: getAssociatedTokenAddress(mint, this.provider.publicKey),
       albusAuthority: this.pda.authority()[0],
@@ -147,21 +120,8 @@ export class CredentialManager extends BaseManager {
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
 
-    try {
-      const tx = new Transaction().add(ix)
-      const signers: Signer[] = []
-      if (opts?.feePayer) {
-        tx.feePayer = opts.feePayer.publicKey
-        signers.push(opts.feePayer)
-      }
-      const signature = await this.provider.sendAndConfirm(tx, signers, {
-        ...this.provider.opts,
-        ...opts?.confirm,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
+    return { signature }
   }
 
   /**
@@ -260,7 +220,7 @@ export type UpdateCredentialProps = {
   name?: string
 }
 
-export type RevokeCredentialProps = {
+export type DeleteCredentialProps = {
   mint: PublicKeyInitData
 }
 
