@@ -1000,6 +1000,14 @@ impl Processor {
             return Err(StakePoolError::StakeListAndPoolOutOfDate.into());
         }
 
+        // Albus integration
+        if let Some(policy) = stake_pool.add_validator_policy {
+            AlbusVerifier::new(next_account_info(account_info_iter)?)
+                .check_policy(policy)
+                .check_owner(*validator_vote_info.key)
+                .run()?;
+        }
+
         check_account_owner(validator_list_info, program_id)?;
         let mut validator_list_data = validator_list_info.data.borrow_mut();
         let (header, mut validator_list) =
@@ -2727,9 +2735,8 @@ impl Processor {
         }
 
         // Albus integration
-        if let Some(policy) = stake_pool.policy {
-            let proof_request_info = next_account_info(account_info_iter)?;
-            AlbusVerifier::new(proof_request_info)
+        if let Some(policy) = stake_pool.deposit_policy {
+            AlbusVerifier::new(next_account_info(account_info_iter)?)
                 .check_policy(policy)
                 .check_owner(*stake_deposit_authority_info.key)
                 .run()?;
@@ -2986,7 +2993,6 @@ impl Processor {
         let pool_mint_info = next_account_info(account_info_iter)?;
         let system_program_info = next_account_info(account_info_iter)?;
         let token_program_info = next_account_info(account_info_iter)?;
-        let sol_deposit_authority_info = next_account_info(account_info_iter);
 
         let clock = Clock::get()?;
 
@@ -2997,9 +3003,8 @@ impl Processor {
         }
 
         // Albus integration
-        if let Some(policy) = stake_pool.policy {
-            let proof_request_info = next_account_info(account_info_iter)?;
-            AlbusVerifier::new(proof_request_info)
+        if let Some(policy) = stake_pool.deposit_policy {
+            AlbusVerifier::new(next_account_info(account_info_iter)?)
                 .check_policy(policy)
                 .check_owner(*from_user_lamports_info.key)
                 .run()?;
@@ -3010,6 +3015,8 @@ impl Processor {
             program_id,
             stake_pool_info.key,
         )?;
+
+        let sol_deposit_authority_info = next_account_info(account_info_iter);
         stake_pool.check_sol_deposit_authority(sol_deposit_authority_info)?;
         stake_pool.check_mint(pool_mint_info)?;
         stake_pool.check_reserve_stake(reserve_stake_account_info)?;
