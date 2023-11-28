@@ -30,7 +30,7 @@ const os = require('node:os')
 const path = require('node:path')
 
 const programName = 'albus_transfer'
-const programId = 'AtRAnsesSYFZRDgZ9E4cVfmuiQvMaAGLa7hgg7QfpqwZ'
+const programId = 'ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe'
 
 const programDir = path.join(__dirname, '..', '..', 'programs', 'albus-transfer')
 const idlGenerator = 'anchor'

@@ -91,7 +91,7 @@ export const depositAllTokenTypesInstructionDiscriminator = [
 export function createDepositAllTokenTypesInstruction(
   accounts: DepositAllTokenTypesInstructionAccounts,
   args: DepositAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('AsWaPFKSfQN7mJFzUVuJRmX2iEm2rMEvAX6NZAFvrUQM'),
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
 ) {
   const [data] = depositAllTokenTypesStruct.serialize({
     instructionDiscriminator: depositAllTokenTypesInstructionDiscriminator,
