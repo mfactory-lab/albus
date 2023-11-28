@@ -14,7 +14,7 @@ mod errors;
 mod state;
 mod utils;
 
-declare_id!("AsWaPFKSfQN7mJFzUVuJRmX2iEm2rMEvAX6NZAFvrUQM");
+declare_id!("ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq");
 
 #[program]
 pub mod albus_swap {

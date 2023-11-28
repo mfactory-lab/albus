@@ -28,7 +28,7 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("AtRAnsesSYFZRDgZ9E4cVfmuiQvMaAGLa7hgg7QfpqwZ");
+declare_id!("ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe");
 
 #[program]
 pub mod albus_transfer {
