@@ -26,25 +26,43 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::state::{Credential, CredentialStatus, MAX_CREDENTIAL_URI_LEN};
+use crate::constants::{CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX};
 use crate::utils::assert_authorized;
+use crate::ID;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::sysvar;
+use mpl_token_metadata::instructions::UpdateV1CpiBuilder;
+use mpl_token_metadata::types::{Creator, Data};
 
 pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
     assert_authorized(ctx.accounts.authority.key)?;
 
-    if data.uri.len() > MAX_CREDENTIAL_URI_LEN {
-        msg!("Error: Max uri length is {}", MAX_CREDENTIAL_URI_LEN);
-        return Err(ProgramError::InvalidArgument.into());
-    }
+    let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
 
-    let timestamp = Clock::get()?.unix_timestamp;
-
-    let credential = &mut ctx.accounts.credential;
-    credential.uri = data.uri;
-    credential.status = data.status;
-    credential.status_text = data.status_text;
-    credential.processed_at = timestamp;
+    UpdateV1CpiBuilder::new(&ctx.accounts.metadata_program)
+        .metadata(&ctx.accounts.metadata_account)
+        .authority(&ctx.accounts.albus_authority)
+        .token(Some(&ctx.accounts.token_account))
+        .mint(&ctx.accounts.mint)
+        .payer(&ctx.accounts.authority)
+        .sysvar_instructions(&ctx.accounts.sysvar_instructions)
+        .system_program(&ctx.accounts.system_program)
+        .data(Data {
+            name: data.name,
+            symbol: format!("{}-{}", NFT_SYMBOL_PREFIX, CREDENTIAL_SYMBOL_CODE),
+            uri: data.uri,
+            seller_fee_basis_points: 0,
+            creators: Some(vec![
+                Creator {
+                    address: ctx.accounts.albus_authority.key(),
+                    verified: true,
+                    share: 100,
+                },
+                // Add issuer account ?
+            ]),
+        })
+        .is_mutable(true)
+        .invoke_signed(&[&signer_seeds])?;
 
     Ok(())
 }
@@ -52,17 +70,65 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateCredentialData {
     pub uri: String,
-    pub status: CredentialStatus,
-    pub status_text: String,
+    pub name: String,
 }
 
 #[derive(Accounts)]
 pub struct UpdateCredential<'info> {
-    #[account(mut)]
-    pub credential: Box<Account<'info, Credential>>,
+    /// CHECK:
+    #[account(mut, seeds = [ID.as_ref()], bump)]
+    pub albus_authority: AccountInfo<'info>,
 
+    /// Destination token account (required for pNFT).
+    ///
+    /// CHECK: account checked in CPI
+    pub token_account: UncheckedAccount<'info>,
+
+    /// Mint account of the NFT.
+    /// The account will be initialized if necessary.
+    ///
+    /// Must be a signer if:
+    ///   * the mint account does not exist.
+    ///
+    /// CHECK: account checked in CPI
+    pub mint: UncheckedAccount<'info>,
+
+    /// Metadata account of the NFT.
+    /// This account must be uninitialized.
+    ///
+    /// CHECK: account checked in CPI
+    #[account(mut)]
+    pub metadata_account: UncheckedAccount<'info>,
+
+    // /// Master edition account of the NFT.
+    // /// The account will be initialized if necessary.
+    // ///
+    // /// CHECK: account checked in CPI
+    // #[account(mut)]
+    // pub edition_account: UncheckedAccount<'info>,
     #[account(mut)]
     pub authority: Signer<'info>,
 
+    /// Token Metadata program.
+    ///
+    /// CHECK: account checked in CPI
+    pub metadata_program: Program<'info, TokenMetadata>,
+
+    /// Instructions sysvar account.
+    ///
+    /// CHECK: account constraints checked in account trait
+    #[account(address = sysvar::instructions::id())]
+    pub sysvar_instructions: UncheckedAccount<'info>,
+
+    /// System program.
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Clone)]
+pub struct TokenMetadata;
+
+impl Id for TokenMetadata {
+    fn id() -> Pubkey {
+        mpl_token_metadata::ID
+    }
 }

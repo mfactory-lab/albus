@@ -26,28 +26,20 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use solana_program::pubkey;
-use solana_program::pubkey::Pubkey;
+use crate::state::Credential;
+use anchor_lang::prelude::*;
 
-/// List of root authorities
-pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
-    #[cfg(feature = "testing")]
-    pubkey!("4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i"),
-    #[cfg(feature = "devnet")]
-    pubkey!("5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH"),
-    pubkey!("AuthxkATW25YDWX4kyDLh5qFMV1VhxKtRC9FBHh2JwZR"),
-];
+pub fn handler(_ctx: Context<DeleteCredential>) -> Result<()> {
+    Ok(())
+}
 
-/// Issuer signal name used in Albus circuits
-pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
+#[derive(Accounts)]
+pub struct DeleteCredential<'info> {
+    #[account(mut, close = authority, has_one = authority)]
+    pub credential: Box<Account<'info, Credential>>,
 
-/// Timestamp signal name used in Albus circuits
-pub const TIMESTAMP_SIGNAL: &str = "timestamp";
-pub const TIMESTAMP_THRESHOLD: u16 = 30;
+    #[account(mut)]
+    pub authority: Signer<'info>,
 
-/// Albus NFT symbols begin with this prefix
-pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
-pub const CREDENTIAL_SYMBOL_CODE: &str = "DC";
-pub const CREDENTIAL_NAME: &str = "Albus Digital Credential";
-
-pub const DEFAULT_SECRET_SHARE_THRESHOLD: u8 = 2;
+    pub system_program: Program<'info, System>,
+}

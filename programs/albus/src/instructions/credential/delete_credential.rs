@@ -26,20 +26,113 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::state::Credential;
+use crate::ID;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::sysvar;
+use anchor_spl::token::spl_token::instruction::AuthorityType;
+use anchor_spl::token::{set_authority, SetAuthority, Token};
+use mpl_token_metadata::instructions::{BurnV1CpiBuilder, ThawDelegatedAccountCpiBuilder};
 
-pub fn handler(_ctx: Context<DeleteCredential>) -> Result<()> {
+pub fn handler(ctx: Context<DeleteCredential>) -> Result<()> {
+    // assert_authorized(ctx.accounts.authority.key)?;
+    let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
+
+    ThawDelegatedAccountCpiBuilder::new(&ctx.accounts.metadata_program)
+        .mint(&ctx.accounts.mint)
+        .edition(&ctx.accounts.edition_account)
+        .token_account(&ctx.accounts.token_account)
+        .delegate(&ctx.accounts.albus_authority)
+        .token_program(&ctx.accounts.token_program)
+        .invoke_signed(&[&signer_seeds])?;
+
+    set_authority(
+        CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            SetAuthority {
+                account_or_mint: ctx.accounts.token_account.to_account_info(),
+                current_authority: ctx.accounts.authority.to_account_info(),
+            },
+        ),
+        AuthorityType::AccountOwner,
+        Some(ctx.accounts.albus_authority.key()),
+    )?;
+
+    BurnV1CpiBuilder::new(&ctx.accounts.metadata_program)
+        .authority(&ctx.accounts.albus_authority)
+        .metadata(&ctx.accounts.metadata_account)
+        .token(&ctx.accounts.token_account)
+        .mint(&ctx.accounts.mint)
+        .edition(Some(&ctx.accounts.edition_account))
+        .spl_token_program(&ctx.accounts.token_program)
+        .sysvar_instructions(&ctx.accounts.sysvar_instructions)
+        .system_program(&ctx.accounts.system_program)
+        .invoke_signed(&[&signer_seeds])?;
+
     Ok(())
 }
 
 #[derive(Accounts)]
 pub struct DeleteCredential<'info> {
-    #[account(mut, close = authority, has_one = authority)]
-    pub credential: Box<Account<'info, Credential>>,
+    /// CHECK:
+    #[account(mut, seeds = [ID.as_ref()], bump)]
+    pub albus_authority: AccountInfo<'info>,
+
+    /// Destination token account (required for pNFT).
+    ///
+    /// CHECK: account checked in CPI
+    #[account(mut)]
+    pub token_account: UncheckedAccount<'info>,
+
+    /// Mint account of the NFT.
+    /// The account will be initialized if necessary.
+    ///
+    /// Must be a signer if:
+    ///   * the mint account does not exist.
+    ///
+    /// CHECK: account checked in CPI
+    #[account(mut)]
+    pub mint: UncheckedAccount<'info>,
+
+    /// Metadata account of the NFT.
+    /// This account must be uninitialized.
+    ///
+    /// CHECK: account checked in CPI
+    #[account(mut)]
+    pub metadata_account: UncheckedAccount<'info>,
+
+    /// Master edition account of the NFT.
+    /// The account will be initialized if necessary.
+    ///
+    /// CHECK: account checked in CPI
+    #[account(mut)]
+    pub edition_account: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
 
+    /// Token Metadata program.
+    ///
+    /// CHECK: account checked in CPI
+    pub metadata_program: Program<'info, TokenMetadata>,
+
+    /// SPL Token program.
+    pub token_program: Program<'info, Token>,
+
+    /// Instructions sysvar account.
+    ///
+    /// CHECK: account constraints checked in account trait
+    #[account(address = sysvar::instructions::id())]
+    pub sysvar_instructions: UncheckedAccount<'info>,
+
+    /// System program.
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Clone)]
+pub struct TokenMetadata;
+
+impl Id for TokenMetadata {
+    fn id() -> Pubkey {
+        mpl_token_metadata::ID
+    }
 }

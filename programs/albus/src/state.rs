@@ -98,8 +98,6 @@ pub struct Issuer {
     pub created_at: i64,
     /// PDA bump.
     pub bump: u8,
-    /// Amount of issued credentials
-    pub credential_counter: u64,
     /// Uniq code of the issuer
     #[max_len(MAX_ISSUER_CODE_LEN)]
     pub code: String,
@@ -131,6 +129,51 @@ impl Issuer {
         )
     }
 }
+
+//
+// On-chain credential
+//
+// pub const MAX_CREDENTIAL_URI_LEN: usize = 200;
+//
+// #[account]
+// #[derive(InitSpace)]
+// pub struct Credential {
+//     /// Authority of the credential
+//     pub authority: Pubkey,
+//     /// Credential's [Issuer]
+//     pub issuer: Pubkey,
+//     /// Auto-increment issuer specific identifier
+//     pub identifier: u32,
+//     /// Creation date
+//     pub created_at: i64,
+//     /// Processing date
+//     pub processed_at: i64,
+//     /// PDA bump.
+//     pub bump: u8,
+//     /// Issuance status
+//     pub status: CredentialStatus,
+//     /// Credential payload uri
+//     #[max_len(MAX_CREDENTIAL_URI_LEN)]
+//     pub uri: String,
+// }
+//
+// impl Credential {
+//     pub const SEED: &'static [u8] = b"credential";
+//
+//     #[inline]
+//     pub fn space() -> usize {
+//         8 + Self::INIT_SPACE
+//     }
+// }
+//
+// #[repr(u8)]
+// #[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
+// pub enum CredentialStatus {
+//     #[default]
+//     Pending,
+//     Issued,
+//     Rejected,
+// }
 
 pub const MAX_CIRCUIT_CODE_LEN: usize = 16;
 pub const MAX_CIRCUIT_NAME_LEN: usize = 32;
@@ -511,52 +554,6 @@ pub enum ProofRequestStatus {
     Pending,
     Proved,
     Verified,
-    Rejected,
-}
-
-pub const MAX_CREDENTIAL_URI_LEN: usize = 128;
-pub const MAX_CREDENTIAL_STATUS_TEXT_LEN: usize = 200;
-
-#[account]
-#[derive(InitSpace)]
-pub struct Credential {
-    /// Authority of the credential
-    pub authority: Pubkey,
-    /// Credential's [Issuer]
-    pub issuer: Pubkey,
-    /// Auto-increment issuer specific identifier
-    pub identifier: u64,
-    /// Creation date
-    pub created_at: i64,
-    /// Processing date
-    pub processed_at: i64,
-    /// PDA bump.
-    pub bump: u8,
-    /// Issuance status
-    pub status: CredentialStatus,
-    /// Issuance status text
-    #[max_len(MAX_CREDENTIAL_STATUS_TEXT_LEN)]
-    pub status_text: String,
-    /// Credential payload uri
-    #[max_len(MAX_CREDENTIAL_URI_LEN)]
-    pub uri: String,
-}
-
-impl Credential {
-    pub const SEED: &'static [u8] = b"credential";
-
-    #[inline]
-    pub fn space() -> usize {
-        8 + Self::INIT_SPACE
-    }
-}
-
-#[repr(u8)]
-#[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
-pub enum CredentialStatus {
-    #[default]
-    Pending,
-    Issued,
     Rejected,
 }
 

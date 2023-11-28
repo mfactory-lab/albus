@@ -64,11 +64,8 @@ pub mod albus {
 
     // Credential
 
-    pub fn create_credential(
-        ctx: Context<CreateCredential>,
-        data: CreateCredentialData,
-    ) -> Result<()> {
-        create_credential::handler(ctx, data)
+    pub fn create_credential(ctx: Context<CreateCredential>) -> Result<()> {
+        create_credential::handler(ctx)
     }
 
     pub fn update_credential(
@@ -206,7 +203,6 @@ pub mod albus {
 
     // Admin
 
-    #[cfg(feature = "devnet")]
     pub fn admin_close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
         close_account::close_account(ctx)
     }

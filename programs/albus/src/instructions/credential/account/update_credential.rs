@@ -26,28 +26,41 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use solana_program::pubkey;
-use solana_program::pubkey::Pubkey;
+use crate::state::{Credential, CredentialStatus, MAX_CREDENTIAL_URI_LEN};
+use crate::utils::assert_authorized;
+use anchor_lang::prelude::*;
 
-/// List of root authorities
-pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
-    #[cfg(feature = "testing")]
-    pubkey!("4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i"),
-    #[cfg(feature = "devnet")]
-    pubkey!("5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH"),
-    pubkey!("AuthxkATW25YDWX4kyDLh5qFMV1VhxKtRC9FBHh2JwZR"),
-];
+pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
+    assert_authorized(ctx.accounts.authority.key)?;
 
-/// Issuer signal name used in Albus circuits
-pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
+    if data.uri.len() > MAX_CREDENTIAL_URI_LEN {
+        msg!("Error: Max uri length is {}", MAX_CREDENTIAL_URI_LEN);
+        return Err(ProgramError::InvalidArgument.into());
+    }
 
-/// Timestamp signal name used in Albus circuits
-pub const TIMESTAMP_SIGNAL: &str = "timestamp";
-pub const TIMESTAMP_THRESHOLD: u16 = 30;
+    let timestamp = Clock::get()?.unix_timestamp;
 
-/// Albus NFT symbols begin with this prefix
-pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
-pub const CREDENTIAL_SYMBOL_CODE: &str = "DC";
-pub const CREDENTIAL_NAME: &str = "Albus Digital Credential";
+    let credential = &mut ctx.accounts.credential;
+    credential.uri = data.uri;
+    credential.status = data.status;
+    credential.processed_at = timestamp;
 
-pub const DEFAULT_SECRET_SHARE_THRESHOLD: u8 = 2;
+    Ok(())
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct UpdateCredentialData {
+    pub status: CredentialStatus,
+    pub uri: String,
+}
+
+#[derive(Accounts)]
+pub struct UpdateCredential<'info> {
+    #[account(mut)]
+    pub credential: Box<Account<'info, Credential>>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
