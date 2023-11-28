@@ -524,6 +524,8 @@ pub struct Credential {
     pub authority: Pubkey,
     /// Credential's [Issuer]
     pub issuer: Pubkey,
+    /// Auto-increment issuer specific identifier
+    pub identifier: u64,
     /// Creation date
     pub created_at: i64,
     /// Processing date

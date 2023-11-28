@@ -35,20 +35,20 @@ pub fn handler(ctx: Context<CreateCredential>, data: CreateCredentialData) -> Re
         return Err(ProgramError::InvalidArgument.into());
     }
 
-    let authority = &ctx.accounts.authority;
-
-    let issuer = &mut ctx.accounts.issuer;
-    issuer.credential_counter += 1;
-
-    let credential = &mut ctx.accounts.credential;
-
     let timestamp = Clock::get()?.unix_timestamp;
+
+    let authority = &ctx.accounts.authority;
+    let issuer = &mut ctx.accounts.issuer;
+    let credential = &mut ctx.accounts.credential;
 
     credential.uri = data.uri;
     credential.issuer = issuer.key();
+    credential.identifier = issuer.credential_counter;
     credential.authority = authority.key();
     credential.created_at = timestamp;
     credential.bump = ctx.bumps.credential;
+
+    issuer.credential_counter += 1;
 
     Ok(())
 }
@@ -62,7 +62,7 @@ pub struct CreateCredentialData {
 pub struct CreateCredential<'info> {
     #[account(
         init,
-        seeds = [Credential::SEED, &issuer.credential_counter.to_le_bytes()],
+        seeds = [Credential::SEED, issuer.key().as_ref(), &issuer.credential_counter.to_le_bytes()],
         bump,
         payer = payer,
         space = Credential::space()
