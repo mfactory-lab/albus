@@ -74,7 +74,7 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
         if let Some(s) = signals.get(TIMESTAMP_SIGNAL) {
             let input_ts = bytes_to_num(req.public_inputs[s.index]);
             if (input_ts as i64) < timestamp - TIMESTAMP_THRESHOLD as i64 {
-                msg!("Error: Invalid timestamp input");
+                msg!("Error: Invalid timestamp, new proof required");
                 return Err(AlbusError::InvalidData.into());
             }
         }

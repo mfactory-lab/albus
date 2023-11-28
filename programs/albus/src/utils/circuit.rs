@@ -88,18 +88,6 @@ impl Signals {
         }
     }
 
-    // fn parse_signal(s: &str) -> (&str, usize) {
-    //     let (name, rest) = s.split_once('[').unwrap_or((s, ""));
-    //     let size = if let Some((n, rest)) = rest.split_once(']') {
-    //         let n = n.parse::<usize>().unwrap_or(1);
-    //         let (_, m) = Self::parse_signal(rest);
-    //         n * m
-    //     } else {
-    //         1
-    //     };
-    //     (name, size)
-    // }
-
     pub fn get(&self, k: &str) -> Option<&SignalValue> {
         self.data.get(k)
     }

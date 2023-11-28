@@ -57,11 +57,6 @@ pub fn handler<'info>(
 
     // Try to initialize share accounts
     if !ctx.remaining_accounts.is_empty() {
-        // let slots_ref = ctx.accounts.slot_hashes.try_borrow_data()?;
-        // let slots = &**slots_ref;
-        // let mut offset: usize = 1;
-        // let rand = u8::random_within_range(slots, &mut offset, 1, 3);
-
         if data.trustees.len() != ctx.remaining_accounts.len() {
             msg!(
                 "Invalid length of provided trustees, expected {}",
@@ -169,7 +164,7 @@ pub struct CreateInvestigationRequest<'info> {
     )]
     pub investigation_request: Box<Account<'info, InvestigationRequest>>,
 
-    #[account(has_one = service_provider)]
+    #[account(mut, has_one = service_provider)]
     pub proof_request: Box<Account<'info, ProofRequest>>,
 
     pub service_provider: Box<Account<'info, ServiceProvider>>,
