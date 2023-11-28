@@ -52,15 +52,17 @@ solana_security_txt::security_txt! {
 pub mod albus {
     use super::*;
 
-    // Credentials
+    // Issuer
 
-    // pub fn mint_credential(ctx: Context<MintCredential>, data: MintCredentialData) -> Result<()> {
-    //     mint_credential::handler(ctx, data)
-    // }
-    //
-    // pub fn revoke_credential(ctx: Context<RevokeCredential>) -> Result<()> {
-    //     revoke_credential::handler(ctx)
-    // }
+    pub fn create_issuer(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()> {
+        create_issuer::handler(ctx, data)
+    }
+
+    pub fn delete_issuer(ctx: Context<DeleteIssuer>) -> Result<()> {
+        delete_issuer::handler(ctx)
+    }
+
+    // Credential
 
     pub fn create_credential(
         ctx: Context<CreateCredential>,
@@ -78,16 +80,6 @@ pub mod albus {
 
     pub fn delete_credential(ctx: Context<DeleteCredential>) -> Result<()> {
         delete_credential::handler(ctx)
-    }
-
-    // Issuer
-
-    pub fn create_issuer(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()> {
-        create_issuer::handler(ctx, data)
-    }
-
-    pub fn delete_issuer(ctx: Context<DeleteIssuer>) -> Result<()> {
-        delete_issuer::handler(ctx)
     }
 
     // Circuit
@@ -214,6 +206,7 @@ pub mod albus {
 
     // Admin
 
+    #[cfg(feature = "devnet")]
     pub fn admin_close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
         close_account::close_account(ctx)
     }
