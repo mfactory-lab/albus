@@ -719,6 +719,8 @@ impl Processor {
         deposit_fee: Fee,
         referral_fee: u8,
         max_validators: u32,
+        deposit_policy: Option<Pubkey>,
+        add_validator_policy: Option<Pubkey>,
     ) -> ProgramResult {
         let account_info_iter = &mut accounts.iter();
         let stake_pool_info = next_account_info(account_info_iter)?;
@@ -948,6 +950,8 @@ impl Processor {
         stake_pool.next_sol_withdrawal_fee = FutureEpoch::None;
         stake_pool.last_epoch_pool_token_supply = 0;
         stake_pool.last_epoch_total_lamports = 0;
+        stake_pool.deposit_policy = deposit_policy;
+        stake_pool.add_validator_policy = add_validator_policy;
 
         borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)
             .map_err(|e| e.into())
@@ -3875,6 +3879,8 @@ impl Processor {
                 deposit_fee,
                 referral_fee,
                 max_validators,
+                deposit_policy,
+                add_validator_policy,
             } => {
                 msg!("Instruction: Initialize stake pool");
                 Self::process_initialize(
@@ -3885,6 +3891,8 @@ impl Processor {
                     deposit_fee,
                     referral_fee,
                     max_validators,
+                    deposit_policy,
+                    add_validator_policy,
                 )
             }
             StakePoolInstruction::AddValidatorToPool(seed) => {

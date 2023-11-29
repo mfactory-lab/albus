@@ -76,6 +76,10 @@ pub enum StakePoolInstruction {
         referral_fee: u8,
         /// Maximum expected number of validators
         max_validators: u32,
+        /// Albus policy for deposit
+        deposit_policy: Option<Pubkey>,
+        /// Albus policy for add new validator
+        add_validator_policy: Option<Pubkey>,
     },
 
     ///   (Staker only) Adds stake account delegated to validator to the pool's
@@ -739,6 +743,8 @@ pub fn initialize(
     deposit_fee: Fee,
     referral_fee: u8,
     max_validators: u32,
+    deposit_policy: Option<Pubkey>,
+    add_validator_policy: Option<Pubkey>,
 ) -> Instruction {
     let init_data = StakePoolInstruction::Initialize {
         fee,
@@ -746,6 +752,8 @@ pub fn initialize(
         deposit_fee,
         referral_fee,
         max_validators,
+        deposit_policy,
+        add_validator_policy,
     };
     let data = init_data.try_to_vec().unwrap();
     let mut accounts = vec![
