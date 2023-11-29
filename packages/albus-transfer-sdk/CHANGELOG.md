@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.4-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/transfer-sdk-v0.2.3...@albus-finance/transfer-sdk-v0.2.4-next.0) (2023-11-29)
+
+
+### 🐞 Bug Fixes
+
+* change program adress ([80fc1b9](https://github.com/mfactory-lab/albus/commit/80fc1b9508b0cff28c61525eb7661bc8102b92dc))
+* new program addresses ([73fca66](https://github.com/mfactory-lab/albus/commit/73fca66d856db7625e00009accf4d53ccbcd31b3))
+
 ## [0.2.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/transfer-sdk-v0.2.2...@albus-finance/transfer-sdk-v0.2.3) (2023-11-07)
 
 ## [0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/transfer-sdk-v0.2.1...@albus-finance/transfer-sdk-v0.2.2) (2023-11-07)
