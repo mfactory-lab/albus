@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.0...@albus-finance/swap-sdk-v0.1.2-next.1) (2023-11-29)
+
+
+### 🐞 Bug Fixes
+
+* change program adress ([80fc1b9](https://github.com/mfactory-lab/albus/commit/80fc1b9508b0cff28c61525eb7661bc8102b92dc))
+* new program addresses ([73fca66](https://github.com/mfactory-lab/albus/commit/73fca66d856db7625e00009accf4d53ccbcd31b3))
+
 ## [0.1.2-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.1...@albus-finance/swap-sdk-v0.1.2-next.0) (2023-11-17)
 
 
