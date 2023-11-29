@@ -39,6 +39,10 @@ test = "pnpm test:e2e"
 [test]
 startup_wait = 10000
 
+[[test.genesis]]
+address = "ASP9HnS3MzoVNrRYgr96UMRbsR1xbHa8xPrbJYKxYEZY"
+program = "target/deploy/albus_stake_pool.so"
+
 [test.validator]
 url = "https://api.mainnet-beta.solana.com"
 
