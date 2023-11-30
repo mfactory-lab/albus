@@ -54,24 +54,30 @@ export class CredentialManager extends BaseManager {
    */
   async create(props?: CreateCredentialProps, opts?: TxOpts) {
     const mint = Keypair.generate()
-    const owner = props?.owner ? new PublicKey(props?.owner) : this.provider.publicKey
+    const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
+    const tokenAccount = getAssociatedTokenAddress(mint.publicKey, authority)
 
     const ix = createCreateCredentialInstruction({
+      authority,
+      tokenAccount,
       mint: mint.publicKey,
-      tokenAccount: getAssociatedTokenAddress(mint.publicKey, owner),
       albusAuthority: this.pda.authority()[0],
       editionAccount: getMasterEditionPDA(mint.publicKey),
       metadataAccount: getMetadataPDA(mint.publicKey),
-      authority: this.provider.publicKey,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
 
-    const signature = await this.txBuilder
+    const builder = this.txBuilder
       .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
       .addInstruction(ix)
       .addSigner(mint)
-      .sendAndConfirm(opts?.confirm, opts?.feePayer)
+
+    if (props?.owner) {
+      builder.addSigner(props.owner)
+    }
+
+    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
 
     return { mintAddress: mint.publicKey, signature }
   }
@@ -216,7 +222,7 @@ export type CredentialInfo = {
 }
 
 export type CreateCredentialProps = {
-  owner?: PublicKeyInitData
+  owner?: Keypair
 }
 
 export type UpdateCredentialProps = {

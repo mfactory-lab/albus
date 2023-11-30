@@ -39,6 +39,7 @@ use mpl_token_metadata::types::{PrintSupply, TokenStandard};
 
 pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
+    let payer = &ctx.accounts.albus_authority;
 
     CreateV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .name(CREDENTIAL_NAME.into())
@@ -49,7 +50,7 @@ pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
         .master_edition(Some(&ctx.accounts.edition_account))
         .token_standard(TokenStandard::NonFungible)
         // .token_standard(TokenStandard::ProgrammableNonFungible)
-        .payer(&ctx.accounts.albus_authority)
+        .payer(payer)
         .authority(&ctx.accounts.albus_authority)
         .seller_fee_basis_points(0)
         .update_authority(&ctx.accounts.albus_authority, true)
@@ -68,7 +69,7 @@ pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
         .metadata(&ctx.accounts.metadata_account)
         .master_edition(Some(&ctx.accounts.edition_account))
         .authority(&ctx.accounts.albus_authority)
-        .payer(&ctx.accounts.albus_authority)
+        .payer(payer)
         .system_program(&ctx.accounts.system_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
         .spl_token_program(&ctx.accounts.token_program)
@@ -82,7 +83,7 @@ pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
         .mint(&ctx.accounts.mint)
         .master_edition(Some(&ctx.accounts.edition_account))
         .authority(&ctx.accounts.authority)
-        .payer(&ctx.accounts.albus_authority)
+        .payer(payer)
         .spl_token_program(Some(&ctx.accounts.token_program))
         .system_program(&ctx.accounts.system_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)

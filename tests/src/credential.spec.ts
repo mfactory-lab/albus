@@ -102,6 +102,20 @@ describe('albusCredential', async () => {
     assert.equal(tokenWithMint.state, AccountState.Frozen)
   })
 
+  it('can create credential for custom owner', async () => {
+    const owner = Keypair.generate()
+    const { mintAddress } = await holderClient.credential.create({ owner })
+    const nft = await mx.nfts().findByMint({ mintAddress })
+    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
+    const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
+      mint: mintAddress,
+      address: owner.publicKey,
+      addressType: 'owner',
+    })
+    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
+    assert.equal(tokenWithMint.state, AccountState.Frozen)
+  })
+
   it('can update credential', async () => {
     const data = {
       mint: credentialMint,
