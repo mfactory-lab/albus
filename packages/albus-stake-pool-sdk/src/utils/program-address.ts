@@ -1,51 +1,51 @@
-import { PublicKey } from '@solana/web3.js';
-import BN from 'bn.js';
-import { Buffer } from 'buffer';
+import { Buffer } from 'node:buffer'
+import { PublicKey } from '@solana/web3.js'
+import type BN from 'bn.js'
 import {
-  METADATA_PROGRAM_ID,
   EPHEMERAL_STAKE_SEED_PREFIX,
+  METADATA_PROGRAM_ID,
   TRANSIENT_STAKE_SEED_PREFIX,
-} from '../constants';
+} from '../constants'
 
 /**
- * Generates the withdraw authority program address for the stake pool
+ * Generates the withdrawal authority program address for the stake pool
  */
-export async function findWithdrawAuthorityProgramAddress(
+export function findWithdrawAuthorityProgramAddress(
   programId: PublicKey,
   stakePoolAddress: PublicKey,
 ) {
-  const [publicKey] = await PublicKey.findProgramAddress(
+  const [publicKey] = PublicKey.findProgramAddressSync(
     [stakePoolAddress.toBuffer(), Buffer.from('withdraw')],
     programId,
-  );
-  return publicKey;
+  )
+  return publicKey
 }
 
 /**
  * Generates the stake program address for a validator's vote account
  */
-export async function findStakeProgramAddress(
+export function findStakeProgramAddress(
   programId: PublicKey,
   voteAccountAddress: PublicKey,
   stakePoolAddress: PublicKey,
 ) {
-  const [publicKey] = await PublicKey.findProgramAddress(
+  const [publicKey] = PublicKey.findProgramAddressSync(
     [voteAccountAddress.toBuffer(), stakePoolAddress.toBuffer()],
     programId,
-  );
-  return publicKey;
+  )
+  return publicKey
 }
 
 /**
  * Generates the stake program address for a validator's vote account
  */
-export async function findTransientStakeProgramAddress(
+export function findTransientStakeProgramAddress(
   programId: PublicKey,
   voteAccountAddress: PublicKey,
   stakePoolAddress: PublicKey,
   seed: BN,
 ) {
-  const [publicKey] = await PublicKey.findProgramAddress(
+  const [publicKey] = PublicKey.findProgramAddressSync(
     [
       TRANSIENT_STAKE_SEED_PREFIX,
       voteAccountAddress.toBuffer(),
@@ -53,23 +53,23 @@ export async function findTransientStakeProgramAddress(
       seed.toBuffer('le', 8),
     ],
     programId,
-  );
-  return publicKey;
+  )
+  return publicKey
 }
 
 /**
  * Generates the ephemeral program address for stake pool redelegation
  */
-export async function findEphemeralStakeProgramAddress(
+export function findEphemeralStakeProgramAddress(
   programId: PublicKey,
   stakePoolAddress: PublicKey,
   seed: BN,
 ) {
-  const [publicKey] = await PublicKey.findProgramAddress(
+  const [publicKey] = PublicKey.findProgramAddressSync(
     [EPHEMERAL_STAKE_SEED_PREFIX, stakePoolAddress.toBuffer(), seed.toBuffer('le', 8)],
     programId,
-  );
-  return publicKey;
+  )
+  return publicKey
 }
 
 /**
@@ -79,6 +79,6 @@ export function findMetadataAddress(stakePoolMintAddress: PublicKey) {
   const [publicKey] = PublicKey.findProgramAddressSync(
     [Buffer.from('metadata'), METADATA_PROGRAM_ID.toBuffer(), stakePoolMintAddress.toBuffer()],
     METADATA_PROGRAM_ID,
-  );
-  return publicKey;
+  )
+  return publicKey
 }

@@ -8,7 +8,7 @@ export const METADATA_MAX_SYMBOL_LENGTH = 10
 export const METADATA_MAX_URI_LENGTH = 200
 
 // Public key that identifies the SPL Stake Pool program.
-export const STAKE_POOL_PROGRAM_ID = new PublicKey('SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy')
+export const STAKE_POOL_PROGRAM_ID = new PublicKey('ASP9HnS3MzoVNrRYgr96UMRbsR1xbHa8xPrbJYKxYEZY')
 
 // Maximum number of validators to update during UpdateValidatorListBalance.
 export const MAX_VALIDATORS_TO_UPDATE = 5

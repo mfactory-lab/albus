@@ -2,8 +2,7 @@ import { option, publicKey, struct, u32, u64, u8, vec } from '@coral-xyz/borsh'
 import type { Lockup } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
-import type {
-  Infer } from 'superstruct'
+import type { Infer } from 'superstruct'
 import {
   coerce,
   enums,
