@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.18...@albus-finance/sdk-v0.2.2-next.19) (2023-11-30)
+
+
+### 🐞 Bug Fixes
+
+* create credential with custom owner ([69a5f42](https://github.com/mfactory-lab/albus/commit/69a5f42e6875363aa07b2526e29e43d904643a88))
+
 ## [0.2.2-next.18](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.16...@albus-finance/sdk-v0.2.2-next.18) (2023-11-29)
 
 
