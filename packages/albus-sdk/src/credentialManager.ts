@@ -88,12 +88,12 @@ export class CredentialManager extends BaseManager {
    */
   async update(props: UpdateCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
-    const owner = new PublicKey(props.owner)
+    const tokenAccount = getAssociatedTokenAddress(mint, new PublicKey(props.owner))
 
     const ix = createUpdateCredentialInstruction({
       mint,
+      tokenAccount,
       albusAuthority: this.pda.authority()[0],
-      tokenAccount: getAssociatedTokenAddress(mint, owner),
       metadataAccount: getMetadataPDA(mint),
       authority: this.provider.publicKey,
       metadataProgram: METADATA_PROGRAM_ID,
