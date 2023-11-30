@@ -21,7 +21,6 @@ export type IssuerArgs = {
   isDisabled: boolean
   createdAt: beet.bignum
   bump: number
-  credentialCounter: number
   code: string
   name: string
   description: string
@@ -43,7 +42,6 @@ export class Issuer implements IssuerArgs {
     readonly isDisabled: boolean,
     readonly createdAt: beet.bignum,
     readonly bump: number,
-    readonly credentialCounter: number,
     readonly code: string,
     readonly name: string,
     readonly description: string,
@@ -60,7 +58,6 @@ export class Issuer implements IssuerArgs {
       args.isDisabled,
       args.createdAt,
       args.bump,
-      args.credentialCounter,
       args.code,
       args.name,
       args.description,
@@ -188,7 +185,6 @@ export class Issuer implements IssuerArgs {
         return x
       })(),
       bump: this.bump,
-      credentialCounter: this.credentialCounter,
       code: this.code,
       name: this.name,
       description: this.description,
@@ -214,7 +210,6 @@ export const issuerBeet = new beet.FixableBeetStruct<
     ['isDisabled', beet.bool],
     ['createdAt', beet.i64],
     ['bump', beet.u8],
-    ['credentialCounter', beet.u32],
     ['code', beet.utf8String],
     ['name', beet.utf8String],
     ['description', beet.utf8String],

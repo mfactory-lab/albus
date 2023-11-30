@@ -1013,13 +1013,6 @@
             "type": "u8"
           },
           {
-            "name": "credentialCounter",
-            "docs": [
-              "Amount of issued credentials"
-            ],
-            "type": "u32"
-          },
-          {
             "name": "code",
             "docs": [
               "Uniq code of the issuer"
