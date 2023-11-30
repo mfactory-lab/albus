@@ -117,21 +117,27 @@ export class CredentialManager extends BaseManager {
    */
   async delete(props: DeleteCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
+    const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
+    const tokenAccount = getAssociatedTokenAddress(mint, authority)
 
     const ix = createDeleteCredentialInstruction({
       mint,
-      tokenAccount: getAssociatedTokenAddress(mint, this.provider.publicKey),
+      tokenAccount,
       albusAuthority: this.pda.authority()[0],
       editionAccount: getMasterEditionPDA(mint),
       metadataAccount: getMetadataPDA(mint),
-      authority: this.provider.publicKey,
+      authority,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts?.confirm, opts?.feePayer)
+    const builder = this.txBuilder.addInstruction(ix)
+
+    if (props?.owner) {
+      builder.addSigner(props.owner)
+    }
+
+    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
 
     return { signature }
   }
@@ -233,6 +239,7 @@ export type UpdateCredentialProps = {
 }
 
 export type DeleteCredentialProps = {
+  owner?: Keypair
   mint: PublicKeyInitData
 }
 

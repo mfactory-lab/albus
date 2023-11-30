@@ -102,20 +102,6 @@ describe('albusCredential', async () => {
     assert.equal(tokenWithMint.state, AccountState.Frozen)
   })
 
-  it('can create credential for custom owner', async () => {
-    const owner = Keypair.generate()
-    const { mintAddress } = await holderClient.credential.create({ owner })
-    const nft = await mx.nfts().findByMint({ mintAddress })
-    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
-    const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
-      mint: mintAddress,
-      address: owner.publicKey,
-      addressType: 'owner',
-    })
-    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
-    assert.equal(tokenWithMint.state, AccountState.Frozen)
-  })
-
   it('can update credential', async () => {
     const data = {
       mint: credentialMint,
@@ -185,5 +171,21 @@ describe('albusCredential', async () => {
     assert.equal(accounts[1]?.exists, false, 'token account no longer exists')
     // assert.equal(accounts[2]?.exists, false, 'metadata account no longer exists')
     assert.equal(accounts[3]?.exists, false, 'edition account no longer exists')
+  })
+
+  it('can create and delete credential with custom owner', async () => {
+    const owner = Keypair.generate()
+    const { mintAddress } = await holderClient.credential.create({ owner })
+    const nft = await mx.nfts().findByMint({ mintAddress })
+    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
+    const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
+      mint: mintAddress,
+      address: owner.publicKey,
+      addressType: 'owner',
+    })
+    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
+    assert.equal(tokenWithMint.state, AccountState.Frozen)
+
+    await holderClient.credential.delete({ mint: mintAddress, owner })
   })
 })
