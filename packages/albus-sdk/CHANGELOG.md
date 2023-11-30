@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2-next.20](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.19...@albus-finance/sdk-v0.2.2-next.20) (2023-11-30)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed credential deletion with custom owner ([b44f785](https://github.com/mfactory-lab/albus/commit/b44f785dd7762a407f261ff2189c4057af0c3ff0))
+
 ## [0.2.2-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.18...@albus-finance/sdk-v0.2.2-next.19) (2023-11-30)
 
 
