@@ -9,11 +9,13 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js'
-import * as BufferLayout from '@solana/buffer-layout'
+
+import { option, publicKey, str, struct, u32, u64, u8 } from '@coral-xyz/borsh'
+
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import type BN from 'bn.js'
 import type { InstructionType } from './utils'
-import { decodeData, encodeData, option, publicKey } from './utils'
+import { decodeData, encodeData } from './utils'
 import {
   METADATA_MAX_NAME_LENGTH,
   METADATA_MAX_SYMBOL_LENGTH,
@@ -51,16 +53,16 @@ export type StakePoolInstructionType =
   | 'DecreaseValidatorStakeWithReserve'
   | 'Redelegate'
 
-const MOVE_STAKE_LAYOUT = BufferLayout.struct<any>([
-  BufferLayout.u8('instruction'),
-  BufferLayout.ns64('lamports'),
-  BufferLayout.ns64('transientStakeSeed'),
+const MOVE_STAKE_LAYOUT = struct<any>([
+  u8('instruction'),
+  u64('lamports'),
+  u64('transientStakeSeed'),
 ])
 
-const UPDATE_VALIDATOR_LIST_BALANCE_LAYOUT = BufferLayout.struct<any>([
-  BufferLayout.u8('instruction'),
-  BufferLayout.u32('startIndex'),
-  BufferLayout.u8('noMerge'),
+const UPDATE_VALIDATOR_LIST_BALANCE_LAYOUT = struct<any>([
+  u8('instruction'),
+  u32('startIndex'),
+  u8('noMerge'),
 ])
 
 export function tokenMetadataLayout(
@@ -83,21 +85,21 @@ export function tokenMetadataLayout(
 
   return {
     index: instruction,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
-      BufferLayout.u32('nameLen'),
-      BufferLayout.blob(nameLength, 'name'),
-      BufferLayout.u32('symbolLen'),
-      BufferLayout.blob(symbolLength, 'symbol'),
-      BufferLayout.u32('uriLen'),
-      BufferLayout.blob(uriLength, 'uri'),
+    layout: struct<any>([
+      u8('instruction'),
+      u32('nameLen'),
+      str('name'),
+      u32('symbolLen'),
+      str('symbol'),
+      u32('uriLen'),
+      str('uri'),
     ]),
   }
 }
 
 function feeLayout(property?: string) {
-  return BufferLayout.struct<any>(
-    [BufferLayout.nu64('denominator'), BufferLayout.nu64('numerator')],
+  return struct<any>(
+    [u64('denominator'), u64('numerator')],
     property,
   )
 }
@@ -112,30 +114,30 @@ export const STAKE_POOL_INSTRUCTION_LAYOUTS: {
   /// Initializes a new StakePool.
   Initialize: {
     index: 0,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
+    layout: struct<any>([
+      u8('instruction'),
       feeLayout('fee'),
       feeLayout('withdrawalFee'),
       feeLayout('depositFee'),
-      BufferLayout.u8('referralFee'),
-      BufferLayout.u32('maxValidators'),
-      option(publicKey('depositPolicy')),
-      option(publicKey('addValidatorPolicy')),
+      u8('referralFee'),
+      u32('maxValidators'),
+      option(publicKey(), 'depositPolicy'),
+      option(publicKey(), 'addValidatorPolicy'),
     ]),
   },
   /// (Staker only) Adds stake account delegated to validator to the pool's list of managed validators.
   AddValidatorToPool: {
     index: 1,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
+    layout: struct<any>([
+      u8('instruction'),
       // Optional non-zero u32 seed used for generating the validator stake address
-      // OptionLayout.of(BufferLayout.u32('seed')),
+      u32('seed'),
     ]),
   },
   /// (Staker only) Removes validator from the pool, deactivating its stake
   RemoveValidatorFromPool: {
     index: 2,
-    layout: BufferLayout.struct<any>([BufferLayout.u8('instruction')]),
+    layout: struct<any>([u8('instruction')]),
   },
   /// (Staker only) Decrease active stake on a validator, eventually moving it to the reserve
   DecreaseValidatorStake: {
@@ -149,10 +151,10 @@ export const STAKE_POOL_INSTRUCTION_LAYOUTS: {
   },
   // SetPreferredValidator: {
   //   index: 5,
-  //   layout: BufferLayout.struct<any>([
-  //     BufferLayout.u8('instruction'),
-  //     BufferLayout.u8('validatorType'),
-  //     BufferLayout.u64('validatorVoteAddress'), // Option<Pubkey>
+  //   layout: struct<any>([
+  //     u8('instruction'),
+  //     u8('validatorType'),
+  //     u64('validatorVoteAddress'), // Option<Pubkey>
   //   ]),
   // },
   UpdateValidatorListBalance: {
@@ -161,58 +163,58 @@ export const STAKE_POOL_INSTRUCTION_LAYOUTS: {
   },
   UpdateStakePoolBalance: {
     index: 7,
-    layout: BufferLayout.struct<any>([BufferLayout.u8('instruction')]),
+    layout: struct<any>([u8('instruction')]),
   },
   CleanupRemovedValidatorEntries: {
     index: 8,
-    layout: BufferLayout.struct<any>([BufferLayout.u8('instruction')]),
+    layout: struct<any>([u8('instruction')]),
   },
   DepositStake: {
     index: 9,
-    layout: BufferLayout.struct<any>([BufferLayout.u8('instruction')]),
+    layout: struct<any>([u8('instruction')]),
   },
   /// Withdraw the token from the pool at the current ratio.
   WithdrawStake: {
     index: 10,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
-      BufferLayout.ns64('poolTokens'),
+    layout: struct<any>([
+      u8('instruction'),
+      u64('poolTokens'),
     ]),
   },
   /// Deposit SOL directly into the pool's reserve account. The output is a "pool" token
   /// representing ownership into the pool. Inputs are converted to the current ratio.
   DepositSol: {
     index: 14,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
-      BufferLayout.ns64('lamports'),
+    layout: struct<any>([
+      u8('instruction'),
+      u64('lamports'),
     ]),
   },
   /// Withdraw SOL directly from the pool's reserve account. Fails if the
   /// reserve does not have enough SOL.
   WithdrawSol: {
     index: 16,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
-      BufferLayout.ns64('poolTokens'),
+    layout: struct<any>([
+      u8('instruction'),
+      u64('poolTokens'),
     ]),
   },
   IncreaseAdditionalValidatorStake: {
     index: 19,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
-      BufferLayout.ns64('lamports'),
-      BufferLayout.ns64('transientStakeSeed'),
-      BufferLayout.ns64('ephemeralStakeSeed'),
+    layout: struct<any>([
+      u8('instruction'),
+      u64('lamports'),
+      u64('transientStakeSeed'),
+      u64('ephemeralStakeSeed'),
     ]),
   },
   DecreaseAdditionalValidatorStake: {
     index: 20,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
-      BufferLayout.ns64('lamports'),
-      BufferLayout.ns64('transientStakeSeed'),
-      BufferLayout.ns64('ephemeralStakeSeed'),
+    layout: struct<any>([
+      u8('instruction'),
+      u64('lamports'),
+      u64('transientStakeSeed'),
+      u64('ephemeralStakeSeed'),
     ]),
   },
   DecreaseValidatorStakeWithReserve: {
@@ -221,18 +223,18 @@ export const STAKE_POOL_INSTRUCTION_LAYOUTS: {
   },
   Redelegate: {
     index: 22,
-    layout: BufferLayout.struct<any>([
-      BufferLayout.u8('instruction'),
+    layout: struct<any>([
+      u8('instruction'),
       /// Amount of lamports to redelegate
-      BufferLayout.ns64('lamports'),
+      u64('lamports'),
       /// Seed used to create source transient stake account
-      BufferLayout.ns64('sourceTransientStakeSeed'),
+      u64('sourceTransientStakeSeed'),
       /// Seed used to create destination ephemeral account.
-      BufferLayout.ns64('ephemeralStakeSeed'),
+      u64('ephemeralStakeSeed'),
       /// Seed used to create destination transient stake account. If there is
       /// already transient stake, this must match the current seed, otherwise
       /// it can be anything
-      BufferLayout.ns64('destinationTransientStakeSeed'),
+      u64('destinationTransientStakeSeed'),
     ]),
   },
 })
@@ -261,14 +263,14 @@ export type InitializeParams = {
 export type AddValidatorToPoolParams = {
   stakePool: PublicKey
   staker: PublicKey
-  // reserveStake: PublicKey;
-  funder: PublicKey
+  reserveStake: PublicKey
   withdrawAuthority: PublicKey
   validatorList: PublicKey
   validatorStake: PublicKey
   validatorVote: PublicKey
   /// (Optional) Seed to used to create the validator stake account.
   seed?: number
+  proofRequest?: PublicKey
 }
 
 export type RemoveValidatorFromPoolParams = {
@@ -379,6 +381,7 @@ export type DepositStakeParams = {
   managerFeeAccount: PublicKey
   referralPoolAccount: PublicKey
   poolMint: PublicKey
+  proofRequest?: PublicKey
 }
 
 /**
@@ -486,14 +489,15 @@ export class StakePoolInstruction {
    */
   static initialize(params: InitializeParams) {
     const type = STAKE_POOL_INSTRUCTION_LAYOUTS.Initialize
+
     const data = encodeData(type, {
       fee: params.fee,
       withdrawalFee: params.withdrawalFee,
       depositFee: params.depositFee,
       referralFee: params.referralFee,
       maxValidators: params.maxValidators,
-      depositPolicy: params.depositPolicy,
-      addValidatorPolicy: params.addValidatorPolicy,
+      depositPolicy: params.depositPolicy ?? null,
+      addValidatorPolicy: params.addValidatorPolicy ?? null,
     })
 
     const keys = [
@@ -529,8 +533,7 @@ export class StakePoolInstruction {
     const keys = [
       { pubkey: params.stakePool, isSigner: false, isWritable: true },
       { pubkey: params.staker, isSigner: true, isWritable: false },
-      { pubkey: params.funder, isSigner: true, isWritable: true },
-      // { pubkey: params.reserveStake, isSigner: false, isWritable: true },
+      { pubkey: params.reserveStake, isSigner: false, isWritable: true },
       { pubkey: params.withdrawAuthority, isSigner: false, isWritable: false },
       { pubkey: params.validatorList, isSigner: false, isWritable: true },
       { pubkey: params.validatorStake, isSigner: false, isWritable: true },
@@ -542,6 +545,10 @@ export class StakePoolInstruction {
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
       { pubkey: StakeProgram.programId, isSigner: false, isWritable: false },
     ]
+
+    if (params.proofRequest) {
+      keys.push({ pubkey: params.proofRequest, isSigner: false, isWritable: false })
+    }
 
     return new TransactionInstruction({
       programId: STAKE_POOL_PROGRAM_ID,
@@ -652,7 +659,7 @@ export class StakePoolInstruction {
   }
 
   /**
-   * Creates instruction to cleanup removed validator entries.
+   * Creates instruction to clean up removed validator entries.
    */
   static cleanupRemovedValidatorEntries(
     params: CleanupRemovedValidatorEntriesParams,
@@ -912,6 +919,7 @@ export class StakePoolInstruction {
       managerFeeAccount,
       referralPoolAccount,
       poolMint,
+      proofRequest,
     } = params
 
     const type = STAKE_POOL_INSTRUCTION_LAYOUTS.DepositStake
@@ -934,6 +942,10 @@ export class StakePoolInstruction {
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       { pubkey: StakeProgram.programId, isSigner: false, isWritable: false },
     ]
+
+    if (proofRequest) {
+      keys.push({ pubkey: proofRequest, isSigner: false, isWritable: false })
+    }
 
     return new TransactionInstruction({
       programId: STAKE_POOL_PROGRAM_ID,

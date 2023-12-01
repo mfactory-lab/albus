@@ -32,6 +32,7 @@
     "prepublishOnly": "vite build"
   },
   "dependencies": {
+    "@albus-finance/sdk": "workspace:^",
     "@coral-xyz/borsh": "^0.29.0",
     "@solana/buffer-layout": "^4.0.1",
     "@solana/spl-token": "^0.3.8",

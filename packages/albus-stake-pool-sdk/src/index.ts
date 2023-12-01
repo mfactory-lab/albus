@@ -8,6 +8,7 @@ import {
 } from '@solana/spl-token'
 import { create } from 'superstruct'
 import BN from 'bn.js'
+import { AlbusClient } from '@albus-finance/sdk'
 import type { ValidatorAccount } from './utils'
 import {
   arrayChunk,
@@ -26,7 +27,12 @@ import {
 import { StakePoolInstruction } from './instructions'
 import type { Fee, StakePool, ValidatorList, ValidatorStakeInfo } from './layouts'
 import { StakeAccount, StakePoolLayout, ValidatorListLayout, ValidatorStakeInfoLayout } from './layouts'
-import { MAX_VALIDATORS_TO_UPDATE, MINIMUM_ACTIVE_STAKE, STAKE_POOL_PROGRAM_ID } from './constants'
+import {
+  DEFAULT_MAX_VALIDATORS,
+  MAX_VALIDATORS_TO_UPDATE,
+  MINIMUM_ACTIVE_STAKE,
+  STAKE_POOL_PROGRAM_ID,
+} from './constants'
 
 export type { StakePool, AccountType, ValidatorList, ValidatorStakeInfo } from './layouts'
 export { STAKE_POOL_PROGRAM_ID } from './constants'
@@ -222,6 +228,14 @@ export async function depositStake(
     }).instructions,
   )
 
+  let proofRequest: PublicKey | undefined
+  if (stakePool.account.data.depositPolicy) {
+    [proofRequest] = AlbusClient.pda.proofRequest(
+      stakePool.account.data.depositPolicy,
+      authorizedPubkey,
+    )
+  }
+
   instructions.push(
     StakePoolInstruction.depositStake({
       stakePool: stakePoolAddress,
@@ -235,6 +249,7 @@ export async function depositStake(
       depositStake,
       validatorStake,
       poolMint,
+      proofRequest,
     }),
   )
 
@@ -1034,7 +1049,7 @@ type InitializeProps = {
   depositFee?: Fee
   withdrawalFee?: Fee
   referralFee?: number
-  // Default: 2950
+  // Default: 2949
   maxValidators?: number
   // Albus policy
   depositPolicy?: PublicKey
@@ -1060,7 +1075,7 @@ export async function initialize(props: InitializeProps) {
     addValidatorPolicy,
   } = props
 
-  const poolBalance = await connection.getMinimumBalanceForRentExemption(StakePoolLayout.span)
+  const poolBalance = await connection.getMinimumBalanceForRentExemption(StakePoolLayout.space)
 
   const stakePool = props.stakePool ?? Keypair.generate()
   const validatorList = props.validatorList ?? Keypair.generate()
@@ -1073,21 +1088,15 @@ export async function initialize(props: InitializeProps) {
       fromPubkey: manager.publicKey,
       newAccountPubkey: stakePool.publicKey,
       lamports: poolBalance,
-      space: StakePoolLayout.span,
+      space: StakePoolLayout.space,
       programId: STAKE_POOL_PROGRAM_ID,
     }),
   )
 
   // current supported max by the program, go big!
-  const maxValidators = props.maxValidators ?? 2950
-
-  // TODO: ValidatorListLayout.span returns -1
-  // const validatorListSpace = ValidatorListLayout.span + ValidatorStakeInfoLayout.span * maxValidators;
-  const validatorListSpace = 1 + 4 + 4 + ValidatorStakeInfoLayout.span * maxValidators
-
-  const validatorListBalance = await connection.getMinimumBalanceForRentExemption(
-    validatorListSpace,
-  )
+  const maxValidators = props.maxValidators ?? DEFAULT_MAX_VALIDATORS
+  const validatorListSpace = ValidatorListLayout.space + ValidatorStakeInfoLayout.space * maxValidators
+  const validatorListBalance = await connection.getMinimumBalanceForRentExemption(validatorListSpace)
 
   instructions.push(
     SystemProgram.createAccount({
@@ -1294,8 +1303,7 @@ export async function addValidatorToPool(
   connection: Connection,
   stakePoolAddress: PublicKey,
   validatorVote: PublicKey,
-  funder: PublicKey,
-  // seed?: number,
+  seed?: number,
 ) {
   const stakePool = await getStakePoolAccount(connection, stakePoolAddress)
 
@@ -1325,19 +1333,27 @@ export async function addValidatorToPool(
     stakePoolAddress,
   )
 
+  let proofRequest: PublicKey | undefined
+  if (stakePool.account.data.addValidatorPolicy) {
+    [proofRequest] = AlbusClient.pda.proofRequest(
+      stakePool.account.data.addValidatorPolicy,
+      validatorVote,
+    )
+  }
+
   const instructions: TransactionInstruction[] = []
 
   instructions.push(
     StakePoolInstruction.addValidatorToPool({
       stakePool: stakePoolAddress,
       staker: stakePool.account.data.staker,
-      funder,
-      // reserveStake: stakePool.account.data.reserveStake,
+      reserveStake: stakePool.account.data.reserveStake,
       validatorList: stakePool.account.data.validatorList,
       validatorStake,
       withdrawAuthority,
       validatorVote,
-      seed: undefined,
+      seed,
+      proofRequest,
     }),
   )
 

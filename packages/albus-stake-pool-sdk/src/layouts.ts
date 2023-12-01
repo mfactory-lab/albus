@@ -19,7 +19,7 @@ export type Fee = {
   numerator: BN
 }
 
-const feeFields = [u64('denominator'), u64('numerator')]
+export const feeFields = [u64('denominator'), u64('numerator')]
 
 export enum AccountType {
   Uninitialized,
@@ -27,12 +27,11 @@ export enum AccountType {
   ValidatorList,
 }
 
-export const BigNumFromString = coerce(instance(BN), string(), (value) => {
-  if (typeof value === 'string') {
-    return new BN(value, 10)
-  }
-  throw new Error('invalid big num')
-})
+export const BigNumFromString = coerce(
+  instance(BN),
+  string(),
+  value => new BN(value, 10),
+)
 
 export const PublicKeyFromString = coerce(
   instance(PublicKey),
@@ -115,6 +114,8 @@ export type StakePool = {
   nextSolWithdrawalFee?: Fee | undefined
   lastEpochPoolTokenSupply: BN
   lastEpochTotalLamports: BN
+  depositPolicy?: PublicKey
+  addValidatorPolicy?: PublicKey
 }
 
 export const StakePoolLayout = struct<StakePool>([
@@ -148,7 +149,13 @@ export const StakePoolLayout = struct<StakePool>([
   option(struct(feeFields), 'nextSolWithdrawalFee'),
   u64('lastEpochPoolTokenSupply'),
   u64('lastEpochTotalLamports'),
+
+  // Albus integration
+  option(publicKey(), 'depositPolicy'),
+  option(publicKey(), 'addValidatorPolicy'),
 ])
+
+StakePoolLayout.space = 501
 
 export enum ValidatorStakeInfoStatus {
   Active,
@@ -187,6 +194,8 @@ export const ValidatorStakeInfoLayout = struct<ValidatorStakeInfo>([
   publicKey('voteAccountAddress'),
 ])
 
+ValidatorStakeInfoLayout.space = 73
+
 export type ValidatorList = {
   /// Account type, must be ValidatorList currently
   accountType: number
@@ -201,3 +210,5 @@ export const ValidatorListLayout = struct<ValidatorList>([
   u32('maxValidators'),
   vec(ValidatorStakeInfoLayout, 'validators'),
 ])
+
+ValidatorListLayout.space = 1 + 4 + 4
