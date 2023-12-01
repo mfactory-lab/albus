@@ -28,7 +28,8 @@
 
 import { Transaction } from '@solana/web3.js'
 import type { ConfirmOptions, Signer, TransactionInstruction, TransactionInstructionCtorFields } from '@solana/web3.js'
-import type { AlbusClient, ClientProvider } from './client'
+import { AlbusClient } from './client'
+import type { ClientProvider } from './client'
 import { errorFromCode } from './generated'
 
 export abstract class BaseManager {
@@ -41,7 +42,7 @@ export abstract class BaseManager {
   }
 
   protected get pda() {
-    return this.client.pda
+    return AlbusClient.pda
   }
 
   protected trace(...msg: any[]) {

@@ -35,7 +35,7 @@ import { PROGRAM_ID } from './generated'
 export class PdaManager {
   programId = PROGRAM_ID
 
-  constructor(private encoder = new TextEncoder()) {}
+  constructor(private readonly encoder = new TextEncoder()) {}
 
   authority() {
     return PublicKey.findProgramAddressSync([this.programId.toBuffer()], this.programId)

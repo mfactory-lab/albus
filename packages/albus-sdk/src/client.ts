@@ -53,8 +53,9 @@ export type ClientOptions = {
 }
 
 export class AlbusClient {
+  static pda = new PdaManager()
+
   readonly options: ClientOptions
-  readonly pda: PdaManager
   readonly circuit: CircuitManager
   readonly policy: PolicyManager
   readonly service: ServiceManager
@@ -75,7 +76,6 @@ export class AlbusClient {
     }
 
     this.options = options ?? {}
-    this.pda = new PdaManager()
     this.eventManager = new EventManager(this, idl as any)
     this.issuer = new IssuerManager(this)
     this.circuit = new CircuitManager(this)
