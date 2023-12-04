@@ -2,7 +2,7 @@ name: Release(stake-pool-sdk)
 
 on:
   push:
-    branches: [ dev, main ]
+    branches: [ dev ]
     paths:
       - packages/albus-stake-pool-sdk/src/**
   workflow_dispatch:
