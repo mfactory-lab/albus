@@ -2,7 +2,7 @@ name: Release(swap-sdk)
 
 on:
   push:
-    branches: [ dev, main ]
+    branches: [ dev ]
     paths:
       - packages/albus-swap-sdk/src/**
   workflow_dispatch:
