@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.1.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/stake-pool-sdk-v0.1.0...@albus-finance/stake-pool-sdk-v0.1.1) (2023-12-04)
+
 ## 0.1.0 (2023-12-04)
 
 
