@@ -128,7 +128,7 @@ export class ProofRequest implements ProofRequestArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL',
+      'ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi',
     ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, proofRequestBeet)

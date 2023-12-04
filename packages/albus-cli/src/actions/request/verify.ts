@@ -29,7 +29,9 @@
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-type Opts = {}
+type Opts = {
+  // ...
+}
 
 export async function verifyRequest(addr: string, _opts: Opts) {
   const { client } = useContext()

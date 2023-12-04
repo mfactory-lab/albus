@@ -17,6 +17,7 @@ export type UpdateServiceProviderData = {
   website: beet.COption<string>
   contactInfo: beet.COption<ContactInfo>
   secretShareThreshold: beet.COption<number>
+  clearTrustees: boolean
 }
 
 /**
@@ -31,6 +32,7 @@ export const updateServiceProviderDataBeet
       ['website', beet.coption(beet.utf8String)],
       ['contactInfo', beet.coption(contactInfoBeet)],
       ['secretShareThreshold', beet.coption(beet.u8)],
+      ['clearTrustees', beet.bool],
     ],
     'UpdateServiceProviderData',
   )

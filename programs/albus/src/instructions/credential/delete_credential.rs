@@ -33,7 +33,7 @@ use anchor_spl::token::spl_token::instruction::AuthorityType;
 use anchor_spl::token::{set_authority, SetAuthority, Token};
 use mpl_token_metadata::instructions::{BurnV1CpiBuilder, ThawDelegatedAccountCpiBuilder};
 
-pub fn handler(ctx: Context<RevokeCredential>) -> Result<()> {
+pub fn handler(ctx: Context<DeleteCredential>) -> Result<()> {
     // assert_authorized(ctx.accounts.authority.key)?;
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
 
@@ -72,7 +72,7 @@ pub fn handler(ctx: Context<RevokeCredential>) -> Result<()> {
 }
 
 #[derive(Accounts)]
-pub struct RevokeCredential<'info> {
+pub struct DeleteCredential<'info> {
     /// CHECK:
     #[account(mut, seeds = [ID.as_ref()], bump)]
     pub albus_authority: AccountInfo<'info>,

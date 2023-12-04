@@ -1,0 +1,16 @@
+name: Release(stake-pool-sdk)
+
+on:
+  push:
+    branches: [ dev, main ]
+    paths:
+      - packages/albus-stake-pool-sdk/src/**
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Reusable
+    uses: ./.github/workflows/release.yml
+    secrets: inherit
+    with:
+      package: "@albus-finance/stake-pool-sdk"

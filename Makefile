@@ -1,7 +1,7 @@
 #!/usr/bin/make
 
 .DEFAULT_GOAL: help
-.PHONY: build bump test test-unit
+.PHONY: build build_pool bump test test-unit
 
 NETWORK ?= devnet
 PROGRAM ?= albus
@@ -19,6 +19,9 @@ help: ## Show this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[32m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 # ----------------------------------------------------------------------------------------------------------------------
+
+balance: ## Wallet balance
+	solana balance -k $(wallet)
 
 bump: ## Bump program version
 	cd ./programs/$(PROGRAM)/ && cargo bump
@@ -39,6 +42,7 @@ test-unit: ## Test unit
 
 sdk: ## Generate new sdk
 	pnpm -F @albus-finance/sdk generate
+	pnpm lint:fix
 
 deploy: build ## Deploy program
 	anchor deploy -p $(PROGRAM) --provider.cluster $(NETWORK)
@@ -55,6 +59,12 @@ close-buffers: ## Close program buffers
 
 clean:
 	rm -rf node_modules target .anchor
+
+spool-build: ## Build stake pool
+	cd ./programs/albus-stake-pool/ && cargo build-sbf
+
+spool-deploy: ## Deploy stake pool
+	solana program deploy -u $(NETWORK) --upgrade-authority $(wallet) ./target/deploy/albus_stake_pool.so
 
 #ifneq ($(NETWORK), $(shell cat target/network_changed 2>/dev/null))
 ##force update of target/network_changed if value of NETWORK changed from last time

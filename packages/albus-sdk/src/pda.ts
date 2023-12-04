@@ -29,12 +29,13 @@
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 
+import * as Albus from '@albus-finance/core'
 import { PROGRAM_ID } from './generated'
 
 export class PdaManager {
   programId = PROGRAM_ID
 
-  constructor(private encoder = new TextEncoder()) {}
+  constructor(private readonly encoder = new TextEncoder()) {}
 
   authority() {
     return PublicKey.findProgramAddressSync([this.programId.toBuffer()], this.programId)
@@ -44,6 +45,14 @@ export class PdaManager {
     return PublicKey.findProgramAddressSync([
       this.encoder.encode('issuer'),
       this.encoder.encode(code),
+    ], this.programId)
+  }
+
+  credential(issuer: PublicKeyInitData, id: number) {
+    return PublicKey.findProgramAddressSync([
+      this.encoder.encode('credential'),
+      new PublicKey(issuer).toBuffer(),
+      Albus.crypto.utils.hexToBytes(id.toString(16)),
     ], this.programId)
   }
 

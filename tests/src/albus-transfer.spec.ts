@@ -31,7 +31,7 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/s
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { beforeAll, describe, it } from 'vitest'
-import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk'
+import { AlbusClient } from '../../packages/albus-sdk'
 import { AlbusTransferClient } from '../../packages/albus-transfer-sdk/src'
 import { airdrop, createTestData, createTestProofRequest, payer, provider } from './utils'
 
@@ -47,7 +47,7 @@ describe('albusTransfer', () => {
     await airdrop(payer.publicKey)
     const testData = await createTestData(client, 'transfer')
     policy = testData.policy
-    proofRequest = await createTestProofRequest(client, client, 'transfer', ProofRequestStatus.Verified)
+    proofRequest = await createTestProofRequest(client, client, 'transfer')
   })
 
   it('can transfer SOL', async () => {

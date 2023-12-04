@@ -1,9 +1,58 @@
 {
-  "version": "0.0.22",
+  "version": "0.0.24",
   "name": "albus",
   "instructions": [
     {
-      "name": "mintCredential",
+      "name": "createIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateIssuerData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createCredential",
       "accounts": [
         {
           "name": "albusAuthority",
@@ -110,14 +159,7 @@
           ]
         }
       ],
-      "args": [
-        {
-          "name": "data",
-          "type": {
-            "defined": "MintCredentialData"
-          }
-        }
-      ]
+      "args": []
     },
     {
       "name": "updateCredential",
@@ -201,7 +243,7 @@
       ]
     },
     {
-      "name": "revokeCredential",
+      "name": "deleteCredential",
       "accounts": [
         {
           "name": "albusAuthority",
@@ -288,55 +330,6 @@
           "docs": [
             "System program."
           ]
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "createIssuer",
-      "accounts": [
-        {
-          "name": "issuer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "data",
-          "type": {
-            "defined": "CreateIssuerData"
-          }
-        }
-      ]
-    },
-    {
-      "name": "deleteIssuer",
-      "accounts": [
-        {
-          "name": "issuer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": []
@@ -857,7 +850,7 @@
         },
         {
           "name": "proofRequest",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -884,6 +877,27 @@
           }
         }
       ]
+    },
+    {
+      "name": "deleteInvestigationRequest",
+      "accounts": [
+        {
+          "name": "investigationRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     },
     {
       "name": "revealSecretShare",
@@ -1379,7 +1393,7 @@
           {
             "name": "encryptionKey",
             "docs": [
-              "The key that is used for secret sharing encryption."
+              "The key that is used for secret sharing encryption"
             ],
             "type": "publicKey"
           },
@@ -1440,6 +1454,15 @@
               "PDA bump"
             ],
             "type": "u8"
+          },
+          {
+            "name": "trustees",
+            "docs": [
+              "[Trustee] accounts that were used for secret sharing"
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
           }
         ]
       }
@@ -1581,7 +1604,7 @@
           {
             "name": "verifiedAt",
             "docs": [
-              "Timestamp for when the proof was verified"
+              "Timestamp for when the `proof` was verified"
             ],
             "type": "i64"
           },
@@ -1756,18 +1779,6 @@
           {
             "name": "extendIc",
             "type": "bool"
-          }
-        ]
-      }
-    },
-    {
-      "name": "MintCredentialData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "uri",
-            "type": "string"
           }
         ]
       }
@@ -2102,6 +2113,10 @@
             "type": {
               "option": "u8"
             }
+          },
+          {
+            "name": "clearTrustees",
+            "type": "bool"
           }
         ]
       }
@@ -2494,6 +2509,113 @@
           "index": false
         }
       ]
+    },
+    {
+      "name": "RevealSecretShareEvent",
+      "fields": [
+        {
+          "name": "investigationRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequestOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "trustee",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "status",
+          "type": {
+            "defined": "RevelationStatus"
+          },
+          "index": false
+        },
+        {
+          "name": "index",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "CreateInvestigationRequestEvent",
+      "fields": [
+        {
+          "name": "investigationRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequestOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "DeleteInvestigationRequestEvent",
+      "fields": [
+        {
+          "name": "investigationRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequestOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -2544,7 +2666,7 @@
     }
   ],
   "metadata": {
-    "address": "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL",
+    "address": "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi",
     "origin": "anchor",
     "binaryVersion": "0.29.0",
     "libVersion": "0.29.0"

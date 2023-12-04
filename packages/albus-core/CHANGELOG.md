@@ -7,8 +7,6 @@
 
 * **core:** fix version ([64e096f](https://github.com/mfactory-lab/albus/commit/64e096f283d933844782e8b55ab43bc448fff157))
 * **core:** improved zkp helpers and eddsa keys ([9efde7d](https://github.com/mfactory-lab/albus/commit/9efde7d234a0bcc040c2057630543880bda0e450))
-* **sdk:** fixed investigation reveal share ([2e76150](https://github.com/mfactory-lab/albus/commit/2e76150bd1714241a34622f422444142bcf710e0))
-
 
 ### ♻️ Refactors
 

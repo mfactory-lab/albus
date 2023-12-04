@@ -14,23 +14,23 @@ members = [
 ]
 
 [provider]
-#cluster = "localnet"
-cluster = "devnet"
-wallet= "./.secrets/upgrade-authority.json"
-#wallet = "~/.config/solana/id.json"
+cluster = "localnet"
+wallet = "~/.config/solana/albus.json"
 
 [programs.localnet]
-albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
-albus_swap = "J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea"
-albus_transfer = "J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c"
+albus = "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi"
+albus_swap = "ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq"
+albus_transfer = "ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe"
 
 [programs.devnet]
-albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
-albus_swap = "J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea"
-albus_transfer = "J4pyN7p9dAovEQKoZJV1jUbM3FrCBPLCS2dyiRUnwi5c"
+albus = "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi"
+albus_swap = "ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq"
+albus_transfer = "ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe"
 
 [programs.mainnet]
-albus = "ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL"
+albus = "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi"
+albus_swap = "ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq"
+albus_transfer = "ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe"
 
 [registry]
 url = "https://api.apr.dev"
@@ -41,13 +41,13 @@ test = "pnpm test:e2e"
 [test]
 startup_wait = 10000
 
+[[test.genesis]]
+address = "ASP9HnS3MzoVNrRYgr96UMRbsR1xbHa8xPrbJYKxYEZY"
+program = "target/deploy/albus_stake_pool.so"
+
 [test.validator]
 url = "https://api.mainnet-beta.solana.com"
 
 ### Token Metadata
 [[test.validator.clone]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-
-### Stake Pool
-#[[test.validator.clone]]
-#address = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"

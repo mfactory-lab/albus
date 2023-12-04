@@ -11,62 +11,68 @@ import * as web3 from '@solana/web3.js'
 
 /**
  * @category Instructions
- * @category RevokeCredential
+ * @category CreateCredential
  * @category generated
  */
-export const revokeCredentialStruct = new beet.BeetArgsStruct<{
+export const createCredentialStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'RevokeCredentialInstructionArgs',
+  'CreateCredentialInstructionArgs',
 )
 /**
- * Accounts required by the _revokeCredential_ instruction
+ * Accounts required by the _createCredential_ instruction
  *
  * @property [_writable_] albusAuthority
  * @property [_writable_] tokenAccount
- * @property [_writable_] mint
+ * @property [_writable_] tokenRecord (optional)
+ * @property [_writable_, **signer**] mint
  * @property [_writable_] metadataAccount
  * @property [_writable_] editionAccount
  * @property [_writable_, **signer**] authority
  * @property [] metadataProgram
  * @property [] sysvarInstructions
  * @category Instructions
- * @category RevokeCredential
+ * @category CreateCredential
  * @category generated
  */
-export type RevokeCredentialInstructionAccounts = {
+export type CreateCredentialInstructionAccounts = {
   albusAuthority: web3.PublicKey
   tokenAccount: web3.PublicKey
+  tokenRecord?: web3.PublicKey
   mint: web3.PublicKey
   metadataAccount: web3.PublicKey
   editionAccount: web3.PublicKey
   authority: web3.PublicKey
-  metadataProgram: web3.PublicKey
   tokenProgram?: web3.PublicKey
+  ataProgram?: web3.PublicKey
+  metadataProgram: web3.PublicKey
   sysvarInstructions: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const revokeCredentialInstructionDiscriminator = [
-  38, 123, 95, 95, 223, 158, 169, 87,
+export const createCredentialInstructionDiscriminator = [
+  205, 74, 60, 212, 63, 198, 196, 109,
 ]
 
 /**
- * Creates a _RevokeCredential_ instruction.
+ * Creates a _CreateCredential_ instruction.
+ *
+ * Optional accounts that are not provided default to the program ID since
+ * this was indicated in the IDL from which this instruction was generated.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @category Instructions
- * @category RevokeCredential
+ * @category CreateCredential
  * @category generated
  */
-export function createRevokeCredentialInstruction(
-  accounts: RevokeCredentialInstructionAccounts,
-  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
+export function createCreateCredentialInstruction(
+  accounts: CreateCredentialInstructionAccounts,
+  programId = new web3.PublicKey('ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'),
 ) {
-  const [data] = revokeCredentialStruct.serialize({
-    instructionDiscriminator: revokeCredentialInstructionDiscriminator,
+  const [data] = createCredentialStruct.serialize({
+    instructionDiscriminator: createCredentialInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
@@ -80,9 +86,14 @@ export function createRevokeCredentialInstruction(
       isSigner: false,
     },
     {
+      pubkey: accounts.tokenRecord ?? programId,
+      isWritable: accounts.tokenRecord != null,
+      isSigner: false,
+    },
+    {
       pubkey: accounts.mint,
       isWritable: true,
-      isSigner: false,
+      isSigner: true,
     },
     {
       pubkey: accounts.metadataAccount,
@@ -100,12 +111,17 @@ export function createRevokeCredentialInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.metadataProgram,
+      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
+      pubkey: accounts.ataProgram ?? splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.metadataProgram,
       isWritable: false,
       isSigner: false,
     },

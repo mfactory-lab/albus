@@ -35,7 +35,7 @@ pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
     pubkey!("4kMtMnYWFbsMc7M3jcdnfCceHaiXmrqaMz2QZQAmn88i"),
     #[cfg(feature = "devnet")]
     pubkey!("5tWk9EZcMpdKzxVGr4ZakZDHdWiqVJkLQ1b3v2vraDeH"),
-    pubkey!("AuTHJvxjcr2wB8xfZbciwfHNn8n1H2HrBz5yD2F6onWH"),
+    pubkey!("AuthxkATW25YDWX4kyDLh5qFMV1VhxKtRC9FBHh2JwZR"),
 ];
 
 /// Issuer signal name used in Albus circuits

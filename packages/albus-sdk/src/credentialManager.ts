@@ -30,15 +30,14 @@ import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-toke
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
 import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
-import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from '@solana/web3.js'
+import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js'
 import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
 import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
-  createMintCredentialInstruction,
-  createRevokeCredentialInstruction,
+  createCreateCredentialInstruction,
+  createDeleteCredentialInstruction,
   createUpdateCredentialInstruction,
-  errorFromCode,
 } from './generated'
 import type { ExtendedMetadata } from './utils'
 import {
@@ -55,39 +54,32 @@ export class CredentialManager extends BaseManager {
    */
   async create(props?: CreateCredentialProps, opts?: TxOpts) {
     const mint = Keypair.generate()
-    const owner = props?.owner ? new PublicKey(props?.owner) : this.provider.publicKey
+    const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
+    const tokenAccount = getAssociatedTokenAddress(mint.publicKey, authority)
 
-    const ix = createMintCredentialInstruction({
+    const ix = createCreateCredentialInstruction({
+      authority,
+      tokenAccount,
       mint: mint.publicKey,
-      tokenAccount: getAssociatedTokenAddress(mint.publicKey, owner),
       albusAuthority: this.pda.authority()[0],
       editionAccount: getMasterEditionPDA(mint.publicKey),
       metadataAccount: getMetadataPDA(mint.publicKey),
-      authority: this.provider.publicKey,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-    }, {
-      data: {
-        uri: '',
-      },
     })
 
-    try {
-      const tx = new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
-        .add(ix)
+    const builder = this.txBuilder
+      .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
+      .addInstruction(ix)
+      .addSigner(mint)
 
-      const signers: Signer[] = [mint]
-      if (opts?.feePayer) {
-        tx.feePayer = opts.feePayer.publicKey
-        signers.push(opts.feePayer)
-      }
-
-      const signature = await this.provider.sendAndConfirm(tx, signers, { ...this.provider.opts, ...opts?.confirm })
-      return { mintAddress: mint.publicKey, signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
+    if (props?.owner) {
+      builder.addSigner(props.owner)
     }
+
+    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+
+    return { mintAddress: mint.publicKey, signature }
   }
 
   /**
@@ -96,12 +88,12 @@ export class CredentialManager extends BaseManager {
    */
   async update(props: UpdateCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
-    const owner = new PublicKey(props.owner)
+    const tokenAccount = getAssociatedTokenAddress(mint, new PublicKey(props.owner))
 
     const ix = createUpdateCredentialInstruction({
       mint,
+      tokenAccount,
       albusAuthority: this.pda.authority()[0],
-      tokenAccount: getAssociatedTokenAddress(mint, owner),
       metadataAccount: getMetadataPDA(mint),
       authority: this.provider.publicKey,
       metadataProgram: METADATA_PROGRAM_ID,
@@ -113,63 +105,49 @@ export class CredentialManager extends BaseManager {
       },
     })
 
-    try {
-      const tx = new Transaction().add(ix)
-      const signers: Signer[] = []
-      if (opts?.feePayer) {
-        tx.feePayer = opts.feePayer.publicKey
-        signers.push(opts.feePayer)
-      }
-      const signature = await this.provider.sendAndConfirm(tx, signers, {
-        ...this.provider.opts,
-        ...opts?.confirm,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts?.confirm, opts?.feePayer)
+
+    return { signature }
   }
 
   /**
-   * Revoke credential and burn credential NFT.
+   * Delete credential and burn credential NFT.
    */
-  async revoke(props: RevokeCredentialProps, opts?: TxOpts) {
+  async delete(props: DeleteCredentialProps, opts?: TxOpts) {
     const mint = new PublicKey(props.mint)
+    const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
+    const tokenAccount = getAssociatedTokenAddress(mint, authority)
 
-    const ix = createRevokeCredentialInstruction({
+    const ix = createDeleteCredentialInstruction({
       mint,
-      tokenAccount: getAssociatedTokenAddress(mint, this.provider.publicKey),
+      tokenAccount,
       albusAuthority: this.pda.authority()[0],
       editionAccount: getMasterEditionPDA(mint),
       metadataAccount: getMetadataPDA(mint),
-      authority: this.provider.publicKey,
+      authority,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
 
-    try {
-      const tx = new Transaction().add(ix)
-      const signers: Signer[] = []
-      if (opts?.feePayer) {
-        tx.feePayer = opts.feePayer.publicKey
-        signers.push(opts.feePayer)
-      }
-      const signature = await this.provider.sendAndConfirm(tx, signers, {
-        ...this.provider.opts,
-        ...opts?.confirm,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
+    const builder = this.txBuilder.addInstruction(ix)
+
+    if (props?.owner) {
+      builder.addSigner(props.owner)
     }
+
+    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+
+    return { signature }
   }
 
   /**
    * Load a credential associated with a specified address.
    * This function retrieves, verifies, and optionally decrypts the credential.
    */
-  async load(addr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
-    const nft = await loadNft(this.provider.connection, addr, {
+  async load(mintAddr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
+    const nft = await loadNft(this.provider.connection, mintAddr, {
       authority: this.pda.authority()[0],
       code: CREDENTIAL_SYMBOL_CODE,
     })
@@ -250,7 +228,7 @@ export type CredentialInfo = {
 }
 
 export type CreateCredentialProps = {
-  owner?: PublicKeyInitData
+  owner?: Keypair
 }
 
 export type UpdateCredentialProps = {
@@ -260,7 +238,8 @@ export type UpdateCredentialProps = {
   name?: string
 }
 
-export type RevokeCredentialProps = {
+export type DeleteCredentialProps = {
+  owner?: Keypair
   mint: PublicKeyInitData
 }
 

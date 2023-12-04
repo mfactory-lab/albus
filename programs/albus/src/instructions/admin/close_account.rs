@@ -29,9 +29,6 @@
 use crate::utils::{assert_authorized, close};
 use anchor_lang::prelude::*;
 
-/// Close any program account
-/// Useful for fast cleanup
-/// Should be disabled in production
 pub fn close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
     assert_authorized(ctx.accounts.authority.key).and_then(|_| {
         close(

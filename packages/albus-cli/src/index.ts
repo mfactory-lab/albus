@@ -97,6 +97,19 @@ id.command('new')
   .action(actions.identity.create)
 
 // ------------------------------------------
+// Investigation Management
+// ------------------------------------------
+
+const investigation = cli.command('investigation')
+  .description('Investigation Management')
+
+investigation.command('show')
+  .description('Show investigation request')
+  .argument('<address>', 'Investigation address')
+  .option('--encryptionKey <string>', '(optional) Path to the encryption key')
+  .action(actions.investigation.show)
+
+// ------------------------------------------
 // VC Management
 // ------------------------------------------
 
@@ -275,7 +288,7 @@ trustee.command('create')
   .argument('name', 'The name of the trustee')
   .option('--email <string>', '(optional) Email')
   .option('--website <string>', '(optional) Website')
-  .option('--encryptionKeypair <string>', '(optional) Path to he encryption keypair')
+  .option('--encryptionKey <string>', '(optional) Path to the encryption key')
   .action(actions.trustee.create)
 
 trustee.command('verify')

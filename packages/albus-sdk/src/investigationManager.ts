@@ -44,6 +44,7 @@ import {
   InvestigationRequest,
   InvestigationRequestShare,
   createCreateInvestigationRequestInstruction,
+  createDeleteInvestigationRequestInstruction,
   createRevealSecretShareInstruction,
   errorFromCode,
   investigationRequestDiscriminator,
@@ -188,6 +189,37 @@ export class InvestigationManager extends BaseManager {
           data: props.noData ? null : InvestigationRequestShare.fromAccountInfo(acc.account)[0],
         }
       })
+  }
+
+  /**
+   * Delete {@link InvestigationRequest}
+   * Only investigation creator can delete it
+   */
+  async delete(props: DeleteInvestigationProps, opts?: ConfirmOptions) {
+    const authority = this.provider.publicKey
+    const investigationRequestAddr = new PublicKey(props.investigationRequest)
+    const investigationRequest = await this.load(investigationRequestAddr)
+
+    const ix = createDeleteInvestigationRequestInstruction({
+      investigationRequest: new PublicKey(props.investigationRequest),
+      anchorRemainingAccounts: investigationRequest.trustees.map(pubkey => ({
+        pubkey: this.pda.investigationRequestShare(investigationRequestAddr, pubkey)[0],
+        isSigner: false,
+        isWritable: true,
+      })),
+      authority,
+    })
+
+    try {
+      const tx = new Transaction().add(ix)
+      const signature = await this.provider.sendAndConfirm(tx, [], {
+        ...this.provider.opts,
+        ...opts,
+      })
+      return { signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
   }
 
   /**
@@ -367,20 +399,28 @@ export class InvestigationManager extends BaseManager {
       throw new Error('Invalid encryption key')
     }
 
-    const decryptedShares: [number, bigint][] = []
-    for (const { data } of shares) {
+    const decryptedShares = new Map<number, bigint>()
+    for (const { data, pubkey } of shares) {
+      if (data === null || decryptedShares.has(data.index)) {
+        continue
+      }
       const encBytes = Uint8Array.from(data?.share ?? [])
       if (encBytes.length === 0) {
+        this.trace('decryptData', `skip empty ${pubkey}...`)
         continue
       }
       const shareBytes = await Albus.crypto.XC20P.decryptBytes(encBytes, encKeypair.secretKey)
       const share = Albus.crypto.utils.bytesToBigInt(shareBytes)
-      decryptedShares.push([data?.index ?? 0, share])
+      decryptedShares.set(data.index, share)
     }
 
-    this.trace('decryptData', 'decryptedShares', decryptedShares)
+    this.trace('decryptData', 'decryptedShares', Array.from(decryptedShares.entries()))
 
-    const secret = Albus.crypto.reconstructShamirSecret(Albus.crypto.babyJub.F, investigationRequest.requiredShareCount, decryptedShares)
+    const secret = Albus.crypto.reconstructShamirSecret(
+      Albus.crypto.babyJub.F,
+      investigationRequest.requiredShareCount,
+      Array.from(decryptedShares.entries()),
+    )
 
     this.trace('decryptData', 'secret', secret)
 
@@ -402,6 +442,10 @@ export class InvestigationManager extends BaseManager {
 export type CreateInvestigationProps = {
   proofRequest: PublicKeyInitData | ProofRequest
   encryptionKey?: PublicKey
+}
+
+export type DeleteInvestigationProps = {
+  investigationRequest: PublicKeyInitData
 }
 
 export type FindInvestigationProps = {

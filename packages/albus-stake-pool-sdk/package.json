@@ -1,0 +1,50 @@
+{
+  "name": "@albus-finance/stake-pool-sdk",
+  "version": "0.0.1",
+  "description": "Albus Stake Pool SDK",
+  "_type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/albus-stake-pool-sdk"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "_dev": "vite build --watch",
+    "build": "vite build",
+    "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
+    "release": "release-it",
+    "release:ci": "release-it --ci -VV",
+    "release:dry": "release-it --ci --dry-run",
+    "release:pre": "release-it --preRelease=next",
+    "prepublishOnly": "vite build"
+  },
+  "dependencies": {
+    "@albus-finance/sdk": "workspace:^",
+    "@coral-xyz/borsh": "^0.29.0",
+    "@solana/buffer-layout": "^4.0.1",
+    "@solana/spl-token": "^0.3.8",
+    "@solana/web3.js": "^1.87.6",
+    "bn.js": "^5.2.0",
+    "buffer": "^6.0.3",
+    "superstruct": "^1.0.3"
+  },
+  "devDependencies": {
+    "release-it-config": "workspace:^"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -51,7 +51,7 @@ export const verifyProofRequestInstructionDiscriminator = [
  */
 export function createVerifyProofRequestInstruction(
   accounts: VerifyProofRequestInstructionAccounts,
-  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
+  programId = new web3.PublicKey('ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'),
 ) {
   const [data] = verifyProofRequestStruct.serialize({
     instructionDiscriminator: verifyProofRequestInstructionDiscriminator,

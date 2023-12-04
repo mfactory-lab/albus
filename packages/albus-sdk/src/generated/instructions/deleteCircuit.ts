@@ -49,7 +49,7 @@ export const deleteCircuitInstructionDiscriminator = [
  */
 export function createDeleteCircuitInstruction(
   accounts: DeleteCircuitInstructionAccounts,
-  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
+  programId = new web3.PublicKey('ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'),
 ) {
   const [data] = deleteCircuitStruct.serialize({
     instructionDiscriminator: deleteCircuitInstructionDiscriminator,

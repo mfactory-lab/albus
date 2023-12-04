@@ -49,7 +49,7 @@ export const deleteProofRequestInstructionDiscriminator = [
  */
 export function createDeleteProofRequestInstruction(
   accounts: DeleteProofRequestInstructionAccounts,
-  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
+  programId = new web3.PublicKey('ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'),
 ) {
   const [data] = deleteProofRequestStruct.serialize({
     instructionDiscriminator: deleteProofRequestInstructionDiscriminator,

@@ -1,6 +1,58 @@
 # Changelog
 
-## [0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.13...@albus-finance/sdk-v0.2.2) (2023-11-17)
+## [0.2.2-next.21](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.20...@albus-finance/sdk-v0.2.2-next.21) (2023-12-04)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** new idl ([056cd97](https://github.com/mfactory-lab/albus/commit/056cd97b0de7290f19e5e3368252ce2de2b15a2b))
+* **sdk:** pda improve ([6aa74ea](https://github.com/mfactory-lab/albus/commit/6aa74ea2e12d2c9891b13e2c959a201f3b62decf))
+* **sdk:** static `pda` ([21e9ce2](https://github.com/mfactory-lab/albus/commit/21e9ce2bc2b12d453a29795db32404bee9b4f133))
+
+
+### ♻️ Refactors
+
+* **sdk:** code improvements ([91f460a](https://github.com/mfactory-lab/albus/commit/91f460a450de0a312625bb18a008009506bed147))
+
+## [0.2.2-next.20](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.19...@albus-finance/sdk-v0.2.2-next.20) (2023-11-30)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed credential deletion with custom owner ([b44f785](https://github.com/mfactory-lab/albus/commit/b44f785dd7762a407f261ff2189c4057af0c3ff0))
+
+## [0.2.2-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.18...@albus-finance/sdk-v0.2.2-next.19) (2023-11-30)
+
+
+### 🐞 Bug Fixes
+
+* create credential with custom owner ([69a5f42](https://github.com/mfactory-lab/albus/commit/69a5f42e6875363aa07b2526e29e43d904643a88))
+
+## [0.2.2-next.18](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.16...@albus-finance/sdk-v0.2.2-next.18) (2023-11-29)
+
+
+### 🐞 Bug Fixes
+
+* new program address ([ad5e09a](https://github.com/mfactory-lab/albus/commit/ad5e09a59adb2d9067c6f34bc5a18beb13329609))
+* **sdk:** global improvements ([442e17a](https://github.com/mfactory-lab/albus/commit/442e17a7c1fcc0a3d644cadea3862451890ddf93))
+* **sdk:** set published version ([bdc09d4](https://github.com/mfactory-lab/albus/commit/bdc09d48218966e5b447e0e6075d1dfdbf2e760c))
+
+## [0.2.2-next.16](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.15...@albus-finance/sdk-v0.2.2-next.16) (2023-11-21)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix investigation `decryptData` ([f1c15b8](https://github.com/mfactory-lab/albus/commit/f1c15b8bf2a05ece880d39e8d176d7bf693a0228))
+
+## [0.2.2-next.15](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.14...@albus-finance/sdk-v0.2.2-next.15) (2023-11-20)
+
+## [0.2.2-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.13...@albus-finance/sdk-v0.2.2-next.14) (2023-11-20)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** delete investigation request, improved `InvestigationManager` ([13bd15c](https://github.com/mfactory-lab/albus/commit/13bd15c131bdbfc0bd64a17b23be3b006d2adf3f))
+* **sdk:** service update with empty trustees ([46c5034](https://github.com/mfactory-lab/albus/commit/46c5034905f9d479ac41c8e6251a83735aba7d8b))
 
 ## [0.2.2-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.12...@albus-finance/sdk-v0.2.2-next.13) (2023-11-17)
 

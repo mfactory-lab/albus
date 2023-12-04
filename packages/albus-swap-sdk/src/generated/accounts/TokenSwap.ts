@@ -117,7 +117,7 @@ export class TokenSwap implements TokenSwapArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'J8YCNcS2xDvowMcSzWrDYNguk5y9NWfGStNT4YsiKuea',
+      'ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq',
     ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, tokenSwapBeet)

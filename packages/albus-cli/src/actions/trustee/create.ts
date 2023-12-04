@@ -36,15 +36,15 @@ import { useContext } from '@/context'
 type Opts = {
   email?: string
   website?: string
-  encryptionKeypair?: string
+  encryptionKey?: string
 }
 
 export async function create(name: string, opts: Opts) {
   const { client } = useContext()
 
   let keypair: Keypair
-  if (opts.encryptionKeypair) {
-    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.encryptionKeypair).toString())))
+  if (opts.encryptionKey) {
+    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.encryptionKey).toString())))
   } else {
     keypair = Keypair.generate()
     log.info('New encryption keypair was generated!')

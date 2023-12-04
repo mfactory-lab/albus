@@ -28,7 +28,7 @@
 
 import { readFileSync } from 'node:fs'
 import { Buffer } from 'node:buffer'
-import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
+import { Metaplex, irysStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
@@ -56,8 +56,8 @@ export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: s
   const client = new AlbusClient(provider)
   const metaplex = Metaplex.make(provider.connection)
     .use(keypairIdentity(wallet.payer))
-    .use(bundlrStorage({
-      address: 'https://devnet.bundlr.network',
+    .use(irysStorage({
+      address: 'https://devnet.irys.xyz',
       providerUrl: connection.rpcEndpoint,
       timeout: 60000,
     }))

@@ -27,12 +27,13 @@
  */
 
 import { readFileSync } from 'node:fs'
-import { Metaplex, bundlrStorage, keypairIdentity } from '@metaplex-foundation/js'
+import { Metaplex, irysStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { assert } from 'vitest'
-import type { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk'
+import { ProofRequestStatus } from '../../packages/albus-sdk'
+import type { AlbusClient } from '../../packages/albus-sdk'
 
 export const payer = Keypair.fromSecretKey(Uint8Array.from([
   46, 183, 156, 94, 55, 128, 248, 0, 49, 70, 183, 244, 178, 0, 0, 236,
@@ -46,8 +47,8 @@ export const provider = newProvider(payer)
 export function netMetaplex(payerKeypair: Keypair) {
   return Metaplex.make(provider.connection)
     .use(keypairIdentity(payerKeypair))
-    .use(bundlrStorage({
-      address: 'https://devnet.bundlr.network',
+    .use(irysStorage({
+      address: 'https://devnet.irys.xyz',
       providerUrl: provider.connection.rpcEndpoint,
       timeout: 60000,
     }))
@@ -62,7 +63,7 @@ export function newProvider(keypair: Keypair) {
   )
 }
 
-export async function airdrop(addr: PublicKeyInitData, amount = 10) {
+export async function airdrop(addr: PublicKeyInitData, amount = 100) {
   await provider.connection.confirmTransaction(
     await provider.connection.requestAirdrop(new PublicKey(addr), amount * LAMPORTS_PER_SOL),
   )
@@ -76,12 +77,12 @@ export function loadFixture(name: string) {
   return readFileSync(`./fixtures/${name}`)
 }
 
-export async function createTestProofRequest(client: AlbusClient, adminClient: AlbusClient, prefix: string, status: ProofRequestStatus) {
+export async function createTestProofRequest(client: AlbusClient, adminClient: AlbusClient, prefix: string, status?: ProofRequestStatus) {
   const { address } = await client.proofRequest.create({
     serviceCode: `${prefix}_test`,
     policyCode: `${prefix}_test`,
   })
-  await adminClient.proofRequest.changeStatus({ proofRequest: address, status })
+  await adminClient.proofRequest.changeStatus({ proofRequest: address, status: status ?? ProofRequestStatus.Verified })
   return address
 }
 

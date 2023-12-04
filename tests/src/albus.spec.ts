@@ -435,6 +435,27 @@ describe('albus', async () => {
       assert.equal(String(result.claims.birthDate.value), credential.credentialSubject.birthDate)
       // console.log(result)
     })
+
+    it('can delete investigation request', async () => {
+      const newClient = new AlbusClient(newProvider(investigator))
+        .configure('debug', client.options.debug)
+
+      try {
+        const { signature } = await newClient.investigation
+          .delete({ investigationRequest: investigationAddress })
+        assert.ok(signature.length > 0)
+
+        try {
+          await newClient.investigation.load(investigationAddress)
+          assert.ok(false)
+        } catch (e) {
+          assert.ok(true)
+        }
+      } catch (e) {
+        console.log(e)
+        assert.ok(false)
+      }
+    })
   })
 
   it('can delete proof request', async () => {

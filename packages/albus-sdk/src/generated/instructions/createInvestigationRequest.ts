@@ -41,7 +41,7 @@ export const createInvestigationRequestStruct = new beet.FixableBeetArgsStruct<
  * Accounts required by the _createInvestigationRequest_ instruction
  *
  * @property [_writable_] investigationRequest
- * @property [] proofRequest
+ * @property [_writable_] proofRequest
  * @property [] serviceProvider
  * @property [_writable_, **signer**] authority
  * @category Instructions
@@ -74,7 +74,7 @@ export const createInvestigationRequestInstructionDiscriminator = [
 export function createCreateInvestigationRequestInstruction(
   accounts: CreateInvestigationRequestInstructionAccounts,
   args: CreateInvestigationRequestInstructionArgs,
-  programId = new web3.PublicKey('ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL'),
+  programId = new web3.PublicKey('ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'),
 ) {
   const [data] = createInvestigationRequestStruct.serialize({
     instructionDiscriminator:
@@ -89,7 +89,7 @@ export function createCreateInvestigationRequestInstruction(
     },
     {
       pubkey: accounts.proofRequest,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {

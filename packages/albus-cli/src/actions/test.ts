@@ -71,7 +71,7 @@ export async function credential(_opts: Opts) {
   console.log(res)
 
   log.info('Revoking NFT...')
-  await holderClient.credential.revoke({
+  await holderClient.credential.delete({
     mint: mintAddress,
   })
 

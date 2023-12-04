@@ -1,7 +1,7 @@
 {
   "name": "@albus-finance/sdk",
   "type": "module",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Albus Protocol SDK",
   "repository": {
     "type": "git",
@@ -41,11 +41,11 @@
     "@metaplex-foundation/beet": "^0.7.1",
     "@metaplex-foundation/beet-solana": "^0.4.0",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
-    "@solana/web3.js": "^1.77.3",
+    "@solana/web3.js": "^1.87.6",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@metaplex-foundation/solita": "^0.20.0",
+    "@metaplex-foundation/solita": "^0.20.1",
     "release-it-config": "workspace:^"
   },
   "publishConfig": {

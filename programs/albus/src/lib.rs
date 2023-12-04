@@ -36,7 +36,7 @@ mod utils;
 use anchor_lang::prelude::*;
 use instructions::*;
 
-declare_id!("ALBs64hsiHgdg53mvd4bcvNZLfDRhctSVaP7PwAPpsZL");
+declare_id!("ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi");
 
 #[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
@@ -52,10 +52,20 @@ solana_security_txt::security_txt! {
 pub mod albus {
     use super::*;
 
-    // Credentials
+    // Issuer
 
-    pub fn mint_credential(ctx: Context<MintCredential>, data: MintCredentialData) -> Result<()> {
-        mint_credential::handler(ctx, data)
+    pub fn create_issuer(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()> {
+        create_issuer::handler(ctx, data)
+    }
+
+    pub fn delete_issuer(ctx: Context<DeleteIssuer>) -> Result<()> {
+        delete_issuer::handler(ctx)
+    }
+
+    // Credential
+
+    pub fn create_credential(ctx: Context<CreateCredential>) -> Result<()> {
+        create_credential::handler(ctx)
     }
 
     pub fn update_credential(
@@ -65,18 +75,8 @@ pub mod albus {
         update_credential::handler(ctx, data)
     }
 
-    pub fn revoke_credential(ctx: Context<RevokeCredential>) -> Result<()> {
-        revoke_credential::handler(ctx)
-    }
-
-    // Issuer
-
-    pub fn create_issuer(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()> {
-        create_issuer::handler(ctx, data)
-    }
-
-    pub fn delete_issuer(ctx: Context<DeleteIssuer>) -> Result<()> {
-        delete_issuer::handler(ctx)
+    pub fn delete_credential(ctx: Context<DeleteCredential>) -> Result<()> {
+        delete_credential::handler(ctx)
     }
 
     // Circuit
@@ -186,6 +186,12 @@ pub mod albus {
         data: CreateInvestigationRequestData,
     ) -> Result<()> {
         create_investigation_request::handler(ctx, data)
+    }
+
+    pub fn delete_investigation_request<'info>(
+        ctx: Context<'_, '_, 'info, 'info, DeleteInvestigationRequest<'info>>,
+    ) -> Result<()> {
+        delete_investigation_request::handler(ctx)
     }
 
     pub fn reveal_secret_share(

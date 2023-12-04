@@ -26,10 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub mod mint_credential;
-pub mod revoke_credential;
+pub mod create_credential;
+pub mod delete_credential;
 pub mod update_credential;
 
-pub use self::mint_credential::*;
-pub use self::revoke_credential::*;
+pub use self::create_credential::*;
+pub use self::delete_credential::*;
 pub use self::update_credential::*;
