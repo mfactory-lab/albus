@@ -950,6 +950,8 @@ impl Processor {
         stake_pool.next_sol_withdrawal_fee = FutureEpoch::None;
         stake_pool.last_epoch_pool_token_supply = 0;
         stake_pool.last_epoch_total_lamports = 0;
+
+        // Albus integration
         stake_pool.deposit_policy = deposit_policy;
         stake_pool.add_validator_policy = add_validator_policy;
 
@@ -990,6 +992,14 @@ impl Processor {
             return Err(StakePoolError::InvalidState.into());
         }
 
+        // Albus integration
+        if let Some(policy) = stake_pool.add_validator_policy {
+            AlbusVerifier::new(next_account_info(account_info_iter)?)
+                .check_policy(policy)
+                // .check_owner(*validator_vote_info.key)
+                .run()?;
+        }
+
         stake_pool.check_authority_withdraw(
             withdraw_authority_info.key,
             program_id,
@@ -1002,14 +1012,6 @@ impl Processor {
 
         if stake_pool.last_update_epoch < clock.epoch {
             return Err(StakePoolError::StakeListAndPoolOutOfDate.into());
-        }
-
-        // Albus integration
-        if let Some(policy) = stake_pool.add_validator_policy {
-            AlbusVerifier::new(next_account_info(account_info_iter)?)
-                .check_policy(policy)
-                .check_owner(*validator_vote_info.key)
-                .run()?;
         }
 
         check_account_owner(validator_list_info, program_id)?;
@@ -1066,6 +1068,7 @@ impl Processor {
             .ok_or(StakePoolError::WrongStakeStake)?;
         let minimum_lamports = minimum_reserve_lamports(&reserve_meta);
         let reserve_lamports = reserve_stake_info.lamports();
+
         if reserve_lamports.saturating_sub(required_lamports) < minimum_lamports {
             msg!(
                 "Need to add {} lamports for the reserve stake to be rent-exempt after adding a validator, reserve currently has {} lamports",
@@ -2742,7 +2745,8 @@ impl Processor {
         if let Some(policy) = stake_pool.deposit_policy {
             AlbusVerifier::new(next_account_info(account_info_iter)?)
                 .check_policy(policy)
-                .check_owner(*stake_deposit_authority_info.key)
+                // TODO: user authority is not provided, get it from `dest_user_pool_info` ?
+                // .check_owner()
                 .run()?;
         }
 
@@ -3872,6 +3876,7 @@ impl Processor {
     /// Processes [Instruction](enum.Instruction.html).
     pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
         let instruction = StakePoolInstruction::try_from_slice(input)?;
+
         match instruction {
             StakePoolInstruction::Initialize {
                 fee,
@@ -3883,6 +3888,9 @@ impl Processor {
                 add_validator_policy,
             } => {
                 msg!("Instruction: Initialize stake pool");
+                msg!("deposit_policy {:?}", deposit_policy);
+                msg!("add_validator_policy {:?}", add_validator_policy);
+
                 Self::process_initialize(
                     program_id,
                     accounts,
