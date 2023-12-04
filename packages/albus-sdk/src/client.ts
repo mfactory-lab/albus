@@ -53,7 +53,7 @@ export type ClientOptions = {
 }
 
 export class AlbusClient {
-  static pda = new PdaManager()
+  static readonly pda = new PdaManager()
 
   readonly options: ClientOptions
   readonly circuit: CircuitManager
@@ -85,6 +85,10 @@ export class AlbusClient {
     this.trustee = new TrusteeManager(this)
     this.proofRequest = new ProofRequestManager(this)
     this.investigation = new InvestigationManager(this)
+  }
+
+  get pda() {
+    return AlbusClient.pda
   }
 
   get programId() {

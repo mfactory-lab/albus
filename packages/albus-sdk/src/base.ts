@@ -28,8 +28,7 @@
 
 import { Transaction } from '@solana/web3.js'
 import type { ConfirmOptions, Signer, TransactionInstruction, TransactionInstructionCtorFields } from '@solana/web3.js'
-import { AlbusClient } from './client'
-import type { ClientProvider } from './client'
+import type { AlbusClient, ClientProvider } from './client'
 import { errorFromCode } from './generated'
 
 export abstract class BaseManager {
@@ -42,7 +41,7 @@ export abstract class BaseManager {
   }
 
   protected get pda() {
-    return AlbusClient.pda
+    return this.client.pda
   }
 
   protected trace(...msg: any[]) {
@@ -58,7 +57,7 @@ export abstract class BaseManager {
 }
 
 export class TxBuilder {
-  txs: Array<{ tx: Transaction; signers?: Signer[] }> = []
+  txs: Array<{ tx: Transaction, signers?: Signer[] }> = []
 
   constructor(readonly provider: ClientProvider) {
     this.addTransaction(new Transaction(), [])
