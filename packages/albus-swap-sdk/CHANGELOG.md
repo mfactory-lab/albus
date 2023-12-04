@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4) (2023-12-04)
+
+## [v0.1.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4) (2023-11-17)
+
 ## [0.1.2-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.0...@albus-finance/swap-sdk-v0.1.2-next.2) (2023-11-29)
 
 
