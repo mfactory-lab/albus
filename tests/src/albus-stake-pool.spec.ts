@@ -94,7 +94,7 @@ describe('albusStakePool', async () => {
         fromPubkey: user.publicKey,
         authorized: new Authorized(user.publicKey, user.publicKey),
         lamports: (await provider.connection.getMinimumBalanceForRentExemption(StakeProgram.space))
-          + 10 * LAMPORTS_PER_SOL,
+        + 10 * LAMPORTS_PER_SOL,
         lockup: new Lockup(0, 0, user.publicKey),
         stakePubkey: keypair.publicKey,
       }))
@@ -265,8 +265,8 @@ describe('albusStakePool', async () => {
 
     try {
       await userClient.provider.sendAndConfirm(tx, signers)
-    } catch (e) {
-      // console.log(e.logs.find((l: string) => l.includes('Proof request is rejected')))
+    } catch (e: any) {
+      assert.ok(!!e.logs.find((l: string) => l.includes('Proof request is rejected')))
       assert.ok(true)
     }
   })

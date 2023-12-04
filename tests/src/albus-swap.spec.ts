@@ -31,7 +31,7 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/s
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
-import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk'
+import { AlbusClient } from '../../packages/albus-sdk'
 import { AlbusSwapClient, CurveType } from '../../packages/albus-swap-sdk/src'
 import { airdrop, createTestData, createTestProofRequest, deleteTestData, newProvider, payer, provider } from './utils'
 
@@ -116,7 +116,7 @@ describe('albusSwap', async () => {
   })
 
   it('can swap tokens', async () => {
-    const proofRequest = await createTestProofRequest(userClient, client, 'swap', ProofRequestStatus.Verified)
+    const proofRequest = await createTestProofRequest(userClient, client, 'swap')
 
     await userSwapClient.swap({
       authority: swapAuthority,
