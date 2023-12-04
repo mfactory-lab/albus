@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.2.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/transfer-sdk-v0.2.4-next.0...@albus-finance/transfer-sdk-v0.2.4) (2023-12-04)
+
 ## [0.2.4-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/transfer-sdk-v0.2.3...@albus-finance/transfer-sdk-v0.2.4-next.0) (2023-11-29)
 
 
