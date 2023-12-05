@@ -42,7 +42,7 @@ export function useContext() {
   return context
 }
 
-export function initContext({ cluster, keypair }: { cluster: Cluster; keypair: string }) {
+export function initContext({ cluster, keypair }: { cluster: Cluster, keypair: string }) {
   const opts = AnchorProvider.defaultOptions()
   const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
   const connection = new web3.Connection(endpoint, opts.commitment)

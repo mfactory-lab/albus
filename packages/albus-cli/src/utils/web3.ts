@@ -41,7 +41,7 @@ export function clusterUrl(c: Cluster) {
   return clusterApiUrl(c as any)
 }
 
-function exploreLink(id: string, opts: { type: 'tx' | 'address'; cluster?: Cluster }) {
+function exploreLink(id: string, opts: { type: 'tx' | 'address', cluster?: Cluster }) {
   let cluster: Cluster = opts.cluster ?? 'mainnet-beta'
   if (cluster.startsWith('http')) {
     if (cluster.includes('devnet')) {

@@ -413,7 +413,7 @@ type BJJProof = {
   type: ProofType.BJJSignature2021
   created: number
   verificationMethod?: string
-  proofValue: { r8y: string; r8x: string; s: string; ax?: string; ay?: string }
+  proofValue: { r8y: string, r8x: string, s: string, ax?: string, ay?: string }
   proofPurpose?: string
 } & Proof
 

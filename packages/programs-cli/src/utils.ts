@@ -48,6 +48,6 @@ export function exploreTransaction(signature: string) {
   return exploreLink(signature, { type: 'tx', cluster })
 }
 
-function exploreLink(id: string, opts: { type: 'tx' | 'address'; cluster?: Cluster }) {
+function exploreLink(id: string, opts: { type: 'tx' | 'address', cluster?: Cluster }) {
   return `https://explorer.solana.com/${opts.type}/${id}?cluster=${opts.cluster ?? 'mainnet-beta'}`
 }
