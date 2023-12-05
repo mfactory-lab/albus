@@ -31,10 +31,14 @@ import type { Cluster, PublicKeyInitData, Transaction } from '@solana/web3.js'
 import * as anchor from '@coral-xyz/anchor'
 import { useContext } from '../context'
 
-export function clusterUrl(c: Cluster) {
+export function clusterUrl(c: Cluster | string) {
   switch (c) {
+    case 'mainnet':
     case 'mainnet-beta':
-      return 'https://solana-api.projectserum.com/'
+      if (import.meta.env.CLI_SOLANA_MAINNET_CLUSTER) {
+        return import.meta.env.CLI_SOLANA_MAINNET_CLUSTER
+      }
+      break
     case 'testnet':
       return 'https://testnet.rpcpool.com'
   }

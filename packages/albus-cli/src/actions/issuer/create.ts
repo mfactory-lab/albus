@@ -31,6 +31,7 @@ import { readFileSync } from 'node:fs'
 import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
+import { capitalize } from '@/utils'
 
 type Opts = {
   name?: string
@@ -64,8 +65,4 @@ export async function create(code: string, opts: Opts) {
   log.info('\nDone')
   log.info(`Signature: ${signature}`)
   log.info(`Address: ${address}`)
-}
-
-function capitalize(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1)
 }

@@ -26,30 +26,38 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { Buffer } from 'node:buffer'
+import { readFileSync } from 'node:fs'
+import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
+import { AlbusClient } from '@albus-finance/sdk'
 import log from 'loglevel'
-import { show } from './show'
+import { Keypair } from '@solana/web3.js'
 import { useContext } from '@/context'
-import { capitalize } from '@/utils'
+import { clusterUrl } from '@/utils'
 
-type Opts = {
-  code: string
-  name?: string
-  authority?: string
-  website?: string
-  secretShareThreshold?: number
-  trustees?: string[]
-}
-
-export async function create(opts: Opts) {
+export async function migrate(_opts: any) {
   const { client } = useContext()
 
-  const { signature } = await client.service.create({
-    ...opts,
-    name: opts.name ?? capitalize(opts.code),
-  })
+  // mainnet connection
+  const opts = AnchorProvider.defaultOptions()
+  const keypair = import.meta.env.CLI_SOLANA_MAINNET_KEYPAIR
+  const wallet = new Wallet(
+    Keypair.fromSecretKey(Buffer.from(JSON.parse(
+      keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
+    ))),
+  )
+  const endpoint = import.meta.env.CLI_SOLANA_MAINNET_CLUSTER ?? clusterUrl('mainnet-beta')
+  const connection = new web3.Connection(endpoint, opts.commitment)
+  const prodClient = new AlbusClient(new AnchorProvider(connection, wallet, opts))
 
-  await show(opts.code)
+  log.info('Loading from mainnet...')
+  const issuers = await client.issuer.find()
 
-  log.info(`Signature: ${signature}`)
-  log.info('OK')
+  // for (const issuer of issuers) {
+  //   prodClient.issuer.create({
+  //     code: string
+  //     name: string
+  //   })
+  // }
+  console.log(issuers)
 }

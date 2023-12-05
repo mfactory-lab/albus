@@ -202,6 +202,11 @@ circuit.command('delete')
 const service = cli.command('service')
   .description('Service Management')
 
+service.command('all', { isDefault: true })
+  .description('Show all service providers')
+  .option('--authority', '(optional) filter by authority')
+  .action(actions.service.showAll)
+
 service.command('create')
   .description('Create new service')
   .requiredOption('--code <string>', 'service code')
@@ -231,11 +236,6 @@ service.command('show')
   .argument('addr', 'Service provider PDA`s address')
   .action(actions.service.show)
 
-service.command('all')
-  .description('Show all service providers')
-  .option('--authority', '(optional) filter by authority')
-  .action(actions.service.showAll)
-
 // ------------------------------------------
 // Policy Management
 // ------------------------------------------
@@ -248,6 +248,11 @@ policy.command('all', { isDefault: true })
   .option('-s, --serviceCode <string>', 'Filter by service code')
   .option('-s, --circuitCode <string>', 'Filter by circuit code')
   .action(actions.policy.showAll)
+
+policy.command('show')
+  .description('Show policy')
+  .argument('addrOrId', 'Policy address or identifier')
+  .action(actions.policy.show)
 
 policy.command('create')
   .description('Create new policy')
@@ -374,6 +379,9 @@ asset.command('upload')
 
 const admin = cli.command('admin')
   .description('Admin Management')
+
+admin.command('migrate')
+  .action(actions.admin.migrate)
 
 admin.command('address')
   .action(() => {

@@ -27,11 +27,29 @@
  */
 
 import log from 'loglevel'
+import { PublicKey } from '@solana/web3.js'
+import type { Policy } from '@albus-finance/sdk'
 import { useContext } from '@/context'
 
 type Opts = {
   circuitCode?: string
   serviceCode?: string
+}
+
+export async function show(idOrAddr: string) {
+  const { client } = useContext()
+  let policy: Policy
+  try {
+    const pubkey = new PublicKey(idOrAddr)
+    policy = await client.policy.load(pubkey)
+  } catch (e) {
+    policy = await client.policy.loadById(idOrAddr)
+  }
+
+  console.log(policy.pretty())
+
+  console.log('\nRULES:')
+  console.log(JSON.stringify(policy.rules))
 }
 
 export async function showAll(opts: Opts) {
