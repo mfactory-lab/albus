@@ -97,6 +97,9 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
                     req.issuer = iss.key();
                 }
             }
+        } else {
+            // reset issuer
+            req.issuer = Default::default();
         }
 
         // validate policy rules
