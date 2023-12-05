@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.5-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.3-next.3...@albus-finance/core-v0.3.5-next.0) (2023-12-05)
+
+
+### 🐞 Bug Fixes
+
+* **core:** fix version ([4ce7d9f](https://github.com/mfactory-lab/albus/commit/4ce7d9f9044642325ca510883c6b5ccf8540760d))
+
+
+### ♻️ Refactors
+
+* apply new lint rules ([bb30025](https://github.com/mfactory-lab/albus/commit/bb30025be223a559db2b4bf81466425f81f514f0))
+
+## [v0.3.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.3-next.3...@albus-finance/core-v0.3.5-next.0) (2023-11-17)
+
 ## [0.3.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.3-next.0...@albus-finance/core-v0.3.3) (2023-11-17)
 
 
