@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.5-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.5-next.0) (2023-12-05)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add trustee authority ([716ad50](https://github.com/mfactory-lab/albus/commit/716ad50cdfe81823a115507cf527a96cc4623133))
+
+## [v0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.5-next.0) (2023-11-17)
+
 ## [0.2.2-next.21](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.20...@albus-finance/sdk-v0.2.2-next.21) (2023-12-04)
 
 
