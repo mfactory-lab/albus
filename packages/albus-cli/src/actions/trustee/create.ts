@@ -29,13 +29,14 @@
 import { Buffer } from 'node:buffer'
 import { readFileSync } from 'node:fs'
 import * as Albus from '@albus-finance/core'
-import { Keypair } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
 type Opts = {
   email?: string
   website?: string
+  authority?: string
   encryptionKey?: string
 }
 
@@ -59,6 +60,7 @@ export async function create(name: string, opts: Opts) {
     name,
     email: opts.email ?? '',
     website: opts.website ?? '',
+    authority: opts.authority ? new PublicKey(opts.authority) : null,
   })
 
   log.info('\nDone')
