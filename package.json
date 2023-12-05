@@ -3,7 +3,7 @@
   "type": "module",
   "license": "AGPL-3.0",
   "scripts": {
-    "cli": "pnpm -F @albus-finance/cli run cli",
+    "cli": "node ./packages/albus-cli/dist/index.cjs",
     "cli:run": "pnpm -F @albus-finance/cli run run",
     "dev": "pnpm -r --parallel --filter=./packages/** run dev",
     "docs": "docsify serve ./docs",

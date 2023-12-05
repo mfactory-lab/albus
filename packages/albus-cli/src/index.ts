@@ -30,7 +30,7 @@ import type { Command } from 'commander'
 import { program as cli } from 'commander'
 import chalk from 'chalk'
 import log from 'loglevel'
-import { initContext } from '@/context'
+import { initContext, useContext } from '@/context'
 import * as actions from '@/actions'
 
 const VERSION = import.meta.env.VERSION
@@ -373,6 +373,13 @@ asset.command('upload')
 
 const admin = cli.command('admin')
   .description('Admin Management')
+
+admin.command('address')
+  .action(() => {
+    const { client } = useContext()
+    const addr = client.pda.authority()[0]
+    log.info(`Authority: ${addr}`)
+  })
 
 admin.command('fund')
   .description('Fund albus authority balance')
