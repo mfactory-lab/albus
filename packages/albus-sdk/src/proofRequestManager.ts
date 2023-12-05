@@ -267,7 +267,7 @@ export class ProofRequestManager extends BaseManager {
   /**
    * Decrypts data using the provided secret and signals.
    */
-  decryptData(props: { secret: bigint; signals: Record<string, any> }) {
+  decryptData(props: { secret: bigint, signals: Record<string, any> }) {
     const { secret, signals } = props
     const nonce = signals.timestamp as bigint
     const encryptedData = (signals.encryptedData ?? []) as bigint[]

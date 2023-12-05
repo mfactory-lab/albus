@@ -128,6 +128,7 @@ export class TrusteeManager extends BaseManager {
         name: props.name,
         email: props.email,
         website: props.website,
+        authority: props.authority,
       },
     })
 
