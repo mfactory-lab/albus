@@ -58,7 +58,7 @@ export async function update(code: string, opts: Opts) {
       if (rr.length < 2 || rr[1] === undefined) {
         throw new Error(`Invalid rule ${rr}, should be in format \`{key}:{value}\``)
       }
-      return { key: String(rr[0]), value: String(rr[1]) }
+      return { key: String(rr[0]), value: rr[2] ?? rr[1] }
     }),
   })
 
