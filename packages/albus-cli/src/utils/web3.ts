@@ -67,6 +67,11 @@ export function exploreTransaction(signature: string) {
   return exploreLink(signature, { type: 'tx', cluster })
 }
 
+// shorten the input address to have 5 characters at start and end
+export function shortenAddress(address: PublicKey | string, chars = 5): string {
+  return `${String(address).slice(0, chars)}...${String(address).slice(-chars)}`
+}
+
 /**
  * Generates a link for inspecting the contents
  */
