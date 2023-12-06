@@ -1,4 +1,4 @@
-pragma circom 2.1.4;
+pragma circom 2.1.6;
 
 /**
  * Convert number date `20220101` to date array `[2022, 01, 01]`
