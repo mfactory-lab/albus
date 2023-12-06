@@ -57,7 +57,8 @@ export function initContext({ cluster, keypair }: { cluster: Cluster, keypair: s
   const metaplex = Metaplex.make(provider.connection)
     .use(keypairIdentity(wallet.payer))
     .use(irysStorage({
-      address: 'https://devnet.irys.xyz',
+      // address: 'https://node1.irys.xyz',
+      // address: 'https://devnet.irys.xyz',
       providerUrl: connection.rpcEndpoint,
       timeout: 60000,
     }))
