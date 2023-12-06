@@ -70,7 +70,7 @@ describe('albusCredential', async () => {
   beforeAll(async () => {
     await airdrop(payer.publicKey)
     await airdrop(holder.publicKey)
-    await airdrop(updateAuthority)
+    // await airdrop(updateAuthority)
   })
 
   let credentialMint: PublicKey
@@ -83,7 +83,11 @@ describe('albusCredential', async () => {
 
   it('can create/update/delete credential with custom owner', async () => {
     const owner = Keypair.generate()
+
+    await airdrop(owner.publicKey)
+
     const { mintAddress } = await holderClient.credential.create({ owner })
+
     const nft = await mx.nfts().findByMint({ mintAddress })
     assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
     const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
