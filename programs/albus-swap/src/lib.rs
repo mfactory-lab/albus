@@ -149,7 +149,7 @@ pub mod albus_swap {
                 ctx.accounts
                     .proof_request
                     .as_ref()
-                    .expect("Prof request required"),
+                    .expect("Proof request required"),
             )
             .check_policy(policy)
             .check_owner(ctx.accounts.user_transfer_authority.key())
