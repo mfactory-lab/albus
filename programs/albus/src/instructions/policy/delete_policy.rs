@@ -32,7 +32,10 @@ use crate::errors::AlbusError;
 use crate::state::Policy;
 use crate::state::ServiceProvider;
 
-pub fn handler(_ctx: Context<DeletePolicy>) -> Result<()> {
+pub fn handler(ctx: Context<DeletePolicy>) -> Result<()> {
+    let service = &mut ctx.accounts.service_provider;
+    service.policy_count = service.policy_count.saturating_sub(1);
+
     Ok(())
 }
 
