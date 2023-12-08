@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.0...@albus-finance/sdk-v0.2.5-next.1) (2023-12-08)
+
+
+### 🐞 Bug Fixes
+
+* **albus:** add `payer` for credential creation ([45d123c](https://github.com/mfactory-lab/albus/commit/45d123cf03823ca6e2e8907b1165866a881d17d3))
+
 ## [0.2.5-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.5-next.0) (2023-12-05)
 
 
