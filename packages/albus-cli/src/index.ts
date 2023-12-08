@@ -32,6 +32,7 @@ import chalk from 'chalk'
 import log from 'loglevel'
 import { initContext, useContext } from '@/context'
 import * as actions from '@/actions'
+import { lamportsToSol } from '@/utils'
 
 const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
@@ -384,10 +385,13 @@ admin.command('migrate')
   .action(actions.admin.migrate)
 
 admin.command('address')
-  .action(() => {
+  .action(async () => {
     const { client } = useContext()
     const addr = client.pda.authority()[0]
+
+    const balance = await client.provider.connection.getBalance(addr)
     log.info(`Authority: ${addr}`)
+    log.info(`Balance: ${lamportsToSol(balance)}`)
   })
 
 admin.command('fund')
