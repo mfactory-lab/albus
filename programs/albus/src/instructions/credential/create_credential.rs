@@ -44,7 +44,7 @@ pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
     let payer = if ctx.accounts.albus_authority.lamports() > 22_000_000 {
         &ctx.accounts.albus_authority
     } else {
-        &ctx.accounts.authority
+        &ctx.accounts.payer
     };
 
     CreateV1CpiBuilder::new(&ctx.accounts.metadata_program)
@@ -166,6 +166,8 @@ pub struct CreateCredential<'info> {
     pub edition_account: UncheckedAccount<'info>,
 
     #[account(mut)]
+    pub payer: Signer<'info>,
+
     pub authority: Signer<'info>,
 
     /// SPL Token program.

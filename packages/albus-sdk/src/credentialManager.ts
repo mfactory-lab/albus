@@ -61,6 +61,7 @@ export class CredentialManager extends BaseManager {
       authority,
       tokenAccount,
       mint: mint.publicKey,
+      payer: this.provider.publicKey,
       albusAuthority: this.pda.authority()[0],
       editionAccount: getMasterEditionPDA(mint.publicKey),
       metadataAccount: getMetadataPDA(mint.publicKey),

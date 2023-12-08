@@ -112,8 +112,13 @@
           ]
         },
         {
-          "name": "authority",
+          "name": "payer",
           "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -536,7 +541,7 @@
         },
         {
           "name": "serviceProvider",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
