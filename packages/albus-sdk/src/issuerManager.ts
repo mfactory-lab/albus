@@ -105,6 +105,17 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
+   * Find issuers and return a map
+   */
+  async findMapped(props: FindIssuerProps = {}) {
+    return (await this.find(props))
+      .reduce((a, { pubkey, data }) => {
+        a.set(pubkey.toString(), data!)
+        return a
+      }, new Map<string, Issuer>())
+  }
+
+  /**
    * Find issuers
    * @param props
    */
