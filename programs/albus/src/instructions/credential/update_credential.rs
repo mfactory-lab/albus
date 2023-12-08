@@ -44,7 +44,7 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
         .authority(&ctx.accounts.albus_authority)
         .token(Some(&ctx.accounts.token_account))
         .mint(&ctx.accounts.mint)
-        .payer(&ctx.accounts.authority)
+        .payer(&ctx.accounts.albus_authority)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
         .system_program(&ctx.accounts.system_program)
         .data(Data {
@@ -106,8 +106,8 @@ pub struct UpdateCredential<'info> {
     // /// CHECK: account checked in CPI
     // #[account(mut)]
     // pub edition_account: UncheckedAccount<'info>,
-    #[account(mut)]
-    pub authority: Signer<'info>,
+    /// CHECK: account checked in CPI
+    pub authority: UncheckedAccount<'info>,
 
     /// Token Metadata program.
     ///

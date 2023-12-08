@@ -44,7 +44,7 @@ export const updateCredentialStruct = new beet.FixableBeetArgsStruct<
  * @property [] tokenAccount
  * @property [] mint
  * @property [_writable_] metadataAccount
- * @property [_writable_, **signer**] authority
+ * @property [] authority
  * @property [] metadataProgram
  * @property [] sysvarInstructions
  * @category Instructions
@@ -109,8 +109,8 @@ export function createUpdateCredentialInstruction(
     },
     {
       pubkey: accounts.authority,
-      isWritable: true,
-      isSigner: true,
+      isWritable: false,
+      isSigner: false,
     },
     {
       pubkey: accounts.metadataProgram,
