@@ -67,7 +67,7 @@ describe('albusCredential', async () => {
   console.log(`Holder: ${holder.publicKey}`)
   console.log(`UpdateAuthority: ${updateAuthority}`)
 
-  async function balance(addr: PublicKey) {
+  async function _balance(addr: PublicKey) {
     const balance = await provider.connection.getBalance(addr)
     console.log(`Balance(${addr}): ${balance}`)
   }
