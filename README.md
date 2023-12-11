@@ -25,6 +25,7 @@
 # Full documentation
 
 - [Introduction](https://github.com/mfactory-lab/albus/wiki)
+- [Architecture](https://github.com/mfactory-lab/albus/wiki/architecture)
 - [User workflows](https://github.com/mfactory-lab/albus/wiki/user-workflows)
   - [Business user workflow](https://github.com/mfactory-lab/albus/wiki/user-workflows#business-user-workflow)
   - [End user workflow](https://github.com/mfactory-lab/albus/wiki/user-workflows#end-user-workflows)
