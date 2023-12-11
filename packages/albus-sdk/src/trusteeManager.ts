@@ -74,7 +74,7 @@ export class TrusteeManager extends BaseManager {
    * Find trustees
    */
   async find(props: FindTrusteeProps = {}) {
-    const builder = Trustee.gpaBuilder()
+    const builder = Trustee.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', trusteeDiscriminator)
 
     if (props.noData) {
@@ -130,7 +130,7 @@ export class TrusteeManager extends BaseManager {
         website: props.website,
         authority: props.authority,
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -156,7 +156,7 @@ export class TrusteeManager extends BaseManager {
         website: props.website ?? null,
         newAuthority: props.newAuthority ?? null,
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -173,7 +173,7 @@ export class TrusteeManager extends BaseManager {
     const ix = createVerifyTrusteeInstruction({
       trustee: new PublicKey(trustee),
       authority,
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -190,7 +190,7 @@ export class TrusteeManager extends BaseManager {
     const ix = createDeleteTrusteeInstruction({
       trustee: new PublicKey(trustee),
       authority,
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)

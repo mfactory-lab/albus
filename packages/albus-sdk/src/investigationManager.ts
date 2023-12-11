@@ -108,7 +108,7 @@ export class InvestigationManager extends BaseManager {
    * @param props
    */
   async find(props: FindInvestigationProps = {}) {
-    const builder = InvestigationRequest.gpaBuilder()
+    const builder = InvestigationRequest.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', investigationRequestDiscriminator)
 
     if (props.noData) {
@@ -152,7 +152,7 @@ export class InvestigationManager extends BaseManager {
    * @param props
    */
   async findShares(props: FindInvestigationShareProps = {}) {
-    const builder = InvestigationRequestShare.gpaBuilder()
+    const builder = InvestigationRequestShare.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', investigationRequestShareDiscriminator)
 
     if (props.noData) {
@@ -208,7 +208,7 @@ export class InvestigationManager extends BaseManager {
         isWritable: true,
       })),
       authority,
-    })
+    }, this.programId)
 
     try {
       const tx = new Transaction().add(ix)
@@ -281,7 +281,7 @@ export class InvestigationManager extends BaseManager {
         encryptionKey: props.encryptionKey ?? authority,
         trustees: selectedTrustees,
       },
-    })
+    }, this.programId)
 
     try {
       const tx = new Transaction().add(ix)
@@ -369,7 +369,7 @@ export class InvestigationManager extends BaseManager {
         share: newEncryptedShare,
         index: index + 1,
       },
-    })
+    }, this.programId)
 
     try {
       const tx = new Transaction().add(ix)

@@ -120,7 +120,7 @@ export class IssuerManager extends BaseManager {
    * @param props
    */
   async find(props: FindIssuerProps = {}) {
-    const builder = Issuer.gpaBuilder()
+    const builder = Issuer.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', issuerDiscriminator)
 
     if (props.authority) {
@@ -166,21 +166,19 @@ export class IssuerManager extends BaseManager {
     const authority = this.provider.publicKey
     const [issuer] = this.pda.issuer(props.code)
 
-    const instruction = createCreateIssuerInstruction(
-      {
-        issuer,
-        authority,
+    const instruction = createCreateIssuerInstruction({
+      issuer,
+      authority,
+    },
+    {
+      data: {
+        code: props.code,
+        name: props.name,
+        description: props.description ?? '',
+        pubkey: props.keypair.publicKey,
+        zkPubkey: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.keypair.secretKey)),
       },
-      {
-        data: {
-          code: props.code,
-          name: props.name,
-          description: props.description ?? '',
-          pubkey: props.keypair.publicKey,
-          zkPubkey: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.keypair.secretKey)),
-        },
-      },
-    )
+    }, this.programId)
 
     try {
       const tx = new Transaction().add(instruction)
@@ -207,7 +205,7 @@ export class IssuerManager extends BaseManager {
     const instruction = createDeleteIssuerInstruction({
       issuer: new PublicKey(props.issuer),
       authority,
-    })
+    }, this.programId)
     try {
       const tx = new Transaction().add(instruction)
       const signature = await this.provider.sendAndConfirm(tx, [], {
@@ -220,6 +218,11 @@ export class IssuerManager extends BaseManager {
     }
   }
 
+  /**
+   * Convert issuer `babyjub` pubkey to bytes
+   * @param pubkey
+   * @private
+   */
   private zkPubkeyToBytes(pubkey: [bigint, bigint]) {
     return pubkey.reduce((bytes: number[], i) => {
       return [...bytes, ...Albus.crypto.utils.bigintToBytes(BigInt(i), 32)]

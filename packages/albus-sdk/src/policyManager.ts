@@ -77,7 +77,7 @@ export class PolicyManager extends BaseManager {
    * @returns {Promise<{pubkey: PublicKey, data: Policy}[]>} A Promise that resolves to an array of policy results.
    */
   async find(props: FindPolicyProps = {}) {
-    const builder = Policy.gpaBuilder()
+    const builder = Policy.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', policyDiscriminator)
 
     if (props.withoutData) {
@@ -128,7 +128,7 @@ export class PolicyManager extends BaseManager {
         retentionPeriod: props.retentionPeriod ?? 0,
         rules: preparePolicyRules(props),
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -162,7 +162,7 @@ export class PolicyManager extends BaseManager {
         retentionPeriod: props.retentionPeriod ?? null,
         rules: preparePolicyRules(props),
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -188,7 +188,7 @@ export class PolicyManager extends BaseManager {
       policy,
       serviceProvider,
       authority,
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)

@@ -67,7 +67,7 @@ export class CredentialManager extends BaseManager {
       metadataAccount: getMetadataPDA(mint.publicKey),
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-    })
+    }, this.programId)
 
     const builder = this.txBuilder
       .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
@@ -104,7 +104,7 @@ export class CredentialManager extends BaseManager {
         name: props.name ?? CREDENTIAL_NAME,
         uri: props.uri,
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -130,7 +130,7 @@ export class CredentialManager extends BaseManager {
       authority,
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-    })
+    }, this.programId)
 
     const builder = this.txBuilder.addInstruction(ix)
 

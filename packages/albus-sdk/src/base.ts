@@ -36,6 +36,10 @@ export abstract class BaseManager {
 
   protected traceNamespace: string = this.constructor.name
 
+  protected get programId() {
+    return this.client.programId
+  }
+
   protected get provider() {
     return this.client.provider
   }

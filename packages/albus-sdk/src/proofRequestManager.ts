@@ -131,7 +131,7 @@ export class ProofRequestManager extends BaseManager {
    * Find proof requests based on specified criteria.
    */
   async find(props: FindProofRequestProps = {}) {
-    const builder = ProofRequest.gpaBuilder()
+    const builder = ProofRequest.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', proofRequestDiscriminator)
 
     if (props.noData) {
@@ -202,6 +202,7 @@ export class ProofRequestManager extends BaseManager {
           maxPublicInputs,
         },
       },
+      this.programId,
     )
 
     const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
@@ -220,7 +221,7 @@ export class ProofRequestManager extends BaseManager {
     const ix = createDeleteProofRequestInstruction({
       proofRequest: new PublicKey(props.proofRequest),
       authority,
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
 
@@ -242,6 +243,7 @@ export class ProofRequestManager extends BaseManager {
           status: props.status,
         },
       },
+      this.programId,
     )
 
     const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
@@ -369,6 +371,7 @@ export class ProofRequestManager extends BaseManager {
                 proof: null,
               },
             },
+            this.programId,
           )),
         )
       }
@@ -390,6 +393,7 @@ export class ProofRequestManager extends BaseManager {
             proof,
           },
         },
+        this.programId,
       )),
     )
 
@@ -402,7 +406,7 @@ export class ProofRequestManager extends BaseManager {
             proofRequest: new PublicKey(props.proofRequest),
             circuit: proofRequest.circuit,
             authority,
-          }),
+          }, this.programId),
           ),
       )
     }
