@@ -1,0 +1,31 @@
+name: Deploy Program
+
+on:
+  workflow_dispatch:
+    inputs:
+      solana-cluster:
+        description: Solana cluster
+        type: choice
+        default: devnet
+        options:
+          - devnet
+          - testnet
+          - mainnet
+      program:
+        description: Program to upgrade
+        type: choice
+        default: albus
+        options:
+          - albus
+          - albus-swap
+          - albus-transfer
+          - albus-stake-pool
+
+jobs:
+  deploy-albus:
+    name: Reusable
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      program: ${{ inputs.program }}
+      solana-cluster: ${{ inputs.solana-cluster }}

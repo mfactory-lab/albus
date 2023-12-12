@@ -1,0 +1,36 @@
+name: Deploy Program
+
+on:
+  workflow_call:
+    inputs:
+      program:
+        type: string
+        required: true
+      solana-cluster:
+        type: string
+        required: false
+        default: 'devnet'
+    secrets:
+      UPGRADE_AUTHORITY:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: backpackapp/build:v0.29.0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Solana Key
+        run: |
+          echo "echo \"${{ secrets.UPGRADE_AUTHORITY }}\" > ~/.config/solana/albus.json" >> run
+
+      - name: Balance
+        run: make balance PROGRAM=${{ inputs.program }} NETWORK=${{ inputs.solana-cluster }}
+
+      - name: Build
+        run: make build PROGRAM=${{ inputs.program }} NETWORK=${{ inputs.solana-cluster }}
+
+      - name: Upgrade
+        run: make upgrade PROGRAM=${{ inputs.program }} NETWORK=${{ inputs.solana-cluster }}
