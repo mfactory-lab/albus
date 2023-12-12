@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.4-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4-next.0) (2023-12-11)
+
+
+### 🐞 Bug Fixes
+
+* **swap:** handle wrapped sol transactions ([5936cdf](https://github.com/mfactory-lab/albus/commit/5936cdfd6f883f2f826427d7ce99e8ecf8f26ec8))
+
+## [v0.1.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4-next.0) (2023-11-17)
+
 ## [0.1.2-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.0...@albus-finance/swap-sdk-v0.1.2-next.2) (2023-11-29)
 
 
