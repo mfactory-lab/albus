@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
+  release-core:
     name: Reusable
     uses: ./.github/workflows/release.yml
     secrets: inherit
