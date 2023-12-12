@@ -108,13 +108,9 @@ impl<'a> Groth16Verifier<'a> {
 
     pub fn verify(&self) -> Result<bool, Groth16Error> {
         let mut acc = self.vk.ic[0];
-        // let mut input = [u8::default(); G1_SIZE + ALT_BN128_FIELD_SIZE];
         let mut input = Vec::with_capacity(G1_SIZE + ALT_BN128_FIELD_SIZE);
 
         for (i, ic) in self.public_inputs.iter().zip(self.vk.ic.iter().skip(1)) {
-            // input[..G1_SIZE].copy_from_slice(ic);
-            // input[G1_SIZE..].copy_from_slice(i);
-
             input.clear();
             input.extend_from_slice(ic);
             input.extend_from_slice(i);
@@ -129,16 +125,6 @@ impl<'a> Groth16Verifier<'a> {
                 .try_into()
                 .expect("conversion failed");
         }
-
-        // let mut input = [u8::default(); G1_SIZE * 4 + G2_SIZE * 4];
-        // input[0..64].copy_from_slice(&self.proof.a);
-        // input[64..192].copy_from_slice(&self.proof.b);
-        // input[192..256].copy_from_slice(&acc);
-        // input[256..384].copy_from_slice(&self.vk.gamma);
-        // input[384..448].copy_from_slice(&self.proof.c);
-        // input[448..576].copy_from_slice(&self.vk.delta);
-        // input[576..640].copy_from_slice(&self.vk.alpha);
-        // input[640..768].copy_from_slice(&self.vk.beta);
 
         let mut input = Vec::with_capacity(G1_SIZE * 4 + G2_SIZE * 4);
         input.extend_from_slice(self.proof.a.as_slice());
