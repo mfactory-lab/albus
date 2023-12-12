@@ -51,6 +51,9 @@ deploy: build ## Deploy program
 upgrade: build ## Upgrade program
 	anchor upgrade -p $(program_id) --provider.cluster $(NETWORK) ./target/deploy/$(PROGRAM).so
 
+verify: build ## Verify program
+	anchor verify $(program_id) --provider.cluster $(NETWORK)
+
 show-buffers: ## Show program buffers
 	solana program show --buffers -k $(wallet) -u $(NETWORK)
 
