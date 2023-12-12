@@ -28,7 +28,9 @@
 
 use anchor_lang::prelude::*;
 
-use crate::constants::{ISSUER_PK_SIGNAL, TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD};
+use crate::constants::{
+    ISSUER_PK_SIGNAL, META_VALID_UNTIL_SIGNAL, TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD,
+};
 use crate::state::{Circuit, Issuer, Policy, ProofData};
 use crate::utils::bytes_to_num;
 use crate::{
@@ -72,10 +74,23 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
 
         // validate timestamp
         if let Some(s) = signals.get(TIMESTAMP_SIGNAL) {
-            let input_ts = bytes_to_num(req.public_inputs[s.index]);
-            if (input_ts as i64) < timestamp - TIMESTAMP_THRESHOLD as i64 {
+            let input = bytes_to_num(req.public_inputs[s.index]);
+            if (input as i64) < timestamp - TIMESTAMP_THRESHOLD as i64 {
                 msg!("Error: Invalid timestamp, new proof required");
                 return Err(AlbusError::InvalidData.into());
+            }
+        }
+
+        // validate expiration
+        if let Some(s) = signals.get(META_VALID_UNTIL_SIGNAL) {
+            let input = bytes_to_num(req.public_inputs[s.index]);
+            let valid_until = i64::try_from(input).expect("failed to parse `meta_validUntil`");
+            if valid_until <= timestamp {
+                msg!("Error: credential is expired");
+                return Err(AlbusError::Expired.into());
+            }
+            if req.expired_at == 0 || valid_until < req.expired_at {
+                req.expired_at = valid_until;
             }
         }
 
