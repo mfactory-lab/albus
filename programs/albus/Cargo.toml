@@ -19,6 +19,7 @@ default = []
 verify-on-chain = ["groth16-solana"]
 testing = ["verify-on-chain"]
 devnet = ["verify-on-chain"]
+mainnet = []
 
 [dependencies]
 anchor-lang = { version = "0.29.0", features = ["init-if-needed"] }

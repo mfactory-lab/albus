@@ -36,7 +36,11 @@ mod utils;
 use anchor_lang::prelude::*;
 use instructions::*;
 
+#[cfg(feature = "mainnet")]
 declare_id!("ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi");
+
+#[cfg(not(feature = "mainnet"))]
+declare_id!("ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp");
 
 #[cfg(not(feature = "no-entrypoint"))]
 solana_security_txt::security_txt! {
