@@ -12,13 +12,16 @@ ifeq ($(ENV),prod)
 	# The `prod` environment uses its own keypair
 	PROGRAM_KEYPAIR = ./target/deploy/$(PROGRAM)-keypair-prod.json
 	BUILD_FEATURES = mainnet
-	NETWORK = mainnet-beta
+	CLUSTER = mainnet
+	SOLANA_CLUSTER = mainnet-beta
 else ifeq ($(ENV),stage)
 #	BUILD_FEATURES = verify-on-chain
-	NETWORK = mainnet-beta
+	CLUSTER = mainnet
+	SOLANA_CLUSTER = mainnet-beta
 else
 	BUILD_FEATURES = devnet
-	NETWORK = devnet
+	CLUSTER = devnet
+	SOLANA_CLUSTER = devnet
 endif
 
 # Get the program ID by program name from the Anchor.toml file
@@ -35,11 +38,12 @@ help: ## Show this help
 
 info: ## Info
 	@echo "ENV: $(ENV)"
-	@echo "NETWORK: $(NETWORK)"
+	@echo "CLUSTER: $(CLUSTER)"
+	@echo "SOLANA_CLUSTER: $(SOLANA_CLUSTER)"
 	@echo "PROGRAM_KEYPAIR: $(PROGRAM_KEYPAIR)"
 	@echo "BUILD_FEATURES: $(BUILD_FEATURES)"
 	@echo "WALLET: $$(solana address -k $(WALLET))"
-	@echo "Balance: $$(solana balance -k $(WALLET) -u $(NETWORK))"
+	@echo "Balance: $$(solana balance -k $(WALLET) -u $(SOLANA_CLUSTER))"
 
 sdk: build ## Generate new sdk
 	pnpm -F @albus-finance/sdk generate
@@ -59,19 +63,19 @@ test-unit: ## Test unit
 	cargo test --all-features
 
 deploy: build ## Deploy program
-	anchor deploy -p $(PROGRAM) --provider.cluster $(NETWORK) --program-keypair $(PROGRAM_KEYPAIR)
+	anchor deploy -p $(PROGRAM) --provider.cluster $(CLUSTER) --program-keypair $(PROGRAM_KEYPAIR)
 
 upgrade: build ## Upgrade program
-	anchor upgrade -p $(PROGRAM_ID) --provider.cluster $(NETWORK) ./target/deploy/$(PROGRAM).so
+	anchor upgrade -p $(PROGRAM_ID) --provider.cluster $(CLUSTER) ./target/deploy/$(PROGRAM).so
 
 verify: build ## Verify program
-	anchor verify $(PROGRAM_ID) --provider.cluster $(NETWORK)
+	anchor verify $(PROGRAM_ID) --provider.cluster $(CLUSTER)
 
 show-buffers: ## Show program buffers
-	solana program show --buffers -k $(WALLET) -u $(NETWORK)
+	solana program show --buffers -k $(WALLET) -u $(SOLANA_CLUSTER)
 
 close-buffers: ## Close program buffers
-	solana program close --buffers -k $(WALLET) -u $(NETWORK)
+	solana program close --buffers -k $(WALLET) -u $(SOLANA_CLUSTER)
 
 clean:
 	rm -rf node_modules target .anchor
@@ -80,7 +84,7 @@ spool-build: ## Build stake pool
 	cd ./programs/albus-stake-pool/ && cargo build-sbf
 
 spool-deploy: ## Deploy stake pool
-	solana program deploy -u $(NETWORK) --upgrade-authority $(WALLET) ./target/deploy/albus_stake_pool.so
+	solana program deploy -u $(SOLANA_CLUSTER) --upgrade-authority $(WALLET) ./target/deploy/albus_stake_pool.so
 
 #ifneq ($(NETWORK), $(shell cat target/network_changed 2>/dev/null))
 ##force update of target/network_changed if value of NETWORK changed from last time
