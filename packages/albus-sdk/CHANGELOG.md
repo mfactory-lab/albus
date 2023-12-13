@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.2...@albus-finance/sdk-v0.2.5-next.3) (2023-12-13)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `AlbusClientEnv`, dev program id ([4b5870b](https://github.com/mfactory-lab/albus/commit/4b5870b3412381bef36c2029bd28eaacd8904867))
+* **sdk:** remove `ALBUS_DID` ([347dc27](https://github.com/mfactory-lab/albus/commit/347dc270c3a8a48e1090a76338da47b927105162))
+
 ## [0.2.5-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.1...@albus-finance/sdk-v0.2.5-next.2) (2023-12-12)
 
 
