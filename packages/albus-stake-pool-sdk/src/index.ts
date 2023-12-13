@@ -230,7 +230,7 @@ export async function depositStake(
 
   let proofRequest: PublicKey | undefined
   if (stakePool.account.data.depositPolicy) {
-    [proofRequest] = AlbusClient.pda.proofRequest(
+    [proofRequest] = AlbusClient.pda().proofRequest(
       stakePool.account.data.depositPolicy,
       authorizedPubkey,
     )
@@ -1335,7 +1335,7 @@ export async function addValidatorToPool(
 
   let proofRequest: PublicKey | undefined
   if (stakePool.account.data.addValidatorPolicy) {
-    [proofRequest] = AlbusClient.pda.proofRequest(
+    [proofRequest] = AlbusClient.pda().proofRequest(
       stakePool.account.data.addValidatorPolicy,
       validatorVote,
     )
