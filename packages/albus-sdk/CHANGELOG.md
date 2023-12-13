@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.1...@albus-finance/sdk-v0.2.5-next.2) (2023-12-12)
+
+
+### 🐞 Bug Fixes
+
+* fixed credential payer ([d0a9455](https://github.com/mfactory-lab/albus/commit/d0a9455631b4141e3c29fe41d5f5ae46bb76dc78))
+* **sdk:** support custom `programId` ([03377c4](https://github.com/mfactory-lab/albus/commit/03377c43cd22440f38373652b42c2d0e911ab92d))
+
 ## [0.2.5-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.0...@albus-finance/sdk-v0.2.5-next.1) (2023-12-08)
 
 
