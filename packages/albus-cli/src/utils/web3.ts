@@ -29,7 +29,18 @@
 import { LAMPORTS_PER_SOL, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import type { Cluster, PublicKeyInitData, Transaction } from '@solana/web3.js'
 import * as anchor from '@coral-xyz/anchor'
+import { AlbusClientEnv } from '@albus-finance/sdk'
 import { useContext } from '../context'
+
+export function clusterByEnv(env: AlbusClientEnv) {
+  switch (env) {
+    case AlbusClientEnv.DEV:
+      return 'devnet'
+    case AlbusClientEnv.STAGE:
+    case AlbusClientEnv.PROD:
+      return 'mainnet-beta'
+  }
+}
 
 export function clusterUrl(c: Cluster | string) {
   switch (c) {

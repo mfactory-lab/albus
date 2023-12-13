@@ -32,6 +32,7 @@ import { Metaplex, irysStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
 import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
+import type { AlbusClientEnv } from '@albus-finance/sdk'
 import { AlbusClient } from '@albus-finance/sdk'
 import { clusterUrl } from './utils'
 import config from './config'
@@ -42,7 +43,7 @@ export function useContext() {
   return context
 }
 
-export function initContext({ cluster, keypair }: { cluster: Cluster, keypair: string }) {
+export function initContext({ cluster, env, keypair }: { cluster: Cluster, env: AlbusClientEnv, keypair: string }) {
   const opts = AnchorProvider.defaultOptions()
   const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
   const connection = new web3.Connection(endpoint, opts.commitment)
@@ -53,7 +54,7 @@ export function initContext({ cluster, keypair }: { cluster: Cluster, keypair: s
     ))),
   )
   const provider = new AnchorProvider(connection, wallet, opts)
-  const client = new AlbusClient(provider)
+  const client = new AlbusClient(provider).env(env).debug()
   const metaplex = Metaplex.make(provider.connection)
     .use(keypairIdentity(wallet.payer))
     .use(irysStorage({

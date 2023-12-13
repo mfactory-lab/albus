@@ -32,11 +32,10 @@ import chalk from 'chalk'
 import log from 'loglevel'
 import { initContext, useContext } from '@/context'
 import * as actions from '@/actions'
-import { lamportsToSol } from '@/utils'
+import { clusterByEnv, lamportsToSol } from '@/utils'
 
 const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
-const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet'
 // eslint-disable-next-line node/prefer-global/process
 const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
 
@@ -54,17 +53,22 @@ cli
   .name('cli')
   .version(VERSION)
   .allowExcessArguments(false)
-  .option('-c, --cluster <CLUSTER>', 'solana cluster', DEFAULT_CLUSTER)
+  .option('-e, --env <ENV>', 'env [dev, stage, prod]', 'dev')
+  .option('-c, --cluster <CLUSTER>', 'solana cluster')
   .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair', DEFAULT_KEYPAIR)
   .option('-l, --log-level <LEVEL>', 'log level', (l: any) => l && log.setLevel(l), DEFAULT_LOG_LEVEL)
   .hook('preAction', async (command: Command) => {
     const opts = command.opts() as any
     log.setLevel(opts.logLevel)
+    if (!opts.cluster) {
+      opts.cluster = clusterByEnv(opts.env)
+    }
     const { provider, cluster, client } = initContext(opts)
     console.log(chalk.dim(`# Version: ${VERSION}`))
     console.log(chalk.dim(`# Program Address: ${client.programId}`))
     console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
     console.log(chalk.dim(`# Cluster: ${cluster}`))
+    console.log(chalk.dim(`# Env: ${opts.env}`))
     console.log('\n')
   })
   .hook('postAction', (_c: Command) => {
