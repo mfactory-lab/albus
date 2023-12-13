@@ -46,11 +46,9 @@ import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
 import { DEV_PROGRAM_ID } from './constants'
 
-export enum AlbusClientEnv { DEV, STAGE, PROD }
+export enum AlbusClientEnv { DEV = 'dev', STAGE = 'stage', PROD = 'prod' }
 
 export class AlbusClient {
-  static readonly pda = new PdaManager()
-
   readonly options: ClientOptions
   readonly circuit: CircuitManager
   readonly policy: PolicyManager
@@ -105,10 +103,17 @@ export class AlbusClient {
   }
 
   /**
-   * Get the PdaManager instance.
+   * Retrieves an instance of the PdaManager.
+   */
+  static pda(programId?: PublicKey) {
+    return new PdaManager(programId)
+  }
+
+  /**
+   * Retrieves an instance of the PdaManager associated with the current instance's program ID.
    */
   get pda() {
-    return AlbusClient.pda
+    return new PdaManager(this.programId)
   }
 
   /**

@@ -33,9 +33,10 @@ import * as Albus from '@albus-finance/core'
 import { PROGRAM_ID } from './generated'
 
 export class PdaManager {
-  programId = PROGRAM_ID
-
-  constructor(private readonly encoder = new TextEncoder()) {}
+  constructor(
+    readonly programId: PublicKey = PROGRAM_ID,
+    private readonly encoder = new TextEncoder(),
+  ) {}
 
   authority() {
     return PublicKey.findProgramAddressSync([this.programId.toBuffer()], this.programId)
