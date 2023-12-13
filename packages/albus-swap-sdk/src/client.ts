@@ -214,7 +214,7 @@ export class AlbusSwapClient {
         createCloseAccountInstruction(props.userDestination, this.provider.publicKey, this.provider.publicKey),
       )
     }
-    
+
     return this.provider.sendAndConfirm(tx, [], opts)
   }
 
