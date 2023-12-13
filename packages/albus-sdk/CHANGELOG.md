@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.3...@albus-finance/sdk-v0.2.5-next.4) (2023-12-13)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix circuit manager, add `deleteById` ([f3ff148](https://github.com/mfactory-lab/albus/commit/f3ff1486a6507985a86ba4c756fb50635147eb32))
+* **sdk:** pda manager improved ([88a5801](https://github.com/mfactory-lab/albus/commit/88a580108b2ae61b5018ba574f5d28c3ad9df4b2))
+
 ## [0.2.5-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.2...@albus-finance/sdk-v0.2.5-next.3) (2023-12-13)
 
 
