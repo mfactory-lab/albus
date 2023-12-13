@@ -36,7 +36,6 @@ import type {
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import chunk from 'lodash/chunk'
 import { BaseManager } from './base'
-import { ALBUS_DID } from './constants'
 import type {
   ProofData,
   ProofRequestStatus,
@@ -317,7 +316,7 @@ export class ProofRequestManager extends BaseManager {
         type: 'BJJSignature2021',
         created: Number(new Date()),
         // TODO: fixme
-        verificationMethod: `${ALBUS_DID}#keys-0`,
+        verificationMethod: `#keys-0`,
         rootHash: data.credentialRoot,
         proofValue: {
           ax: data.issuerPk[0],
