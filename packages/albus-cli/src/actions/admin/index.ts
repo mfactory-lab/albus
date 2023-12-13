@@ -107,7 +107,7 @@ async function closeAccount(pubkey: PublicKey) {
   const ix = createAdminCloseAccountInstruction({
     authority: client.provider.publicKey,
     account: pubkey,
-  })
+  }, client.programId)
   const sig = await client.provider.sendAndConfirm(new Transaction().add(ix))
   log.info(`Signature: ${sig}`)
 }
