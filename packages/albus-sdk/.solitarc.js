@@ -30,7 +30,6 @@ const os = require('node:os')
 const path = require('node:path')
 
 const programName = 'albus'
-// const programId = 'ALBUSePbQQtw6WavFNyALeyL4ekBADRE28PQJovDDZQz'
 const programId = 'ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'
 
 const programDir = path.join(__dirname, '..', '..', 'programs', programName)
