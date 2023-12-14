@@ -26,45 +26,15 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
-import { readFileSync } from 'node:fs'
-import * as Albus from '@albus-finance/core'
-import { Keypair, PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-type Opts = {
-  email?: string
-  website?: string
-  authority?: string
-  encryptionKey?: string
-}
-
-export async function create(name: string, opts: Opts) {
+export async function remove(addr: string) {
   const { client } = useContext()
 
-  let keypair: Keypair
-  if (opts.encryptionKey) {
-    keypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.encryptionKey).toString())))
-  } else {
-    keypair = Keypair.generate()
-    log.info('New encryption keypair was generated!')
-    log.info(`|- SecretKey: [${keypair.secretKey}]`)
-  }
+  console.log(`addr: ${addr}`)
 
-  const encryptionKey = Albus.zkp.getBabyJubPrivateKey(keypair)
-  const key = encryptionKey.public().compress()
+  const { signature } = await client.trustee.delete(addr)
 
-  const { signature, address } = await client.trustee.create({
-    key: Array.from(key),
-    name,
-    email: opts.email ?? '',
-    website: opts.website ?? '',
-    authority: opts.authority ? new PublicKey(opts.authority) : undefined,
-  })
-
-  log.info('\nDone')
   log.info(`Signature: ${signature}`)
-  log.info(`Address: ${address}`)
-  log.info(`Key: ${key}`)
 }

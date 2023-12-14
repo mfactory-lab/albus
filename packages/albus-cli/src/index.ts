@@ -302,6 +302,11 @@ trustee.command('create')
   .option('--encryptionKey <string>', '(optional) Path to the encryption key')
   .action(actions.trustee.create)
 
+trustee.command('delete')
+  .description('Delete a trustee')
+  .argument('addr', 'Trustee address')
+  .action(actions.trustee.remove)
+
 trustee.command('verify')
   .description('Verify a trustee')
   .argument('addr', 'Trustee address')
@@ -384,6 +389,9 @@ asset.command('upload')
 
 const admin = cli.command('admin')
   .description('Admin Management')
+
+admin.command('info')
+  .action(actions.admin.info)
 
 admin.command('migrate')
   .action(actions.admin.migrate)

@@ -29,3 +29,4 @@
 export * from './create'
 export * from './show'
 export * from './verify'
+export * from './delete'

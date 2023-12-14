@@ -37,6 +37,7 @@ import { PublicKey, Transaction } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
+export * from './info'
 export * from './migrate'
 
 export async function fund(_opts: any) {
