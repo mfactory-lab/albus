@@ -29,7 +29,6 @@
 import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
-import type { CreateTrusteeData, UpdateTrusteeData } from './generated'
 import {
   Trustee,
   createCreateTrusteeInstruction,
@@ -128,7 +127,7 @@ export class TrusteeManager extends BaseManager {
         name: props.name,
         email: props.email,
         website: props.website,
-        authority: props.authority,
+        authority: props.authority ?? null,
       },
     }, this.programId)
 
@@ -204,12 +203,21 @@ export class TrusteeManager extends BaseManager {
   }
 }
 
-export type CreateTrusteeProps = NonNullable<unknown> & CreateTrusteeData
+export type CreateTrusteeProps = {
+  key: number[] /* size: 32 */
+  name: string
+  email: string
+  website: string
+  authority?: PublicKey
+}
 
 export type UpdateTrusteeProps = {
   key: ArrayLike<number>
-  // newKey: number[]
-} & Partial<UpdateTrusteeData>
+  newAuthority?: PublicKey
+  name?: string
+  email?: string
+  website?: string
+}
 
 export type FindTrusteeProps = {
   name?: string
