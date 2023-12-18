@@ -10,6 +10,7 @@ repository = "https://github.com/mfactory-lab/albus"
 
 [features]
 cpi = ["anchor-lang"]
+devnet = []
 
 [dependencies]
 arrayref = "^0.3.7"

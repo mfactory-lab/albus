@@ -29,6 +29,10 @@
 use solana_program::pubkey;
 use solana_program::pubkey::Pubkey;
 
+#[cfg(feature = "devnet")]
+pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp");
+
+#[cfg(not(feature = "devnet"))]
 pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi");
 
 pub const POLICY_DISCRIMINATOR: &[u8] = &[222, 135, 7, 163, 235, 177, 33, 68];
