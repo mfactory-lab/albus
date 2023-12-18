@@ -283,7 +283,27 @@ export class AlbusSwapClient {
    * Deposit one side of tokens into the pool
    */
   async depositSingleTokenTypeExactAmountIn(props: DepositSingleTokenTypeExactAmountInProps, opts?: ConfirmOptions) {
-    const instruction = createDepositSingleTokenTypeInstruction(
+    const tx = new Transaction()
+
+    /**
+     * create pool mint token account for user
+     */
+    try {
+      await getAccount(this.connection, props.destination)
+    } catch (error: unknown) {
+      if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+        tx.add(
+          createAssociatedTokenAccountInstruction(
+            this.provider.publicKey,
+            props.destination,
+            this.provider.publicKey,
+            props.poolMint,
+          ),
+        )
+      }
+    }
+
+    tx.add(createDepositSingleTokenTypeInstruction(
       {
         authority: this.swapAuthority(props.tokenSwap),
         userTransferAuthority: this.provider.publicKey,
@@ -298,9 +318,8 @@ export class AlbusSwapClient {
         sourceTokenAmount: new BN(props.sourceTokenAmount.toString()),
         minimumPoolTokenAmount: new BN(props.minimumPoolTokenAmount.toString()),
       },
-    )
-
-    const tx = new Transaction().add(instruction)
+    ))
+    
     return this.provider.sendAndConfirm(tx, [], opts)
   }
 
