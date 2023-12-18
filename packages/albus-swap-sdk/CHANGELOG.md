@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.3...@albus-finance/swap-sdk-v0.1.4-next.4) (2023-12-18)
+
+
+### 🐞 Bug Fixes
+
+* **swap:** deposit token wrapped sol fix ([a28013a](https://github.com/mfactory-lab/albus/commit/a28013a6045c2bfb4872c2157efca24e29960b09))
+
 ## [0.1.4-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.2...@albus-finance/swap-sdk-v0.1.4-next.3) (2023-12-18)
 
 
