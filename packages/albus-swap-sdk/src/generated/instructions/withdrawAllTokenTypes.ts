@@ -70,14 +70,7 @@ export type WithdrawAllTokenTypesInstructionAccounts = {
 }
 
 export const withdrawAllTokenTypesInstructionDiscriminator = [
-  189,
-  254,
-  156,
-  174,
-  210,
-  9,
-  164,
-  216,
+  189, 254, 156, 174, 210, 9, 164, 216,
 ]
 
 /**

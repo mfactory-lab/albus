@@ -70,14 +70,7 @@ export type SwapInstructionAccounts = {
 }
 
 export const swapInstructionDiscriminator = [
-  248,
-  198,
-  158,
-  145,
-  225,
-  117,
-  135,
-  200,
+  248, 198, 158, 145, 225, 117, 135, 200,
 ]
 
 /**

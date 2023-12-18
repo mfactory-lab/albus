@@ -1,9 +1,12 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.3",
   "name": "albus_swap",
   "instructions": [
     {
       "name": "initialize",
+      "docs": [
+        "Processes an [Initialize](enum.Instruction.html)."
+      ],
       "accounts": [
         {
           "name": "authority",
@@ -91,6 +94,9 @@
     },
     {
       "name": "swap",
+      "docs": [
+        "Processes an [Swap](enum.Instruction.html)."
+      ],
       "accounts": [
         {
           "name": "proofRequest",
@@ -568,6 +574,27 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "closeAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [

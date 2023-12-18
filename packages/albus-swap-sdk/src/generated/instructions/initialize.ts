@@ -69,14 +69,7 @@ export type InitializeInstructionAccounts = {
 }
 
 export const initializeInstructionDiscriminator = [
-  175,
-  175,
-  109,
-  31,
-  13,
-  152,
-  155,
-  237,
+  175, 175, 109, 31, 13, 152, 155, 237,
 ]
 
 /**
