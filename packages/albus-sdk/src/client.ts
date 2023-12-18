@@ -147,6 +147,13 @@ export class AlbusClient {
     }
     return this.configure('programId', DEV_PROGRAM_ID)
   }
+
+  /**
+   * Local environment.
+   */
+  local() {
+    return this.configure('programId', DEV_PROGRAM_ID)
+  }
 }
 
 export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> & { opts?: ConfirmOptions }
