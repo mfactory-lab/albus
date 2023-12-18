@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.4...@albus-finance/sdk-v0.2.5-next.5) (2023-12-18)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix trustee manager interfaces ([65f7e33](https://github.com/mfactory-lab/albus/commit/65f7e33676ddac4ec9bb0ce6d222a8542bd4c5ee))
+
 ## [0.2.5-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.3...@albus-finance/sdk-v0.2.5-next.4) (2023-12-13)
 
 
