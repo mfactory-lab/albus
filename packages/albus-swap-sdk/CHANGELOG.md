@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.1...@albus-finance/swap-sdk-v0.1.4-next.2) (2023-12-18)
+
+
+### 🐞 Bug Fixes
+
+* **swap:** create pool token account for user ([628b688](https://github.com/mfactory-lab/albus/commit/628b688f94cb142e8a4c332c051867135261d642))
+
 ## [0.1.4-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.0...@albus-finance/swap-sdk-v0.1.4-next.1) (2023-12-18)
 
 
