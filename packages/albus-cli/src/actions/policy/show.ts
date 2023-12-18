@@ -29,6 +29,7 @@
 import log from 'loglevel'
 import { PublicKey } from '@solana/web3.js'
 import type { Policy } from '@albus-finance/sdk'
+import Table from 'cli-table3'
 import { useContext } from '@/context'
 
 type Opts = {
@@ -64,13 +65,23 @@ export async function showAll(opts: Opts) {
     serviceCode: opts.serviceCode,
   })
 
-  log.info('--------------------------------------------------------------------------')
+  const table = new Table({
+    head: ['#', 'Address', 'Code', 'Name', 'Service', 'Circuit', 'Proof Req', 'Created'],
+  })
 
-  for (const policy of policies) {
-    log.info('Address:', policy.pubkey.toString())
-    log.info('ServiceCode:', services.get(policy.data!.serviceProvider.toString())?.code)
-    log.info('CircuitCode:', circuits.get(policy.data!.circuit.toString())?.code)
-    log.info(policy.data?.pretty())
-    log.info('--------------------------------------------------------------------------')
+  let i = 0
+  for (const { pubkey, data } of policies) {
+    table.push([
+      String(++i),
+      String(pubkey),
+      String(data!.code),
+      String(data!.name),
+      String(services.get(data!.serviceProvider.toString())?.code),
+      String(circuits.get(data!.circuit.toString())?.code),
+      String(data!.proofRequestCount),
+      String(new Date(Number(data!.createdAt) * 1000).toISOString()),
+    ])
   }
+
+  console.log(table.toString())
 }
