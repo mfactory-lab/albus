@@ -2,7 +2,7 @@ import { BN } from '@coral-xyz/anchor'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
-import { NATIVE_MINT, TokenAccountNotFoundError, TokenInvalidAccountOwnerError, createAssociatedTokenAccountInstruction, createCloseAccountInstruction, createSyncNativeInstruction, getAccount } from '@solana/spl-token'
+import { NATIVE_MINT, TokenAccountNotFoundError, TokenInvalidAccountOwnerError, createAssociatedTokenAccountInstruction, createCloseAccountInstruction, createSyncNativeInstruction, getAccount, getAssociatedTokenAddress } from '@solana/spl-token'
 
 import type { CurveType } from './generated'
 import {
@@ -150,41 +150,12 @@ export class AlbusSwapClient {
       }
     }
 
-    /**
-     * if swap SOL to some token create source token account and wrap the required amount of SOL
-     */
-    if (props.sourceTokenMint && props.sourceTokenMint?.toBase58() === NATIVE_MINT.toBase58()) {
-      let wrappedSolBalance = 0
-      try {
-        const accountInfo = await getAccount(this.connection, props.userSource)
-        wrappedSolBalance = Number(accountInfo.amount)
-      } catch (error: unknown) {
-        if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-          tx.add(
-            createAssociatedTokenAccountInstruction(
-              this.provider.publicKey,
-              props.userSource,
-              this.provider.publicKey,
-              props.sourceTokenMint,
-            ),
-          )
-        }
-      }
-
-      const amountIn = Number(props.amountIn)
-      if (props.amountIn > wrappedSolBalance) {
-        tx.add(
-          SystemProgram.transfer({
-            fromPubkey: this.provider.publicKey,
-            toPubkey: props.userSource,
-            lamports: amountIn - wrappedSolBalance,
-          }),
-          createSyncNativeInstruction(
-            props.userSource,
-          ),
-        )
-      }
-    }
+    await this.handleWrappedSol({
+      tx,
+      amount: props.amountIn,
+      userSource: props.userSource,
+      sourceTokenMint: props.sourceTokenMint,
+    })
 
     tx.add(createSwapInstruction(
       {
@@ -303,6 +274,23 @@ export class AlbusSwapClient {
       }
     }
 
+    /**
+     * check both pool tokens because it is not known which of the tokens the user is transferring
+     * such a check is valid because a token that does not match userSource will be skipped
+     */
+    await this.handleWrappedSol({
+      tx,
+      amount: props.sourceTokenAmount,
+      userSource: props.source,
+      sourceTokenMint: props.swapTokenA,
+    })
+    await this.handleWrappedSol({
+      tx,
+      amount: props.sourceTokenAmount,
+      userSource: props.source,
+      sourceTokenMint: props.swapTokenB,
+    })
+
     tx.add(createDepositSingleTokenTypeInstruction(
       {
         authority: this.swapAuthority(props.tokenSwap),
@@ -319,7 +307,7 @@ export class AlbusSwapClient {
         minimumPoolTokenAmount: new BN(props.minimumPoolTokenAmount.toString()),
       },
     ))
-    
+
     return this.provider.sendAndConfirm(tx, [], opts)
   }
 
@@ -391,6 +379,57 @@ export class AlbusSwapClient {
         pubkey,
         data: !props.noData ? TokenSwap.fromAccountInfo(account)[0] : null,
       }))
+  }
+
+  /**
+   * if swap SOL to some token create source token account and wrap the required amount of SOL
+   */
+  async handleWrappedSol(props: {
+    tx: Transaction,
+    amount: bigint | number,
+    userSource: PublicKey,
+    sourceTokenMint?: PublicKey,
+  }) {
+    if (props.sourceTokenMint && props.sourceTokenMint?.toBase58() === NATIVE_MINT.toBase58()) {
+      let wrappedSolBalance = 0
+      try {
+        const userSourceCheck = await getAssociatedTokenAddress(props.sourceTokenMint,  this.provider.publicKey)
+        if (userSourceCheck.toBase58() !== props.userSource.toBase58()) {
+          /**
+           * wrong userSource address
+           */
+          return
+        }
+
+        const accountInfo = await getAccount(this.connection, props.userSource)
+        wrappedSolBalance = Number(accountInfo.amount)
+      } catch (error: unknown) {
+        if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+          props.tx.add(
+            createAssociatedTokenAccountInstruction(
+              this.provider.publicKey,
+              props.userSource,
+              this.provider.publicKey,
+              props.sourceTokenMint,
+            ),
+          )
+        }
+      }
+
+      const amount = Number(props.amount)
+      if (props.amount > wrappedSolBalance) {
+        props.tx.add(
+          SystemProgram.transfer({
+            fromPubkey: this.provider.publicKey,
+            toPubkey: props.userSource,
+            lamports: amount - wrappedSolBalance,
+          }),
+          createSyncNativeInstruction(
+            props.userSource,
+          ),
+        )
+      }
+    }
   }
 }
 
