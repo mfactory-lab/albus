@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.5...@albus-finance/sdk-v0.2.5-next.6) (2023-12-18)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `local` env ([dba3e36](https://github.com/mfactory-lab/albus/commit/dba3e367c25ef4bf50e81fbf25545e82f770eb53))
+
 ## [0.2.5-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.4...@albus-finance/sdk-v0.2.5-next.5) (2023-12-18)
 
 
