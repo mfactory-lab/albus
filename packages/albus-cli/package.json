@@ -30,6 +30,7 @@
   "dependencies": {
     "@albus-finance/core": "workspace:^",
     "@albus-finance/sdk": "workspace:^",
+    "@albus-finance/swap-sdk": "workspace:^",
     "@coral-xyz/anchor": "^0.29.0",
     "@faker-js/faker": "^8.3.1",
     "@metaplex-foundation/js": "^0.20.1",

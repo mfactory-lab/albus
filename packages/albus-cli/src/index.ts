@@ -423,6 +423,20 @@ admin.command('close')
 
 // ------------------------------------------
 
+const swap = cli.command('swap')
+swap.command('all')
+  .action(actions.swap.findAll)
+
+swap.command('closeAll')
+  .action(actions.swap.closeAll)
+
+swap.command('close')
+  .argument('<pubkey>', 'Account address')
+  .description('Close and account')
+  .action(actions.swap.close)
+
+// ------------------------------------------
+
 cli.command('*', { isDefault: true, hidden: true })
   .action(() => {
     cli.help()
