@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.0...@albus-finance/swap-sdk-v0.1.4-next.1) (2023-12-18)
+
+
+### 🐞 Bug Fixes
+
+* **swap-sdk:** add `closeAccount` ([3a87764](https://github.com/mfactory-lab/albus/commit/3a877645d19ed914ffcdb42cd63e31a04d8ae49e))
+
 ## [0.1.4-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4-next.0) (2023-12-11)
 
 
