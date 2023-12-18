@@ -27,7 +27,7 @@
  */
 
 import type { Account } from '@solana/spl-token'
-import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
+import { createMint, getAccount, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
@@ -35,11 +35,16 @@ import { AlbusClient } from '../../packages/albus-sdk'
 import { AlbusSwapClient, CurveType } from '../../packages/albus-swap-sdk/src'
 import { airdrop, createTestData, createTestProofRequest, deleteTestData, newProvider, payer, provider } from './utils'
 
+async function tokenBalance(addr: PublicKey) {
+  const acc = await getAccount(provider.connection, addr)
+  return acc.amount
+}
+
 describe('albusSwap', async () => {
   const user = Keypair.generate()
 
-  const client = new AlbusClient(provider)
-  const userClient = new AlbusClient(newProvider(user))
+  const client = new AlbusClient(provider).local()
+  const userClient = new AlbusClient(newProvider(user)).local()
   const swapClient = new AlbusSwapClient(provider)
   const userSwapClient = new AlbusSwapClient(newProvider(user))
 
@@ -55,6 +60,7 @@ describe('albusSwap', async () => {
   let swapTokenB: Account
   let userTokenA: Account
   let userTokenB: Account
+  let userPoolToken: Account
 
   beforeAll(async () => {
     await airdrop(payer.publicKey)
@@ -71,11 +77,13 @@ describe('albusSwap', async () => {
     swapTokenB = await getOrCreateAssociatedTokenAccount(provider.connection, payer, tokenB, swapAuthority, true)
     userTokenA = await getOrCreateAssociatedTokenAccount(provider.connection, user, tokenA, user.publicKey)
     userTokenB = await getOrCreateAssociatedTokenAccount(provider.connection, user, tokenB, user.publicKey)
+    userPoolToken = await getOrCreateAssociatedTokenAccount(provider.connection, user, poolMint, user.publicKey)
 
     // initial balances
     await mintTo(provider.connection, payer, tokenA, swapTokenA.address, payer, 100_000_000_000)
     await mintTo(provider.connection, payer, tokenB, swapTokenB.address, payer, 100_000_000_000)
-    await mintTo(provider.connection, payer, tokenA, userTokenA.address, payer, 1_000_000_000)
+
+    await mintTo(provider.connection, payer, tokenA, userTokenA.address, payer, 10_000_000_000)
 
     // albus test data
     const testData = await createTestData(client, 'swap')
@@ -131,5 +139,26 @@ describe('albusSwap', async () => {
       amountIn: 1_000_000_000,
       minimumAmountOut: 1_000_000,
     })
+  })
+
+  it('can deposit single token', async () => {
+    const beforeBalance = await tokenBalance(swapTokenA.address)
+
+    await userSwapClient.depositSingleTokenTypeExactAmountIn({
+      tokenSwap: tokenSwap.publicKey,
+      poolMint,
+      source: userTokenA.address,
+      destination: userPoolToken.address,
+      swapTokenA: swapTokenA.address,
+      swapTokenB: swapTokenB.address,
+      sourceTokenAmount: 1_000_000_000,
+      minimumPoolTokenAmount: 0,
+    })
+
+    const afterBalance = await tokenBalance(swapTokenA.address)
+    assert.equal(afterBalance, beforeBalance + 1_000_000_000n)
+
+    // const tokenSwapData = await swapClient.load(tokenSwap.publicKey)
+    // console.log(tokenSwapData)
   })
 })
