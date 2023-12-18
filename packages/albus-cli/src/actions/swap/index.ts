@@ -37,8 +37,8 @@ export async function closeAll() {
 
   for (const { pubkey } of pools) {
     log.info(`Close: ${pubkey}`)
-    const ix = await createCloseAccountInstruction({
-      authority: client.provider.publicKey,
+    const ix = createCloseAccountInstruction({
+      authority: provider.publicKey,
       account: pubkey,
     })
     const signature = await provider.sendAndConfirm(new Transaction().add(ix))
@@ -52,10 +52,8 @@ export async function close(addr: string) {
   const { provider } = useContext()
 
   const account = new PublicKey(addr)
-  const client = new AlbusSwapClient(provider)
-
-  const ix = await createCloseAccountInstruction({
-    authority: client.provider.publicKey,
+  const ix = createCloseAccountInstruction({
+    authority: provider.publicKey,
     account,
   })
 
