@@ -274,21 +274,11 @@ export class AlbusSwapClient {
       }
     }
 
-    /**
-     * check both pool tokens because it is not known which of the tokens the user is transferring
-     * such a check is valid because a token that does not match userSource will be skipped
-     */
     await this.handleWrappedSol({
       tx,
       amount: props.sourceTokenAmount,
       userSource: props.source,
-      sourceTokenMint: props.swapTokenA,
-    })
-    await this.handleWrappedSol({
-      tx,
-      amount: props.sourceTokenAmount,
-      userSource: props.source,
-      sourceTokenMint: props.swapTokenB,
+      sourceTokenMint: props.sourceTokenMint,
     })
 
     tx.add(createDepositSingleTokenTypeInstruction(
@@ -393,7 +383,7 @@ export class AlbusSwapClient {
     if (props.sourceTokenMint && props.sourceTokenMint?.toBase58() === NATIVE_MINT.toBase58()) {
       let wrappedSolBalance = 0
       try {
-        const userSourceCheck = await getAssociatedTokenAddress(props.sourceTokenMint,  this.provider.publicKey)
+        const userSourceCheck = await getAssociatedTokenAddress(props.sourceTokenMint, this.provider.publicKey)
         if (userSourceCheck.toBase58() !== props.userSource.toBase58()) {
           /**
            * wrong userSource address
@@ -572,6 +562,8 @@ export type DepositSingleTokenTypeExactAmountInProps = {
   /// Pool token amount to receive in exchange.
   /// The amount is set by the current exchange rate and size of the pool.
   minimumPoolTokenAmount: bigint | number
+  /// Mint address of token that user will swap
+  sourceTokenMint?: PublicKey
 }
 
 export type WithdrawSingleTokenTypeExactAmountOutProps = {
