@@ -27,8 +27,8 @@
  */
 
 import { AccountState } from '@solana/spl-token'
-import { Keypair } from '@solana/web3.js'
 import type { PublicKey } from '@solana/web3.js'
+import { Keypair } from '@solana/web3.js'
 import axios from 'axios'
 
 import { assert, beforeAll, describe, it, vi } from 'vitest'
@@ -46,9 +46,11 @@ describe('albusCredential', async () => {
   const issuer = Keypair.generate()
   const holder = Keypair.generate()
 
-  const client = new AlbusClient(provider)
-  const holderClient = new AlbusClient(newProvider(holder))
+  const client = new AlbusClient(provider).local()
+  const holderClient = new AlbusClient(newProvider(holder)).local()
   const mx = netMetaplex(payer)
+
+  console.log(client.programId)
 
   const updateAuthority = client.pda.authority()[0]
 
@@ -87,7 +89,7 @@ describe('albusCredential', async () => {
   }
 
   it('can not create credential with empty balances', async () => {
-    const client = new AlbusClient(newProvider(Keypair.generate()))
+    const client = new AlbusClient(newProvider(Keypair.generate())).local()
     try {
       await client.credential.create({}, { feePayer: payer })
       assert.ok(false)
@@ -116,7 +118,7 @@ describe('albusCredential', async () => {
   it('can create credential with albus payer', async () => {
     await airdrop(updateAuthority)
     const owner = Keypair.generate()
-    const client = new AlbusClient(newProvider(Keypair.generate()))
+    const client = new AlbusClient(newProvider(Keypair.generate())).local()
     await client.credential.create({ owner }, { feePayer: payer })
   })
 

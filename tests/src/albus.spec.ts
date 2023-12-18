@@ -32,10 +32,8 @@ import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../packages/albus-sdk/src'
 import { airdrop, assertErrorCode, loadFixture, newProvider, payer, provider } from './utils'
 
-const DEBUG = false
-
 describe('albus', async () => {
-  const client = new AlbusClient(provider).configure('debug', DEBUG)
+  const client = new AlbusClient(provider).debug().local()
 
   const issuer = Keypair.generate()
 
@@ -162,7 +160,7 @@ describe('albus', async () => {
     try {
       for (let i = 0; i < trustees.length; i++) {
         const trusteeKeypair = trustees[i]!
-        const newClient = new AlbusClient(newProvider(trusteeKeypair))
+        const newClient = new AlbusClient(newProvider(trusteeKeypair)).local()
         const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trusteeKeypair)
         const data = {
           name: `trustee${i}`,
@@ -211,7 +209,7 @@ describe('albus', async () => {
   it('can update a trustee', async () => {
     try {
       const trusteeKeypair = trustees[0]!
-      const newClient = new AlbusClient(newProvider(trusteeKeypair))
+      const newClient = new AlbusClient(newProvider(trusteeKeypair)).local()
       const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trusteeKeypair)
       const data = {
         key: Array.from(babyJubKey.public().compress()),
@@ -355,7 +353,7 @@ describe('albus', async () => {
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
     const newPayerKeypair = Keypair.generate()
-    const newClient = new AlbusClient(newProvider(newPayerKeypair))
+    const newClient = new AlbusClient(newProvider(newPayerKeypair)).local()
     await airdrop(newPayerKeypair.publicKey)
 
     try {
@@ -370,7 +368,7 @@ describe('albus', async () => {
     let investigationAddress: PublicKey
 
     it('can create investigation request', async () => {
-      const newClient = new AlbusClient(newProvider(investigator))
+      const newClient = new AlbusClient(newProvider(investigator)).local()
         .configure('debug', client.options.debug)
 
       const [service] = client.pda.serviceProvider(serviceCode)
@@ -437,7 +435,7 @@ describe('albus', async () => {
     })
 
     it('can delete investigation request', async () => {
-      const newClient = new AlbusClient(newProvider(investigator))
+      const newClient = new AlbusClient(newProvider(investigator)).local()
         .configure('debug', client.options.debug)
 
       try {

@@ -36,7 +36,7 @@ import { AlbusTransferClient } from '../../packages/albus-transfer-sdk/src'
 import { airdrop, createTestData, createTestProofRequest, payer, provider } from './utils'
 
 describe('albusTransfer', () => {
-  const client = new AlbusClient(provider)
+  const client = new AlbusClient(provider).local()
   const transferClient = new AlbusTransferClient(provider)
   const receiver = Keypair.generate()
 

@@ -57,8 +57,8 @@ describe('albusStakePool', async () => {
   const user = Keypair.generate()
   const vote = Keypair.generate()
 
-  const client = new AlbusClient(provider)
-  const userClient = new AlbusClient(newProvider(user))
+  const client = new AlbusClient(provider).local()
+  const userClient = new AlbusClient(newProvider(user)).local()
 
   let stakePool: PublicKey
   let stakePoolMint: PublicKey
