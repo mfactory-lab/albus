@@ -1,43 +1,6 @@
 # Changelog
 
-## [0.1.4-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.3...@albus-finance/swap-sdk-v0.1.4-next.4) (2023-12-18)
-
-
-### 🐞 Bug Fixes
-
-* **swap:** deposit token wrapped sol fix ([a28013a](https://github.com/mfactory-lab/albus/commit/a28013a6045c2bfb4872c2157efca24e29960b09))
-
-## [0.1.4-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.2...@albus-finance/swap-sdk-v0.1.4-next.3) (2023-12-18)
-
-
-### 🐞 Bug Fixes
-
-* handle wrapped sol (swap, depositSingle) ([78b2705](https://github.com/mfactory-lab/albus/commit/78b27054c54fe23517b4012f5065502e74a27381))
-
-## [0.1.4-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.1...@albus-finance/swap-sdk-v0.1.4-next.2) (2023-12-18)
-
-
-### 🐞 Bug Fixes
-
-* **swap:** create pool token account for user ([628b688](https://github.com/mfactory-lab/albus/commit/628b688f94cb142e8a4c332c051867135261d642))
-
-## [0.1.4-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.0...@albus-finance/swap-sdk-v0.1.4-next.1) (2023-12-18)
-
-
-### 🐞 Bug Fixes
-
-* **swap-sdk:** add `closeAccount` ([3a87764](https://github.com/mfactory-lab/albus/commit/3a877645d19ed914ffcdb42cd63e31a04d8ae49e))
-
-## [0.1.4-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4-next.0) (2023-12-11)
-
-
-### 🐞 Bug Fixes
-
-* **swap:** handle wrapped sol transactions ([5936cdf](https://github.com/mfactory-lab/albus/commit/5936cdfd6f883f2f826427d7ce99e8ecf8f26ec8))
-
-## [v0.1.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4-next.0) (2023-11-17)
-
-## [0.1.2-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.0...@albus-finance/swap-sdk-v0.1.2-next.2) (2023-11-29)
+## [0.1.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4) (2023-12-04)
 
 
 ### 🐞 Bug Fixes

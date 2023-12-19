@@ -1,61 +1,6 @@
 # Changelog
 
-## [0.2.5-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.5...@albus-finance/sdk-v0.2.5-next.6) (2023-12-18)
-
-
-### 🐞 Bug Fixes
-
-* **sdk:** add `local` env ([dba3e36](https://github.com/mfactory-lab/albus/commit/dba3e367c25ef4bf50e81fbf25545e82f770eb53))
-
-## [0.2.5-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.4...@albus-finance/sdk-v0.2.5-next.5) (2023-12-18)
-
-
-### 🐞 Bug Fixes
-
-* **sdk:** fix trustee manager interfaces ([65f7e33](https://github.com/mfactory-lab/albus/commit/65f7e33676ddac4ec9bb0ce6d222a8542bd4c5ee))
-
-## [0.2.5-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.3...@albus-finance/sdk-v0.2.5-next.4) (2023-12-13)
-
-
-### 🐞 Bug Fixes
-
-* **sdk:** fix circuit manager, add `deleteById` ([f3ff148](https://github.com/mfactory-lab/albus/commit/f3ff1486a6507985a86ba4c756fb50635147eb32))
-* **sdk:** pda manager improved ([88a5801](https://github.com/mfactory-lab/albus/commit/88a580108b2ae61b5018ba574f5d28c3ad9df4b2))
-
-## [0.2.5-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.2...@albus-finance/sdk-v0.2.5-next.3) (2023-12-13)
-
-
-### 🐞 Bug Fixes
-
-* **sdk:** add `AlbusClientEnv`, dev program id ([4b5870b](https://github.com/mfactory-lab/albus/commit/4b5870b3412381bef36c2029bd28eaacd8904867))
-* **sdk:** remove `ALBUS_DID` ([347dc27](https://github.com/mfactory-lab/albus/commit/347dc270c3a8a48e1090a76338da47b927105162))
-
-## [0.2.5-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.1...@albus-finance/sdk-v0.2.5-next.2) (2023-12-12)
-
-
-### 🐞 Bug Fixes
-
-* fixed credential payer ([d0a9455](https://github.com/mfactory-lab/albus/commit/d0a9455631b4141e3c29fe41d5f5ae46bb76dc78))
-* **sdk:** support custom `programId` ([03377c4](https://github.com/mfactory-lab/albus/commit/03377c43cd22440f38373652b42c2d0e911ab92d))
-
-## [0.2.5-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.0...@albus-finance/sdk-v0.2.5-next.1) (2023-12-08)
-
-
-### 🐞 Bug Fixes
-
-* **albus:** add `payer` for credential creation ([45d123c](https://github.com/mfactory-lab/albus/commit/45d123cf03823ca6e2e8907b1165866a881d17d3))
-
-## [0.2.5-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.5-next.0) (2023-12-05)
-
-
-### 🐞 Bug Fixes
-
-* **sdk:** add trustee authority ([716ad50](https://github.com/mfactory-lab/albus/commit/716ad50cdfe81823a115507cf527a96cc4623133))
-
-## [v0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.5-next.0) (2023-11-17)
-
-## [0.2.2-next.21](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.20...@albus-finance/sdk-v0.2.2-next.21) (2023-12-04)
-
+## [v0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.4) (2023-11-17)
 
 ### 🐞 Bug Fixes
 

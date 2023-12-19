@@ -1,6 +1,6 @@
 {
   "name": "@albus-finance/stake-pool-sdk",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "Albus Stake Pool SDK",
   "_type": "module",
   "repository": {
