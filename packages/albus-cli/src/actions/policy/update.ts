@@ -55,10 +55,10 @@ export async function update(code: string, opts: Opts) {
     retentionPeriod: opts.retentionPeriod,
     rules: opts.rules?.map((r) => {
       const rr = r.split(':')
-      if (rr.length < 2) {
+      if (rr.length < 2 || rr[1] === undefined) {
         throw new Error(`Invalid rule ${rr}, should be in format \`{key}:{value}\``)
       }
-      return { key: String(rr[0]), value: Number(rr[1]) }
+      return { key: String(rr[0]), value: rr[2] ?? rr[1] }
     }),
   })
 

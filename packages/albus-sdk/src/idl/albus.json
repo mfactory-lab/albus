@@ -1,5 +1,5 @@
 {
-  "version": "0.0.24",
+  "version": "0.0.25",
   "name": "albus",
   "instructions": [
     {
@@ -112,8 +112,13 @@
           ]
         },
         {
-          "name": "authority",
+          "name": "payer",
           "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -203,8 +208,8 @@
         },
         {
           "name": "authority",
-          "isMut": true,
-          "isSigner": true
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "metadataProgram",
@@ -536,7 +541,7 @@
         },
         {
           "name": "serviceProvider",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2146,6 +2151,12 @@
           {
             "name": "website",
             "type": "string"
+          },
+          {
+            "name": "authority",
+            "type": {
+              "option": "publicKey"
+            }
           }
         ]
       }

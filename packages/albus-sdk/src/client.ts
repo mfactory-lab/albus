@@ -44,17 +44,11 @@ import { TrusteeManager } from './trusteeManager'
 import type { Wallet, WithRequired } from './types'
 import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
+import { DEV_PROGRAM_ID } from './constants'
 
-export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> & { opts?: ConfirmOptions }
-
-export type ClientOptions = {
-  programId?: PublicKey
-  debug?: boolean
-}
+export enum AlbusClientEnv { DEV = 'dev', STAGE = 'stage', PROD = 'prod' }
 
 export class AlbusClient {
-  static readonly pda = new PdaManager()
-
   readonly options: ClientOptions
   readonly circuit: CircuitManager
   readonly policy: PolicyManager
@@ -87,19 +81,6 @@ export class AlbusClient {
     this.investigation = new InvestigationManager(this)
   }
 
-  get pda() {
-    return AlbusClient.pda
-  }
-
-  get programId() {
-    return this.options.programId ?? PROGRAM_ID
-  }
-
-  configure<K extends keyof ClientOptions>(key: K, val: ClientOptions[K]) {
-    this.options[key] = val
-    return this
-  }
-
   /**
    * Initialize a new `AlbusClient` from the provided {@link wallet}.
    */
@@ -120,4 +101,64 @@ export class AlbusClient {
   static fromKeypair(connection: Connection, keypair: Keypair, opts?: ConfirmOptions) {
     return AlbusClient.fromWallet(connection, new NodeWallet(keypair), opts)
   }
+
+  /**
+   * Retrieves an instance of the PdaManager.
+   */
+  static pda(programId?: PublicKey) {
+    return new PdaManager(programId)
+  }
+
+  /**
+   * Retrieves an instance of the PdaManager associated with the current instance's program ID.
+   */
+  get pda() {
+    return new PdaManager(this.programId)
+  }
+
+  /**
+   * Get the current program ID.
+   */
+  get programId() {
+    return this.options.programId ?? PROGRAM_ID
+  }
+
+  /**
+   * Configure a specific option.
+   */
+  configure<K extends keyof ClientOptions>(key: K, val: ClientOptions[K]) {
+    this.options[key] = val
+    return this
+  }
+
+  /**
+   * Enable or disable debugging.
+   */
+  debug(val = true) {
+    return this.configure('debug', val)
+  }
+
+  /**
+   * Set the environment.
+   */
+  env(env: AlbusClientEnv) {
+    if (env === AlbusClientEnv.PROD) {
+      return this.configure('programId', PROGRAM_ID)
+    }
+    return this.configure('programId', DEV_PROGRAM_ID)
+  }
+
+  /**
+   * Local environment.
+   */
+  local() {
+    return this.configure('programId', DEV_PROGRAM_ID)
+  }
+}
+
+export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> & { opts?: ConfirmOptions }
+
+export type ClientOptions = {
+  programId?: PublicKey
+  debug?: boolean
 }

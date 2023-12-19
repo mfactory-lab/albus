@@ -58,6 +58,7 @@ export async function showAll(opts: ShowAllOpts) {
 
   const services = await client.service.findMapped()
   const circuits = await client.circuit.findMapped()
+  const issuers = await client.issuer.findMapped()
 
   const items = await client.proofRequest.find({
     user: opts.user ? new PublicKey(opts.user) : undefined,
@@ -71,7 +72,7 @@ export async function showAll(opts: ShowAllOpts) {
   })
 
   const table = new Table({
-    head: ['#', 'Address', 'Status', 'Service', 'Circuit', 'Date'],
+    head: ['#', 'Address', 'Status', 'Service', 'Issuer', 'Circuit', 'Date'],
   })
 
   let i = 0
@@ -82,6 +83,7 @@ export async function showAll(opts: ShowAllOpts) {
       String(pubkey),
       String(ProofRequestStatus[data!.status]),
       String(services.get(data!.serviceProvider.toString())?.code),
+      String(issuers.get(data!.issuer.toString())?.code ?? '-'),
       String(circuits.get(data!.circuit.toString())?.code),
       String(new Date(Number(data!.createdAt) * 1000).toISOString()),
       // String(item.data.proof),

@@ -64,14 +64,7 @@ export type DepositSingleTokenTypeInstructionAccounts = {
 }
 
 export const depositSingleTokenTypeInstructionDiscriminator = [
-  175,
-  0,
-  152,
-  41,
-  199,
-  0,
-  148,
-  43,
+  175, 0, 152, 41, 199, 0, 148, 43,
 ]
 
 /**

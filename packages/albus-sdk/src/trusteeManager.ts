@@ -29,7 +29,6 @@
 import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
-import type { CreateTrusteeData, UpdateTrusteeData } from './generated'
 import {
   Trustee,
   createCreateTrusteeInstruction,
@@ -74,7 +73,7 @@ export class TrusteeManager extends BaseManager {
    * Find trustees
    */
   async find(props: FindTrusteeProps = {}) {
-    const builder = Trustee.gpaBuilder()
+    const builder = Trustee.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', trusteeDiscriminator)
 
     if (props.noData) {
@@ -128,8 +127,9 @@ export class TrusteeManager extends BaseManager {
         name: props.name,
         email: props.email,
         website: props.website,
+        authority: props.authority ?? null,
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -155,7 +155,7 @@ export class TrusteeManager extends BaseManager {
         website: props.website ?? null,
         newAuthority: props.newAuthority ?? null,
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -172,7 +172,7 @@ export class TrusteeManager extends BaseManager {
     const ix = createVerifyTrusteeInstruction({
       trustee: new PublicKey(trustee),
       authority,
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -189,7 +189,7 @@ export class TrusteeManager extends BaseManager {
     const ix = createDeleteTrusteeInstruction({
       trustee: new PublicKey(trustee),
       authority,
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -203,12 +203,21 @@ export class TrusteeManager extends BaseManager {
   }
 }
 
-export type CreateTrusteeProps = NonNullable<unknown> & CreateTrusteeData
+export type CreateTrusteeProps = {
+  key: number[] /* size: 32 */
+  name: string
+  email: string
+  website: string
+  authority?: PublicKey
+}
 
 export type UpdateTrusteeProps = {
   key: ArrayLike<number>
-  // newKey: number[]
-} & Partial<UpdateTrusteeData>
+  newAuthority?: PublicKey
+  name?: string
+  email?: string
+  website?: string
+}
 
 export type FindTrusteeProps = {
   name?: string

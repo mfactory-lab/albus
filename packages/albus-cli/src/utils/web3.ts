@@ -29,19 +29,34 @@
 import { LAMPORTS_PER_SOL, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import type { Cluster, PublicKeyInitData, Transaction } from '@solana/web3.js'
 import * as anchor from '@coral-xyz/anchor'
+import { AlbusClientEnv } from '@albus-finance/sdk'
 import { useContext } from '../context'
 
-export function clusterUrl(c: Cluster) {
+export function clusterByEnv(env: AlbusClientEnv) {
+  switch (env) {
+    case AlbusClientEnv.DEV:
+      return 'devnet'
+    case AlbusClientEnv.STAGE:
+    case AlbusClientEnv.PROD:
+      return 'mainnet-beta'
+  }
+}
+
+export function clusterUrl(c: Cluster | string) {
   switch (c) {
+    case 'mainnet':
     case 'mainnet-beta':
-      return 'https://solana-api.projectserum.com/'
+      if (import.meta.env.CLI_SOLANA_MAINNET_CLUSTER) {
+        return import.meta.env.CLI_SOLANA_MAINNET_CLUSTER
+      }
+      break
     case 'testnet':
       return 'https://testnet.rpcpool.com'
   }
   return clusterApiUrl(c as any)
 }
 
-function exploreLink(id: string, opts: { type: 'tx' | 'address'; cluster?: Cluster }) {
+function exploreLink(id: string, opts: { type: 'tx' | 'address', cluster?: Cluster }) {
   let cluster: Cluster = opts.cluster ?? 'mainnet-beta'
   if (cluster.startsWith('http')) {
     if (cluster.includes('devnet')) {
@@ -61,6 +76,11 @@ export function exploreAddress(addr: PublicKeyInitData) {
 export function exploreTransaction(signature: string) {
   const { cluster } = useContext()
   return exploreLink(signature, { type: 'tx', cluster })
+}
+
+// shorten the input address to have 5 characters at start and end
+export function shortenAddress(address: PublicKey | string, chars = 5): string {
+  return `${String(address).slice(0, chars)}...${String(address).slice(-chars)}`
 }
 
 /**

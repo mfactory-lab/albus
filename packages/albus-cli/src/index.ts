@@ -30,12 +30,12 @@ import type { Command } from 'commander'
 import { program as cli } from 'commander'
 import chalk from 'chalk'
 import log from 'loglevel'
-import { initContext } from '@/context'
+import { initContext, useContext } from '@/context'
 import * as actions from '@/actions'
+import { clusterByEnv, lamportsToSol } from '@/utils'
 
 const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
-const DEFAULT_CLUSTER = import.meta.env.CLI_SOLANA_CLUSTER || 'devnet'
 // eslint-disable-next-line node/prefer-global/process
 const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
 
@@ -53,17 +53,22 @@ cli
   .name('cli')
   .version(VERSION)
   .allowExcessArguments(false)
-  .option('-c, --cluster <CLUSTER>', 'solana cluster', DEFAULT_CLUSTER)
+  .option('-e, --env <ENV>', 'env [dev, stage, prod]', 'dev')
+  .option('-c, --cluster <CLUSTER>', 'solana cluster')
   .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair', DEFAULT_KEYPAIR)
   .option('-l, --log-level <LEVEL>', 'log level', (l: any) => l && log.setLevel(l), DEFAULT_LOG_LEVEL)
   .hook('preAction', async (command: Command) => {
     const opts = command.opts() as any
     log.setLevel(opts.logLevel)
+    if (!opts.cluster) {
+      opts.cluster = clusterByEnv(opts.env)
+    }
     const { provider, cluster, client } = initContext(opts)
     console.log(chalk.dim(`# Version: ${VERSION}`))
     console.log(chalk.dim(`# Program Address: ${client.programId}`))
     console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
     console.log(chalk.dim(`# Cluster: ${cluster}`))
+    console.log(chalk.dim(`# Env: ${opts.env}`))
     console.log('\n')
   })
   .hook('postAction', (_c: Command) => {
@@ -202,6 +207,11 @@ circuit.command('delete')
 const service = cli.command('service')
   .description('Service Management')
 
+service.command('all', { isDefault: true })
+  .description('Show all service providers')
+  .option('--authority', '(optional) filter by authority')
+  .action(actions.service.showAll)
+
 service.command('create')
   .description('Create new service')
   .requiredOption('--code <string>', 'service code')
@@ -231,11 +241,6 @@ service.command('show')
   .argument('addr', 'Service provider PDA`s address')
   .action(actions.service.show)
 
-service.command('all')
-  .description('Show all service providers')
-  .option('--authority', '(optional) filter by authority')
-  .action(actions.service.showAll)
-
 // ------------------------------------------
 // Policy Management
 // ------------------------------------------
@@ -248,6 +253,11 @@ policy.command('all', { isDefault: true })
   .option('-s, --serviceCode <string>', 'Filter by service code')
   .option('-s, --circuitCode <string>', 'Filter by circuit code')
   .action(actions.policy.showAll)
+
+policy.command('show')
+  .description('Show policy')
+  .argument('addrOrId', 'Policy address or identifier')
+  .action(actions.policy.show)
 
 policy.command('create')
   .description('Create new policy')
@@ -287,9 +297,15 @@ trustee.command('create')
   .description('Create new Trustee')
   .argument('name', 'The name of the trustee')
   .option('--email <string>', '(optional) Email')
-  .option('--website <string>', '(optional) Website')
+  .option('--email <string>', '(optional) Email')
+  .option('--authority <string>', '(optional) Authority')
   .option('--encryptionKey <string>', '(optional) Path to the encryption key')
   .action(actions.trustee.create)
+
+trustee.command('delete')
+  .description('Delete a trustee')
+  .argument('addr', 'Trustee address')
+  .action(actions.trustee.remove)
 
 trustee.command('verify')
   .description('Verify a trustee')
@@ -374,6 +390,22 @@ asset.command('upload')
 const admin = cli.command('admin')
   .description('Admin Management')
 
+admin.command('info')
+  .action(actions.admin.info)
+
+admin.command('migrate')
+  .action(actions.admin.migrate)
+
+admin.command('address')
+  .action(async () => {
+    const { client } = useContext()
+    const addr = client.pda.authority()[0]
+
+    const balance = await client.provider.connection.getBalance(addr)
+    log.info(`Authority: ${addr}`)
+    log.info(`Balance: ${lamportsToSol(balance)}`)
+  })
+
 admin.command('fund')
   .description('Fund albus authority balance')
   .action(actions.admin.fund)
@@ -388,6 +420,20 @@ admin.command('close')
   .argument('<pubkey>', 'Account address')
   .description('Close and account')
   .action(actions.admin.close)
+
+// ------------------------------------------
+
+const swap = cli.command('swap')
+swap.command('all')
+  .action(actions.swap.findAll)
+
+swap.command('closeAll')
+  .action(actions.swap.closeAll)
+
+swap.command('close')
+  .argument('<pubkey>', 'Account address')
+  .description('Close and account')
+  .action(actions.swap.close)
 
 // ------------------------------------------
 

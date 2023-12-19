@@ -28,3 +28,7 @@
 
 export * from './web3'
 export * from './http'
+
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}

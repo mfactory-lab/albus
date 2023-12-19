@@ -2,7 +2,7 @@ import { BN } from '@coral-xyz/anchor'
 import type { AnchorProvider } from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
-import { TokenAccountNotFoundError, TokenInvalidAccountOwnerError, createAssociatedTokenAccountInstruction, getAccount } from '@solana/spl-token'
+import { NATIVE_MINT, TokenAccountNotFoundError, TokenInvalidAccountOwnerError, createAssociatedTokenAccountInstruction, createCloseAccountInstruction, createSyncNativeInstruction, getAccount, getAssociatedTokenAddress } from '@solana/spl-token'
 
 import type { CurveType } from './generated'
 import {
@@ -130,22 +130,32 @@ export class AlbusSwapClient {
   async swap(props: SwapProps, opts?: ConfirmOptions) {
     const tx = new Transaction()
 
+    /**
+     * create destination token account
+     */
     try {
       await getAccount(this.connection, props.userDestination)
     } catch (error: unknown) {
       if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-        if (props.receiver && props.destinationTokenMint) {
+        if (props.destinationTokenMint) {
           tx.add(
             createAssociatedTokenAccountInstruction(
               this.provider.publicKey,
               props.userDestination,
-              props.receiver,
+              this.provider.publicKey,
               props.destinationTokenMint,
             ),
           )
         }
       }
     }
+
+    await this.handleWrappedSol({
+      tx,
+      amount: props.amountIn,
+      userSource: props.userSource,
+      sourceTokenMint: props.sourceTokenMint,
+    })
 
     tx.add(createSwapInstruction(
       {
@@ -166,6 +176,15 @@ export class AlbusSwapClient {
         minimumAmountOut: new BN(props.minimumAmountOut.toString()),
       },
     ))
+
+    /**
+     * if swap some token to SOL create source token account and wrap the required amount of SOL
+     */
+    if (props.destinationTokenMint && props.destinationTokenMint?.toBase58() === NATIVE_MINT.toBase58()) {
+      tx.add(
+        createCloseAccountInstruction(props.userDestination, this.provider.publicKey, this.provider.publicKey),
+      )
+    }
 
     return this.provider.sendAndConfirm(tx, [], opts)
   }
@@ -235,7 +254,34 @@ export class AlbusSwapClient {
    * Deposit one side of tokens into the pool
    */
   async depositSingleTokenTypeExactAmountIn(props: DepositSingleTokenTypeExactAmountInProps, opts?: ConfirmOptions) {
-    const instruction = createDepositSingleTokenTypeInstruction(
+    const tx = new Transaction()
+
+    /**
+     * create pool mint token account for user
+     */
+    try {
+      await getAccount(this.connection, props.destination)
+    } catch (error: unknown) {
+      if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+        tx.add(
+          createAssociatedTokenAccountInstruction(
+            this.provider.publicKey,
+            props.destination,
+            this.provider.publicKey,
+            props.poolMint,
+          ),
+        )
+      }
+    }
+
+    await this.handleWrappedSol({
+      tx,
+      amount: props.sourceTokenAmount,
+      userSource: props.source,
+      sourceTokenMint: props.sourceTokenMint,
+    })
+
+    tx.add(createDepositSingleTokenTypeInstruction(
       {
         authority: this.swapAuthority(props.tokenSwap),
         userTransferAuthority: this.provider.publicKey,
@@ -250,9 +296,8 @@ export class AlbusSwapClient {
         sourceTokenAmount: new BN(props.sourceTokenAmount.toString()),
         minimumPoolTokenAmount: new BN(props.minimumPoolTokenAmount.toString()),
       },
-    )
+    ))
 
-    const tx = new Transaction().add(instruction)
     return this.provider.sendAndConfirm(tx, [], opts)
   }
 
@@ -325,6 +370,57 @@ export class AlbusSwapClient {
         data: !props.noData ? TokenSwap.fromAccountInfo(account)[0] : null,
       }))
   }
+
+  /**
+   * if swap SOL to some token create source token account and wrap the required amount of SOL
+   */
+  async handleWrappedSol(props: {
+    tx: Transaction,
+    amount: bigint | number,
+    userSource: PublicKey,
+    sourceTokenMint?: PublicKey,
+  }) {
+    if (props.sourceTokenMint && props.sourceTokenMint?.toBase58() === NATIVE_MINT.toBase58()) {
+      let wrappedSolBalance = 0
+      try {
+        const userSourceCheck = await getAssociatedTokenAddress(props.sourceTokenMint, this.provider.publicKey)
+        if (userSourceCheck.toBase58() !== props.userSource.toBase58()) {
+          /**
+           * wrong userSource address
+           */
+          return
+        }
+
+        const accountInfo = await getAccount(this.connection, props.userSource)
+        wrappedSolBalance = Number(accountInfo.amount)
+      } catch (error: unknown) {
+        if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+          props.tx.add(
+            createAssociatedTokenAccountInstruction(
+              this.provider.publicKey,
+              props.userSource,
+              this.provider.publicKey,
+              props.sourceTokenMint,
+            ),
+          )
+        }
+      }
+
+      const amount = Number(props.amount)
+      if (props.amount > wrappedSolBalance) {
+        props.tx.add(
+          SystemProgram.transfer({
+            fromPubkey: this.provider.publicKey,
+            toPubkey: props.userSource,
+            lamports: amount - wrappedSolBalance,
+          }),
+          createSyncNativeInstruction(
+            props.userSource,
+          ),
+        )
+      }
+    }
+  }
 }
 
 export type LoadAllProps = {
@@ -392,10 +488,10 @@ export type SwapProps = {
   amountIn: bigint | number
   /// Minimum amount of DESTINATION token to output, prevents excessive slippage
   minimumAmountOut: bigint | number
-  /// User address
-  receiver?: PublicKey
   /// Mint address of token that user will receive
   destinationTokenMint?: PublicKey
+  /// Mint address of token that user will swap
+  sourceTokenMint?: PublicKey
 }
 
 export type DepositAllTokenTypesProps = {
@@ -466,6 +562,8 @@ export type DepositSingleTokenTypeExactAmountInProps = {
   /// Pool token amount to receive in exchange.
   /// The amount is set by the current exchange rate and size of the pool.
   minimumPoolTokenAmount: bigint | number
+  /// Mint address of token that user will swap
+  sourceTokenMint?: PublicKey
 }
 
 export type WithdrawSingleTokenTypeExactAmountOutProps = {

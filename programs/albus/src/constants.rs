@@ -38,6 +38,8 @@ pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[
     pubkey!("AuthxkATW25YDWX4kyDLh5qFMV1VhxKtRC9FBHh2JwZR"),
 ];
 
+pub const META_VALID_UNTIL_SIGNAL: &str = "meta_validUntil";
+
 /// Issuer signal name used in Albus circuits
 pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
 

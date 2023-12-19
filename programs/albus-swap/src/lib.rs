@@ -149,7 +149,7 @@ pub mod albus_swap {
                 ctx.accounts
                     .proof_request
                     .as_ref()
-                    .expect("Prof request required"),
+                    .expect("Proof request required"),
             )
             .check_policy(policy)
             .check_owner(ctx.accounts.user_transfer_authority.key())
@@ -685,6 +685,30 @@ pub mod albus_swap {
 
         Ok(())
     }
+
+    pub fn close_account(ctx: Context<CloseAccount>) -> Result<()> {
+        let acc = ctx.accounts.account.to_account_info();
+        let sol_destination = ctx.accounts.authority.to_account_info();
+
+        // Transfer lamports from the account to the sol_destination.
+        let dest_starting_lamports = sol_destination.lamports();
+        **sol_destination.lamports.borrow_mut() =
+            dest_starting_lamports.checked_add(acc.lamports()).unwrap();
+        **acc.lamports.borrow_mut() = 0;
+
+        acc.assign(&solana_program::system_program::ID);
+        acc.realloc(0, false).map_err(Into::into)
+    }
+}
+
+#[derive(Accounts)]
+pub struct CloseAccount<'info> {
+    /// CHECK:
+    #[account(mut)]
+    pub account: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]

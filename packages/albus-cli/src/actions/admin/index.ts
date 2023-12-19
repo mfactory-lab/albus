@@ -37,6 +37,9 @@ import { PublicKey, Transaction } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
+export * from './info'
+export * from './migrate'
+
 export async function fund(_opts: any) {
   const { client } = useContext()
   const addr = client.pda.authority()[0]
@@ -105,7 +108,7 @@ async function closeAccount(pubkey: PublicKey) {
   const ix = createAdminCloseAccountInstruction({
     authority: client.provider.publicKey,
     account: pubkey,
-  })
+  }, client.programId)
   const sig = await client.provider.sendAndConfirm(new Transaction().add(ix))
   log.info(`Signature: ${sig}`)
 }

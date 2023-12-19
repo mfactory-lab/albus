@@ -27,8 +27,8 @@
  */
 
 import { AccountState } from '@solana/spl-token'
-import { Keypair } from '@solana/web3.js'
 import type { PublicKey } from '@solana/web3.js'
+import { Keypair } from '@solana/web3.js'
 import axios from 'axios'
 
 import { assert, beforeAll, describe, it, vi } from 'vitest'
@@ -46,9 +46,11 @@ describe('albusCredential', async () => {
   const issuer = Keypair.generate()
   const holder = Keypair.generate()
 
-  const client = new AlbusClient(provider)
-  const holderClient = new AlbusClient(newProvider(holder))
+  const client = new AlbusClient(provider).local()
+  const holderClient = new AlbusClient(newProvider(holder)).local()
   const mx = netMetaplex(payer)
+
+  console.log(client.programId)
 
   const updateAuthority = client.pda.authority()[0]
 
@@ -67,10 +69,15 @@ describe('albusCredential', async () => {
   console.log(`Holder: ${holder.publicKey}`)
   console.log(`UpdateAuthority: ${updateAuthority}`)
 
+  async function _balance(addr: PublicKey) {
+    const balance = await provider.connection.getBalance(addr)
+    console.log(`Balance(${addr}): ${balance}`)
+  }
+
   beforeAll(async () => {
     await airdrop(payer.publicKey)
     await airdrop(holder.publicKey)
-    await airdrop(updateAuthority)
+    // await airdrop(updateAuthority)
   })
 
   let credentialMint: PublicKey
@@ -81,11 +88,48 @@ describe('albusCredential', async () => {
     },
   }
 
-  it('can create/update/delete credential with custom owner', async () => {
-    const owner = Keypair.generate()
-    const { mintAddress } = await holderClient.credential.create({ owner })
+  it('can not create credential with empty balances', async () => {
+    const client = new AlbusClient(newProvider(Keypair.generate())).local()
+    try {
+      await client.credential.create({}, { feePayer: payer })
+      assert.ok(false)
+    } catch (e: any) {
+      assert.ok(String(e.message).includes('custom program error: 0x1'))
+    }
+  })
+
+  it('can create credential with user payer', async () => {
+    const { mintAddress } = await holderClient.credential.create()
+
+    credentialMint = mintAddress
     const nft = await mx.nfts().findByMint({ mintAddress })
     assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
+
+    const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
+      mint: mintAddress,
+      address: holderClient.provider.publicKey,
+      addressType: 'owner',
+    })
+
+    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
+    assert.equal(tokenWithMint.state, AccountState.Frozen)
+  })
+
+  it('can create credential with albus payer', async () => {
+    await airdrop(updateAuthority)
+    const owner = Keypair.generate()
+    const client = new AlbusClient(newProvider(Keypair.generate())).local()
+    await client.credential.create({ owner }, { feePayer: payer })
+  })
+
+  it('can manage credential with custom owner', async () => {
+    const owner = Keypair.generate()
+
+    const { mintAddress } = await holderClient.credential.create({ owner })
+
+    const nft = await mx.nfts().findByMint({ mintAddress })
+    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
+
     const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
       mint: mintAddress,
       address: owner.publicKey,
@@ -102,24 +146,6 @@ describe('albusCredential', async () => {
     })
 
     await holderClient.credential.delete({ mint: mintAddress, owner })
-  })
-
-  it('can create credential', async () => {
-    const { mintAddress } = await holderClient.credential.create()
-    console.log(`mintAddress ${mintAddress}`)
-
-    credentialMint = mintAddress
-    const nft = await mx.nfts().findByMint({ mintAddress })
-    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
-
-    const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
-      mint: mintAddress,
-      address: holderClient.provider.publicKey,
-      addressType: 'owner',
-    })
-
-    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
-    assert.equal(tokenWithMint.state, AccountState.Frozen)
   })
 
   it('can update credential', async () => {
@@ -170,11 +196,8 @@ describe('albusCredential', async () => {
     assert.deepEqual(vc[0]?.credential, credential.vc)
   })
 
-  it('can revoke credential', async () => {
-    await holderClient.credential.delete({
-      mint: credentialMint,
-    })
-
+  it('can delete credential', async () => {
+    await holderClient.credential.delete({ mint: credentialMint })
     const token = getAssociatedTokenAddress(credentialMint, client.provider.publicKey)
 
     // Then the NFT accounts no longer exist.

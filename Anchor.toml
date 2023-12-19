@@ -18,12 +18,12 @@ cluster = "localnet"
 wallet = "~/.config/solana/albus.json"
 
 [programs.localnet]
-albus = "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi"
+albus = "ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp"
 albus_swap = "ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq"
 albus_transfer = "ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe"
 
 [programs.devnet]
-albus = "ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi"
+albus = "ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp"
 albus_swap = "ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq"
 albus_transfer = "ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe"
 

@@ -66,7 +66,7 @@ export class CircuitManager extends BaseManager {
    * @param filter.code
    */
   async find(filter: { code?: string } = {}) {
-    const builder = Circuit.gpaBuilder()
+    const builder = Circuit.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', circuitDiscriminator)
 
     if (filter.code) {
@@ -117,7 +117,7 @@ export class CircuitManager extends BaseManager {
         privateSignals: props.privateSignals,
         publicSignals: props.publicSignals,
       },
-    })
+    }, this.programId)
 
     try {
       const tx = new Transaction().add(instruction)
@@ -157,7 +157,7 @@ export class CircuitManager extends BaseManager {
           ic: vk.ic.slice(0, icFirstSize),
           extendIc: false,
         },
-      }),
+      }, this.programId),
     )
 
     if (vk.ic.length > icFirstSize) {
@@ -173,7 +173,7 @@ export class CircuitManager extends BaseManager {
               extendIc: true,
               ic,
             },
-          }),
+          }, this.programId),
         )
       }
     }
@@ -194,18 +194,16 @@ export class CircuitManager extends BaseManager {
   }
 
   /**
-   * Delete circuit by code
-   * @param props
-   * @param props.code
+   * Delete circuit by address
+   * @param addr
    * @param opts
    */
-  async delete(props: { code: string }, opts?: ConfirmOptions) {
+  async deleteById(addr: PublicKeyInitData, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const [circuit] = this.pda.circuit(props.code)
     const instruction = createDeleteCircuitInstruction({
-      circuit,
+      circuit: new PublicKey(addr),
       authority,
-    })
+    }, this.programId)
 
     try {
       const tx = new Transaction().add(instruction)
@@ -217,6 +215,17 @@ export class CircuitManager extends BaseManager {
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
+  }
+
+  /**
+   * Delete circuit by code
+   * @param props
+   * @param props.code
+   * @param opts
+   */
+  async delete(props: { code: string }, opts?: ConfirmOptions) {
+    const [circuit] = this.pda.circuit(props.code)
+    return this.deleteById(circuit, opts)
   }
 }
 

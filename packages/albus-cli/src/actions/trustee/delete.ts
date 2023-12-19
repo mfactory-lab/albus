@@ -26,8 +26,15 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './addValidator'
-export * from './depositSol'
-export * from './depositStake'
-export * from './withdrawSol'
-export * from './withdrawStake'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+export async function remove(addr: string) {
+  const { client } = useContext()
+
+  console.log(`addr: ${addr}`)
+
+  const { signature } = await client.trustee.delete(addr)
+
+  log.info(`Signature: ${signature}`)
+}

@@ -66,14 +66,7 @@ export type WithdrawSingleTokenTypeInstructionAccounts = {
 }
 
 export const withdrawSingleTokenTypeInstructionDiscriminator = [
-  111,
-  171,
-  21,
-  77,
-  237,
-  181,
-  241,
-  56,
+  111, 171, 21, 77, 237, 181, 241, 56,
 ]
 
 /**

@@ -28,12 +28,13 @@
 
 import log from 'loglevel'
 import { useContext } from '@/context'
+import { capitalize } from '@/utils'
 
 type Opts = {
   serviceCode: string
   circuitCode: string
   code: string
-  name: string
+  name?: string
   description?: string
   expirationPeriod?: number
   retentionPeriod?: number
@@ -47,16 +48,16 @@ export async function create(opts: Opts) {
     circuitCode: opts.circuitCode,
     serviceCode: opts.serviceCode,
     code: opts.code,
-    name: opts.name,
+    name: opts.name ?? capitalize(opts.code),
     description: opts.description,
     expirationPeriod: opts.expirationPeriod,
     retentionPeriod: opts.retentionPeriod,
     rules: opts.rules?.map((r) => {
       const rr = r.split(':')
-      if (rr.length < 2) {
-        throw new Error('Invalid rule')
+      if (rr.length < 2 || rr[1] === undefined) {
+        throw new Error(`Invalid rule ${rr}, should be in format \`{key}:{value}\``)
       }
-      return { key: String(rr[0]), value: Number(rr[2]) }
+      return { key: String(rr[0]), value: String(rr[1]), label: rr[2] ?? rr[1] }
     }),
   })
 

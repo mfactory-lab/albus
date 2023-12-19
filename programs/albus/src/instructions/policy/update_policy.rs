@@ -49,10 +49,6 @@ pub fn handler(ctx: Context<UpdatePolicy>, data: UpdatePolicyData) -> Result<()>
         policy.retention_period = retention_period;
     }
 
-    if let Some(retention_period) = data.retention_period {
-        policy.retention_period = retention_period;
-    }
-
     if let Some(rules) = data.rules {
         policy.rules = rules;
     }
@@ -74,7 +70,7 @@ pub struct UpdatePolicy<'info> {
     #[account(mut, has_one = service_provider)]
     pub policy: Box<Account<'info, Policy>>,
 
-    #[account(mut, has_one = authority)]
+    #[account(has_one = authority)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 
     #[account(mut)]

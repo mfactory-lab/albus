@@ -27,12 +27,17 @@
  */
 
 import log from 'loglevel'
+import { PublicKey } from '@solana/web3.js'
 import { useContext } from '@/context'
 
-export async function remove(code: string) {
+export async function remove(addrOrCode: string) {
   const { client } = useContext()
-
-  const { signature } = await client.circuit.delete({ code })
-
+  let addr: PublicKey
+  try {
+    addr = new PublicKey(addrOrCode)
+  } catch (e) {
+    addr = client.pda.circuit(addrOrCode)[0]
+  }
+  const { signature } = await client.circuit.deleteById(addr)
   log.info(`Signature: ${signature}`)
 }

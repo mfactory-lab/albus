@@ -98,7 +98,7 @@ export class ServiceManager extends BaseManager {
    * @param props
    */
   async find(props: FindServicesProps = {}) {
-    const builder = ServiceProvider.gpaBuilder()
+    const builder = ServiceProvider.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', serviceProviderDiscriminator)
 
     // after fetch filters
@@ -170,7 +170,7 @@ export class ServiceManager extends BaseManager {
         trustees: props.trustees ? props.trustees.map(t => new PublicKey(t)) : null,
         authority: props.authority ? new PublicKey(props.authority) : null,
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -204,7 +204,7 @@ export class ServiceManager extends BaseManager {
         newAuthority: props.newAuthority ? new PublicKey(props.newAuthority) : null,
         clearTrustees: props.trustees?.length === 0,
       },
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)
@@ -228,7 +228,7 @@ export class ServiceManager extends BaseManager {
     const ix = createDeleteServiceProviderInstruction({
       serviceProvider,
       authority,
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder
       .addInstruction(ix)

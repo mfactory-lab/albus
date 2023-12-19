@@ -26,39 +26,27 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import Table from 'cli-table3'
+import type { PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
-import { StakeAuthorize } from '@albus/verified-stake-sdk/src/generated'
-import log from 'loglevel'
-import { useContext } from '../../context'
-import { exploreTransaction } from '../../utils'
+import { useContext } from '@/context'
+import { lamportsToSol } from '@/utils'
 
-type Opts = {
-  zkp: string
-  stake: string
-  newAuthorized: string
-  authorized: string
-}
+export async function info(_opts: any) {
+  const { client } = useContext()
 
-export async function authorize(opts: Opts) {
-  const { stakeClient } = useContext()
+  const table = new Table({
+    head: ['Name', 'Address', 'Balance'],
+  })
 
-  let authorized = StakeAuthorize.Staker
-
-  if (opts.authorized === 'w') {
-    authorized = StakeAuthorize.Withdrawer
+  async function addRow(title: string, addr: PublicKeyInitData) {
+    const balance = await client.provider.connection.getBalance(new PublicKey(addr))
+    table.push([title, String(addr), String(lamportsToSol(balance))])
   }
 
-  try {
-    const signature = await stakeClient.authorize({
-      newAuthorized: new PublicKey(opts.newAuthorized),
-      stake: new PublicKey(opts.stake),
-      stakeAuthorized: authorized,
-      zkpRequest: new PublicKey(opts.zkp),
-    })
+  await addRow('FeePayer (front)', 'HxCjxUFNXQQfAgPrf8EHrrbhU6x93Y81BTFQenroL7hB')
+  await addRow('Admin (issuer)', 'AuthxkATW25YDWX4kyDLh5qFMV1VhxKtRC9FBHh2JwZR')
+  await addRow('Authority (nft mint)', client.pda.authority()[0])
 
-    log.info(`Signature: ${signature}`)
-    log.info(exploreTransaction(signature))
-  } catch (e) {
-    log.error(e)
-  }
+  console.log(table.toString())
 }

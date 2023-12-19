@@ -29,17 +29,24 @@
 use anchor_lang::prelude::*;
 
 use crate::state::Trustee;
+use crate::utils::assert_authorized;
 
 pub fn handler(ctx: Context<CreateTrustee>, data: CreateTrusteeData) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;
 
     let trustee = &mut ctx.accounts.trustee;
 
+    trustee.authority = if let Some(authority) = data.authority {
+        assert_authorized(&ctx.accounts.authority.key())?;
+        authority
+    } else {
+        ctx.accounts.authority.key()
+    };
+
     trustee.key = data.key;
     trustee.name = data.name;
     trustee.email = data.email;
     trustee.website = data.website;
-    trustee.authority = ctx.accounts.authority.key();
     trustee.created_at = timestamp;
     trustee.is_verified = false;
     trustee.bump = ctx.bumps.trustee;
@@ -53,6 +60,7 @@ pub struct CreateTrusteeData {
     pub name: String,
     pub email: String,
     pub website: String,
+    pub authority: Option<Pubkey>,
 }
 
 #[derive(Accounts)]

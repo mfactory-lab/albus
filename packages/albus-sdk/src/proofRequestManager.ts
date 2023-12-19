@@ -36,7 +36,6 @@ import type {
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import chunk from 'lodash/chunk'
 import { BaseManager } from './base'
-import { ALBUS_DID } from './constants'
 import type {
   ProofData,
   ProofRequestStatus,
@@ -131,7 +130,7 @@ export class ProofRequestManager extends BaseManager {
    * Find proof requests based on specified criteria.
    */
   async find(props: FindProofRequestProps = {}) {
-    const builder = ProofRequest.gpaBuilder()
+    const builder = ProofRequest.gpaBuilder(this.programId)
       .addFilter('accountDiscriminator', proofRequestDiscriminator)
 
     if (props.noData) {
@@ -202,6 +201,7 @@ export class ProofRequestManager extends BaseManager {
           maxPublicInputs,
         },
       },
+      this.programId,
     )
 
     const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
@@ -220,7 +220,7 @@ export class ProofRequestManager extends BaseManager {
     const ix = createDeleteProofRequestInstruction({
       proofRequest: new PublicKey(props.proofRequest),
       authority,
-    })
+    }, this.programId)
 
     const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
 
@@ -242,6 +242,7 @@ export class ProofRequestManager extends BaseManager {
           status: props.status,
         },
       },
+      this.programId,
     )
 
     const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
@@ -267,7 +268,7 @@ export class ProofRequestManager extends BaseManager {
   /**
    * Decrypts data using the provided secret and signals.
    */
-  decryptData(props: { secret: bigint; signals: Record<string, any> }) {
+  decryptData(props: { secret: bigint, signals: Record<string, any> }) {
     const { secret, signals } = props
     const nonce = signals.timestamp as bigint
     const encryptedData = (signals.encryptedData ?? []) as bigint[]
@@ -315,7 +316,7 @@ export class ProofRequestManager extends BaseManager {
         type: 'BJJSignature2021',
         created: Number(new Date()),
         // TODO: fixme
-        verificationMethod: `${ALBUS_DID}#keys-0`,
+        verificationMethod: `#keys-0`,
         rootHash: data.credentialRoot,
         proofValue: {
           ax: data.issuerPk[0],
@@ -369,6 +370,7 @@ export class ProofRequestManager extends BaseManager {
                 proof: null,
               },
             },
+            this.programId,
           )),
         )
       }
@@ -390,6 +392,7 @@ export class ProofRequestManager extends BaseManager {
             proof,
           },
         },
+        this.programId,
       )),
     )
 
@@ -402,7 +405,7 @@ export class ProofRequestManager extends BaseManager {
             proofRequest: new PublicKey(props.proofRequest),
             circuit: proofRequest.circuit,
             authority,
-          }),
+          }, this.programId),
           ),
       )
     }

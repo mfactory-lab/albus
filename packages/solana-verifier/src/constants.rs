@@ -30,6 +30,7 @@ use solana_program::pubkey;
 use solana_program::pubkey::Pubkey;
 
 pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi");
+pub const ALBUS_DEV_PROGRAM_ID: Pubkey = pubkey!("ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp");
 
 pub const POLICY_DISCRIMINATOR: &[u8] = &[222, 135, 7, 163, 235, 177, 33, 68];
 pub const PROOF_REQUEST_DISCRIMINATOR: &[u8] = &[78, 10, 176, 254, 231, 33, 111, 224];

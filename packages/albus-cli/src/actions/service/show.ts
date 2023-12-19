@@ -30,6 +30,7 @@ import { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import Table from 'cli-table3'
 import { useContext } from '@/context'
+import { shortenAddress } from '@/utils'
 
 export async function show(code: string) {
   const { client } = useContext()
@@ -55,15 +56,15 @@ export async function showAll(opts: { authority?: string }) {
   })
 
   const table = new Table({
-    head: ['Address', 'Code', 'Name', 'Trustee count', 'Policy count', 'Request count'],
+    head: ['Address', 'Authority', 'Code', 'Name', 'Trustee count', 'Policy count', 'Request count'],
   })
 
   for (const { pubkey, data } of items) {
     table.push([
       pubkey.toString(),
+      String(shortenAddress(data!.authority)),
       String(data?.code),
       String(data?.name),
-      // String(data?.authority),
       Number(data?.trustees.length ?? 0),
       Number(data?.policyCount),
       Number(data?.proofRequestCount),

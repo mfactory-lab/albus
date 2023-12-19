@@ -26,40 +26,38 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import fs from 'node:fs'
 import { Buffer } from 'node:buffer'
-import { Keypair, PublicKey } from '@solana/web3.js'
+import { readFileSync } from 'node:fs'
+import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
+import { AlbusClient } from '@albus-finance/sdk'
 import log from 'loglevel'
-import { useContext } from '../../context'
-import { exploreTransaction } from '../../utils'
+import { Keypair } from '@solana/web3.js'
+import { useContext } from '@/context'
+import { clusterUrl } from '@/utils'
 
-type Opts = {
-  zkp: string
-  stake: string
-  vote: string
-  uninitializedStake: string
-  base: string
-  seed: string
-}
+export async function migrate(_opts: any) {
+  const { client } = useContext()
 
-export async function redelegateWithSeed(opts: Opts) {
-  const { stakeClient } = useContext()
+  // mainnet connection
+  const opts = AnchorProvider.defaultOptions()
+  const keypair = import.meta.env.CLI_SOLANA_MAINNET_KEYPAIR
+  const wallet = new Wallet(
+    Keypair.fromSecretKey(Buffer.from(JSON.parse(
+      keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
+    ))),
+  )
+  const endpoint = import.meta.env.CLI_SOLANA_MAINNET_CLUSTER ?? clusterUrl('mainnet-beta')
+  const connection = new web3.Connection(endpoint, opts.commitment)
+  const prodClient = new AlbusClient(new AnchorProvider(connection, wallet, opts))
 
-  const baseKeypair = Keypair.fromSecretKey(Buffer.from(JSON.parse(fs.readFileSync(opts.base).toString())))
+  log.info('Loading from mainnet...')
+  const issuers = await client.issuer.find()
 
-  try {
-    const signature = await stakeClient.redelegateWithSeed({
-      base: baseKeypair,
-      seed: opts.seed,
-      stake: new PublicKey(opts.stake),
-      uninitializedStake: new PublicKey(opts.uninitializedStake),
-      vote: new PublicKey(opts.vote),
-      zkpRequest: new PublicKey(opts.zkp),
-    })
-
-    log.info(`Signature: ${signature}`)
-    log.info(exploreTransaction(signature))
-  } catch (e) {
-    log.error(e)
-  }
+  // for (const issuer of issuers) {
+  //   prodClient.issuer.create({
+  //     code: string
+  //     name: string
+  //   })
+  // }
+  console.log(issuers)
 }

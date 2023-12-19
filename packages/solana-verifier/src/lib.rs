@@ -31,7 +31,7 @@ mod constants;
 mod cpi;
 mod utils;
 
-use crate::constants::{ALBUS_PROGRAM_ID, PROOF_REQUEST_DISCRIMINATOR};
+use crate::constants::{ALBUS_DEV_PROGRAM_ID, ALBUS_PROGRAM_ID, PROOF_REQUEST_DISCRIMINATOR};
 use crate::utils::cmp_pubkeys;
 use arrayref::array_ref;
 use arrayref::array_refs;
@@ -81,7 +81,9 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
 
     /// Checks if the provided account is a valid program account
     fn check_program_account(&self, acc: &AccountInfo) -> Result<(), ProgramError> {
-        if !cmp_pubkeys(acc.owner, ALBUS_PROGRAM_ID) {
+        if !cmp_pubkeys(acc.owner, ALBUS_PROGRAM_ID)
+            && !cmp_pubkeys(acc.owner, ALBUS_DEV_PROGRAM_ID)
+        {
             return Err(ProgramError::IllegalOwner);
         }
         if acc.data_is_empty() {

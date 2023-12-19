@@ -29,10 +29,11 @@
 import log from 'loglevel'
 import { show } from './show'
 import { useContext } from '@/context'
+import { capitalize } from '@/utils'
 
 type Opts = {
   code: string
-  name: string
+  name?: string
   authority?: string
   website?: string
   secretShareThreshold?: number
@@ -42,7 +43,10 @@ type Opts = {
 export async function create(opts: Opts) {
   const { client } = useContext()
 
-  const { signature } = await client.service.create(opts)
+  const { signature } = await client.service.create({
+    ...opts,
+    name: opts.name ?? capitalize(opts.code),
+  })
 
   await show(opts.code)
 

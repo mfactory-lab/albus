@@ -28,7 +28,7 @@
 
 declare module 'circom_tester' {
   type WasmTester = {
-    symbols: { [key: string]: { labelIdx: number; varIdx: number; componentIdx: number } }
+    symbols: { [key: string]: { labelIdx: number, varIdx: number, componentIdx: number } }
     calculateWitness<T>(witness: T, sanityCheck?: boolean): Promise<any>
     checkConstraints<T>(witness: T): Promise<any>
     assertOut(actualOut: any, expectedOut: unknown): Promise<void>

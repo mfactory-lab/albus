@@ -41,7 +41,7 @@ export const updatePolicyStruct = new beet.FixableBeetArgsStruct<
  * Accounts required by the _updatePolicy_ instruction
  *
  * @property [_writable_] policy
- * @property [_writable_] serviceProvider
+ * @property [] serviceProvider
  * @property [_writable_, **signer**] authority
  * @category Instructions
  * @category UpdatePolicy
@@ -86,7 +86,7 @@ export function createUpdatePolicyInstruction(
     },
     {
       pubkey: accounts.serviceProvider,
-      isWritable: true,
+      isWritable: false,
       isSigner: false,
     },
     {
