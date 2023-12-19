@@ -5,7 +5,7 @@
 <h1 align="center"><strong>Albus Protocol</strong></h1>
 <p align="center">
   <strong>
-  Albus Protocol provides on-chain KYC infrastructure for Web3 protocols and their users. Building on a Self-Sovereign Identity (SSI) model, Albus harnesses the power of blockchain and Zero-Knowledge Proofs to create a secure environment where Web3 protocols can KYC their users without accessing their private data. Albus also adds an extra layer of compliance by ensuring that user data can be made available to authorized entities with legitimate requests under data retention law.
+Albus Protocol provides on-chain Zero-Knowledge-based verification infrastructure for Web3 businesses and their users. Building on Self-Sovereign Identity (SSI) model, Albus harnesses the power of blockchain and Zero-Knowledge Proofs to create a privacy-oriented environment where Web3 businesses can verify their users, and users can prove claims about themselves to Web3 businesses. Albus also adds an extra layer of compliance by ensuring that user data can be safely retained under data retention law and made available to authorised entities with legitimate requests.
   </strong>
 </p>
 
@@ -16,15 +16,20 @@
   <a target="_blank" href="https://github.com/mfactory-lab/albus/wiki"><img alt="Docs" src="https://img.shields.io/badge/docs-wiki-blue" /></a>
 </p>
 
-# Website and litepaper
+# Website and lite paper
 
 - [Albus landing page](https://albus.finance/)
 - [Albus application website](https://app.albus.finance/)
 - [Albus litepaper](https://albus.finance/assets/ALBUS%20LITEPAPER%20v2.02%20Sep23-86978e72.pdf)
 
-# Full documentation
+# Documentation
 
-- [Introduction](https://github.com/mfactory-lab/albus/wiki)
+- [What is Albus Protocol?](https://github.com/mfactory-lab/albus/wiki#what-is-albus-protocol)
+  - [Problem](https://github.com/mfactory-lab/albus/wiki#problem)
+  - [Solution](https://github.com/mfactory-lab/albus/wiki#solution)
+  - [Example](https://github.com/mfactory-lab/albus/wiki#example)
+  - [Benefits](https://github.com/mfactory-lab/albus/wiki#benefits)
+  - [Use cases](https://github.com/mfactory-lab/albus/wiki#use-cases)
 - [Architecture](https://github.com/mfactory-lab/albus/wiki/architecture)
 - [User workflows](https://github.com/mfactory-lab/albus/wiki/user-workflows)
   - [Business user workflow](https://github.com/mfactory-lab/albus/wiki/user-workflows#business-user-workflow)
