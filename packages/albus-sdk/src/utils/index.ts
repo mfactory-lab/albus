@@ -29,3 +29,4 @@
 export * from './circuit'
 export * from './wallet'
 export * from './web3'
+export * from './policy-formatter'
