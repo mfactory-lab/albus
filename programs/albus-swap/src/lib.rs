@@ -485,7 +485,7 @@ pub mod albus_swap {
                 ctx.accounts
                     .transfer_to_token_b_ctx()
                     .with_signer(&[&seeds[..]]),
-                token_a_amount,
+                token_b_amount,
             )?;
         }
 
@@ -686,28 +686,54 @@ pub mod albus_swap {
         Ok(())
     }
 
-    pub fn close_account(ctx: Context<CloseAccount>) -> Result<()> {
-        let acc = ctx.accounts.account.to_account_info();
-        let sol_destination = ctx.accounts.authority.to_account_info();
-
-        // Transfer lamports from the account to the sol_destination.
-        let dest_starting_lamports = sol_destination.lamports();
-        **sol_destination.lamports.borrow_mut() =
-            dest_starting_lamports.checked_add(acc.lamports()).unwrap();
-        **acc.lamports.borrow_mut() = 0;
-
-        acc.assign(&solana_program::system_program::ID);
-        acc.realloc(0, false).map_err(Into::into)
-    }
+    // pub fn close(ctx: Context<ClosePool>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
+    //     let token_swap = &mut ctx.accounts.token_swap;
+    //
+    //     if token_a_amount > 0 {
+    //         let cpi_accounts = Transfer {
+    //             from:  &ctx.swap_token_a.to_account_info(),
+    //             to:  &ctx.dest_token_a.to_account_info(),
+    //             authority: &ctx.authority.to_account_info(),
+    //         };
+    //
+    //         token::transfer(
+    //             CpiContext::new(ctx.token_program.to_account_info(), cpi_accounts)
+    //                 .with_signer(&[&seeds[..]]),
+    //             token_a_amount,
+    //         )?;
+    //     }
+    //
+    //     if token_b_amount > 0 {
+    //         token::transfer(
+    //             ctx.accounts
+    //                 .transfer_to_token_b_ctx()
+    //                 .with_signer(&[&seeds[..]]),
+    //             token_a_amount,
+    //         )?;
+    //     }
+    //
+    //     let acc = token_swap.to_account_info();
+    //     let sol_destination = ctx.accounts.authority.to_account_info();
+    //
+    //     // Transfer lamports from the account to the sol_destination.
+    //     let dest_starting_lamports = sol_destination.lamports();
+    //     **sol_destination.lamports.borrow_mut() =
+    //         dest_starting_lamports.checked_add(acc.lamports()).unwrap();
+    //     **acc.lamports.borrow_mut() = 0;
+    //
+    //     acc.assign(&solana_program::system_program::ID);
+    //     acc.realloc(0, false).map_err(Into::into)
+    // }
 }
 
 #[derive(Accounts)]
-pub struct CloseAccount<'info> {
-    /// CHECK:
+pub struct ClosePool<'info> {
+    /// CHECK: safe
+    pub authority: AccountInfo<'info>,
     #[account(mut)]
-    pub account: UncheckedAccount<'info>,
+    pub token_swap: Box<Account<'info, TokenSwap>>,
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -1108,5 +1134,33 @@ impl<'info> Swap<'info> {
             authority: self.authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::curve::base::SwapCurve;
+    use crate::curve::calculator::RoundDirection;
+    use crate::errors::SwapError;
+    use crate::utils::to_u128;
+    use solana_program::native_token::LAMPORTS_PER_SOL;
+
+    #[test]
+    fn test1() {
+        let curve = SwapCurve::default();
+
+        let calculator = curve.calculator;
+        let results = calculator
+            .pool_tokens_to_trading_tokens(
+                (0.01 * LAMPORTS_PER_SOL as f64) as u128,
+                to_u128((11.59 * LAMPORTS_PER_SOL as f64) as u64).unwrap(),
+                to_u128((3.821 * LAMPORTS_PER_SOL as f64) as u64).unwrap(),
+                to_u128((10.22 * 1_000_000f64) as u64).unwrap(),
+                RoundDirection::Floor,
+            )
+            .ok_or(SwapError::ZeroTradingTokens)
+            .unwrap();
+
+        println!("{:?}", results);
     }
 }
