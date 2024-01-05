@@ -64,11 +64,10 @@ export class CredentialManager extends BaseManager {
    * @param callback
    */
   async addListener(mint: PublicKeyInitData, callback: CredentialChangeCallback) {
-    const mintPubkey = new PublicKey(mint)
-    const key = mintPubkey.toString()
+    const key = String(new PublicKey(mint))
     await this.removeListener(key)
     this.subscriptions[key] = this.provider.connection
-      .onAccountChange(getMetadataPDA(mintPubkey), async (acc) => {
+      .onAccountChange(getMetadataPDA(mint), async (acc) => {
         const metadata = await getMetadataByAccountInfo(acc, true)
         const credentialInfo = await this.getCredentialInfo(metadata)
         callback(credentialInfo)
