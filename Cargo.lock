@@ -87,7 +87,7 @@ dependencies = [
 
 [[package]]
 name = "albus"
-version = "0.0.25"
+version = "0.0.26"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -129,7 +129,7 @@ dependencies = [
 
 [[package]]
 name = "albus-swap"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "albus-solana-verifier",
  "anchor-lang",
