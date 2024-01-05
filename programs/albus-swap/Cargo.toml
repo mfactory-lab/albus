@@ -1,6 +1,6 @@
 [package]
 name = "albus-swap"
-version = "0.0.3"
+version = "0.0.4"
 homepage = "https://albus.finance"
 repository = "https://github.com/mfactory-lab/albus"
 license = "AGPL-3.0"
