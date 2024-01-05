@@ -29,8 +29,15 @@
 import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
-import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
-import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js'
+import type { ClientSubscriptionId, ConfirmOptions,
+  PublicKeyInitData,
+  Signer } from '@solana/web3.js'
+import {
+  ComputeBudgetProgram,
+  Keypair,
+  PublicKey,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+} from '@solana/web3.js'
 import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
 import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
@@ -42,13 +49,52 @@ import {
 import type { ExtendedMetadata } from './utils'
 import {
   getAssociatedTokenAddress,
-  getMasterEditionPDA,
+  getMasterEditionPDA, getMetadataByAccountInfo,
   getMetadataPDA,
   getParsedNftAccountsByOwner,
   loadNft,
 } from './utils'
 
 export class CredentialManager extends BaseManager {
+  private subscriptions = new Map<string, ClientSubscriptionId>()
+
+  /**
+   * Register a callback to be invoked whenever the credential account changes
+   * @param mint
+   * @param callback
+   */
+  async addListener(mint: PublicKeyInitData, callback: CredentialChangeCallback) {
+    const mintPubkey = new PublicKey(mint)
+    const key = mintPubkey.toString()
+    await this.removeListener(key)
+    this.subscriptions[key] = this.provider.connection
+      .onAccountChange(getMetadataPDA(mintPubkey), async (acc) => {
+        const metadata = await getMetadataByAccountInfo(acc, true)
+        const credentialInfo = await this.getCredentialInfo(metadata)
+        callback(credentialInfo)
+      })
+  }
+
+  /**
+   * Deregister an account notification callback
+   * @param mint
+   */
+  removeListener(mint: PublicKeyInitData) {
+    const key = String(new PublicKey(mint))
+    if (this.subscriptions.has(key)) {
+      return this.provider.connection.removeAccountChangeListener(this.subscriptions[key])
+    }
+  }
+
+  /**
+   * Deregister all callbacks
+   */
+  async removeAllListener() {
+    for (const subscriptionId of this.subscriptions.values()) {
+      await this.provider.connection.removeAccountChangeListener(subscriptionId)
+    }
+  }
+
   /**
    * Create new Credential NFT.
    */
@@ -222,6 +268,11 @@ export type TxOpts = {
   confirm?: ConfirmOptions
   feePayer?: Signer
 }
+
+/**
+ * Callback function for credential change notifications
+ */
+type CredentialChangeCallback = (vc: VerifiableCredential) => void
 
 export type CredentialInfo = {
   address: PublicKey

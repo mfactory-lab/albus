@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import type { Buffer } from 'node:buffer'
 import axios from 'axios'
 import { utils as AnchorUtils } from '@coral-xyz/anchor'
 import type { Creator } from '@metaplex-foundation/mpl-token-metadata'
@@ -72,15 +73,33 @@ export function validateNft(nft: Metadata, props: ValidateNftProps) {
 /**
  * Load and validate NFT Metadata
  * @param connection
- * @param addr
+ * @param mint
  * @param validate
  */
-export async function loadNft(connection: Connection, addr: PublicKeyInitData, validate: ValidateNftProps) {
-  const metadata = await getMetadataByMint(connection, addr, true)
+export async function loadNft(connection: Connection, mint: PublicKeyInitData, validate: ValidateNftProps) {
+  const metadata = await getMetadataByMint(connection, mint, true)
   if (!metadata) {
-    throw new Error(`Unable to find Metadata account at ${addr}`)
+    throw new Error(`Unable to find Metadata account at ${mint}`)
   }
   validateNft(metadata, validate)
+  return metadata
+}
+
+/**
+ * Load Metadata by accountInfo
+ * @param accountInfo
+ * @param loadJson
+ */
+export async function getMetadataByAccountInfo(accountInfo: AccountInfo<Buffer>, loadJson = false) {
+  const metadata = sanitizeMetadata(Metadata.fromAccountInfo(accountInfo)[0]) as ExtendedMetadata
+  if (loadJson) {
+    try {
+      metadata.json = (await axios.get(metadata.data.uri)).data
+    } catch (e) {
+      console.log('Error: Failed to load NFT metadata')
+      metadata.json = {}
+    }
+  }
   return metadata
 }
 
@@ -90,19 +109,10 @@ export async function loadNft(connection: Connection, addr: PublicKeyInitData, v
  * @param mint
  * @param loadJson
  */
-async function getMetadataByMint(connection: Connection, mint: PublicKeyInitData, loadJson = false) {
+export async function getMetadataByMint(connection: Connection, mint: PublicKeyInitData, loadJson = false) {
   const accountInfo = await connection.getAccountInfo(getMetadataPDA(mint))
   if (accountInfo) {
-    const metadata = sanitizeMetadata(Metadata.fromAccountInfo(accountInfo)[0]) as ExtendedMetadata
-    if (loadJson) {
-      try {
-        metadata.json = (await axios.get(metadata.data.uri)).data
-      } catch (e) {
-        console.log('Error: Failed to load NFT metadata')
-        metadata.json = {}
-      }
-    }
-    return metadata
+    return getMetadataByAccountInfo(accountInfo, loadJson)
   }
 }
 
