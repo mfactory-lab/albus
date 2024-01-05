@@ -65,13 +65,14 @@ export class CredentialManager extends BaseManager {
    * @param props
    */
   async addListener(mint: PublicKeyInitData, callback: CredentialChangeCallback, props?: LoadCredentialProps) {
-    const key = String(new PublicKey(mint))
+    const mintPubkey = new PublicKey(mint)
+    const key = String(mintPubkey)
     await this.removeListener(key)
     this.subscriptions[key] = this.provider.connection
       .onAccountChange(getMetadataPDA(mint), async (acc) => {
         const metadata = await getMetadataByAccountInfo(acc, true)
         const credentialInfo = await this.getCredentialInfo(metadata, props)
-        callback(credentialInfo)
+        callback(credentialInfo, mintPubkey)
       })
   }
 
@@ -272,7 +273,7 @@ export type TxOpts = {
 /**
  * Callback function for credential change notifications
  */
-type CredentialChangeCallback = (vc: VerifiableCredential) => void
+type CredentialChangeCallback = (vc: VerifiableCredential, mint: PublicKey) => void
 
 export type CredentialInfo = {
   address: PublicKey
