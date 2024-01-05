@@ -130,25 +130,7 @@ export class AlbusSwapClient {
   async swap(props: SwapProps, opts?: ConfirmOptions) {
     const tx = new Transaction()
 
-    /**
-     * create destination token account
-     */
-    try {
-      await getAccount(this.connection, props.userDestination)
-    } catch (error: unknown) {
-      if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-        if (props.destinationTokenMint) {
-          tx.add(
-            createAssociatedTokenAccountInstruction(
-              this.provider.publicKey,
-              props.userDestination,
-              this.provider.publicKey,
-              props.destinationTokenMint,
-            ),
-          )
-        }
-      }
-    }
+    await this.handleAccount(tx, props.userDestination, props.destinationTokenMint)
 
     await this.handleWrappedSol({
       tx,
@@ -177,14 +159,7 @@ export class AlbusSwapClient {
       },
     ))
 
-    /**
-     * if swap some token to SOL create source token account and wrap the required amount of SOL
-     */
-    if (props.destinationTokenMint && props.destinationTokenMint?.toBase58() === NATIVE_MINT.toBase58()) {
-      tx.add(
-        createCloseAccountInstruction(props.userDestination, this.provider.publicKey, this.provider.publicKey),
-      )
-    }
+    this.unwrapSol(tx, props.userDestination, props.destinationTokenMint)
 
     return this.provider.sendAndConfirm(tx, [], opts)
   }
@@ -196,7 +171,25 @@ export class AlbusSwapClient {
     props: DepositAllTokenTypesProps,
     opts?: ConfirmOptions,
   ) {
-    const instruction = createDepositAllTokenTypesInstruction(
+    const tx = new Transaction()
+
+    await this.handleAccount(tx, props.destination, props.poolMint)
+
+    await this.handleWrappedSol({
+      tx,
+      amount: props.maximumTokenA,
+      userSource: props.userTokenA,
+      sourceTokenMint: props.tokenAMint,
+    })
+
+    await this.handleWrappedSol({
+      tx,
+      amount: props.maximumTokenB,
+      userSource: props.userTokenB,
+      sourceTokenMint: props.tokenBMint,
+    })
+
+    tx.add(createDepositAllTokenTypesInstruction(
       {
         authority: this.swapAuthority(props.tokenSwap),
         userTransferAuthority: this.provider.publicKey,
@@ -213,9 +206,7 @@ export class AlbusSwapClient {
         maximumTokenAAmount: new BN(props.maximumTokenA.toString()),
         maximumTokenBAmount: new BN(props.maximumTokenB.toString()),
       },
-    )
-
-    const tx = new Transaction().add(instruction)
+    ))
     return this.provider.sendAndConfirm(tx, [], opts)
   }
 
@@ -226,7 +217,12 @@ export class AlbusSwapClient {
     props: WithdrawAllTokenTypesProps,
     opts?: ConfirmOptions,
   ) {
-    const instruction = createWithdrawAllTokenTypesInstruction(
+    const tx = new Transaction()
+
+    await this.handleAccount(tx, props.destTokenA, props.tokenAMint)
+    await this.handleAccount(tx, props.destTokenB, props.tokenBMint)
+
+    tx.add(createWithdrawAllTokenTypesInstruction(
       {
         authority: this.swapAuthority(props.tokenSwap),
         userTransferAuthority: this.provider.publicKey,
@@ -244,9 +240,11 @@ export class AlbusSwapClient {
         minimumTokenAAmount: new BN(props.minimumTokenA.toString()),
         minimumTokenBAmount: new BN(props.minimumTokenB.toString()),
       },
-    )
+    ))
 
-    const tx = new Transaction().add(instruction)
+    this.unwrapSol(tx, props.destTokenA, props.tokenAMint)
+    this.unwrapSol(tx, props.destTokenB, props.tokenBMint)
+
     return this.provider.sendAndConfirm(tx, [], opts)
   }
 
@@ -256,23 +254,7 @@ export class AlbusSwapClient {
   async depositSingleTokenTypeExactAmountIn(props: DepositSingleTokenTypeExactAmountInProps, opts?: ConfirmOptions) {
     const tx = new Transaction()
 
-    /**
-     * create pool mint token account for user
-     */
-    try {
-      await getAccount(this.connection, props.destination)
-    } catch (error: unknown) {
-      if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-        tx.add(
-          createAssociatedTokenAccountInstruction(
-            this.provider.publicKey,
-            props.destination,
-            this.provider.publicKey,
-            props.poolMint,
-          ),
-        )
-      }
-    }
+    await this.handleAccount(tx, props.destination, props.poolMint)
 
     await this.handleWrappedSol({
       tx,
@@ -308,7 +290,11 @@ export class AlbusSwapClient {
     props: WithdrawSingleTokenTypeExactAmountOutProps,
     opts?: ConfirmOptions,
   ) {
-    const instruction = createWithdrawSingleTokenTypeInstruction(
+    const tx = new Transaction()
+
+    await this.handleAccount(tx, props.destination, props.destinationTokenMint)
+
+    tx.add(createWithdrawSingleTokenTypeInstruction(
       {
         authority: this.swapAuthority(props.tokenSwap),
         userTransferAuthority: this.provider.publicKey,
@@ -324,9 +310,10 @@ export class AlbusSwapClient {
         destinationTokenAmount: new BN(props.destinationTokenAmount.toString()),
         maximumPoolTokenAmount: new BN(props.maximumPoolTokenAmount.toString()),
       },
-    )
+    ))
 
-    const tx = new Transaction().add(instruction)
+    this.unwrapSol(tx, props.destination, props.destinationTokenMint)
+
     return this.provider.sendAndConfirm(tx, [], opts)
   }
 
@@ -369,6 +356,33 @@ export class AlbusSwapClient {
         pubkey,
         data: !props.noData ? TokenSwap.fromAccountInfo(account)[0] : null,
       }))
+  }
+
+  unwrapSol(tx: Transaction, account: PublicKey, mint?: PublicKey) {
+    if (mint && mint.toBase58() === NATIVE_MINT.toBase58()) {
+      tx.add(
+        createCloseAccountInstruction(account, this.provider.publicKey, this.provider.publicKey),
+      )
+    }
+  }
+
+  async handleAccount(tx: Transaction, account: PublicKey, mint?: PublicKey) {
+    try {
+      await getAccount(this.connection, account)
+    } catch (error: unknown) {
+      if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+        if (mint) {
+          tx.add(
+            createAssociatedTokenAccountInstruction(
+              this.provider.publicKey,
+              account,
+              this.provider.publicKey,
+              mint,
+            ),
+          )
+        }
+      }
+    }
   }
 
   /**
@@ -516,6 +530,10 @@ export type DepositAllTokenTypesProps = {
   maximumTokenA: bigint | number
   /// Maximum token B amount to deposit, prevents excessive slippage
   maximumTokenB: bigint | number
+  /// Mint address of token A
+  tokenAMint?: PublicKey
+  /// Mint address of token B
+  tokenBMint?: PublicKey
 }
 
 export type WithdrawAllTokenTypesProps = {
@@ -542,6 +560,10 @@ export type WithdrawAllTokenTypesProps = {
   minimumTokenA: bigint | number
   /// Minimum amount of token B to receive, prevents excessive slippage
   minimumTokenB: bigint | number
+  /// Mint address of token A
+  tokenAMint?: PublicKey
+  /// Mint address of token B
+  tokenBMint?: PublicKey
 }
 
 export type DepositSingleTokenTypeExactAmountInProps = {
@@ -586,4 +608,6 @@ export type WithdrawSingleTokenTypeExactAmountOutProps = {
   /// Maximum number of pool tokens to burn. User receives an output of token A
   /// or B based on the percentage of the pool tokens that are returned.
   maximumPoolTokenAmount: bigint | number
+  /// Mint address of token that user will receive
+  destinationTokenMint?: PublicKey
 }
