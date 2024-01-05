@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.1...@albus-finance/sdk-v0.3.0-next.2) (2024-01-05)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed credential `addListener` ([e3d0651](https://github.com/mfactory-lab/albus/commit/e3d065165eab8fad5b9c2f53b97c19c64cfaa27e))
+
 ## [0.3.0-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.3.0-next.1) (2024-01-05)
 
 
