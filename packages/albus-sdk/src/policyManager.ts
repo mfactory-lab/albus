@@ -196,6 +196,22 @@ export class PolicyManager extends BaseManager {
 
     return { signature }
   }
+
+  async deleteByAddr(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+    const policy = await this.load(addr)
+
+    const ix = createDeletePolicyInstruction({
+      policy: new PublicKey(addr),
+      serviceProvider: policy.serviceProvider,
+      authority: this.provider.publicKey,
+    }, this.programId)
+
+    const signature = await this.txBuilder
+      .addInstruction(ix)
+      .sendAndConfirm(opts)
+
+    return { signature }
+  }
 }
 
 function preparePolicyRules(props: UpdatePolicyProps) {
