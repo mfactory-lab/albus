@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.2...@albus-finance/sdk-v0.3.0-next.3) (2024-01-05)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `mint` for credential listener callback ([852911e](https://github.com/mfactory-lab/albus/commit/852911ed86975283852f0867ffd2f0a6c5d08d1c))
+
 ## [0.3.0-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.1...@albus-finance/sdk-v0.3.0-next.2) (2024-01-05)
 
 
