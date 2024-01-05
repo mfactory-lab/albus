@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.3.0-next.1) (2024-01-05)
+
+
+### 🌟 Features
+
+* **sdk:** add credential listener ([4ee83f1](https://github.com/mfactory-lab/albus/commit/4ee83f1865fbe91582ff86b73dc1d3ab8021f247))
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `deleteByAddr` for `policyManager` ([309e0d2](https://github.com/mfactory-lab/albus/commit/309e0d206a9a9139edd077cb234175127456cde2))
+* **sdk:** version ([3d92bde](https://github.com/mfactory-lab/albus/commit/3d92bdea1e4ba7d4c819ca8b266309764f032862))
+
+
+### ♻️ Refactors
+
+* **sdk:** code cleanup ([9fb02df](https://github.com/mfactory-lab/albus/commit/9fb02df138c11f29d9f5115f0fe8951494187430))
+
+## [v0.2.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.3.0-next.1) (2023-12-04)
+
 ## [v0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.4) (2023-11-17)
 
 ### 🐞 Bug Fixes
