@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.3...@albus-finance/sdk-v0.3.0-next.4) (2024-01-09)
+
+
+### 🌟 Features
+
+* **sdk:** support create and prove request with `txBuilder` ([3f1051b](https://github.com/mfactory-lab/albus/commit/3f1051bbe7b8dbc5244c73a0018ff1bdc5677b80))
+
 ## [0.3.0-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.2...@albus-finance/sdk-v0.3.0-next.3) (2024-01-05)
 
 
