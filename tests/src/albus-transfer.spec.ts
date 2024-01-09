@@ -31,7 +31,7 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/s
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { beforeAll, describe, it } from 'vitest'
-import { AlbusClient } from '../../packages/albus-sdk'
+import { AlbusClient } from '../../packages/albus-sdk/src'
 import { AlbusTransferClient } from '../../packages/albus-transfer-sdk/src'
 import { airdrop, createTestData, createTestProofRequest, payer, provider } from './utils'
 

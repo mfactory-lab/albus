@@ -41,7 +41,7 @@ import {
 } from '@solana/web3.js'
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
 import { createAssociatedTokenAccount, createMint } from '@solana/spl-token'
-import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk'
+import { AlbusClient, ProofRequestStatus } from '../../packages/albus-sdk/src'
 import {
   STAKE_POOL_PROGRAM_ID,
   addValidatorToPool,
