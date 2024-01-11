@@ -39,6 +39,8 @@
 
 * **sdk:** code cleanup ([9fb02df](https://github.com/mfactory-lab/albus/commit/9fb02df138c11f29d9f5115f0fe8951494187430))
 
+## [0.2.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.2.6) (2023-12-19)
+
 ## [v0.2.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.3.0-next.1) (2023-12-04)
 
 ## [v0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.4) (2023-11-17)
