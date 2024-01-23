@@ -40,7 +40,7 @@ There are 3 scenarios for end users in Albus:
 
 When an end user visits a business user's website and requests its service, for example a token swap from a DeFi protocol, the business user redirects the user to the [Albus application website](https://app.albus.finance/). At the website, the user has to complete a quick wizard to prove compliance with the policy this business user has set for the requested service. After proving it, the user will receive a Compliance Certificate confirming their eligibility for the service.
 
-<figure><img src="docs/gitbook-sync//.gitbook/assets/end-user-flow1.png" alt="End user flow: Wizard"><figcaption></figcaption></figure>
+<figure><img src="/docs/gitbook-sync/.gitbook/assets/end-user-flow1.png" alt="End user flow: Wizard"><figcaption></figcaption></figure>
 
 After getting redirected to the Albus application website, the user connects a wallet, enters as a user, and starts interacting with the quick wizard.
 
