@@ -14,7 +14,7 @@ layout:
 
 # Albus architecture
 
-<figure><img src="/.gitbook/assets/albus-architecture.png" alt="Albus architecture diagram"><figcaption></figcaption></figure>
+<figure><img src="/docs/gitbook-sync/.gitbook/assets/albus-architecture.png" alt="Albus architecture diagram"><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 * AML – Anti-Money Laundering&#x20;
@@ -57,7 +57,7 @@ The blockchain layer includes:
 * **disclosure request**: a request created by an authorised entity for Trustees.
 
 {% hint style="info" %}
-For detailed definitions, please refer to the [Glossary](/glossary.md).
+For detailed definitions, please refer to the [Glossary](/docs/gitbook-sync/glossary.md).
 {% endhint %}
 
 ### Backend layer
@@ -71,7 +71,7 @@ The backend layer includes the following methods:
 * circuit methods.
 
 {% hint style="info" %}
-For details, please refer to the [Integration](/integration.md) and [CLI](/albus-cli.md) sections.
+For details, please refer to the [Integration](/docs/gitbook-sync/integration.md) and [CLI](/docs/gitbook-sync/albus-cli.md) sections.
 {% endhint %}
 
 ## External components
@@ -86,5 +86,5 @@ Albus interacts with the following external entities:
 - **Authorised entity**: an individual or an entity authorised to access retained user data for a legitimate purpose (e.g., conduct an investigation or an audit). 
 
 {% hint style="info" %}
-For detailed definitions, please refer to the [Glossary](/glossary.md).
+For detailed definitions, please refer to the [Glossary](/docs/gitbook-sync/glossary.md).
 {% endhint %}

@@ -17,7 +17,7 @@ layout:
 This section will guide you through integrating Albus into your workflow. The on-chain part is implemented in Rust, while the off-chain part is built with TypeScript.
 
 {% hint style="info" %}
-Web3 protocols (business users) are referred to as service providers in this section. For all definitions, please refer to the [Glossary](/glossary.md).
+Web3 protocols (business users) are referred to as service providers in this section. For all definitions, please refer to the [Glossary](/docs/gitbook-sync/glossary.md).
 {% endhint %}
 
 ## On-chain component (Rust)
@@ -333,7 +333,8 @@ Data passed to the `update` method:
 
 * `name`: service provider's name.
 * `website`: service provider's website.
-* `secretShareThreshold`: the number of shares into which a decryption key is split under a secret sharing scheme (for details, see the [Glossary](https://github.com/mfactory-lab/albus/wiki/Glossary#for-developers)).
+* `secretShareThreshold`: the number of shares into which a decryption key is split under a secret sharing scheme (for details, see the [Glossary](/docs/gitbook-sync/glossary.md#secret-sharing-scheme-shamirs-secret-sharing-sss)).
+
 * `contactInfo`:
   * `kind`: contact type:
     * `0`: Telegram
