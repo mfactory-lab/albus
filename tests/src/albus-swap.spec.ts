@@ -103,7 +103,8 @@ describe('albusSwap', async () => {
       destination: poolFeeAccount.address,
       tokenA: swapTokenA.address,
       tokenB: swapTokenB.address,
-      policy,
+      swapPolicy: policy,
+      addLiquidityPolicy: policy,
       curveType: CurveType.ConstantProduct,
       curveParameters: [],
       fees: {
@@ -144,6 +145,8 @@ describe('albusSwap', async () => {
   it('can deposit single token', async () => {
     const beforeBalance = await tokenBalance(swapTokenA.address)
 
+    const proofRequest = await createTestProofRequest(userClient, client, 'swap')
+
     await userSwapClient.depositSingleTokenTypeExactAmountIn({
       tokenSwap: tokenSwap.publicKey,
       poolMint,
@@ -153,6 +156,7 @@ describe('albusSwap', async () => {
       swapTokenB: swapTokenB.address,
       sourceTokenAmount: 1_000_000_000,
       minimumPoolTokenAmount: 0,
+      proofRequest,
     })
 
     const afterBalance = await tokenBalance(swapTokenA.address)

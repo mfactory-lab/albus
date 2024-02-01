@@ -27,7 +27,20 @@
  */
 
 import { describe, it } from 'vitest'
+import { encodeClaimValue } from '../src/credential'
 import { setupCircuit } from './utils'
+
+describe('parseDate', async () => {
+  const circuit = await setupCircuit('test/parseDate')
+
+  const date = [1989, 11, 30]
+  it('works', async () => {
+    const witness = await circuit.calculateWitness({
+      date: encodeClaimValue(date.join('-')),
+    }, true)
+    await circuit.assertOut(witness, { out: date })
+  })
+})
 
 describe('dateToTimestamp', async () => {
   const input = {
@@ -38,7 +51,7 @@ describe('dateToTimestamp', async () => {
 
   const circuit = await setupCircuit('test/dateToTimestamp')
 
-  it('valid', async () => {
+  it('works', async () => {
     const date = new Date(`${input.year}-${input.month}-${input.day}`)
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, { out: date.getTime() / 1000 })
@@ -52,7 +65,7 @@ describe('timestampToDate', async () => {
 
   const circuit = await setupCircuit('test/timestampToDate')
 
-  it('valid', async () => {
+  it('works', async () => {
     const witness = await circuit.calculateWitness(input, true)
     await circuit.assertOut(witness, { out: [2023, 10, 12] })
   })

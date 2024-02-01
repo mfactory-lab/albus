@@ -1,6 +1,6 @@
 [package]
 name = "albus-swap"
-version = "0.0.4"
+version = "0.0.5"
 homepage = "https://albus.finance"
 repository = "https://github.com/mfactory-lab/albus"
 license = "AGPL-3.0"
@@ -15,6 +15,7 @@ no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 production = []
+mainnet = []
 devnet = []
 testing = []
 fuzz = ["arbitrary", "roots"]
