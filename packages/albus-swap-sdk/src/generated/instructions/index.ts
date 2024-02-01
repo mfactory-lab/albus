@@ -1,4 +1,3 @@
-export * from './closeAccount'
 export * from './depositAllTokenTypes'
 export * from './depositSingleTokenType'
 export * from './initialize'

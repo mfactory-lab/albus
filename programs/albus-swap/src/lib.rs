@@ -29,7 +29,8 @@ pub mod albus_swap {
         ctx: Context<Initialize>,
         fees_input: FeesInfo,
         curve_input: CurveInfo,
-        policy: Option<Pubkey>,
+        swap_policy: Option<Pubkey>,
+        add_liquidity_policy: Option<Pubkey>,
     ) -> Result<()> {
         if ctx.accounts.token_swap.is_initialized {
             return Err(SwapError::AlreadyInUse.into());
@@ -135,7 +136,8 @@ pub mod albus_swap {
         token_swap.pool_fee_account = ctx.accounts.pool_fee.key();
         token_swap.fees = fees_input;
         token_swap.curve = curve_input;
-        token_swap.policy = policy;
+        token_swap.swap_policy = swap_policy;
+        token_swap.add_liquidity_policy = add_liquidity_policy;
 
         Ok(())
     }
@@ -144,7 +146,7 @@ pub mod albus_swap {
     pub fn swap(ctx: Context<Swap>, amount_in: u64, minimum_amount_out: u64) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
 
-        if let Some(policy) = token_swap.policy {
+        if let Some(policy) = token_swap.swap_policy {
             AlbusVerifier::new(
                 ctx.accounts
                     .proof_request
@@ -312,6 +314,18 @@ pub mod albus_swap {
         maximum_token_b_amount: u64,
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
+
+        if let Some(policy) = token_swap.add_liquidity_policy {
+            AlbusVerifier::new(
+                ctx.accounts
+                    .proof_request
+                    .as_ref()
+                    .expect("Proof request required"),
+            )
+            .check_policy(policy)
+            .check_owner(ctx.accounts.user_transfer_authority.key())
+            .run()?;
+        }
 
         let curve = SwapCurve::try_from(token_swap.curve.clone())?;
 
@@ -499,6 +513,18 @@ pub mod albus_swap {
         minimum_pool_token_amount: u64,
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
+
+        if let Some(policy) = token_swap.add_liquidity_policy {
+            AlbusVerifier::new(
+                ctx.accounts
+                    .proof_request
+                    .as_ref()
+                    .expect("Proof request required"),
+            )
+            .check_policy(policy)
+            .check_owner(ctx.accounts.user_transfer_authority.key())
+            .run()?;
+        }
 
         let curve: SwapCurve = token_swap.curve.clone().try_into()?;
         let fees = token_swap.fees.into();
@@ -810,6 +836,8 @@ pub struct Swap<'info> {
 /// the current ratio.
 #[derive(Accounts)]
 pub struct DepositAllTokenTypes<'info> {
+    /// CHECK: safe, checked in Albus
+    pub proof_request: Option<AccountInfo<'info>>,
     /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
     /// CHECK: safe
@@ -847,6 +875,8 @@ pub struct DepositAllTokenTypes<'info> {
 /// a swap and deposit all token types were performed.
 #[derive(Accounts)]
 pub struct DepositSingleTokenType<'info> {
+    /// CHECK: safe, checked in Albus
+    pub proof_request: Option<AccountInfo<'info>>,
     /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
     /// CHECK: safe

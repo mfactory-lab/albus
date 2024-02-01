@@ -1,5 +1,5 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.4",
   "name": "albus_swap",
   "instructions": [
     {
@@ -85,7 +85,13 @@
           }
         },
         {
-          "name": "policy",
+          "name": "swapPolicy",
+          "type": {
+            "option": "publicKey"
+          }
+        },
+        {
+          "name": "addLiquidityPolicy",
           "type": {
             "option": "publicKey"
           }
@@ -205,6 +211,12 @@
         "Processes an [DepositAllTokenTypes](enum.Instruction.html)."
       ],
       "accounts": [
+        {
+          "name": "proofRequest",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
         {
           "name": "tokenSwap",
           "isMut": false,
@@ -406,6 +418,12 @@
       ],
       "accounts": [
         {
+          "name": "proofRequest",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
           "name": "tokenSwap",
           "isMut": false,
           "isSigner": false,
@@ -574,27 +592,6 @@
           "type": "u64"
         }
       ]
-    },
-    {
-      "name": "closeAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
     }
   ],
   "accounts": [
@@ -691,9 +688,18 @@
             }
           },
           {
-            "name": "policy",
+            "name": "swapPolicy",
             "docs": [
-              "Albus policy"
+              "Swap policy address (Albus)"
+            ],
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "addLiquidityPolicy",
+            "docs": [
+              "Add liquidity policy address (Albus)"
             ],
             "type": {
               "option": "publicKey"

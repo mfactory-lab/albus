@@ -33,7 +33,7 @@ export const withdrawSingleTokenTypeStruct = new beet.BeetArgsStruct<
     ['destinationTokenAmount', beet.u64],
     ['maximumPoolTokenAmount', beet.u64],
   ],
-  'WithdrawSingleTokenTypeInstructionArgs',
+  'WithdrawSingleTokenTypeInstructionArgs'
 )
 /**
  * Accounts required by the _withdrawSingleTokenType_ instruction
@@ -82,7 +82,7 @@ export const withdrawSingleTokenTypeInstructionDiscriminator = [
 export function createWithdrawSingleTokenTypeInstruction(
   accounts: WithdrawSingleTokenTypeInstructionAccounts,
   args: WithdrawSingleTokenTypeInstructionArgs,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
 ) {
   const [data] = withdrawSingleTokenTypeStruct.serialize({
     instructionDiscriminator: withdrawSingleTokenTypeInstructionDiscriminator,

@@ -6,7 +6,6 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-
 /**
  * @category enums
  * @category generated
@@ -21,5 +20,5 @@ export enum TradeDirection {
  * @category generated
  */
 export const tradeDirectionBeet = beet.fixedScalarEnum(
-  TradeDirection,
+  TradeDirection
 ) as beet.FixedSizeBeet<TradeDirection, TradeDirection>
