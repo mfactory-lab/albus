@@ -36,6 +36,7 @@ import { SMT, Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from 
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
+import { bigintToBytes, bytesToBigInt, bytesToString } from './crypto/utils'
 
 const { base58ToBytes } = utils
 
@@ -556,7 +557,11 @@ export async function createCredentialTree(credential: VerifiableCredential, dep
 }
 
 /**
- * Creates a claim's tree from the provided claims and returns an object with tree operations.
+ * Creates a claims tree based on the provided claims object and optional depth.
+ *
+ * @param {Claims} claims - The claims object to create the tree from.
+ * @param {number} [depth] - The optional depth of the tree. If not provided, the default depth will be used.
+ * @return {Promise<{encodeKey: (k: string) => bigint; root: any; claimsKey: number; get: (key: string) => Promise<any>; delete: (key: string) => any; add: (key: string, val: any) => any; update: (key: string, val: any) => any}>} - An object representing the claims tree with various methods for interacting with it.
  */
 export async function createClaimsTree(claims: Claims, depth?: number) {
   const tree = new SMT()
@@ -572,6 +577,9 @@ export async function createClaimsTree(claims: Claims, depth?: number) {
   return {
     encodeKey,
     root: tree.root,
+    get claimsKey() {
+      return 0
+    },
     get: async (key: string) => {
       const proof = await tree.get(encodeKey(key))
       const siblings = proof.siblings
@@ -586,21 +594,38 @@ export async function createClaimsTree(claims: Claims, depth?: number) {
       }
     },
     delete: (key: string) => tree.delete(encodeKey(key)),
-    add: (key: string, val: any) => {
-      return tree.add(encodeKey(key), encodeClaimValue(val))
-    },
+    add: (key: string, val: any) => tree.add(encodeKey(key), encodeClaimValue(val)),
     update: (key: string, val: any) => tree.update(encodeKey(key), encodeClaimValue(val)),
   }
 }
 
-// Helpers
-
-export function encodeClaimValue(s: string | number | bigint) {
-  try {
-    return BigInt(s)
-  } catch (e) {
-    return poseidon.hashBytes(new TextEncoder().encode(String(s)))
+/**
+ * Encodes a claim value to a BigInt.
+ *
+ * @param {string | number | bigint} s - The value to encode.
+ * @return {bigint} - The encoded BigInt value.
+ */
+export function encodeClaimValue(s: string | number | bigint): bigint {
+  // try {
+  //   return BigInt(s)
+  // } catch (e) {
+  //   return poseidon.hashBytes(new TextEncoder().encode(String(s)))
+  // }
+  const bytes = new TextEncoder().encode(String(s))
+  if (bytes.length > 32) {
+    throw new Error('The maximum size for a claim is limited to 32 bytes.')
   }
+  return bytesToBigInt(bytes)
+}
+
+/**
+ * Decodes a claim value from a bigint.
+ *
+ * @param {bigint} s - The bigint to decode.
+ * @return {string} The decoded claim value.
+ */
+export function decodeClaimValue(s: bigint): string {
+  return bytesToString(bigintToBytes(s))
 }
 
 function flattenObject(obj: Record<string, any>, parentKey?: string) {
