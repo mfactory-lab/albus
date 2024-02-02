@@ -3,10 +3,39 @@
   "name": "albus_swap",
   "instructions": [
     {
-      "name": "initialize",
-      "docs": [
-        "Processes an [Initialize](enum.Instruction.html)."
+      "name": "migrate",
+      "accounts": [
+        {
+          "name": "tokenSwap",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
       ],
+      "args": []
+    },
+    {
+      "name": "updatePolicy",
+      "accounts": [
+        {
+          "name": "tokenSwap",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
       "accounts": [
         {
           "name": "authority",
@@ -703,6 +732,18 @@
             ],
             "type": {
               "option": "publicKey"
+            }
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Reserved space"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
             }
           }
         ]

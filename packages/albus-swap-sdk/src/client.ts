@@ -126,7 +126,7 @@ export class AlbusSwapClient {
       },
       isInitialized: false,
       swapPolicy: PublicKey.default,
-      addLiquidityPolicy: PublicKey.default,
+      // addLiquidityPolicy: PublicKey.default,
       poolFeeAccount: PublicKey.default,
       poolMint: PublicKey.default,
       tokenA: PublicKey.default,
@@ -367,10 +367,12 @@ export class AlbusSwapClient {
     }
 
     return (await builder.run(this.provider.connection))
-      .map(({ pubkey, account }) => ({
-        pubkey,
-        data: !props.noData ? TokenSwap.fromAccountInfo(account)[0] : null,
-      }))
+      .map(({ pubkey, account }) => {
+        return {
+          pubkey,
+          data: !props.noData ? TokenSwap.fromAccountInfo(account)[0] : null,
+        }
+      })
   }
 
   unwrapSol(tx: Transaction, account: PublicKey, mint?: PublicKey) {

@@ -24,7 +24,27 @@ pub mod albus_swap {
     use crate::curve::fees::Fees;
     use albus_solana_verifier::AlbusVerifier;
 
-    /// Processes an [Initialize](enum.Instruction.html).
+    pub fn migrate(ctx: Context<Migrate>) -> Result<()> {
+        let token_swap = &mut ctx.accounts.token_swap;
+
+        realloc_account(
+            &token_swap,
+            &ctx.accounts.payer,
+            &ctx.accounts.system_program,
+            8 + std::mem::size_of::<TokenSwap>(),
+            false,
+        )?;
+
+        Ok(())
+    }
+
+    pub fn update_policy(ctx: Context<UpdatePolicy>) -> Result<()> {
+        let token_swap = &mut ctx.accounts.token_swap;
+        token_swap.add_liquidity_policy = token_swap.swap_policy;
+
+        Ok(())
+    }
+
     pub fn initialize(
         ctx: Context<Initialize>,
         fees_input: FeesInfo,
@@ -758,6 +778,22 @@ pub struct ClosePool<'info> {
     pub authority: AccountInfo<'info>,
     #[account(mut)]
     pub token_swap: Box<Account<'info, TokenSwap>>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UpdatePolicy<'info> {
+    #[account(mut)]
+    pub token_swap: Box<Account<'info, TokenSwap>>,
+}
+
+#[derive(Accounts)]
+pub struct Migrate<'info> {
+    /// CHECK:
+    #[account(mut)]
+    pub token_swap: AccountInfo<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,

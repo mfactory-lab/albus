@@ -76,6 +76,9 @@ pub struct TokenSwap {
 
     /// Add liquidity policy address (Albus)
     pub add_liquidity_policy: Option<Pubkey>,
+
+    /// Reserved space
+    pub _reserved: [u8; 64],
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]

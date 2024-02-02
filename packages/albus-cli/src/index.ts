@@ -424,16 +424,19 @@ admin.command('close')
 // ------------------------------------------
 
 const swap = cli.command('swap')
+swap.command('migrate')
+  .action(actions.swap.migrate)
+
 swap.command('all')
   .action(actions.swap.findAll)
 
-swap.command('closeAll')
-  .action(actions.swap.closeAll)
-
-swap.command('close')
-  .argument('<pubkey>', 'Account address')
-  .description('Close and account')
-  .action(actions.swap.close)
+// swap.command('closeAll')
+//   .action(actions.swap.closeAll)
+//
+// swap.command('close')
+//   .argument('<pubkey>', 'Account address')
+//   .description('Close and account')
+//   .action(actions.swap.close)
 
 // ------------------------------------------
 
