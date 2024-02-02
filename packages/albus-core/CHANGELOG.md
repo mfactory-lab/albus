@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.6-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.5...@albus-finance/core-v0.3.6-next.0) (2024-02-02)
+
+
+### 🐞 Bug Fixes
+
+* **core:** new encode claim ([d0c6b53](https://github.com/mfactory-lab/albus/commit/d0c6b531adcafca9cf66b861f5d47c46b2dc84e9))
+
+## [v0.3.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.5...@albus-finance/core-v0.3.6-next.0) (2023-12-04)
+
+## [v0.3.5-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.5...@albus-finance/core-v0.3.6-next.0) (2023-12-05)
+
+
+### ♻️ Refactors
+
+* apply new lint rules ([bb30025](https://github.com/mfactory-lab/albus/commit/bb30025be223a559db2b4bf81466425f81f514f0))
+
 ## [0.3.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.3-next.3...@albus-finance/core-v0.3.5) (2023-12-04)
 
 
