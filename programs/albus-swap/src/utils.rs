@@ -35,54 +35,6 @@ use solana_program::program_memory::sol_memcmp;
 use solana_program::pubkey::PUBKEY_BYTES;
 use solana_program::system_instruction;
 
-/// Resize an account using realloc, lifted from Solana Cookbook.
-#[inline(always)]
-pub fn realloc_account<'a>(
-    target_account: &AccountInfo<'a>,
-    funding_account: &AccountInfo<'a>,
-    system_program: &AccountInfo<'a>,
-    new_size: usize,
-    refund: bool,
-) -> ProgramResult {
-    let rent = Rent::get()?;
-    let old_minimum_balance = rent.minimum_balance(target_account.data_len());
-    let new_minimum_balance = rent.minimum_balance(new_size);
-    let lamports_diff = new_minimum_balance.abs_diff(old_minimum_balance);
-
-    if new_minimum_balance > old_minimum_balance {
-        invoke(
-            &system_instruction::transfer(funding_account.key, target_account.key, lamports_diff),
-            &[
-                funding_account.clone(),
-                target_account.clone(),
-                system_program.clone(),
-            ],
-        )?;
-    } else if refund {
-        transfer_lamports_from_pdas(target_account, funding_account, lamports_diff)?;
-    }
-
-    target_account.realloc(new_size, false)
-}
-
-pub fn transfer_lamports_from_pdas<'a>(
-    from: &AccountInfo<'a>,
-    to: &AccountInfo<'a>,
-    lamports: u64,
-) -> ProgramResult {
-    **from.lamports.borrow_mut() = from
-        .lamports()
-        .checked_sub(lamports)
-        .ok_or(ProgramError::ArithmeticOverflow)?;
-
-    **to.lamports.borrow_mut() = to
-        .lamports()
-        .checked_add(lamports)
-        .ok_or(ProgramError::ArithmeticOverflow)?;
-
-    Ok(())
-}
-
 pub fn to_u128(val: u64) -> std::result::Result<u128, SwapError> {
     val.try_into().map_err(|_| SwapError::ConversionFailure)
 }
@@ -152,5 +104,72 @@ pub fn check_accounts(
             return Err(SwapError::IncorrectFeeAccount.into());
         }
     }
+    Ok(())
+}
+
+/// Close an account.
+#[inline(always)]
+pub fn close_account<'a>(
+    target_account: &AccountInfo<'a>,
+    receiving_account: &AccountInfo<'a>,
+) -> ProgramResult {
+    let dest_starting_lamports = receiving_account.lamports();
+    **receiving_account.lamports.borrow_mut() = dest_starting_lamports
+        .checked_add(target_account.lamports())
+        .unwrap();
+    **target_account.lamports.borrow_mut() = 0;
+
+    // let mut src_data = target_account.data.borrow_mut();
+    // src_data.fill(0);
+
+    target_account.assign(&solana_program::system_program::ID);
+    target_account.realloc(0, false)
+}
+
+/// Resize an account using realloc, lifted from Solana Cookbook.
+#[inline(always)]
+pub fn realloc_account<'a>(
+    target_account: &AccountInfo<'a>,
+    funding_account: &AccountInfo<'a>,
+    system_program: &AccountInfo<'a>,
+    new_size: usize,
+    refund: bool,
+) -> ProgramResult {
+    let rent = Rent::get()?;
+    let old_minimum_balance = rent.minimum_balance(target_account.data_len());
+    let new_minimum_balance = rent.minimum_balance(new_size);
+    let lamports_diff = new_minimum_balance.abs_diff(old_minimum_balance);
+
+    if new_minimum_balance > old_minimum_balance {
+        invoke(
+            &system_instruction::transfer(funding_account.key, target_account.key, lamports_diff),
+            &[
+                funding_account.clone(),
+                target_account.clone(),
+                system_program.clone(),
+            ],
+        )?;
+    } else if refund {
+        transfer_lamports_from_pdas(target_account, funding_account, lamports_diff)?;
+    }
+
+    target_account.realloc(new_size, false)
+}
+
+pub fn transfer_lamports_from_pdas<'a>(
+    from: &AccountInfo<'a>,
+    to: &AccountInfo<'a>,
+    lamports: u64,
+) -> ProgramResult {
+    **from.lamports.borrow_mut() = from
+        .lamports()
+        .checked_sub(lamports)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+
+    **to.lamports.borrow_mut() = to
+        .lamports()
+        .checked_add(lamports)
+        .ok_or(ProgramError::ArithmeticOverflow)?;
+
     Ok(())
 }

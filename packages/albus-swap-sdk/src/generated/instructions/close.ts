@@ -5,58 +5,95 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
+import * as splToken from '@solana/spl-token'
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
 
 /**
  * @category Instructions
- * @category Migrate
+ * @category Close
  * @category generated
  */
-export const migrateStruct = new beet.BeetArgsStruct<{
+export const closeStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'MigrateInstructionArgs'
+  'CloseInstructionArgs'
 )
 /**
- * Accounts required by the _migrate_ instruction
+ * Accounts required by the _close_ instruction
  *
+ * @property [] authority
  * @property [_writable_] tokenSwap
+ * @property [_writable_] swapTokenA
+ * @property [_writable_] swapTokenB
+ * @property [_writable_] destTokenA
+ * @property [_writable_] destTokenB
  * @property [_writable_, **signer**] payer
  * @category Instructions
- * @category Migrate
+ * @category Close
  * @category generated
  */
-export type MigrateInstructionAccounts = {
+export type CloseInstructionAccounts = {
+  authority: web3.PublicKey
   tokenSwap: web3.PublicKey
+  swapTokenA: web3.PublicKey
+  swapTokenB: web3.PublicKey
+  destTokenA: web3.PublicKey
+  destTokenB: web3.PublicKey
   payer: web3.PublicKey
+  tokenProgram?: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const migrateInstructionDiscriminator = [
-  155, 234, 231, 146, 236, 158, 162, 30,
+export const closeInstructionDiscriminator = [
+  98, 165, 201, 177, 108, 65, 206, 96,
 ]
 
 /**
- * Creates a _Migrate_ instruction.
+ * Creates a _Close_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @category Instructions
- * @category Migrate
+ * @category Close
  * @category generated
  */
-export function createMigrateInstruction(
-  accounts: MigrateInstructionAccounts,
+export function createCloseInstruction(
+  accounts: CloseInstructionAccounts,
   programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
 ) {
-  const [data] = migrateStruct.serialize({
-    instructionDiscriminator: migrateInstructionDiscriminator,
+  const [data] = closeStruct.serialize({
+    instructionDiscriminator: closeInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
+      pubkey: accounts.authority,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
       pubkey: accounts.tokenSwap,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.swapTokenA,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.swapTokenB,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.destTokenA,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.destTokenB,
       isWritable: true,
       isSigner: false,
     },
@@ -64,6 +101,11 @@ export function createMigrateInstruction(
       pubkey: accounts.payer,
       isWritable: true,
       isSigner: true,
+    },
+    {
+      pubkey: accounts.tokenProgram ?? splToken.TOKEN_PROGRAM_ID,
+      isWritable: false,
+      isSigner: false,
     },
     {
       pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,

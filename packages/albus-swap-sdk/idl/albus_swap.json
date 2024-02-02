@@ -3,38 +3,6 @@
   "name": "albus_swap",
   "instructions": [
     {
-      "name": "migrate",
-      "accounts": [
-        {
-          "name": "tokenSwap",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "updatePolicy",
-      "accounts": [
-        {
-          "name": "tokenSwap",
-          "isMut": true,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "initialize",
       "accounts": [
         {
@@ -533,7 +501,7 @@
     {
       "name": "withdrawSingleTokenType",
       "docs": [
-        "Processes a [WithdrawSingleTokenTypeExactAmountOut](enum.Instruction.html)."
+        "Processes a WithdrawSingleTokenTypeExactAmountOut."
       ],
       "accounts": [
         {
@@ -621,6 +589,72 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "close",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenSwap",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "swapTokenA",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token_a Swap Account to potentially withdraw from."
+          ]
+        },
+        {
+          "name": "swapTokenB",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token_b Swap Account to potentially withdraw from."
+          ]
+        },
+        {
+          "name": "destTokenA",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token_a user Account to credit."
+          ]
+        },
+        {
+          "name": "destTokenB",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token_b user Account to credit."
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Pool Token program id."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [

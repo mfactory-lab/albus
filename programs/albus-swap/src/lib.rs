@@ -24,27 +24,6 @@ pub mod albus_swap {
     use crate::curve::fees::Fees;
     use albus_solana_verifier::AlbusVerifier;
 
-    pub fn migrate(ctx: Context<Migrate>) -> Result<()> {
-        let token_swap = &mut ctx.accounts.token_swap;
-
-        realloc_account(
-            &token_swap,
-            &ctx.accounts.payer,
-            &ctx.accounts.system_program,
-            8 + std::mem::size_of::<TokenSwap>(),
-            false,
-        )?;
-
-        Ok(())
-    }
-
-    pub fn update_policy(ctx: Context<UpdatePolicy>) -> Result<()> {
-        let token_swap = &mut ctx.accounts.token_swap;
-        token_swap.add_liquidity_policy = token_swap.swap_policy;
-
-        Ok(())
-    }
-
     pub fn initialize(
         ctx: Context<Initialize>,
         fees_input: FeesInfo,
@@ -619,7 +598,7 @@ pub mod albus_swap {
         Ok(())
     }
 
-    /// Processes a [WithdrawSingleTokenTypeExactAmountOut](enum.Instruction.html).
+    /// Processes a WithdrawSingleTokenTypeExactAmountOut.
     pub fn withdraw_single_token_type(
         ctx: Context<WithdrawSingleTokenType>,
         destination_token_amount: u64,
@@ -732,44 +711,46 @@ pub mod albus_swap {
         Ok(())
     }
 
-    // pub fn close(ctx: Context<ClosePool>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
-    //     let token_swap = &mut ctx.accounts.token_swap;
-    //
-    //     if token_a_amount > 0 {
-    //         let cpi_accounts = Transfer {
-    //             from:  &ctx.swap_token_a.to_account_info(),
-    //             to:  &ctx.dest_token_a.to_account_info(),
-    //             authority: &ctx.authority.to_account_info(),
-    //         };
-    //
-    //         token::transfer(
-    //             CpiContext::new(ctx.token_program.to_account_info(), cpi_accounts)
-    //                 .with_signer(&[&seeds[..]]),
-    //             token_a_amount,
-    //         )?;
-    //     }
-    //
-    //     if token_b_amount > 0 {
-    //         token::transfer(
-    //             ctx.accounts
-    //                 .transfer_to_token_b_ctx()
-    //                 .with_signer(&[&seeds[..]]),
-    //             token_a_amount,
-    //         )?;
-    //     }
-    //
-    //     let acc = token_swap.to_account_info();
-    //     let sol_destination = ctx.accounts.authority.to_account_info();
-    //
-    //     // Transfer lamports from the account to the sol_destination.
-    //     let dest_starting_lamports = sol_destination.lamports();
-    //     **sol_destination.lamports.borrow_mut() =
-    //         dest_starting_lamports.checked_add(acc.lamports()).unwrap();
-    //     **acc.lamports.borrow_mut() = 0;
-    //
-    //     acc.assign(&solana_program::system_program::ID);
-    //     acc.realloc(0, false).map_err(Into::into)
-    // }
+    pub fn close(ctx: Context<ClosePool>) -> Result<()> {
+        let token_swap = &mut ctx.accounts.token_swap;
+        let token_a_amount = ctx.accounts.swap_token_a.amount;
+        let token_b_amount = ctx.accounts.swap_token_b.amount;
+
+        let seeds = &[&token_swap.key().to_bytes(), &[token_swap.bump_seed][..]];
+
+        if token_a_amount > 0 {
+            let cpi_accounts = Transfer {
+                from: ctx.accounts.swap_token_a.to_account_info(),
+                to: ctx.accounts.dest_token_a.to_account_info(),
+                authority: ctx.accounts.authority.to_account_info(),
+            };
+            token::transfer(
+                CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts)
+                    .with_signer(&[&seeds[..]]),
+                token_a_amount,
+            )?;
+        }
+
+        if token_b_amount > 0 {
+            let cpi_accounts = Transfer {
+                from: ctx.accounts.swap_token_b.to_account_info(),
+                to: ctx.accounts.dest_token_b.to_account_info(),
+                authority: ctx.accounts.authority.to_account_info(),
+            };
+            token::transfer(
+                CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts)
+                    .with_signer(&[&seeds[..]]),
+                token_b_amount,
+            )?;
+        }
+
+        close_account(
+            &token_swap.to_account_info(),
+            &ctx.accounts.payer.to_account_info(),
+        )?;
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -778,24 +759,24 @@ pub struct ClosePool<'info> {
     pub authority: AccountInfo<'info>,
     #[account(mut)]
     pub token_swap: Box<Account<'info, TokenSwap>>,
+    /// token_a Swap Account to potentially withdraw from.
+    #[account(mut)]
+    pub swap_token_a: Account<'info, TokenAccount>,
+    /// token_b Swap Account to potentially withdraw from.
+    #[account(mut)]
+    pub swap_token_b: Account<'info, TokenAccount>,
+    /// token_a user Account to credit.
+    /// CHECK: safe
+    #[account(mut)]
+    pub dest_token_a: AccountInfo<'info>,
+    /// token_b user Account to credit.
+    /// CHECK: safe
+    #[account(mut)]
+    pub dest_token_b: AccountInfo<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct UpdatePolicy<'info> {
-    #[account(mut)]
-    pub token_swap: Box<Account<'info, TokenSwap>>,
-}
-
-#[derive(Accounts)]
-pub struct Migrate<'info> {
-    /// CHECK:
-    #[account(mut)]
-    pub token_swap: AccountInfo<'info>,
-    #[account(mut)]
-    pub payer: Signer<'info>,
+    /// Pool Token program id.
+    pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
 
