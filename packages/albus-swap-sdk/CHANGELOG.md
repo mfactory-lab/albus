@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.5-next.1...@albus-finance/swap-sdk-v0.1.5-next.2) (2024-02-01)
+
+
+### 🌟 Features
+
+* **swap:** separated swap and add liquidity policies ([e2d5f21](https://github.com/mfactory-lab/albus/commit/e2d5f21bda47de77ba909bb5118348e5d290e2f2))
+
 ## [0.1.5-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.4...@albus-finance/swap-sdk-v0.1.5-next.1) (2024-01-22)
 
 
