@@ -32,8 +32,8 @@ import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
 import type { PublicKeyInitData } from '@solana/web3.js'
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { assert } from 'vitest'
-import { ProofRequestStatus } from '../../packages/albus-sdk'
-import type { AlbusClient } from '../../packages/albus-sdk'
+import { ProofRequestStatus } from '../../packages/albus-sdk/src'
+import type { AlbusClient } from '../../packages/albus-sdk/src'
 
 export const payer = Keypair.fromSecretKey(Uint8Array.from([
   46, 183, 156, 94, 55, 128, 248, 0, 49, 70, 183, 244, 178, 0, 0, 236,

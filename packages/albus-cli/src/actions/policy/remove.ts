@@ -29,11 +29,16 @@
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-export async function remove(code: string) {
+export async function remove(addrOrCode: string) {
   const { client } = useContext()
 
-  const chunks = code.split('_')
-  const { signature } = await client.policy.delete({ serviceCode: chunks[0]!, code: chunks[1]! })
+  const chunks = addrOrCode.split(/_(.+)?/, 2)
 
-  log.info(`Signature: ${signature}`)
+  if (chunks.length >= 2) {
+    const { signature } = await client.policy.delete({ serviceCode: chunks[0]!, code: chunks[1]! })
+    log.info(`Signature: ${signature}`)
+  } else {
+    const { signature } = await client.policy.deleteByAddr(addrOrCode)
+    log.info(`Signature: ${signature}`)
+  }
 }

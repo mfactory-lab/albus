@@ -8,15 +8,17 @@
 import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
-import { FeesInfo, feesInfoBeet } from '../types/FeesInfo'
-import { CurveInfo, curveInfoBeet } from '../types/CurveInfo'
+import type { FeesInfo } from './generated/types/FeesInfo'
+import { feesInfoBeet } from './generated/types/FeesInfo'
+import type { CurveInfo } from './generated/types/CurveInfo'
+import { curveInfoBeet } from './generated/types/CurveInfo'
 
 /**
- * Arguments used to create {@link TokenSwap}
+ * Arguments used to create {@link TokenSwapOld}
  * @category Accounts
  * @category generated
  */
-export type TokenSwapArgs = {
+export type TokenSwapOldArgs = {
   isInitialized: boolean
   bumpSeed: number
   tokenProgramId: web3.PublicKey
@@ -28,20 +30,18 @@ export type TokenSwapArgs = {
   poolFeeAccount: web3.PublicKey
   fees: FeesInfo
   curve: CurveInfo
-  swapPolicy: beet.COption<web3.PublicKey>
-  addLiquidityPolicy: beet.COption<web3.PublicKey>
-  reserved: number[] /* size: 64 */
+  policy: beet.COption<web3.PublicKey>
 }
 
-export const tokenSwapDiscriminator = [135, 144, 215, 161, 140, 125, 41, 96]
+export const tokenSwapOldDiscriminator = [135, 144, 215, 161, 140, 125, 41, 96]
 /**
- * Holds the data for the {@link TokenSwap} Account and provides de/serialization
+ * Holds the data for the {@link TokenSwapOld} Account and provides de/serialization
  * functionality for that data
  *
  * @category Accounts
  * @category generated
  */
-export class TokenSwap implements TokenSwapArgs {
+export class TokenSwapOld implements TokenSwapOldArgs {
   private constructor(
     readonly isInitialized: boolean,
     readonly bumpSeed: number,
@@ -54,16 +54,14 @@ export class TokenSwap implements TokenSwapArgs {
     readonly poolFeeAccount: web3.PublicKey,
     readonly fees: FeesInfo,
     readonly curve: CurveInfo,
-    readonly swapPolicy: beet.COption<web3.PublicKey>,
-    readonly addLiquidityPolicy: beet.COption<web3.PublicKey>,
-    readonly reserved: number[] /* size: 64 */
+    readonly policy: beet.COption<web3.PublicKey>,
   ) {}
 
   /**
-   * Creates a {@link TokenSwap} instance from the provided args.
+   * Creates a {@link TokenSwapOld} instance from the provided args.
    */
-  static fromArgs(args: TokenSwapArgs) {
-    return new TokenSwap(
+  static fromArgs(args: TokenSwapOldArgs) {
+    return new TokenSwapOld(
       args.isInitialized,
       args.bumpSeed,
       args.tokenProgramId,
@@ -75,42 +73,40 @@ export class TokenSwap implements TokenSwapArgs {
       args.poolFeeAccount,
       args.fees,
       args.curve,
-      args.swapPolicy,
-      args.addLiquidityPolicy,
-      args.reserved
+      args.policy,
     )
   }
 
   /**
-   * Deserializes the {@link TokenSwap} from the data of the provided {@link web3.AccountInfo}.
+   * Deserializes the {@link TokenSwapOld} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
-    offset = 0
-  ): [TokenSwap, number] {
-    return TokenSwap.deserialize(accountInfo.data, offset)
+    offset = 0,
+  ): [TokenSwapOld, number] {
+    return TokenSwapOld.deserialize(accountInfo.data, offset)
   }
 
   /**
    * Retrieves the account info from the provided address and deserializes
-   * the {@link TokenSwap} from its data.
+   * the {@link TokenSwapOld} from its data.
    *
    * @throws Error if no account info is found at the address or if deserialization fails
    */
   static async fromAccountAddress(
     connection: web3.Connection,
     address: web3.PublicKey,
-    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
-  ): Promise<TokenSwap> {
+    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
+  ): Promise<TokenSwapOld> {
     const accountInfo = await connection.getAccountInfo(
       address,
-      commitmentOrConfig
+      commitmentOrConfig,
     )
     if (accountInfo == null) {
       throw new Error(`Unable to find TokenSwap account at ${address}`)
     }
-    return TokenSwap.fromAccountInfo(accountInfo, 0)[0]
+    return TokenSwapOld.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -121,67 +117,67 @@ export class TokenSwap implements TokenSwapArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'
-    )
+      'ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq',
+    ),
   ) {
-    return beetSolana.GpaBuilder.fromStruct(programId, tokenSwapBeet)
+    return beetSolana.GpaBuilder.fromStruct(programId, tokenSwapOldBeet)
   }
 
   /**
-   * Deserializes the {@link TokenSwap} from the provided data Buffer.
+   * Deserializes the {@link TokenSwapOld} from the provided data Buffer.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static deserialize(buf: Buffer, offset = 0): [TokenSwap, number] {
-    return tokenSwapBeet.deserialize(buf, offset)
+  static deserialize(buf: Buffer, offset = 0): [TokenSwapOld, number] {
+    return tokenSwapOldBeet.deserialize(buf, offset)
   }
 
   /**
-   * Serializes the {@link TokenSwap} into a Buffer.
+   * Serializes the {@link TokenSwapOld} into a Buffer.
    * @returns a tuple of the created Buffer and the offset up to which the buffer was written to store it.
    */
   serialize(): [Buffer, number] {
-    return tokenSwapBeet.serialize({
-      accountDiscriminator: tokenSwapDiscriminator,
+    return tokenSwapOldBeet.serialize({
+      accountDiscriminator: tokenSwapOldDiscriminator,
       ...this,
     })
   }
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link TokenSwap} for the provided args.
+   * {@link TokenSwapOld} for the provided args.
    *
    * @param args need to be provided since the byte size for this account
    * depends on them
    */
-  static byteSize(args: TokenSwapArgs) {
-    const instance = TokenSwap.fromArgs(args)
-    return tokenSwapBeet.toFixedFromValue({
-      accountDiscriminator: tokenSwapDiscriminator,
+  static byteSize(args: TokenSwapOldArgs) {
+    const instance = TokenSwapOld.fromArgs(args)
+    return tokenSwapOldBeet.toFixedFromValue({
+      accountDiscriminator: tokenSwapOldDiscriminator,
       ...instance,
     }).byteSize
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
-   * {@link TokenSwap} data from rent
+   * {@link TokenSwapOld} data from rent
    *
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
    */
   static async getMinimumBalanceForRentExemption(
-    args: TokenSwapArgs,
+    args: TokenSwapOldArgs,
     connection: web3.Connection,
-    commitment?: web3.Commitment
+    commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
-      TokenSwap.byteSize(args),
-      commitment
+      TokenSwapOld.byteSize(args),
+      commitment,
     )
   }
 
   /**
-   * Returns a readable version of {@link TokenSwap} properties
+   * Returns a readable version of {@link TokenSwapOld} properties
    * and can be used to convert to JSON and/or logging
    */
   pretty() {
@@ -197,9 +193,7 @@ export class TokenSwap implements TokenSwapArgs {
       poolFeeAccount: this.poolFeeAccount.toBase58(),
       fees: this.fees,
       curve: this.curve,
-      swapPolicy: this.swapPolicy,
-      addLiquidityPolicy: this.addLiquidityPolicy,
-      reserved: this.reserved,
+      policy: this.policy,
     }
   }
 }
@@ -208,9 +202,9 @@ export class TokenSwap implements TokenSwapArgs {
  * @category Accounts
  * @category generated
  */
-export const tokenSwapBeet = new beet.FixableBeetStruct<
-  TokenSwap,
-  TokenSwapArgs & {
+export const tokenSwapOldBeet = new beet.FixableBeetStruct<
+  TokenSwapOld,
+  TokenSwapOldArgs & {
     accountDiscriminator: number[] /* size: 8 */
   }
 >(
@@ -227,10 +221,8 @@ export const tokenSwapBeet = new beet.FixableBeetStruct<
     ['poolFeeAccount', beetSolana.publicKey],
     ['fees', feesInfoBeet],
     ['curve', curveInfoBeet],
-    ['swapPolicy', beet.coption(beetSolana.publicKey)],
-    ['addLiquidityPolicy', beet.coption(beetSolana.publicKey)],
-    ['reserved', beet.uniformFixedSizeArray(beet.u8, 64)],
+    ['policy', beet.coption(beetSolana.publicKey)],
   ],
-  TokenSwap.fromArgs,
-  'TokenSwap'
+  TokenSwapOld.fromArgs,
+  'TokenSwap',
 )

@@ -57,6 +57,7 @@ jobs:
 
       - name: Setup git
         run: |
+          git config --global user.email "release@albus.finance"
           git config --global user.name "release-it-bot"
 
       - name: Run release

@@ -151,7 +151,7 @@ describe('countryPolicy', async () => {
   // it('_', async () => {
   //   console.log('[')
   //   for (const c of countries) {
-  //     console.log(`0x${bytesToHex(bigintToBytes(encodeClaimValue(c.code3)))}, // ${c.code3}`)
+  //     console.log(`${encodeClaimValue(c.code3)}, // ${c.code3}`)
   //   }
   //   console.log(']')
   // })

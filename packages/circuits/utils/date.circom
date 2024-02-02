@@ -1,5 +1,40 @@
 pragma circom 2.1.6;
 
+include "circomlib/circuits/bitify.circom";
+include "string.circom";
+
+/**
+ * Convert date `2022-01-01` to date array `[2022, 01, 01]`
+ */
+template ParseDate() {
+  signal input date;
+  signal output out[3];
+
+  component bits = Num2Bits(256);
+  bits.in <== date;
+
+  var y = BitsToAscii(48, 4)(bits.out);
+
+  var m = BitsToAscii(24, 2)(bits.out);
+  assert(m>0 && m<=12);
+
+  var d = BitsToAscii(0, 2)(bits.out);
+  assert(d>0 && d<=31);
+
+  out <-- [y,m,d];
+}
+
+/**
+ * Convert string date `232396204657573373161521` to timestamp `1697039001`.
+ */
+template Str2Timestamp() {
+  signal input in;
+  signal output out;
+  var maxTimestampLength = 10;
+  var bits[256] = Num2Bits(256)(in);
+  out <== BitsToAscii(0, maxTimestampLength)(bits);
+}
+
 /**
  * Convert number date `20220101` to date array `[2022, 01, 01]`
  */

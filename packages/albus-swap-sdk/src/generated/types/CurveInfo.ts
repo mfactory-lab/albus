@@ -6,7 +6,6 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-
 export type CurveInfo = {
   curveType: number
   curveParameters: number[] /* size: 32 */
@@ -21,5 +20,5 @@ export const curveInfoBeet = new beet.BeetArgsStruct<CurveInfo>(
     ['curveType', beet.u8],
     ['curveParameters', beet.uniformFixedSizeArray(beet.u8, 32)],
   ],
-  'CurveInfo',
+  'CurveInfo'
 )

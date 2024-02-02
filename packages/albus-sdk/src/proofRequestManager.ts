@@ -35,6 +35,7 @@ import type {
 } from '@solana/web3.js'
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import chunk from 'lodash/chunk'
+import type { TxBuilder } from './utils'
 import { BaseManager } from './base'
 import type {
   ProofData,
@@ -187,6 +188,7 @@ export class ProofRequestManager extends BaseManager {
 
     // TODO: load circuit, get maxPublicInputs
     const maxPublicInputs = props.maxPublicInputs ?? 50
+    const txBuilder = props.txBuilder ?? this.txBuilder
 
     const ix = createCreateProofRequestInstruction(
       {
@@ -204,7 +206,13 @@ export class ProofRequestManager extends BaseManager {
       this.programId,
     )
 
-    const signature = await this.txBuilder.addInstruction(ix).sendAndConfirm(opts)
+    txBuilder.addInstruction(ix)
+
+    let signature: string | undefined
+
+    if (!props.txBuilder) {
+      signature = await txBuilder.sendAndConfirm(opts)
+    }
 
     return {
       address: proofRequest,
@@ -340,27 +348,30 @@ export class ProofRequestManager extends BaseManager {
    */
   async prove(props: ProveProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
-    const proofRequest = props.proofRequestData ?? await this.load(props.proofRequest)
+    const proofRequest = new PublicKey(props.proofRequest)
+    const circuit = new PublicKey(props.circuit)
+    const policy = new PublicKey(props.policy)
 
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
+
+    // extending public inputs, length more than 19 does not fit into one transaction
+    // a transaction's maximum size is 1,232 bytes
     const inputsLimit = { withProof: 19, withoutProof: 28 }
 
     this.trace('prove', 'init', { proof, publicInputs })
 
-    const txBuilder = this.txBuilder
+    const txBuilder = props.txBuilder ?? this.txBuilder
 
-    // extending public inputs, length more than 19 does not fit into one transaction
-    // a transaction's maximum size is 1,232 bytes
     if (publicInputs.length > inputsLimit.withProof) {
       const inputChunks = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
         txBuilder.addTransaction(
           new Transaction().add(createProveProofRequestInstruction(
             {
-              proofRequest: new PublicKey(props.proofRequest),
-              circuit: proofRequest.circuit,
-              policy: proofRequest.policy,
+              proofRequest,
+              circuit,
+              policy,
               authority,
             },
             {
@@ -379,9 +390,9 @@ export class ProofRequestManager extends BaseManager {
     txBuilder.addTransaction(
       new Transaction().add(createProveProofRequestInstruction(
         {
-          proofRequest: new PublicKey(props.proofRequest),
-          circuit: proofRequest.circuit,
-          policy: proofRequest.policy,
+          proofRequest,
+          circuit,
+          policy,
           issuer: props.issuer,
           authority,
         },
@@ -402,39 +413,46 @@ export class ProofRequestManager extends BaseManager {
         new Transaction()
           .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
           .add(createVerifyProofRequestInstruction({
-            proofRequest: new PublicKey(props.proofRequest),
-            circuit: proofRequest.circuit,
+            proofRequest,
+            circuit,
             authority,
-          }, this.programId),
-          ),
+          }, this.programId)),
       )
     }
 
-    this.trace('prove', `sending ${txBuilder.txs.length} transactions...`)
-    const signatures = await txBuilder.sendAll(opts)
-    this.trace('prove', { signatures })
+    let signatures: string[] = []
+    if (!props.txBuilder) {
+      this.trace('prove', `sending ${txBuilder.txs.length} transactions...`)
+      signatures = await txBuilder.sendAll(opts)
+      this.trace('prove', { signatures })
+    }
 
     return { signatures }
   }
 
   /**
-   * Perform a full proof generation process based on the provided properties.
+   * Perform a full proof generation process.
    */
-  async fullProve(props: FullProveProps) {
-    const { proofRequest, circuit, policy, serviceProvider }
-      = await this.loadFull(props.proofRequest, ['circuit', 'policy', 'serviceProvider'])
+  async fullProveInternal(props: FullProveInternalProps) {
+    const accountInfos = await this.provider.connection.getMultipleAccountsInfo([
+      new PublicKey(props.serviceProvider),
+      new PublicKey(props.circuit),
+      new PublicKey(props.policy),
+    ])
 
-    if (!circuit) {
-      throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
+    if (!accountInfos[0]) {
+      throw new Error(`Unable to find Service account at ${props.serviceProvider}`)
+    }
+    if (!accountInfos[1]) {
+      throw new Error(`Unable to find Circuit account at ${props.circuit}`)
+    }
+    if (!accountInfos[2]) {
+      throw new Error(`Unable to find Policy account at ${props.policy}`)
     }
 
-    if (!policy) {
-      throw new Error(`Unable to find Policy account at ${proofRequest.policy}`)
-    }
-
-    if (!serviceProvider) {
-      throw new Error(`Unable to find Service account at ${proofRequest.serviceProvider}`)
-    }
+    const serviceProvider = ServiceProvider.fromAccountInfo(accountInfos[0])[0]
+    const circuit = Circuit.fromAccountInfo(accountInfos[1])[0]
+    const policy = Policy.fromAccountInfo(accountInfos[2])[0]
 
     const credential = await this.credential.load(props.vc, {
       decryptionKey: props.decryptionKey ?? props.userPrivateKey,
@@ -449,11 +467,9 @@ export class ProofRequestManager extends BaseManager {
         this.trace('fullProve', `loading trustee accounts...`, serviceProvider.trustees.map(t => t.toBase58()))
         const keys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
           .filter(p => p !== null) as [bigint, bigint][]
-
         for (const key of keys) {
           this.trace('fullProve', 'trustee sharedKey', Albus.zkp.generateEcdhSharedKey(props.userPrivateKey, key))
         }
-
         return keys
       })
       .build()
@@ -471,8 +487,8 @@ export class ProofRequestManager extends BaseManager {
 
     try {
       const proofData = {
-        wasmFile: circuit.wasmUri,
-        zkeyFile: circuit.zkeyUri,
+        wasmFile: props.wasmUri ?? circuit.wasmUri,
+        zkeyFile: props.zkeyUri ?? circuit.zkeyUri,
         input: proofInput.data,
       }
 
@@ -482,12 +498,14 @@ export class ProofRequestManager extends BaseManager {
       this.trace('fullProve', 'sending transaction...')
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
-        proofRequestData: proofRequest,
+        circuit: props.circuit,
+        policy: props.policy,
         verify: props.verify ?? true,
         proof,
         issuer,
         // @ts-expect-error readonly
         publicSignals,
+        txBuilder: props.txBuilder,
       })
 
       this.trace('fullProve', 'prove result', { signatures })
@@ -500,6 +518,19 @@ export class ProofRequestManager extends BaseManager {
       this.trace('fullProve', e)
       throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
+  }
+
+  /**
+   * Perform a full proof generation process for provided proof request.
+   */
+  async fullProve(props: FullProveProps) {
+    const proofRequest = await this.load(props.proofRequest)
+    return this.fullProveInternal({
+      serviceProvider: proofRequest.serviceProvider,
+      circuit: proofRequest.circuit,
+      policy: proofRequest.policy,
+      ...props,
+    })
   }
 
   async getTimestamp() {
@@ -537,6 +568,7 @@ export type CreateProofRequestProps = {
   policyCode: string
   expiresIn?: number
   maxPublicInputs?: number
+  txBuilder?: TxBuilder
 }
 
 export type DeleteProofRequestProps = {
@@ -556,6 +588,10 @@ export type FindProofRequestProps = {
   noData?: boolean
 }
 
+export type VerifyProps = {
+  proofRequest: PublicKeyInitData | ProofRequest
+}
+
 export type FullProveProps = {
   proofRequest: PublicKeyInitData
   vc: PublicKeyInitData
@@ -565,19 +601,30 @@ export type FullProveProps = {
   // On-chain verification. Default: true
   verify?: boolean
   throwOnError?: boolean
+  txBuilder?: TxBuilder
+  // for tests only
+  // eslint-disable-next-line node/prefer-global/buffer
+  wasmUri?: Buffer | string
+  // for tests only
+  // eslint-disable-next-line node/prefer-global/buffer
+  zkeyUri?: Buffer | string
 }
 
-export type VerifyProps = {
-  proofRequest: PublicKeyInitData | ProofRequest
-}
+export type FullProveInternalProps = {
+  serviceProvider: PublicKeyInitData
+  circuit: PublicKeyInitData
+  policy: PublicKeyInitData
+} & FullProveProps
 
 export type ProveProps = {
   proofRequest: PublicKeyInitData
-  proofRequestData?: ProofRequest
+  circuit: PublicKeyInitData
+  policy: PublicKeyInitData
   issuer?: PublicKey
   proof: ProofData
   publicSignals: (string | number | bigint)[]
   verify: boolean
+  txBuilder?: TxBuilder
 }
 
 export type ChangeStatus = {

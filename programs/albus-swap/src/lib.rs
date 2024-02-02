@@ -24,12 +24,33 @@ pub mod albus_swap {
     use crate::curve::fees::Fees;
     use albus_solana_verifier::AlbusVerifier;
 
-    /// Processes an [Initialize](enum.Instruction.html).
+    pub fn migrate(ctx: Context<Migrate>) -> Result<()> {
+        let token_swap = &mut ctx.accounts.token_swap;
+
+        realloc_account(
+            &token_swap,
+            &ctx.accounts.payer,
+            &ctx.accounts.system_program,
+            8 + std::mem::size_of::<TokenSwap>(),
+            false,
+        )?;
+
+        Ok(())
+    }
+
+    pub fn update_policy(ctx: Context<UpdatePolicy>) -> Result<()> {
+        let token_swap = &mut ctx.accounts.token_swap;
+        token_swap.add_liquidity_policy = token_swap.swap_policy;
+
+        Ok(())
+    }
+
     pub fn initialize(
         ctx: Context<Initialize>,
         fees_input: FeesInfo,
         curve_input: CurveInfo,
-        policy: Option<Pubkey>,
+        swap_policy: Option<Pubkey>,
+        add_liquidity_policy: Option<Pubkey>,
     ) -> Result<()> {
         if ctx.accounts.token_swap.is_initialized {
             return Err(SwapError::AlreadyInUse.into());
@@ -135,7 +156,8 @@ pub mod albus_swap {
         token_swap.pool_fee_account = ctx.accounts.pool_fee.key();
         token_swap.fees = fees_input;
         token_swap.curve = curve_input;
-        token_swap.policy = policy;
+        token_swap.swap_policy = swap_policy;
+        token_swap.add_liquidity_policy = add_liquidity_policy;
 
         Ok(())
     }
@@ -144,7 +166,7 @@ pub mod albus_swap {
     pub fn swap(ctx: Context<Swap>, amount_in: u64, minimum_amount_out: u64) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
 
-        if let Some(policy) = token_swap.policy {
+        if let Some(policy) = token_swap.swap_policy {
             AlbusVerifier::new(
                 ctx.accounts
                     .proof_request
@@ -312,6 +334,18 @@ pub mod albus_swap {
         maximum_token_b_amount: u64,
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
+
+        if let Some(policy) = token_swap.add_liquidity_policy {
+            AlbusVerifier::new(
+                ctx.accounts
+                    .proof_request
+                    .as_ref()
+                    .expect("Proof request required"),
+            )
+            .check_policy(policy)
+            .check_owner(ctx.accounts.user_transfer_authority.key())
+            .run()?;
+        }
 
         let curve = SwapCurve::try_from(token_swap.curve.clone())?;
 
@@ -485,7 +519,7 @@ pub mod albus_swap {
                 ctx.accounts
                     .transfer_to_token_b_ctx()
                     .with_signer(&[&seeds[..]]),
-                token_a_amount,
+                token_b_amount,
             )?;
         }
 
@@ -499,6 +533,18 @@ pub mod albus_swap {
         minimum_pool_token_amount: u64,
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
+
+        if let Some(policy) = token_swap.add_liquidity_policy {
+            AlbusVerifier::new(
+                ctx.accounts
+                    .proof_request
+                    .as_ref()
+                    .expect("Proof request required"),
+            )
+            .check_policy(policy)
+            .check_owner(ctx.accounts.user_transfer_authority.key())
+            .run()?;
+        }
 
         let curve: SwapCurve = token_swap.curve.clone().try_into()?;
         let fees = token_swap.fees.into();
@@ -686,28 +732,70 @@ pub mod albus_swap {
         Ok(())
     }
 
-    pub fn close_account(ctx: Context<CloseAccount>) -> Result<()> {
-        let acc = ctx.accounts.account.to_account_info();
-        let sol_destination = ctx.accounts.authority.to_account_info();
-
-        // Transfer lamports from the account to the sol_destination.
-        let dest_starting_lamports = sol_destination.lamports();
-        **sol_destination.lamports.borrow_mut() =
-            dest_starting_lamports.checked_add(acc.lamports()).unwrap();
-        **acc.lamports.borrow_mut() = 0;
-
-        acc.assign(&solana_program::system_program::ID);
-        acc.realloc(0, false).map_err(Into::into)
-    }
+    // pub fn close(ctx: Context<ClosePool>, token_a_amount: u64, token_b_amount: u64) -> Result<()> {
+    //     let token_swap = &mut ctx.accounts.token_swap;
+    //
+    //     if token_a_amount > 0 {
+    //         let cpi_accounts = Transfer {
+    //             from:  &ctx.swap_token_a.to_account_info(),
+    //             to:  &ctx.dest_token_a.to_account_info(),
+    //             authority: &ctx.authority.to_account_info(),
+    //         };
+    //
+    //         token::transfer(
+    //             CpiContext::new(ctx.token_program.to_account_info(), cpi_accounts)
+    //                 .with_signer(&[&seeds[..]]),
+    //             token_a_amount,
+    //         )?;
+    //     }
+    //
+    //     if token_b_amount > 0 {
+    //         token::transfer(
+    //             ctx.accounts
+    //                 .transfer_to_token_b_ctx()
+    //                 .with_signer(&[&seeds[..]]),
+    //             token_a_amount,
+    //         )?;
+    //     }
+    //
+    //     let acc = token_swap.to_account_info();
+    //     let sol_destination = ctx.accounts.authority.to_account_info();
+    //
+    //     // Transfer lamports from the account to the sol_destination.
+    //     let dest_starting_lamports = sol_destination.lamports();
+    //     **sol_destination.lamports.borrow_mut() =
+    //         dest_starting_lamports.checked_add(acc.lamports()).unwrap();
+    //     **acc.lamports.borrow_mut() = 0;
+    //
+    //     acc.assign(&solana_program::system_program::ID);
+    //     acc.realloc(0, false).map_err(Into::into)
+    // }
 }
 
 #[derive(Accounts)]
-pub struct CloseAccount<'info> {
+pub struct ClosePool<'info> {
+    /// CHECK: safe
+    pub authority: AccountInfo<'info>,
+    #[account(mut)]
+    pub token_swap: Box<Account<'info, TokenSwap>>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UpdatePolicy<'info> {
+    #[account(mut)]
+    pub token_swap: Box<Account<'info, TokenSwap>>,
+}
+
+#[derive(Accounts)]
+pub struct Migrate<'info> {
     /// CHECK:
     #[account(mut)]
-    pub account: UncheckedAccount<'info>,
+    pub token_swap: AccountInfo<'info>,
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -784,6 +872,8 @@ pub struct Swap<'info> {
 /// the current ratio.
 #[derive(Accounts)]
 pub struct DepositAllTokenTypes<'info> {
+    /// CHECK: safe, checked in Albus
+    pub proof_request: Option<AccountInfo<'info>>,
     /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
     /// CHECK: safe
@@ -821,6 +911,8 @@ pub struct DepositAllTokenTypes<'info> {
 /// a swap and deposit all token types were performed.
 #[derive(Accounts)]
 pub struct DepositSingleTokenType<'info> {
+    /// CHECK: safe, checked in Albus
+    pub proof_request: Option<AccountInfo<'info>>,
     /// Token-swap
     pub token_swap: Box<Account<'info, TokenSwap>>,
     /// CHECK: safe
@@ -1108,5 +1200,33 @@ impl<'info> Swap<'info> {
             authority: self.authority.to_account_info(),
         };
         CpiContext::new(self.token_program.to_account_info(), cpi_accounts)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::curve::base::SwapCurve;
+    use crate::curve::calculator::RoundDirection;
+    use crate::errors::SwapError;
+    use crate::utils::to_u128;
+    use solana_program::native_token::LAMPORTS_PER_SOL;
+
+    #[test]
+    fn test1() {
+        let curve = SwapCurve::default();
+
+        let calculator = curve.calculator;
+        let results = calculator
+            .pool_tokens_to_trading_tokens(
+                (0.01 * LAMPORTS_PER_SOL as f64) as u128,
+                to_u128((11.59 * LAMPORTS_PER_SOL as f64) as u64).unwrap(),
+                to_u128((3.821 * LAMPORTS_PER_SOL as f64) as u64).unwrap(),
+                to_u128((10.22 * 1_000_000f64) as u64).unwrap(),
+                RoundDirection::Floor,
+            )
+            .ok_or(SwapError::ZeroTradingTokens)
+            .unwrap();
+
+        println!("{:?}", results);
     }
 }

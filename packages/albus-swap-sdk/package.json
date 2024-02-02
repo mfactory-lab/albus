@@ -1,8 +1,8 @@
 {
   "name": "@albus-finance/swap-sdk",
-  "version": "0.1.4",
+  "version": "0.1.5-next.2",
   "description": "Albus Swap SDK",
-  "type": "module",
+  "_type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
-    "@metaplex-foundation/beet": "^0.7.1",
+    "@metaplex-foundation/beet": "^0.7.2",
     "@solana/spl-token": "^0.3.8",
     "@solana/web3.js": "^1.87.6"
   },

@@ -10,58 +10,58 @@ import * as web3 from '@solana/web3.js'
 
 /**
  * @category Instructions
- * @category CloseAccount
+ * @category Migrate
  * @category generated
  */
-export const closeAccountStruct = new beet.BeetArgsStruct<{
+export const migrateStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'CloseAccountInstructionArgs',
+  'MigrateInstructionArgs'
 )
 /**
- * Accounts required by the _closeAccount_ instruction
+ * Accounts required by the _migrate_ instruction
  *
- * @property [_writable_] account
- * @property [_writable_, **signer**] authority
+ * @property [_writable_] tokenSwap
+ * @property [_writable_, **signer**] payer
  * @category Instructions
- * @category CloseAccount
+ * @category Migrate
  * @category generated
  */
-export type CloseAccountInstructionAccounts = {
-  account: web3.PublicKey
-  authority: web3.PublicKey
+export type MigrateInstructionAccounts = {
+  tokenSwap: web3.PublicKey
+  payer: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const closeAccountInstructionDiscriminator = [
-  125, 255, 149, 14, 110, 34, 72, 24,
+export const migrateInstructionDiscriminator = [
+  155, 234, 231, 146, 236, 158, 162, 30,
 ]
 
 /**
- * Creates a _CloseAccount_ instruction.
+ * Creates a _Migrate_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @category Instructions
- * @category CloseAccount
+ * @category Migrate
  * @category generated
  */
-export function createCloseAccountInstruction(
-  accounts: CloseAccountInstructionAccounts,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
+export function createMigrateInstruction(
+  accounts: MigrateInstructionAccounts,
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
 ) {
-  const [data] = closeAccountStruct.serialize({
-    instructionDiscriminator: closeAccountInstructionDiscriminator,
+  const [data] = migrateStruct.serialize({
+    instructionDiscriminator: migrateInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
-      pubkey: accounts.account,
+      pubkey: accounts.tokenSwap,
       isWritable: true,
       isSigner: false,
     },
     {
-      pubkey: accounts.authority,
+      pubkey: accounts.payer,
       isWritable: true,
       isSigner: true,
     },

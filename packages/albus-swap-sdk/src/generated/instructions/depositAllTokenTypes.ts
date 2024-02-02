@@ -35,11 +35,12 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
     ['maximumTokenAAmount', beet.u64],
     ['maximumTokenBAmount', beet.u64],
   ],
-  'DepositAllTokenTypesInstructionArgs',
+  'DepositAllTokenTypesInstructionArgs'
 )
 /**
  * Accounts required by the _depositAllTokenTypes_ instruction
  *
+ * @property [] proofRequest (optional)
  * @property [] tokenSwap
  * @property [] authority
  * @property [**signer**] userTransferAuthority
@@ -54,6 +55,7 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type DepositAllTokenTypesInstructionAccounts = {
+  proofRequest?: web3.PublicKey
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -74,6 +76,9 @@ export const depositAllTokenTypesInstructionDiscriminator = [
 /**
  * Creates a _DepositAllTokenTypes_ instruction.
  *
+ * Optional accounts that are not provided default to the program ID since
+ * this was indicated in the IDL from which this instruction was generated.
+ *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
@@ -84,13 +89,18 @@ export const depositAllTokenTypesInstructionDiscriminator = [
 export function createDepositAllTokenTypesInstruction(
   accounts: DepositAllTokenTypesInstructionAccounts,
   args: DepositAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
 ) {
   const [data] = depositAllTokenTypesStruct.serialize({
     instructionDiscriminator: depositAllTokenTypesInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
+    {
+      pubkey: accounts.proofRequest ?? programId,
+      isWritable: false,
+      isSigner: false,
+    },
     {
       pubkey: accounts.tokenSwap,
       isWritable: false,

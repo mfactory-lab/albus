@@ -32,7 +32,7 @@ import { Keypair } from '@solana/web3.js'
 import axios from 'axios'
 
 import { assert, beforeAll, describe, it, vi } from 'vitest'
-import * as Albus from '../../packages/albus-core'
+import * as Albus from '../../packages/albus-core/src'
 import { generateDid } from '../../packages/albus-core/src/utils'
 import {
   AlbusClient,

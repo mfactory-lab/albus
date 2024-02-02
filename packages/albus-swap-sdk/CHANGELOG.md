@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.5-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.5-next.1...@albus-finance/swap-sdk-v0.1.5-next.2) (2024-02-01)
+
+
+### 🌟 Features
+
+* **swap:** separated swap and add liquidity policies ([e2d5f21](https://github.com/mfactory-lab/albus/commit/e2d5f21bda47de77ba909bb5118348e5d290e2f2))
+
+## [0.1.5-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.4...@albus-finance/swap-sdk-v0.1.5-next.1) (2024-01-22)
+
+
+### 🐞 Bug Fixes
+
+* **swap-sdk:** handle accounts in withdraw methods, refactory ([73b1fc2](https://github.com/mfactory-lab/albus/commit/73b1fc295620c3c6776851d5777d970c8415093f))
+* **swap:** deposit all: token accounts, wrapped sol ([a856513](https://github.com/mfactory-lab/albus/commit/a8565134959937ce2d04ff00ee0bf1ef2ca7573c))
+
+## [v0.1.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.4-next.4...@albus-finance/swap-sdk-v0.1.5-next.1) (2023-12-04)
+
 ## [0.1.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.2-next.2...@albus-finance/swap-sdk-v0.1.4) (2023-12-04)
 
 

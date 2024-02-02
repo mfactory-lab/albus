@@ -29,11 +29,11 @@
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
 import * as Albus from '../../packages/albus-core/src'
-import { AlbusClient, InvestigationStatus, ProofRequestStatus } from '../../packages/albus-sdk/src'
+import { AlbusClient, InvestigationStatus, ProofRequestStatus, TxBuilder } from '../../packages/albus-sdk/src'
 import { airdrop, assertErrorCode, loadFixture, newProvider, payer, provider } from './utils'
 
 describe('albus', async () => {
-  const client = new AlbusClient(provider).debug().local()
+  const client = new AlbusClient(provider).local() // .debug()
 
   const issuer = Keypair.generate()
 
@@ -282,6 +282,32 @@ describe('albus', async () => {
     }
   })
 
+  it('can create and prove a proof request with tx builder', async () => {
+    const txBuilder = new TxBuilder(provider)
+    const { address } = await client.proofRequest.create({ serviceCode, policyCode, txBuilder })
+
+    const [serviceProvider] = client.pda.serviceProvider(serviceCode)
+    const [policy] = client.pda.policy(serviceProvider, policyCode)
+    const [circuit] = client.pda.circuit(circuitCode)
+
+    await client.proofRequest.fullProveInternal({
+      userPrivateKey: payer.secretKey,
+      proofRequest: address,
+      serviceProvider,
+      circuit,
+      policy,
+      txBuilder,
+      vc: PublicKey.default, // mocked
+      wasmUri: loadFixture('agePolicy.wasm'),
+      zkeyUri: loadFixture('agePolicy.zkey'),
+    })
+
+    await txBuilder.sendAll()
+
+    const proofRequest = await client.proofRequest.load(address)
+    assert.equal(proofRequest.status, ProofRequestStatus.Verified)
+  })
+
   it('can create a proof request', async () => {
     const { address } = await client.proofRequest.create({ serviceCode, policyCode })
     const proofRequest = await client.proofRequest.load(address)
@@ -302,25 +328,12 @@ describe('albus', async () => {
     const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
-    // mock wasmUri and zkeyUri
-    vi.spyOn(client.proofRequest, 'loadFull')
-      .mockImplementationOnce(async (addr, props) => {
-        const res = await client.proofRequest.loadFull(addr, props)
-
-        return {
-          ...res,
-          circuit: {
-            ...res.circuit,
-            wasmUri: loadFixture('agePolicy.wasm'),
-            zkeyUri: loadFixture('agePolicy.zkey'),
-          },
-        } as any
-      })
-
     const { signatures } = await client.proofRequest.fullProve({
       proofRequest,
-      vc: PublicKey.default, // mocked
       userPrivateKey: payer.secretKey,
+      vc: PublicKey.default, // mocked
+      wasmUri: loadFixture('agePolicy.wasm'),
+      zkeyUri: loadFixture('agePolicy.zkey'),
     })
 
     assert.ok(signatures.length > 0)

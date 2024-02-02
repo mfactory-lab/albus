@@ -33,11 +33,12 @@ export const depositSingleTokenTypeStruct = new beet.BeetArgsStruct<
     ['sourceTokenAmount', beet.u64],
     ['minimumPoolTokenAmount', beet.u64],
   ],
-  'DepositSingleTokenTypeInstructionArgs',
+  'DepositSingleTokenTypeInstructionArgs'
 )
 /**
  * Accounts required by the _depositSingleTokenType_ instruction
  *
+ * @property [] proofRequest (optional)
  * @property [] tokenSwap
  * @property [] authority
  * @property [**signer**] userTransferAuthority
@@ -51,6 +52,7 @@ export const depositSingleTokenTypeStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type DepositSingleTokenTypeInstructionAccounts = {
+  proofRequest?: web3.PublicKey
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -70,6 +72,9 @@ export const depositSingleTokenTypeInstructionDiscriminator = [
 /**
  * Creates a _DepositSingleTokenType_ instruction.
  *
+ * Optional accounts that are not provided default to the program ID since
+ * this was indicated in the IDL from which this instruction was generated.
+ *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
@@ -80,13 +85,18 @@ export const depositSingleTokenTypeInstructionDiscriminator = [
 export function createDepositSingleTokenTypeInstruction(
   accounts: DepositSingleTokenTypeInstructionAccounts,
   args: DepositSingleTokenTypeInstructionArgs,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
 ) {
   const [data] = depositSingleTokenTypeStruct.serialize({
     instructionDiscriminator: depositSingleTokenTypeInstructionDiscriminator,
     ...args,
   })
   const keys: web3.AccountMeta[] = [
+    {
+      pubkey: accounts.proofRequest ?? programId,
+      isWritable: false,
+      isSigner: false,
+    },
     {
       pubkey: accounts.tokenSwap,
       isWritable: false,

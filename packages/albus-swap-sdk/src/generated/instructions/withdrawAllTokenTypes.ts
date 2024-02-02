@@ -35,7 +35,7 @@ export const withdrawAllTokenTypesStruct = new beet.BeetArgsStruct<
     ['minimumTokenAAmount', beet.u64],
     ['minimumTokenBAmount', beet.u64],
   ],
-  'WithdrawAllTokenTypesInstructionArgs',
+  'WithdrawAllTokenTypesInstructionArgs'
 )
 /**
  * Accounts required by the _withdrawAllTokenTypes_ instruction
@@ -86,7 +86,7 @@ export const withdrawAllTokenTypesInstructionDiscriminator = [
 export function createWithdrawAllTokenTypesInstruction(
   accounts: WithdrawAllTokenTypesInstructionAccounts,
   args: WithdrawAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
 ) {
   const [data] = withdrawAllTokenTypesStruct.serialize({
     instructionDiscriminator: withdrawAllTokenTypesInstructionDiscriminator,
