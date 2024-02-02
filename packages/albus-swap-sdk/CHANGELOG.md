@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.5-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.5-next.2...@albus-finance/swap-sdk-v0.1.5-next.4) (2024-02-02)
+
+
+### 🌟 Features
+
+* **swap:** add close instruction ([6a929e1](https://github.com/mfactory-lab/albus/commit/6a929e1b418a8138d2de694b9c33c09143cc3251))
+* **swap:** add close instruction ([500ce6a](https://github.com/mfactory-lab/albus/commit/500ce6a6ceb98e36d772c07f49082be3f27c1845))
+
+
+### 🐞 Bug Fixes
+
+* **swap:** add migration ([e6da510](https://github.com/mfactory-lab/albus/commit/e6da51064b9c92e337bb62ab329ee9e619716a70))
+* **swap:** fix version ([0b3dd88](https://github.com/mfactory-lab/albus/commit/0b3dd889f84705a54e256036beac8d8d463ecacf))
+
 ## [0.1.5-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.5-next.1...@albus-finance/swap-sdk-v0.1.5-next.2) (2024-02-01)
 
 
