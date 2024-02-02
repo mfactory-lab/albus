@@ -97,9 +97,6 @@
     },
     {
       "name": "swap",
-      "docs": [
-        "Processes an [Swap](enum.Instruction.html)."
-      ],
       "accounts": [
         {
           "name": "proofRequest",
@@ -204,9 +201,6 @@
     },
     {
       "name": "depositAllTokenTypes",
-      "docs": [
-        "Processes an [DepositAllTokenTypes](enum.Instruction.html)."
-      ],
       "accounts": [
         {
           "name": "proofRequest",
@@ -306,9 +300,6 @@
     },
     {
       "name": "withdrawAllTokenTypes",
-      "docs": [
-        "Processes an [WithdrawAllTokenTypes](enum.Instruction.html)."
-      ],
       "accounts": [
         {
           "name": "tokenSwap",
@@ -410,9 +401,6 @@
     },
     {
       "name": "depositSingleTokenType",
-      "docs": [
-        "Processes DepositSingleTokenTypeExactAmountIn"
-      ],
       "accounts": [
         {
           "name": "proofRequest",
@@ -500,9 +488,6 @@
     },
     {
       "name": "withdrawSingleTokenType",
-      "docs": [
-        "Processes a WithdrawSingleTokenTypeExactAmountOut."
-      ],
       "accounts": [
         {
           "name": "tokenSwap",
@@ -771,7 +756,7 @@
           {
             "name": "reserved",
             "docs": [
-              "Reserved space"
+              "Reserved for future use"
             ],
             "type": {
               "array": [

@@ -10,20 +10,20 @@ import {
   createCloseAccountInstruction,
   createSyncNativeInstruction,
   getAccount,
-  getAssociatedTokenAddress,
+  getAssociatedTokenAddress, getAssociatedTokenAddressSync,
 } from '@solana/spl-token'
 
 import type { CurveType } from './generated'
 import {
   PROGRAM_ID,
   TokenSwap,
+  createCloseInstruction,
   createDepositAllTokenTypesInstruction,
   createDepositSingleTokenTypeInstruction,
   createInitializeInstruction,
   createSwapInstruction,
   createWithdrawAllTokenTypesInstruction,
-  createWithdrawSingleTokenTypeInstruction,
-  tokenSwapDiscriminator,
+  createWithdrawSingleTokenTypeInstruction, tokenSwapDiscriminator,
 } from './generated'
 
 export class AlbusSwapClient {
@@ -40,6 +40,41 @@ export class AlbusSwapClient {
       [tokenSwap.toBuffer()],
       this.programId,
     )[0]
+  }
+
+  /**
+   * Close Token Swap
+   */
+  async closeTokenSwap(props: CloseTokenSwapProps, opts?: ConfirmOptions) {
+    const tx = new Transaction()
+
+    const payer = this.provider.publicKey
+    const swapAuthority = this.swapAuthority(props.tokenSwap)
+    const tokenSwap = await this.load(props.tokenSwap)
+
+    const destTokenA = getAssociatedTokenAddressSync(tokenSwap.tokenAMint, payer)
+    const destTokenB = getAssociatedTokenAddressSync(tokenSwap.tokenBMint, payer)
+
+    await this.handleMissingTokenAccount(tx, destTokenA, tokenSwap.tokenAMint)
+    await this.handleMissingTokenAccount(tx, destTokenB, tokenSwap.tokenBMint)
+
+    tx.add(
+      createCloseInstruction({
+        payer,
+        tokenSwap: props.tokenSwap,
+        authority: swapAuthority,
+        destTokenA,
+        destTokenB,
+        swapTokenA: tokenSwap.tokenA,
+        swapTokenB: tokenSwap.tokenB,
+      }),
+    )
+
+    const signature = await this.provider.sendAndConfirm(tx, [], opts)
+
+    return {
+      signature,
+    }
   }
 
   /**
@@ -125,8 +160,6 @@ export class AlbusSwapClient {
         hostFeeDenominator: 0,
       },
       isInitialized: false,
-      swapPolicy: PublicKey.default,
-      // addLiquidityPolicy: PublicKey.default,
       poolFeeAccount: PublicKey.default,
       poolMint: PublicKey.default,
       tokenA: PublicKey.default,
@@ -134,6 +167,9 @@ export class AlbusSwapClient {
       tokenB: PublicKey.default,
       tokenBMint: PublicKey.default,
       tokenProgramId: PublicKey.default,
+      swapPolicy: PublicKey.default,
+      addLiquidityPolicy: PublicKey.default,
+      reserved: [],
     })
   }
 
@@ -143,7 +179,7 @@ export class AlbusSwapClient {
   async swap(props: SwapProps, opts?: ConfirmOptions) {
     const tx = new Transaction()
 
-    await this.handleAccount(tx, props.userDestination, props.destinationTokenMint)
+    await this.handleMissingTokenAccount(tx, props.userDestination, props.destinationTokenMint)
 
     await this.handleWrappedSol({
       tx,
@@ -186,7 +222,7 @@ export class AlbusSwapClient {
   ) {
     const tx = new Transaction()
 
-    await this.handleAccount(tx, props.destination, props.poolMint)
+    await this.handleMissingTokenAccount(tx, props.destination, props.poolMint)
 
     await this.handleWrappedSol({
       tx,
@@ -233,8 +269,8 @@ export class AlbusSwapClient {
   ) {
     const tx = new Transaction()
 
-    await this.handleAccount(tx, props.destTokenA, props.tokenAMint)
-    await this.handleAccount(tx, props.destTokenB, props.tokenBMint)
+    await this.handleMissingTokenAccount(tx, props.destTokenA, props.tokenAMint)
+    await this.handleMissingTokenAccount(tx, props.destTokenB, props.tokenBMint)
 
     tx.add(createWithdrawAllTokenTypesInstruction(
       {
@@ -268,7 +304,7 @@ export class AlbusSwapClient {
   async depositSingleTokenTypeExactAmountIn(props: DepositSingleTokenTypeExactAmountInProps, opts?: ConfirmOptions) {
     const tx = new Transaction()
 
-    await this.handleAccount(tx, props.destination, props.poolMint)
+    await this.handleMissingTokenAccount(tx, props.destination, props.poolMint)
 
     await this.handleWrappedSol({
       tx,
@@ -307,7 +343,7 @@ export class AlbusSwapClient {
   ) {
     const tx = new Transaction()
 
-    await this.handleAccount(tx, props.destination, props.destinationTokenMint)
+    await this.handleMissingTokenAccount(tx, props.destination, props.destinationTokenMint)
 
     tx.add(createWithdrawSingleTokenTypeInstruction(
       {
@@ -375,15 +411,15 @@ export class AlbusSwapClient {
       })
   }
 
-  unwrapSol(tx: Transaction, account: PublicKey, mint?: PublicKey) {
+  unwrapSol(tx: Transaction, tokenAccount: PublicKey, mint?: PublicKey) {
     if (mint && mint.toBase58() === NATIVE_MINT.toBase58()) {
       tx.add(
-        createCloseAccountInstruction(account, this.provider.publicKey, this.provider.publicKey),
+        createCloseAccountInstruction(tokenAccount, this.provider.publicKey, this.provider.publicKey),
       )
     }
   }
 
-  async handleAccount(tx: Transaction, account: PublicKey, mint?: PublicKey) {
+  async handleMissingTokenAccount(tx: Transaction, account: PublicKey, mint?: PublicKey) {
     try {
       await getAccount(this.connection, account)
     } catch (error: unknown) {
@@ -460,6 +496,10 @@ export type LoadAllProps = {
   poolMint?: PublicKeyInitData
   tokenAMint?: PublicKeyInitData
   tokenBMint?: PublicKeyInitData
+}
+
+export type CloseTokenSwapProps = {
+  tokenSwap: PublicKey
 }
 
 export type CreateTokenSwapProps = {

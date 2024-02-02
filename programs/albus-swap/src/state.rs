@@ -77,7 +77,7 @@ pub struct TokenSwap {
     /// Add liquidity policy address (Albus)
     pub add_liquidity_policy: Option<Pubkey>,
 
-    /// Reserved space
+    /// Reserved for future use
     pub _reserved: [u8; 64],
 }
 

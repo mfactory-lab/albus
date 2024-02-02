@@ -141,7 +141,6 @@ pub mod albus_swap {
         Ok(())
     }
 
-    /// Processes an [Swap](enum.Instruction.html).
     pub fn swap(ctx: Context<Swap>, amount_in: u64, minimum_amount_out: u64) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
 
@@ -305,7 +304,6 @@ pub mod albus_swap {
         Ok(())
     }
 
-    /// Processes an [DepositAllTokenTypes](enum.Instruction.html).
     pub fn deposit_all_token_types(
         ctx: Context<DepositAllTokenTypes>,
         pool_token_amount: u64,
@@ -406,7 +404,6 @@ pub mod albus_swap {
         Ok(())
     }
 
-    /// Processes an [WithdrawAllTokenTypes](enum.Instruction.html).
     pub fn withdraw_all_token_types(
         ctx: Context<WithdrawAllTokenTypes>,
         pool_token_amount: u64,
@@ -505,7 +502,6 @@ pub mod albus_swap {
         Ok(())
     }
 
-    /// Processes DepositSingleTokenTypeExactAmountIn
     pub fn deposit_single_token_type(
         ctx: Context<DepositSingleTokenType>,
         source_token_amount: u64,
@@ -598,7 +594,6 @@ pub mod albus_swap {
         Ok(())
     }
 
-    /// Processes a WithdrawSingleTokenTypeExactAmountOut.
     pub fn withdraw_single_token_type(
         ctx: Context<WithdrawSingleTokenType>,
         destination_token_amount: u64,
@@ -768,11 +763,11 @@ pub struct ClosePool<'info> {
     /// token_a user Account to credit.
     /// CHECK: safe
     #[account(mut)]
-    pub dest_token_a: AccountInfo<'info>,
+    pub dest_token_a: Account<'info, TokenAccount>,
     /// token_b user Account to credit.
     /// CHECK: safe
     #[account(mut)]
-    pub dest_token_b: AccountInfo<'info>,
+    pub dest_token_b: Account<'info, TokenAccount>,
     #[account(mut)]
     pub payer: Signer<'info>,
     /// Pool Token program id.
