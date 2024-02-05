@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.4...@albus-finance/sdk-v0.3.0-next.6) (2024-02-05)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix lodash esm error ([e58be45](https://github.com/mfactory-lab/albus/commit/e58be45fb4af8eebb0bac4d50fd70226ea878463))
+* **sdk:** fix version ([b2cb012](https://github.com/mfactory-lab/albus/commit/b2cb0124b94d340f5793ade8fefd325c8ec5eed5))
+* **sdk:** global improvements ([922462b](https://github.com/mfactory-lab/albus/commit/922462b7e0926b10c6c861e57d85a18493913bc8))
+
+## [v0.2.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.4...@albus-finance/sdk-v0.3.0-next.6) (2023-12-19)
+
 ## [0.3.0-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.3...@albus-finance/sdk-v0.3.0-next.4) (2024-01-09)
 
 
