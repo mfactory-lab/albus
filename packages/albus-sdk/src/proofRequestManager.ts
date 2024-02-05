@@ -34,7 +34,7 @@ import type {
   PublicKeyInitData,
 } from '@solana/web3.js'
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
-import chunk from 'lodash/chunk'
+import { chunk } from 'lodash-es'
 import type { TxBuilder } from './utils'
 import { BaseManager } from './base'
 import type {

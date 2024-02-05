@@ -42,7 +42,7 @@
     "@metaplex-foundation/beet-solana": "^0.4.0",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
     "@solana/web3.js": "^1.87.6",
-    "lodash": "^4.17.21"
+    "lodash-es": "^4.17.21"
   },
   "devDependencies": {
     "@metaplex-foundation/solita": "^0.20.1",

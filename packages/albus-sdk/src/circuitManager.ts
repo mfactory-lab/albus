@@ -29,7 +29,7 @@
 import * as Albus from '@albus-finance/core'
 import type { Commitment, ConfirmOptions, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { PublicKey, Transaction } from '@solana/web3.js'
-import chunk from 'lodash/chunk'
+import { chunk } from 'lodash-es'
 import { BaseManager } from './base'
 
 import {
