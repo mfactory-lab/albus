@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.0...@albus-finance/core-v0.3.6-next.1) (2024-02-05)
+
+
+### 🐞 Bug Fixes
+
+* **core:** update snarkjs version ([75c321b](https://github.com/mfactory-lab/albus/commit/75c321bed6398e541f65feb325b43a89738b500a))
+
 ## [0.3.6-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.5...@albus-finance/core-v0.3.6-next.0) (2024-02-02)
 
 
