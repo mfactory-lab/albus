@@ -37,7 +37,7 @@ import { clusterByEnv, lamportsToSol } from '@/utils'
 const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
 // eslint-disable-next-line node/prefer-global/process
-const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
+const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/albus.json`
 
 const originFactory = log.methodFactory
 log.methodFactory = function (name, lvl, logger) {

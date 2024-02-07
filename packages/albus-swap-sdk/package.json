@@ -2,7 +2,7 @@
   "name": "@albus-finance/swap-sdk",
   "version": "0.1.5-next.4",
   "description": "Albus Swap SDK",
-  "_type": "module",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",

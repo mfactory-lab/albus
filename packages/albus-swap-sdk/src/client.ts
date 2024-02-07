@@ -1,5 +1,5 @@
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import { BN } from '@coral-xyz/anchor'
+import anchor from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
 import {
@@ -25,6 +25,8 @@ import {
   createWithdrawAllTokenTypesInstruction,
   createWithdrawSingleTokenTypeInstruction, tokenSwapDiscriminator,
 } from './generated'
+
+const { BN } = anchor
 
 export class AlbusSwapClient {
   programId = PROGRAM_ID
