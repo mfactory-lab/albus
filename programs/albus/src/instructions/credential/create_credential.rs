@@ -40,12 +40,14 @@ use mpl_token_metadata::types::{PrintSupply, TokenStandard};
 pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
 
-    let balance = ctx.accounts.albus_authority.lamports();
-    let mut payer: &AccountInfo = &ctx.accounts.payer;
+    let payer: &AccountInfo = &ctx.accounts.payer;
+
+    // Albus payer
+    // let balance = ctx.accounts.albus_authority.lamports();
     // requires 0.0219862 SOL
-    if balance > 25_000_000 {
-        payer = &ctx.accounts.albus_authority;
-    }
+    // if balance > 25_000_000 {
+    //     payer = &ctx.accounts.albus_authority;
+    // }
 
     CreateV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .name(CREDENTIAL_NAME.into())
