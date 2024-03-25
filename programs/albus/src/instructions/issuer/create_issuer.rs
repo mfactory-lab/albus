@@ -37,14 +37,12 @@ pub fn handler(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()>
     let timestamp = Clock::get()?.unix_timestamp;
 
     let issuer = &mut ctx.accounts.issuer;
-
     issuer.code = data.code;
     issuer.name = data.name;
     issuer.description = data.description;
-    issuer.pubkey = data.pubkey;
-    issuer.zk_pubkey = data.zk_pubkey;
     issuer.created_at = timestamp;
-    issuer.authority = ctx.accounts.authority.key();
+    issuer.authority = data.authority;
+    issuer.zk_authority = data.zk_authority;
     issuer.bump = ctx.bumps.issuer;
 
     Ok(())
@@ -55,8 +53,8 @@ pub struct CreateIssuerData {
     pub code: String,
     pub name: String,
     pub description: String,
-    pub pubkey: Pubkey,
-    pub zk_pubkey: [u8; 64],
+    pub authority: Pubkey,
+    pub zk_authority: [u8; 64],
 }
 
 #[derive(Accounts)]

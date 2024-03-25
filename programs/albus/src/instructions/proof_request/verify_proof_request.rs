@@ -51,7 +51,7 @@ pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
             beta: circuit.vk.beta,
             gamma: circuit.vk.gamma,
             delta: circuit.vk.delta,
-            ic: circuit.vk.ic.to_vec(),
+            ic: &circuit.vk.ic,
         };
 
         Groth16Verifier::new(&proof, &req.public_inputs, &vk)
