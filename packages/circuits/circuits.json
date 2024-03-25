@@ -1,0 +1,78 @@
+{
+  "ageProof": {
+    "file": "ageProof",
+    "template": "AgeProof",
+    "params": [5, 3, 2],
+    "pubs": [
+      "timestamp",
+      "config",
+      "claimsKey",
+      "claimsProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature",
+      "trusteePublicKey"
+    ]
+  },
+  "attendanceProof": {
+    "file": "attendanceProof",
+    "template": "AttendanceProof",
+    "params": [5],
+    "pubs": [
+      "expectedEvent",
+      "expectedDateFrom",
+      "expectedDateTo",
+      "claimsKey",
+      "claimsProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature",
+      "trusteePublicKey"
+    ]
+  },
+  "kyc": {
+    "file": "kyc",
+    "template": "Kyc",
+    "params": [5, 2, 3, 2],
+    "pubs": [
+      "config",
+      "timestamp",
+      "countryLookup",
+      "claimsKey",
+      "claimsProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature",
+      "trusteePublicKey"
+    ]
+  },
+  "livenessProof": {
+    "file": "livenessProof",
+    "template": "LivenessProof",
+    "params": [4, 1],
+    "pubs": [
+      "timestamp",
+      "expectedType",
+      "claimsKey",
+      "claimsProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature"
+    ]
+  },
+  "residenceProof": {
+    "file": "residenceProof",
+    "template": "ResidenceProof",
+    "params": [5, 2],
+    "pubs": [
+      "timestamp",
+      "selectionMode",
+      "countryLookup",
+      "claimsKey",
+      "claimsProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature"
+    ]
+  }
+}

@@ -3,26 +3,39 @@ pragma circom 2.1.6;
 include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/eddsaposeidon.circom";
 include "circomlib/circuits/babyjub.circom";
+include "utils/age.circom";
 include "utils/country.circom";
 include "utils/date.circom";
 include "utils/poseidon.circom";
-include "ageProof.circom";
-include "encryptionProof.circom";
-include "merkleProof.circom";
+include "utils/encryptionProof.circom";
+include "utils/merkleProof.circom";
 
-template Main(credentialDepth, shamirN, shamirK) {
+template Config() {
+  signal input in;
+  signal output minAge;
+  signal output maxAge;
+  signal output countrySelectionMode; // 1 - inclusion, 0 - exclusion
+
+  var bits[256] = Num2Bits(256)(in);
+  minAge <== Bin2Num(256, 8, 0)(bits);
+  maxAge <== Bin2Num(256, 8, 8)(bits);
+  countrySelectionMode <== Bin2Num(256, 8, 16)(bits);
+}
+
+template Kyc(credentialDepth, countryLookupSize, shamirN, shamirK) {
   var totalClaims = 6;
 
+  signal input config;
   signal input timestamp;
-  signal input config[2];
+  signal input countryLookup[countryLookupSize]; // 16 countries per lookup
 
   // Claims
-  signal input meta_validUntil; // timestamp
   signal input givenName; // John
   signal input familyName; // Doe
   signal input birthDate; // 2001-01-02
-  signal input country; // USA
+  signal input country; // US
   signal input docNumber; // EF122345
+  signal input meta_validUntil; // timestamp
 
   signal input claimsKey;
   signal input claimsProof[totalClaims][credentialDepth];
@@ -39,8 +52,18 @@ template Main(credentialDepth, shamirN, shamirK) {
   signal output encryptedData[adjustToMultiple(totalClaims-1, 3) + 1];
   // Encrypted secret shares
   signal output encryptedShare[shamirN][4];
-//   // User public key, derived from `userPrivateKey`
-//   signal output userPublicKey[2];
+
+  // User public key, derived from `userPrivateKey`
+  signal output userPublicKey[2];
+
+  // Configuration
+  component cfg = Config();
+  cfg.in <== config;
+
+  // Extracts the user public key from private key
+  component upk = BabyPbk();
+  upk.in <== userPrivateKey;
+  userPublicKey <== [upk.Ax, upk.Ay];
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();
@@ -64,11 +87,6 @@ template Main(credentialDepth, shamirN, shamirK) {
   var isNotExpired = LessThan(32)([timestamp, validUntil]);
   isNotExpired * validUntil === validUntil;
 
-//   // Extracts the user public key from private key
-//   component upk = BabyPbk();
-//   upk.in <== userPrivateKey;
-//   userPublicKey <== [upk.Ax, upk.Ay];
-
   // Derive secret key
   var secret = Poseidon(3)([userPrivateKey, credentialRoot, timestamp]);
 
@@ -83,44 +101,35 @@ template Main(credentialDepth, shamirN, shamirK) {
   encryptedData <== enc.encryptedData;
   encryptedShare <== enc.encryptedShare;
 
-  // Configuration
-  component cfg = Config();
-  cfg.in <== config[0];
-
   // Age validation
-  component age = AgeProof();
+  component age = AgeVerifier();
   age.currentDate <-- timestampToDate(timestamp);
   age.birthDate <== ParseDate()(birthDate);
   age.minAge <== cfg.minAge;
   age.maxAge <== cfg.maxAge;
+
+  log(age.currentDate[0], age.currentDate[1], age.currentDate[2]);
+  log(age.birthDate[0], age.birthDate[1], age.birthDate[2]);
+  log(cfg.minAge);
+  log(cfg.maxAge);
+
   age.valid === 1;
 
   // Country validation
-  component countryProof = CountryProof(1);
-  countryProof.selectionMode <== cfg.selectionMode;
-  countryProof.lookup <== [config[1]];
+  component countryProof = CountryProof(countryLookupSize);
+  countryProof.selectionMode <== cfg.countrySelectionMode;
+  countryProof.lookup <== countryLookup;
   countryProof.country <== country;
 }
 
-// The policy configuration
-template Config() {
-  signal input in;
-  signal output minAge;
-  signal output maxAge;
-  signal output selectionMode;
-
-  var bits[256] = Num2Bits(256)(in);
-  minAge <== Bin2Num(256, 8, 0)(bits);
-  maxAge <== Bin2Num(256, 8, 8)(bits);
-  selectionMode <== Bin2Num(256, 8, 16)(bits);
-}
-
-component main{public [
-  timestamp,
-  config,
-  claimsKey,
-  claimsProof,
-  issuerPk,
-  issuerSignature,
-  trusteePublicKey
-]} = Main(5, 3, 2);
+// component main{public [
+//   config,
+//   timestamp,
+//   countryLookup,
+//   claimsKey,
+//   claimsProof,
+//   credentialRoot,
+//   issuerPk,
+//   issuerSignature,
+//   trusteePublicKey
+// ]} = Main(5, 2, 3, 2);

@@ -1,7 +1,40 @@
 {
   "name": "@lbus-finance/circuits",
+  "version": "0.0.1",
   "private": true,
+  "description": "Circuits for Albus",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/circuits"
+  },
+  "sideEffects": false,
+  "files": [
+    "!circom/main",
+    "!circom/test",
+    "LICENSE",
+    "README.md",
+    "circuits/**/*.circom"
+  ],
+  "scripts": {
+    "circom:compile": "circomkit compile",
+    "circom:setup": "circomkit setup",
+    "release": "release-it",
+    "release:ci": "release-it --ci -VV",
+    "release:dry": "release-it --ci --dry-run",
+    "release:pre": "release-it --preRelease=next",
+    "test": "vitest"
+  },
   "dependencies": {
+    "@albus-finance/core": "workspace:^",
     "circomlib": "^2.0.5"
+  },
+  "devDependencies": {
+    "circomkit": "0.0.24",
+    "release-it-config": "workspace:^"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

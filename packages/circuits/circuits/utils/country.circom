@@ -1,12 +1,13 @@
 pragma circom 2.1.6;
 
-include "circomlib/circuits/comparators.circom";
+include "array.circom";
 include "binary.circom";
 
 template CountryProof(n) {
   signal input lookup[n];
   signal input country; // ISO2
   signal input selectionMode; // 1 - inclusion, 0 - exclusion
+
   component res = IN(n * 16);
   res.value <== CountryLookup(n)(lookup);
   res.in <== country;
@@ -22,29 +23,6 @@ template CountryLookup(n) {
       out[i * 16 + j] <== Bin2Num(256, 16, j*16)(bits);
     }
   }
-}
-
-template IN (n) {
-  signal input in;
-  signal input value[n];
-  signal output out;
-
-  component eq[n];
-  signal count[n+1];
-  count[0] <== 0;
-
-  for (var i=0; i<n; i++) {
-    eq[i] = IsEqual();
-    eq[i].in[0] <== in;
-    eq[i].in[1] <== value[i];
-    count[i+1] <== count[i] + eq[i].out;
-  }
-
-  component gt = GreaterThan(252);
-  gt.in[0] <== count[n];
-  gt.in[1] <== 0;
-
-  out <== gt.out; // 1 - if in signal in the list, 0 - if it is not
 }
 
 // template GetCountryIndex() {

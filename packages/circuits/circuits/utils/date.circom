@@ -7,11 +7,11 @@ include "string.circom";
  * Convert date `2022-01-01` to date array `[2022, 01, 01]`
  */
 template ParseDate() {
-  signal input date;
+  signal input in;
   signal output out[3];
 
   component bits = Num2Bits(256);
-  bits.in <== date;
+  bits.in <== in;
 
   var y = BitsToAscii(48, 4)(bits.out);
 

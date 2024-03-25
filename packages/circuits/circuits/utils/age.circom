@@ -2,9 +2,9 @@ pragma circom 2.1.6;
 
 include "circomlib/circuits/gates.circom";
 include "circomlib/circuits/comparators.circom";
-include "utils/date.circom";
+include "date.circom";
 
-template AgeProof() {
+template AgeVerifier() {
   signal input currentDate[3]; // [Y,m,d]
   signal input birthDate[3]; // [Y,m,d]
   signal input minAge;

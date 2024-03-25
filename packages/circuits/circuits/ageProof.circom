@@ -3,31 +3,35 @@ pragma circom 2.1.6;
 include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/eddsaposeidon.circom";
 include "circomlib/circuits/babyjub.circom";
+include "utils/age.circom";
+include "utils/binary.circom";
 include "utils/date.circom";
 include "utils/poseidon.circom";
-include "ageProof.circom";
-include "encryptionProof.circom";
-include "merkleProof.circom";
+include "utils/encryptionProof.circom";
+include "utils/merkleProof.circom";
 
-template AgePolicy(credentialDepth, shamirN, shamirK) {
-  // Current timestamp
+template Config() {
+  signal input in;
+  signal output minAge;
+  signal output maxAge;
+
+  var bits[256] = Num2Bits(256)(in);
+  minAge <== Bin2Num(256, 8, 0)(bits);
+  maxAge <== Bin2Num(256, 8, 8)(bits);
+}
+
+template AgeProof(credentialDepth, shamirN, shamirK) {
   signal input timestamp; // unix timestamp
+  signal input config;
 
-  // Policy params
-  signal input minAge;
-  signal input maxAge;
+  // Claims
+  signal input birthDate; // 2001-01-02
+  signal input meta_validUntil; // timestamp
+
+  signal input claimsKey;
+  signal input claimsProof[2][credentialDepth];
 
   signal input credentialRoot;
-
-  // Credential expiration date
-  signal input meta_validUntil; // unix timestamp
-  signal input meta_validUntilKey;
-  signal input meta_validUntilProof[credentialDepth];
-
-  // Birth date
-  signal input birthDate; // Ymd format. Example: 20010101
-  signal input birthDateKey;
-  signal input birthDateProof[credentialDepth];
 
   signal input issuerPk[2]; // [Ax, Ay]
   signal input issuerSignature[3]; // [R8x, R8y, S]
@@ -42,12 +46,19 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   // User public key, derived from `userPrivateKey`
   signal output userPublicKey[2];
 
-  // Expiration date check
-  component isExpValid = LessThan(32);
-  isExpValid.in[0] <== timestamp;
-  isExpValid.in[1] <== meta_validUntil;
-  // If the expiration date is zero, the validation should be skipped
-  isExpValid.out * meta_validUntil === meta_validUntil;
+  // Configuration
+  component cfg = Config();
+  cfg.in <== config;
+
+  // Extracts the user public key from private key
+  component upk = BabyPbk();
+  upk.in <== userPrivateKey;
+  userPublicKey <== [upk.Ax, upk.Ay];
+
+  // Expiration check
+  var validUntil = Str2Timestamp()(meta_validUntil);
+  var isNotExpired = LessThan(32)([timestamp, validUntil]);
+  isNotExpired * validUntil === validUntil;
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();
@@ -62,14 +73,9 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   // Data integrity check
   component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
-  mtp.siblings <== [birthDateProof, meta_validUntilProof];
-  mtp.key <== [birthDateKey, meta_validUntilKey];
   mtp.value <== [birthDate, meta_validUntil];
-
-  // Extracts the user public key from private key
-  component upk = BabyPbk();
-  upk.in <== userPrivateKey;
-  userPublicKey <== [upk.Ax, upk.Ay];
+  mtp.key <== Num2Bytes(2)(claimsKey);
+  mtp.siblings <== claimsProof;
 
   // Derive secret key
   component secret = Poseidon(3);
@@ -87,25 +93,10 @@ template AgePolicy(credentialDepth, shamirN, shamirK) {
   encryptedShare <== enc.encryptedShare;
 
   // Age validation
-  component age = AgeProof();
+  component age = AgeVerifier();
   age.currentDate <-- timestampToDate(timestamp);
-  age.birthDate <-- numToDate(birthDate);
-  age.minAge <== minAge;
-  age.maxAge <== maxAge;
+  age.birthDate <== ParseDate()(birthDate);
+  age.minAge <== cfg.minAge;
+  age.maxAge <== cfg.maxAge;
   age.valid === 1;
 }
-
-component main{public [
-  timestamp,
-  minAge,
-  maxAge,
-  credentialRoot,
-//  meta_validUntil,
-  meta_validUntilKey,
-  meta_validUntilProof,
-  birthDateKey,
-  birthDateProof,
-  issuerPk,
-  issuerSignature,
-  trusteePublicKey
-]} = AgePolicy(5, 3, 2);

@@ -26,16 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-declare module 'circom_tester' {
-  type WasmTester = {
-    symbols: { [key: string]: { labelIdx: number, varIdx: number, componentIdx: number } }
-    calculateWitness<T>(witness: T, sanityCheck?: boolean): Promise<any>
-    checkConstraints<T>(witness: T): Promise<any>
-    assertOut(actualOut: any, expectedOut: unknown): Promise<void>
-    loadConstraints(): Promise<void>
-    loadSymbols(): Promise<void>
-    release(): Promise<void>
-    getDecoratedOutput<T>(witness: T): Promise<string>
-  }
-  function wasm(filename: string, opts?: NonNullable<unknown>): Promise<WasmTester>
-}
+import { pluginViteConfig } from '../../vite.config'
+
+export default pluginViteConfig(import.meta.url)

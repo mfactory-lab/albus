@@ -1,8 +1,8 @@
 pragma circom 2.1.6;
 
-include "utils/ecdh.circom";
-include "utils/poseidon.circom";
-include "utils/shamirSecretSharing.circom";
+include "ecdh.circom";
+include "poseidon.circom";
+include "shamirSecretSharing.circom";
 
 template EncryptionProof(N, shamirN, shamirK) {
   signal input userPrivateKey;
