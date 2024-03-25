@@ -259,7 +259,10 @@ export class ProofRequestManager extends BaseManager {
   }
 
   /**
-   * Verify a proof based on the provided properties.
+   * Verify the proof request.
+   *
+   * @param {VerifyProps} props - the props containing the proof request and circuit
+   * @return {Promise<boolean>} a promise that resolves to a boolean indicating the verification result
    */
   async verify(props: VerifyProps): Promise<boolean> {
     const proofRequest = await this.load(props.proofRequest)
@@ -273,6 +276,9 @@ export class ProofRequestManager extends BaseManager {
     return Albus.zkp.verifyProof({ vk, proof, publicInput })
   }
 
+  /**
+   * Verify the proof request on-chain.
+   */
   async verifyOnChain(props: VerifyOnChainProps, opts?: ConfirmOptions) {
     const authority = this.provider.publicKey
     const proofRequest = new PublicKey(props.proofRequest)
@@ -282,7 +288,7 @@ export class ProofRequestManager extends BaseManager {
 
     txBuilder.addTransaction(
       new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: props.computeUnits ?? 400_000 }))
         // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 220 * 1024 }))
         .add(createVerifyProofRequestInstruction({
           proofRequest,
@@ -292,7 +298,6 @@ export class ProofRequestManager extends BaseManager {
     )
 
     if (!props.txBuilder) {
-      console.log('sending...')
       const signature = await txBuilder.sendAndConfirm(opts)
       return { signature }
     }
@@ -301,12 +306,13 @@ export class ProofRequestManager extends BaseManager {
   /**
    * Decrypts data using the provided secret and signals.
    */
-  decryptData(props: { secret: bigint, signals: Record<string, any> }) {
+  decryptData(props: DecryptProofRequestDataProps) {
     const { secret, signals } = props
     const nonce = signals.timestamp as bigint
     const encryptedData = (signals.encryptedData ?? []) as bigint[]
+    const decryptLength = encryptedData.length - 1 - (encryptedData.length - 1 % 3)
 
-    const data = Albus.crypto.Poseidon.decrypt(encryptedData, [secret, secret], 1, nonce)
+    const data = Albus.crypto.Poseidon.decrypt(encryptedData, [secret, secret], decryptLength, nonce)
 
     console.log(data)
 
@@ -622,6 +628,7 @@ export type VerifyOnChainProps = {
   proofRequest: PublicKeyInitData
   circuit: PublicKeyInitData
   txBuilder?: TxBuilder
+  computeUnits?: number
 }
 
 export type VerifyProps = {
@@ -667,7 +674,13 @@ export type ChangeStatus = {
   proofRequest: PublicKeyInitData
   status: ProofRequestStatus
 }
-type GenerateVerifiablePresentationProps = {
+
+export type GenerateVerifiablePresentationProps = {
   proofRequest: PublicKeyInitData
   userPrivateKey: Uint8Array
+}
+
+export type DecryptProofRequestDataProps = {
+  secret: bigint
+  signals: Record<string, any>
 }

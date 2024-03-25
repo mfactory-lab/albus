@@ -34,7 +34,7 @@ import type {
   PublicKeyInitData,
   Signer,
 } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 
 import {
@@ -153,17 +153,12 @@ export class IssuerManager extends BaseManager {
       }))
   }
 
-  /**
-   * Create a new issuer
-   * @param props
-   * @param opts
-   */
-  async create(props: CreateIssuerProps, opts?: ConfirmOptions) {
+  createIx(props: CreateIssuerProps) {
     const authority = this.provider.publicKey
-    const [issuer] = this.pda.issuer(props.code)
+    const [address] = this.pda.issuer(props.code)
 
-    const instruction = createCreateIssuerInstruction({
-      issuer,
+    const ix = createCreateIssuerInstruction({
+      issuer: address,
       authority,
     },
     {
@@ -176,38 +171,47 @@ export class IssuerManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      address,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Create a new issuer.
+   */
+  async create(props: CreateIssuerProps, opts?: ConfirmOptions) {
+    const { instructions, address } = this.createIx(props)
     try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return {
-        address: issuer,
-        signature,
-      }
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+      return { address, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
   }
 
-  /**
-   * Delete issuer
-   * @param props
-   * @param opts
-   */
-  async delete(props: DeleteIssuerProps, opts?: ConfirmOptions) {
+  deleteIx(props: DeleteIssuerProps) {
     const authority = this.provider.publicKey
-    const instruction = createDeleteIssuerInstruction({
+    const ix = createDeleteIssuerInstruction({
       issuer: new PublicKey(props.issuer),
       authority,
     }, this.programId)
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete an existing issuer.
+   */
+  async delete(props: DeleteIssuerProps, opts?: ConfirmOptions) {
+    const { instructions } = this.deleteIx(props)
     try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -215,9 +219,7 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Convert issuer `babyjub` pubkey to bytes
-   * @param pubkey
-   * @private
+   * Convert issuer zk-pubkey to bytes.
    */
   private zkPubkeyToBytes(pubkey: [bigint, bigint]) {
     return pubkey.reduce((bytes: number[], i) => {

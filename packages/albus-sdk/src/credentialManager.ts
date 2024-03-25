@@ -95,10 +95,7 @@ export class CredentialManager extends BaseManager {
     }
   }
 
-  /**
-   * Create new Credential NFT.
-   */
-  async create(props?: CreateCredentialProps, opts?: TxOpts) {
+  createIx(props?: CreateCredentialProps) {
     const mint = Keypair.generate()
     const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
     const tokenAccount = getAssociatedTokenAddress(mint.publicKey, authority)
@@ -115,9 +112,21 @@ export class CredentialManager extends BaseManager {
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, this.programId)
 
+    return {
+      mint,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Create new Credential NFT.
+   */
+  async create(props?: CreateCredentialProps, opts?: TxOpts) {
+    const { mint, instructions } = this.createIx(props)
+
     const builder = this.txBuilder
       .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
-      .addInstruction(ix)
+      .addInstruction(...instructions)
       .addSigner(mint)
 
     if (opts?.priorityFee) {
@@ -133,10 +142,7 @@ export class CredentialManager extends BaseManager {
     return { mintAddress: mint.publicKey, signature }
   }
 
-  /**
-   * Update credential data.
-   */
-  async update(props: UpdateCredentialProps, opts?: TxOpts) {
+  async updateIx(props: UpdateCredentialProps) {
     // const owner = new PublicKey(props.owner)
     // const tokenAccount = getAssociatedTokenAddress(mint, owner)
 
@@ -172,8 +178,19 @@ export class CredentialManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Update credential data.
+   */
+  async update(props: UpdateCredentialProps, opts?: TxOpts) {
+    const { instructions } = await this.updateIx(props)
+
     const builder = this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
 
     if (opts?.priorityFee) {
       builder.priorityFee(opts.priorityFee)
@@ -184,10 +201,7 @@ export class CredentialManager extends BaseManager {
     return { signature }
   }
 
-  /**
-   * Delete credential and burn credential NFT.
-   */
-  async delete(props: DeleteCredentialProps, opts?: TxOpts) {
+  deleteIx(props: DeleteCredentialProps) {
     const mint = new PublicKey(props.mint)
     const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
     const tokenAccount = getAssociatedTokenAddress(mint, authority)
@@ -203,7 +217,19 @@ export class CredentialManager extends BaseManager {
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, this.programId)
 
-    const builder = this.txBuilder.addInstruction(ix)
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete credential and burn credential NFT.
+   */
+  async delete(props: DeleteCredentialProps, opts?: TxOpts) {
+    const { instructions } = this.deleteIx(props)
+
+    const builder = this.txBuilder
+      .addInstruction(...instructions)
 
     if (opts?.priorityFee) {
       builder.priorityFee(opts.priorityFee)

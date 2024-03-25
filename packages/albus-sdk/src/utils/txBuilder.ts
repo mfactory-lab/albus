@@ -38,8 +38,10 @@ export class TxBuilder {
   }
 
   priorityFee(microLamports: number | bigint) {
-    for (const { tx } of this.txs) {
-      tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: BigInt(microLamports) }))
+    if (microLamports > 0) {
+      for (const { tx } of this.txs) {
+        tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: BigInt(microLamports) }))
+      }
     }
     return this
   }
@@ -63,8 +65,6 @@ export class TxBuilder {
         this.txs[0]!.tx.feePayer = feePayer.publicKey
         this.txs[0]!.signers?.push(feePayer)
       }
-
-      console.log(this.txs)
       return await this.provider.sendAndConfirm(this.txs[0]!.tx, this.txs[0]!.signers, {
         ...this.provider.opts,
         ...opts,

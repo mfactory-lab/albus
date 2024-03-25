@@ -77,6 +77,9 @@ export class AlbusIssuerClient {
     return this.client.credentialSpec.find(props)
   }
 
+  /**
+   * Load credential request with the given properties.
+   */
   loadCredentialRequest(props: PublicKeyInitData) {
     return this.client.credentialRequest.load(props)
   }

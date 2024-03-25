@@ -63,13 +63,10 @@ export class CredentialSpecManager extends BaseManager {
       .map(acc => CredentialSpec.fromAccountInfo(acc!)[0])
   }
 
-  /**
-   * Create new Credential Spec
-   */
-  async create(props: CreateCredentialSpecProps, opts?: TxOpts) {
+  async createIx(props: CreateCredentialSpecProps) {
     const authority = this.provider.publicKey
     const issuer = new PublicKey(props.issuer)
-    const [credentialSpec] = this.pda.credentialSpec(issuer, props.name)
+    const [address] = this.pda.credentialSpec(issuer, props.name)
 
     if (props.name.length > 32) {
       throw new Error(`Credential spec name length must be less than 32 bytes`)
@@ -77,7 +74,7 @@ export class CredentialSpecManager extends BaseManager {
 
     const ix = createCreateCredentialSpecInstruction({
       authority,
-      credentialSpec,
+      credentialSpec: address,
       issuer,
     }, {
       data: {
@@ -86,8 +83,20 @@ export class CredentialSpecManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      address,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Create new Credential Spec
+   */
+  async create(props: CreateCredentialSpecProps, opts?: TxOpts) {
+    const { address, instructions } = await this.createIx(props)
+
     const builder = this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
 
     if (opts?.priorityFee) {
       builder.priorityFee(opts.priorityFee)
@@ -95,25 +104,34 @@ export class CredentialSpecManager extends BaseManager {
 
     const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
 
-    return { signature, address: credentialSpec }
+    return { address, signature }
+  }
+
+  deleteIx(props: DeleteCredentialSpecProps) {
+    const authority = this.provider.publicKey
+    const issuer = new PublicKey(props.issuer)
+    const [address] = this.pda.credentialSpec(issuer, props.name)
+
+    const ix = createDeleteCredentialSpecInstruction({
+      authority,
+      credentialSpec: address,
+      issuer,
+    }, this.programId)
+
+    return {
+      address,
+      instructions: [ix],
+    }
   }
 
   /**
    * Delete Credential Spec
    */
   async delete(props: DeleteCredentialSpecProps, opts?: TxOpts) {
-    const authority = this.provider.publicKey
-    const issuer = new PublicKey(props.issuer)
-    const [credentialSpec] = this.pda.credentialSpec(issuer, props.name)
-
-    const ix = createDeleteCredentialSpecInstruction({
-      authority,
-      credentialSpec,
-      issuer,
-    }, this.programId)
+    const { instructions } = this.deleteIx(props)
 
     const builder = this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
 
     if (opts?.priorityFee) {
       builder.priorityFee(opts.priorityFee)
@@ -153,6 +171,10 @@ export class CredentialSpecManager extends BaseManager {
           data: props.noData ? null : CredentialSpec.fromAccountInfo(acc.account)[0],
         }
       })
+  }
+
+  async validate() {
+
   }
 }
 

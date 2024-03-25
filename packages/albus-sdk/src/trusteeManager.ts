@@ -112,14 +112,12 @@ export class TrusteeManager extends BaseManager {
       })
   }
 
-  /**
-   * Add new trustee
-   */
-  async create(props: CreateTrusteeProps, opts?: ConfirmOptions) {
+  createIx(props: CreateTrusteeProps) {
     const authority = this.provider.publicKey
-    const [trustee] = this.pda.trustee(props.key)
+    const [address] = this.pda.trustee(props.key)
+
     const ix = createCreateTrusteeInstruction({
-      trustee,
+      trustee: address,
       authority,
     }, {
       data: {
@@ -131,22 +129,31 @@ export class TrusteeManager extends BaseManager {
       },
     }, this.programId)
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts)
-
-    return { address: trustee, signature }
+    return {
+      address,
+      instructions: [ix],
+    }
   }
 
   /**
-   * Update trustee
+   * Add new trustee
    */
-  async update(props: UpdateTrusteeProps, opts?: ConfirmOptions) {
+  async create(props: CreateTrusteeProps, opts?: ConfirmOptions) {
+    const { address, instructions } = this.createIx(props)
+
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+
+    return { address, signature }
+  }
+
+  updateIx(props: UpdateTrusteeProps) {
     const authority = this.provider.publicKey
-    const [trustee] = this.pda.trustee(props.key)
+    const [address] = this.pda.trustee(props.key)
 
     const ix = createUpdateTrusteeInstruction({
-      trustee,
+      trustee: address,
       authority,
     }, {
       data: {
@@ -157,45 +164,77 @@ export class TrusteeManager extends BaseManager {
       },
     }, this.programId)
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts)
-
-    return { address: trustee, signature }
+    return {
+      address,
+      instructions: [ix],
+    }
   }
 
   /**
-   * Verify trustee
+   * Update trustee
    */
-  async verify(trustee: PublicKeyInitData, opts?: ConfirmOptions) {
+  async update(props: UpdateTrusteeProps, opts?: ConfirmOptions) {
+    const { address, instructions } = this.updateIx(props)
+
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+
+    return { address, signature }
+  }
+
+  verifyIx(trustee: PublicKeyInitData) {
     const authority = this.provider.publicKey
     const ix = createVerifyTrusteeInstruction({
       trustee: new PublicKey(trustee),
       authority,
     }, this.programId)
 
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Verify trustee
+   */
+  async verify(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+    const { instructions } = this.verifyIx(addr)
+
     const signature = await this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
       .sendAndConfirm(opts)
 
     return { signature }
   }
 
-  /**
-   * Delete trustee
-   */
-  async delete(trustee: PublicKeyInitData, opts?: ConfirmOptions) {
+  deleteIx(addr: PublicKeyInitData) {
     const authority = this.provider.publicKey
     const ix = createDeleteTrusteeInstruction({
-      trustee: new PublicKey(trustee),
+      trustee: new PublicKey(addr),
       authority,
     }, this.programId)
 
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete trustee
+   */
+  async delete(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+    const { instructions } = this.deleteIx(addr)
+
     const signature = await this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
       .sendAndConfirm(opts)
 
     return { signature }
+  }
+
+  async deleteByKeyIx(key: ArrayLike<number>) {
+    return this.deleteIx(this.pda.trustee(key)[0])
   }
 
   async deleteByKey(key: ArrayLike<number>, opts?: ConfirmOptions) {

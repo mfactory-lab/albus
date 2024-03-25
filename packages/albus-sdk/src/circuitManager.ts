@@ -27,8 +27,14 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type { Commitment, ConfirmOptions, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import type {
+  Commitment,
+  ConfirmOptions,
+  PublicKeyInitData,
+  TransactionInstruction,
+} from '@solana/web3.js'
+import {
+  PublicKey, Transaction } from '@solana/web3.js'
 import { chunk } from 'lodash-es'
 import { BaseManager } from './base'
 
@@ -42,6 +48,8 @@ import {
 } from './generated'
 
 export class CircuitManager extends BaseManager {
+  traceNamespace = 'CircuitManager'
+
   /**
    * Load circuit by {@link addr}
    * @param addr
@@ -94,17 +102,12 @@ export class CircuitManager extends BaseManager {
       }, new Map<string, Circuit>())
   }
 
-  /**
-   * Create a new circuit
-   * @param props
-   * @param opts
-   */
-  async create(props: CreateCircuitProps, opts?: ConfirmOptions) {
+  createIx(props: CreateCircuitProps) {
     const authority = this.provider.publicKey
-    const [circuit] = this.pda.circuit(props.code)
+    const [address] = this.pda.circuit(props.code)
 
-    const instruction = createCreateCircuitInstruction({
-      circuit,
+    const ix = createCreateCircuitInstruction({
+      circuit: address,
       authority,
     }, {
       data: {
@@ -119,28 +122,34 @@ export class CircuitManager extends BaseManager {
       },
     }, this.programId)
 
-    try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature, address: circuit }
-    } catch (e: any) {
-      this.trace('create', e)
-      throw errorFromCode(e.code) ?? e
+    return {
+      address,
+      instructions: [ix],
     }
   }
 
   /**
-   * Update circuit verification key
+   * Create a new circuit
    * @param props
    * @param opts
    */
-  async updateVk(props: UpdateCircuitVkProps, opts?: ConfirmOptions) {
+  async create(props: CreateCircuitProps, opts?: ConfirmOptions) {
+    const { address, instructions } = this.createIx(props)
+    try {
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+      return { signature, address }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  updateVkIx(props: UpdateCircuitVkProps) {
     const authority = this.provider.publicKey
     const [circuit] = this.pda.circuit(props.code)
 
+    // TODO: refactory
     const icFirstSize = 8
     const icChunkSize = 15
     const vk = Albus.zkp.encodeVerifyingKey(props.vk)
@@ -178,18 +187,39 @@ export class CircuitManager extends BaseManager {
       }
     }
 
+    return {
+      instructions,
+    }
+  }
+
+  /**
+   * Update circuit verification key
+   * @param props
+   * @param opts
+   */
+  async updateVk(props: UpdateCircuitVkProps, opts?: ConfirmOptions) {
+    const { instructions } = this.updateVkIx(props)
+    const txBuilder = this.txBuilder
+    for (const ix of instructions) {
+      txBuilder.addTransaction(new Transaction().add(ix))
+    }
     try {
-      const signatures = await this.provider.sendAll(
-        instructions.map(ix => ({ tx: new Transaction().add(ix) })),
-        {
-          ...this.provider.opts,
-          ...opts,
-        },
-      )
+      const signatures = await txBuilder.sendAll(opts)
       return { signatures }
     } catch (e: any) {
-      console.log(e)
       throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  deleteByIdIx(addr: PublicKeyInitData) {
+    const authority = this.provider.publicKey
+    const ix = createDeleteCircuitInstruction({
+      circuit: new PublicKey(addr),
+      authority,
+    }, this.programId)
+
+    return {
+      instructions: [ix],
     }
   }
 
@@ -199,18 +229,13 @@ export class CircuitManager extends BaseManager {
    * @param opts
    */
   async deleteById(addr: PublicKeyInitData, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
-    const instruction = createDeleteCircuitInstruction({
-      circuit: new PublicKey(addr),
-      authority,
-    }, this.programId)
+    const { instructions } = this.deleteByIdIx(addr)
 
     try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e

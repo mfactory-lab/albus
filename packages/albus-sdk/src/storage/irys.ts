@@ -63,10 +63,10 @@ export type IrysWalletAdapter = {
 }
 
 const ARWEAVE_BASE_URL = 'https://arweave.net'
-const MIN_WITHDRAW_BALANCE = 5000
-
 const IRYS_DEVNET = 'https://devnet.irys.xyz'
 const IRYS_MAINNET = 'https://node1.irys.xyz'
+
+const MIN_WITHDRAW_BALANCE = 5000
 
 /// Size of irys transaction header
 const HEADER_SIZE = 2_000
@@ -150,7 +150,7 @@ export class IrysStorageDriver implements StorageDriver {
     return balance.toNumber()
   }
 
-  async fund(amount: number, skipBalanceCheck = false): Promise<void> {
+  async fund(amount: number | BigNumber, skipBalanceCheck = false): Promise<void> {
     const irys = await this.irys()
     let toFund = new BigNumber(amount)
 
@@ -167,7 +167,7 @@ export class IrysStorageDriver implements StorageDriver {
     }
 
     // TODO: Catch errors and wrap in irysErrors.
-    await irys.fund(toFund)
+    await irys.fund(toFund.integerValue())
   }
 
   async withdrawAll(): Promise<void> {

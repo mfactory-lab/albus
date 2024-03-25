@@ -63,19 +63,16 @@ export class CredentialRequestManager extends BaseManager {
       .map(acc => CredentialRequest.fromAccountInfo(acc!)[0])
   }
 
-  /**
-   * Create new Credential Request
-   */
-  async create(props: CreateCredentialRequestProps, opts?: TxOpts) {
+  createIx(props: CreateCredentialRequestProps) {
     const authority = this.provider.publicKey
     const issuer = new PublicKey(props.issuer)
     const credentialMint = new PublicKey(props.mint)
     const credentialToken = getAssociatedTokenAddress(credentialMint, authority)
     const [credentialSpec] = this.pda.credentialSpec(issuer, props.specId)
-    const [credentialRequest] = this.pda.credentialRequest(credentialSpec, authority)
+    const [address] = this.pda.credentialRequest(credentialSpec, authority)
 
     const ix = createRequestCredentialInstruction({
-      credentialRequest,
+      credentialRequest: address,
       credentialSpec,
       credentialMint,
       credentialToken,
@@ -87,8 +84,20 @@ export class CredentialRequestManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      address,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Create new Credential Request.
+   */
+  async create(props: CreateCredentialRequestProps, opts?: TxOpts) {
+    const { address, instructions } = this.createIx(props)
+
     const builder = this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
 
     if (opts?.priorityFee) {
       builder.priorityFee(opts.priorityFee)
@@ -96,7 +105,7 @@ export class CredentialRequestManager extends BaseManager {
 
     const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
 
-    return { address: credentialRequest, signature }
+    return { address, signature }
   }
 
   /**
@@ -140,6 +149,10 @@ export class CredentialRequestManager extends BaseManager {
           data: props.noData ? null : CredentialRequest.fromAccountInfo(acc.account)[0],
         }
       })
+  }
+
+  validate() {
+    //
   }
 }
 

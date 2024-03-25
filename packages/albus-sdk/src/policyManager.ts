@@ -100,22 +100,14 @@ export class PolicyManager extends BaseManager {
     })
   }
 
-  /**
-   * Add a new policy with the specified properties.
-   *
-   * @param {CreatePolicyProps} props - The properties for creating the policy.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{ signature:string, address: PublicKey }>} A Promise that resolves to the result of creating the policy, including its signature and address.
-   * @throws {Error} Throws an error if there is an issue creating the policy or if the transaction fails to confirm.
-   */
-  async create(props: CreatePolicyProps, opts?: ConfirmOptions) {
+  createIx(props: CreatePolicyProps) {
     const authority = this.provider.publicKey
     const [circuit] = this.pda.circuit(props.circuitCode)
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
-    const [policy] = this.pda.policy(serviceProvider, props.code)
+    const [address] = this.pda.policy(serviceProvider, props.code)
 
     const ix = createCreatePolicyInstruction({
-      policy,
+      policy: address,
       circuit,
       serviceProvider,
       authority,
@@ -130,28 +122,30 @@ export class PolicyManager extends BaseManager {
       },
     }, this.programId)
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts)
-
-    return { address: policy, signature }
+    return {
+      address,
+      instructions: [ix],
+    }
   }
 
   /**
-   * Update a policy with the specified properties.
-   *
-   * @param {UpdatePolicyProps} props - The properties for creating the policy.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{ signature:string, address: PublicKey }>} A Promise that resolves to the result of creating the policy, including its signature and address.
-   * @throws {Error} Throws an error if there is an issue creating the policy or if the transaction fails to confirm.
+   * Add a new policy with the specified properties.
    */
-  async update(props: UpdatePolicyProps, opts?: ConfirmOptions) {
+  async create(props: CreatePolicyProps, opts?: ConfirmOptions) {
+    const { instructions, address } = this.createIx(props)
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+    return { address, signature }
+  }
+
+  updateIx(props: UpdatePolicyProps) {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
-    const [policy] = this.pda.policy(serviceProvider, props.code)
+    const [address] = this.pda.policy(serviceProvider, props.code)
 
     const ix = createUpdatePolicyInstruction({
-      policy,
+      policy: address,
       serviceProvider,
       authority,
     }, {
@@ -164,22 +158,24 @@ export class PolicyManager extends BaseManager {
       },
     }, this.programId)
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts)
-
-    return { address: policy, signature }
+    return {
+      address,
+      instructions: [ix],
+    }
   }
 
   /**
-   * Delete a policy based on the specified properties.
-   *
-   * @param {DeletePolicyProps} props - The properties for deleting the policy.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature: string}>} A Promise that resolves to the result of deleting the policy, including its signature.
-   * @throws {Error} Throws an error if there is an issue deleting the policy or if the transaction fails to confirm.
+   * Update a policy with the specified properties.
    */
-  async delete(props: DeletePolicyProps, opts?: ConfirmOptions) {
+  async update(props: UpdatePolicyProps, opts?: ConfirmOptions) {
+    const { instructions, address } = this.updateIx(props)
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+    return { address, signature }
+  }
+
+  deleteIx(props: DeletePolicyProps) {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
     const [policy] = this.pda.policy(serviceProvider, props.code)
@@ -190,14 +186,23 @@ export class PolicyManager extends BaseManager {
       authority,
     }, this.programId)
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts)
+    return {
+      instructions: [ix],
+    }
+  }
 
+  /**
+   * Delete a policy based on the specified properties.
+   */
+  async delete(props: DeletePolicyProps, opts?: ConfirmOptions) {
+    const { instructions } = this.deleteIx(props)
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
     return { signature }
   }
 
-  async deleteByAddr(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+  async deleteByAddrIx(addr: PublicKeyInitData) {
     const policy = await this.load(addr)
 
     const ix = createDeletePolicyInstruction({
@@ -206,8 +211,19 @@ export class PolicyManager extends BaseManager {
       authority: this.provider.publicKey,
     }, this.programId)
 
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete policy by address.
+   */
+  async deleteByAddr(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+    const { instructions } = await this.deleteByAddrIx(addr)
+
     const signature = await this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
       .sendAndConfirm(opts)
 
     return { signature }

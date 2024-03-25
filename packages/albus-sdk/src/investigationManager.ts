@@ -33,7 +33,7 @@ import type {
   GetMultipleAccountsConfig,
   PublicKeyInitData,
 } from '@solana/web3.js'
-import { Keypair, PublicKey, Transaction } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import type {
   InvestigationStatus,
@@ -191,41 +191,7 @@ export class InvestigationManager extends BaseManager {
       })
   }
 
-  /**
-   * Delete {@link InvestigationRequest}
-   * Only investigation creator can delete it
-   */
-  async delete(props: DeleteInvestigationProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
-    const investigationRequestAddr = new PublicKey(props.investigationRequest)
-    const investigationRequest = await this.load(investigationRequestAddr)
-
-    const ix = createDeleteInvestigationRequestInstruction({
-      investigationRequest: new PublicKey(props.investigationRequest),
-      anchorRemainingAccounts: investigationRequest.trustees.map(pubkey => ({
-        pubkey: this.pda.investigationRequestShare(investigationRequestAddr, pubkey)[0],
-        isSigner: false,
-        isWritable: true,
-      })),
-      authority,
-    }, this.programId)
-
-    try {
-      const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
-  }
-
-  /**
-   * Create new {@link InvestigationRequest}
-   */
-  async create(props: CreateInvestigationProps, opts?: ConfirmOptions) {
+  async createIx(props: CreateInvestigationProps) {
     const authority = this.provider.publicKey
 
     const proofRequest = await this.proofRequest.load(props.proofRequest)
@@ -259,19 +225,19 @@ export class InvestigationManager extends BaseManager {
     const selectedTrustees = (signals.trusteePublicKey as bigint[][] ?? [])
       .map(p => this.pda.trustee(Albus.zkp.packPubkey(p))[0])
 
-    const [investigationRequest] = this.pda.investigationRequest(props.proofRequest, authority)
+    const [address] = this.pda.investigationRequest(props.proofRequest, authority)
 
-    this.trace('create', `investigationRequest: ${investigationRequest}`)
+    this.trace('create', `investigationRequest: ${address}`)
     this.trace('create', `selectedTrustees`, selectedTrustees.map(p => p.toString()))
 
     const ix = createCreateInvestigationRequestInstruction({
-      investigationRequest,
+      investigationRequest: address,
       proofRequest: new PublicKey(props.proofRequest),
       serviceProvider: proofRequest.serviceProvider,
       authority,
       anchorRemainingAccounts: selectedTrustees.length > 0
         ? selectedTrustees.map(pubkey => ({
-          pubkey: this.pda.investigationRequestShare(investigationRequest, pubkey)[0],
+          pubkey: this.pda.investigationRequestShare(address, pubkey)[0],
           isSigner: false,
           isWritable: true,
         }))
@@ -283,22 +249,65 @@ export class InvestigationManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      address,
+      selectedTrustees,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Create new {@link InvestigationRequest}
+   */
+  async create(props: CreateInvestigationProps, opts?: ConfirmOptions) {
+    const { address, selectedTrustees, instructions } = await this.createIx(props)
     try {
-      const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { address: investigationRequest, selectedTrustees, signature }
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+      return { address, selectedTrustees, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
   }
 
+  async deleteIx(props: DeleteInvestigationProps) {
+    const authority = this.provider.publicKey
+    const investigationRequestAddr = new PublicKey(props.investigationRequest)
+    const investigationRequest = await this.load(investigationRequestAddr)
+
+    const ix = createDeleteInvestigationRequestInstruction({
+      investigationRequest: new PublicKey(props.investigationRequest),
+      anchorRemainingAccounts: investigationRequest.trustees.map(pubkey => ({
+        pubkey: this.pda.investigationRequestShare(investigationRequestAddr, pubkey)[0],
+        isSigner: false,
+        isWritable: true,
+      })),
+      authority,
+    }, this.programId)
+
+    return {
+      instructions: [ix],
+    }
+  }
+
   /**
-   * Reveal a secret share for {@link InvestigationRequest}
+   * Delete {@link InvestigationRequest}
+   * Only investigation creator can delete it
    */
-  async revealShare(props: RevealShareProps, opts?: ConfirmOptions) {
+  async delete(props: DeleteInvestigationProps, opts?: ConfirmOptions) {
+    const { instructions } = await this.deleteIx(props)
+    try {
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+      return { signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  async revealShareIx(props: RevealShareProps) {
     const authority = this.provider.publicKey
 
     const investigationRequest = await this.load(props.investigationRequest)
@@ -371,12 +380,24 @@ export class InvestigationManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      investigationRequest: new PublicKey(props.investigationRequest),
+      investigationRequestShare,
+      userPublicKey,
+      secretShare,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Reveal a secret share for {@link InvestigationRequest}
+   */
+  async revealShare(props: RevealShareProps, opts?: ConfirmOptions) {
+    const { instructions, investigationRequest, userPublicKey, secretShare } = await this.revealShareIx(props)
     try {
-      const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
       return { address: investigationRequest, userPublicKey, secretShare, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e

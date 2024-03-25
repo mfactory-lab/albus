@@ -46,6 +46,7 @@ import { NodeWallet } from './utils'
 import { DEV_PROGRAM_ID } from './constants'
 import { CredentialSpecManager } from './credentialSpecManager'
 import { CredentialRequestManager } from './credentialRequestManager'
+import type { IrysOptions } from './storage/irys'
 import { IrysStorageDriver } from './storage/irys'
 import idl from './idl/albus.json'
 
@@ -123,11 +124,14 @@ export class AlbusClient {
     return AlbusClient.pda(this.programId)
   }
 
+  /**
+   * Returns the storage driver based on the selected storage driver option.
+   */
   get storage() {
-    switch (this.options.storageDriver) {
+    switch (this.options.storage?.driver) {
       case 'irys':
       default:
-        return new IrysStorageDriver(this.provider, this.options.storage)
+        return new IrysStorageDriver(this.provider, this.options.storage?.options)
     }
   }
 
@@ -165,6 +169,7 @@ export class AlbusClient {
 
   /**
    * Local environment.
+   * Uses the dev program ID.
    */
   local() {
     return this.configure('programId', DEV_PROGRAM_ID)
@@ -175,8 +180,12 @@ export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfir
   { wallet: Wallet, opts?: ConfirmOptions }
 
 export type ClientOptions = {
+  /// Custom Program ID
   programId?: PublicKey
+  /// Enable debugging
   debug?: boolean
-  storageDriver?: string
-  storage?: any
-}
+  /// Storage driver
+  storage?: { driver: string, options?: IrysOptions | Record<string, any> }
+  /// Priority fee to be used with the transaction builder, in micro-lamports
+  priorityFee?: number
+} & Record<string, any>
