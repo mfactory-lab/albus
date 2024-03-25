@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0-next.8](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.7...@albus-finance/sdk-v0.3.0-next.8) (2024-03-25)
+
+
+### 🌟 Features
+
+* add irys storage driver ([1b0d86b](https://github.com/mfactory-lab/albus/commit/1b0d86bf0ce0f28baae5d1ad02323c4a9a3e80b7))
+* **sdk:** new sdk, credential request manager, credential spec manager, add issuer client ([d6307f7](https://github.com/mfactory-lab/albus/commit/d6307f707b4535775824f2919d730f1497967616))
+
+
+### ♻️ Refactors
+
+* **sdk:** add global priority fee, separate instructions ([cd54ad4](https://github.com/mfactory-lab/albus/commit/cd54ad491880f3fc1e2ea2d0ec3e3df01eb28c5c))
+
 ## [0.3.0-next.7](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.6...@albus-finance/sdk-v0.3.0-next.7) (2024-02-05)
 
 ## [0.3.0-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.4...@albus-finance/sdk-v0.3.0-next.6) (2024-02-05)
