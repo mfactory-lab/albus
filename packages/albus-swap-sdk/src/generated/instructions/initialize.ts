@@ -9,8 +9,10 @@ import * as splToken from '@solana/spl-token'
 import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
-import { FeesInfo, feesInfoBeet } from '../types/FeesInfo'
-import { CurveInfo, curveInfoBeet } from '../types/CurveInfo'
+import type { FeesInfo } from '../types/FeesInfo'
+import { feesInfoBeet } from '../types/FeesInfo'
+import type { CurveInfo } from '../types/CurveInfo'
+import { curveInfoBeet } from '../types/CurveInfo'
 
 /**
  * @category Instructions
@@ -40,7 +42,7 @@ export const initializeStruct = new beet.FixableBeetArgsStruct<
     ['swapPolicy', beet.coption(beetSolana.publicKey)],
     ['addLiquidityPolicy', beet.coption(beetSolana.publicKey)],
   ],
-  'InitializeInstructionArgs'
+  'InitializeInstructionArgs',
 )
 /**
  * Accounts required by the _initialize_ instruction
@@ -85,7 +87,7 @@ export const initializeInstructionDiscriminator = [
 export function createInitializeInstruction(
   accounts: InitializeInstructionAccounts,
   args: InitializeInstructionArgs,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
 ) {
   const [data] = initializeStruct.serialize({
     instructionDiscriminator: initializeInstructionDiscriminator,

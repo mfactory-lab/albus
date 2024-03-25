@@ -6,6 +6,7 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
+
 export type FeesInfo = {
   tradeFeeNumerator: beet.bignum
   tradeFeeDenominator: beet.bignum
@@ -32,5 +33,5 @@ export const feesInfoBeet = new beet.BeetArgsStruct<FeesInfo>(
     ['hostFeeNumerator', beet.u64],
     ['hostFeeDenominator', beet.u64],
   ],
-  'FeesInfo'
+  'FeesInfo',
 )

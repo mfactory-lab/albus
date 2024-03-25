@@ -4,9 +4,9 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-bellman = { version = "0.13.0", default-features = false, features = ["groth16"], optional = true }
-#rand_core = { version = "0.6", default-features = false }
-getrandom = { version = "0.2.8", features = ["custom"] }
+bellman = { version = "0.13.0", default-features = false, features = [ "groth16" ], optional = true }
+# rand_core = { version = "0.6", default-features = false }
+getrandom = { version = "0.2.8", features = [ "custom" ] }
 pairing = "0.22"
 ff = "0.12"
 
@@ -16,5 +16,5 @@ bellman = "0.13.0"
 rand = "0.8"
 
 [features]
-std = ["bellman"]
+std = [ "bellman" ]
 default = []

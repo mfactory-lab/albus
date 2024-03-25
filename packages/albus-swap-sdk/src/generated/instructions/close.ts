@@ -18,7 +18,7 @@ export const closeStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'CloseInstructionArgs'
+  'CloseInstructionArgs',
 )
 /**
  * Accounts required by the _close_ instruction
@@ -61,7 +61,7 @@ export const closeInstructionDiscriminator = [
  */
 export function createCloseInstruction(
   accounts: CloseInstructionAccounts,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
 ) {
   const [data] = closeStruct.serialize({
     instructionDiscriminator: closeInstructionDiscriminator,

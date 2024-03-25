@@ -51,7 +51,7 @@ export class InvalidProgramAddressError extends Error {
 createErrorFromCodeLookup.set(0x1771, () => new InvalidProgramAddressError())
 createErrorFromNameLookup.set(
   'InvalidProgramAddress',
-  () => new InvalidProgramAddressError()
+  () => new InvalidProgramAddressError(),
 )
 
 /**
@@ -94,7 +94,7 @@ export class InvalidOutputOwnerError extends Error {
 createErrorFromCodeLookup.set(0x1773, () => new InvalidOutputOwnerError())
 createErrorFromNameLookup.set(
   'InvalidOutputOwner',
-  () => new InvalidOutputOwnerError()
+  () => new InvalidOutputOwnerError(),
 )
 
 /**
@@ -137,7 +137,7 @@ export class ExpectedAccountError extends Error {
 createErrorFromCodeLookup.set(0x1775, () => new ExpectedAccountError())
 createErrorFromNameLookup.set(
   'ExpectedAccount',
-  () => new ExpectedAccountError()
+  () => new ExpectedAccountError(),
 )
 
 /**
@@ -200,7 +200,7 @@ export class InvalidDelegateError extends Error {
 createErrorFromCodeLookup.set(0x1778, () => new InvalidDelegateError())
 createErrorFromNameLookup.set(
   'InvalidDelegate',
-  () => new InvalidDelegateError()
+  () => new InvalidDelegateError(),
 )
 
 /**
@@ -230,7 +230,7 @@ createErrorFromNameLookup.set('InvalidInput', () => new InvalidInputError())
  * @category generated
  */
 export class IncorrectSwapAccountError extends Error {
-  readonly code: number = 0x177a
+  readonly code: number = 0x177A
   readonly name: string = 'IncorrectSwapAccount'
   constructor() {
     super('Address of the provided swap token account is incorrect')
@@ -240,10 +240,10 @@ export class IncorrectSwapAccountError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x177a, () => new IncorrectSwapAccountError())
+createErrorFromCodeLookup.set(0x177A, () => new IncorrectSwapAccountError())
 createErrorFromNameLookup.set(
   'IncorrectSwapAccount',
-  () => new IncorrectSwapAccountError()
+  () => new IncorrectSwapAccountError(),
 )
 
 /**
@@ -253,7 +253,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class IncorrectPoolMintError extends Error {
-  readonly code: number = 0x177b
+  readonly code: number = 0x177B
   readonly name: string = 'IncorrectPoolMint'
   constructor() {
     super('Address of the provided pool token mint is incorrect')
@@ -263,10 +263,10 @@ export class IncorrectPoolMintError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x177b, () => new IncorrectPoolMintError())
+createErrorFromCodeLookup.set(0x177B, () => new IncorrectPoolMintError())
 createErrorFromNameLookup.set(
   'IncorrectPoolMint',
-  () => new IncorrectPoolMintError()
+  () => new IncorrectPoolMintError(),
 )
 
 /**
@@ -276,7 +276,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class InvalidOutputError extends Error {
-  readonly code: number = 0x177c
+  readonly code: number = 0x177C
   readonly name: string = 'InvalidOutput'
   constructor() {
     super('InvalidOutput')
@@ -286,7 +286,7 @@ export class InvalidOutputError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x177c, () => new InvalidOutputError())
+createErrorFromCodeLookup.set(0x177C, () => new InvalidOutputError())
 createErrorFromNameLookup.set('InvalidOutput', () => new InvalidOutputError())
 
 /**
@@ -296,7 +296,7 @@ createErrorFromNameLookup.set('InvalidOutput', () => new InvalidOutputError())
  * @category generated
  */
 export class CalculationFailureError extends Error {
-  readonly code: number = 0x177d
+  readonly code: number = 0x177D
   readonly name: string = 'CalculationFailure'
   constructor() {
     super('General calculation failure due to overflow or underflow')
@@ -306,10 +306,10 @@ export class CalculationFailureError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x177d, () => new CalculationFailureError())
+createErrorFromCodeLookup.set(0x177D, () => new CalculationFailureError())
 createErrorFromNameLookup.set(
   'CalculationFailure',
-  () => new CalculationFailureError()
+  () => new CalculationFailureError(),
 )
 
 /**
@@ -319,7 +319,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class InvalidInstructionError extends Error {
-  readonly code: number = 0x177e
+  readonly code: number = 0x177E
   readonly name: string = 'InvalidInstruction'
   constructor() {
     super('Invalid instruction')
@@ -329,10 +329,10 @@ export class InvalidInstructionError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x177e, () => new InvalidInstructionError())
+createErrorFromCodeLookup.set(0x177E, () => new InvalidInstructionError())
 createErrorFromNameLookup.set(
   'InvalidInstruction',
-  () => new InvalidInstructionError()
+  () => new InvalidInstructionError(),
 )
 
 /**
@@ -342,7 +342,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class RepeatedMintError extends Error {
-  readonly code: number = 0x177f
+  readonly code: number = 0x177F
   readonly name: string = 'RepeatedMint'
   constructor() {
     super('Swap input token accounts have the same mint')
@@ -352,7 +352,7 @@ export class RepeatedMintError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x177f, () => new RepeatedMintError())
+createErrorFromCodeLookup.set(0x177F, () => new RepeatedMintError())
 createErrorFromNameLookup.set('RepeatedMint', () => new RepeatedMintError())
 
 /**
@@ -375,7 +375,7 @@ export class ExceededSlippageError extends Error {
 createErrorFromCodeLookup.set(0x1780, () => new ExceededSlippageError())
 createErrorFromNameLookup.set(
   'ExceededSlippage',
-  () => new ExceededSlippageError()
+  () => new ExceededSlippageError(),
 )
 
 /**
@@ -398,7 +398,7 @@ export class InvalidCloseAuthorityError extends Error {
 createErrorFromCodeLookup.set(0x1781, () => new InvalidCloseAuthorityError())
 createErrorFromNameLookup.set(
   'InvalidCloseAuthority',
-  () => new InvalidCloseAuthorityError()
+  () => new InvalidCloseAuthorityError(),
 )
 
 /**
@@ -421,7 +421,7 @@ export class InvalidFreezeAuthorityError extends Error {
 createErrorFromCodeLookup.set(0x1782, () => new InvalidFreezeAuthorityError())
 createErrorFromNameLookup.set(
   'InvalidFreezeAuthority',
-  () => new InvalidFreezeAuthorityError()
+  () => new InvalidFreezeAuthorityError(),
 )
 
 /**
@@ -444,7 +444,7 @@ export class IncorrectFeeAccountError extends Error {
 createErrorFromCodeLookup.set(0x1783, () => new IncorrectFeeAccountError())
 createErrorFromNameLookup.set(
   'IncorrectFeeAccount',
-  () => new IncorrectFeeAccountError()
+  () => new IncorrectFeeAccountError(),
 )
 
 /**
@@ -467,7 +467,7 @@ export class ZeroTradingTokensError extends Error {
 createErrorFromCodeLookup.set(0x1784, () => new ZeroTradingTokensError())
 createErrorFromNameLookup.set(
   'ZeroTradingTokens',
-  () => new ZeroTradingTokensError()
+  () => new ZeroTradingTokensError(),
 )
 
 /**
@@ -490,7 +490,7 @@ export class FeeCalculationFailureError extends Error {
 createErrorFromCodeLookup.set(0x1785, () => new FeeCalculationFailureError())
 createErrorFromNameLookup.set(
   'FeeCalculationFailure',
-  () => new FeeCalculationFailureError()
+  () => new FeeCalculationFailureError(),
 )
 
 /**
@@ -513,7 +513,7 @@ export class ConversionFailureError extends Error {
 createErrorFromCodeLookup.set(0x1786, () => new ConversionFailureError())
 createErrorFromNameLookup.set(
   'ConversionFailure',
-  () => new ConversionFailureError()
+  () => new ConversionFailureError(),
 )
 
 /**
@@ -526,7 +526,7 @@ export class InvalidFeeError extends Error {
   readonly code: number = 0x1787
   readonly name: string = 'InvalidFee'
   constructor() {
-    super("The provided fee does not match the program owner's constraints")
+    super('The provided fee does not match the program owner\'s constraints')
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, InvalidFeeError)
     }
@@ -547,7 +547,7 @@ export class IncorrectTokenProgramIdError extends Error {
   readonly name: string = 'IncorrectTokenProgramId'
   constructor() {
     super(
-      'The provided token program does not match the token program expected by the swap'
+      'The provided token program does not match the token program expected by the swap',
     )
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, IncorrectTokenProgramIdError)
@@ -558,7 +558,7 @@ export class IncorrectTokenProgramIdError extends Error {
 createErrorFromCodeLookup.set(0x1788, () => new IncorrectTokenProgramIdError())
 createErrorFromNameLookup.set(
   'IncorrectTokenProgramId',
-  () => new IncorrectTokenProgramIdError()
+  () => new IncorrectTokenProgramIdError(),
 )
 
 /**
@@ -581,7 +581,7 @@ export class UnsupportedCurveTypeError extends Error {
 createErrorFromCodeLookup.set(0x1789, () => new UnsupportedCurveTypeError())
 createErrorFromNameLookup.set(
   'UnsupportedCurveType',
-  () => new UnsupportedCurveTypeError()
+  () => new UnsupportedCurveTypeError(),
 )
 
 /**
@@ -591,7 +591,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class InvalidCurveError extends Error {
-  readonly code: number = 0x178a
+  readonly code: number = 0x178A
   readonly name: string = 'InvalidCurve'
   constructor() {
     super('The provided curve parameters are invalid')
@@ -601,7 +601,7 @@ export class InvalidCurveError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x178a, () => new InvalidCurveError())
+createErrorFromCodeLookup.set(0x178A, () => new InvalidCurveError())
 createErrorFromNameLookup.set('InvalidCurve', () => new InvalidCurveError())
 
 /**
@@ -611,7 +611,7 @@ createErrorFromNameLookup.set('InvalidCurve', () => new InvalidCurveError())
  * @category generated
  */
 export class UnsupportedCurveOperationError extends Error {
-  readonly code: number = 0x178b
+  readonly code: number = 0x178B
   readonly name: string = 'UnsupportedCurveOperation'
   constructor() {
     super('The operation cannot be performed on the given curve')
@@ -622,12 +622,12 @@ export class UnsupportedCurveOperationError extends Error {
 }
 
 createErrorFromCodeLookup.set(
-  0x178b,
-  () => new UnsupportedCurveOperationError()
+  0x178B,
+  () => new UnsupportedCurveOperationError(),
 )
 createErrorFromNameLookup.set(
   'UnsupportedCurveOperation',
-  () => new UnsupportedCurveOperationError()
+  () => new UnsupportedCurveOperationError(),
 )
 
 /**

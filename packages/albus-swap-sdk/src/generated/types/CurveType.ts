@@ -6,6 +6,7 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
+
 /**
  * @category enums
  * @category generated
@@ -21,5 +22,5 @@ export enum CurveType {
  * @category generated
  */
 export const curveTypeBeet = beet.fixedScalarEnum(
-  CurveType
+  CurveType,
 ) as beet.FixedSizeBeet<CurveType, CurveType>

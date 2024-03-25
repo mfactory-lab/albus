@@ -33,7 +33,7 @@ export const depositSingleTokenTypeStruct = new beet.BeetArgsStruct<
     ['sourceTokenAmount', beet.u64],
     ['minimumPoolTokenAmount', beet.u64],
   ],
-  'DepositSingleTokenTypeInstructionArgs'
+  'DepositSingleTokenTypeInstructionArgs',
 )
 /**
  * Accounts required by the _depositSingleTokenType_ instruction
@@ -85,7 +85,7 @@ export const depositSingleTokenTypeInstructionDiscriminator = [
 export function createDepositSingleTokenTypeInstruction(
   accounts: DepositSingleTokenTypeInstructionAccounts,
   args: DepositSingleTokenTypeInstructionArgs,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
 ) {
   const [data] = depositSingleTokenTypeStruct.serialize({
     instructionDiscriminator: depositSingleTokenTypeInstructionDiscriminator,

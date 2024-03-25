@@ -4,12 +4,16 @@ description = "Albus on-chain compliance check"
 version = "0.1.3"
 edition = "2021"
 license = "AGPL-3.0"
-keywords = ["albus", "kyc", "did"]
+keywords = [
+  "albus",
+  "kyc",
+  "did"
+]
 repository = "https://github.com/mfactory-lab/albus"
-#readme = "README.md"
+# readme = "README.md"
 
 [features]
-cpi = ["anchor-lang"]
+cpi = [ "anchor-lang" ]
 
 [dependencies]
 arrayref = "^0.3.7"

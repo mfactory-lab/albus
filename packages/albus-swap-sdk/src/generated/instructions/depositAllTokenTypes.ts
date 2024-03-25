@@ -35,7 +35,7 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
     ['maximumTokenAAmount', beet.u64],
     ['maximumTokenBAmount', beet.u64],
   ],
-  'DepositAllTokenTypesInstructionArgs'
+  'DepositAllTokenTypesInstructionArgs',
 )
 /**
  * Accounts required by the _depositAllTokenTypes_ instruction
@@ -89,7 +89,7 @@ export const depositAllTokenTypesInstructionDiscriminator = [
 export function createDepositAllTokenTypesInstruction(
   accounts: DepositAllTokenTypesInstructionAccounts,
   args: DepositAllTokenTypesInstructionArgs,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
 ) {
   const [data] = depositAllTokenTypesStruct.serialize({
     instructionDiscriminator: depositAllTokenTypesInstructionDiscriminator,

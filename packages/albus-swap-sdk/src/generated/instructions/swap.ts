@@ -33,7 +33,7 @@ export const swapStruct = new beet.BeetArgsStruct<
     ['amountIn', beet.u64],
     ['minimumAmountOut', beet.u64],
   ],
-  'SwapInstructionArgs'
+  'SwapInstructionArgs',
 )
 /**
  * Accounts required by the _swap_ instruction
@@ -89,7 +89,7 @@ export const swapInstructionDiscriminator = [
 export function createSwapInstruction(
   accounts: SwapInstructionAccounts,
   args: SwapInstructionArgs,
-  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq')
+  programId = new web3.PublicKey('ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'),
 ) {
   const [data] = swapStruct.serialize({
     instructionDiscriminator: swapInstructionDiscriminator,

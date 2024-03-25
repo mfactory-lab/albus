@@ -8,8 +8,10 @@
 import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
-import { FeesInfo, feesInfoBeet } from '../types/FeesInfo'
-import { CurveInfo, curveInfoBeet } from '../types/CurveInfo'
+import type { FeesInfo } from '../types/FeesInfo'
+import { feesInfoBeet } from '../types/FeesInfo'
+import type { CurveInfo } from '../types/CurveInfo'
+import { curveInfoBeet } from '../types/CurveInfo'
 
 /**
  * Arguments used to create {@link TokenSwap}
@@ -56,7 +58,7 @@ export class TokenSwap implements TokenSwapArgs {
     readonly curve: CurveInfo,
     readonly swapPolicy: beet.COption<web3.PublicKey>,
     readonly addLiquidityPolicy: beet.COption<web3.PublicKey>,
-    readonly reserved: number[] /* size: 64 */
+    readonly reserved: number[], /* size: 64 */
   ) {}
 
   /**
@@ -77,7 +79,7 @@ export class TokenSwap implements TokenSwapArgs {
       args.curve,
       args.swapPolicy,
       args.addLiquidityPolicy,
-      args.reserved
+      args.reserved,
     )
   }
 
@@ -87,7 +89,7 @@ export class TokenSwap implements TokenSwapArgs {
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
-    offset = 0
+    offset = 0,
   ): [TokenSwap, number] {
     return TokenSwap.deserialize(accountInfo.data, offset)
   }
@@ -101,11 +103,11 @@ export class TokenSwap implements TokenSwapArgs {
   static async fromAccountAddress(
     connection: web3.Connection,
     address: web3.PublicKey,
-    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
+    commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
   ): Promise<TokenSwap> {
     const accountInfo = await connection.getAccountInfo(
       address,
-      commitmentOrConfig
+      commitmentOrConfig,
     )
     if (accountInfo == null) {
       throw new Error(`Unable to find TokenSwap account at ${address}`)
@@ -121,8 +123,8 @@ export class TokenSwap implements TokenSwapArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq'
-    )
+      'ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq',
+    ),
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, tokenSwapBeet)
   }
@@ -172,11 +174,11 @@ export class TokenSwap implements TokenSwapArgs {
   static async getMinimumBalanceForRentExemption(
     args: TokenSwapArgs,
     connection: web3.Connection,
-    commitment?: web3.Commitment
+    commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
       TokenSwap.byteSize(args),
-      commitment
+      commitment,
     )
   }
 
@@ -232,5 +234,5 @@ export const tokenSwapBeet = new beet.FixableBeetStruct<
     ['reserved', beet.uniformFixedSizeArray(beet.u8, 64)],
   ],
   TokenSwap.fromArgs,
-  'TokenSwap'
+  'TokenSwap',
 )

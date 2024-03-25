@@ -6,6 +6,7 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
+
 /**
  * @category enums
  * @category generated
@@ -20,5 +21,5 @@ export enum RoundDirection {
  * @category generated
  */
 export const roundDirectionBeet = beet.fixedScalarEnum(
-  RoundDirection
+  RoundDirection,
 ) as beet.FixedSizeBeet<RoundDirection, RoundDirection>
