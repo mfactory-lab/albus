@@ -4,13 +4,13 @@ solana_version = "1.16.17"
 
 [features]
 seeds = false
-skip-lint = true
+skip-lint = false
 
 [workspace]
 members = [
-  "programs/albus",
-  "programs/albus-transfer",
-  "programs/albus-swap",
+    "programs/albus",
+    "programs/albus-transfer",
+    "programs/albus-swap",
 ]
 
 [provider]
@@ -39,11 +39,11 @@ url = "https://api.apr.dev"
 test = "pnpm test:e2e"
 
 [test]
-startup_wait = 10000
+startup_wait = 20000
 
-[[test.genesis]]
-address = "ASP9HnS3MzoVNrRYgr96UMRbsR1xbHa8xPrbJYKxYEZY"
-program = "target/deploy/albus_stake_pool.so"
+#[[test.genesis]]
+#address = "ASP9HnS3MzoVNrRYgr96UMRbsR1xbHa8xPrbJYKxYEZY"
+#program = "target/deploy/albus_stake_pool.so"
 
 [test.validator]
 url = "https://api.mainnet-beta.solana.com"
