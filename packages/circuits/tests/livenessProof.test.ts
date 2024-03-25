@@ -27,52 +27,43 @@
  */
 
 import { Keypair } from '@solana/web3.js'
-import { assert, describe, it } from 'vitest'
-import { createClaimsTree, encodeClaimValue } from '../src/credential'
-import { eddsa } from '../src/crypto'
-import { setupCircuit } from './utils'
+import { describe, it } from 'vitest'
+import { encodeClaimValue } from '../../albus-core/src/credential'
+import { circomkit, prepareInput } from './common'
 
-describe('livenessProof', async () => {
+describe('likenessProof', async () => {
   const issuerKeypair = Keypair.generate()
-  const issuerPk = eddsa.prv2pub(issuerKeypair.secretKey)
 
-  const circuit = await setupCircuit('livenessProof')
+  const credentialDepth = 5
+
+  const circuit = await circomkit.WitnessTester('livenessProof', {
+    file: 'livenessProof',
+    template: 'LivenessProof',
+    params: [credentialDepth, 1],
+  })
 
   const timestamp = 1697035401 // 2023-10-11 14:43
+
   const claims = {
-    type: 'sumsub:selfie',
+    livenessType: 'sumsub:selfie',
     meta: {
       validUntil: 0,
     },
   }
 
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = {}) {
-    const tree = await createClaimsTree(claims, 2)
-    const typeProof = await tree.get('type')
-    const validUntilProof = await tree.get('meta.validUntil')
-    const signature = eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
-
     return {
-      timestamp,
-      credentialRoot: tree.root,
-      type: typeProof.value,
-      typeKey: typeProof.key,
-      typeProof: typeProof.siblings,
-      meta_validUntil: validUntilProof.value,
-      meta_validUntilKey: validUntilProof.key,
-      meta_validUntilProof: validUntilProof.siblings,
-      issuerPk,
-      issuerSignature: [...signature.R8, signature.S],
+      ...(await prepareInput(issuerKeypair, claims, ['livenessType', 'meta.validUntil'])),
       ...params,
-    }
+    } as any
   }
 
   it('valid', async () => {
     const input = await generateInput(claims, {
-      expectedType: encodeClaimValue(claims.type),
+      timestamp,
+      expectedType: encodeClaimValue(claims.livenessType),
     })
-    const witness = await circuit.calculateWitness(input, true)
-    await circuit.assertOut(witness, {})
+    await circuit.expectPass(input)
   })
 
   it('expired', async () => {
@@ -82,15 +73,9 @@ describe('livenessProof', async () => {
         validUntil: timestamp,
       },
     }, {
-      expectedType: encodeClaimValue(claims.type),
+      timestamp,
+      expectedType: encodeClaimValue(claims.livenessType),
     })
-    try {
-      const witness = await circuit.calculateWitness(input, true)
-      await circuit.assertOut(witness, {})
-      assert.ok(false)
-    } catch (e: any) {
-      // console.log(e.message)
-      assert.include(e.message, 'Error in template LivenessProof_253 line: 35')
-    }
+    await circuit.expectFail(input)
   })
 })

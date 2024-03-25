@@ -27,11 +27,11 @@
  */
 
 import { describe, it } from 'vitest'
-import { SMT } from '../src/crypto'
+import { crypto } from '@albus-finance/core'
 
 describe('smt', async () => {
   it('build', async () => {
-    const smt = new SMT()
+    const smt = new crypto.SMT()
     for (let i = 0; i < 17; i++) {
       await smt.add(BigInt(i), BigInt(i))
       console.log(`add ${i}`)

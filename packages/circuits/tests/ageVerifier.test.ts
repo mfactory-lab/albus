@@ -27,9 +27,9 @@
  */
 
 import { describe, it } from 'vitest'
-import { setupCircuit } from './utils'
+import { circomkit } from './common'
 
-describe('ageProof', async () => {
+describe('ageVerifier', async () => {
   const input = {
     currentDate: [2023, 7, 11],
     birthDate: [2005, 7, 11],
@@ -37,27 +37,27 @@ describe('ageProof', async () => {
     maxAge: 0,
   }
 
-  const circuit = await setupCircuit('test/ageProof')
-
-  it('accept valid birth date', async () => {
-    const witness = await circuit.calculateWitness(input, true)
-    await circuit.assertOut(witness, { valid: 1 })
+  const circuit = await circomkit.WitnessTester('ageProof', {
+    file: 'utils/age',
+    template: 'AgeVerifier',
   })
 
-  it('decline large birth date', async () => {
-    const witness = await circuit.calculateWitness({
+  it('should accept valid birth date', async () => {
+    await circuit.expectPass(input, { valid: 1 })
+  })
+
+  it('should decline large birth date', async () => {
+    await circuit.expectPass({
       ...input,
       birthDate: [2003, 7, 10],
       maxAge: 20,
-    }, true)
-    await circuit.assertOut(witness, { valid: 0 })
+    }, { valid: 0 })
   })
 
-  it('decline small birth date', async () => {
-    const witness = await circuit.calculateWitness({
+  it('should decline small birth date', async () => {
+    await circuit.expectPass({
       ...input,
       birthDate: [2005, 7, 12],
-    }, true)
-    await circuit.assertOut(witness, { valid: 0 })
+    }, { valid: 0 })
   })
 })
