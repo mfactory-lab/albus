@@ -33,7 +33,6 @@ import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import { afterEach, assert, describe, it, vi } from 'vitest'
 import type { Circuit, Policy, ServiceProvider } from '../src'
 import { AlbusClient } from '../src'
-import { ProofInputBuilder } from '../src/utils'
 
 const { eddsa } = Albus.crypto
 describe('albusClient', async () => {
@@ -122,11 +121,13 @@ describe('albusClient', async () => {
       givenName: 'Mikayla',
       familyName: 'Halvorson',
       gender: 'female',
-      birthDate: '19661002',
+      birthDate: '1966-10-02',
       birthPlace: 'Westland',
-      nationality: 'MNE',
-      country: 'MNE',
-      countryOfBirth: 'MNE',
+      nationality: 'GB',
+      country: 'GB',
+      countryOfBirth: 'GB',
+      docType: 'ID_CARD',
+      docNumber: 'AB123456',
     }, {
       issuerSecretKey: payerKeypair.secretKey,
       validUntil: now + 86400, // 1 day
@@ -136,29 +137,6 @@ describe('albusClient', async () => {
       const keypair = Keypair.generate()
       const key = Albus.zkp.packPubkey(eddsa.prv2pub(keypair.secretKey))
       assert.ok(Albus.zkp.unpackPubkey(key) !== null)
-    })
-
-    it('prepareInputs', async () => {
-      const user = Keypair.generate()
-
-      const inputs = await new ProofInputBuilder(credential)
-        .withUserPrivateKey(user.secretKey)
-        .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
-        .withPolicy(policy)
-        .withCircuit(circuit)
-        .build()
-
-      const data = inputs.data
-
-      assert.equal(data.meta_validUntil, now + 86400)
-      assert.equal(data.meta_validUntilKey, 2)
-      assert.equal(data.meta_validUntilProof.length, 5)
-      assert.equal(data.birthDate, '19661002')
-      assert.equal(data.birthDateKey, 7n)
-      assert.equal(data.birthDateProof.length, 5)
-      assert.equal(data.issuerPk.length, 2)
-      assert.equal(data.issuerSignature.length, 3)
-      assert.deepEqual(data.trusteePublicKey, [[1n, 2n], [1n, 2n], [1n, 2n]])
     })
 
     it('prove', async () => {

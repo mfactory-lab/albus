@@ -26,10 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { describe, it } from 'vitest'
+import { assert, describe, it } from 'vitest'
 import * as Albus from '@albus-finance/core'
-import { Keypair } from '@solana/web3.js'
-import type { Circuit } from '../src'
+import { Keypair, PublicKey } from '@solana/web3.js'
+import type { Circuit, Policy } from '../src'
+import { ProofInputBuilder } from '../src'
 import { loadFixture } from './client.spec'
 
 describe('proof builder', async () => {
@@ -38,30 +39,32 @@ describe('proof builder', async () => {
   const now = Math.floor(Date.now() / 1000)
 
   const circuit = {
-    code: 'age',
-    name: 'Age',
-    vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('agePolicy.vk.json').toString())),
-    wasmUri: loadFixture('agePolicy.wasm'),
-    zkeyUri: loadFixture('agePolicy.zkey'),
+    code: 'kyc',
+    name: 'kyc',
+    vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('kycPolicy.vk.json').toString())),
+    wasmUri: loadFixture('kycPolicy.wasm'),
+    zkeyUri: loadFixture('kycPolicy.zkey'),
     outputs: [
-      'encryptedData[4]',
+      'encryptedData[7]',
       'encryptedShare[3][4]',
       'userPublicKey[2]',
     ],
     privateSignals: [
+      'givenName',
+      'familyName',
       'birthDate',
-      'userPrivateKey',
+      'country',
+      'docNumber',
       'meta_validUntil',
+      'userPrivateKey',
     ],
     publicSignals: [
       'timestamp',
-      'minAge',
-      'maxAge',
+      'config',
+      'countryLookup[2]',
       'credentialRoot',
-      'meta_validUntilKey',
-      'meta_validUntilProof[5]',
-      'birthDateKey',
-      'birthDateProof[5]',
+      'claimKey',
+      'claimProof[3]',
       'issuerPk[2]',
       'issuerSignature[3]',
       'trusteePublicKey[3][2]',
@@ -72,24 +75,96 @@ describe('proof builder', async () => {
     givenName: 'Mikayla',
     familyName: 'Halvorson',
     gender: 'female',
-    birthDate: '19661002',
+    birthDate: '1966-10-02',
     birthPlace: 'Westland',
-    nationality: 'MNE',
-    country: 'MNE',
-    countryOfBirth: 'MNE',
+    nationality: 'GB',
+    country: 'GB',
+    countryOfBirth: 'GB',
+    docType: 'ID_CARD',
+    docNumber: 'AB123456',
   }, {
     issuerSecretKey: issuer.secretKey,
     validUntil: now + 86400, // 1 day
   })
 
-  // const inputs = await new ProofInputBuilder(credential)
-  //   .withUserPrivateKey(user.secretKey)
-  //   .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
-  //   .withPolicy(policy)
-  //   .withCircuit(circuit)
-  //   .build()
+  const config = {
+    minAge: 18,
+    maxAge: 0,
+    selectionMode: 1,
+  }
+
+  const policy = {
+    serviceProvider: PublicKey.default,
+    circuit: PublicKey.default,
+    code: 'kyc',
+    name: 'kyc',
+    description: '',
+    expirationPeriod: 0,
+    retentionPeriod: 0,
+    rules: [
+      {
+        key: 'config',
+        value: [config.minAge, config.maxAge, config.selectionMode].reverse(),
+      },
+      {
+        key: 'countryLookup',
+        value: countryLookup(['UA', 'GB']),
+      },
+    ],
+  } as Policy
 
   it('works', async () => {
-    //
+    const proofInput = await new ProofInputBuilder(credential)
+      .withUserPrivateKey(user.secretKey)
+      .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
+      .withTimestamp(now)
+      .withPolicy(policy)
+      .withCircuit(circuit)
+      .build()
+
+    const proofData = {
+      wasmFile: circuit.wasmUri,
+      zkeyFile: circuit.zkeyUri,
+      input: proofInput.data,
+    }
+
+    const proofRequest = await Albus.zkp.generateProof(proofData)
+
+    const userSecret = Albus.crypto.Poseidon.hash([
+      proofInput.data.userPrivateKey,
+      proofInput.data.credentialRoot,
+      proofInput.data.timestamp,
+    ])
+
+    const decryptedData = Albus.crypto.Poseidon.decrypt(
+      proofRequest.publicSignals.slice(0, 7).map(BigInt),
+      [userSecret, userSecret],
+      5,
+      proofInput.data.timestamp,
+    )
+      .map(Albus.credential.decodeClaimValue)
+
+    assert.equal(decryptedData[0], credential.credentialSubject.givenName)
+    assert.equal(decryptedData[1], credential.credentialSubject.familyName)
+    assert.equal(decryptedData[2], credential.credentialSubject.birthDate)
+    assert.equal(decryptedData[3], credential.credentialSubject.country)
+    assert.equal(decryptedData[4], credential.credentialSubject.docNumber)
+
+    await Albus.zkp.verifyProof({
+      vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
+      proof: proofRequest.proof,
+      publicInput: proofRequest.publicSignals as any,
+    })
   })
 })
+
+function countryLookup(iso2Codes: string[]) {
+  if (iso2Codes.length > 16) {
+    throw new Error('countryLookup cannot have more than 16 codes')
+  }
+  const encoder = new TextEncoder()
+  return iso2Codes.reduce((acc, code) => {
+    acc.push(...encoder.encode(code))
+    return acc
+  }, [] as number[])
+}
