@@ -6,7 +6,6 @@
 ENV ?= dev # dev, stage, prod
 PROGRAM ?= albus
 PROGRAM_KEYPAIR ?= ./target/deploy/$(PROGRAM)-keypair.json
-CIRCUITS_PATH ?= ./packages/circuits
 
 ifeq ($(ENV),prod)
 	# The `prod` environment uses its own keypair
@@ -47,13 +46,13 @@ info: ## Info
 
 sdk: build ## Generate new sdk
 	pnpm -F @albus-finance/sdk generate
-	pnpm lint:fix
+	pnpm eslint ./packages/albus-sdk/src/generated
 
 bump: ## Bump program version
 	cd ./programs/$(PROGRAM)/ && cargo bump
 
 build: ## Build program
-	anchor build -p $(PROGRAM) --arch sbf -- --features "$(BUILD_FEATURES)"
+	anchor build -p $(PROGRAM) --idl-ts ./packages/albus-sdk/src/idl --arch sbf -- --features "$(BUILD_FEATURES)"
 
 test: ## Test integration (localnet)
 	anchor test --arch sbf --skip-lint --provider.cluster localnet -- --features testing
@@ -92,16 +91,6 @@ spool-deploy: ## Deploy stake pool
 #endif
 #target/network_changed:
 #	echo $(NETWORK) > target/network_changed
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-# Parse args
-args := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-
-circom: ## Build circom (e.g. make circom AgePolicy)
-	circom $(CIRCUITS_PATH)/$(args).circom -p bn128 -l node_modules --r1cs --wasm --sym -o $(CIRCUITS_PATH) && \
-	mv $(CIRCUITS_PATH)/$(args)_js/$(args).wasm $(CIRCUITS_PATH)/ && \
-	rm -rf $(CIRCUITS_PATH)/$(args)_js
 
 %::
 	@true
