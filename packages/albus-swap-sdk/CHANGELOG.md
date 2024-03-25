@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.5-next.4...@albus-finance/swap-sdk-v0.1.5-next.5) (2024-02-07)
+
+
+### 🐞 Bug Fixes
+
+* swap sdk + cli fixes ([8ec0d99](https://github.com/mfactory-lab/albus/commit/8ec0d99b18c100726e59a8fe3cf63469c09a6ffd))
+
 ## [0.1.5-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/swap-sdk-v0.1.5-next.2...@albus-finance/swap-sdk-v0.1.5-next.4) (2024-02-02)
 
 
