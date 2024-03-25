@@ -25,6 +25,7 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
+#![doc = include_str!("../README.md")]
 
 mod constants;
 mod errors;
@@ -32,6 +33,9 @@ mod events;
 mod instructions;
 mod state;
 mod utils;
+
+#[cfg(feature = "custom-heap")]
+mod allocator;
 
 use anchor_lang::prelude::*;
 use instructions::*;
@@ -81,6 +85,26 @@ pub mod albus {
 
     pub fn delete_credential(ctx: Context<DeleteCredential>) -> Result<()> {
         delete_credential::handler(ctx)
+    }
+
+    pub fn request_credential(
+        ctx: Context<RequestCredential>,
+        data: RequestCredentialData,
+    ) -> Result<()> {
+        request_credential::handler(ctx, data)
+    }
+
+    // Credential Spec
+
+    pub fn create_credential_spec(
+        ctx: Context<CreateCredentialSpec>,
+        data: CreateCredentialSpecData,
+    ) -> Result<()> {
+        create_credential_spec::handler(ctx, data)
+    }
+
+    pub fn delete_credential_spec(ctx: Context<DeleteCredentialSpec>) -> Result<()> {
+        delete_credential_spec::handler(ctx)
     }
 
     // Circuit

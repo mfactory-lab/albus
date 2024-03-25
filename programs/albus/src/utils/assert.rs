@@ -43,7 +43,11 @@ pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {
 
 /// Check that the `authority` key is authorized
 pub fn assert_authorized(authority: &Pubkey) -> Result<()> {
-    if !AUTHORIZED_AUTHORITY.is_empty() && !AUTHORIZED_AUTHORITY.iter().any(|&a| a == *authority) {
+    if !AUTHORIZED_AUTHORITY.is_empty()
+        && !AUTHORIZED_AUTHORITY
+            .iter()
+            .any(|&a| cmp_pubkeys(&a, authority))
+    {
         msg!(
             "The {} account is not allowed to perform this action",
             authority
