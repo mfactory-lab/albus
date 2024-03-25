@@ -1,19 +1,19 @@
 import { basename, dirname, isAbsolute, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import inject from '@rollup/plugin-inject'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-import type { BuildOptions, PluginOption, UserConfig } from 'vite'
+import type { BuildOptions, UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 const inline: string[] = [
   // TODO: fixme `key-did-resolver` doesn't support commonjs
-  'key-did-resolver',
-  'multiformats/bases/base58',
-  'multiformats/bases/base64',
-  'varint',
-  'bigint-mod-arith',
-  'nist-weierstrauss',
+  // 'key-did-resolver',
+  // 'multiformats/bases/base58',
+  // 'multiformats/bases/base64',
+  // 'varint',
+  // 'bigint-mod-arith',
+  // 'nist-weierstrauss',
 ]
 
 const isObject = (item: unknown): item is Record<string, unknown> => Boolean(item && typeof item === 'object' && !Array.isArray(item))
@@ -72,7 +72,10 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
             rollupTypes: true,
             // insertTypesEntry: true,
           }),
-          inject({ Buffer: ['buffer', 'Buffer'] }) as PluginOption,
+          nodePolyfills({
+            protocolImports: true,
+          }),
+          // inject({ Buffer: ['buffer', 'Buffer'] }) as PluginOption,
         ],
         output: {
           dir: resolve(dir, 'dist'),
@@ -93,11 +96,11 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
 export function pluginViteConfig(packageDirName: string, options: UserConfig = {}) {
   return defineConfig({
     ...options,
-    resolve: mergeDeep({
-      alias: {
-        'node:buffer': 'buffer',
-      },
-    }, options.resolve),
+    // resolve: mergeDeep({
+    //   alias: {
+    //     'node:buffer': 'buffer',
+    //   },
+    // }, options.resolve),
     build: viteBuild(packageDirName, options.build),
     test: {
       globals: true,
@@ -105,8 +108,9 @@ export function pluginViteConfig(packageDirName: string, options: UserConfig = {
       // environment: 'node',
       // environment: 'jsdom',
       testTimeout: 20000,
+      pool: 'forks', // default `threads` doesn't work with `ffjavascript` lib
     },
-  } as any)
+  } as UserConfig)
 }
 
 // export default defineConfig({
