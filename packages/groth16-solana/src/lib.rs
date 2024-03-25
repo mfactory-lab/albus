@@ -47,12 +47,12 @@ pub enum Groth16Error {
 }
 
 #[derive(PartialEq, Eq, Debug)]
-pub struct VK {
+pub struct VK<'a> {
     pub alpha: G1,
     pub beta: G2,
     pub gamma: G2,
     pub delta: G2,
-    pub ic: Vec<G1>,
+    pub ic: &'a [G1],
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -88,7 +88,7 @@ impl Proof {
 pub struct Groth16Verifier<'a> {
     proof: &'a Proof,
     public_inputs: &'a [[u8; ALT_BN128_FIELD_SIZE]],
-    vk: &'a VK,
+    vk: &'a VK<'a>,
 }
 
 impl<'a> Groth16Verifier<'a> {
@@ -136,8 +136,9 @@ impl<'a> Groth16Verifier<'a> {
         input.extend_from_slice(self.vk.alpha.as_slice());
         input.extend_from_slice(self.vk.beta.as_slice());
 
-        let res = alt_bn128_pairing(input.as_slice()).map_err(Groth16Error::AltBn128Error)?;
 
+        let res = alt_bn128_pairing(input.as_slice()).map_err(Groth16Error::AltBn128Error)?;
+        
         if res[31] != 1 {
             return Err(Groth16Error::VerificationFailed);
         }

@@ -13,15 +13,16 @@ fn test_memory() {
     let (vk, public_inputs, proof) = test_data();
     let proof_a = &alt_bn128_g1_neg(&proof[..64]).unwrap()[..];
 
-    let proof = Box::new(Proof::new(
+    let _profiler = dhat::Profiler::builder().testing().build();
+
+    let proof = Proof::new(
         proof_a.try_into().unwrap(),
         proof[64..192].try_into().unwrap(),
         proof[192..256].try_into().unwrap(),
-    ));
+    );
 
     let verifier = Groth16Verifier::new(&proof, public_inputs, &vk).unwrap();
 
-    let _profiler = dhat::Profiler::builder().testing().build();
     let _ = verifier.verify();
 
     println!("{:#?}", dhat::HeapStats::get());
@@ -81,7 +82,7 @@ fn change_endianness(bytes: &[u8]) -> Vec<u8> {
     vec
 }
 
-fn test_data<'a>() -> (VK, &'a [[u8; 32]], [u8; 256]) {
+fn test_data<'a>() -> (VK<'a>, &'a [[u8; 32]], [u8; 256]) {
     (
         VK {
             alpha: [
@@ -120,7 +121,7 @@ fn test_data<'a>() -> (VK, &'a [[u8; 32]], [u8; 256]) {
                 141, 203, 64, 143, 227, 209, 231, 105, 12, 67, 211, 123, 76, 230, 204, 1, 102, 250,
                 125, 170,
             ],
-            ic: vec![
+            ic: &[
                 [
                     2, 11, 194, 97, 0, 60, 149, 138, 51, 98, 201, 46, 23, 237, 7, 220, 255, 190,
                     37, 208, 120, 93, 216, 202, 145, 138, 10, 186, 49, 135, 146, 62, 7, 104, 179,
