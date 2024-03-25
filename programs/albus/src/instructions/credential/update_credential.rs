@@ -26,42 +26,64 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::constants::{CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX};
-use crate::utils::assert_authorized;
+use crate::errors::AlbusError;
+use crate::state::{CredentialRequest, Issuer};
+use crate::utils::{assert_authorized, cmp_pubkeys};
 use crate::ID;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
-use mpl_token_metadata::instructions::UpdateV1CpiBuilder;
-use mpl_token_metadata::types::{Creator, Data};
+use anchor_spl::metadata::mpl_token_metadata::{instructions::UpdateV1CpiBuilder, types::Data};
+use anchor_spl::metadata::Metadata as MetadataProgram;
+use anchor_spl::metadata::MetadataAccount;
 
 pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
-    assert_authorized(ctx.accounts.authority.key)?;
+    match &ctx.accounts.credential_request {
+        None => {
+            assert_authorized(ctx.accounts.authority.key)?;
+        }
+        Some(req) => {
+            if !cmp_pubkeys(&req.credential_mint, ctx.accounts.mint.key) {
+                msg!("Credential mint mismatch");
+                return Err(AlbusError::Unauthorized.into());
+            }
+            match &ctx.accounts.credential_request_issuer {
+                None => {
+                    msg!("Credential request issuer not set");
+                    return Err(AlbusError::Unauthorized.into());
+                }
+                Some(issuer) => {
+                    if !cmp_pubkeys(&req.issuer, &issuer.key()) {
+                        msg!("Credential request issuer mismatch");
+                        return Err(AlbusError::Unauthorized.into());
+                    }
+                    if !cmp_pubkeys(&issuer.authority, ctx.accounts.authority.key) {
+                        msg!("Credential request issuer authority mismatch");
+                        return Err(AlbusError::Unauthorized.into());
+                    }
+                }
+            }
+        }
+    }
 
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
+    let metadata = &ctx.accounts.metadata_account;
 
     UpdateV1CpiBuilder::new(&ctx.accounts.metadata_program)
-        .metadata(&ctx.accounts.metadata_account)
+        .metadata(&ctx.accounts.metadata_account.to_account_info())
         .authority(&ctx.accounts.albus_authority)
-        .token(Some(&ctx.accounts.token_account))
+        // .token(Some(&ctx.accounts.token_account))
         .mint(&ctx.accounts.mint)
         .payer(&ctx.accounts.albus_authority)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
         .system_program(&ctx.accounts.system_program)
         .data(Data {
-            name: data.name,
-            symbol: format!("{}-{}", NFT_SYMBOL_PREFIX, CREDENTIAL_SYMBOL_CODE),
+            name: data.name.unwrap_or(metadata.name.to_string()),
+            symbol: metadata.symbol.to_string(),
             uri: data.uri,
-            seller_fee_basis_points: 0,
-            creators: Some(vec![
-                Creator {
-                    address: ctx.accounts.albus_authority.key(),
-                    verified: true,
-                    share: 100,
-                },
-                // Add issuer account ?
-            ]),
+            seller_fee_basis_points: metadata.seller_fee_basis_points,
+            creators: metadata.creators.clone(),
         })
-        .is_mutable(true)
+        // .is_mutable(true)
         .invoke_signed(&[&signer_seeds])?;
 
     Ok(())
@@ -70,7 +92,7 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateCredentialData {
     pub uri: String,
-    pub name: String,
+    pub name: Option<String>,
 }
 
 #[derive(Accounts)]
@@ -79,40 +101,27 @@ pub struct UpdateCredential<'info> {
     #[account(mut, seeds = [ID.as_ref()], bump)]
     pub albus_authority: AccountInfo<'info>,
 
-    /// Destination token account (required for pNFT).
-    ///
-    /// CHECK: account checked in CPI
-    pub token_account: UncheckedAccount<'info>,
+    /// (Optional) Credential request.
+    pub credential_request: Option<Box<Account<'info, CredentialRequest>>>,
 
+    /// (Optional) Credential request issuer.
+    pub credential_request_issuer: Option<Box<Account<'info, Issuer>>>,
+
+    // /// Destination token account (required for pNFT).
+    // ///
+    // /// CHECK: account checked in CPI
+    // pub token_account: UncheckedAccount<'info>,
     /// Mint account of the NFT.
-    /// The account will be initialized if necessary.
-    ///
-    /// Must be a signer if:
-    ///   * the mint account does not exist.
     ///
     /// CHECK: account checked in CPI
     pub mint: UncheckedAccount<'info>,
 
     /// Metadata account of the NFT.
-    /// This account must be uninitialized.
-    ///
-    /// CHECK: account checked in CPI
     #[account(mut)]
-    pub metadata_account: UncheckedAccount<'info>,
+    pub metadata_account: Account<'info, MetadataAccount>,
 
-    // /// Master edition account of the NFT.
-    // /// The account will be initialized if necessary.
-    // ///
-    // /// CHECK: account checked in CPI
-    // #[account(mut)]
-    // pub edition_account: UncheckedAccount<'info>,
-    /// CHECK: account checked in CPI
-    pub authority: UncheckedAccount<'info>,
-
-    /// Token Metadata program.
-    ///
-    /// CHECK: account checked in CPI
-    pub metadata_program: Program<'info, TokenMetadata>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
 
     /// Instructions sysvar account.
     ///
@@ -120,15 +129,11 @@ pub struct UpdateCredential<'info> {
     #[account(address = sysvar::instructions::id())]
     pub sysvar_instructions: UncheckedAccount<'info>,
 
+    /// Token Metadata program.
+    ///
+    /// CHECK: account checked in CPI
+    pub metadata_program: Program<'info, MetadataProgram>,
+
     /// System program.
     pub system_program: Program<'info, System>,
-}
-
-#[derive(Clone)]
-pub struct TokenMetadata;
-
-impl Id for TokenMetadata {
-    fn id() -> Pubkey {
-        mpl_token_metadata::ID
-    }
 }

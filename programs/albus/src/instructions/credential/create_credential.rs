@@ -30,12 +30,14 @@ use crate::constants::{CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFI
 use crate::ID;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
-use anchor_spl::token::Token;
-use mpl_token_metadata::instructions::MintV1CpiBuilder;
-use mpl_token_metadata::instructions::{
+use anchor_spl::associated_token::AssociatedToken as AssociatedTokenProgram;
+use anchor_spl::metadata::mpl_token_metadata::instructions::MintV1CpiBuilder;
+use anchor_spl::metadata::mpl_token_metadata::instructions::{
     CreateV1CpiBuilder, DelegateStandardV1CpiBuilder, FreezeDelegatedAccountCpiBuilder,
 };
-use mpl_token_metadata::types::{PrintSupply, TokenStandard};
+use anchor_spl::metadata::mpl_token_metadata::types::{PrintSupply, TokenStandard};
+use anchor_spl::metadata::Metadata as MetadataProgram;
+use anchor_spl::token::Token;
 
 pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
@@ -176,12 +178,10 @@ pub struct CreateCredential<'info> {
     pub token_program: Program<'info, Token>,
 
     /// SPL Associated Token program.
-    pub ata_program: Program<'info, AssociatedToken>,
+    pub ata_program: Program<'info, AssociatedTokenProgram>,
 
     /// Token Metadata program.
-    ///
-    /// CHECK: account checked in CPI
-    pub metadata_program: Program<'info, TokenMetadata>,
+    pub metadata_program: Program<'info, MetadataProgram>,
 
     /// Instructions sysvar account.
     ///
@@ -191,22 +191,4 @@ pub struct CreateCredential<'info> {
 
     /// System program.
     pub system_program: Program<'info, System>,
-}
-
-#[derive(Clone)]
-pub struct TokenMetadata;
-
-impl Id for TokenMetadata {
-    fn id() -> Pubkey {
-        mpl_token_metadata::ID
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct AssociatedToken;
-
-impl Id for AssociatedToken {
-    fn id() -> Pubkey {
-        anchor_spl::associated_token::ID
-    }
 }

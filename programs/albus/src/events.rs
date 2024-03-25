@@ -108,3 +108,13 @@ pub struct DeleteInvestigationRequestEvent {
     pub authority: Pubkey,
     pub timestamp: i64,
 }
+
+#[event]
+pub struct CreateCredentialRequestEvent {
+    pub credential_spec: Pubkey,
+    pub credential_mint: Pubkey,
+    pub owner: Pubkey,
+    pub issuer: Pubkey,
+    pub uri: String,
+    pub timestamp: i64,
+}

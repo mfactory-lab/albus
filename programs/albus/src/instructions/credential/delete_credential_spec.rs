@@ -26,40 +26,31 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { readFileSync } from 'node:fs'
-import type { WasmTester } from 'circom_tester'
-import { wasm as circomTester } from 'circom_tester'
+use crate::errors::AlbusError;
+use crate::state::{CredentialSpec, Issuer};
+use crate::utils::{assert_authorized, cmp_pubkeys};
+use anchor_lang::prelude::*;
 
-const FIXTURES_BASE_PATH = '../circuits'
+pub fn handler(ctx: Context<DeleteCredentialSpec>) -> Result<()> {
+    let authority = &ctx.accounts.authority;
+    let issuer = &ctx.accounts.issuer;
 
-export function setupCircuit(name: string) {
-  return circomTester(`${FIXTURES_BASE_PATH}/${name}.circom`, {
-    include: ['../../node_modules'],
-  })
-}
-
-export function loadFixture(name: string) {
-  return readFileSync(`${FIXTURES_BASE_PATH}/${name}`)
-}
-
-export async function calculateLabeledWitness(tester: WasmTester, input: unknown, sanityCheck: boolean) {
-  const witness = await tester.calculateWitness(input, sanityCheck)
-
-  if (!tester.symbols) {
-    await tester.loadSymbols()
-  }
-
-  const labels: { [label: string]: string | undefined } = {}
-
-  for (const n in tester.symbols) {
-    let v: string
-    if (typeof witness[tester.symbols[n]!.varIdx] !== 'undefined') {
-      v = witness[tester.symbols[n]!.varIdx].toString()
-    } else {
-      v = 'undefined'
+    if assert_authorized(authority.key).is_err() && !cmp_pubkeys(&issuer.authority, authority.key) {
+        return Err(AlbusError::Unauthorized.into());
     }
-    labels[n] = v
-  }
 
-  return labels
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct DeleteCredentialSpec<'info> {
+    #[account(mut, close = authority, has_one = issuer)]
+    pub credential_spec: Box<Account<'info, CredentialSpec>>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub issuer: Box<Account<'info, Issuer>>,
+
+    pub system_program: Program<'info, System>,
 }

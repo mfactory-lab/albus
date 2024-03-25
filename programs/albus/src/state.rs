@@ -30,7 +30,7 @@ use crate::utils::Signals;
 use anchor_lang::prelude::*;
 
 #[cfg(feature = "verify-on-chain")]
-use groth16_solana::{Proof, VK};
+use groth16_solana::{Proof};
 
 #[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct ProofData {
@@ -66,19 +66,6 @@ impl VerificationKey {
     }
 }
 
-#[cfg(feature = "verify-on-chain")]
-impl From<VerificationKey> for VK {
-    fn from(value: VerificationKey) -> Self {
-        Self {
-            alpha: value.alpha,
-            beta: value.beta,
-            gamma: value.gamma,
-            delta: value.delta,
-            ic: value.ic,
-        }
-    }
-}
-
 pub const MAX_ISSUER_CODE_LEN: usize = 32;
 pub const MAX_ISSUER_NAME_LEN: usize = 32;
 pub const MAX_ISSUER_DESC_LEN: usize = 64;
@@ -86,12 +73,10 @@ pub const MAX_ISSUER_DESC_LEN: usize = 64;
 #[account]
 #[derive(InitSpace)]
 pub struct Issuer {
-    /// Signer Public key
-    pub pubkey: Pubkey,
-    /// Public key (babyjub curve)
-    pub zk_pubkey: [u8; 64],
-    /// Authority account of the issuer
+    /// The authority of the issuer
     pub authority: Pubkey,
+    /// The ZK authority of the issuer (bbj-pubkey)
+    pub zk_authority: [u8; 64],
     /// Issuer status
     pub is_disabled: bool,
     /// Creation date
@@ -122,58 +107,13 @@ impl Issuer {
         self.is_disabled
     }
 
-    pub fn zk_pubkey(&self) -> ([u8; 32], [u8; 32]) {
+    pub fn zk_authority(&self) -> ([u8; 32], [u8; 32]) {
         (
-            self.zk_pubkey[..32].try_into().unwrap(),
-            self.zk_pubkey[32..].try_into().unwrap(),
+            self.zk_authority[..32].try_into().unwrap(),
+            self.zk_authority[32..].try_into().unwrap(),
         )
     }
 }
-
-//
-// On-chain credential
-//
-// pub const MAX_CREDENTIAL_URI_LEN: usize = 200;
-//
-// #[account]
-// #[derive(InitSpace)]
-// pub struct Credential {
-//     /// Authority of the credential
-//     pub authority: Pubkey,
-//     /// Credential's [Issuer]
-//     pub issuer: Pubkey,
-//     /// Auto-increment issuer specific identifier
-//     pub identifier: u32,
-//     /// Creation date
-//     pub created_at: i64,
-//     /// Processing date
-//     pub processed_at: i64,
-//     /// PDA bump.
-//     pub bump: u8,
-//     /// Issuance status
-//     pub status: CredentialStatus,
-//     /// Credential payload uri
-//     #[max_len(MAX_CREDENTIAL_URI_LEN)]
-//     pub uri: String,
-// }
-//
-// impl Credential {
-//     pub const SEED: &'static [u8] = b"credential";
-//
-//     #[inline]
-//     pub fn space() -> usize {
-//         8 + Self::INIT_SPACE
-//     }
-// }
-//
-// #[repr(u8)]
-// #[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
-// pub enum CredentialStatus {
-//     #[default]
-//     Pending,
-//     Issued,
-//     Rejected,
-// }
 
 pub const MAX_CIRCUIT_CODE_LEN: usize = 16;
 pub const MAX_CIRCUIT_NAME_LEN: usize = 32;
@@ -555,6 +495,115 @@ pub enum ProofRequestStatus {
     Proved,
     Verified,
     Rejected,
+}
+
+pub const MAX_CREDENTIAL_REQUEST_URI_LEN: usize = 200;
+pub const MAX_CREDENTIAL_SPEC_NAME_LEN: usize = 32;
+pub const MAX_CREDENTIAL_SPEC_URI_LEN: usize = 200;
+// pub const MAX_CREDENTIAL_REQUIREMENT_KEY_LEN: usize = 32;
+// pub const MAX_CREDENTIAL_REQUIREMENT_VALUE_LEN: usize = 64;
+
+//
+// On-chain credential
+//
+// pub const MAX_CREDENTIAL_URI_LEN: usize = 200;
+//
+// #[account]
+// #[derive(InitSpace)]
+// pub struct Credential {
+//     /// Authority of the credential
+//     pub authority: Pubkey,
+//     /// Credential's [Issuer]
+//     pub issuer: Pubkey,
+//     /// Auto-increment issuer specific identifier
+//     pub identifier: u32,
+//     /// Creation date
+//     pub created_at: i64,
+//     /// Processing date
+//     pub processed_at: i64,
+//     /// PDA bump.
+//     pub bump: u8,
+//     /// Issuance status
+//     pub status: CredentialStatus,
+//     /// Credential payload uri
+//     #[max_len(MAX_CREDENTIAL_URI_LEN)]
+//     pub uri: String,
+// }
+//
+// impl Credential {
+//     pub const SEED: &'static [u8] = b"credential";
+//
+//     #[inline]
+//     pub fn space() -> usize {
+//         8 + Self::INIT_SPACE
+//     }
+// }
+//
+// #[repr(u8)]
+// #[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
+// pub enum CredentialStatus {
+//     #[default]
+//     Pending,
+//     Issued,
+//     Rejected,
+// }
+
+#[account]
+#[derive(InitSpace)]
+pub struct CredentialRequest {
+    /// The [CredentialSpec] associated with this request
+    pub credential_spec: Pubkey,
+    /// Credential mint address
+    pub credential_mint: Pubkey,
+    /// Credential request creator
+    pub owner: Pubkey,
+    /// The [Issuer] associated with this request
+    pub issuer: Pubkey,
+    /// Presentation Submission
+    #[max_len(MAX_CREDENTIAL_REQUEST_URI_LEN)]
+    pub uri: String,
+    /// Status of the request
+    pub status: u8,
+    /// Creation date
+    pub created_at: i64,
+    /// PDA bump
+    pub bump: u8,
+}
+
+impl CredentialRequest {
+    pub const SEED: &'static [u8] = b"credential-request";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct CredentialSpec {
+    /// The [Issuer] associated with this spec
+    pub issuer: Pubkey,
+    /// The name of the credential spec
+    #[max_len(MAX_CREDENTIAL_SPEC_NAME_LEN)]
+    pub name: String,
+    /// Total number of credential requests associated with this spec
+    pub credential_request_count: u64,
+    /// PDA bump
+    pub bump: u8,
+    /// Presentation definition
+    /// https://identity.foundation/presentation-exchange/#presentation-definition
+    #[max_len(MAX_CREDENTIAL_SPEC_URI_LEN)]
+    pub uri: String,
+}
+
+impl CredentialSpec {
+    pub const SEED: &'static [u8] = b"credential-spec";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
 }
 
 #[cfg(test)]

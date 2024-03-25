@@ -29,9 +29,12 @@
 use crate::ID;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar;
+use anchor_spl::metadata::mpl_token_metadata::instructions::{
+    BurnV1CpiBuilder, ThawDelegatedAccountCpiBuilder,
+};
+use anchor_spl::metadata::Metadata as MetadataProgram;
 use anchor_spl::token::spl_token::instruction::AuthorityType;
 use anchor_spl::token::{set_authority, SetAuthority, Token};
-use mpl_token_metadata::instructions::{BurnV1CpiBuilder, ThawDelegatedAccountCpiBuilder};
 
 pub fn handler(ctx: Context<DeleteCredential>) -> Result<()> {
     // assert_authorized(ctx.accounts.authority.key)?;
@@ -113,7 +116,7 @@ pub struct DeleteCredential<'info> {
     /// Token Metadata program.
     ///
     /// CHECK: account checked in CPI
-    pub metadata_program: Program<'info, TokenMetadata>,
+    pub metadata_program: Program<'info, MetadataProgram>,
 
     /// SPL Token program.
     pub token_program: Program<'info, Token>,
@@ -126,13 +129,4 @@ pub struct DeleteCredential<'info> {
 
     /// System program.
     pub system_program: Program<'info, System>,
-}
-
-#[derive(Clone)]
-pub struct TokenMetadata;
-
-impl Id for TokenMetadata {
-    fn id() -> Pubkey {
-        mpl_token_metadata::ID
-    }
 }
