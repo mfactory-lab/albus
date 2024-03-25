@@ -26,13 +26,14 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { Metaplex, irysStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
-import type { PublicKeyInitData } from '@solana/web3.js'
+import type { ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { assert } from 'vitest'
-import { ProofRequestStatus } from '../../packages/albus-sdk/src'
+import { Circomkit } from 'circomkit'
+import { ProofRequestStatus, parseSignal } from '../../packages/albus-sdk/src'
 import type { AlbusClient } from '../../packages/albus-sdk/src'
 
 export const payer = Keypair.fromSecretKey(Uint8Array.from([
@@ -42,9 +43,12 @@ export const payer = Keypair.fromSecretKey(Uint8Array.from([
   148, 253, 191, 58, 219, 119, 104, 89, 225, 26, 244, 119, 160, 6, 156, 227,
 ]))
 
-export const provider = newProvider(payer)
+export const provider = initProvider(payer)
 
-export function netMetaplex(payerKeypair: Keypair) {
+/**
+ * Initializes a Metaplex instance with the given payer keypair.
+ */
+export function initMetaplex(payerKeypair: Keypair) {
   return Metaplex.make(provider.connection)
     .use(keypairIdentity(payerKeypair))
     .use(irysStorage({
@@ -54,27 +58,53 @@ export function netMetaplex(payerKeypair: Keypair) {
     }))
 }
 
-export function newProvider(keypair: Keypair) {
-  const opts = AnchorProvider.defaultOptions()
+/**
+ * Initializes the provider with the given keypair and options.
+ */
+export function initProvider(keypair: Keypair, opts?: ConfirmOptions) {
+  opts = {
+    ...opts,
+    skipPreflight: true,
+    commitment: 'confirmed',
+    preflightCommitment: 'confirmed',
+  }
   return new AnchorProvider(
-    new Connection('http://localhost:8899', opts),
+    new Connection('http://127.0.0.1:8899', opts),
     new Wallet(keypair),
-    opts,
+    {
+      ...AnchorProvider.defaultOptions(),
+      ...opts,
+    },
   )
 }
 
-export async function airdrop(addr: PublicKeyInitData, amount = 100) {
-  await provider.connection.confirmTransaction(
-    await provider.connection.requestAirdrop(new PublicKey(addr), amount * LAMPORTS_PER_SOL),
-  )
+/**
+ * Requests an airdrop of a specified amount of SOL to the given public key address.
+ */
+export async function requestAirdrop(addr: PublicKeyInitData, amount = 100) {
+  const { connection } = provider
+  const signature = await connection.requestAirdrop(new PublicKey(addr), amount * LAMPORTS_PER_SOL)
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash()
+  await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature })
 }
 
+/**
+ * Sleeps for a specified amount of time.
+ */
+export const sleep = (delay: number) => new Promise(resolve => setTimeout(resolve, delay))
+
+/**
+ * Asserts that the error message contains the specified message.
+ */
+export function assertErrorMessage(error: { logs?: string[] }, msg: string) {
+  assert.ok(String((error?.logs ?? []).join('')).includes(msg))
+}
+
+/**
+ * Asserts that the given error object has the specified error code.
+ */
 export function assertErrorCode(error: { logs?: string[] }, code: string) {
-  assert.ok(String((error?.logs ?? []).join('')).includes(`Error Code: ${code}`))
-}
-
-export function loadFixture(name: string) {
-  return readFileSync(`./fixtures/${name}`)
+  assertErrorMessage(error, `Error Code: ${code}`)
 }
 
 export async function createTestProofRequest(client: AlbusClient, adminClient: AlbusClient, prefix: string, status?: ProofRequestStatus) {
@@ -131,4 +161,137 @@ export async function deleteTestData(client: AlbusClient, prefix: string) {
   await client.policy.delete({ serviceCode, code: policyCode })
   await client.service.delete({ code: serviceCode })
   await client.circuit.delete({ code: circuitCode })
+}
+
+export class CircuitHelper {
+  private circomkit: Circomkit
+
+  constructor(readonly circuit: string) {
+    this.circomkit = new Circomkit({
+      protocol: 'groth16',
+      circuits: '../packages/circuits/circuits.json',
+      dirCircuits: '../packages/circuits/circuits',
+      dirBuild: '../packages/circuits/build',
+      dirPtau: '../packages/circuits/ptau',
+      include: ['../node_modules'],
+      inspect: false,
+    })
+  }
+
+  /**
+   * Try to set up the given circuit.
+   */
+  async setup() {
+    const circuitPath = `${this.circomkit.config.dirBuild}/${this.circuit}`
+    const alreadySetup = existsSync(`${circuitPath}/groth16_vkey.json`) && existsSync(`${circuitPath}/groth16_pkey.zkey`)
+
+    if (!alreadySetup) {
+      return this.circomkit.setup(this.circuit)
+    }
+  }
+
+  /**
+   * Load zkey for a given circuit.
+   */
+  async zkey() {
+    return readFileSync(`${this.circomkit.config.dirBuild}/${this.circuit}/groth16_pkey.zkey`)
+  }
+
+  /**
+   * Load verifying key for a given circuit.
+   */
+  async vkey() {
+    return JSON.parse(readFileSync(`${this.circomkit.config.dirBuild}/${this.circuit}/groth16_vkey.json`).toString())
+  }
+
+  /**
+   * Load WASM file for the given circuit.
+   */
+  async wasm() {
+    return readFileSync(`${this.circomkit.config.dirBuild}/${this.circuit}/${this.circuit}_js/${this.circuit}.wasm`)
+  }
+
+  /**
+   * Load signals for a given circuit.
+   */
+  async info() {
+    const info = await this.circomkit.info(this.circuit)
+    const symData = readFileSync(`${this.circomkit.config.dirBuild}/${this.circuit}/${this.circuit}.sym`)
+    return {
+      ...info,
+      signals: loadSignals(symData.toString(), info.outputs, info.publicInputs, info.privateInputs),
+    }
+  }
+}
+
+/**
+ * Load symbols from {@link symData} and categorize them based on the number
+ * of outputs, public inputs, and private inputs.
+ */
+function loadSignals(symData: string, nOutputs: number, nPubInputs: number, nPrvInputs: number) {
+  const signals = loadSymbols(symData, (acc, { idx, name }) => {
+    const sig = { ...parseSignal(name.replace('main.', '')), type: '' }
+    if (!sig?.name) {
+      return
+    }
+    if (idx <= nOutputs) {
+      sig.type = 'output'
+    } else if (idx <= nOutputs + nPubInputs) {
+      sig.type = 'public'
+    } else {
+      sig.type = 'private'
+    }
+    acc[sig.name] = sig
+  }, nOutputs + nPubInputs + nPrvInputs)
+
+  return Object.keys(signals)
+    .reduce((acc, name) => {
+      const sig = signals[name]
+      let input = name
+      if (sig.size > 0) {
+        input += `[${sig.size + 1}]`
+        if (sig.next && sig.next.size > 0) {
+          input += `[${sig.next.size + 1}]`
+        }
+      }
+      acc[sig.type].push(input)
+      return acc
+    }, {
+      output: [] as string[],
+      public: [] as string[],
+      private: [] as string[],
+    })
+}
+
+/**
+ * Loads symbols from a string representation into an object.
+ */
+function loadSymbols<T>(symData: string, apply: (acc: { [key: string]: any }, any: any) => T, limit?: number) {
+  return symData.split('\n').slice(0, limit).reduce((acc, line) => {
+    const arr = line.split(',')
+    if (arr.length >= 4) {
+      apply(acc, {
+        idx: Number(arr[0]),
+        varIdx: Number(arr[1]),
+        componentIdx: Number(arr[2]),
+        name: String(arr[3]),
+      })
+    }
+    return acc
+  }, {})
+}
+
+/**
+ * Converts ISO 3166-1 alpha-2 country codes to bytes.
+ */
+export function countryLookup(iso2Codes: string[]) {
+  const encoder = new TextEncoder()
+
+  if (iso2Codes.length > 16) {
+    throw new Error('countryLookup cannot have more than 16 codes')
+  }
+  return iso2Codes.reduce((acc, code) => {
+    acc.push(...encoder.encode(code))
+    return acc
+  }, [] as number[])
 }

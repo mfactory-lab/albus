@@ -51,14 +51,14 @@ import {
 } from '../../packages/albus-stake-pool-sdk/src'
 import { MINIMUM_RESERVE_LAMPORTS } from '../../packages/albus-stake-pool-sdk/src/constants'
 import { getValidatorListAccount } from '../../packages/albus-stake-pool-sdk/src/utils'
-import { airdrop, createTestData, createTestProofRequest, deleteTestData, newProvider, payer, provider } from './utils'
+import { createTestData, createTestProofRequest, deleteTestData, initProvider, payer, provider, requestAirdrop } from './utils'
 
 describe('albusStakePool', async () => {
   const user = Keypair.generate()
   const vote = Keypair.generate()
 
   const client = new AlbusClient(provider).local()
-  const userClient = new AlbusClient(newProvider(user)).local()
+  const userClient = new AlbusClient(initProvider(user)).local()
 
   let stakePool: PublicKey
   let stakePoolMint: PublicKey
@@ -74,8 +74,8 @@ describe('albusStakePool', async () => {
   console.log(`votePubkey: ${vote.publicKey}`)
 
   beforeAll(async () => {
-    await airdrop(payer.publicKey)
-    await airdrop(user.publicKey)
+    await requestAirdrop(payer.publicKey)
+    await requestAirdrop(user.publicKey)
 
     // albus test data
     const testData = await createTestData(client, 'stakePool')

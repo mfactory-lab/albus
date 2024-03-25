@@ -33,7 +33,7 @@ import { Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { beforeAll, describe, it } from 'vitest'
 import { AlbusClient } from '../../packages/albus-sdk/src'
 import { AlbusTransferClient } from '../../packages/albus-transfer-sdk/src'
-import { airdrop, createTestData, createTestProofRequest, payer, provider } from './utils'
+import { createTestData, createTestProofRequest, payer, provider, requestAirdrop } from './utils'
 
 describe('albusTransfer', () => {
   const client = new AlbusClient(provider).local()
@@ -44,7 +44,7 @@ describe('albusTransfer', () => {
   let policy: PublicKey
 
   beforeAll(async () => {
-    await airdrop(payer.publicKey)
+    await requestAirdrop(payer.publicKey)
     const testData = await createTestData(client, 'transfer')
     policy = testData.policy
     proofRequest = await createTestProofRequest(client, client, 'transfer')

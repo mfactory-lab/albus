@@ -33,7 +33,7 @@ import { Keypair } from '@solana/web3.js'
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
 import { AlbusClient } from '../../packages/albus-sdk/src'
 import { AlbusSwapClient, CurveType } from '../../packages/albus-swap-sdk/src'
-import { airdrop, createTestData, createTestProofRequest, deleteTestData, newProvider, payer, provider } from './utils'
+import { createTestData, createTestProofRequest, deleteTestData, initProvider, payer, provider, requestAirdrop } from './utils'
 
 async function tokenBalance(addr: PublicKey) {
   const acc = await getAccount(provider.connection, addr)
@@ -44,9 +44,9 @@ describe('albusSwap', async () => {
   const user = Keypair.generate()
 
   const client = new AlbusClient(provider).local()
-  const userClient = new AlbusClient(newProvider(user)).local()
+  const userClient = new AlbusClient(initProvider(user)).local()
   const swapClient = new AlbusSwapClient(provider)
-  const userSwapClient = new AlbusSwapClient(newProvider(user))
+  const userSwapClient = new AlbusSwapClient(initProvider(user))
 
   const tokenSwap = Keypair.generate()
   const swapAuthority = swapClient.swapAuthority(tokenSwap.publicKey)
@@ -63,8 +63,8 @@ describe('albusSwap', async () => {
   let userPoolToken: Account
 
   beforeAll(async () => {
-    await airdrop(payer.publicKey)
-    await airdrop(user.publicKey)
+    await requestAirdrop(payer.publicKey)
+    await requestAirdrop(user.publicKey)
 
     // create mint accounts
     tokenA = await createMint(provider.connection, payer, payer.publicKey, null, 9)

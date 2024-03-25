@@ -38,6 +38,7 @@ export default defineConfig({
     // include: ['**/?(*.){test,spec}.?(c|m)[jt]s?(x)'],
     testTimeout: 20000,
     environment: 'node',
+    pool: 'forks',
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

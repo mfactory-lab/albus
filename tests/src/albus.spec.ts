@@ -30,7 +30,7 @@ import { Keypair, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
 import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus, TxBuilder } from '../../packages/albus-sdk/src'
-import { airdrop, assertErrorCode, loadFixture, newProvider, payer, provider } from './utils'
+import { CircuitHelper, assertErrorCode, countryLookup, initProvider, payer, provider, requestAirdrop } from './utils'
 
 describe('albus', async () => {
   const client = new AlbusClient(provider).local() // .debug()
@@ -49,70 +49,72 @@ describe('albus', async () => {
     Keypair.generate(),
   ]
 
+  const circuit = 'kyc'
+
+  const circuitHelper = new CircuitHelper('kyc')
+
   const credential = await Albus.credential.createVerifiableCredential({
-    birthDate: '19890101',
-    firstName: 'Alex',
-    country: 'US',
+    givenName: 'Mikayla',
+    familyName: 'Halvorson',
+    gender: 'female',
+    birthDate: '1966-10-02',
+    birthPlace: 'Westland',
+    nationality: 'GB',
+    country: 'GB',
+    countryOfBirth: 'GB',
+    docType: 'ID_CARD',
+    docNumber: 'AB123456',
   }, {
     issuerSecretKey: issuer.secretKey,
   })
 
   const circuitData = {
     code: circuitCode,
-    name: 'Age policy',
+    name: circuit,
     wasmUri: 'mock:wasmUri',
     zkeyUri: 'mock:zkeyUri',
-    outputs: [
-      'encryptedData[4]',
-      'encryptedShare[3][4]',
-      'userPublicKey[2]',
-    ],
-    privateSignals: [
-      'birthDate',
-      'userPrivateKey',
-      'meta_validUntil',
-    ],
-    publicSignals: [
-      'timestamp',
-      'minAge',
-      'maxAge',
-      'credentialRoot',
-      'meta_validUntilKey',
-      'meta_validUntilProof[5]',
-      'birthDateKey',
-      'birthDateProof[5]',
-      'issuerPk[2]',
-      'issuerSignature[3]',
-      'trusteePublicKey[3][2]',
-    ],
+    outputs: [] as string[],
+    privateSignals: [] as string[],
+    publicSignals: [] as string[],
   }
 
   const policyData = {
     code: policyCode,
     serviceCode,
     circuitCode: circuitData.code,
-    name: 'Age policy 18+',
-    description: 'Test policy',
+    name: `${circuit} policy`,
+    description: `Policy for ${circuit}`,
     expirationPeriod: 0,
     retentionPeriod: 0,
     rules: [
-      { key: 'minAge', value: 18 },
-      { key: 'maxAge', value: 100 },
-    ],
+      { key: 'config', value: [18, 100, 1].reverse() },
+      { key: 'countryLookup', value: countryLookup(['UA', 'GB'].reverse()) },
+    ] as any[],
   }
+
+  let maxPublicInputs = 0
 
   beforeAll(async () => {
     vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
 
-    // airdrops
-    await airdrop(payer.publicKey)
-    await airdrop(investigator.publicKey)
-    for (const trusteeKeypair of trustees) {
-      await airdrop(trusteeKeypair.publicKey)
-    }
-  })
+    await circuitHelper.setup()
+    const { signals, publicInputs, outputs } = await circuitHelper.info()
+    circuitData.privateSignals = signals.private
+    circuitData.publicSignals = signals.public
+    circuitData.outputs = signals.output
+    maxPublicInputs = publicInputs + outputs
 
-  it('can create issuer', async () => {
+    console.log('maxPublicInputs', maxPublicInputs)
+
+    // airdrops
+    await requestAirdrop(payer.publicKey)
+    await requestAirdrop(investigator.publicKey)
+    for (const trusteeKeypair of trustees) {
+      await requestAirdrop(trusteeKeypair.publicKey)
+    }
+  }, 50000)
+
+  it('should allow to create an issuer', async () => {
     try {
       const { signature, address } = await client.issuer.create({
         code: issuerCode,
@@ -127,7 +129,7 @@ describe('albus', async () => {
     }
   })
 
-  it('can create circuit', async () => {
+  it('should allow to create a circuit', async () => {
     try {
       const { signature, address } = await client.circuit.create(circuitData)
       assert.ok(!!signature)
@@ -138,8 +140,8 @@ describe('albus', async () => {
     }
   })
 
-  it('can update circuit vk', async () => {
-    const vk = JSON.parse(loadFixture('agePolicy.vk.json').toString())
+  it('should allow to update a circuit vk', async () => {
+    const vk = await circuitHelper.vkey()
     try {
       const data = { code: circuitCode, vk }
       const { signatures } = await client.circuit.updateVk(data)
@@ -156,11 +158,11 @@ describe('albus', async () => {
     }
   })
 
-  it(`can create ${trustees.length} trustees`, async () => {
+  it(`should allow to create ${trustees.length} trustees`, async () => {
     try {
       for (let i = 0; i < trustees.length; i++) {
         const trusteeKeypair = trustees[i]!
-        const newClient = new AlbusClient(newProvider(trusteeKeypair)).local()
+        const newClient = new AlbusClient(initProvider(trusteeKeypair)).local()
         const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trusteeKeypair)
         const data = {
           name: `trustee${i}`,
@@ -194,7 +196,7 @@ describe('albus', async () => {
     }
   })
 
-  it('can verify all trustees', async () => {
+  it('should allow to verify all trustees', async () => {
     try {
       const trustees = await client.trustee.find({ noData: true })
       for (const { pubkey } of trustees) {
@@ -206,10 +208,10 @@ describe('albus', async () => {
     }
   })
 
-  it('can update a trustee', async () => {
+  it('should allow to update a trustee', async () => {
     try {
       const trusteeKeypair = trustees[0]!
-      const newClient = new AlbusClient(newProvider(trusteeKeypair)).local()
+      const newClient = new AlbusClient(initProvider(trusteeKeypair)).local()
       const babyJubKey = Albus.zkp.getBabyJubPrivateKey(trusteeKeypair)
       const data = {
         key: Array.from(babyJubKey.public().compress()),
@@ -231,7 +233,7 @@ describe('albus', async () => {
     }
   })
 
-  it('can create a service', async () => {
+  it('should allow to create a service provider', async () => {
     try {
       const data = { code: serviceCode, name: 'acme', website: 'https://example.com' }
       const { address } = await client.service.create(data)
@@ -246,7 +248,7 @@ describe('albus', async () => {
     }
   })
 
-  it('can service select a trustee', async () => {
+  it('should allow for service provider select a trustee', async () => {
     try {
       const [serviceProvider] = client.pda.serviceProvider(serviceCode)
       const data = {
@@ -264,7 +266,7 @@ describe('albus', async () => {
     }
   })
 
-  it('can create a policy', async () => {
+  it('should allow to create a policy', async () => {
     try {
       const { address } = await client.policy.create(policyData)
       const policy = await client.policy.load(address)
@@ -282,9 +284,10 @@ describe('albus', async () => {
     }
   })
 
-  it('can create and prove a proof request with tx builder', async () => {
+  // let proofRequestAddress: PublicKey
+  it('should allow to create and prove a proof request with tx builder', async () => {
     const txBuilder = new TxBuilder(provider)
-    const { address } = await client.proofRequest.create({ serviceCode, policyCode, txBuilder })
+    const { address } = await client.proofRequest.create({ serviceCode, policyCode, txBuilder, maxPublicInputs })
 
     const [serviceProvider] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(serviceProvider, policyCode)
@@ -298,18 +301,33 @@ describe('albus', async () => {
       policy,
       txBuilder,
       vc: PublicKey.default, // mocked
-      wasmUri: loadFixture('agePolicy.wasm'),
-      zkeyUri: loadFixture('agePolicy.zkey'),
+      wasmUri: await circuitHelper.wasm(),
+      zkeyUri: await circuitHelper.zkey(),
+      verify: true,
     })
 
     await txBuilder.sendAll()
+
+    // proofRequestAddress = address
 
     const proofRequest = await client.proofRequest.load(address)
     assert.equal(proofRequest.status, ProofRequestStatus.Verified)
   })
 
-  it('can create a proof request', async () => {
-    const { address } = await client.proofRequest.create({ serviceCode, policyCode })
+  // it('should allow to verify a proof request', async () => {
+  //   const [circuit] = client.pda.circuit(circuitCode)
+  //
+  //   await client.proofRequest.verifyOnChain({
+  //     proofRequest: proofRequestAddress,
+  //     circuit,
+  //   })
+  //
+  //   const proofRequest2 = await client.proofRequest.load(proofRequestAddress)
+  //   assert.equal(proofRequest2.status, ProofRequestStatus.Verified)
+  // }, { timeout: 50000 })
+
+  it('should allow to create a proof request', async () => {
+    const { address } = await client.proofRequest.create({ serviceCode, policyCode, maxPublicInputs })
     const proofRequest = await client.proofRequest.load(address)
 
     const [serviceProvider] = client.pda.serviceProvider(serviceCode)
@@ -323,7 +341,7 @@ describe('albus', async () => {
     assert.equal(proofRequest.status, ProofRequestStatus.Pending)
   })
 
-  it('can prove a proof request', async () => {
+  it('should allow to prove the proof request', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
@@ -332,8 +350,8 @@ describe('albus', async () => {
       proofRequest,
       userPrivateKey: payer.secretKey,
       vc: PublicKey.default, // mocked
-      wasmUri: loadFixture('agePolicy.wasm'),
-      zkeyUri: loadFixture('agePolicy.zkey'),
+      wasmUri: await circuitHelper.wasm(),
+      zkeyUri: await circuitHelper.zkey(),
     })
 
     assert.ok(signatures.length > 0)
@@ -345,7 +363,7 @@ describe('albus', async () => {
     assert.ok(data.publicInputs.length > 0)
   })
 
-  it('can verify proof request', async () => {
+  it('should allow to verify the proof request', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
@@ -353,21 +371,21 @@ describe('albus', async () => {
     assert.ok(res)
   })
 
-  it('can change proof request status', async () => {
+  it('should allow to change proof request status', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
     await client.proofRequest.changeStatus({ proofRequest, status: ProofRequestStatus.Rejected })
   })
 
-  it('can not change proof request status with unauthorized authority', async () => {
+  it('should not allow to change proof request status with unauthorized authority', async () => {
     const [service] = client.pda.serviceProvider(serviceCode)
     const [policy] = client.pda.policy(service, policyCode)
     const [proofRequest] = client.pda.proofRequest(policy, provider.publicKey)
 
     const newPayerKeypair = Keypair.generate()
-    const newClient = new AlbusClient(newProvider(newPayerKeypair)).local()
-    await airdrop(newPayerKeypair.publicKey)
+    const newClient = new AlbusClient(initProvider(newPayerKeypair)).local()
+    await requestAirdrop(newPayerKeypair.publicKey)
 
     try {
       await newClient.proofRequest.changeStatus({ proofRequest, status: ProofRequestStatus.Verified })
@@ -381,7 +399,7 @@ describe('albus', async () => {
     let investigationAddress: PublicKey
 
     it('can create investigation request', async () => {
-      const newClient = new AlbusClient(newProvider(investigator)).local()
+      const newClient = new AlbusClient(initProvider(investigator)).local()
         .configure('debug', client.options.debug)
 
       const [service] = client.pda.serviceProvider(serviceCode)
@@ -448,7 +466,7 @@ describe('albus', async () => {
     })
 
     it('can delete investigation request', async () => {
-      const newClient = new AlbusClient(newProvider(investigator)).local()
+      const newClient = new AlbusClient(initProvider(investigator)).local()
         .configure('debug', client.options.debug)
 
       try {

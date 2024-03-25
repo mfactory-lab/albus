@@ -3,15 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "vitest --no-threads",
-    "test:ui": "vitest --no-threads --ui",
-    "test:debug": "DEBUG=vite-node:* vitest --no-threads"
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:debug": "DEBUG=vite-node:* vitest"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/js": "^0.20.1",
     "@solana/spl-token": "^0.3.9",
     "@types/bn.js": "^5.1.5",
-    "@types/bs58": "^4.0.4"
+    "@types/bs58": "^4.0.4",
+    "circomkit": "0.0.24"
   }
 }

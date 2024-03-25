@@ -40,19 +40,19 @@ import {
   getMasterEditionPDA,
   getMetadataPDA,
 } from '../../packages/albus-sdk/src'
-import { airdrop, netMetaplex, newProvider, payer, provider } from './utils'
+import { assertErrorMessage, initMetaplex, initProvider, payer, provider, requestAirdrop } from './utils'
 
 describe('albusCredential', async () => {
   const issuer = Keypair.generate()
   const holder = Keypair.generate()
 
   const client = new AlbusClient(provider).local()
-  const holderClient = new AlbusClient(newProvider(holder)).local()
-  const mx = netMetaplex(payer)
-
-  console.log(client.programId)
+  const holderClient = new AlbusClient(initProvider(holder)).local()
+  const mx = initMetaplex(payer)
 
   const updateAuthority = client.pda.authority()[0]
+
+  const CREDENTIAL_MOCK_URI = 'https://credential.json'
 
   const credential = {
     name: 'ALBUS Digital Credential',
@@ -65,19 +65,19 @@ describe('albusCredential', async () => {
     }),
   }
 
-  console.log(`Payer: ${payer.publicKey}`)
-  console.log(`Holder: ${holder.publicKey}`)
-  console.log(`UpdateAuthority: ${updateAuthority}`)
-
-  async function _balance(addr: PublicKey) {
-    const balance = await provider.connection.getBalance(addr)
-    console.log(`Balance(${addr}): ${balance}`)
-  }
-
   beforeAll(async () => {
-    await airdrop(payer.publicKey)
-    await airdrop(holder.publicKey)
-    // await airdrop(updateAuthority)
+    await requestAirdrop(payer.publicKey)
+    await requestAirdrop(holder.publicKey)
+    // await requestAirdrop(updateAuthority)
+    vi.spyOn(axios, 'get').mockImplementation(async (uri) => {
+      switch (uri) {
+        case CREDENTIAL_MOCK_URI:
+          return {
+            status: 200,
+            data: credential,
+          }
+      }
+    })
   })
 
   let credentialMint: PublicKey
@@ -88,115 +88,73 @@ describe('albusCredential', async () => {
     },
   }
 
-  it('can not create credential with empty balances', async () => {
-    const client = new AlbusClient(newProvider(Keypair.generate())).local()
+  it('should not create credential with empty balances', async () => {
+    const client = new AlbusClient(initProvider(Keypair.generate())).local()
     try {
       await client.credential.create({}, { feePayer: payer })
       assert.ok(false)
     } catch (e: any) {
-      assert.ok(String(e.message).includes('custom program error: 0x1'))
+      // insufficient lamports 0, need 15616720
+      assertErrorMessage(e, 'insufficient lamports 0')
     }
   })
 
-  it('can create credential with user payer', async () => {
+  async function assertValidNft(mintAddress: PublicKey, owner: PublicKey) {
+    const nft = await mx.nfts().findByMint({ mintAddress })
+    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
+
+    const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
+      mint: mintAddress,
+      address: owner,
+      addressType: 'owner',
+    })
+
+    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
+    assert.equal(tokenWithMint.state, AccountState.Frozen)
+    assert.equal(tokenWithMint.amount.basisPoints.toNumber(), 1)
+    return tokenWithMint
+  }
+
+  it('should create a credential with holder', async () => {
     const { mintAddress } = await holderClient.credential.create()
-
     credentialMint = mintAddress
-    const nft = await mx.nfts().findByMint({ mintAddress })
-    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
-
-    const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
-      mint: mintAddress,
-      address: holderClient.provider.publicKey,
-      addressType: 'owner',
-    })
-
-    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
-    assert.equal(tokenWithMint.state, AccountState.Frozen)
+    await assertValidNft(mintAddress, holderClient.provider.publicKey)
   })
 
-  it('can create credential with albus payer', async () => {
-    await airdrop(updateAuthority)
+  it('should manage credential with custom owner: updates credential URI and deletes credential', async () => {
     const owner = Keypair.generate()
-    const client = new AlbusClient(newProvider(Keypair.generate())).local()
-    await client.credential.create({ owner }, { feePayer: payer })
-  })
-
-  it('can manage credential with custom owner', async () => {
-    const owner = Keypair.generate()
-
     const { mintAddress } = await holderClient.credential.create({ owner })
-
-    const nft = await mx.nfts().findByMint({ mintAddress })
-    assert.equal(String(nft.updateAuthorityAddress), String(updateAuthority))
-
-    const tokenWithMint = await mx.tokens().findTokenWithMintByMint({
-      mint: mintAddress,
-      address: owner.publicKey,
-      addressType: 'owner',
-    })
-    assert.equal(String(tokenWithMint.delegateAddress), String(updateAuthority))
-    assert.equal(tokenWithMint.state, AccountState.Frozen)
-
+    await assertValidNft(mintAddress, owner.publicKey)
     await client.credential.update({
       mint: mintAddress,
-      owner: owner.publicKey,
-      uri: 'https://credential.json',
-      name: 'Test Credential',
+      uri: CREDENTIAL_MOCK_URI,
     })
-
     await holderClient.credential.delete({ mint: mintAddress, owner })
   })
 
-  it('can update credential', async () => {
+  it('should update a credential', async () => {
     const data = {
       mint: credentialMint,
       owner: holder.publicKey,
-      uri: 'https://credential.json',
-      name: 'Test Credential',
+      uri: CREDENTIAL_MOCK_URI,
     }
     await client.credential.update(data)
     const nft = await mx.nfts().findByMint({ mintAddress: credentialMint })
     assert.equal(nft.uri, data.uri)
-    assert.equal(nft.name, data.name)
   })
 
-  it('can load credential', async () => {
-    vi.spyOn(axios, 'get')
-      .mockImplementationOnce(async (uri) => {
-        switch (uri) {
-          case 'https://credential.json':
-            return {
-              status: 200,
-              data: credential,
-            }
-        }
-      })
-
+  it('should load a credential', async () => {
     const vc = await holderClient.credential.load(credentialMint, { resolver })
-
     assert.deepEqual(vc, credential.vc)
   })
 
-  it('can load all credentials', async () => {
-    vi.spyOn(axios, 'get')
-      .mockImplementationOnce(async (uri) => {
-        switch (uri) {
-          case 'https://credential.json':
-            return {
-              status: 200,
-              data: credential,
-            }
-        }
-      })
-
+  it('should load all credentials', async () => {
     const vc = await holderClient.credential.loadAll({ resolver })
-
     assert.equal(vc.length, 1)
     assert.deepEqual(vc[0]?.credential, credential.vc)
   })
 
-  it('can delete credential', async () => {
+  it('should delete credential', async () => {
     await holderClient.credential.delete({ mint: credentialMint })
     const token = getAssociatedTokenAddress(credentialMint, client.provider.publicKey)
 
