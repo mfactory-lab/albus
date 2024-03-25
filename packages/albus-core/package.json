@@ -46,7 +46,6 @@
     "web-did-resolver": "^2.0.27"
   },
   "devDependencies": {
-    "circom_tester": "^0.0.20",
     "release-it-config": "workspace:^"
   },
   "publishConfig": {
