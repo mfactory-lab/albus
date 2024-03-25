@@ -6,8 +6,12 @@ import { Trustee } from './Trustee'
 import { InvestigationRequest } from './InvestigationRequest'
 import { InvestigationRequestShare } from './InvestigationRequestShare'
 import { ProofRequest } from './ProofRequest'
+import { CredentialRequest } from './CredentialRequest'
+import { CredentialSpec } from './CredentialSpec'
 
 export * from './Circuit'
+export * from './CredentialRequest'
+export * from './CredentialSpec'
 export * from './InvestigationRequest'
 export * from './InvestigationRequestShare'
 export * from './Issuer'
@@ -25,4 +29,6 @@ export const accountProviders = {
   InvestigationRequest,
   InvestigationRequestShare,
   ProofRequest,
+  CredentialRequest,
+  CredentialSpec,
 }

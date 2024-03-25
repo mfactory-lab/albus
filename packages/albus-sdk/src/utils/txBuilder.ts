@@ -5,6 +5,7 @@ import type {
   TransactionInstructionCtorFields,
 } from '@solana/web3.js'
 import {
+  ComputeBudgetProgram,
   Transaction,
 } from '@solana/web3.js'
 import type { ClientProvider } from '../client'
@@ -18,7 +19,11 @@ export class TxBuilder {
   }
 
   addTransaction(tx: Transaction, signers?: Signer[]) {
-    this.txs.push({ tx, signers })
+    if (this.txs[0] && this.txs[0].tx.instructions.length > 0) {
+      this.txs.push({ tx, signers })
+    } else {
+      this.txs[0] = { tx, signers }
+    }
     return this
   }
 
@@ -29,6 +34,13 @@ export class TxBuilder {
 
   addSigner(signer: Signer) {
     this.txs[0]?.signers?.push(signer)
+    return this
+  }
+
+  priorityFee(microLamports: number | bigint) {
+    for (const { tx } of this.txs) {
+      tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: BigInt(microLamports) }))
+    }
     return this
   }
 
@@ -51,6 +63,8 @@ export class TxBuilder {
         this.txs[0]!.tx.feePayer = feePayer.publicKey
         this.txs[0]!.signers?.push(feePayer)
       }
+
+      console.log(this.txs)
       return await this.provider.sendAndConfirm(this.txs[0]!.tx, this.txs[0]!.signers, {
         ...this.provider.opts,
         ...opts,

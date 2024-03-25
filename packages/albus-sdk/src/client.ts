@@ -45,6 +45,8 @@ import type { Wallet, WithRequired } from './types'
 import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
 import { DEV_PROGRAM_ID } from './constants'
+import { CredentialSpecManager } from './credentialSpecManager'
+import { CredentialRequestManager } from './credentialRequestManager'
 
 export enum AlbusClientEnv { DEV = 'dev', STAGE = 'stage', PROD = 'prod' }
 
@@ -54,6 +56,8 @@ export class AlbusClient {
   readonly policy: PolicyManager
   readonly service: ServiceManager
   readonly credential: CredentialManager
+  readonly credentialSpec: CredentialSpecManager
+  readonly credentialRequest: CredentialRequestManager
   readonly trustee: TrusteeManager
   readonly issuer: IssuerManager
   readonly investigation: InvestigationManager
@@ -76,6 +80,8 @@ export class AlbusClient {
     this.policy = new PolicyManager(this)
     this.service = new ServiceManager(this)
     this.credential = new CredentialManager(this)
+    this.credentialSpec = new CredentialSpecManager(this)
+    this.credentialRequest = new CredentialRequestManager(this)
     this.trustee = new TrusteeManager(this)
     this.proofRequest = new ProofRequestManager(this)
     this.investigation = new InvestigationManager(this)
@@ -113,7 +119,7 @@ export class AlbusClient {
    * Retrieves an instance of the PdaManager associated with the current instance's program ID.
    */
   get pda() {
-    return new PdaManager(this.programId)
+    return AlbusClient.pda(this.programId)
   }
 
   /**

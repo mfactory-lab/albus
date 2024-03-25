@@ -57,6 +57,22 @@ export class PdaManager {
     ], this.programId)
   }
 
+  credentialSpec(issuer: PublicKeyInitData, code: string) {
+    return PublicKey.findProgramAddressSync([
+      this.encoder.encode('credential-spec'),
+      new PublicKey(issuer).toBuffer(),
+      this.encoder.encode(code),
+    ], this.programId)
+  }
+
+  credentialRequest(spec: PublicKeyInitData, authority: PublicKeyInitData) {
+    return PublicKey.findProgramAddressSync([
+      this.encoder.encode('credential-request'),
+      new PublicKey(spec).toBuffer(),
+      new PublicKey(authority).toBuffer(),
+    ], this.programId)
+  }
+
   circuit(code: string) {
     return PublicKey.findProgramAddressSync([
       this.encoder.encode('circuit'),

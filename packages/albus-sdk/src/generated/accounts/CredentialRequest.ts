@@ -10,71 +10,73 @@ import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 
 /**
- * Arguments used to create {@link Issuer}
+ * Arguments used to create {@link CredentialRequest}
  * @category Accounts
  * @category generated
  */
-export type IssuerArgs = {
-  authority: web3.PublicKey
-  zkAuthority: number[] /* size: 64 */
-  isDisabled: boolean
+export type CredentialRequestArgs = {
+  credentialSpec: web3.PublicKey
+  credentialMint: web3.PublicKey
+  owner: web3.PublicKey
+  issuer: web3.PublicKey
+  uri: string
+  status: number
   createdAt: beet.bignum
   bump: number
-  code: string
-  name: string
-  description: string
 }
 
-export const issuerDiscriminator = [216, 19, 83, 230, 108, 53, 80, 14]
+export const credentialRequestDiscriminator = [
+  13, 77, 28, 51, 251, 145, 231, 29,
+]
 /**
- * Holds the data for the {@link Issuer} Account and provides de/serialization
+ * Holds the data for the {@link CredentialRequest} Account and provides de/serialization
  * functionality for that data
  *
  * @category Accounts
  * @category generated
  */
-export class Issuer implements IssuerArgs {
+export class CredentialRequest implements CredentialRequestArgs {
   private constructor(
-    readonly authority: web3.PublicKey,
-    readonly zkAuthority: number[] /* size: 64 */,
-    readonly isDisabled: boolean,
+    readonly credentialSpec: web3.PublicKey,
+    readonly credentialMint: web3.PublicKey,
+    readonly owner: web3.PublicKey,
+    readonly issuer: web3.PublicKey,
+    readonly uri: string,
+    readonly status: number,
     readonly createdAt: beet.bignum,
     readonly bump: number,
-    readonly code: string,
-    readonly name: string,
-    readonly description: string,
   ) {}
 
   /**
-   * Creates a {@link Issuer} instance from the provided args.
+   * Creates a {@link CredentialRequest} instance from the provided args.
    */
-  static fromArgs(args: IssuerArgs) {
-    return new Issuer(
-      args.authority,
-      args.zkAuthority,
-      args.isDisabled,
+  static fromArgs(args: CredentialRequestArgs) {
+    return new CredentialRequest(
+      args.credentialSpec,
+      args.credentialMint,
+      args.owner,
+      args.issuer,
+      args.uri,
+      args.status,
       args.createdAt,
       args.bump,
-      args.code,
-      args.name,
-      args.description,
     )
   }
 
   /**
-   * Deserializes the {@link Issuer} from the data of the provided {@link web3.AccountInfo}.
+   * Deserializes the {@link CredentialRequest} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
     offset = 0,
-  ): [Issuer, number] {
-    return Issuer.deserialize(accountInfo.data, offset)
+  ): [CredentialRequest, number] {
+    return CredentialRequest.deserialize(accountInfo.data, offset)
   }
 
   /**
    * Retrieves the account info from the provided address and deserializes
-   * the {@link Issuer} from its data.
+   * the {@link CredentialRequest} from its data.
    *
    * @throws Error if no account info is found at the address or if deserialization fails
    */
@@ -82,15 +84,15 @@ export class Issuer implements IssuerArgs {
     connection: web3.Connection,
     address: web3.PublicKey,
     commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig,
-  ): Promise<Issuer> {
+  ): Promise<CredentialRequest> {
     const accountInfo = await connection.getAccountInfo(
       address,
       commitmentOrConfig,
     )
     if (accountInfo == null) {
-      throw new Error(`Unable to find Issuer account at ${address}`)
+      throw new Error(`Unable to find CredentialRequest account at ${address}`)
     }
-    return Issuer.fromAccountInfo(accountInfo, 0)[0]
+    return CredentialRequest.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -104,71 +106,74 @@ export class Issuer implements IssuerArgs {
       'ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi',
     ),
   ) {
-    return beetSolana.GpaBuilder.fromStruct(programId, issuerBeet)
+    return beetSolana.GpaBuilder.fromStruct(programId, credentialRequestBeet)
   }
 
   /**
-   * Deserializes the {@link Issuer} from the provided data Buffer.
+   * Deserializes the {@link CredentialRequest} from the provided data Buffer.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static deserialize(buf: Buffer, offset = 0): [Issuer, number] {
-    return issuerBeet.deserialize(buf, offset)
+  static deserialize(buf: Buffer, offset = 0): [CredentialRequest, number] {
+    return credentialRequestBeet.deserialize(buf, offset)
   }
 
   /**
-   * Serializes the {@link Issuer} into a Buffer.
+   * Serializes the {@link CredentialRequest} into a Buffer.
    * @returns a tuple of the created Buffer and the offset up to which the buffer was written to store it.
    */
   serialize(): [Buffer, number] {
-    return issuerBeet.serialize({
-      accountDiscriminator: issuerDiscriminator,
+    return credentialRequestBeet.serialize({
+      accountDiscriminator: credentialRequestDiscriminator,
       ...this,
     })
   }
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link Issuer} for the provided args.
+   * {@link CredentialRequest} for the provided args.
    *
    * @param args need to be provided since the byte size for this account
    * depends on them
    */
-  static byteSize(args: IssuerArgs) {
-    const instance = Issuer.fromArgs(args)
-    return issuerBeet.toFixedFromValue({
-      accountDiscriminator: issuerDiscriminator,
+  static byteSize(args: CredentialRequestArgs) {
+    const instance = CredentialRequest.fromArgs(args)
+    return credentialRequestBeet.toFixedFromValue({
+      accountDiscriminator: credentialRequestDiscriminator,
       ...instance,
     }).byteSize
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
-   * {@link Issuer} data from rent
+   * {@link CredentialRequest} data from rent
    *
    * @param args need to be provided since the byte size for this account
    * depends on them
    * @param connection used to retrieve the rent exemption information
    */
   static async getMinimumBalanceForRentExemption(
-    args: IssuerArgs,
+    args: CredentialRequestArgs,
     connection: web3.Connection,
     commitment?: web3.Commitment,
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
-      Issuer.byteSize(args),
+      CredentialRequest.byteSize(args),
       commitment,
     )
   }
 
   /**
-   * Returns a readable version of {@link Issuer} properties
+   * Returns a readable version of {@link CredentialRequest} properties
    * and can be used to convert to JSON and/or logging
    */
   pretty() {
     return {
-      authority: this.authority.toBase58(),
-      zkAuthority: this.zkAuthority,
-      isDisabled: this.isDisabled,
+      credentialSpec: this.credentialSpec.toBase58(),
+      credentialMint: this.credentialMint.toBase58(),
+      owner: this.owner.toBase58(),
+      issuer: this.issuer.toBase58(),
+      uri: this.uri,
+      status: this.status,
       createdAt: (() => {
         const x = <{ toNumber: () => number }> this.createdAt
         if (typeof x.toNumber === 'function') {
@@ -181,9 +186,6 @@ export class Issuer implements IssuerArgs {
         return x
       })(),
       bump: this.bump,
-      code: this.code,
-      name: this.name,
-      description: this.description,
     }
   }
 }
@@ -192,23 +194,23 @@ export class Issuer implements IssuerArgs {
  * @category Accounts
  * @category generated
  */
-export const issuerBeet = new beet.FixableBeetStruct<
-  Issuer,
-  IssuerArgs & {
+export const credentialRequestBeet = new beet.FixableBeetStruct<
+  CredentialRequest,
+  CredentialRequestArgs & {
     accountDiscriminator: number[] /* size: 8 */
   }
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
-    ['authority', beetSolana.publicKey],
-    ['zkAuthority', beet.uniformFixedSizeArray(beet.u8, 64)],
-    ['isDisabled', beet.bool],
+    ['credentialSpec', beetSolana.publicKey],
+    ['credentialMint', beetSolana.publicKey],
+    ['owner', beetSolana.publicKey],
+    ['issuer', beetSolana.publicKey],
+    ['uri', beet.utf8String],
+    ['status', beet.u8],
     ['createdAt', beet.i64],
     ['bump', beet.u8],
-    ['code', beet.utf8String],
-    ['name', beet.utf8String],
-    ['description', beet.utf8String],
   ],
-  Issuer.fromArgs,
-  'Issuer',
+  CredentialRequest.fromArgs,
+  'CredentialRequest',
 )

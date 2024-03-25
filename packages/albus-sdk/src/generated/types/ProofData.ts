@@ -6,6 +6,7 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
+
 export type ProofData = {
   a: number[] /* size: 64 */
   b: number[] /* size: 128 */

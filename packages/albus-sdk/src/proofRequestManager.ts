@@ -95,8 +95,8 @@ export class ProofRequestManager extends BaseManager {
    */
   async loadFull(
     addr: PublicKeyInitData | ProofRequest,
-    accounts: Array<Exclude<keyof LoadFullResult, 'proofRequest'>> = [],
-    commitmentOrConfig?: Commitment | GetMultipleAccountsConfig,
+        accounts: Array<Exclude<keyof LoadFullResult, 'proofRequest'>> = [],
+        commitmentOrConfig?: Commitment | GetMultipleAccountsConfig,
   ) {
     const proofRequest = await this.load(addr)
     const pubKeys = accounts.map(key => proofRequest[key])
@@ -273,6 +273,31 @@ export class ProofRequestManager extends BaseManager {
     return Albus.zkp.verifyProof({ vk, proof, publicInput })
   }
 
+  async verifyOnChain(props: VerifyOnChainProps, opts?: ConfirmOptions) {
+    const authority = this.provider.publicKey
+    const proofRequest = new PublicKey(props.proofRequest)
+    const circuit = new PublicKey(props.circuit)
+
+    const txBuilder = props.txBuilder ?? this.txBuilder
+
+    txBuilder.addTransaction(
+      new Transaction()
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
+        // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 220 * 1024 }))
+        .add(createVerifyProofRequestInstruction({
+          proofRequest,
+          circuit,
+          authority,
+        }, this.programId)),
+    )
+
+    if (!props.txBuilder) {
+      console.log('sending...')
+      const signature = await txBuilder.sendAndConfirm(opts)
+      return { signature }
+    }
+  }
+
   /**
    * Decrypts data using the provided secret and signals.
    */
@@ -282,6 +307,8 @@ export class ProofRequestManager extends BaseManager {
     const encryptedData = (signals.encryptedData ?? []) as bigint[]
 
     const data = Albus.crypto.Poseidon.decrypt(encryptedData, [secret, secret], 1, nonce)
+
+    console.log(data)
 
     return {
       claims: {
@@ -411,7 +438,8 @@ export class ProofRequestManager extends BaseManager {
       this.trace('prove', 'createVerifyProofRequestInstruction (setComputeUnitLimit: 400_000)')
       txBuilder.addTransaction(
         new Transaction()
-          .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
+          .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 600_000 }))
+          // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 500 * 1024 }))
           .add(createVerifyProofRequestInstruction({
             proofRequest,
             circuit,
@@ -495,12 +523,14 @@ export class ProofRequestManager extends BaseManager {
       this.trace('fullProve', 'proving...', proofData)
       const { proof, publicSignals } = await Albus.zkp.generateProof(proofData)
 
+      console.log(proof, publicSignals)
+
       this.trace('fullProve', 'sending transaction...')
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
         circuit: props.circuit,
         policy: props.policy,
-        verify: props.verify ?? true,
+        verify: props.verify ?? false,
         proof,
         issuer,
         // @ts-expect-error readonly
@@ -586,6 +616,12 @@ export type FindProofRequestProps = {
   status?: ProofRequestStatus
   skipUser?: boolean
   noData?: boolean
+}
+
+export type VerifyOnChainProps = {
+  proofRequest: PublicKeyInitData
+  circuit: PublicKeyInitData
+  txBuilder?: TxBuilder
 }
 
 export type VerifyProps = {

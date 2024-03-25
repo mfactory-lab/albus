@@ -17,18 +17,18 @@ export class ProofInputBuilder<T = Record<string, any>> {
   private claimsTreeDepth?: number
   private userPrivateKey?: bigint | string
   private trusteePublicKey?: (bigint | string)[][]
-  private trusteeLoader?: TrusteeLoader
   private circuit?: Circuit
   private policy?: Policy
   // Unix timestamp
   private timestamp?: number
+  private trusteeLoader?: TrusteeLoader
   private timestampLoader?: () => Promise<number>
 
   /**
    * Generated proof input data.
    * @readonly
    */
-  readonly data: T = {} as T
+  readonly data = {} as { claimsKey?: any, claimsProof?: any } & T
 
   constructor(private readonly credential: VerifiableCredential) {
   }
@@ -78,6 +78,9 @@ export class ProofInputBuilder<T = Record<string, any>> {
   async build() {
     await this.initClaimsTree()
     await Promise.all([this.applyPrivateSignals(), this.applyPublicSignals()])
+    if (this.data.claimsKey !== undefined) {
+      this.data.claimsKey = Albus.crypto.utils.bytesToBigInt(this.data.claimsKey.reverse())
+    }
     return this
   }
 
@@ -97,13 +100,13 @@ export class ProofInputBuilder<T = Record<string, any>> {
   async initClaimsTree() {
     const treeDepth = this.claimsTreeDepth
       // try to find merkle proof in the circuit public signals and get the merkle tree depth
-      ?? this.publicSignals.find(s => s?.name.endsWith('Proof') && s?.size > 1)?.size
+      ?? this.publicSignals.find(s => s?.name === 'claimsProof')?.next?.size
 
     this.claimsTree = await Albus.credential.createCredentialTree(this.credential, treeDepth)
   }
 
   /**
-   * Normalize a claim key by trimming space.
+   * Normalize a claim key by removing whitespace and replacing underscores with dots.
    *
    * @param {string} s - The claim key to normalize.
    * @returns {string} The normalized claim key.
@@ -156,15 +159,17 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * @returns {boolean} A boolean indicating whether the signal was successfully applied.
    */
   private applyPolicySignal(signal: ParseSignalResult): boolean {
-    const rules = this.policy?.rules
-      ?.filter(r => r.key === signal.name || r.key.startsWith(`${signal.name}.`)) ?? []
-    if (rules.length > 1 && signal.size > 1) {
-      this.data[signal.name] = rules.map(r => Albus.crypto.ffUtils.beBuff2int(Uint8Array.from(r.value)))
-      return true
-    } else if (rules[0] !== undefined) {
-      this.data[signal.name] = Albus.crypto.ffUtils.beBuff2int(Uint8Array.from(rules[0].value))
+    const rules = this.policy?.rules?.filter(r => r.key === signal.name) ?? []
+
+    if (rules.length > 0) {
+      const value = Object.assign(
+        Array.from({ length: signal.size }).fill(0n),
+        rules.map(r => Albus.crypto.ffUtils.beBuff2int(Uint8Array.from(r.value))),
+      )
+      this.data[signal.name] = signal.size === 0 ? value[0] : value
       return true
     }
+
     return false
   }
 
@@ -173,8 +178,8 @@ export class ProofInputBuilder<T = Record<string, any>> {
    *
    * @param signal - The signal to apply.
    * @param throwIfUnknown - Whether to throw an error if the signal is not found in the credential.
-   * @returns {Promise<boolean>} A boolean indicating whether the signal was successfully applied.
-   * @throws An error if the claims tree is not initialized or if the signal is not found in the credential and `throwIfUnknown` is true.
+   * @returns A boolean indicating whether the signal was successfully applied.
+   * @throws {Error} An error if the claims tree is not initialized or if the signal is not found in the credential and `throwIfUnknown` is true.
    */
   private async applyCredentialSignal(signal: ParseSignalResult, throwIfUnknown = false) {
     if (!this.claimsTree) {
@@ -186,8 +191,18 @@ export class ProofInputBuilder<T = Record<string, any>> {
       throw new Error(`claim "${claim}" is not found in the credential`)
     }
     this.data[signal.name] = proof.value
-    this.data[`${signal.name}Key`] = proof.key
-    this.data[`${signal.name}Proof`] = proof.siblings
+
+    // this.data[`${signal.name}Key`] = proof.key
+    // this.data[`${signal.name}Proof`] = proof.siblings
+
+    if (this.data.claimsKey === undefined) {
+      this.data.claimsKey = []
+    }
+    if (this.data.claimsProof === undefined) {
+      this.data.claimsProof = []
+    }
+    this.data.claimsKey.push(Number(proof.key))
+    this.data.claimsProof.push(proof.siblings)
   }
 
   /**

@@ -7,20 +7,20 @@
 
 import * as beet from '@metaplex-foundation/beet'
 
-export type UpdateCredentialData = {
+export type CreateCredentialSpecData = {
+  name: string
   uri: string
-  name: beet.COption<string>
 }
 
 /**
  * @category userTypes
  * @category generated
  */
-export const updateCredentialDataBeet
-  = new beet.FixableBeetArgsStruct<UpdateCredentialData>(
+export const createCredentialSpecDataBeet
+  = new beet.FixableBeetArgsStruct<CreateCredentialSpecData>(
     [
+      ['name', beet.utf8String],
       ['uri', beet.utf8String],
-      ['name', beet.coption(beet.utf8String)],
     ],
-    'UpdateCredentialData',
+    'CreateCredentialSpecData',
   )

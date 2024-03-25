@@ -29,7 +29,8 @@
 import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
-import type { ClientSubscriptionId, ConfirmOptions,
+import type { ClientSubscriptionId,
+  ConfirmOptions,
   PublicKeyInitData,
   Signer } from '@solana/web3.js'
 import {
@@ -40,11 +41,13 @@ import {
 } from '@solana/web3.js'
 import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
-import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
-  createCreateCredentialInstruction,
-  createDeleteCredentialInstruction,
-  createUpdateCredentialInstruction,
+  CREDENTIAL_NAME,
+  CREDENTIAL_SYMBOL_CODE,
+  NFT_SYMBOL_PREFIX,
+} from './constants'
+import {
+  createCreateCredentialInstruction, createDeleteCredentialInstruction, createUpdateCredentialInstruction,
 } from './generated'
 import type { ExtendedMetadata } from './utils'
 import {
@@ -60,9 +63,6 @@ export class CredentialManager extends BaseManager {
 
   /**
    * Register a callback to be invoked whenever the credential account changes
-   * @param mint
-   * @param callback
-   * @param props
    */
   async addListener(mint: PublicKeyInitData, callback: CredentialChangeCallback, props?: LoadCredentialProps) {
     const mintPubkey = new PublicKey(mint)
@@ -78,7 +78,6 @@ export class CredentialManager extends BaseManager {
 
   /**
    * Deregister an account notification callback
-   * @param mint
    */
   removeListener(mint: PublicKeyInitData) {
     const key = String(new PublicKey(mint))
@@ -121,6 +120,10 @@ export class CredentialManager extends BaseManager {
       .addInstruction(ix)
       .addSigner(mint)
 
+    if (opts?.priorityFee) {
+      builder.priorityFee(opts.priorityFee)
+    }
+
     if (props?.owner) {
       builder.addSigner(props.owner)
     }
@@ -132,15 +135,31 @@ export class CredentialManager extends BaseManager {
 
   /**
    * Update credential data.
-   * Require admin authority
    */
   async update(props: UpdateCredentialProps, opts?: TxOpts) {
-    const mint = new PublicKey(props.mint)
-    const tokenAccount = getAssociatedTokenAddress(mint, new PublicKey(props.owner))
+    // const owner = new PublicKey(props.owner)
+    // const tokenAccount = getAssociatedTokenAddress(mint, owner)
+
+    let mint: PublicKey | undefined
+    let credentialRequest: PublicKey | undefined
+    let credentialRequestIssuer: PublicKey | undefined
+    if (props.credentialRequest) {
+      credentialRequest = new PublicKey(props.credentialRequest)
+      const credentialRequestAccount = await this.client.credentialRequest.load(credentialRequest)
+      credentialRequestIssuer = credentialRequestAccount.issuer
+      mint = credentialRequestAccount.credentialMint
+    } else {
+      if (!props.mint) {
+        throw new Error('Missing mint address')
+      }
+      mint = new PublicKey(props.mint)
+    }
 
     const ix = createUpdateCredentialInstruction({
       mint,
-      tokenAccount,
+      // tokenAccount,
+      credentialRequest,
+      credentialRequestIssuer,
       albusAuthority: this.pda.authority()[0],
       metadataAccount: getMetadataPDA(mint),
       authority: this.provider.publicKey,
@@ -153,9 +172,14 @@ export class CredentialManager extends BaseManager {
       },
     }, this.programId)
 
-    const signature = await this.txBuilder
+    const builder = this.txBuilder
       .addInstruction(ix)
-      .sendAndConfirm(opts?.confirm, opts?.feePayer)
+
+    if (opts?.priorityFee) {
+      builder.priorityFee(opts.priorityFee)
+    }
+
+    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
 
     return { signature }
   }
@@ -181,6 +205,10 @@ export class CredentialManager extends BaseManager {
 
     const builder = this.txBuilder.addInstruction(ix)
 
+    if (opts?.priorityFee) {
+      builder.priorityFee(opts.priorityFee)
+    }
+
     if (props?.owner) {
       builder.addSigner(props.owner)
     }
@@ -192,7 +220,6 @@ export class CredentialManager extends BaseManager {
 
   /**
    * Load a credential associated with a specified address.
-   * This function retrieves, verifies, and optionally decrypts the credential.
    */
   async load(mintAddr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
     const nft = await loadNft(this.provider.connection, mintAddr, {
@@ -204,7 +231,6 @@ export class CredentialManager extends BaseManager {
 
   /**
    * Load all credentials for the provided owner.
-   * @param props
    */
   async loadAll(props: LoadAllCredentialProps = {}) {
     const accounts = await getParsedNftAccountsByOwner(
@@ -228,6 +254,9 @@ export class CredentialManager extends BaseManager {
     return result
   }
 
+  /**
+   * Get credential info, verify and optionally decrypt
+   */
   private async getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
     if (nft.json?.vc !== undefined) {
       try {
@@ -268,6 +297,7 @@ function parseUriData(uri: string) {
 export type TxOpts = {
   confirm?: ConfirmOptions
   feePayer?: Signer
+  priorityFee?: number
 }
 
 /**
@@ -285,10 +315,12 @@ export type CreateCredentialProps = {
 }
 
 export type UpdateCredentialProps = {
-  owner: PublicKeyInitData
-  mint: PublicKeyInitData
   uri: string
   name?: string
+  // Optional credential request associated with issuer
+  credentialRequest?: PublicKeyInitData
+  issuer?: PublicKeyInitData
+  mint?: PublicKeyInitData
 }
 
 export type DeleteCredentialProps = {

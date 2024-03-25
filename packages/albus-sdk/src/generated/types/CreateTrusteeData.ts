@@ -8,6 +8,7 @@
 import type * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
+
 export type CreateTrusteeData = {
   key: number[] /* size: 32 */
   name: string

@@ -1,5 +1,5 @@
 {
-  "version": "0.0.25",
+  "version": "0.0.26",
   "name": "albus",
   "instructions": [
     {
@@ -142,8 +142,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Token Metadata program.",
-            ""
+            "Token Metadata program."
           ]
         },
         {
@@ -175,12 +174,21 @@
           "isSigner": false
         },
         {
-          "name": "tokenAccount",
+          "name": "credentialRequest",
           "isMut": false,
           "isSigner": false,
+          "isOptional": true,
           "docs": [
-            "Destination token account (required for pNFT).",
-            ""
+            "(Optional) Credential request."
+          ]
+        },
+        {
+          "name": "credentialRequestIssuer",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "(Optional) Credential request issuer."
           ]
         },
         {
@@ -189,10 +197,6 @@
           "isSigner": false,
           "docs": [
             "Mint account of the NFT.",
-            "The account will be initialized if necessary.",
-            "",
-            "Must be a signer if:",
-            "* the mint account does not exist.",
             ""
           ]
         },
@@ -201,24 +205,13 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Metadata account of the NFT.",
-            "This account must be uninitialized.",
-            ""
+            "Metadata account of the NFT."
           ]
         },
         {
           "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "metadataProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Token Metadata program.",
-            ""
-          ]
+          "isMut": true,
+          "isSigner": true
         },
         {
           "name": "sysvarInstructions",
@@ -226,6 +219,15 @@
           "isSigner": false,
           "docs": [
             "Instructions sysvar account.",
+            ""
+          ]
+        },
+        {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Token Metadata program.",
             ""
           ]
         },
@@ -335,6 +337,116 @@
           "docs": [
             "System program."
           ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "requestCredential",
+      "accounts": [
+        {
+          "name": "credentialRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "credentialSpec",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "credentialMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "credentialToken",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program."
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "RequestCredentialData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "createCredentialSpec",
+      "accounts": [
+        {
+          "name": "credentialSpec",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateCredentialSpecData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteCredentialSpec",
+      "accounts": [
+        {
+          "name": "credentialSpec",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -971,16 +1083,16 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "pubkey",
+            "name": "authority",
             "docs": [
-              "Signer Public key"
+              "The authority of the issuer"
             ],
             "type": "publicKey"
           },
           {
-            "name": "zkPubkey",
+            "name": "zkAuthority",
             "docs": [
-              "Public key (babyjub curve)"
+              "The ZK authority of the issuer (bbj-pubkey)"
             ],
             "type": {
               "array": [
@@ -988,13 +1100,6 @@
                 64
               ]
             }
-          },
-          {
-            "name": "authority",
-            "docs": [
-              "Authority account of the issuer"
-            ],
-            "type": "publicKey"
           },
           {
             "name": "isDisabled",
@@ -1670,6 +1775,114 @@
           }
         ]
       }
+    },
+    {
+      "name": "CredentialRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "credentialSpec",
+            "docs": [
+              "The [CredentialSpec] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "credentialMint",
+            "docs": [
+              "Credential mint address"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "docs": [
+              "Credential request creator"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "issuer",
+            "docs": [
+              "The [Issuer] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "Presentation Submission"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Status of the request"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CredentialSpec",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "docs": [
+              "The [Issuer] associated with this spec"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the credential spec"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "credentialRequestCount",
+            "docs": [
+              "Total number of credential requests associated with this spec"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "Presentation definition",
+              "https://identity.foundation/presentation-exchange/#presentation-definition"
+            ],
+            "type": "string"
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -1789,6 +2002,34 @@
       }
     },
     {
+      "name": "CreateCredentialSpecData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequestCredentialData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateCredentialData",
       "type": {
         "kind": "struct",
@@ -1799,7 +2040,9 @@
           },
           {
             "name": "name",
-            "type": "string"
+            "type": {
+              "option": "string"
+            }
           }
         ]
       }
@@ -1856,11 +2099,11 @@
             "type": "string"
           },
           {
-            "name": "pubkey",
+            "name": "authority",
             "type": "publicKey"
           },
           {
-            "name": "zkPubkey",
+            "name": "zkAuthority",
             "type": {
               "array": [
                 "u8",
@@ -2627,6 +2870,41 @@
           "index": false
         }
       ]
+    },
+    {
+      "name": "CreateCredentialRequestEvent",
+      "fields": [
+        {
+          "name": "credentialSpec",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "credentialMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "issuer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "uri",
+          "type": "string",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -2657,8 +2935,8 @@
     },
     {
       "code": 6005,
-      "name": "IncorrectOwner",
-      "msg": "Incorrect owner"
+      "name": "InvalidOwner",
+      "msg": "Invalid owner"
     },
     {
       "code": 6006,

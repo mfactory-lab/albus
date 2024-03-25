@@ -1,6 +1,6 @@
 {
   "name": "@albus-finance/sdk",
-  "type": "module",
+  "_type": "module",
   "version": "0.3.0-next.7",
   "description": "Albus Protocol SDK",
   "repository": {
@@ -32,16 +32,13 @@
     "release:pre": "release-it --ci --preRelease=next",
     "prepublishOnly": "vite build"
   },
-  "peerDependencies": {
-    "snarkjs": "*"
-  },
   "dependencies": {
     "@albus-finance/core": "workspace:^",
     "@coral-xyz/anchor": "^0.29.0",
-    "@metaplex-foundation/beet": "^0.7.1",
+    "@metaplex-foundation/beet": "^0.7.2",
     "@metaplex-foundation/beet-solana": "^0.4.0",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
-    "@solana/web3.js": "^1.87.6",
+    "@solana/web3.js": "^1.68.0",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {

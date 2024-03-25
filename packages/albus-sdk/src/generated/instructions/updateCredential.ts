@@ -41,24 +41,26 @@ export const updateCredentialStruct = new beet.FixableBeetArgsStruct<
  * Accounts required by the _updateCredential_ instruction
  *
  * @property [_writable_] albusAuthority
- * @property [] tokenAccount
+ * @property [] credentialRequest (optional)
+ * @property [] credentialRequestIssuer (optional)
  * @property [] mint
  * @property [_writable_] metadataAccount
- * @property [] authority
- * @property [] metadataProgram
+ * @property [_writable_, **signer**] authority
  * @property [] sysvarInstructions
+ * @property [] metadataProgram
  * @category Instructions
  * @category UpdateCredential
  * @category generated
  */
 export type UpdateCredentialInstructionAccounts = {
   albusAuthority: web3.PublicKey
-  tokenAccount: web3.PublicKey
+  credentialRequest?: web3.PublicKey
+  credentialRequestIssuer?: web3.PublicKey
   mint: web3.PublicKey
   metadataAccount: web3.PublicKey
   authority: web3.PublicKey
-  metadataProgram: web3.PublicKey
   sysvarInstructions: web3.PublicKey
+  metadataProgram: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -69,6 +71,9 @@ export const updateCredentialInstructionDiscriminator = [
 
 /**
  * Creates a _UpdateCredential_ instruction.
+ *
+ * Optional accounts that are not provided default to the program ID since
+ * this was indicated in the IDL from which this instruction was generated.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
@@ -93,7 +98,12 @@ export function createUpdateCredentialInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.tokenAccount,
+      pubkey: accounts.credentialRequest ?? programId,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.credentialRequestIssuer ?? programId,
       isWritable: false,
       isSigner: false,
     },
@@ -109,16 +119,16 @@ export function createUpdateCredentialInstruction(
     },
     {
       pubkey: accounts.authority,
+      isWritable: true,
+      isSigner: true,
+    },
+    {
+      pubkey: accounts.sysvarInstructions,
       isWritable: false,
       isSigner: false,
     },
     {
       pubkey: accounts.metadataProgram,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.sysvarInstructions,
       isWritable: false,
       isSigner: false,
     },
