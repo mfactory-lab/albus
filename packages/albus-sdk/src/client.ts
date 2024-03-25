@@ -43,10 +43,11 @@ import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
 import type { Wallet, WithRequired } from './types'
 import { NodeWallet } from './utils'
-import idl from './idl/albus.json'
 import { DEV_PROGRAM_ID } from './constants'
 import { CredentialSpecManager } from './credentialSpecManager'
 import { CredentialRequestManager } from './credentialRequestManager'
+import { IrysStorageDriver } from './storage/irys'
+import idl from './idl/albus.json'
 
 export enum AlbusClientEnv { DEV = 'dev', STAGE = 'stage', PROD = 'prod' }
 
@@ -122,6 +123,14 @@ export class AlbusClient {
     return AlbusClient.pda(this.programId)
   }
 
+  get storage() {
+    switch (this.options.storageDriver) {
+      case 'irys':
+      default:
+        return new IrysStorageDriver(this.provider, this.options.storage)
+    }
+  }
+
   /**
    * Get the current program ID.
    */
@@ -162,9 +171,12 @@ export class AlbusClient {
   }
 }
 
-export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> & { opts?: ConfirmOptions }
+export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> &
+  { wallet: Wallet, opts?: ConfirmOptions }
 
 export type ClientOptions = {
   programId?: PublicKey
   debug?: boolean
+  storageDriver?: string
+  storage?: any
 }
