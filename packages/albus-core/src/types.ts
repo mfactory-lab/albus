@@ -67,29 +67,29 @@ export type Proof = Extensible<{ type?: string }>
 export type IssuerType = Extensible<{ id: string }> | string
 export type DateType = string | Date
 
-export type W3CCredential = Extensible<{
+export type W3CCredential<T = Claims> = Extensible<{
   '@context': string[]
-  id?: string
-  type: string[]
-  issuer: IssuerType
-  issuanceDate: string
-  validFrom?: string
-  validUntil?: string
-  credentialSubject: Claims // Extensible<{ id: string }>
-  credentialStatus?: CredentialStatus
-  evidence?: any
-  termsOfUse?: any
+  'id'?: string
+  'type': string[]
+  'issuer': IssuerType
+  'issuanceDate': string
+  'validFrom'?: string
+  'validUntil'?: string
+  'credentialSubject': T
+  'credentialStatus'?: CredentialStatus
+  'evidence'?: any
+  'termsOfUse'?: any
 }>
 
 export type W3CPresentation = Extensible<{
   '@context': string[]
-  type: string[]
-  id?: string
-  verifiableCredential?: VerifiableCredential[]
-  holder: string
-  verifier?: string[]
-  issuanceDate?: string
-  validFrom?: string
+  'type': string[]
+  'id'?: string
+  'verifiableCredential'?: VerifiableCredential[]
+  'holder': string
+  'verifier'?: string[]
+  'issuanceDate'?: string
+  'validFrom'?: string
 }>
 
 /**
@@ -97,7 +97,7 @@ export type W3CPresentation = Extensible<{
  *
  * @see https://www.w3.org/TR/vc-data-model/#proof-formats
  */
-export type VerifiableCredential = Verifiable<W3CCredential>
+export type VerifiableCredential<T = Claims> = Verifiable<W3CCredential<T>>
 
 /**
  * A union type for both possible representations of a Presentation (JWT and W3C standard)

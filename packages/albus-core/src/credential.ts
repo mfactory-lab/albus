@@ -32,7 +32,7 @@ import type { Resolvable, ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
-import { SMT, Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
+import { MultiBase, SMT, Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
@@ -46,6 +46,41 @@ export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
 export const DEFAULT_CLAIM_TREE_DEPTH = 5 // 2^5-1 = 16 elements
+
+function normalizeClaims(claims: Claims) {
+  const normalizedClaims: Record<string, any> = {}
+
+  for (const key in claims) {
+    let value = claims[key]
+    if (typeof value === 'object') {
+      value = normalizeClaims(value)
+    } else {
+      value = String(value).trim()
+    }
+    normalizedClaims[key] = value
+  }
+
+  return normalizedClaims
+}
+
+/**
+ * Create metadata info from the credential
+ * used for generate a claims tree
+ */
+export function getCredentialMeta(credential: W3CCredential | VerifiableCredential) {
+  const parseDate = (value: number | string) => Math.floor(new Date(value).getTime() / 1000)
+  const meta: Record<string, any> = {
+    issuer: credential.issuer,
+    issuanceDate: parseDate(credential.issuanceDate),
+    validUntil: credential.validUntil ? parseDate(credential.validUntil) : 0,
+    validFrom: credential.validFrom ? parseDate(credential.validFrom) : 0,
+  }
+  const type = credential.type.slice(-1)[0]
+  if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
+    meta.type = type
+  }
+  return meta
+}
 
 export type CreateCredentialOpts = {
   issuerSecretKey?: number[] | Uint8Array
@@ -65,33 +100,10 @@ export type CreateCredentialOpts = {
   credentialType?: CredentialType
 }
 
-function normalizeClaims(claims: Claims) {
-  const normalizedClaims: Record<string, any> = {}
-
-  for (const key in claims) {
-    let value = claims[key]
-
-    if (typeof value === 'object') {
-      value = normalizeClaims(value)
-    } else {
-      value = String(value).trim()
-
-      // normalize date to integer format (2000-01-01 > 20000101)
-      if (value.match(/\d{4}-\d{2}-\d{2}/)) {
-        value = value.split('-').join('')
-      }
-    }
-
-    normalizedClaims[key] = value
-  }
-
-  return normalizedClaims
-}
-
 /**
  * Create new verifiable credential
  */
-export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts = {}) {
+export async function createVerifiableCredential<C extends Claims>(claims: C, opts: CreateCredentialOpts = {}): Promise<VerifiableCredential<C>> {
   const normalizedClaims = normalizeClaims(claims)
 
   let credentialSubject: Claims = {}
@@ -149,26 +161,7 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
     })
   }
 
-  return vc as VerifiableCredential
-}
-
-/**
- * Create metadata info from the credential
- * used for generate a claims tree
- */
-export function getCredentialMeta(credential: W3CCredential | VerifiableCredential) {
-  const parseDate = (value: number | string) => Math.floor(new Date(value).getTime() / 1000)
-  const meta: Record<string, any> = {
-    issuer: credential.issuer,
-    issuanceDate: parseDate(credential.issuanceDate),
-    validUntil: credential.validUntil ? parseDate(credential.validUntil) : 0,
-    validFrom: credential.validFrom ? parseDate(credential.validFrom) : 0,
-  }
-  const type = credential.type.slice(-1)[0]
-  if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
-    meta.type = type
-  }
-  return meta
+  return vc as VerifiableCredential<C>
 }
 
 export type CreatePresentationOpts = {
@@ -180,6 +173,9 @@ export type CreatePresentationOpts = {
   decryptionKey?: number[] | Uint8Array
   // By default, the challenge is the holder's public key.
   challenge?: Uint8Array
+  // custom issuance date
+  timestamp?: number
+  presentationType?: PresentationType
 }
 
 /**
@@ -193,10 +189,15 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
   const creds: VerifiableCredential[] = []
 
   for (const credential of opts.credentials) {
-    if (credential.proof.type !== ProofType.BJJSignature2021) {
-      console.log(`unsupported signature ${credential.proof.type}`)
+    if (!credential.type.includes(CredentialType.AlbusCredential)) {
+      console.log(`unsupported credential type ${credential.type}`)
       continue
     }
+
+    // if (credential.proof.type !== ProofType.BJJSignature2021) {
+    //   console.log(`unsupported signature ${credential.proof.type}`)
+    //   continue
+    // }
 
     // decrypt claims if needed
     let claims: Claims = {}
@@ -243,13 +244,20 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
   }
 
   if (creds.length === 0) {
-    throw new Error('Not credentials found')
+    throw new Error('no credentials provided')
+  }
+
+  const now = opts?.timestamp ? new Date(opts.timestamp * 1000) : new Date()
+  const vpType = [DEFAULT_VP_TYPE, PresentationType.AlbusPresentation]
+
+  if (opts.presentationType) {
+    vpType.push(opts.presentationType)
   }
 
   const vp: W3CPresentation = {
     '@context': [DEFAULT_CONTEXT],
-    'type': [DEFAULT_VP_TYPE, PresentationType.AlbusPresentation],
-    'issuanceDate': new Date().toISOString(),
+    'type': vpType,
+    'issuanceDate': now.toISOString(),
     'holder': holderDid,
     'verifiableCredential': creds,
   }
@@ -311,7 +319,10 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 
   // decrypt subject if needed
   let credentialSubject = vc.credentialSubject
-  if (vc.credentialSubject.encrypted && opts.decryptionKey) {
+  if (vc.credentialSubject.encrypted) {
+    if (!opts.decryptionKey) {
+      throw new Error('credential subject is encrypted but no decryption key provided')
+    }
     try {
       credentialSubject = JSON.parse(await XC20P.decrypt(credentialSubject.encrypted, opts.decryptionKey))
     } catch (e) {
@@ -378,12 +389,19 @@ export async function verifyPresentation(vp: VerifiablePresentation, opts: Verif
     if (vm.type === 'Ed25519VerificationKey2018') {
       if (vm.publicKeyBase58) {
         pubKey = base58ToBytes(vm.publicKeyBase58)
+        break
+      }
+    }
+    if (vm.type === 'Ed25519VerificationKey2020') {
+      if (vm.publicKeyMultibase) {
+        pubKey = MultiBase.decode(vm.publicKeyMultibase)
+        break
       }
     }
   }
 
   if (!pubKey) {
-    throw new Error('unable to find `Ed25519VerificationKey2018` verification key')
+    throw new Error('unable to find `Ed25519VerificationKey2018` or `Ed25519VerificationKey2020` verification key')
   }
 
   if (!(verifyPresentationProof(vp.proof as PresentationProof, opts.challenge ?? pubKey))) {
@@ -561,7 +579,7 @@ export async function createCredentialTree(credential: VerifiableCredential, dep
  *
  * @param {Claims} claims - The claims object to create the tree from.
  * @param {number} [depth] - The optional depth of the tree. If not provided, the default depth will be used.
- * @return {Promise<{encodeKey: (k: string) => bigint; root: any; claimsKey: number; get: (key: string) => Promise<any>; delete: (key: string) => any; add: (key: string, val: any) => any; update: (key: string, val: any) => any}>} - An object representing the claims tree with various methods for interacting with it.
+ * @return An object representing the claims tree with various methods for interacting with it.
  */
 export async function createClaimsTree(claims: Claims, depth?: number) {
   const tree = new SMT()
@@ -577,9 +595,6 @@ export async function createClaimsTree(claims: Claims, depth?: number) {
   return {
     encodeKey,
     root: tree.root,
-    get claimsKey() {
-      return 0
-    },
     get: async (key: string) => {
       const proof = await tree.get(encodeKey(key))
       const siblings = proof.siblings
