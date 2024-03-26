@@ -36,7 +36,8 @@ import type {
   TransactionSignature,
 } from '@solana/web3.js'
 
-import { NodeIrys, WebIrys } from '@irys/sdk'
+// eslint-disable-next-line import/no-named-default
+import type { default as NodeIrys, WebIrys } from '@irys/sdk'
 import BigNumber from 'bignumber.js'
 import type { ClientProvider } from '../client'
 import type { StorageDriver, StorageFile } from './index'
@@ -207,7 +208,7 @@ export class IrysStorageDriver implements StorageDriver {
       providerUrl: this._options.providerUrl,
     }
 
-    // automatically set address if not set
+    // If the address is not provided, determine it from the provider URL.
     if (!address) {
       if (options.providerUrl?.includes('localhost')
         || options.providerUrl?.includes('devnet')
@@ -245,9 +246,9 @@ export class IrysStorageDriver implements StorageDriver {
     keypair: Keypair,
     options: any,
   ): Promise<NodeIrys> {
-    // const bPackage = await import('@irys/sdk')
+    const bPackage = await import('@irys/sdk')
 
-    return new NodeIrys({
+    return new bPackage.NodeIrys({
       url: address,
       token: currency,
       key: keypair.secretKey,
@@ -279,9 +280,8 @@ export class IrysStorageDriver implements StorageDriver {
       },
     }
 
-    // const { WebIrys } = await import('@irys/sdk')
-    // const bPackage = _removeDoubleDefault(await import('@irys/sdk'))
-    const irys = new WebIrys({
+    const bPackage = await import('@irys/sdk')
+    const irys = new bPackage.WebIrys({
       url: address,
       token: currency,
       wallet: { provider: wallet },
