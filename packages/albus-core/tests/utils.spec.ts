@@ -27,6 +27,7 @@
  */
 
 import { assert, describe, it } from 'vitest'
+import { Keypair } from '@solana/web3.js'
 import {
   altBn128G1Neg,
   bytesToFinite,
@@ -38,9 +39,10 @@ import {
   encodeProof,
   encodePublicSignals,
   encodeVerifyingKey,
-  finiteToBytes,
+  finiteToBytes, packPubkey, unpackPubkey,
 } from '../src/zkp'
 import { bytesToHex, hexToBytes, hexToString } from '../src/crypto/utils'
+import { eddsa } from '../src/crypto'
 
 describe('utils', () => {
   it('hex', async () => {
@@ -50,6 +52,12 @@ describe('utils', () => {
 
     assert.deepEqual(hexToBytes(hex), bytes)
     assert.deepEqual(hexToString(hex), string)
+  })
+
+  it('can packPubkey and unpackPubkey', async () => {
+    const keypair = Keypair.generate()
+    const pubkey = eddsa.prv2pub(keypair.secretKey)
+    assert.deepEqual(unpackPubkey(packPubkey(pubkey)), pubkey)
   })
 
   it('altBn128G1Neg', async () => {
