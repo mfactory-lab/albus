@@ -1,5 +1,5 @@
 export type Albus = {
-  "version": "0.0.26",
+  "version": "0.0.27",
   "name": "albus",
   "instructions": [
     {
@@ -2968,7 +2968,7 @@ export type Albus = {
 };
 
 export const IDL: Albus = {
-  "version": "0.0.26",
+  "version": "0.0.27",
   "name": "albus",
   "instructions": [
     {
