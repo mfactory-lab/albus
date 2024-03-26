@@ -1,5 +1,5 @@
 {
-  "name": "@albus/tests",
+  "name": "@albus-finance/tests",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,7 @@
     "test:debug": "DEBUG=vite-node:* vitest"
   },
   "devDependencies": {
+    "@albus-finance/circuits": "workspace:*",
     "@coral-xyz/anchor": "^0.29.0",
     "@metaplex-foundation/js": "^0.20.1",
     "@solana/spl-token": "^0.3.9",

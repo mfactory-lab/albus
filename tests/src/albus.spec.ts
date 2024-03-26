@@ -28,9 +28,10 @@
 
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
+import { CircuitHelper, countryLookup } from '@albus-finance/circuits'
 import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus, TxBuilder } from '../../packages/albus-sdk/src'
-import { CircuitHelper, assertErrorCode, countryLookup, initProvider, payer, provider, requestAirdrop } from './utils'
+import { assertErrorCode, initProvider, payer, provider, requestAirdrop } from './utils'
 
 describe('albus', async () => {
   const client = new AlbusClient(provider).local() // .debug()
@@ -48,8 +49,6 @@ describe('albus', async () => {
     Keypair.generate(),
     Keypair.generate(),
   ]
-
-  const circuit = 'kyc'
 
   const circuitHelper = new CircuitHelper('kyc')
 
@@ -70,7 +69,7 @@ describe('albus', async () => {
 
   const circuitData = {
     code: circuitCode,
-    name: circuit,
+    name: circuitHelper.circuit,
     wasmUri: 'mock:wasmUri',
     zkeyUri: 'mock:zkeyUri',
     outputs: [] as string[],
@@ -82,8 +81,8 @@ describe('albus', async () => {
     code: policyCode,
     serviceCode,
     circuitCode: circuitData.code,
-    name: `${circuit} policy`,
-    description: `Policy for ${circuit}`,
+    name: `${circuitHelper.circuit} policy`,
+    description: `Policy for ${circuitHelper.circuit}`,
     expirationPeriod: 0,
     retentionPeriod: 0,
     rules: [
@@ -103,8 +102,6 @@ describe('albus', async () => {
     circuitData.publicSignals = signals.public
     circuitData.outputs = signals.output
     maxPublicInputs = publicInputs + outputs
-
-    console.log('maxPublicInputs', maxPublicInputs)
 
     // airdrops
     await requestAirdrop(payer.publicKey)
