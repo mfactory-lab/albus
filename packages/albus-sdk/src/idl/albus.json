@@ -1083,14 +1083,14 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "authority",
+            "name": "pubkey",
             "docs": [
               "The authority of the issuer"
             ],
             "type": "publicKey"
           },
           {
-            "name": "zkAuthority",
+            "name": "zkPubkey",
             "docs": [
               "The ZK authority of the issuer (bbj-pubkey)"
             ],
@@ -1100,6 +1100,13 @@
                 64
               ]
             }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The authority of the issuer"
+            ],
+            "type": "publicKey"
           },
           {
             "name": "isDisabled",
@@ -2103,7 +2110,11 @@
             "type": "publicKey"
           },
           {
-            "name": "zkAuthority",
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "zkPubkey",
             "type": {
               "array": [
                 "u8",

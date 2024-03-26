@@ -529,8 +529,6 @@ export class ProofRequestManager extends BaseManager {
       this.trace('fullProve', 'proving...', proofData)
       const { proof, publicSignals } = await Albus.zkp.generateProof(proofData)
 
-      console.log(proof, publicSignals)
-
       this.trace('fullProve', 'sending transaction...')
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,

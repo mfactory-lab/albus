@@ -86,7 +86,7 @@ export class IssuerManager extends BaseManager {
    */
   async loadByZkPubkey(pubkey: [bigint, bigint], noData?: boolean) {
     const accounts = await this.find({
-      zkAuthority: this.zkPubkeyToBytes(pubkey),
+      zkPubkey: this.zkPubkeyToBytes(pubkey),
       noData,
     })
     if (accounts.length === 0) {
@@ -127,8 +127,12 @@ export class IssuerManager extends BaseManager {
       builder.addFilter('authority', new PublicKey(props.authority))
     }
 
-    if (props.zkAuthority) {
-      builder.addFilter('zkAuthority', Array.from(props.zkAuthority))
+    if (props.pubkey) {
+      builder.addFilter('pubkey', new PublicKey(props.pubkey))
+    }
+
+    if (props.zkPubkey) {
+      builder.addFilter('zkPubkey', Array.from(props.zkPubkey))
     }
 
     if (props.code) {
@@ -167,7 +171,8 @@ export class IssuerManager extends BaseManager {
         name: props.name,
         description: props.description ?? '',
         authority: props.keypair.publicKey,
-        zkAuthority: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.keypair.secretKey)),
+        pubkey: props.keypair.publicKey,
+        zkPubkey: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.keypair.secretKey)),
       },
     }, this.programId)
 
@@ -231,7 +236,8 @@ export class IssuerManager extends BaseManager {
 export type FindIssuerProps = {
   code?: string
   authority?: PublicKeyInitData
-  zkAuthority?: Iterable<number>
+  pubkey?: Iterable<number>
+  zkPubkey?: Iterable<number>
   active?: boolean
   noData?: boolean
 }

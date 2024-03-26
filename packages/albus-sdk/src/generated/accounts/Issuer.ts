@@ -15,8 +15,9 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
  * @category generated
  */
 export type IssuerArgs = {
+  pubkey: web3.PublicKey
+  zkPubkey: number[] /* size: 64 */
   authority: web3.PublicKey
-  zkAuthority: number[] /* size: 64 */
   isDisabled: boolean
   createdAt: beet.bignum
   bump: number
@@ -35,8 +36,9 @@ export const issuerDiscriminator = [216, 19, 83, 230, 108, 53, 80, 14]
  */
 export class Issuer implements IssuerArgs {
   private constructor(
+    readonly pubkey: web3.PublicKey,
+    readonly zkPubkey: number[] /* size: 64 */,
     readonly authority: web3.PublicKey,
-    readonly zkAuthority: number[] /* size: 64 */,
     readonly isDisabled: boolean,
     readonly createdAt: beet.bignum,
     readonly bump: number,
@@ -50,8 +52,9 @@ export class Issuer implements IssuerArgs {
    */
   static fromArgs(args: IssuerArgs) {
     return new Issuer(
+      args.pubkey,
+      args.zkPubkey,
       args.authority,
-      args.zkAuthority,
       args.isDisabled,
       args.createdAt,
       args.bump,
@@ -166,8 +169,9 @@ export class Issuer implements IssuerArgs {
    */
   pretty() {
     return {
+      pubkey: this.pubkey.toBase58(),
+      zkPubkey: this.zkPubkey,
       authority: this.authority.toBase58(),
-      zkAuthority: this.zkAuthority,
       isDisabled: this.isDisabled,
       createdAt: (() => {
         const x = <{ toNumber: () => number }> this.createdAt
@@ -200,8 +204,9 @@ export const issuerBeet = new beet.FixableBeetStruct<
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
+    ['pubkey', beetSolana.publicKey],
+    ['zkPubkey', beet.uniformFixedSizeArray(beet.u8, 64)],
     ['authority', beetSolana.publicKey],
-    ['zkAuthority', beet.uniformFixedSizeArray(beet.u8, 64)],
     ['isDisabled', beet.bool],
     ['createdAt', beet.i64],
     ['bump', beet.u8],

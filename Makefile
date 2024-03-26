@@ -46,7 +46,7 @@ info: ## Info
 
 sdk: build ## Generate new sdk
 	pnpm -F @albus-finance/sdk generate
-	pnpm eslint ./packages/albus-sdk/src/generated
+	pnpm eslint ./packages/albus-sdk/src/generated --fix
 
 bump: ## Bump program version
 	cd ./programs/$(PROGRAM)/ && cargo bump

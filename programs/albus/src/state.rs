@@ -74,9 +74,11 @@ pub const MAX_ISSUER_DESC_LEN: usize = 64;
 #[derive(InitSpace)]
 pub struct Issuer {
     /// The authority of the issuer
-    pub authority: Pubkey,
+    pub pubkey: Pubkey,
     /// The ZK authority of the issuer (bbj-pubkey)
-    pub zk_authority: [u8; 64],
+    pub zk_pubkey: [u8; 64],
+    /// The authority of the issuer
+    pub authority: Pubkey,
     /// Issuer status
     pub is_disabled: bool,
     /// Creation date
@@ -109,8 +111,8 @@ impl Issuer {
 
     pub fn zk_authority(&self) -> ([u8; 32], [u8; 32]) {
         (
-            self.zk_authority[..32].try_into().unwrap(),
-            self.zk_authority[32..].try_into().unwrap(),
+            self.zk_pubkey[..32].try_into().unwrap(),
+            self.zk_pubkey[32..].try_into().unwrap(),
         )
     }
 }
