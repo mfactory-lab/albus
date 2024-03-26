@@ -629,7 +629,7 @@ export function encodeClaimValue(s: string | number | bigint): bigint {
   const bytes = new TextEncoder().encode(String(s))
   if (bytes.length > 32) {
     // TODO: fixme
-    return bytesToBigInt(bytes.slice().slice(0, 32))
+    return bytesToBigInt(bytes.slice(0, 32))
     // throw new Error('The maximum size for a claim is limited to 32 bytes.')
   }
   return bytesToBigInt(bytes)

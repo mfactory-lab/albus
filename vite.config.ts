@@ -7,13 +7,14 @@ import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 const inline: string[] = [
-  // TODO: fixme `key-did-resolver` doesn't support commonjs
-  // 'key-did-resolver',
-  // 'multiformats/bases/base58',
-  // 'multiformats/bases/base64',
-  // 'varint',
-  // 'bigint-mod-arith',
-  // 'nist-weierstrauss',
+  // TODO: fixme `key-did-resolver` doesn't support commonjs,
+  //  albus-issuer and albus-verifier are commonjs for now
+  'key-did-resolver',
+  'multiformats/bases/base58',
+  'multiformats/bases/base64',
+  'varint',
+  'bigint-mod-arith',
+  'nist-weierstrauss',
 ]
 
 const isObject = (item: unknown): item is Record<string, unknown> => Boolean(item && typeof item === 'object' && !Array.isArray(item))
