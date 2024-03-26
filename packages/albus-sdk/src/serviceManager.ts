@@ -40,6 +40,8 @@ import {
 } from './generated'
 
 export class ServiceManager extends BaseManager {
+  traceNamespace = 'ServiceManager'
+
   /**
    * Load {@link ServiceProvider} by {@link addr}
    * @param addr

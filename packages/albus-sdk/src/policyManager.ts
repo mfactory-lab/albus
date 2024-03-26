@@ -41,6 +41,8 @@ import {
 const ID_SEPARATOR = '_'
 
 export class PolicyManager extends BaseManager {
+  traceNamespace = 'PolicyManager'
+
   /**
    * Load a policy based on its public key address.
    *

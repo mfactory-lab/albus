@@ -53,6 +53,8 @@ import {
 import { getSignals } from './utils'
 
 export class InvestigationManager extends BaseManager {
+  traceNamespace = 'InvestigationManager'
+
   private get proofRequest() {
     return this.client.proofRequest
   }

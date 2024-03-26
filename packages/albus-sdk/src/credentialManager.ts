@@ -29,16 +29,16 @@
 import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
-import type { ClientSubscriptionId,
+import type {
+  ClientSubscriptionId,
   ConfirmOptions,
   PublicKeyInitData,
   Signer } from '@solana/web3.js'
-import {
-  ComputeBudgetProgram,
+import { ComputeBudgetProgram,
+
   Keypair,
   PublicKey,
-  SYSVAR_INSTRUCTIONS_PUBKEY,
-} from '@solana/web3.js'
+  SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js'
 import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
 import {

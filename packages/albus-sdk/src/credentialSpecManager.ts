@@ -44,6 +44,8 @@ import {
 } from './generated'
 
 export class CredentialSpecManager extends BaseManager {
+  traceNamespace = 'CredentialSpecManager'
+
   /**
    * Load {@link CredentialSpec} by {@link addr}
    */

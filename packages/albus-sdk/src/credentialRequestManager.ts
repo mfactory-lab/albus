@@ -44,6 +44,8 @@ import {
 import { getAssociatedTokenAddress } from './utils'
 
 export class CredentialRequestManager extends BaseManager {
+  traceNamespace = 'CredentialRequestManager'
+
   /**
    * Load {@link CredentialRequest} by {@link addr}
    */

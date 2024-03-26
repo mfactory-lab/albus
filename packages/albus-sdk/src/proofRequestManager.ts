@@ -58,6 +58,8 @@ import { KnownSignals } from './types'
 import { ProofInputBuilder, getSignals, getSolanaTimestamp } from './utils'
 
 export class ProofRequestManager extends BaseManager {
+  traceNamespace = 'ProofRequestManager'
+
   private get service() {
     return this.client.service
   }
@@ -355,10 +357,9 @@ export class ProofRequestManager extends BaseManager {
       birthDate: data.claims.birthDate.value,
       customProof: {
         type: 'BJJSignature2021',
-        created: Number(new Date()),
-        // TODO: fixme
-        verificationMethod: `#keys-0`,
         rootHash: data.credentialRoot,
+        verificationMethod: '#eddsa-bjj',
+        proofPurpose: 'assertionMethod',
         proofValue: {
           ax: data.issuerPk[0],
           ay: data.issuerPk[1],
@@ -366,7 +367,6 @@ export class ProofRequestManager extends BaseManager {
           r8y: data.issuerSignature[1],
           s: data.issuerSignature[2],
         },
-        proofPurpose: 'assertionMethod',
       },
     })
 

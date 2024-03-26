@@ -56,6 +56,6 @@ export abstract class BaseManager {
     if (!this.client.options.debug) {
       return
     }
-    console.log(`[AlbusClient][${this.traceNamespace}]`, ...msg)
+    console.info(`[Albus][${this.traceNamespace}]`, ...msg)
   }
 }

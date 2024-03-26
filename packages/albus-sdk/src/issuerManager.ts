@@ -46,6 +46,8 @@ import {
 } from './generated'
 
 export class IssuerManager extends BaseManager {
+  traceNamespace = 'IssuerManager'
+
   /**
    * Load issuer by {@link addr}
    * @param addr

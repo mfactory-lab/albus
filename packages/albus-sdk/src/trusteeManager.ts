@@ -39,6 +39,8 @@ import {
 } from './generated'
 
 export class TrusteeManager extends BaseManager {
+  traceNamespace = 'TrusteeManager'
+
   /**
    * Load trustee by {@link addr}
    */
