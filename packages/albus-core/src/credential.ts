@@ -36,7 +36,7 @@ import { SMT, Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from 
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
-import { bigintToBytes, bytesToBigInt, bytesToString } from './crypto/utils'
+import { bigintToBytes, bytesToString } from './crypto/utils'
 
 const { base58ToBytes } = utils
 
@@ -606,16 +606,16 @@ export async function createClaimsTree(claims: Claims, depth?: number) {
  * @return {bigint} - The encoded BigInt value.
  */
 export function encodeClaimValue(s: string | number | bigint): bigint {
-  // try {
-  //   return BigInt(s)
-  // } catch (e) {
-  //   return poseidon.hashBytes(new TextEncoder().encode(String(s)))
-  // }
-  const bytes = new TextEncoder().encode(String(s))
-  if (bytes.length > 32) {
-    throw new Error('The maximum size for a claim is limited to 32 bytes.')
+  try {
+    return BigInt(s)
+  } catch (e) {
+    return poseidon.hashBytes(new TextEncoder().encode(String(s)))
   }
-  return bytesToBigInt(bytes)
+  // const bytes = new TextEncoder().encode(String(s))
+  // if (bytes.length > 32) {
+  //   throw new Error('The maximum size for a claim is limited to 32 bytes.')
+  // }
+  // return bytesToBigInt(bytes)
 }
 
 /**

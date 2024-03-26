@@ -42,6 +42,7 @@ import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
 import type { Wallet, WithRequired } from './types'
+import type { PriorityFeeLoader } from './utils'
 import { NodeWallet } from './utils'
 import idl from './idl/albus.json'
 import { DEV_PROGRAM_ID } from './constants'
@@ -161,4 +162,8 @@ export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfir
 export type ClientOptions = {
   programId?: PublicKey
   debug?: boolean
+  /// Priority fee to be used with the transaction builder, in micro-lamports
+  priorityFee?: number
+  /// Priority fee callback to be used with the transaction builder
+  priorityFeeLoader?: PriorityFeeLoader
 }
