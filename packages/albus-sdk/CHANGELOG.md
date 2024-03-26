@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.9](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.8...@albus-finance/sdk-v0.3.0-next.9) (2024-03-26)
+
+
+### 🌟 Features
+
+* **sdk:** add priority fee loader ([ec02efd](https://github.com/mfactory-lab/albus/commit/ec02efd357786224f5479e4c2a40e933ce2220d2))
+
 ## [0.3.0-next.8](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.7...@albus-finance/sdk-v0.3.0-next.8) (2024-03-25)
 
 
