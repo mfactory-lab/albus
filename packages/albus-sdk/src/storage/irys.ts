@@ -36,8 +36,7 @@ import type {
   TransactionSignature,
 } from '@solana/web3.js'
 
-// eslint-disable-next-line import/no-named-default
-import { default as NodeIrys, WebIrys } from '@irys/sdk'
+import { NodeIrys, WebIrys } from '@irys/sdk'
 import BigNumber from 'bignumber.js'
 import type { ClientProvider } from '../client'
 import type { StorageDriver, StorageFile } from './index'
