@@ -11,7 +11,7 @@ import {
 import type { ClientProvider } from '../client'
 import { errorFromCode } from '../generated'
 
-export type PriorityFeeLoader = () => Promise<number>
+export type PriorityFeeLoader = (tx: Transaction) => Promise<number>
 
 export class TxBuilder {
   txs: Array<{ tx: Transaction, signers?: Signer[] }> = []
@@ -40,7 +40,7 @@ export class TxBuilder {
     return this
   }
 
-  priorityFee(microLamports: number | bigint) {
+  withPriorityFee(microLamports: number | bigint) {
     if (microLamports > 0) {
       for (const { tx } of this.txs) {
         tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: BigInt(microLamports) }))
@@ -56,11 +56,20 @@ export class TxBuilder {
 
   async sendAll(opts?: ConfirmOptions) {
     try {
-      if (this.priorityFeeLoader) {
-        this.priorityFee(await this.priorityFeeLoader())
-      }
       // skip empty transactions
       const txs = this.txs.filter(({ tx }) => tx.instructions.length > 0)
+
+      // apply priority fee
+      if (this.priorityFeeLoader) {
+        for (const { tx } of this.txs) {
+          const microLamports = await this.priorityFeeLoader(tx)
+          tx.instructions = [
+            ComputeBudgetProgram.setComputeUnitPrice({ microLamports }),
+            ...tx.instructions,
+          ]
+        }
+      }
+
       return await this.provider.sendAll(txs, {
         ...this.provider.opts,
         ...opts,
@@ -71,15 +80,26 @@ export class TxBuilder {
   }
 
   async sendAndConfirm(opts?: ConfirmOptions, feePayer?: Signer) {
+    if (this.txs[0] === undefined) {
+      throw new Error('No transactions to send')
+    }
+
+    if (feePayer !== undefined) {
+      this.txs[0].tx.feePayer = feePayer.publicKey
+      this.txs[0].signers?.push(feePayer)
+    }
+
+    // apply priority fee
+    if (this.priorityFeeLoader) {
+      const microLamports = await this.priorityFeeLoader(this.txs[0].tx)
+      this.txs[0].tx.instructions = [
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports }),
+        ...this.txs[0].tx.instructions,
+      ]
+    }
+
     try {
-      if (feePayer !== undefined) {
-        this.txs[0]!.tx.feePayer = feePayer.publicKey
-        this.txs[0]!.signers?.push(feePayer)
-      }
-      if (this.priorityFeeLoader) {
-        this.priorityFee(await this.priorityFeeLoader())
-      }
-      return await this.provider.sendAndConfirm(this.txs[0]!.tx, this.txs[0]!.signers, {
+      return await this.provider.sendAndConfirm(this.txs[0].tx, this.txs[0].signers, {
         ...this.provider.opts,
         ...opts,
       })

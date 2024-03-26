@@ -99,7 +99,7 @@ export class CredentialSpecManager extends BaseManager {
       .addInstruction(...instructions)
 
     if (opts?.priorityFee) {
-      builder.priorityFee(opts.priorityFee)
+      builder.withPriorityFee(opts.priorityFee)
     }
 
     const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
@@ -134,7 +134,7 @@ export class CredentialSpecManager extends BaseManager {
       .addInstruction(...instructions)
 
     if (opts?.priorityFee) {
-      builder.priorityFee(opts.priorityFee)
+      builder.withPriorityFee(opts.priorityFee)
     }
 
     const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
