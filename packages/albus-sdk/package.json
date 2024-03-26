@@ -1,7 +1,7 @@
 {
   "name": "@albus-finance/sdk",
   "_type": "module",
-  "version": "0.3.0-next.13",
+  "version": "0.3.0-next.14",
   "description": "Albus Protocol SDK",
   "repository": {
     "type": "git",
