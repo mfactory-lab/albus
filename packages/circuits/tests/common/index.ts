@@ -3,21 +3,9 @@ import type { Claims } from '@albus-finance/core'
 import { credential, crypto } from '@albus-finance/core'
 import type { Keypair } from '@solana/web3.js'
 
-const encoder = new TextEncoder()
-
 export const circomkit = new Circomkit({
   verbose: false,
 })
-
-export function countryLookup(iso2Codes: string[]) {
-  if (iso2Codes.length > 16) {
-    throw new Error('countryLookup cannot have more than 16 codes')
-  }
-  return iso2Codes.reduce((acc, code) => {
-    acc.push(...encoder.encode(code))
-    return acc
-  }, [] as number[])
-}
 
 export async function prepareInput(issuerKeypair: Keypair, claims: Claims, usedClaims: string[] = []) {
   const issuerPk = crypto.eddsa.prv2pub(issuerKeypair.secretKey)

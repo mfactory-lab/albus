@@ -1,5 +1,5 @@
 {
-  "name": "@lbus-finance/circuits",
+  "name": "@albus-finance/circuits",
   "version": "0.0.1",
   "private": true,
   "description": "Circuits for Albus",
@@ -10,7 +10,9 @@
     "directory": "packages/circuits"
   },
   "sideEffects": false,
+  "main": "./src/index.ts",
   "files": [
+    "src/**/*.ts",
     "!circom/main",
     "!circom/test",
     "LICENSE",

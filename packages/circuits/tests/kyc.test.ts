@@ -1,7 +1,8 @@
 import { crypto, zkp } from '@albus-finance/core'
 import { Keypair } from '@solana/web3.js'
 import { describe, it } from 'vitest'
-import { circomkit, countryLookup, prepareInput } from './common'
+import { countryLookup } from '../src'
+import { circomkit, prepareInput } from './common'
 
 const { eddsa } = crypto
 const { formatPrivKeyForBabyJub } = zkp
