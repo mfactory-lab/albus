@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.10](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.9...@albus-finance/sdk-v0.3.0-next.10) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** remove dynamic import from irys storage driver ([5c2331b](https://github.com/mfactory-lab/albus/commit/5c2331b44a56dc2c65bce1ca2d188ec6f779ba8f))
+
 ## [0.3.0-next.9](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.8...@albus-finance/sdk-v0.3.0-next.9) (2024-03-26)
 
 
