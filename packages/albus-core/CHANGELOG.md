@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.2...@albus-finance/core-v0.3.6-next.3) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* add inline deps for commonjs ([b48c56e](https://github.com/mfactory-lab/albus/commit/b48c56ea8b750d0fb048fe5cf8bf1b2c1b0b54eb))
+
 ## [0.3.6-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.1...@albus-finance/core-v0.3.6-next.2) (2024-03-26)
 
 
