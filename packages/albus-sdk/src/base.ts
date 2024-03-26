@@ -48,6 +48,7 @@ export abstract class BaseManager {
 
   protected get txBuilder() {
     return new TxBuilder(this.provider)
+      .withPriorityFeeLoader(this.client.options?.priorityFeeLoader)
       .priorityFee(this.client.options?.priorityFee ?? 0)
   }
 

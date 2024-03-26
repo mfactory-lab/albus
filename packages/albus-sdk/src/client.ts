@@ -42,6 +42,7 @@ import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
 import type { Wallet, WithRequired } from './types'
+import type { PriorityFeeLoader } from './utils'
 import { NodeWallet } from './utils'
 import { DEV_PROGRAM_ID } from './constants'
 import { CredentialSpecManager } from './credentialSpecManager'
@@ -188,4 +189,6 @@ export type ClientOptions = {
   storage?: { driver: string, options?: IrysOptions | Record<string, any> }
   /// Priority fee to be used with the transaction builder, in micro-lamports
   priorityFee?: number
+  /// Priority fee callback to be used with the transaction builder
+  priorityFeeLoader?: PriorityFeeLoader
 } & Record<string, any>

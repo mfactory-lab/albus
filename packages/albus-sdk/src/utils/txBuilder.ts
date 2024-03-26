@@ -11,8 +11,11 @@ import {
 import type { ClientProvider } from '../client'
 import { errorFromCode } from '../generated'
 
+export type PriorityFeeLoader = () => Promise<number>
+
 export class TxBuilder {
   txs: Array<{ tx: Transaction, signers?: Signer[] }> = []
+  private priorityFeeLoader: PriorityFeeLoader | undefined
 
   constructor(readonly provider: ClientProvider) {
     this.addTransaction(new Transaction(), [])
@@ -46,8 +49,16 @@ export class TxBuilder {
     return this
   }
 
+  withPriorityFeeLoader(fn: PriorityFeeLoader | undefined) {
+    this.priorityFeeLoader = fn
+    return this
+  }
+
   async sendAll(opts?: ConfirmOptions) {
     try {
+      if (this.priorityFeeLoader) {
+        this.priorityFee(await this.priorityFeeLoader())
+      }
       // skip empty transactions
       const txs = this.txs.filter(({ tx }) => tx.instructions.length > 0)
       return await this.provider.sendAll(txs, {
@@ -65,6 +76,9 @@ export class TxBuilder {
         this.txs[0]!.tx.feePayer = feePayer.publicKey
         this.txs[0]!.signers?.push(feePayer)
       }
+      if (this.priorityFeeLoader) {
+        this.priorityFee(await this.priorityFeeLoader())
+      }
       return await this.provider.sendAndConfirm(this.txs[0]!.tx, this.txs[0]!.signers, {
         ...this.provider.opts,
         ...opts,
@@ -72,5 +86,9 @@ export class TxBuilder {
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
+  }
+
+  clear() {
+    this.txs = []
   }
 }
