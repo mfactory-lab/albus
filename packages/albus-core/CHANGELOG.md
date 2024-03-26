@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.6-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.1...@albus-finance/core-v0.3.6-next.2) (2024-03-26)
+
+
+### 🌟 Features
+
+* new circuits, circomkit integration ([7e0c96d](https://github.com/mfactory-lab/albus/commit/7e0c96de363c65e635a88039bc53b207127656c7))
+* **program:** request credential feature ([a2a0f26](https://github.com/mfactory-lab/albus/commit/a2a0f26c114e80afa634b161215d92a4176eafa3))
+
+
+### 🐞 Bug Fixes
+
+* **core:** fixed `encodeClaimValue` ([950ec47](https://github.com/mfactory-lab/albus/commit/950ec47419ed1f1b9932c60ca46c25d318c9c027))
+* **core:** improved credential utils ([5766ff4](https://github.com/mfactory-lab/albus/commit/5766ff468480c5a1374d1fc3b9236289dc14c8b2))
+* **core:** remove circuit tests ([87727a8](https://github.com/mfactory-lab/albus/commit/87727a88af52048ba39993c9550ac01552f290e2))
+
 ## [0.3.6-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.0...@albus-finance/core-v0.3.6-next.1) (2024-02-05)
 
 
