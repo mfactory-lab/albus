@@ -7,8 +7,8 @@ import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 const inline: string[] = [
-  // TODO: fixme `key-did-resolver` doesn't support commonjs,
-  //  albus-issuer and albus-verifier are commonjs for now
+  // TODO: fixme this libs doesn't support commonjs, used for `albus-issuer` and `albus-verifier`
+  'lodash-es',
   'key-did-resolver',
   'multiformats/bases/base58',
   'multiformats/bases/base64',
