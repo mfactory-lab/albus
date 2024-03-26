@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.12...@albus-finance/sdk-v0.3.0-next.13) (2024-03-26)
+
+
+### ♻️ Refactors
+
+* **sdk:** improved priority fee ([c58b493](https://github.com/mfactory-lab/albus/commit/c58b493057b7e344156423359939c2efba710a39))
+
 ## [0.3.0-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.11...@albus-finance/sdk-v0.3.0-next.12) (2024-03-26)
 
 
