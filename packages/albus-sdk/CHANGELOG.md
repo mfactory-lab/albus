@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.13...@albus-finance/sdk-v0.3.0-next.14) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* add issuer pubkey field ([91201c9](https://github.com/mfactory-lab/albus/commit/91201c977ee72f83873431db4854781e452b219e))
+
 ## [0.3.0-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.12...@albus-finance/sdk-v0.3.0-next.13) (2024-03-26)
 
 
