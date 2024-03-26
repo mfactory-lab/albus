@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.11...@albus-finance/sdk-v0.3.0-next.12) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed `irys/sdk` import ([0b30888](https://github.com/mfactory-lab/albus/commit/0b30888f44999eb051567948d6435530abd614ea))
+
 ## [0.3.0-next.11](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.10...@albus-finance/sdk-v0.3.0-next.11) (2024-03-26)
 
 
