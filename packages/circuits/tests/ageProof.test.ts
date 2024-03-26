@@ -60,11 +60,11 @@ describe('ageProof', async () => {
     params: [credentialDepth, shamirN, shamirK],
   })
 
-  async function generateInput(claims: Record<string, any>, opts: { trustees?: Keypair[], minAge: number, maxAge?: number }) {
+  async function generateInput(claims: Record<string, any>, opts: { trustees?: Keypair[], minAge?: number, maxAge?: number }) {
     const input = {
       ...(await prepareInput(issuerKeypair, claims, ['birthDate', 'meta.validUntil'])),
       timestamp,
-      config: bytesToBigInt([opts.minAge, opts.maxAge ?? 0].reverse()),
+      config: bytesToBigInt([opts.minAge ?? 0, opts.maxAge ?? 0].reverse()),
       trusteePublicKey: [] as any,
       userPrivateKey,
     }
@@ -132,8 +132,19 @@ describe('ageProof', async () => {
   })
 
   it('should fail if age is too young', async () => {
+    const trustees = [Keypair.generate(), Keypair.generate(), Keypair.generate()]
     const input = await generateInput({ ...claims, birthDate: '2019-10-02' }, {
       minAge: 18,
+      trustees,
+    })
+    await circuit.expectFail(input)
+  })
+
+  it('should fail if age is too old', async () => {
+    const trustees = [Keypair.generate(), Keypair.generate(), Keypair.generate()]
+    const input = await generateInput({ ...claims, birthDate: '2019-10-02' }, {
+      maxAge: 4,
+      trustees,
     })
     await circuit.expectFail(input)
   })
