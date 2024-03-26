@@ -43,6 +43,7 @@
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {
+    "@albus-finance/circuits": "workspace:^",
     "@metaplex-foundation/solita": "^0.20.1",
     "release-it-config": "workspace:^"
   },

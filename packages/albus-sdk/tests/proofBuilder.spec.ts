@@ -26,50 +26,25 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { assert, describe, it } from 'vitest'
+import { assert, beforeAll, describe, it } from 'vitest'
 import * as Albus from '@albus-finance/core'
 import { Keypair, PublicKey } from '@solana/web3.js'
-import type { Circuit, Policy } from '../src'
-import { ProofInputBuilder } from '../src'
-import { loadFixture } from './client.spec'
+import { CircuitHelper, countryLookup } from '@albus-finance/circuits'
+import type { Policy } from '../src'
+import { Circuit, ProofInputBuilder } from '../src'
 
 describe('proof builder', async () => {
   const issuer = Keypair.generate()
   const user = Keypair.generate()
   const now = Math.floor(Date.now() / 1000)
 
-  const circuit = {
-    code: 'kyc',
-    name: 'kyc',
-    vk: Albus.zkp.encodeVerifyingKey(JSON.parse(loadFixture('kycPolicy.vk.json').toString())),
-    wasmUri: loadFixture('kycPolicy.wasm'),
-    zkeyUri: loadFixture('kycPolicy.zkey'),
-    outputs: [
-      'encryptedData[7]',
-      'encryptedShare[3][4]',
-      'userPublicKey[2]',
-    ],
-    privateSignals: [
-      'givenName',
-      'familyName',
-      'birthDate',
-      'country',
-      'docNumber',
-      'meta_validUntil',
-      'userPrivateKey',
-    ],
-    publicSignals: [
-      'timestamp',
-      'config',
-      'countryLookup[2]',
-      'credentialRoot',
-      'claimKey',
-      'claimProof[3]',
-      'issuerPk[2]',
-      'issuerSignature[3]',
-      'trusteePublicKey[3][2]',
-    ],
-  } as unknown as Circuit
+  const circuitHelper = new CircuitHelper('kyc')
+
+  const config = {
+    minAge: 18,
+    maxAge: 0,
+    selectionMode: 1, // inclusion
+  }
 
   const credential = await Albus.credential.createVerifiableCredential({
     givenName: 'Mikayla',
@@ -87,17 +62,11 @@ describe('proof builder', async () => {
     validUntil: now + 86400, // 1 day
   })
 
-  const config = {
-    minAge: 18,
-    maxAge: 0,
-    selectionMode: 1,
-  }
-
   const policy = {
     serviceProvider: PublicKey.default,
     circuit: PublicKey.default,
-    code: 'kyc',
-    name: 'kyc',
+    code: circuitHelper.circuit,
+    name: circuitHelper.circuit,
     description: '',
     expirationPeriod: 0,
     retentionPeriod: 0,
@@ -112,6 +81,28 @@ describe('proof builder', async () => {
       },
     ],
   } as Policy
+
+  let circuit: Circuit
+
+  beforeAll(async () => {
+    await circuitHelper.setup()
+
+    const { signals } = await circuitHelper.info()
+
+    circuit = Circuit.fromArgs({
+      code: circuitHelper.circuit,
+      name: circuitHelper.circuit,
+      description: circuitHelper.circuit,
+      vk: Albus.zkp.encodeVerifyingKey(await circuitHelper.vkey()),
+      wasmUri: await circuitHelper.wasm() as any,
+      zkeyUri: await circuitHelper.zkey() as any,
+      privateSignals: signals.private,
+      publicSignals: signals.public,
+      outputs: signals.output,
+      createdAt: now,
+      bump: 0,
+    })
+  }, 50000)
 
   it('works', async () => {
     const proofInput = await new ProofInputBuilder(credential)
@@ -157,14 +148,3 @@ describe('proof builder', async () => {
     })
   })
 })
-
-function countryLookup(iso2Codes: string[]) {
-  if (iso2Codes.length > 16) {
-    throw new Error('countryLookup cannot have more than 16 codes')
-  }
-  const encoder = new TextEncoder()
-  return iso2Codes.reduce((acc, code) => {
-    acc.push(...encoder.encode(code))
-    return acc
-  }, [] as number[])
-}
