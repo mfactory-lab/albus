@@ -37,7 +37,7 @@ import type {
 } from '@solana/web3.js'
 
 // eslint-disable-next-line import/no-named-default
-import type { default as NodeIrys, WebIrys } from '@irys/sdk'
+import { default as NodeIrys, WebIrys } from '@irys/sdk'
 import BigNumber from 'bignumber.js'
 import type { ClientProvider } from '../client'
 import type { StorageDriver, StorageFile } from './index'
@@ -246,9 +246,9 @@ export class IrysStorageDriver implements StorageDriver {
     keypair: Keypair,
     options: any,
   ): Promise<NodeIrys> {
-    const bPackage = await import('@irys/sdk')
-    // eslint-disable-next-line new-cap
-    return new bPackage.default({
+    // const bPackage = await import('@irys/sdk')
+
+    return new NodeIrys({
       url: address,
       token: currency,
       key: keypair.secretKey,
@@ -280,7 +280,7 @@ export class IrysStorageDriver implements StorageDriver {
       },
     }
 
-    const { WebIrys } = await import('@irys/sdk')
+    // const { WebIrys } = await import('@irys/sdk')
     // const bPackage = _removeDoubleDefault(await import('@irys/sdk'))
     const irys = new WebIrys({
       url: address,
