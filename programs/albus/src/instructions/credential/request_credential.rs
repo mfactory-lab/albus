@@ -27,7 +27,7 @@
  */
 use crate::errors::AlbusError;
 use crate::events::CreateCredentialRequestEvent;
-use crate::state::{CredentialRequest, CredentialSpec, Issuer};
+use crate::state::{CredentialRequest, CredentialRequestStatus, CredentialSpec, Issuer};
 use crate::utils::cmp_pubkeys;
 use crate::ID;
 use anchor_lang::prelude::*;
@@ -64,7 +64,7 @@ pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> 
     req.owner = ctx.accounts.authority.key();
     req.issuer = issuer.key();
     req.uri = data.uri;
-    req.status = 0;
+    req.status = CredentialRequestStatus::Pending;
     req.created_at = timestamp;
     req.bump = ctx.bumps.credential_request;
 
@@ -101,7 +101,7 @@ pub struct RequestCredential<'info> {
     )]
     pub credential_request: Box<Account<'info, CredentialRequest>>,
 
-    #[account(mut)]
+    #[account(mut, has_one = issuer)]
     pub credential_spec: Box<Account<'info, CredentialSpec>>,
 
     pub credential_mint: Account<'info, Mint>,
@@ -118,6 +118,5 @@ pub struct RequestCredential<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    /// System program.
     pub system_program: Program<'info, System>,
 }

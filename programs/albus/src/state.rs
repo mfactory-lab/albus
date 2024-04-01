@@ -30,7 +30,7 @@ use crate::utils::Signals;
 use anchor_lang::prelude::*;
 
 #[cfg(feature = "verify-on-chain")]
-use groth16_solana::{Proof};
+use groth16_solana::Proof;
 
 #[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct ProofData {
@@ -73,9 +73,9 @@ pub const MAX_ISSUER_DESC_LEN: usize = 64;
 #[account]
 #[derive(InitSpace)]
 pub struct Issuer {
-    /// The authority of the issuer
+    /// The public key of the issuer
     pub pubkey: Pubkey,
-    /// The ZK authority of the issuer (bbj-pubkey)
+    /// Public key in zk compatible (BabuJubJub curve) format
     pub zk_pubkey: [u8; 64],
     /// The authority of the issuer
     pub authority: Pubkey,
@@ -499,13 +499,6 @@ pub enum ProofRequestStatus {
     Rejected,
 }
 
-pub const MAX_CREDENTIAL_REQUEST_URI_LEN: usize = 200;
-pub const MAX_CREDENTIAL_SPEC_NAME_LEN: usize = 32;
-pub const MAX_CREDENTIAL_SPEC_URI_LEN: usize = 200;
-// pub const MAX_CREDENTIAL_REQUIREMENT_KEY_LEN: usize = 32;
-// pub const MAX_CREDENTIAL_REQUIREMENT_VALUE_LEN: usize = 64;
-
-//
 // On-chain credential
 //
 // pub const MAX_CREDENTIAL_URI_LEN: usize = 200;
@@ -550,6 +543,9 @@ pub const MAX_CREDENTIAL_SPEC_URI_LEN: usize = 200;
 //     Rejected,
 // }
 
+pub const MAX_CRED_REQ_URI_LEN: usize = 200;
+pub const MAX_CRED_REQ_MSG_LEN: usize = 128;
+
 #[account]
 #[derive(InitSpace)]
 pub struct CredentialRequest {
@@ -561,15 +557,18 @@ pub struct CredentialRequest {
     pub owner: Pubkey,
     /// The [Issuer] associated with this request
     pub issuer: Pubkey,
-    /// Presentation Submission
-    #[max_len(MAX_CREDENTIAL_REQUEST_URI_LEN)]
-    pub uri: String,
     /// Status of the request
-    pub status: u8,
+    pub status: CredentialRequestStatus,
     /// Creation date
     pub created_at: i64,
     /// PDA bump
     pub bump: u8,
+    /// Presentation definition
+    #[max_len(MAX_CRED_REQ_URI_LEN)]
+    pub uri: String,
+    /// Rejection message
+    #[max_len(MAX_CRED_REQ_MSG_LEN)]
+    pub message: String,
 }
 
 impl CredentialRequest {
@@ -581,13 +580,27 @@ impl CredentialRequest {
     }
 }
 
+#[repr(u8)]
+#[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
+pub enum CredentialRequestStatus {
+    #[default]
+    Pending,
+    InProgress,
+    Approved,
+    Rejected,
+}
+
+#[constant]
+pub const MAX_CRED_SPEC_NAME_LEN: usize = 32;
+pub const MAX_CRED_SPEC_URI_LEN: usize = 200;
+
 #[account]
 #[derive(InitSpace)]
 pub struct CredentialSpec {
     /// The [Issuer] associated with this spec
     pub issuer: Pubkey,
     /// The name of the credential spec
-    #[max_len(MAX_CREDENTIAL_SPEC_NAME_LEN)]
+    #[max_len(MAX_CRED_SPEC_NAME_LEN)]
     pub name: String,
     /// Total number of credential requests associated with this spec
     pub credential_request_count: u64,
@@ -595,7 +608,7 @@ pub struct CredentialSpec {
     pub bump: u8,
     /// Presentation definition
     /// https://identity.foundation/presentation-exchange/#presentation-definition
-    #[max_len(MAX_CREDENTIAL_SPEC_URI_LEN)]
+    #[max_len(MAX_CRED_SPEC_URI_LEN)]
     pub uri: String,
 }
 

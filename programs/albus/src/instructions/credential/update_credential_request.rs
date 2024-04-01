@@ -26,18 +26,44 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-pub mod create_credential;
-pub mod create_credential_spec;
-pub mod delete_credential;
-pub mod delete_credential_spec;
-pub mod request_credential;
-pub mod update_credential;
-pub mod update_credential_request;
+use crate::errors::AlbusError;
+use crate::state::{CredentialRequest, CredentialRequestStatus, Issuer, MAX_CRED_REQ_MSG_LEN};
+use anchor_lang::prelude::*;
 
-pub use self::create_credential::*;
-pub use self::create_credential_spec::*;
-pub use self::delete_credential::*;
-pub use self::delete_credential_spec::*;
-pub use self::request_credential::*;
-pub use self::update_credential::*;
-pub use self::update_credential_request::*;
+pub fn handler(
+    ctx: Context<UpdateCredentialRequest>,
+    data: UpdateCredentialRequestData,
+) -> Result<()> {
+    let req = &mut ctx.accounts.credential_request;
+
+    if data.message.len() > MAX_CRED_REQ_MSG_LEN {
+        msg!("Message too long, max {}", MAX_CRED_REQ_MSG_LEN);
+        return Err(AlbusError::InvalidData.into());
+    }
+
+    req.status = data.status;
+    req.message = data.message;
+
+    Ok(())
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct UpdateCredentialRequestData {
+    pub status: CredentialRequestStatus,
+    pub message: String,
+}
+
+#[derive(Accounts)]
+#[instruction(data: UpdateCredentialRequestData)]
+pub struct UpdateCredentialRequest<'info> {
+    #[account(mut, has_one = issuer)]
+    pub credential_request: Box<Account<'info, CredentialRequest>>,
+
+    #[account(has_one = authority)]
+    pub issuer: Box<Account<'info, Issuer>>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}

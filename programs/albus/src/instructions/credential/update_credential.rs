@@ -107,7 +107,7 @@ pub struct UpdateCredential<'info> {
     /// (Optional) Credential request issuer.
     pub credential_request_issuer: Option<Box<Account<'info, Issuer>>>,
 
-    // /// Destination token account (required for pNFT).
+    // /// Destination token account.
     // ///
     // /// CHECK: account checked in CPI
     // pub token_account: UncheckedAccount<'info>,
@@ -134,6 +134,5 @@ pub struct UpdateCredential<'info> {
     /// CHECK: account checked in CPI
     pub metadata_program: Program<'info, MetadataProgram>,
 
-    /// System program.
     pub system_program: Program<'info, System>,
 }

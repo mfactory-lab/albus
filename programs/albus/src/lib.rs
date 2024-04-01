@@ -47,13 +47,16 @@ declare_id!("ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi");
 declare_id!("ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp");
 
 #[cfg(not(feature = "no-entrypoint"))]
-solana_security_txt::security_txt! {
-    name: "Albus",
-    project_url: "https://albus.finance",
-    contacts: "email:info@albus.finance,twitter:@AlbusProtocol",
-    policy: "https://github.com/mfactory-lab/albus/blob/master/SECURITY.md",
-    preferred_languages: "en",
-    source_code: "https://github.com/mfactory-lab/albus"
+pub mod security {
+    use solana_security_txt::security_txt;
+    security_txt! {
+        name: "Albus",
+        project_url: "https://albus.finance",
+        contacts: "email:info@albus.finance,twitter:@AlbusProtocol",
+        policy: "https://github.com/mfactory-lab/albus/blob/master/SECURITY.md",
+        preferred_languages: "en",
+        source_code: "https://github.com/mfactory-lab/albus"
+    }
 }
 
 #[program]
@@ -92,6 +95,13 @@ pub mod albus {
         data: RequestCredentialData,
     ) -> Result<()> {
         request_credential::handler(ctx, data)
+    }
+
+    pub fn update_credential_request(
+        ctx: Context<UpdateCredentialRequest>,
+        data: UpdateCredentialRequestData,
+    ) -> Result<()> {
+        update_credential_request::handler(ctx, data)
     }
 
     // Credential Spec
