@@ -10,6 +10,7 @@
 * [Digital credentials](digital-cred.md)
 * [Data retention compliance](data-retention-compliance.md)
 * [Zero-Knowledge Proofs](zero-knowledge-proofs.md)
+* [AML Officer](aml-officer.md)
 * [User data security](data-security.md)
 * [Example](example.md)
 
@@ -28,7 +29,7 @@
 * [Albus CLI](albus-cli.md)
 * [Integration](integration.md)
 
-## Additional info
+## Resources
 
 * [Glossary](glossary.md)
 * [Reference list](reference-list.md)

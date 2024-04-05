@@ -20,6 +20,10 @@ layout:
 
 A dedicated service that runs on the Issuer node. It fetches user data (claims) from an Issuer and converts it to the W3C Verifiable Credential format. Each adapter is dedicated to a specific Issuer.
 
+### AML Officer
+
+A type of Issuer that conducts AML checks and issues Verifiable Credentials for AML-compliant users. It can be an in-house employee of a Web3 business or some other trusted entity.
+
 ### Issuer node
 
 A Node.js node deployed outside the Albus framework. It runs Adapters and issues digital credentials for users in the W3C Verifiable Credential format in case an Issuer cannot provide user data (claims) in this format.
