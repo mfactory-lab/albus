@@ -1,5 +1,4 @@
 import { Circomkit } from 'circomkit'
-import type { Claims } from '@albus-finance/core'
 import { credential, crypto } from '@albus-finance/core'
 import type { Keypair } from '@solana/web3.js'
 
@@ -7,12 +6,12 @@ export const circomkit = new Circomkit({
   verbose: false,
 })
 
-export async function prepareInput(issuerKeypair: Keypair, claims: Claims, usedClaims: string[] = []) {
+export async function prepareInput(issuerKeypair: Keypair, claims: Record<string, any>, usedClaims: string[] = []) {
   const issuerPk = crypto.eddsa.prv2pub(issuerKeypair.secretKey)
 
   const tree = await credential.createClaimsTree(claims)
 
-  const signature = crypto.eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
+  const signature = crypto.eddsa.signPoseidon(issuerKeypair.secretKey, tree.root())
 
   const claimsProof: bigint[][] = []
   const keys: number[] = []
@@ -29,7 +28,7 @@ export async function prepareInput(issuerKeypair: Keypair, claims: Claims, usedC
   }
 
   return {
-    credentialRoot: tree.root,
+    credentialRoot: tree.root(),
     claimsProof,
     claimsKey: crypto.utils.bytesToBigInt(keys.reverse()),
     issuerPk,
