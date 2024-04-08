@@ -27,7 +27,7 @@
  */
 
 import { DEFAULT_CONTEXT, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from '../credential'
-import type { DateType, W3CCredential, W3CPresentation } from '../types'
+import type { W3CCredential, W3CPresentation } from '../types'
 
 export function validateCredentialPayload(payload: W3CCredential): void {
   validateContext(payload['@context'])
@@ -39,15 +39,24 @@ export function validateCredentialPayload(payload: W3CCredential): void {
   if (payload.expirationDate) {
     validateTimestamp(payload.expirationDate)
   }
+  if (payload.validFrom) {
+    validateTimestamp(payload.validFrom)
+  }
+  if (payload.validUntil) {
+    validateTimestamp(payload.validUntil)
+  }
 }
 
 export function validatePresentationPayload(payload: W3CPresentation): void {
   validateContext(payload['@context'])
   validateVpType(payload.type)
-  // empty credential array is allowed
-  if (payload.verifiableCredential && payload.verifiableCredential.length >= 1) {
-    for (const vc of payload.verifiableCredential) {
-      validateCredentialPayload(vc)
+  if (payload.verifiableCredential) {
+    if (Array.isArray(payload.verifiableCredential)) {
+      for (const vc of payload.verifiableCredential) {
+        validateCredentialPayload(vc)
+      }
+    } else {
+      validateCredentialPayload(payload.verifiableCredential)
     }
   }
   if (payload.expirationDate) {
@@ -62,7 +71,7 @@ export function validatePresentationPayload(payload: W3CPresentation): void {
 // 10 digits max is 9999999999 -> 11/20/2286 @ 5:46pm (UTC)
 // 11 digits max is 99999999999 -> 11/16/5138 @ 9:46am (UTC)
 // 12 digits max is 999999999999 -> 09/27/33658 @ 1:46am (UTC)
-function validateTimestamp(value: number | DateType): void {
+function validateTimestamp(value: number | string): void {
   if (typeof value === 'number') {
     if (!(Number.isInteger(value) && value < 100000000000)) {
       throw new TypeError(`"${value}" is not a unix timestamp in seconds`)

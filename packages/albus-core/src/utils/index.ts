@@ -26,6 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+export * from './date'
 export * from './did'
-export * from './nft'
 export * from './validators'

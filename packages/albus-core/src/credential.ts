@@ -28,53 +28,55 @@
 
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
+
 import type { Resolvable, ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
-import { MultiBase, SMT, Signature, XC20P, babyJub, eddsa, ffUtils, poseidon, utils } from './crypto'
+import {
+  PublicKey as BabyJubPubkey,
+  MultiBase,
+  PrivateKey,
+  SMT,
+  Signature,
+  XC20P,
+  eddsa,
+  poseidon,
+  utils,
+} from './crypto'
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
-import type { Claims, Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
-import { encodeDidKey, validateCredentialPayload, validatePresentationPayload } from './utils'
-import { bigintToBytes, bytesToBigInt, bytesToString } from './crypto/utils'
+import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
+import { encodeDidKey, validateCredentialPayload, validatePresentationPayload, w3cDate, w3cDateToUnixTs } from './utils'
 
-const { base58ToBytes } = utils
+const { bigintToBytes, base58ToBytes, bytesToBigInt, bytesToString } = utils
+
+// const {
+//   suites: { LinkedDataSignature },
+//   purposes: { AssertionProofPurpose },
+// } = jsigs
+
+type Claims = Record<string, any>
 
 // https://www.w3.org/TR/vc-data-model-2.0
-export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
+// export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
+export const DEFAULT_CONTEXT = 'https://www.w3.org/2018/credentials/v1'
 export const DEFAULT_VC_TYPE = 'VerifiableCredential'
 export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
 export const DEFAULT_DID = 'did:web:albus.finance'
 export const DEFAULT_CLAIM_TREE_DEPTH = 5 // 2^5-1 = 16 elements
 
-function normalizeClaims(claims: Claims) {
-  const normalizedClaims: Record<string, any> = {}
-
-  for (const key in claims) {
-    let value = claims[key]
-    if (typeof value === 'object') {
-      value = normalizeClaims(value)
-    } else {
-      value = String(value).trim()
-    }
-    normalizedClaims[key] = value
-  }
-
-  return normalizedClaims
-}
-
 /**
  * Create metadata info from the credential
  * used for generate a claims tree
  */
-export function getCredentialMeta(credential: W3CCredential | VerifiableCredential) {
-  const parseDate = (value: number | string) => Math.floor(new Date(value).getTime() / 1000)
+export function getCredentialMeta(credential: W3CCredential) {
   const meta: Record<string, any> = {
-    issuer: credential.issuer,
-    issuanceDate: parseDate(credential.issuanceDate),
-    validUntil: credential.validUntil ? parseDate(credential.validUntil) : 0,
-    validFrom: credential.validFrom ? parseDate(credential.validFrom) : 0,
+    issuer: encodeClaimValue(typeof credential.issuer === 'string' ? credential.issuer : credential.issuer?.id),
+    issuanceDate: w3cDateToUnixTs(credential.issuanceDate),
+    validUntil: credential.validUntil ? w3cDateToUnixTs(credential.validUntil) : 0,
+    validFrom: credential.validFrom ? w3cDateToUnixTs(credential.validFrom) : 0,
   }
+  // the last credential type is used
   const type = credential.type.slice(-1)[0]
   if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
     meta.type = type
@@ -83,8 +85,9 @@ export function getCredentialMeta(credential: W3CCredential | VerifiableCredenti
 }
 
 export type CreateCredentialOpts = {
-  issuerSecretKey?: number[] | Uint8Array
   issuerDid?: string
+  // Signer secret key.
+  issuerSecretKey?: number[] | Uint8Array
   verificationMethod?: string
   encrypt?: boolean
   encryptionKey?: PublicKey
@@ -98,30 +101,15 @@ export type CreateCredentialOpts = {
   // custom issuance date
   timestamp?: number
   credentialType?: CredentialType
+  // suite: typeof LinkedDataSignature
+  // documentLoader: any
+  // purpose?: any
 }
 
 /**
  * Create new verifiable credential
  */
-export async function createVerifiableCredential<C extends Claims>(claims: C, opts: CreateCredentialOpts = {}): Promise<VerifiableCredential<C>> {
-  const normalizedClaims = normalizeClaims(claims)
-
-  let credentialSubject: Claims = {}
-
-  if (opts.encrypt) {
-    if (!opts.encryptionKey) {
-      throw new Error('encryption key is required')
-    }
-    credentialSubject.encryptionKey = opts.encryptionKey.toBase58()
-    credentialSubject.encrypted = await XC20P.encrypt(
-      JSON.stringify(normalizedClaims),
-      opts.encryptionKey,
-      opts.encryptionSecretKey,
-    )
-  } else {
-    credentialSubject = { ...normalizedClaims }
-  }
-
+export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts = {}): Promise<VerifiableCredential> {
   const now = opts?.timestamp ? new Date(opts.timestamp * 1000) : new Date()
   const vcType = [DEFAULT_VC_TYPE, CredentialType.AlbusCredential]
 
@@ -129,58 +117,144 @@ export async function createVerifiableCredential<C extends Claims>(claims: C, op
     vcType.push(opts.credentialType)
   }
 
-  const vc: W3CCredential = {
+  const normalizedClaims = normalizeClaims(claims)
+
+  let vc: VerifiableCredential = {
     '@context': [DEFAULT_CONTEXT],
     'type': vcType,
     'issuer': opts.issuerDid ?? DEFAULT_DID,
-    'issuanceDate': now.toISOString(),
-    'credentialSubject': credentialSubject,
+    'issuanceDate': w3cDate(now),
+    'credentialSubject': normalizedClaims,
+    'proof': undefined,
   }
 
   // Revocation
   // vc.credentialStatus = {
-  //   id: 'https://example.edu/status/24',
-  //   type: 'CredentialStatusList2017',
+  //   id: 'did:albus:abc111222333',
+  //   type: 'AlbusRevocationStatusV1',
   // }
 
   if (opts?.validFrom) {
-    vc.validFrom = new Date(opts.validFrom * 1000).toISOString()
+    vc.validFrom = w3cDate(new Date(opts.validFrom * 1000))
   }
 
   if (opts?.validUntil) {
-    vc.validUntil = new Date(opts.validUntil * 1000).toISOString()
+    vc.validUntil = w3cDate(new Date(opts.validUntil * 1000))
   }
 
-  if (opts.customProof || opts.issuerSecretKey) {
-    const meta = getCredentialMeta(vc)
-    const claimsTree = await createClaimsTree({ meta, ...normalizedClaims })
-    vc.proof = opts.customProof ?? createCredentialProof({
-      rootHash: claimsTree.root,
+  if (opts.issuerSecretKey) {
+    vc = await signCredential(vc, {
       signerSecretKey: Uint8Array.from(opts.issuerSecretKey),
-      verificationMethod: opts.verificationMethod ?? `${vc.issuer}#eddsa-bjj`,
+      verificationMethod: opts.verificationMethod,
+      controller: String(vc.issuer),
     })
   }
 
-  return vc as VerifiableCredential<C>
+  // TODO: implement jsonld-signatures
+  // const { purpose, documentLoader, suite } = opts
+  // vc = jsigs.sign(vc, { purpose: purpose ?? new AssertionProofPurpose(), documentLoader, suite })
+
+  if (opts.encrypt) {
+    if (!opts.encryptionKey) {
+      throw new Error('encryption key is required')
+    }
+    vc = await encryptCredential(vc, { pubkey: opts.encryptionKey, esk: opts.encryptionSecretKey })
+  }
+
+  return vc
+}
+
+export type SingCredentialOpts = {
+  signerSecretKey: Uint8Array
+  verificationMethod: string
+  controller?: string
+  purpose?: string
+  date?: Date
+}
+
+/**
+ * Sign a verifiable credential with the provided options.
+ *
+ * @param {W3CCredential} vc - The verifiable credential to sign.
+ * @param {SingCredentialOpts} opts - The options for signing the credential.
+ * @return {Promise<VerifiableCredential>} The signed verifiable credential.
+ */
+export async function signCredential(vc: W3CCredential, opts: SingCredentialOpts): Promise<VerifiableCredential> {
+  const claimsTree = await createCredentialTree(vc)
+  const proof = createCredentialProof({
+    msg: claimsTree.root(),
+    signerSecretKey: opts.signerSecretKey,
+    verificationMethod: opts.verificationMethod,
+    controller: opts.controller,
+    purpose: opts.purpose,
+    date: opts.date,
+  })
+  return {
+    ...vc,
+    proof,
+  }
+}
+
+export type EncryptCredentialOpts = {
+  pubkey: PublicKey
+  esk?: number[] | Uint8Array
+}
+
+/**
+ * Encrypts the credential subject of a verifiable credential if it is not already encrypted.
+ */
+export async function encryptCredential(vc: VerifiableCredential, opts: EncryptCredentialOpts): Promise<VerifiableCredential & {
+  credentialSubject: {
+    encrypted?: { data: string, key: string }
+  }
+}> {
+  if (vc.credentialSubject?.encrypted !== undefined) {
+    return vc
+  }
+  return {
+    ...vc,
+    credentialSubject: {
+      encrypted: {
+        data: await XC20P.encrypt(
+          JSON.stringify(vc.credentialSubject),
+          opts.pubkey,
+          opts.esk,
+        ),
+        key: opts.pubkey.toBase58(),
+      },
+    },
+  }
+}
+
+/**
+ * Decrypts the credential subject if needed and returns the updated VerifiableCredential.
+ *
+ * @param {VerifiableCredential} vc - The VerifiableCredential to decrypt if needed.
+ * @param {Uint8Array} secretKey - The secret key used for decryption.
+ * @return {Promise<VerifiableCredential>} The VerifiableCredential with decrypted credential subject if needed.
+ */
+export async function decryptCredentialIfNeeded(vc: VerifiableCredential, secretKey: Uint8Array): Promise<VerifiableCredential> {
+  let credentialSubject: Record<string, any> = {}
+  if (vc.credentialSubject?.encrypted?.data !== undefined) {
+    credentialSubject = JSON.parse(
+      await XC20P.decrypt(vc.credentialSubject.encrypted.data, secretKey),
+    )
+    return { ...vc, credentialSubject }
+  }
+  return vc
 }
 
 export type CreatePresentationOpts = {
   holderSecretKey: number[] | Uint8Array
   credentials: VerifiableCredential[]
-  // By default, all credential fields will be exposed
-  exposedFields?: string[]
-  // Used for credential decryption
   decryptionKey?: number[] | Uint8Array
-  // By default, the challenge is the holder's public key.
-  challenge?: Uint8Array
-  // custom issuance date
-  timestamp?: number
+  challenge?: bigint
+  date?: string | Date
   presentationType?: PresentationType
 }
 
 /**
  * Create new verifiable presentation
- * @param opts
  */
 export async function createVerifiablePresentation(opts: CreatePresentationOpts) {
   const holderKeypair = Keypair.fromSecretKey(Uint8Array.from(opts.holderSecretKey))
@@ -188,66 +262,15 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
   const decryptionKey = opts.decryptionKey ?? holderKeypair.secretKey
   const creds: VerifiableCredential[] = []
 
+  // Decrypt credentials if needed
   for (const credential of opts.credentials) {
-    if (!credential.type.includes(CredentialType.AlbusCredential)) {
-      console.log(`unsupported credential type ${credential.type}`)
-      continue
-    }
-
-    // if (credential.proof.type !== ProofType.BJJSignature2021) {
-    //   console.log(`unsupported signature ${credential.proof.type}`)
-    //   continue
-    // }
-
-    // decrypt claims if needed
-    let claims: Claims = {}
-    if ('encrypted' in credential.credentialSubject) {
-      try {
-        claims = JSON.parse(await XC20P.decrypt(credential.credentialSubject.encrypted, decryptionKey))
-      } catch (e) {
-        console.log(`Error: unable to decrypt credential (${e})`)
-      }
-    } else {
-      claims = { ...credential.credentialSubject }
-    }
-
-    const flattenClaims = flattenObject(claims)
-    const claimsTree = await createClaimsTree(claims)
-    const exposedClaims: Claims = {}
-    const credentialProof: Claims = {}
-
-    for (const field of opts.exposedFields ?? Object.keys(flattenClaims)) {
-      if (exposedClaims[field] !== undefined) {
-        // skip if already added
-        continue
-      }
-      if (flattenClaims[field] !== undefined) {
-        exposedClaims[field] = flattenClaims[field]
-        const proof = await claimsTree.get(field)
-        credentialProof[field] = [proof.key, ...proof.siblings]
-      }
-    }
-
-    // no exposed fields, just skip this credential
-    if (Object.keys(exposedClaims).length === 0) {
-      continue
-    }
-
-    exposedClaims['@proof'] = unflattenObject(credentialProof)
-
-    const cred = {
-      ...credential,
-      credentialSubject: unflattenObject(exposedClaims),
-    }
-
-    creds.push(cred)
+    creds.push(await decryptCredentialIfNeeded(credential, Uint8Array.from(decryptionKey)))
   }
 
   if (creds.length === 0) {
     throw new Error('no credentials provided')
   }
 
-  const now = opts?.timestamp ? new Date(opts.timestamp * 1000) : new Date()
   const vpType = [DEFAULT_VP_TYPE, PresentationType.AlbusPresentation]
 
   if (opts.presentationType) {
@@ -257,57 +280,44 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
   const vp: W3CPresentation = {
     '@context': [DEFAULT_CONTEXT],
     'type': vpType,
-    'issuanceDate': now.toISOString(),
+    'issuanceDate': w3cDate(opts.date),
     'holder': holderDid,
     'verifiableCredential': creds,
   }
 
+  const fingerprint = new PrivateKey(holderKeypair.secretKey).public().toBase58()
+
   vp.proof = createPresentationProof({
-    signerSecret: holderKeypair.secretKey,
+    verificationMethod: `${holderDid}#${fingerprint}`,
+    signerSecretKey: holderKeypair.secretKey,
     challenge: opts.challenge,
   })
 
   return vp as VerifiablePresentation
 }
 
-export type EncryptPresentationOpts = {
-  pubkey: PublicKey
-  esk?: number[] | Uint8Array
-}
-
-export async function encryptVerifiablePresentation(vp: VerifiablePresentation, opts: EncryptPresentationOpts) {
-  const verifiableCredential = vp.verifiableCredential ?? []
+/**
+ * Encrypts the verifiable presentation with the given options.
+ */
+export async function encryptPresentation(vp: VerifiablePresentation, opts: EncryptCredentialOpts) {
+  const verifiableCredential = [].concat(vp.verifiableCredential)
   for (let i = 0; i < verifiableCredential.length; i++) {
-    const cred = verifiableCredential[i]!
-    if (!('encrypted' in cred.credentialSubject)) {
-      try {
-        verifiableCredential[i] = {
-          ...cred,
-          credentialSubject: {
-            encrypted: await XC20P.encrypt(
-              JSON.stringify(cred.credentialSubject),
-              opts.pubkey,
-              opts.esk,
-            ),
-          },
-        }
-      } catch (e) {
-        console.log(`failed to encrypt credential #${i}`)
-      }
-    } else {
-      console.log(`credential #${i} already encrypted`)
-    }
+    verifiableCredential[i] = await encryptCredential(verifiableCredential[i], opts)
   }
   return { ...vp, verifiableCredential }
 }
 
 export type VerifyCredentialOpts = {
-  decryptionKey?: number[] | Uint8Array
+  decryptionKey?: ArrayLike<number>
   resolver?: Resolvable
 }
 
 /**
- * Verify credential
+ * Verifies a verifiable credential by resolving the issuer, decrypting the subject if needed, and validating the proof.
+ *
+ * @param {VerifiableCredential} vc - The verifiable credential to be verified.
+ * @param {VerifyCredentialOpts} opts - Additional options for verifying the credential. Default is an empty object.
+ * @return {Promise<VerifiableCredential>} The verified and decrypted verifiable credential.
  */
 export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCredentialOpts = {}): Promise<VerifiableCredential> {
   const resolver = opts.resolver ?? new Resolver({
@@ -317,29 +327,22 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 
   validateCredentialPayload(vc)
 
-  // decrypt subject if needed
-  let credentialSubject = vc.credentialSubject
-  if (vc.credentialSubject.encrypted) {
-    if (!opts.decryptionKey) {
-      throw new Error('credential subject is encrypted but no decryption key provided')
-    }
-    try {
-      credentialSubject = JSON.parse(await XC20P.decrypt(credentialSubject.encrypted, opts.decryptionKey))
-    } catch (e) {
-      console.log('failed to decrypt credential subject')
-    }
-  }
+  const cred = await decryptCredentialIfNeeded(vc, Uint8Array.from(opts.decryptionKey ?? []))
 
   // @ts-expect-error ...
-  const issuerDid = vc.issuer?.id ?? vc.issuer
+  const issuerDid = cred.issuer?.id ?? cred.issuer
+
   const result = await resolver.resolve(issuerDid, { accept: 'application/did+json' })
   if (!result.didDocument?.verificationMethod) {
-    throw new Error('invalid issuer, no verification methods found')
+    throw new Error('Invalid issuer, no verification methods found')
   }
+
+  console.log(issuerDid)
+  console.log(result.didDocument.verificationMethod)
 
   let issuerPubkey: Uint8Array | undefined
   for (const vm of result.didDocument.verificationMethod) {
-    if (vm.type === VerifyType.EddsaBJJVerificationKey) {
+    if (vm.type === VerifyType.BJJVerificationKey2021) {
       if (vm.publicKeyBase58) {
         issuerPubkey = base58ToBytes(vm.publicKeyBase58)
       }
@@ -347,17 +350,32 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   }
 
   if (!issuerPubkey) {
-    throw new Error(`unable to find \`${VerifyType.EddsaBJJVerificationKey}\` verification key`)
+    throw new Error(`Unable to find \`${VerifyType.BJJVerificationKey2021}\` verification key`)
   }
 
-  if (!(verifyCredentialProof(vc.proof as CredentialProof, issuerPubkey))) {
-    throw new Error('proof verification failed')
+  const proof: CredentialProof = [].concat(cred.proof).find(p => p.type === ProofType.BJJSignature2021)
+
+  if (!proof) {
+    throw new Error(`Invalid credential proof, only \`${ProofType.BJJSignature2021}\` is supported`)
   }
 
-  return {
-    ...vc,
-    credentialSubject,
+  if (proof.proofValue[0] !== 'z') {
+    throw new Error('Only base58btc multibase encoding is supported.')
   }
+  const signatureBytes = base58ToBytes(proof.proofValue.substring(1))
+  const signature = Signature.newFromCompressed(signatureBytes.slice(0, 64))
+
+  const claimsTree = await createCredentialTree(cred)
+
+  proof.credentialRoot = claimsTree.root()
+  proof.issuerPubkey = BabyJubPubkey.newFromCompressed(issuerPubkey).p
+  proof.signature = [...signature.R8, signature.S]
+
+  if (!eddsa.verifyPoseidon(proof.credentialRoot, signature, proof.issuerPubkey)) {
+    throw new Error('Proof verification failed')
+  }
+
+  return cred
 }
 
 export type VerifyPresentationOpts = {
@@ -366,7 +384,7 @@ export type VerifyPresentationOpts = {
   decryptionRethrow?: boolean
   // By default, the challenge is the holder's public key.
   challenge?: Uint8Array
-  resolver?: Resolver
+  resolver?: Resolvable
 }
 
 /**
@@ -384,190 +402,143 @@ export async function verifyPresentation(vp: VerifiablePresentation, opts: Verif
   const holderDid = vp.holder?.id ?? vp.holder
   const result = await resolver.resolve(holderDid, { accept: 'application/did+json' })
 
-  let pubKey: Uint8Array | undefined
-  for (const vm of result.didDocument?.verificationMethod ?? []) {
-    if (vm.type === 'Ed25519VerificationKey2018') {
-      if (vm.publicKeyBase58) {
-        pubKey = base58ToBytes(vm.publicKeyBase58)
-        break
-      }
-    }
-    if (vm.type === 'Ed25519VerificationKey2020') {
-      if (vm.publicKeyMultibase) {
-        pubKey = MultiBase.decode(vm.publicKeyMultibase)
-        break
-      }
-    }
+  const vm = (result.didDocument?.verificationMethod ?? [])
+    .find(vm => vm.type === VerifyType.BJJVerificationKey2021)
+
+  if (!vm) {
+    throw new Error(`unable to find ${VerifyType.BJJVerificationKey2021} verification method`)
   }
 
-  if (!pubKey) {
-    throw new Error('unable to find `Ed25519VerificationKey2018` or `Ed25519VerificationKey2020` verification key')
-  }
-
-  if (!(verifyPresentationProof(vp.proof as PresentationProof, opts.challenge ?? pubKey))) {
+  if (!(verifyPresentationProof(vp.proof as PresentationProof, base58ToBytes(vm.publicKeyBase58)))) {
     throw new Error('proof verification failed')
   }
 
   const verifiableCredential: VerifiableCredential[] = []
-  for (const vc of vp.verifiableCredential ?? []) {
-    if ('encrypted' in vc.credentialSubject && opts.decryptionKey) {
-      try {
-        const credentialSubject = JSON.parse(await XC20P.decrypt(vc.credentialSubject.encrypted, opts.decryptionKey))
-        verifiableCredential.push({ ...vc, credentialSubject })
-      } catch (e) {
-        if (opts.decryptionRethrow) {
-          throw e
-        }
-        console.log(`Error: unable to decrypt credential (${e})`)
+
+  // TODO: remove ?
+  for (const vc of [].concat(vp.verifiableCredential)) {
+    try {
+      verifiableCredential.push(await decryptCredentialIfNeeded(vc, Uint8Array.from(opts.decryptionKey)))
+    } catch (e) {
+      if (opts.decryptionRethrow) {
+        throw e
       }
-    } else {
-      verifiableCredential.push(vc)
+      console.log(`Error: unable to decrypt credential (${e})`)
     }
   }
 
   return { ...vp, verifiableCredential }
 }
 
-type BJJProof = {
-  type: ProofType.BJJSignature2021
-  created: number
+type CredentialProof = {
+  created: string
   verificationMethod?: string
-  proofValue: { r8y: string, r8x: string, s: string, ax?: string, ay?: string }
+  proofValue: string
   proofPurpose?: string
 } & Proof
 
-type CredentialProof = {
-  rootHash: string
-} & BJJProof
-
 type PresentationProof = {
   challenge: string
-} & BJJProof
+} & CredentialProof
 
 export type CreateCredentialProof = {
-  rootHash: bigint
+  msg: bigint
   signerSecretKey: Uint8Array
   verificationMethod: string
-  proofPurpose?: string
-  extra?: { [key: string]: any }
+  controller?: string
+  purpose?: string
+  date?: Date
 }
 
 /**
- * Generate BabyJubJub proof for provided credential root hash
+ * Create credential proof
  */
 export function createCredentialProof(opts: CreateCredentialProof): CredentialProof {
   const signer = Keypair.fromSecretKey(opts.signerSecretKey)
-  const signerPubkey = eddsa.prv2pub(signer.secretKey)
+  const signerPubkey = new PrivateKey(signer.secretKey).public()
 
-  const { R8, S } = eddsa.signPoseidon(signer.secretKey, opts.rootHash)
+  const { R8, S } = eddsa.signPoseidon(signer.secretKey, opts.msg)
+  const signature = new Signature(R8, S)
 
-  if (!eddsa.verifyPoseidon(opts.rootHash, new Signature(R8, S), signerPubkey)) {
-    throw new Error('self check on EdDSA signature failed')
+  if (!eddsa.verifyPoseidon(opts.msg, signature, signerPubkey.p)) {
+    throw new Error('Self check on EdDSA signature failed')
+  }
+
+  const proofValue = MultiBase.encode(Uint8Array.from([
+    ...signature.compress(),
+    ...signerPubkey.compress(),
+    ...bigintToBytes(opts.msg, 32),
+  ]))
+
+  if (!opts.verificationMethod && !opts.controller) {
+    throw new Error('Either `verificationMethod` or `controller` must be provided')
   }
 
   return {
     type: ProofType.BJJSignature2021,
-    created: createProofDate(),
-    verificationMethod: opts.verificationMethod,
-    rootHash: String(opts.rootHash),
-    proofValue: {
-      ax: String(signerPubkey[0]),
-      ay: String(signerPubkey[1]),
-      r8x: String(R8[0]),
-      r8y: String(R8[1]),
-      s: String(S),
-    },
-    proofPurpose: opts.proofPurpose ?? 'assertionMethod',
-    ...opts.extra,
-  }
-}
-
-export function verifyCredentialProof(proof: CredentialProof, pubKey: Uint8Array) {
-  switch (proof.type) {
-    case ProofType.BJJSignature2021: {
-      // const babyJub = await babyJubPromise
-      // const eddsa = await eddsaPromise
-      // const a = [babyJub.F.e(proof.proofValue.ax), babyJub.F.e(proof.proofValue.ay)]
-      return eddsa.verifyPoseidon(
-        BigInt(proof.rootHash),
-        new Signature(
-          [BigInt(proof.proofValue.r8x), BigInt(proof.proofValue.r8y)],
-          BigInt(proof.proofValue.s),
-        ),
-        babyJub.unpackPoint(pubKey)!,
-      )
-    }
-    default:
-      throw new Error(`unsupported credential proof type ${proof.type}`)
+    created: w3cDate(opts.date),
+    verificationMethod: opts.verificationMethod ?? `${opts.controller}#${signerPubkey.toBase58()}`,
+    proofPurpose: opts.purpose ?? 'assertionMethod',
+    proofValue,
   }
 }
 
 export type CreatePresentationProof = {
-  signerSecret: Uint8Array
-  challenge?: Uint8Array
-  extra?: { [key: string]: any }
+  challenge?: bigint
+  signerSecretKey: Uint8Array
+  verificationMethod: string
 }
 
+/**
+ * Creates a presentation proof based on the provided options.
+ */
 export function createPresentationProof(opts: CreatePresentationProof): PresentationProof {
-  const signer = Keypair.fromSecretKey(opts.signerSecret)
-  const signerPubkey = eddsa.prv2pub(signer.secretKey)
+  const signer = Keypair.fromSecretKey(opts.signerSecretKey)
 
-  const challenge = poseidon.hash([
-    ffUtils.leBuff2int(opts.challenge ?? signer.publicKey.toBytes()),
-  ])
-  const { R8, S } = eddsa.signPoseidon(signer.secretKey, challenge)
-
-  if (!eddsa.verifyPoseidon(challenge, new Signature(R8, S), signerPubkey)) {
-    throw new Error('self check on EdDSA signature failed')
-  }
+  const proof = createCredentialProof({
+    msg: opts.challenge,
+    signerSecretKey: signer.secretKey,
+    verificationMethod: opts.verificationMethod,
+    purpose: 'authentication',
+  })
 
   return {
-    type: ProofType.BJJSignature2021,
-    created: createProofDate(),
-    challenge: babyJub.F.toString(challenge),
-    proofValue: {
-      ax: String(signerPubkey[0]),
-      ay: String(signerPubkey[1]),
-      r8x: String(R8[0]),
-      r8y: String(R8[1]),
-      s: String(S),
-    },
-    ...opts.extra,
+    ...proof,
+    challenge: String(opts.challenge),
   }
 }
 
-export function verifyPresentationProof(proof: PresentationProof, challenge: Uint8Array) {
+/**
+ * Verifies the credential proof based on the provided credential hash,
+ * proof, and public key.
+ */
+export function verifyCredentialProof(msg: bigint, proof: string, pubKey?: Uint8Array) {
+  if (proof[0] !== 'z') {
+    throw new Error('Only base58btc multibase encoding is supported.')
+  }
+  const signatureBytes = base58ToBytes(proof.substring(1))
+  const signature = Signature.newFromCompressed(signatureBytes.slice(0, 64))
+  const _pubkey = pubKey ?? signatureBytes.slice(64, 96)
+  return eddsa.verifyPoseidon(msg, signature, BabyJubPubkey.newFromCompressed(_pubkey).p)
+}
+
+/**
+ * Verify the presentation proof.
+ */
+export function verifyPresentationProof(proof: PresentationProof, pubKey?: Uint8Array) {
   switch (proof.type) {
     case ProofType.BJJSignature2021: {
-      // const babyJub = await babyJubPromise
-      // const eddsa = await eddsaPromise
-      // const poseidon = await poseidonPromise
-
-      if (proof.challenge !== babyJub.F.toString(poseidon.hash([ffUtils.leBuff2int(challenge)]))) {
-        throw new Error('presentation verification failed, invalid challenge')
-      }
-
-      if (!proof.proofValue.ax || !proof.proofValue.ay) {
-        throw new Error('invalid proof')
-      }
-
-      return eddsa.verifyPoseidon(babyJub.F.e(proof.challenge), new Signature(
-        [
-          BigInt(proof.proofValue.r8x),
-          BigInt(proof.proofValue.r8y),
-        ],
-        BigInt(proof.proofValue.s),
-      ), [
-        BigInt(proof.proofValue.ax),
-        BigInt(proof.proofValue.ay),
-      ])
+      return verifyCredentialProof(BigInt(proof.challenge), proof.proofValue, pubKey)
     }
     default:
       throw new Error(`unsupported credential proof type ${proof.type}`)
   }
 }
 
-export async function createCredentialTree(credential: VerifiableCredential, depth?: number) {
+/**
+ * Creates a credential tree based on the given W3C credential and optional depth.
+ */
+export async function createCredentialTree(credential: W3CCredential, depth?: number) {
   return createClaimsTree({
     meta: getCredentialMeta(credential),
     ...credential.credentialSubject,
@@ -588,13 +559,11 @@ export async function createClaimsTree(claims: Claims, depth?: number) {
   const encodeKey = (k: string) => BigInt(flattenClaimKeys.indexOf(k))
   const treeDepth = depth ?? DEFAULT_CLAIM_TREE_DEPTH
 
-  for (const key of flattenClaimKeys) {
-    await tree.add(encodeKey(key), encodeClaimValue(flattenClaims[key]))
-  }
-
-  return {
-    encodeKey,
-    root: tree.root,
+  const res = {
+    root: () => tree.root,
+    /**
+     * Retrieves a value from the tree based on the provided key.
+     */
     get: async (key: string) => {
       const proof = await tree.get(encodeKey(key))
       const siblings = proof.siblings
@@ -608,25 +577,55 @@ export async function createClaimsTree(claims: Claims, depth?: number) {
         siblings,
       }
     },
+    /**
+     * Deletes a key from the tree.
+     */
     delete: (key: string) => tree.delete(encodeKey(key)),
+    /**
+     * Adds a key-value pair to the tree.
+     */
     add: (key: string, val: any) => tree.add(encodeKey(key), encodeClaimValue(val)),
+    /**
+     * Updates the value associated with the given key in the tree.
+     */
     update: (key: string, val: any) => tree.update(encodeKey(key), encodeClaimValue(val)),
+    /**
+     * Retrieve ZK information from the given keys.
+     */
+    zkInfo: async (keys: string[]) => {
+      const claimsKey: number[] = []
+      const claimsProof: bigint[][] = []
+      for (const key of keys) {
+        const proof = await res.get(key)
+        claimsKey.push(Number(proof.key))
+        claimsProof.push(proof.siblings)
+      }
+      return {
+        key: utils.bytesToBigInt(claimsKey.reverse()),
+        proof: claimsProof,
+      }
+    },
   }
+
+  for (const key of flattenClaimKeys) {
+    await res.add(key, flattenClaims[key])
+  }
+
+  return res
 }
 
 /**
  * Encodes a claim value to a BigInt.
  *
  * @param {string | number | bigint} s - The value to encode.
+ * @param hash
  * @return {bigint} - The encoded BigInt value.
  */
-export function encodeClaimValue(s: string | number | bigint): bigint {
-  // try {
-  //   return BigInt(s)
-  // } catch (e) {
-  //   return poseidon.hashBytes(new TextEncoder().encode(String(s)))
-  // }
+export function encodeClaimValue(s: string | number | bigint, hash = false): bigint {
   const bytes = new TextEncoder().encode(String(s))
+  if (hash) {
+    return poseidon.hashBytes(bytes)
+  }
   if (bytes.length > 32) {
     // TODO: fixme
     return bytesToBigInt(bytes.slice(0, 32))
@@ -636,7 +635,7 @@ export function encodeClaimValue(s: string | number | bigint): bigint {
 }
 
 /**
- * Decodes a claim value from a bigint.
+ * Decodes a claim value from a BigInt.
  *
  * @param {bigint} s - The bigint to decode.
  * @return {string} The decoded claim value.
@@ -645,7 +644,14 @@ export function decodeClaimValue(s: bigint): string {
   return bytesToString(bigintToBytes(s))
 }
 
-function flattenObject(obj: Record<string, any>, parentKey?: string) {
+/**
+ * Recursively flattens an object by converting nested properties into a flat structure.
+ *
+ * @param {Record<string, any>} obj - The object to flatten.
+ * @param {string} [parentKey] - The parent key for the nested properties.
+ * @return {Record<string, any>} The flattened object.
+ */
+function flattenObject(obj: Record<string, any>, parentKey?: string): Record<string, any> {
   let res: Record<string, any> = {}
   Object.entries(obj).forEach(([key, value]) => {
     const k = parentKey ? `${parentKey}.${key}` : key
@@ -658,21 +664,44 @@ function flattenObject(obj: Record<string, any>, parentKey?: string) {
   return res
 }
 
-function unflattenObject(obj: Record<string, any>): Record<string, any> {
-  return Object.keys(obj).reduce((res, k) => {
-    k.split('.').reduce(
-      (acc, e, i, keys) => acc[e] || (acc[e] = Number.isNaN(Number(keys[i + 1]))
-        ? keys.length - 1 === i
-          ? obj[k]
-          : {}
-        : []),
-      res,
-    )
-    return res
-  }, {} as any)
-}
+// /**
+//  * Unflattens an object with dot-separated keys into a nested object.
+//  *
+//  * @param {Record<string, any>} obj - The flattened object to unflatten
+//  * @return {Record<string, any>} The unflattened nested object
+//  */
+// function unflattenObject(obj: Record<string, any>): Record<string, any> {
+//   return Object.keys(obj).reduce((res, k) => {
+//     k.split('.').reduce(
+//       (acc, e, i, keys) => acc[e] || (acc[e] = Number.isNaN(Number(keys[i + 1]))
+//         ? keys.length - 1 === i
+//           ? obj[k]
+//           : {}
+//         : []),
+//       res,
+//     )
+//     return res
+//   }, {} as any)
+// }
 
-function createProofDate() {
-  // TODO: use utc ?
-  return Number(new Date())
+/**
+ * Recursively normalizes the claims object by trimming string values and returning a new object with normalized values.
+ *
+ * @param {Claims} claims - the object containing claims to be normalized
+ * @return {Record<string, any>} a new object with normalized claim values
+ */
+function normalizeClaims(claims: Claims): Record<string, any> {
+  const normalizedClaims: Record<string, any> = {}
+
+  for (const key in claims) {
+    let value = claims[key]
+    if (typeof value === 'object') {
+      value = normalizeClaims(value)
+    } else {
+      value = String(value).trim()
+    }
+    normalizedClaims[key] = value
+  }
+
+  return normalizedClaims
 }

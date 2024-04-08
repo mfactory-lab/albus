@@ -4,3 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dt/@albus-finance/core.svg?maxAge=2592000&style=flat-square)](https://npm-stat.com/charts.html?package=@albus-finance/core)
 
 > The core module of [albus-protocol](https://albus.finance/).
+
+
+# TODO
+- use `vite-plugin-esmodule`
