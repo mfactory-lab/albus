@@ -34,7 +34,9 @@ import { AlbusClient, InvestigationStatus, ProofRequestStatus, TxBuilder } from 
 import { assertErrorCode, initProvider, payer, provider, requestAirdrop } from './utils'
 
 describe('albus', async () => {
-  const client = new AlbusClient(provider).local() // .debug()
+  const client = new AlbusClient(provider, {
+    logger: console.log,
+  }).local() // .debug()
 
   const issuer = Keypair.generate()
 
