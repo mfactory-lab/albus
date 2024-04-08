@@ -27,7 +27,7 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
+import type { Commitment, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import {
@@ -37,12 +37,11 @@ import {
   createUpdatePolicyInstruction,
   policyDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 
 const ID_SEPARATOR = '_'
 
 export class PolicyManager extends BaseManager {
-  traceNamespace = 'PolicyManager'
-
   /**
    * Load a policy based on its public key address.
    *
@@ -133,7 +132,7 @@ export class PolicyManager extends BaseManager {
   /**
    * Add a new policy with the specified properties.
    */
-  async create(props: CreatePolicyProps, opts?: ConfirmOptions) {
+  async create(props: CreatePolicyProps, opts?: SendOpts) {
     const { instructions, address } = this.createIx(props)
     const signature = await this.txBuilder
       .addInstruction(...instructions)
@@ -169,7 +168,7 @@ export class PolicyManager extends BaseManager {
   /**
    * Update a policy with the specified properties.
    */
-  async update(props: UpdatePolicyProps, opts?: ConfirmOptions) {
+  async update(props: UpdatePolicyProps, opts?: SendOpts) {
     const { instructions, address } = this.updateIx(props)
     const signature = await this.txBuilder
       .addInstruction(...instructions)
@@ -196,7 +195,7 @@ export class PolicyManager extends BaseManager {
   /**
    * Delete a policy based on the specified properties.
    */
-  async delete(props: DeletePolicyProps, opts?: ConfirmOptions) {
+  async delete(props: DeletePolicyProps, opts?: SendOpts) {
     const { instructions } = this.deleteIx(props)
     const signature = await this.txBuilder
       .addInstruction(...instructions)
@@ -221,7 +220,7 @@ export class PolicyManager extends BaseManager {
   /**
    * Delete policy by address.
    */
-  async deleteByAddr(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+  async deleteByAddr(addr: PublicKeyInitData, opts?: SendOpts) {
     const { instructions } = await this.deleteByAddrIx(addr)
 
     const signature = await this.txBuilder

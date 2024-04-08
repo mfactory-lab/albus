@@ -1,5 +1,6 @@
 import * as Albus from '@albus-finance/core'
 import type { VerifiableCredential } from '@albus-finance/core'
+import { ProofType } from '@albus-finance/core'
 import type { Circuit, Policy } from '../generated'
 import { KnownSignals } from '../types'
 import type { ParseSignalResult } from './circuit'
@@ -30,7 +31,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
    */
   readonly data = {} as { claimsKey?: any, claimsProof?: any } & T
 
-  constructor(private readonly credential: VerifiableCredential) {
+  constructor(private credential: VerifiableCredential) {
   }
 
   withTimestamp(value: number) {
@@ -205,6 +206,10 @@ export class ProofInputBuilder<T = Record<string, any>> {
     this.data.claimsProof.push(proof.siblings)
   }
 
+  private get credentialProof() {
+    return ([] as Albus.Proof[]).concat(this.credential.proof).find(p => p.type === ProofType.BJJSignature2021)
+  }
+
   /**
    * Apply a known signal, such as TrusteePublicKey, UserPrivateKey, CurrentDate, etc.
    *
@@ -213,6 +218,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
    */
   private async applySignal(signal: ParseSignalResult): Promise<boolean> {
     const { name, size } = signal
+
     switch (name) {
       case KnownSignals.TrusteePublicKey:
         if (this.trusteePublicKey === undefined && this.trusteeLoader !== undefined) {
@@ -239,20 +245,13 @@ export class ProofInputBuilder<T = Record<string, any>> {
         return true
       }
       case KnownSignals.CredentialRoot:
-        this.data[name] = this.credential.proof.rootHash
+        this.data[name] = this.credentialProof?.credentialRoot
         return true
       case KnownSignals.IssuerPublicKey:
-        this.data[name] = [
-          this.credential.proof.proofValue.ax,
-          this.credential.proof.proofValue.ay,
-        ]
+        this.data[name] = this.credentialProof?.issuerPubkey
         return true
       case KnownSignals.IssuerSignature:
-        this.data[name] = [
-          this.credential.proof.proofValue.r8x,
-          this.credential.proof.proofValue.r8y,
-          this.credential.proof.proofValue.s,
-        ]
+        this.data[name] = this.credentialProof?.signature
         return true
     }
     return false

@@ -8,6 +8,10 @@
 import * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
+import {
+  CredentialRequestStatus,
+  credentialRequestStatusBeet,
+} from '../types/CredentialRequestStatus'
 
 /**
  * Arguments used to create {@link CredentialRequest}
@@ -19,10 +23,11 @@ export type CredentialRequestArgs = {
   credentialMint: web3.PublicKey
   owner: web3.PublicKey
   issuer: web3.PublicKey
-  uri: string
-  status: number
+  status: CredentialRequestStatus
   createdAt: beet.bignum
   bump: number
+  uri: string
+  message: string
 }
 
 export const credentialRequestDiscriminator = [
@@ -41,10 +46,11 @@ export class CredentialRequest implements CredentialRequestArgs {
     readonly credentialMint: web3.PublicKey,
     readonly owner: web3.PublicKey,
     readonly issuer: web3.PublicKey,
-    readonly uri: string,
-    readonly status: number,
+    readonly status: CredentialRequestStatus,
     readonly createdAt: beet.bignum,
     readonly bump: number,
+    readonly uri: string,
+    readonly message: string,
   ) {}
 
   /**
@@ -56,10 +62,11 @@ export class CredentialRequest implements CredentialRequestArgs {
       args.credentialMint,
       args.owner,
       args.issuer,
-      args.uri,
       args.status,
       args.createdAt,
       args.bump,
+      args.uri,
+      args.message,
     )
   }
 
@@ -172,8 +179,7 @@ export class CredentialRequest implements CredentialRequestArgs {
       credentialMint: this.credentialMint.toBase58(),
       owner: this.owner.toBase58(),
       issuer: this.issuer.toBase58(),
-      uri: this.uri,
-      status: this.status,
+      status: `CredentialRequestStatus.${CredentialRequestStatus[this.status]}`,
       createdAt: (() => {
         const x = <{ toNumber: () => number }> this.createdAt
         if (typeof x.toNumber === 'function') {
@@ -186,6 +192,8 @@ export class CredentialRequest implements CredentialRequestArgs {
         return x
       })(),
       bump: this.bump,
+      uri: this.uri,
+      message: this.message,
     }
   }
 }
@@ -206,10 +214,11 @@ export const credentialRequestBeet = new beet.FixableBeetStruct<
     ['credentialMint', beetSolana.publicKey],
     ['owner', beetSolana.publicKey],
     ['issuer', beetSolana.publicKey],
-    ['uri', beet.utf8String],
-    ['status', beet.u8],
+    ['status', credentialRequestStatusBeet],
     ['createdAt', beet.i64],
     ['bump', beet.u8],
+    ['uri', beet.utf8String],
+    ['message', beet.utf8String],
   ],
   CredentialRequest.fromArgs,
   'CredentialRequest',

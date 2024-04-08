@@ -27,7 +27,12 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
+import type {
+  Commitment,
+  GetAccountInfoConfig,
+  GetMultipleAccountsConfig,
+  PublicKeyInitData,
+} from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import type { UpdateServiceProviderData } from './generated'
@@ -38,10 +43,9 @@ import {
   createUpdateServiceProviderInstruction,
   serviceProviderDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 
 export class ServiceManager extends BaseManager {
-  traceNamespace = 'ServiceManager'
-
   /**
    * Load {@link ServiceProvider} by {@link addr}
    * @param addr
@@ -178,7 +182,7 @@ export class ServiceManager extends BaseManager {
   /**
    * Add new {@link ServiceProvider}
    */
-  async create(props: CreateServiceProps, opts?: ConfirmOptions) {
+  async create(props: CreateServiceProps, opts?: SendOpts) {
     const { address, instructions } = this.createIx(props)
 
     const signature = await this.txBuilder
@@ -216,7 +220,7 @@ export class ServiceManager extends BaseManager {
   /**
    * Update a {@link ServiceProvider}.
    */
-  async update(props: UpdateServiceProps, opts?: ConfirmOptions) {
+  async update(props: UpdateServiceProps, opts?: SendOpts) {
     const { instructions } = this.updateIx(props)
 
     const signature = await this.txBuilder
@@ -243,7 +247,7 @@ export class ServiceManager extends BaseManager {
    * Delete a {@link ServiceProvider} by its code
    * Require admin authority
    */
-  async delete(props: { code: string }, opts?: ConfirmOptions) {
+  async delete(props: { code: string }, opts?: SendOpts) {
     const { instructions } = this.deleteIx(props)
 
     const signature = await this.txBuilder

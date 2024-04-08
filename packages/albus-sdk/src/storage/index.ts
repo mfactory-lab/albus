@@ -7,10 +7,7 @@ export type StorageDriver = {
   upload: (file: StorageFile) => Promise<string>
   uploadAll?: (files: StorageFile[]) => Promise<string[]>
   uploadData: (data: string) => Promise<string>
-  download?: (
-    uri: string,
-    options?: StorageDownloadOptions
-  ) => Promise<StorageFile>
+  download?: (uri: string, options?: StorageDownloadOptions) => Promise<StorageFile>
   getUploadPriceForFiles?: (files: StorageFile[]) => Promise<number>
 }
 

@@ -27,12 +27,27 @@
  */
 
 import type { AlbusClient } from './client'
-import { TxBuilder } from './utils'
+import type { IFullLogger, Logger } from './utils'
+import { TxBuilder, noopLogger, toFullLogger } from './utils'
 
 export abstract class BaseManager {
-  public constructor(readonly client: AlbusClient) {}
+  protected logger: IFullLogger
+  protected txBuilder: TxBuilder
 
-  protected traceNamespace: string = this.constructor.name
+  public constructor(readonly client: AlbusClient, log: Logger = noopLogger) {
+    this.logger = toFullLogger(client.options.logger ?? log)
+    this.txBuilder = new TxBuilder(client.provider)
+      .withPriorityFeeLoader(client.options?.priorityFeeLoader)
+      .withPriorityFee(client.options?.priorityFee ?? 0)
+  }
+
+  public setLogger(logger: Logger) {
+    this.logger = toFullLogger(logger)
+  }
+
+  public setTxBuilder(txBuilder: TxBuilder) {
+    this.txBuilder = txBuilder
+  }
 
   protected get programId() {
     return this.client.programId
@@ -44,18 +59,5 @@ export abstract class BaseManager {
 
   protected get pda() {
     return this.client.pda
-  }
-
-  protected get txBuilder() {
-    return new TxBuilder(this.provider)
-      .withPriorityFeeLoader(this.client.options?.priorityFeeLoader)
-      .withPriorityFee(this.client.options?.priorityFee ?? 0)
-  }
-
-  protected trace(...msg: any[]) {
-    if (!this.client.options.debug) {
-      return
-    }
-    console.info(`[Albus][${this.traceNamespace}]`, ...msg)
   }
 }

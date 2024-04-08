@@ -46,10 +46,9 @@ import {
   createUpdateCircuitVkInstruction,
   errorFromCode,
 } from './generated'
+import type { SendOpts } from './utils'
 
 export class CircuitManager extends BaseManager {
-  traceNamespace = 'CircuitManager'
-
   /**
    * Load circuit by {@link addr}
    * @param addr
@@ -133,7 +132,7 @@ export class CircuitManager extends BaseManager {
    * @param props
    * @param opts
    */
-  async create(props: CreateCircuitProps, opts?: ConfirmOptions) {
+  async create(props: CreateCircuitProps, opts?: SendOpts) {
     const { address, instructions } = this.createIx(props)
     try {
       const signature = await this.txBuilder
@@ -228,7 +227,7 @@ export class CircuitManager extends BaseManager {
    * @param addr
    * @param opts
    */
-  async deleteById(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+  async deleteById(addr: PublicKeyInitData, opts?: SendOpts) {
     const { instructions } = this.deleteByIdIx(addr)
 
     try {
@@ -248,7 +247,7 @@ export class CircuitManager extends BaseManager {
    * @param props.code
    * @param opts
    */
-  async delete(props: { code: string }, opts?: ConfirmOptions) {
+  async delete(props: { code: string }, opts?: SendOpts) {
     const [circuit] = this.pda.circuit(props.code)
     return this.deleteById(circuit, opts)
   }

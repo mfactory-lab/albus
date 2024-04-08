@@ -31,9 +31,7 @@ import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
 import type {
   ClientSubscriptionId,
-  ConfirmOptions,
-  PublicKeyInitData,
-  Signer } from '@solana/web3.js'
+  PublicKeyInitData } from '@solana/web3.js'
 import { ComputeBudgetProgram,
 
   Keypair,
@@ -49,7 +47,7 @@ import {
 import {
   createCreateCredentialInstruction, createDeleteCredentialInstruction, createUpdateCredentialInstruction,
 } from './generated'
-import type { ExtendedMetadata } from './utils'
+import type { ExtendedMetadata, SendOpts } from './utils'
 import {
   getAssociatedTokenAddress,
   getMasterEditionPDA, getMetadataByAccountInfo,
@@ -121,7 +119,7 @@ export class CredentialManager extends BaseManager {
   /**
    * Create new Credential NFT.
    */
-  async create(props?: CreateCredentialProps, opts?: TxOpts) {
+  async create(props?: CreateCredentialProps, opts?: SendOpts) {
     const { mint, instructions } = this.createIx(props)
 
     const builder = this.txBuilder
@@ -129,15 +127,11 @@ export class CredentialManager extends BaseManager {
       .addInstruction(...instructions)
       .addSigner(mint)
 
-    if (opts?.priorityFee) {
-      builder.withPriorityFee(opts.priorityFee)
-    }
-
     if (props?.owner) {
       builder.addSigner(props.owner)
     }
 
-    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+    const signature = await builder.sendAndConfirm(opts)
 
     return { mintAddress: mint.publicKey, signature }
   }
@@ -186,17 +180,12 @@ export class CredentialManager extends BaseManager {
   /**
    * Update credential data.
    */
-  async update(props: UpdateCredentialProps, opts?: TxOpts) {
+  async update(props: UpdateCredentialProps, opts?: SendOpts) {
     const { instructions } = await this.updateIx(props)
 
-    const builder = this.txBuilder
+    const signature = await this.txBuilder
       .addInstruction(...instructions)
-
-    if (opts?.priorityFee) {
-      builder.withPriorityFee(opts.priorityFee)
-    }
-
-    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+      .sendAndConfirm(opts)
 
     return { signature }
   }
@@ -225,21 +214,17 @@ export class CredentialManager extends BaseManager {
   /**
    * Delete credential and burn credential NFT.
    */
-  async delete(props: DeleteCredentialProps, opts?: TxOpts) {
+  async delete(props: DeleteCredentialProps, opts?: SendOpts) {
     const { instructions } = this.deleteIx(props)
 
     const builder = this.txBuilder
       .addInstruction(...instructions)
 
-    if (opts?.priorityFee) {
-      builder.withPriorityFee(opts.priorityFee)
-    }
-
     if (props?.owner) {
       builder.addSigner(props.owner)
     }
 
-    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+    const signature = await builder.sendAndConfirm(opts)
 
     return { signature }
   }
@@ -318,12 +303,6 @@ function parseUriData(uri: string) {
     }
   }
   return data
-}
-
-export type TxOpts = {
-  confirm?: ConfirmOptions
-  feePayer?: Signer
-  priorityFee?: number
 }
 
 /**

@@ -35,7 +35,7 @@ import type {
 } from '@solana/web3.js'
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import { chunk } from 'lodash-es'
-import type { TxBuilder } from './utils'
+import type { SendOpts, TxBuilder } from './utils'
 import { BaseManager } from './base'
 import type {
   ProofData,
@@ -58,8 +58,6 @@ import { KnownSignals } from './types'
 import { ProofInputBuilder, getSignals, getSolanaTimestamp } from './utils'
 
 export class ProofRequestManager extends BaseManager {
-  traceNamespace = 'ProofRequestManager'
-
   private get service() {
     return this.client.service
   }
@@ -182,7 +180,7 @@ export class ProofRequestManager extends BaseManager {
   /**
    * Create a new proof request with the specified properties.
    */
-  async create(props: CreateProofRequestProps, opts?: ConfirmOptions) {
+  async create(props: CreateProofRequestProps, opts?: SendOpts) {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
     const [policy] = this.pda.policy(serviceProvider, props.policyCode)
@@ -225,7 +223,7 @@ export class ProofRequestManager extends BaseManager {
   /**
    * Delete a proof request based on the specified properties.
    */
-  async delete(props: DeleteProofRequestProps, opts?: ConfirmOptions) {
+  async delete(props: DeleteProofRequestProps, opts?: SendOpts) {
     const authority = this.provider.publicKey
     const ix = createDeleteProofRequestInstruction({
       proofRequest: new PublicKey(props.proofRequest),
@@ -241,7 +239,7 @@ export class ProofRequestManager extends BaseManager {
    * Change the status of a proof request by providing a new status value.
    * Require admin authority.
    */
-  async changeStatus(props: ChangeStatus, opts?: ConfirmOptions) {
+  async changeStatus(props: ChangeStatus, opts?: SendOpts) {
     const ix = createUpdateProofRequestInstruction(
       {
         proofRequest: new PublicKey(props.proofRequest),
@@ -281,7 +279,7 @@ export class ProofRequestManager extends BaseManager {
   /**
    * Verify the proof request on-chain.
    */
-  async verifyOnChain(props: VerifyOnChainProps, opts?: ConfirmOptions) {
+  async verifyOnChain(props: VerifyOnChainProps, opts?: SendOpts) {
     const authority = this.provider.publicKey
     const proofRequest = new PublicKey(props.proofRequest)
     const circuit = new PublicKey(props.circuit)
@@ -291,7 +289,7 @@ export class ProofRequestManager extends BaseManager {
     txBuilder.addTransaction(
       new Transaction()
         .add(ComputeBudgetProgram.setComputeUnitLimit({ units: props.computeUnits ?? 400_000 }))
-        // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 220 * 1024 }))
+      // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 220 * 1024 }))
         .add(createVerifyProofRequestInstruction({
           proofRequest,
           circuit,
@@ -316,7 +314,7 @@ export class ProofRequestManager extends BaseManager {
 
     const data = Albus.crypto.Poseidon.decrypt(encryptedData, [secret, secret], decryptLength, nonce)
 
-    console.log(data)
+    this.logger.log(`Decrypted data:`, data)
 
     return {
       claims: {
@@ -392,7 +390,7 @@ export class ProofRequestManager extends BaseManager {
     // a transaction's maximum size is 1,232 bytes
     const inputsLimit = { withProof: 19, withoutProof: 28 }
 
-    this.trace('prove', 'init', { proof, publicInputs })
+    this.logger.log('prove', 'init', { proof, publicInputs })
 
     const txBuilder = props.txBuilder ?? this.txBuilder
 
@@ -441,11 +439,11 @@ export class ProofRequestManager extends BaseManager {
     )
 
     if (props.verify) {
-      this.trace('prove', 'createVerifyProofRequestInstruction (setComputeUnitLimit: 400_000)')
+      this.logger.log('prove', 'createVerifyProofRequestInstruction (setComputeUnitLimit: 400_000)')
       txBuilder.addTransaction(
         new Transaction()
           .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 600_000 }))
-          // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 500 * 1024 }))
+        // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 500 * 1024 }))
           .add(createVerifyProofRequestInstruction({
             proofRequest,
             circuit,
@@ -456,9 +454,9 @@ export class ProofRequestManager extends BaseManager {
 
     let signatures: string[] = []
     if (!props.txBuilder) {
-      this.trace('prove', `sending ${txBuilder.txs.length} transactions...`)
+      this.logger.log('prove', `sending ${txBuilder.txs.length} transactions...`)
       signatures = await txBuilder.sendAll(opts)
-      this.trace('prove', { signatures })
+      this.logger.log('prove', { signatures })
     }
 
     return { signatures }
@@ -498,11 +496,11 @@ export class ProofRequestManager extends BaseManager {
       .withPolicy(policy)
       .withTimestampLoader(() => this.getTimestamp())
       .withTrusteeLoader(async () => {
-        this.trace('fullProve', `loading trustee accounts...`, serviceProvider.trustees.map(t => t.toBase58()))
+        this.logger.log('fullProve', `loading trustee accounts...`, serviceProvider.trustees.map(t => t.toBase58()))
         const keys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
           .filter(p => p !== null) as [bigint, bigint][]
         for (const key of keys) {
-          this.trace('fullProve', 'trustee sharedKey', Albus.zkp.generateEcdhSharedKey(props.userPrivateKey, key))
+          this.logger.log('fullProve', 'trustee sharedKey', Albus.zkp.generateEcdhSharedKey(props.userPrivateKey, key))
         }
         return keys
       })
@@ -511,12 +509,12 @@ export class ProofRequestManager extends BaseManager {
     // try to find a valid issuer by credential proof signer
     let issuer: PublicKey | undefined
     if (proofInput.data[KnownSignals.IssuerPublicKey]) {
-      this.trace('fullProve', `trying to find an issuer...`)
+      this.logger.log('fullProve', `trying to find an issuer...`)
       issuer = (await this.client.issuer.loadByZkPubkey(
         proofInput.data[KnownSignals.IssuerPublicKey],
         true,
       )).pubkey
-      this.trace('fullProve', `found issuer ${issuer}`)
+      this.logger.log('fullProve', `found issuer ${issuer}`)
     }
 
     try {
@@ -526,10 +524,10 @@ export class ProofRequestManager extends BaseManager {
         input: proofInput.data,
       }
 
-      this.trace('fullProve', 'proving...', proofData)
+      this.logger.log('fullProve', 'proving...', proofData)
       const { proof, publicSignals } = await Albus.zkp.generateProof(proofData)
 
-      this.trace('fullProve', 'sending transaction...')
+      this.logger.log('fullProve', 'sending transaction...')
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
         circuit: props.circuit,
@@ -542,14 +540,14 @@ export class ProofRequestManager extends BaseManager {
         txBuilder: props.txBuilder,
       })
 
-      this.trace('fullProve', 'prove result', { signatures })
+      this.logger.log('fullProve', 'prove result', { signatures })
 
       return { signatures, proof, publicSignals }
     } catch (e: any) {
       if (props.throwOnError) {
         throw e
       }
-      this.trace('fullProve', e)
+      this.logger.log('fullProve', e)
       throw new Error(`Proof generation failed. Circuit constraint violation (${e.message})`)
     }
   }

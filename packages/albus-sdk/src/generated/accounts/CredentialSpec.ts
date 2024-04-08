@@ -18,6 +18,7 @@ export type CredentialSpecArgs = {
   issuer: web3.PublicKey
   name: string
   credentialRequestCount: beet.bignum
+  createdAt: beet.bignum
   bump: number
   uri: string
 }
@@ -35,6 +36,7 @@ export class CredentialSpec implements CredentialSpecArgs {
     readonly issuer: web3.PublicKey,
     readonly name: string,
     readonly credentialRequestCount: beet.bignum,
+    readonly createdAt: beet.bignum,
     readonly bump: number,
     readonly uri: string,
   ) {}
@@ -47,6 +49,7 @@ export class CredentialSpec implements CredentialSpecArgs {
       args.issuer,
       args.name,
       args.credentialRequestCount,
+      args.createdAt,
       args.bump,
       args.uri,
     )
@@ -170,6 +173,17 @@ export class CredentialSpec implements CredentialSpecArgs {
         }
         return x
       })(),
+      createdAt: (() => {
+        const x = <{ toNumber: () => number }> this.createdAt
+        if (typeof x.toNumber === 'function') {
+          try {
+            return x.toNumber()
+          } catch (_) {
+            return x
+          }
+        }
+        return x
+      })(),
       bump: this.bump,
       uri: this.uri,
     }
@@ -191,6 +205,7 @@ export const credentialSpecBeet = new beet.FixableBeetStruct<
     ['issuer', beetSolana.publicKey],
     ['name', beet.utf8String],
     ['credentialRequestCount', beet.u64],
+    ['createdAt', beet.i64],
     ['bump', beet.u8],
     ['uri', beet.utf8String],
   ],

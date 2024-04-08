@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
+import type { Commitment, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import {
@@ -37,10 +37,9 @@ import {
   createVerifyTrusteeInstruction,
   trusteeDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 
 export class TrusteeManager extends BaseManager {
-  traceNamespace = 'TrusteeManager'
-
   /**
    * Load trustee by {@link addr}
    */
@@ -140,7 +139,7 @@ export class TrusteeManager extends BaseManager {
   /**
    * Add new trustee
    */
-  async create(props: CreateTrusteeProps, opts?: ConfirmOptions) {
+  async create(props: CreateTrusteeProps, opts?: SendOpts) {
     const { address, instructions } = this.createIx(props)
 
     const signature = await this.txBuilder
@@ -175,7 +174,7 @@ export class TrusteeManager extends BaseManager {
   /**
    * Update trustee
    */
-  async update(props: UpdateTrusteeProps, opts?: ConfirmOptions) {
+  async update(props: UpdateTrusteeProps, opts?: SendOpts) {
     const { address, instructions } = this.updateIx(props)
 
     const signature = await this.txBuilder
@@ -200,7 +199,7 @@ export class TrusteeManager extends BaseManager {
   /**
    * Verify trustee
    */
-  async verify(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+  async verify(addr: PublicKeyInitData, opts?: SendOpts) {
     const { instructions } = this.verifyIx(addr)
 
     const signature = await this.txBuilder
@@ -225,7 +224,7 @@ export class TrusteeManager extends BaseManager {
   /**
    * Delete trustee
    */
-  async delete(addr: PublicKeyInitData, opts?: ConfirmOptions) {
+  async delete(addr: PublicKeyInitData, opts?: SendOpts) {
     const { instructions } = this.deleteIx(addr)
 
     const signature = await this.txBuilder
@@ -239,7 +238,7 @@ export class TrusteeManager extends BaseManager {
     return this.deleteIx(this.pda.trustee(key)[0])
   }
 
-  async deleteByKey(key: ArrayLike<number>, opts?: ConfirmOptions) {
+  async deleteByKey(key: ArrayLike<number>, opts?: SendOpts) {
     return this.delete(this.pda.trustee(key)[0], opts)
   }
 }

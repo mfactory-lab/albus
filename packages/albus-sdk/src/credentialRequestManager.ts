@@ -28,9 +28,9 @@
 
 import type {
   Commitment,
-  ConfirmOptions,
   GetMultipleAccountsConfig,
-  PublicKeyInitData, Signer } from '@solana/web3.js'
+  PublicKeyInitData,
+} from '@solana/web3.js'
 import {
   PublicKey,
 } from '@solana/web3.js'
@@ -39,13 +39,12 @@ import { BaseManager } from './base'
 import {
   CredentialRequest,
   createRequestCredentialInstruction,
-  credentialRequestDiscriminator,
+  createUpdateCredentialRequestInstruction, credentialRequestDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 import { getAssociatedTokenAddress } from './utils'
 
 export class CredentialRequestManager extends BaseManager {
-  traceNamespace = 'CredentialRequestManager'
-
   /**
    * Load {@link CredentialRequest} by {@link addr}
    */
@@ -95,19 +94,48 @@ export class CredentialRequestManager extends BaseManager {
   /**
    * Create new Credential Request.
    */
-  async create(props: CreateCredentialRequestProps, opts?: TxOpts) {
+  async create(props: CreateCredentialRequestProps, opts?: SendOpts) {
     const { address, instructions } = this.createIx(props)
 
-    const builder = this.txBuilder
+    const signature = await this.txBuilder
       .addInstruction(...instructions)
-
-    if (opts?.priorityFee) {
-      builder.withPriorityFee(opts.priorityFee)
-    }
-
-    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+      .sendAndConfirm(opts)
 
     return { address, signature }
+  }
+
+  updateIx(props: UpdateCredentialRequestProps) {
+    const credentialRequest = new PublicKey(props.credentialRequest)
+    const authority = this.provider.publicKey
+    const issuer = new PublicKey(props.issuer)
+
+    const ix = createUpdateCredentialRequestInstruction({
+      credentialRequest,
+      issuer,
+      authority,
+    }, {
+      data: {
+        status: props.status,
+        message: props.message ?? '',
+      },
+    }, this.programId)
+
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Update the Credential Request.
+   */
+  async update(props: UpdateCredentialRequestProps, opts?: SendOpts) {
+    const { instructions } = this.updateIx(props)
+
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+
+    return { signature }
   }
 
   /**
@@ -158,21 +186,22 @@ export class CredentialRequestManager extends BaseManager {
   }
 }
 
-export type TxOpts = {
-  confirm?: ConfirmOptions
-  feePayer?: Signer
-  priorityFee?: number
-}
-
 export type CreateCredentialRequestProps = {
   /// Credential mint address
   mint: PublicKeyInitData
-  /// Issuer public key
+  /// Issuer address
   issuer: PublicKeyInitData
-  /// Credential specification code
+  /// Credential specification identifier
   specId: string
-  /// Request payload uri
+  /// Presentation URI
   uri?: string
+}
+
+export type UpdateCredentialRequestProps = {
+  credentialRequest: PublicKeyInitData
+  issuer: PublicKeyInitData
+  status: number
+  message?: string
 }
 
 export type FindCredentialRequestProps = {

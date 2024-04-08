@@ -42,7 +42,7 @@ import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
 import type { Wallet, WithRequired } from './types'
-import type { PriorityFeeLoader } from './utils'
+import type { Logger, PriorityFeeLoader } from './utils'
 import { NodeWallet } from './utils'
 import { DEV_PROGRAM_ID } from './constants'
 import { CredentialSpecManager } from './credentialSpecManager'
@@ -50,6 +50,7 @@ import { CredentialRequestManager } from './credentialRequestManager'
 import type { IrysOptions } from './storage/irys'
 import { IrysStorageDriver } from './storage/irys'
 import idl from './idl/albus.json'
+import type { StorageDriver } from './storage'
 
 export enum AlbusClientEnv { DEV = 'dev', STAGE = 'stage', PROD = 'prod' }
 
@@ -128,7 +129,7 @@ export class AlbusClient {
   /**
    * Returns the storage driver based on the selected storage driver option.
    */
-  get storage() {
+  get storage(): StorageDriver {
     switch (this.options.storage?.driver) {
       case 'irys':
       default:
@@ -139,7 +140,7 @@ export class AlbusClient {
   /**
    * Get the current program ID.
    */
-  get programId() {
+  get programId(): PublicKey {
     return this.options.programId ?? PROGRAM_ID
   }
 
@@ -185,6 +186,8 @@ export type ClientOptions = {
   programId?: PublicKey
   /// Enable debugging
   debug?: boolean
+  /// Logger
+  logger?: Logger
   /// Storage driver
   storage?: { driver: string, options?: IrysOptions | Record<string, any> }
   /// Priority fee to be used with the transaction builder, in micro-lamports

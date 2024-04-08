@@ -31,11 +31,12 @@ import type { ConfirmOptions, Connection, Keypair, PublicKeyInitData } from '@so
 import type { Claims, VerifiableCredential, VerifiablePresentation } from '@albus-finance/core'
 import type { Wallet } from './types'
 import { AlbusClient } from './client'
-import type { TxOpts, UpdateCredentialProps } from './credentialManager'
+import type { UpdateCredentialProps } from './credentialManager'
 import type {
   FindCredentialSpecProps,
 } from './credentialSpecManager'
 import type { FindCredentialRequestProps } from './credentialRequestManager'
+import type { SendOpts } from './utils'
 
 export class AlbusIssuerClient {
   constructor(private readonly client: AlbusClient) {
@@ -94,7 +95,7 @@ export class AlbusIssuerClient {
   /**
    * Update a credential with the provided properties.
    */
-  async updateCredential(props: UpdateCredentialProps & { credentialRequest: PublicKeyInitData }, opts?: TxOpts) {
+  async updateCredential(props: UpdateCredentialProps & { credentialRequest: PublicKeyInitData }, opts?: SendOpts) {
     return this.client.credential.update({
       credentialRequest: props.credentialRequest,
       uri: props.uri,

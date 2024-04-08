@@ -35,8 +35,8 @@ export class TxBuilder {
     return this
   }
 
-  addSigner(signer: Signer) {
-    this.txs[0]?.signers?.push(signer)
+  addSigner(...signer: Signer[]) {
+    this.txs[0]?.signers?.push(...signer)
     return this
   }
 
@@ -79,18 +79,20 @@ export class TxBuilder {
     }
   }
 
-  async sendAndConfirm(opts?: ConfirmOptions, feePayer?: Signer) {
+  async sendAndConfirm(opts?: SendOpts) {
     if (this.txs[0] === undefined) {
       throw new Error('No transactions to send')
     }
 
-    if (feePayer !== undefined) {
-      this.txs[0].tx.feePayer = feePayer.publicKey
-      this.txs[0].signers?.push(feePayer)
+    if (opts?.feePayer !== undefined) {
+      this.txs[0].tx.feePayer = opts.feePayer.publicKey
+      this.txs[0].signers?.push(opts.feePayer)
     }
 
     // apply priority fee
-    if (this.priorityFeeLoader) {
+    if (opts?.priorityFee !== undefined) {
+      this.withPriorityFee(opts.priorityFee)
+    } else if (this.priorityFeeLoader) {
       const microLamports = await this.priorityFeeLoader(this.txs[0].tx)
       this.txs[0].tx.instructions = [
         ComputeBudgetProgram.setComputeUnitPrice({ microLamports }),
@@ -101,7 +103,7 @@ export class TxBuilder {
     try {
       return await this.provider.sendAndConfirm(this.txs[0].tx, this.txs[0].signers, {
         ...this.provider.opts,
-        ...opts,
+        ...opts?.confirm,
       })
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -111,4 +113,10 @@ export class TxBuilder {
   clear() {
     this.txs = []
   }
+}
+
+export type SendOpts = {
+  confirm?: ConfirmOptions
+  feePayer?: Signer
+  priorityFee?: number
 }

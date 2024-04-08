@@ -29,7 +29,6 @@
 import * as Albus from '@albus-finance/core'
 import type {
   Commitment,
-  ConfirmOptions,
   GetMultipleAccountsConfig,
   PublicKeyInitData,
   Signer,
@@ -44,10 +43,9 @@ import {
   errorFromCode,
   issuerDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 
 export class IssuerManager extends BaseManager {
-  traceNamespace = 'IssuerManager'
-
   /**
    * Load issuer by {@link addr}
    * @param addr
@@ -187,7 +185,7 @@ export class IssuerManager extends BaseManager {
   /**
    * Create a new issuer.
    */
-  async create(props: CreateIssuerProps, opts?: ConfirmOptions) {
+  async create(props: CreateIssuerProps, opts?: SendOpts) {
     const { instructions, address } = this.createIx(props)
     try {
       const signature = await this.txBuilder
@@ -213,7 +211,7 @@ export class IssuerManager extends BaseManager {
   /**
    * Delete an existing issuer.
    */
-  async delete(props: DeleteIssuerProps, opts?: ConfirmOptions) {
+  async delete(props: DeleteIssuerProps, opts?: SendOpts) {
     const { instructions } = this.deleteIx(props)
     try {
       const signature = await this.txBuilder

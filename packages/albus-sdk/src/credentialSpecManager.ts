@@ -28,9 +28,9 @@
 
 import type {
   Commitment,
-  ConfirmOptions,
   GetMultipleAccountsConfig,
-  PublicKeyInitData, Signer } from '@solana/web3.js'
+  PublicKeyInitData,
+} from '@solana/web3.js'
 import {
   PublicKey,
 } from '@solana/web3.js'
@@ -42,10 +42,11 @@ import {
   createDeleteCredentialSpecInstruction,
   credentialSpecDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
+
+const MAX_CRED_SPEC_NAME_LEN = 32
 
 export class CredentialSpecManager extends BaseManager {
-  traceNamespace = 'CredentialSpecManager'
-
   /**
    * Load {@link CredentialSpec} by {@link addr}
    */
@@ -70,8 +71,8 @@ export class CredentialSpecManager extends BaseManager {
     const issuer = new PublicKey(props.issuer)
     const [address] = this.pda.credentialSpec(issuer, props.name)
 
-    if (props.name.length > 32) {
-      throw new Error(`Credential spec name length must be less than 32 bytes`)
+    if (props.name.length > MAX_CRED_SPEC_NAME_LEN) {
+      throw new Error(`Credential spec name length must be less or equal than ${MAX_CRED_SPEC_NAME_LEN} bytes`)
     }
 
     const ix = createCreateCredentialSpecInstruction({
@@ -94,17 +95,12 @@ export class CredentialSpecManager extends BaseManager {
   /**
    * Create new Credential Spec
    */
-  async create(props: CreateCredentialSpecProps, opts?: TxOpts) {
+  async create(props: CreateCredentialSpecProps, opts?: SendOpts) {
     const { address, instructions } = await this.createIx(props)
 
-    const builder = this.txBuilder
+    const signature = await this.txBuilder
       .addInstruction(...instructions)
-
-    if (opts?.priorityFee) {
-      builder.withPriorityFee(opts.priorityFee)
-    }
-
-    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+      .sendAndConfirm(opts)
 
     return { address, signature }
   }
@@ -129,17 +125,12 @@ export class CredentialSpecManager extends BaseManager {
   /**
    * Delete Credential Spec
    */
-  async delete(props: DeleteCredentialSpecProps, opts?: TxOpts) {
+  async delete(props: DeleteCredentialSpecProps, opts?: SendOpts) {
     const { instructions } = this.deleteIx(props)
 
-    const builder = this.txBuilder
+    const signature = await this.txBuilder
       .addInstruction(...instructions)
-
-    if (opts?.priorityFee) {
-      builder.withPriorityFee(opts.priorityFee)
-    }
-
-    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+      .sendAndConfirm(opts)
 
     return { signature }
   }
@@ -178,12 +169,6 @@ export class CredentialSpecManager extends BaseManager {
   async validate() {
 
   }
-}
-
-export type TxOpts = {
-  confirm?: ConfirmOptions
-  feePayer?: Signer
-  priorityFee?: number
 }
 
 export type CreateCredentialSpecProps = {
