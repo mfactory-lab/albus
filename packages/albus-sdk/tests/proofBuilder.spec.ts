@@ -105,7 +105,17 @@ describe('proof builder', async () => {
   }, 50000)
 
   it('works', async () => {
-    const proofInput = await new ProofInputBuilder(credential)
+    const resolver: any = {
+      resolve() {
+        return { didDocument: Albus.utils.generateDid(issuer) } as any
+      },
+    }
+
+    const vc = await Albus.credential.verifyCredential(credential, {
+      resolver,
+    })
+
+    const proofInput = await new ProofInputBuilder(vc)
       .withUserPrivateKey(user.secretKey)
       .withTrusteePublicKey([[1n, 2n], [1n, 2n], [1n, 2n]])
       .withTimestamp(now)
