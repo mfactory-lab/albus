@@ -26,6 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+
+
 use crate::utils::Signals;
 use anchor_lang::prelude::*;
 
@@ -604,6 +606,8 @@ pub struct CredentialSpec {
     pub name: String,
     /// Total number of credential requests associated with this spec
     pub credential_request_count: u64,
+    /// Creation date
+    pub created_at: i64,
     /// PDA bump
     pub bump: u8,
     /// Presentation definition
