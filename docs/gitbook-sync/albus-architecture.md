@@ -17,9 +17,10 @@ layout:
 <figure><img src="/docs/gitbook-sync/.gitbook/assets/albus-architecture.png" alt="Albus architecture diagram"><figcaption></figcaption></figure>
 
 {% hint style="info" %}
-* AML – Anti-Money Laundering&#x20
-* KYC – Know Your Customer&#x20
+* AML – Anti-Money Laundering
+* KYC – Know Your Customer
 * VC – Verifiable Credential
+* ZKP – Zero-Knowledge Proof
 {% endhint %}
 
 ## Internal components
