@@ -28,11 +28,12 @@
 
 import { describe, it } from 'vitest'
 import vc from '@digitalcredentials/vc'
+import * as didIo from '@digitalcredentials/did-io'
 import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verification-key-2020'
 import { Ed25519Signature2020 } from '@digitalcredentials/ed25519-signature-2020'
 import { securityLoader } from '@digitalcredentials/security-document-loader'
 import { Keypair } from '@solana/web3.js'
-import CryptoLD from 'crypto-ld'
+import { CryptoLD } from 'crypto-ld'
 import * as Albus from '@albus-finance/core'
 import { BabyJubJubKey2021, BabyJubJubSignature2021Suite } from '../src'
 

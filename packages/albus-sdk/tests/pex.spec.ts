@@ -28,85 +28,87 @@
 
 import { describe, it } from 'vitest'
 import type { InputDescriptorV2 } from '@sphereon/pex-models'
+import type { PresentationSignCallBackParams } from '@sphereon/pex'
 import { PEX } from '@sphereon/pex'
 import { Keypair } from '@solana/web3.js'
 import { credential } from '@albus-finance/core'
+import type { IPresentation, IVerifiableCredential, IVerifiablePresentation } from '@sphereon/ssi-types'
 
-describe('pex', () => {
-  it('works', async () => {
-    const pex = new PEX()
+describe('pex', async () => {
+  const pex = new PEX()
 
-    // Example of Presentation Definition V2
-    const presentationDefinitionV2 = {
-      id: '1',
-      input_descriptors: [
-        {
-          id: 'albus_id_card',
-          name: 'Albus ID Card',
-          purpose: 'To verify Albus credentials',
-          constraints: {
-            fields: [
-              {
-                path: ['$.issuer'],
-                filter: {
-                  type: 'string',
-                  const: 'did:web:albus.finance',
-                },
+  // Example of Presentation Definition V2
+  const presentationDefinitionV2 = {
+    id: '1',
+    input_descriptors: [
+      {
+        id: 'albus_id_card',
+        name: 'Albus ID Card',
+        purpose: 'To verify Albus credentials',
+        constraints: {
+          fields: [
+            {
+              path: ['$.issuer'],
+              filter: {
+                type: 'string',
+                const: 'did:web:albus.finance',
               },
-            ],
-          },
+            },
+          ],
         },
-      ] as InputDescriptorV2[],
-    }
+      },
+    ] as InputDescriptorV2[],
+  }
 
-    const issuer = Keypair.generate()
+  const issuer = Keypair.generate()
 
-    const cred = await credential.createVerifiableCredential({
-      givenName: 'Mikayla',
-      familyName: 'Halvorson',
-      gender: 'female',
-      birthDate: '1966-10-02',
-      birthPlace: 'Westland',
-      nationality: 'GB',
-      country: 'GB',
-      countryOfBirth: 'GB',
-      docType: 'ID_CARD',
-      docNumber: 'AB123456',
-    }, {
-      issuerSecretKey: issuer.secretKey,
-    })
+  const cred = await credential.createVerifiableCredential({
+    givenName: 'Mikayla',
+    familyName: 'Halvorson',
+    gender: 'female',
+    birthDate: '1966-10-02',
+    birthPlace: 'Westland',
+    nationality: 'GB',
+    country: 'GB',
+    countryOfBirth: 'GB',
+    docType: 'ID_CARD',
+    docNumber: 'AB123456',
+  }, {
+    issuerSecretKey: issuer.secretKey,
+  })
 
-    console.log(cred)
+  // const credential = {
+  //   '@context': ['https://www.w3.org/ns/credentials/v2'],
+  //   'type': ['VerifiableCredential', 'AlbusCredentialV2'],
+  //   'issuer': 'did:web:albus.finance',
+  //   'issuanceDate': '2024-03-27T17:35:52.540Z',
+  //   'credentialSubject': {
+  //     givenName: 'Mikayla',
+  //     familyName: 'Halvorson',
+  //     gender: 'female',
+  //     birthDate: '1966-10-02',
+  //     birthPlace: 'Westland',
+  //     nationality: 'GB',
+  //     country: 'GB',
+  //     countryOfBirth: 'GB',
+  //     docType: 'ID_CARD',
+  //     docNumber: 'AB123456',
+  //   },
+  //   'proof': [
+  //     {
+  //       type: 'BabyJubJubSignature2021',
+  //       created: '1711560952634',
+  //       verificationMethod: '#eddsa-bjj',
+  //       credentialHash: '5116274216029599390514665569961009758379091985978787472785746168558961665331',
+  //       proofValue: 'abc',
+  //       proofPurpose: 'assertionMethod',
+  //     },
+  //   ],
+  // }
 
-    // const credential = {
-    //   '@context': ['https://www.w3.org/ns/credentials/v2'],
-    //   'type': ['VerifiableCredential', 'AlbusCredentialV2'],
-    //   'issuer': 'did:web:albus.finance',
-    //   'issuanceDate': '2024-03-27T17:35:52.540Z',
-    //   'credentialSubject': {
-    //     givenName: 'Mikayla',
-    //     familyName: 'Halvorson',
-    //     gender: 'female',
-    //     birthDate: '1966-10-02',
-    //     birthPlace: 'Westland',
-    //     nationality: 'GB',
-    //     country: 'GB',
-    //     countryOfBirth: 'GB',
-    //     docType: 'ID_CARD',
-    //     docNumber: 'AB123456',
-    //   },
-    //   'proof': [
-    //     {
-    //       type: 'BabyJubJubSignature2021',
-    //       created: '1711560952634',
-    //       verificationMethod: '#eddsa-bjj',
-    //       credentialHash: '5116274216029599390514665569961009758379091985978787472785746168558961665331',
-    //       proofValue: 'abc',
-    //       proofPurpose: 'assertionMethod',
-    //     },
-    //   ],
-    // }
+  console.log(cred)
 
+  it('works', async () => {
     const cred2 = { ...cred, issuer: 'did:web:albus.finance2' }
 
     const verifiablePresentation = {
@@ -120,15 +122,51 @@ describe('pex', () => {
       ],
       // 'presentation_submission': {},
       'verifiableCredential': [cred, cred2],
-      // 'proof': {},
+    } as IPresentation
+
+    // const res = pex.evaluatePresentation(presentationDefinitionV2, verifiablePresentation)
+
+    function simpleSignedProofCallback(callBackParams: PresentationSignCallBackParams): IVerifiablePresentation {
+      const { presentation, proof, options } = callBackParams // The created partial proof and presentation, as well as original supplied options
+      const { signatureOptions, proofOptions } = options // extract the orignially supploed signature and proof Options
+      // const privateKeyBase58 = signatureOptions.privateKey // Please check keyEncoding from signatureOptions first!
+
+      console.log(proof)
+
+      /**
+       * IProof looks like this:
+       * {
+       *    type: 'Ed25519Signature2018',
+       *    created: '2021-12-01T20:10:45.000Z',
+       *    proofPurpose: 'assertionMethod',
+       *    verificationMethod: 'did:example:"1234......#key',
+       *    .....
+       * }
+       */
+
+      // Just an example. Obviously your lib will have a different method signature
+      // const vp = myVPSignLibrary(presentation, { ...proof, privateKeyBase58 })
+
+      return {
+        ...presentation,
+        proof,
+      } as any
     }
 
-    // const res = pex.verifiablePresentationFrom(
-    //   presentationDefinitionV2,
-    //   [credential, credential2],
-    // )
+    const res2 = await pex.verifiablePresentationFrom(
+      presentationDefinitionV2,
+      [cred as IVerifiableCredential, cred2 as IVerifiableCredential],
+      simpleSignedProofCallback,
+      {
+        holderDID: 'did:web:albus.finance',
+        proofOptions: {
+          proofPurpose: 'assertionMethod',
+          challenge: '123',
+          type: 'Ed25519Signature2018',
+        },
+      },
+    )
 
-    const res = pex.evaluatePresentation(presentationDefinitionV2, verifiablePresentation)
-    console.log(res)
+    console.log(res2)
   })
 })
