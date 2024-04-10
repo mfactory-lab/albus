@@ -93,7 +93,6 @@ export type CreateCredentialOpts = {
   encryptionKey?: PublicKey
   // Optional secret key. Ephemeral secret key used by default
   encryptionSecretKey?: number[] | Uint8Array
-  customProof?: any
   // unix timestamp
   validFrom?: number
   // unix timestamp
@@ -110,7 +109,6 @@ export type CreateCredentialOpts = {
  * Create new verifiable credential
  */
 export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts = {}): Promise<VerifiableCredential> {
-  const now = opts?.timestamp ? new Date(opts.timestamp * 1000) : new Date()
   const vcType = [DEFAULT_VC_TYPE, CredentialType.AlbusCredential]
 
   if (opts.credentialType) {
@@ -123,7 +121,7 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
     '@context': [DEFAULT_CONTEXT],
     'type': vcType,
     'issuer': opts.issuerDid ?? DEFAULT_DID,
-    'issuanceDate': w3cDate(now),
+    'issuanceDate': w3cDate(opts?.timestamp ? new Date(opts.timestamp * 1000) : undefined),
     'credentialSubject': normalizedClaims,
     'proof': undefined,
   }
@@ -245,12 +243,12 @@ export async function decryptCredentialIfNeeded(vc: VerifiableCredential, secret
 }
 
 export type CreatePresentationOpts = {
-  holderSecretKey: number[] | Uint8Array
+  holderSecretKey: ArrayLike<number>
+  holderDid?: string
   credentials: VerifiableCredential[]
-  decryptionKey?: number[] | Uint8Array
-  challenge?: bigint
+  challenge: bigint
   date?: string | Date
-  presentationType?: PresentationType
+  presentationType?: string | string[]
 }
 
 /**
@@ -258,42 +256,54 @@ export type CreatePresentationOpts = {
  */
 export async function createVerifiablePresentation(opts: CreatePresentationOpts) {
   const holderKeypair = Keypair.fromSecretKey(Uint8Array.from(opts.holderSecretKey))
-  const holderDid = encodeDidKey(holderKeypair.publicKey.toBytes())
-  const decryptionKey = opts.decryptionKey ?? holderKeypair.secretKey
-  const creds: VerifiableCredential[] = []
+  const holderDid = opts.holderDid ?? encodeDidKey(holderKeypair.publicKey.toBytes())
 
-  // Decrypt credentials if needed
-  for (const credential of opts.credentials) {
-    creds.push(await decryptCredentialIfNeeded(credential, Uint8Array.from(decryptionKey)))
-  }
-
-  if (creds.length === 0) {
+  if (opts.credentials.length === 0) {
     throw new Error('no credentials provided')
-  }
-
-  const vpType = [DEFAULT_VP_TYPE, PresentationType.AlbusPresentation]
-
-  if (opts.presentationType) {
-    vpType.push(opts.presentationType)
   }
 
   const vp: W3CPresentation = {
     '@context': [DEFAULT_CONTEXT],
-    'type': vpType,
+    'type': [
+      DEFAULT_VP_TYPE,
+      PresentationType.AlbusPresentation,
+      ...(opts.presentationType ? [].concat(opts.presentationType) : []),
+    ],
     'issuanceDate': w3cDate(opts.date),
     'holder': holderDid,
-    'verifiableCredential': creds,
+    'verifiableCredential': opts.credentials,
   }
 
-  const fingerprint = new PrivateKey(holderKeypair.secretKey).public().toBase58()
-
-  vp.proof = createPresentationProof({
-    verificationMethod: `${holderDid}#${fingerprint}`,
-    signerSecretKey: holderKeypair.secretKey,
+  return signPresentation(vp, {
+    controller: holderDid,
     challenge: opts.challenge,
+    signerSecretKey: Uint8Array.from(opts.holderSecretKey),
+  })
+}
+
+export async function signPresentation(vp: W3CPresentation, opts: {
+  verificationMethod?: string
+  controller?: string
+  challenge: bigint
+  signerSecretKey: Uint8Array
+}): Promise<VerifiablePresentation> {
+  const signer = Keypair.fromSecretKey(opts.signerSecretKey)
+
+  const proof = createCredentialProof({
+    controller: opts.controller,
+    msg: opts.challenge,
+    purpose: 'authentication',
+    signerSecretKey: signer.secretKey,
+    verificationMethod: opts.verificationMethod,
   })
 
-  return vp as VerifiablePresentation
+  return {
+    ...vp,
+    proof: {
+      ...proof,
+      challenge: String(opts.challenge),
+    },
+  }
 }
 
 /**
@@ -336,9 +346,6 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   if (!result.didDocument?.verificationMethod) {
     throw new Error('Invalid issuer, no verification methods found')
   }
-
-  console.log(issuerDid)
-  console.log(result.didDocument.verificationMethod)
 
   let issuerPubkey: Uint8Array | undefined
   for (const vm of result.didDocument.verificationMethod) {
@@ -480,31 +487,6 @@ export function createCredentialProof(opts: CreateCredentialProof): CredentialPr
     verificationMethod: opts.verificationMethod ?? `${opts.controller}#${signerPubkey.toBase58()}`,
     proofPurpose: opts.purpose ?? 'assertionMethod',
     proofValue,
-  }
-}
-
-export type CreatePresentationProof = {
-  challenge?: bigint
-  signerSecretKey: Uint8Array
-  verificationMethod: string
-}
-
-/**
- * Creates a presentation proof based on the provided options.
- */
-export function createPresentationProof(opts: CreatePresentationProof): PresentationProof {
-  const signer = Keypair.fromSecretKey(opts.signerSecretKey)
-
-  const proof = createCredentialProof({
-    msg: opts.challenge,
-    signerSecretKey: signer.secretKey,
-    verificationMethod: opts.verificationMethod,
-    purpose: 'authentication',
-  })
-
-  return {
-    ...proof,
-    challenge: String(opts.challenge),
   }
 }
 
