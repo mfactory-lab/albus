@@ -48,7 +48,7 @@ import { CredentialType, PresentationType, ProofType, VerifyType } from './types
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { encodeDidKey, validateCredentialPayload, validatePresentationPayload, w3cDate, w3cDateToUnixTs } from './utils'
 
-const { bigintToBytes, base58ToBytes, bytesToBigInt, bytesToString } = utils
+const { bigintToBytes, base58ToBytes, bytesToBigInt, bytesToString, randomBigInt } = utils
 
 // const {
 //   suites: { LinkedDataSignature },
@@ -246,7 +246,7 @@ export type CreatePresentationOpts = {
   holderSecretKey: ArrayLike<number>
   holderDid?: string
   credentials: VerifiableCredential[]
-  challenge: bigint
+  challenge?: bigint
   date?: string | Date
   presentationType?: string | string[]
 }
@@ -276,7 +276,7 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
 
   return signPresentation(vp, {
     controller: holderDid,
-    challenge: opts.challenge,
+    challenge: opts.challenge ?? randomBigInt(),
     signerSecretKey: Uint8Array.from(opts.holderSecretKey),
   })
 }
@@ -458,7 +458,27 @@ export type CreateCredentialProof = {
 }
 
 /**
- * Create credential proof
+ * Parse credential proof.
+ */
+export function parseCredentialProof(proofValue: string) {
+  if (proofValue[0] !== 'z') {
+    throw new Error('Only base58btc multibase encoding is supported.')
+  }
+
+  const bytes = base58ToBytes(proofValue.substring(1))
+  const signature = Signature.newFromCompressed(bytes.slice(0, 64))
+  const issuerPubkey = BabyJubPubkey.newFromCompressed(bytes.slice(64, 96))
+  const credentialRoot = bytesToBigInt(bytes.slice(96, 128))
+
+  return {
+    signature: [...signature.R8, signature.S],
+    issuerPubkey: issuerPubkey.p,
+    credentialRoot,
+  }
+}
+
+/**
+ * Create credential proof.
  */
 export function createCredentialProof(opts: CreateCredentialProof): CredentialProof {
   const signer = Keypair.fromSecretKey(opts.signerSecretKey)
