@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.17...@albus-finance/sdk-v0.3.0-next.19) (2024-04-10)
+
+
+### 🌟 Features
+
+* **sdk:** add `CredentialRequestManager.createPresentation` ([68fbb44](https://github.com/mfactory-lab/albus/commit/68fbb4410f8466be944c257860113610df53b3fc))
+* **sdk:** add new generated files ([1f4c973](https://github.com/mfactory-lab/albus/commit/1f4c973376471f5f2444ec51237a117c37d694a8))
+* **sdk:** add pex helper, improved issuer client, ([b6847aa](https://github.com/mfactory-lab/albus/commit/b6847aab9a6cbaa300a80ed68421ea5014b27798))
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix version ([ca9aef0](https://github.com/mfactory-lab/albus/commit/ca9aef01bae2071cfb4fe1868c868a207f1bd578))
+* **sdk:** global refactory ([b1ec097](https://github.com/mfactory-lab/albus/commit/b1ec097ae916931833d7332c506a37383134d78c))
+
+
+### ♻️ Refactors
+
+* **sdk:** global improvements ([23c303f](https://github.com/mfactory-lab/albus/commit/23c303f8526a9b2204d73c9b2ce4abc246ff812a))
+
 ## [0.3.0-next.17](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.16...@albus-finance/sdk-v0.3.0-next.17) (2024-03-26)
 
 ## [0.3.0-next.16](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.15...@albus-finance/sdk-v0.3.0-next.16) (2024-03-26)
