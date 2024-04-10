@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.4...@albus-finance/core-v0.3.6-next.5) (2024-04-10)
+
+
+### 🐞 Bug Fixes
+
+* **core:** credential improved ([a060968](https://github.com/mfactory-lab/albus/commit/a060968139a2c01891bea924090ccbe8bb11b265))
+
 ## [0.3.6-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.3...@albus-finance/core-v0.3.6-next.4) (2024-04-08)
 
 
