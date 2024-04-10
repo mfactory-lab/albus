@@ -94,21 +94,22 @@ export class AlbusClient {
   /**
    * Initialize a new `AlbusClient` from the provided {@link wallet}.
    */
-  static fromWallet(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
+  static fromWallet(connection: Connection, wallet?: Wallet, opts?: ClientOptions) {
     return new this(
       new AnchorProvider(
         connection,
         // @ts-expect-error anonymous
         wallet ?? { publicKey: PublicKey.default },
-        { ...AnchorProvider.defaultOptions(), ...opts },
+        { ...AnchorProvider.defaultOptions(), ...opts?.confirmOptions },
       ),
+      opts,
     )
   }
 
   /**
    * Initialize a new `AlbusClient` from the provided {@link keypair}.
    */
-  static fromKeypair(connection: Connection, keypair: Keypair, opts?: ConfirmOptions) {
+  static fromKeypair(connection: Connection, keypair: Keypair, opts?: ClientOptions) {
     return AlbusClient.fromWallet(connection, new NodeWallet(keypair), opts)
   }
 
@@ -194,4 +195,6 @@ export type ClientOptions = {
   priorityFee?: number
   /// Priority fee callback to be used with the transaction builder
   priorityFeeLoader?: PriorityFeeLoader
+  /// Confirm options
+  confirmOptions?: ConfirmOptions
 } & Record<string, any>

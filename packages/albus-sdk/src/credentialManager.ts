@@ -69,7 +69,7 @@ export class CredentialManager extends BaseManager {
     this.subscriptions[key] = this.provider.connection
       .onAccountChange(getMetadataPDA(mint), async (acc) => {
         const metadata = await getMetadataByAccountInfo(acc, true)
-        const credentialInfo = await this.getCredentialInfo(metadata, props)
+        const credentialInfo = await getCredentialInfo(metadata, props)
         callback(credentialInfo, mintPubkey)
       })
   }
@@ -237,7 +237,7 @@ export class CredentialManager extends BaseManager {
       authority: this.pda.authority()[0],
       code: CREDENTIAL_SYMBOL_CODE,
     })
-    return this.getCredentialInfo(nft, props)
+    return getCredentialInfo(nft, props)
   }
 
   /**
@@ -259,33 +259,33 @@ export class CredentialManager extends BaseManager {
     for (const account of accounts) {
       result.push({
         address: account.mint,
-        credential: await this.getCredentialInfo(account, props),
+        credential: await getCredentialInfo(account, props),
       })
     }
     return result
   }
+}
 
-  /**
-   * Get credential info, verify and optionally decrypt
-   */
-  private async getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
-    if (nft.json?.vc !== undefined) {
-      try {
-        return await Albus.credential.verifyCredential(nft.json.vc, {
-          decryptionKey: props?.decryptionKey,
-          resolver: props?.resolver,
-        })
-      } catch (e) {
-        console.log(`Credential Verification Error: ${e}`)
-        if (props?.throwOnError) {
-          throw e
-        }
+/**
+ * Get credential info, verify and optionally decrypt
+ */
+async function getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
+  if (nft.json?.vc !== undefined) {
+    try {
+      return await Albus.credential.verifyCredential(nft.json.vc, {
+        decryptionKey: props?.decryptionKey,
+        resolver: props?.resolver,
+      })
+    } catch (e) {
+      console.log(`Credential Verification Error: ${e}`)
+      if (props?.throwOnError) {
+        throw e
       }
     }
-    return {
-      data: parseUriData(nft.data.uri),
-    } as unknown as VerifiableCredential
   }
+  return {
+    data: parseUriData(nft.data.uri),
+  } as unknown as VerifiableCredential
 }
 
 /**

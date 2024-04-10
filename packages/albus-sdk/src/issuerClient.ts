@@ -26,79 +26,131 @@
  * The developer of this program can be contacted at <info@finance>.
  */
 
+import { Buffer } from 'node:buffer'
+import type { VerifiableCredential, VerifiablePresentation } from '@albus-finance/core'
 import { credential } from '@albus-finance/core'
-import type { ConfirmOptions, Connection, Keypair, PublicKeyInitData } from '@solana/web3.js'
-import type { Claims, VerifiableCredential, VerifiablePresentation } from '@albus-finance/core'
+import type { Connection, Keypair, PublicKeyInitData } from '@solana/web3.js'
+import type { IPresentationDefinition } from '@sphereon/pex'
 import type { Wallet } from './types'
+import type { ClientOptions } from './client'
 import { AlbusClient } from './client'
 import type { UpdateCredentialProps } from './credentialManager'
 import type {
+  CreateCredentialSpecProps,
+  DeleteCredentialSpecProps,
   FindCredentialSpecProps,
 } from './credentialSpecManager'
 import type { FindCredentialRequestProps } from './credentialRequestManager'
 import type { SendOpts } from './utils'
+import { PexHelper } from './utils'
 
 export class AlbusIssuerClient {
   constructor(private readonly client: AlbusClient) {
   }
 
-  static fromWallet(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
+  static fromWallet(connection: Connection, wallet?: Wallet, opts?: ClientOptions) {
     return new this(
       AlbusClient.fromWallet(connection, wallet, opts),
     )
   }
 
-  static fromKeypair(connection: Connection, keypair: Keypair, opts?: ConfirmOptions) {
+  static fromKeypair(connection: Connection, keypair: Keypair, opts?: ClientOptions) {
     return new this(
       AlbusClient.fromKeypair(connection, keypair, opts),
     )
   }
 
-  createVerifiableCredential(claims: Claims, opts: credential.CreateCredentialOpts) {
-    return credential.createVerifiableCredential(claims, opts)
+  /**
+   * Create a new credential spec.
+   */
+  createCredentialSpec(props: CreateCredentialSpecProps, opts?: SendOpts) {
+    return this.client.credentialSpec.create(props, opts)
   }
 
-  verifyVerifiableCredential(vc: VerifiableCredential, opts: credential.VerifyCredentialOpts) {
-    return credential.verifyCredential(vc, opts)
+  /**
+   * Delete a credential spec.
+   */
+  deleteCredentialSpec(props: DeleteCredentialSpecProps, opts?: SendOpts) {
+    return this.client.credentialSpec.delete(props, opts)
   }
 
-  verifyCredentialRequest(addr: PublicKeyInitData) {
-    // TODO:
+  /**
+   * Load credential spec by the given address.
+   */
+  loadCredentialSpec(addr: PublicKeyInitData) {
+    return this.client.credentialSpec.load(addr)
   }
 
-  verifyVerifiablePresentation(vc: VerifiablePresentation) {
-    // TODO:
-  }
-
-  loadCredentialSpec(props: PublicKeyInitData) {
-    return this.client.credentialSpec.load(props)
-  }
-
+  /**
+   * Find credential specs with the given filters.
+   */
   findCredentialSpec(props: FindCredentialSpecProps) {
     return this.client.credentialSpec.find(props)
   }
 
   /**
-   * Load credential request with the given properties.
+   * Load credential request by the given address.
    */
-  loadCredentialRequest(props: PublicKeyInitData) {
-    return this.client.credentialRequest.load(props)
+  loadCredentialRequest(addr: PublicKeyInitData) {
+    return this.client.credentialRequest.load(addr)
   }
 
   /**
-   * Find credential requests
+   * Find credential requests with the given filters.
    */
   findCredentialRequest(props: FindCredentialRequestProps) {
     return this.client.credentialRequest.find(props)
   }
 
   /**
-   * Update a credential with the provided properties.
+   * Create a credential with the provided claims and options.
+   */
+  createCredential(claims: Record<string, any>, opts: credential.CreateCredentialOpts) {
+    return credential.createVerifiableCredential(claims, opts)
+  }
+
+  /**
+   * Verify a credential.
+   */
+  verifyCredential(vc: VerifiableCredential, opts?: credential.VerifyCredentialOpts) {
+    return credential.verifyCredential(vc, opts)
+  }
+
+  /**
+   * Verify a presentation.
+   */
+  verifyPresentation(vp: VerifiablePresentation, opts?: credential.VerifyPresentationOpts) {
+    return credential.verifyPresentation(vp, opts)
+  }
+
+  /**
+   * Issue a new credential, and return the URI of the uploaded credential.
+   */
+  async issueCredential(claims: Record<string, any>, opts: credential.CreateCredentialOpts, selfCheck = true) {
+    const vc = await this.createCredential(claims, opts)
+    if (selfCheck) {
+      await credential.verifyCredential(vc)
+    }
+    return this.client.storage.upload(
+      Buffer.from(JSON.stringify(vc)),
+    )
+  }
+
+  /**
+   * Update the credential.
    */
   async updateCredential(props: UpdateCredentialProps & { credentialRequest: PublicKeyInitData }, opts?: SendOpts) {
     return this.client.credential.update({
       credentialRequest: props.credentialRequest,
       uri: props.uri,
     }, opts)
+  }
+
+  /**
+   * The evaluatePresentation compares what is expected from a presentation with a presentationDefinition.
+   * presentationDefinition: It can be either v1 or v2 of presentationDefinition
+   */
+  evaluatePresentation(definition: IPresentationDefinition, vp: VerifiablePresentation) {
+    return PexHelper.evaluatePresentation(definition, vp)
   }
 }
