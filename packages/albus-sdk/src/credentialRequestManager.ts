@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { Buffer } from 'node:buffer'
 import type {
   Commitment,
   GetMultipleAccountsConfig,
@@ -34,15 +35,19 @@ import type {
 import {
   PublicKey,
 } from '@solana/web3.js'
+import type { IPresentationDefinition } from '@sphereon/pex'
+import type { VerifiableCredential } from '@albus-finance/core'
+import * as Albus from '@albus-finance/core'
 import { BaseManager } from './base'
 
 import {
   CredentialRequest,
   createRequestCredentialInstruction,
-  createUpdateCredentialRequestInstruction, credentialRequestDiscriminator,
+  createUpdateCredentialRequestInstruction,
+  credentialRequestDiscriminator,
 } from './generated'
 import type { SendOpts } from './utils'
-import { getAssociatedTokenAddress } from './utils'
+import { PexHelper, getAssociatedTokenAddress } from './utils'
 
 export class CredentialRequestManager extends BaseManager {
   /**
@@ -181,8 +186,34 @@ export class CredentialRequestManager extends BaseManager {
       })
   }
 
-  validate() {
-    //
+  /**
+   * A function that creates a presentation using the given presentation definition and credentials.
+   * Returns the uri of the created presentation.
+   */
+  async createPresentation(def: IPresentationDefinition, creds: VerifiableCredential[], opts: {
+    holderSecretKey: number[] | Uint8Array
+    holderDid?: string
+    challenge?: bigint
+    date?: string | Date
+  }) {
+    const res = PexHelper.selectFrom(def, creds)
+
+    if (res.areRequiredCredentialsPresent !== 'info') {
+      throw new Error('Not all required credentials are present')
+    }
+
+    const vp = await Albus.credential.createVerifiablePresentation({
+      credentials: res.verifiableCredential as VerifiableCredential[],
+      challenge: opts.challenge ?? Albus.crypto.utils.randomBigInt(),
+      holderSecretKey: opts.holderSecretKey,
+      holderDid: opts.holderDid,
+      date: opts.date,
+      // presentationType: ['PresentationSubmission'],
+    })
+
+    return this.client.storage.upload(
+      Buffer.from(JSON.stringify(vp)),
+    )
   }
 }
 
