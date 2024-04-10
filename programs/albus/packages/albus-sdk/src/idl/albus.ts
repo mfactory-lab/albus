@@ -234,10 +234,7 @@ export type Albus = {
         {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "System program."
-          ]
+          "isSigner": false
         }
       ],
       "args": [
@@ -377,10 +374,7 @@ export type Albus = {
         {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "System program."
-          ]
+          "isSigner": false
         }
       ],
       "args": [
@@ -388,6 +382,39 @@ export type Albus = {
           "name": "data",
           "type": {
             "defined": "RequestCredentialData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateCredentialRequest",
+      "accounts": [
+        {
+          "name": "credentialRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdateCredentialRequestData"
           }
         }
       ]
@@ -1085,14 +1112,14 @@ export type Albus = {
           {
             "name": "pubkey",
             "docs": [
-              "The authority of the issuer"
+              "The public key of the issuer"
             ],
             "type": "publicKey"
           },
           {
             "name": "zkPubkey",
             "docs": [
-              "The ZK authority of the issuer (bbj-pubkey)"
+              "Public key in zk compatible (BabuJubJub curve) format"
             ],
             "type": {
               "array": [
@@ -1817,18 +1844,13 @@ export type Albus = {
             "type": "publicKey"
           },
           {
-            "name": "uri",
-            "docs": [
-              "Presentation Submission"
-            ],
-            "type": "string"
-          },
-          {
             "name": "status",
             "docs": [
               "Status of the request"
             ],
-            "type": "u8"
+            "type": {
+              "defined": "CredentialRequestStatus"
+            }
           },
           {
             "name": "createdAt",
@@ -1843,6 +1865,20 @@ export type Albus = {
               "PDA bump"
             ],
             "type": "u8"
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "Presentation definition"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "message",
+            "docs": [
+              "Rejection message"
+            ],
+            "type": "string"
           }
         ]
       }
@@ -1872,6 +1908,13 @@ export type Albus = {
               "Total number of credential requests associated with this spec"
             ],
             "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
           },
           {
             "name": "bump",
@@ -2031,6 +2074,24 @@ export type Albus = {
         "fields": [
           {
             "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateCredentialRequestData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "status",
+            "type": {
+              "defined": "CredentialRequestStatus"
+            }
+          },
+          {
+            "name": "message",
             "type": "string"
           }
         ]
@@ -2637,6 +2698,26 @@ export type Albus = {
           }
         ]
       }
+    },
+    {
+      "name": "CredentialRequestStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "InProgress"
+          },
+          {
+            "name": "Approved"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
     }
   ],
   "events": [
@@ -3203,10 +3284,7 @@ export const IDL: Albus = {
         {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "System program."
-          ]
+          "isSigner": false
         }
       ],
       "args": [
@@ -3346,10 +3424,7 @@ export const IDL: Albus = {
         {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "System program."
-          ]
+          "isSigner": false
         }
       ],
       "args": [
@@ -3357,6 +3432,39 @@ export const IDL: Albus = {
           "name": "data",
           "type": {
             "defined": "RequestCredentialData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateCredentialRequest",
+      "accounts": [
+        {
+          "name": "credentialRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdateCredentialRequestData"
           }
         }
       ]
@@ -4054,14 +4162,14 @@ export const IDL: Albus = {
           {
             "name": "pubkey",
             "docs": [
-              "The authority of the issuer"
+              "The public key of the issuer"
             ],
             "type": "publicKey"
           },
           {
             "name": "zkPubkey",
             "docs": [
-              "The ZK authority of the issuer (bbj-pubkey)"
+              "Public key in zk compatible (BabuJubJub curve) format"
             ],
             "type": {
               "array": [
@@ -4786,18 +4894,13 @@ export const IDL: Albus = {
             "type": "publicKey"
           },
           {
-            "name": "uri",
-            "docs": [
-              "Presentation Submission"
-            ],
-            "type": "string"
-          },
-          {
             "name": "status",
             "docs": [
               "Status of the request"
             ],
-            "type": "u8"
+            "type": {
+              "defined": "CredentialRequestStatus"
+            }
           },
           {
             "name": "createdAt",
@@ -4812,6 +4915,20 @@ export const IDL: Albus = {
               "PDA bump"
             ],
             "type": "u8"
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "Presentation definition"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "message",
+            "docs": [
+              "Rejection message"
+            ],
+            "type": "string"
           }
         ]
       }
@@ -4841,6 +4958,13 @@ export const IDL: Albus = {
               "Total number of credential requests associated with this spec"
             ],
             "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
           },
           {
             "name": "bump",
@@ -5000,6 +5124,24 @@ export const IDL: Albus = {
         "fields": [
           {
             "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateCredentialRequestData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "status",
+            "type": {
+              "defined": "CredentialRequestStatus"
+            }
+          },
+          {
+            "name": "message",
             "type": "string"
           }
         ]
@@ -5600,6 +5742,26 @@ export const IDL: Albus = {
           },
           {
             "name": "Verified"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CredentialRequestStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "InProgress"
+          },
+          {
+            "name": "Approved"
           },
           {
             "name": "Rejected"

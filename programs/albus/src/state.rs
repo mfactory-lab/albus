@@ -592,7 +592,6 @@ pub enum CredentialRequestStatus {
     Rejected,
 }
 
-#[constant]
 pub const MAX_CRED_SPEC_NAME_LEN: usize = 32;
 pub const MAX_CRED_SPEC_URI_LEN: usize = 200;
 

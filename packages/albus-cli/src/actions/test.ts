@@ -63,7 +63,6 @@ export async function credential(_opts: Opts) {
   log.info('Updating new NFT...')
   const res = await client.credential.update({
     mint: mintAddress,
-    owner: holder.publicKey,
     uri: 'https://exmaple.com',
   })
   console.log(res)
