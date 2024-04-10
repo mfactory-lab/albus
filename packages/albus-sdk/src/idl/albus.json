@@ -1,15 +1,6 @@
 {
   "version": "0.0.27",
   "name": "albus",
-  "constants": [
-    {
-      "name": "MAX_CRED_SPEC_NAME_LEN",
-      "type": {
-        "defined": "usize"
-      },
-      "value": "32"
-    }
-  ],
   "instructions": [
     {
       "name": "createIssuer",

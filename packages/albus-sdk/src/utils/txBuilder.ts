@@ -76,6 +76,8 @@ export class TxBuilder {
       })
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
+    } finally {
+      this.clear()
     }
   }
 
@@ -107,11 +109,14 @@ export class TxBuilder {
       })
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
+    } finally {
+      this.clear()
     }
   }
 
   clear() {
     this.txs = []
+    this.addTransaction(new Transaction(), [])
   }
 }
 

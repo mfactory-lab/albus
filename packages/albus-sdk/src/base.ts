@@ -32,21 +32,24 @@ import { TxBuilder, noopLogger, toFullLogger } from './utils'
 
 export abstract class BaseManager {
   protected logger: IFullLogger
-  protected txBuilder: TxBuilder
+  private _txBuilder?: TxBuilder
 
   public constructor(readonly client: AlbusClient, log: Logger = noopLogger) {
     this.logger = toFullLogger(client.options.logger ?? log)
-    this.txBuilder = new TxBuilder(client.provider)
-      .withPriorityFeeLoader(client.options?.priorityFeeLoader)
-      .withPriorityFee(client.options?.priorityFee ?? 0)
   }
 
   public setLogger(logger: Logger) {
     this.logger = toFullLogger(logger)
   }
 
+  get txBuilder() {
+    return this._txBuilder ?? new TxBuilder(this.client.provider)
+      .withPriorityFeeLoader(this.client.options?.priorityFeeLoader)
+      .withPriorityFee(this.client.options?.priorityFee ?? 0)
+  }
+
   public setTxBuilder(txBuilder: TxBuilder) {
-    this.txBuilder = txBuilder
+    this._txBuilder = txBuilder
   }
 
   protected get programId() {

@@ -206,10 +206,6 @@ export class ProofInputBuilder<T = Record<string, any>> {
     this.data.claimsProof.push(proof.siblings)
   }
 
-  private get credentialProof() {
-    return ([] as Albus.Proof[]).concat(this.credential.proof).find(p => p.type === ProofType.BJJSignature2021)
-  }
-
   /**
    * Apply a known signal, such as TrusteePublicKey, UserPrivateKey, CurrentDate, etc.
    *
@@ -255,5 +251,13 @@ export class ProofInputBuilder<T = Record<string, any>> {
         return true
     }
     return false
+  }
+
+  private get credentialProof() {
+    const proof = ([] as Albus.Proof[]).concat(this.credential.proof).find(p => p.type === ProofType.BJJSignature2021)
+    if (!proof?.proofValue) {
+      throw new Error('Invalid credential, expected BJJSignature2021 proof')
+    }
+    return Albus.credential.parseCredentialProof(proof.proofValue)
   }
 }
