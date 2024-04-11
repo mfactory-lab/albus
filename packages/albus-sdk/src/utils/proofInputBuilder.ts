@@ -6,7 +6,6 @@ import { KnownSignals } from '../types'
 import type { ParseSignalResult } from './circuit'
 import { parseSignal } from './circuit'
 
-type ClaimsTree = Awaited<ReturnType<typeof Albus.credential.createClaimsTree>>
 type TrusteeLoader = () => Promise<[bigint, bigint][]>
 
 /**
@@ -14,7 +13,7 @@ type TrusteeLoader = () => Promise<[bigint, bigint][]>
  * provided credentials, policies, and signals.
  */
 export class ProofInputBuilder<T = Record<string, any>> {
-  private claimsTree?: ClaimsTree
+  private claimsTree?: Albus.credential.ClaimsTree
   private claimsTreeDepth?: number
   private userPrivateKey?: bigint | string
   private trusteePublicKey?: (bigint | string)[][]
@@ -241,7 +240,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
         return true
       }
       case KnownSignals.CredentialRoot:
-        this.data[name] = this.claimsTree?.root()
+        this.data[name] = this.claimsTree?.root
         return true
       case KnownSignals.IssuerPublicKey:
         this.data[name] = this.credentialProof?.issuerPubkey
