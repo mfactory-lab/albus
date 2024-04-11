@@ -30,16 +30,15 @@ import { Keypair } from '@solana/web3.js'
 import { assert, describe, it } from 'vitest'
 import { babyJub, eddsa } from '../src/crypto'
 import {
-  createClaimsTree,
   createCredentialProof,
   createVerifiableCredential,
   createVerifiablePresentation,
-  encodeClaimValue,
   verifyCredential,
   verifyCredentialProof,
   verifyPresentation,
 } from '../src/credential'
 import { generateDid } from '../src/utils'
+import { createClaimsTree, encodeClaimValue } from '../src/credential/tree'
 
 describe('credential', () => {
   const claims = {

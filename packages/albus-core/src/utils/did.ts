@@ -27,7 +27,7 @@
  */
 
 import type { Keypair } from '@solana/web3.js'
-import { DEFAULT_DID } from '../credential'
+import { DEFAULT_DID } from '../credential/constants'
 import { MultiBase, PrivateKey } from '../crypto'
 import { VerifyType } from '../credential/types'
 
