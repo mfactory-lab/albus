@@ -31,12 +31,15 @@ import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
 import type {
   ClientSubscriptionId,
-  PublicKeyInitData } from '@solana/web3.js'
-import { ComputeBudgetProgram,
+  PublicKeyInitData,
+} from '@solana/web3.js'
+import {
+  ComputeBudgetProgram,
 
   Keypair,
   PublicKey,
-  SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js'
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+} from '@solana/web3.js'
 import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
 import {
@@ -93,6 +96,9 @@ export class CredentialManager extends BaseManager {
     }
   }
 
+  /**
+   * Create credential instruction.
+   */
   createIx(props?: CreateCredentialProps) {
     const mint = Keypair.generate()
     const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
@@ -136,6 +142,9 @@ export class CredentialManager extends BaseManager {
     return { mintAddress: mint.publicKey, signature }
   }
 
+  /**
+   * Update credential instruction.
+   */
   async updateIx(props: UpdateCredentialProps) {
     // const owner = new PublicKey(props.owner)
     // const tokenAccount = getAssociatedTokenAddress(mint, owner)
@@ -190,6 +199,9 @@ export class CredentialManager extends BaseManager {
     return { signature }
   }
 
+  /**
+   * Delete credential instruction.
+   */
   deleteIx(props: DeleteCredentialProps) {
     const mint = new PublicKey(props.mint)
     const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
@@ -230,7 +242,7 @@ export class CredentialManager extends BaseManager {
   }
 
   /**
-   * Load a credential associated with a specified address.
+   * Load credential associated with a specified address.
    */
   async load(mintAddr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
     const nft = await loadNft(this.provider.connection, mintAddr, {
@@ -267,7 +279,7 @@ export class CredentialManager extends BaseManager {
 }
 
 /**
- * Get credential info, verify and optionally decrypt
+ * Get credential info, verify and decrypt if necessary.
  */
 async function getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
   if (nft.json?.vc !== undefined) {

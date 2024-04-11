@@ -42,7 +42,6 @@ import type {
 } from './credentialSpecManager'
 import type { FindCredentialRequestProps } from './credentialRequestManager'
 import type { SendOpts } from './utils'
-import { PexHelper } from './utils'
 
 export class AlbusIssuerClient {
   constructor(private readonly client: AlbusClient) {
@@ -151,6 +150,6 @@ export class AlbusIssuerClient {
    * presentationDefinition: It can be either v1 or v2 of presentationDefinition
    */
   evaluatePresentation(definition: IPresentationDefinition, vp: VerifiablePresentation) {
-    return PexHelper.evaluatePresentation(definition, vp)
+    return credential.PexHelper.evaluatePresentation(definition, vp)
   }
 }

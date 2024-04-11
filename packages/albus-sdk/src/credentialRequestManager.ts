@@ -35,8 +35,6 @@ import type {
 import {
   PublicKey,
 } from '@solana/web3.js'
-import type { IPresentationDefinition } from '@sphereon/pex'
-import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
 import { BaseManager } from './base'
 
@@ -47,7 +45,7 @@ import {
   credentialRequestDiscriminator,
 } from './generated'
 import type { SendOpts } from './utils'
-import { PexHelper, getAssociatedTokenAddress } from './utils'
+import { getAssociatedTokenAddress } from './utils'
 
 export class CredentialRequestManager extends BaseManager {
   /**
@@ -69,6 +67,9 @@ export class CredentialRequestManager extends BaseManager {
       .map(acc => CredentialRequest.fromAccountInfo(acc!)[0])
   }
 
+  /**
+   * Create new Credential Request instruction.
+   */
   createIx(props: CreateCredentialRequestProps) {
     const authority = this.provider.publicKey
     const issuer = new PublicKey(props.issuer)
@@ -109,6 +110,9 @@ export class CredentialRequestManager extends BaseManager {
     return { address, signature }
   }
 
+  /**
+   * Update the Credential Request instruction.
+   */
   updateIx(props: UpdateCredentialRequestProps) {
     const credentialRequest = new PublicKey(props.credentialRequest)
     const authority = this.provider.publicKey
@@ -190,27 +194,8 @@ export class CredentialRequestManager extends BaseManager {
    * A function that creates a presentation using the given presentation definition and credentials.
    * Returns the uri of the created presentation.
    */
-  async createPresentation(def: IPresentationDefinition, creds: VerifiableCredential[], opts: {
-    holderSecretKey: number[] | Uint8Array
-    holderDid?: string
-    challenge?: bigint
-    date?: string | Date
-  }) {
-    const res = PexHelper.selectFrom(def, creds)
-
-    if (res.areRequiredCredentialsPresent !== 'info') {
-      throw new Error('Not all required credentials are present')
-    }
-
-    const vp = await Albus.credential.createVerifiablePresentation({
-      credentials: res.verifiableCredential as VerifiableCredential[],
-      challenge: opts.challenge ?? Albus.crypto.utils.randomBigInt(),
-      holderSecretKey: opts.holderSecretKey,
-      holderDid: opts.holderDid,
-      date: opts.date,
-      // presentationType: ['PresentationSubmission'],
-    })
-
+  async createPresentation(opts: Albus.credential.CreatePresentationExchangeOpts) {
+    const vp = await Albus.credential.createPresentationExchange(opts)
     return this.client.storage.upload(
       Buffer.from(JSON.stringify(vp)),
     )
