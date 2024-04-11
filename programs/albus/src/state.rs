@@ -26,8 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-
-
 use crate::utils::Signals;
 use anchor_lang::prelude::*;
 
