@@ -64,7 +64,7 @@ describe('ageProof', async () => {
     const input = {
       ...(await prepareInput(issuerKeypair, claims, ['birthDate', 'meta.validUntil'])),
       timestamp,
-      config: bytesToBigInt([opts.minAge ?? 0, opts.maxAge ?? 0].reverse()),
+      ageRange: bytesToBigInt([opts.minAge ?? 0, opts.maxAge ?? 0].reverse()),
       trusteePublicKey: [] as any,
       userPrivateKey,
     }

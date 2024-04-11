@@ -10,19 +10,9 @@ include "utils/poseidon.circom";
 include "utils/encryptionProof.circom";
 include "utils/merkleProof.circom";
 
-template Config() {
-  signal input in;
-  signal output minAge;
-  signal output maxAge;
-
-  var bits[256] = Num2Bits(256)(in);
-  minAge <== Bin2Num(256, 8, 0)(bits);
-  maxAge <== Bin2Num(256, 8, 8)(bits);
-}
-
 template AgeProof(credentialDepth, shamirN, shamirK) {
   signal input timestamp; // unix timestamp
-  signal input config;
+  signal input ageRange;
 
   // Claims
   signal input birthDate; // 2001-01-02
@@ -45,10 +35,6 @@ template AgeProof(credentialDepth, shamirN, shamirK) {
   signal output encryptedShare[shamirN][4];
   // User public key, derived from `userPrivateKey`
   signal output userPublicKey[2];
-
-  // Configuration
-  component cfg = Config();
-  cfg.in <== config;
 
   // Extracts the user public key from private key
   component upk = BabyPbk();
@@ -92,11 +78,15 @@ template AgeProof(credentialDepth, shamirN, shamirK) {
   encryptedData <== enc.encryptedData;
   encryptedShare <== enc.encryptedShare;
 
+  // Age Range
+  component range = AgeRange();
+  range.in <== ageRange;
+
   // Age validation
   component age = AgeVerifier();
   age.currentDate <-- timestampToDate(timestamp);
   age.birthDate <== ParseDate()(birthDate);
-  age.minAge <== cfg.minAge;
-  age.maxAge <== cfg.maxAge;
+  age.minAge <== range.minAge;
+  age.maxAge <== range.maxAge;
   age.valid === 1;
 }

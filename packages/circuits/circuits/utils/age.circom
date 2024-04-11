@@ -4,6 +4,16 @@ include "circomlib/circuits/gates.circom";
 include "circomlib/circuits/comparators.circom";
 include "date.circom";
 
+template AgeRange() {
+  signal input in;
+  signal output minAge;
+  signal output maxAge;
+
+  var bits[256] = Num2Bits(256)(in);
+  minAge <== Bin2Num(256, 8, 0)(bits);
+  maxAge <== Bin2Num(256, 8, 8)(bits);
+}
+
 template AgeVerifier() {
   signal input currentDate[3]; // [Y,m,d]
   signal input birthDate[3]; // [Y,m,d]

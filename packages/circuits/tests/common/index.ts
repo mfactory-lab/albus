@@ -8,10 +8,8 @@ export const circomkit = new Circomkit({
 
 export async function prepareInput(issuerKeypair: Keypair, claims: Record<string, any>, usedClaims: string[] = []) {
   const issuerPk = crypto.eddsa.prv2pub(issuerKeypair.secretKey)
-
-  const tree = await credential.createClaimsTree(claims)
-
-  const signature = crypto.eddsa.signPoseidon(issuerKeypair.secretKey, tree.root())
+  const tree = await credential.ClaimsTree.from(claims)
+  const signature = crypto.eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
 
   const claimsProof: bigint[][] = []
   const keys: number[] = []
@@ -28,7 +26,7 @@ export async function prepareInput(issuerKeypair: Keypair, claims: Record<string
   }
 
   return {
-    credentialRoot: tree.root(),
+    credentialRoot: tree.root,
     claimsProof,
     claimsKey: crypto.utils.bytesToBigInt(keys.reverse()),
     issuerPk,
