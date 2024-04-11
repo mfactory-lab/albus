@@ -30,103 +30,132 @@ import { SMT, poseidon } from '../crypto'
 import { bigintToBytes, bytesToBigInt, bytesToString } from '../crypto/utils'
 import { DEFAULT_CLAIM_TREE_DEPTH } from './constants'
 
-/**
- * Creates a claims tree based on the provided claims object and optional depth.
- *
- * @param {Record<string, any>} claims - The claims object to create the tree from.
- * @param {number} [depth] - The optional depth of the tree. If not provided, the default depth will be used.
- * @return An object representing the claims tree with various methods for interacting with it.
- */
-export async function createClaimsTree(claims: Record<string, any>, depth?: number) {
-  const tree = new SMT()
-  const flattenClaims = flattenObject(claims)
-  const flattenClaimKeys = Object.keys(flattenClaims)
-  const encodeKey = (k: string) => BigInt(flattenClaimKeys.indexOf(k))
-  const treeDepth = depth ?? DEFAULT_CLAIM_TREE_DEPTH
+export type Claims = Record<string, any>
 
-  const res = {
-    root: () => tree.root,
-    /**
-     * Retrieves a value from the tree based on the provided key.
-     */
-    get: async (key: string) => {
-      const proof = await tree.get(encodeKey(key))
-      const siblings = proof.siblings
-      while (siblings.length < treeDepth) {
-        siblings.push(tree.F.zero)
-      }
-      return {
-        found: proof.found,
-        key: proof.key,
-        value: proof.value,
-        siblings,
-      }
-    },
-    /**
-     * Deletes a key from the tree.
-     */
-    delete: (key: string) => tree.delete(encodeKey(key)),
-    /**
-     * Adds a key-value pair to the tree.
-     */
-    add: (key: string, val: any) => tree.add(encodeKey(key), encodeClaimValue(val)),
-    /**
-     * Updates the value associated with the given key in the tree.
-     */
-    update: (key: string, val: any) => tree.update(encodeKey(key), encodeClaimValue(val)),
-    /**
-     * Retrieve ZK information from the given keys.
-     */
-    zkInfo: async (keys: string[]) => {
-      const claimsKey: number[] = []
-      const claimsProof: bigint[][] = []
-      for (const key of keys) {
-        const proof = await res.get(key)
-        claimsKey.push(Number(proof.key))
-        claimsProof.push(proof.siblings)
-      }
-      return {
-        key: bytesToBigInt(claimsKey.reverse()),
-        proof: claimsProof,
-      }
-    },
+export type ClaimsTreeOptions = { depth?: number }
+
+export class ClaimsTree {
+  private readonly smt: SMT = new SMT()
+  private keys: string[] = []
+
+  private constructor(readonly opts?: ClaimsTreeOptions) {
   }
 
-  for (const key of flattenClaimKeys) {
-    await res.add(key, flattenClaims[key])
+  static async from(claims: Claims, opts?: ClaimsTreeOptions) {
+    const tree = new ClaimsTree(opts)
+    const flattenClaims = flattenObject(claims)
+    for (const key in flattenClaims) {
+      await tree.add(key, flattenClaims[key])
+    }
+    return tree
   }
 
-  return res
+  /**
+   * Encodes a claim value to a BigInt.
+   */
+  static encodeValue(s: string | number | bigint, hash = false): bigint {
+    const bytes = new TextEncoder().encode(String(s))
+    if (hash) {
+      return poseidon.hashBytes(bytes)
+    }
+    if (bytes.length > 32) {
+      // TODO: refactory
+      return bytesToBigInt(bytes.slice(0, 32))
+      // throw new Error('The maximum size for a claim is limited to 32 bytes.')
+    }
+    return bytesToBigInt(bytes)
+  }
+
+  /**
+   * Decodes a claim value from a BigInt.
+   */
+  static decodeValue(s: bigint): string {
+    return bytesToString(bigintToBytes(s))
+  }
+
+  get treeDepth() {
+    return this.opts?.depth ?? DEFAULT_CLAIM_TREE_DEPTH
+  }
+
+  get root() {
+    return this.smt.root
+  }
+
+  encodeKey(k: string) {
+    return BigInt(this.keys.indexOf(k))
+  }
+
+  /**
+   * Retrieves a value from the tree based on the provided key.
+   */
+  async get(key: string) {
+    const proof = await this.smt.get(this.encodeKey(key))
+    const siblings = proof.siblings
+    while (siblings.length < this.treeDepth) {
+      siblings.push(this.smt.F.zero)
+    }
+    return {
+      found: proof.found,
+      key: proof.key,
+      value: proof.value,
+      siblings,
+    }
+  }
+
+  /**
+   * Deletes a key from the tree.
+   */
+  delete(key: string) {
+    return this.smt.delete(this.encodeKey(key))
+  }
+
+  /**
+   * Adds a key-value pair to the tree.
+   */
+  add(key: string, val: any) {
+    this.keys.push(key)
+    return this.smt.add(this.encodeKey(key), ClaimsTree.encodeValue(val))
+  }
+
+  /**
+   * Updates the value associated with the given key in the tree.
+   */
+  update(key: string, val: any) {
+    return this.smt.update(this.encodeKey(key), ClaimsTree.encodeValue(val))
+  }
+
+  /**
+   * Retrieve ZK information from the given keys.
+   */
+  async zkInfo(keys: string[]) {
+    const claimsKey: number[] = []
+    const proof: bigint[][] = []
+    for (const k of keys) {
+      const { key, siblings } = await this.get(k)
+      claimsKey.push(Number(key))
+      proof.push(siblings)
+    }
+    return {
+      key: bytesToBigInt(claimsKey.reverse()),
+      proof,
+    }
+  }
 }
 
 /**
  * Encodes a claim value to a BigInt.
- *
- * @param {string | number | bigint} s - The value to encode.
- * @param hash
- * @return {bigint} - The encoded BigInt value.
+ * @deprecated - Please use ClaimsTree.encodeValue
  */
 export function encodeClaimValue(s: string | number | bigint, hash = false): bigint {
-  const bytes = new TextEncoder().encode(String(s))
-  if (hash) {
-    return poseidon.hashBytes(bytes)
-  }
-  if (bytes.length > 32) {
-    // TODO: fixme
-    return bytesToBigInt(bytes.slice(0, 32))
-    // throw new Error('The maximum size for a claim is limited to 32 bytes.')
-  }
-  return bytesToBigInt(bytes)
+  return ClaimsTree.encodeValue(s, hash)
 }
 
 /**
  * Decodes a claim value from a BigInt.
- *
- * @param {bigint} s - The bigint to decode.
- * @return {string} The decoded claim value.
+ * @deprecated - Please use ClaimsTree.decodeClaimValue
  */
 export function decodeClaimValue(s: bigint): string {
-  return bytesToString(bigintToBytes(s))
+  return ClaimsTree.decodeValue(s)
 }
 
 /**

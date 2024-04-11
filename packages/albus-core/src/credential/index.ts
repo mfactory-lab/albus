@@ -47,10 +47,11 @@ import { CredentialType, PresentationType, ProofType, VerifyType } from './types
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { normalizeClaims, validateCredentialPayload, validatePresentationPayload } from './utils'
 import { DEFAULT_CONTEXT, DEFAULT_DID, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
-import { createClaimsTree, encodeClaimValue } from './tree'
+import { ClaimsTree, encodeClaimValue } from './tree'
 
 const { base58ToBytes, randomBigInt } = utils
 
+export * from './tree'
 export * from './pex'
 
 /**
@@ -120,7 +121,7 @@ export async function createVerifiableCredential(claims: Record<string, any>, op
 export async function signCredential(vc: W3CCredential, opts: SingCredentialOpts): Promise<VerifiableCredential> {
   const claimsTree = await createCredentialTree(vc)
   const proof = createCredentialProof({
-    msg: claimsTree.root(),
+    msg: claimsTree.root,
     signerSecretKey: opts.signerSecretKey,
     verificationMethod: opts.verificationMethod,
     controller: opts.controller,
@@ -298,7 +299,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 
   const claimsTree = await createCredentialTree(cred)
 
-  proof.credentialRoot = claimsTree.root()
+  proof.credentialRoot = claimsTree.root
   proof.issuerPubkey = BabyJubPubkey.newFromCompressed(issuerPubkey).p
   proof.signature = [...signature.R8, signature.S]
 
@@ -448,7 +449,7 @@ export async function createCredentialTree(credential: W3CCredential, depth?: nu
     meta.type = type
   }
 
-  return createClaimsTree({ ...credential.credentialSubject, meta }, depth)
+  return ClaimsTree.from({ ...credential.credentialSubject, meta }, { depth })
 }
 
 export type CreateCredentialOpts = {

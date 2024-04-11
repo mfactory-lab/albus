@@ -38,7 +38,7 @@ import {
   verifyPresentation,
 } from '../src/credential'
 import { generateDid } from '../src/utils'
-import { createClaimsTree, encodeClaimValue } from '../src/credential/tree'
+import { ClaimsTree } from '../src/credential/tree'
 
 describe('credential', () => {
   const claims = {
@@ -67,15 +67,15 @@ describe('credential', () => {
   ]))
 
   it('can create and verify credential proof', async () => {
-    const claimsTree = await createClaimsTree(claims)
+    const claimsTree = await ClaimsTree.from(claims)
     const issuerKeypair = Keypair.generate()
     const pubkey = babyJub.packPoint(eddsa.prv2pub(issuerKeypair.secretKey))
     const proof = createCredentialProof({
-      msg: claimsTree.root(),
+      msg: claimsTree.root,
       signerSecretKey: issuerKeypair.secretKey,
       verificationMethod: 'did:example:123456#key-1',
     })
-    const res = verifyCredentialProof(claimsTree.root(), proof.proofValue, pubkey)
+    const res = verifyCredentialProof(claimsTree.root, proof.proofValue, pubkey)
     assert.ok(res)
   })
 
@@ -154,12 +154,12 @@ describe('credential', () => {
       country5: 'US',
     }
 
-    const tree = await createClaimsTree(claims)
+    const tree = await ClaimsTree.from(claims)
 
     // console.log((await tree.get('degree.university.name')))
 
     assert.equal((await tree.get('birthDate')).key, 7n)
     assert.equal((await tree.get('degree.university.name')).key, 2n)
-    assert.equal((await tree.get('test2.0.name')).value, encodeClaimValue(1))
+    assert.equal((await tree.get('test2.0.name')).value, ClaimsTree.encodeValue(1))
   })
 })
