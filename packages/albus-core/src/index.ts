@@ -31,5 +31,5 @@ import * as zkp from './zkp'
 import * as credential from './credential'
 import * as utils from './utils'
 
-export * from './types'
+export * from './credential/types'
 export { crypto, zkp, credential, utils }

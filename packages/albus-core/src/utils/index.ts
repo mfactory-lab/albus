@@ -28,4 +28,3 @@
 
 export * from './date'
 export * from './did'
-export * from './validators'

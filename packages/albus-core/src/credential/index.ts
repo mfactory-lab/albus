@@ -37,78 +37,24 @@ import {
   PublicKey as BabyJubPubkey,
   MultiBase,
   PrivateKey,
-  SMT,
   Signature,
   XC20P,
   eddsa,
-  poseidon,
   utils,
-} from './crypto'
+} from '../crypto'
+import { encodeDidKey, w3cDate, w3cDateToUnixTs } from '../utils'
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
-import { encodeDidKey, validateCredentialPayload, validatePresentationPayload, w3cDate, w3cDateToUnixTs } from './utils'
+import { normalizeClaims, validateCredentialPayload, validatePresentationPayload } from './utils'
+import { DEFAULT_CONTEXT, DEFAULT_DID, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
+import { createClaimsTree, encodeClaimValue } from './tree'
 
-const { bigintToBytes, base58ToBytes, bytesToBigInt, bytesToString, randomBigInt } = utils
-
-// const {
-//   suites: { LinkedDataSignature },
-//   purposes: { AssertionProofPurpose },
-// } = jsigs
-
-type Claims = Record<string, any>
-
-// https://www.w3.org/TR/vc-data-model-2.0
-// export const DEFAULT_CONTEXT = 'https://www.w3.org/ns/credentials/v2'
-export const DEFAULT_CONTEXT = 'https://www.w3.org/2018/credentials/v1'
-export const DEFAULT_VC_TYPE = 'VerifiableCredential'
-export const DEFAULT_VP_TYPE = 'VerifiablePresentation'
-export const DEFAULT_DID = 'did:web:albus.finance'
-export const DEFAULT_CLAIM_TREE_DEPTH = 5 // 2^5-1 = 16 elements
-
-/**
- * Create metadata info from the credential
- * used for generate a claims tree
- */
-export function getCredentialMeta(credential: W3CCredential) {
-  const meta: Record<string, any> = {
-    issuer: encodeClaimValue(typeof credential.issuer === 'string' ? credential.issuer : credential.issuer?.id),
-    issuanceDate: w3cDateToUnixTs(credential.issuanceDate),
-    validUntil: credential.validUntil ? w3cDateToUnixTs(credential.validUntil) : 0,
-    validFrom: credential.validFrom ? w3cDateToUnixTs(credential.validFrom) : 0,
-  }
-  // the last credential type is used
-  const type = credential.type.slice(-1)[0]
-  if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
-    meta.type = type
-  }
-  return meta
-}
-
-export type CreateCredentialOpts = {
-  issuerDid?: string
-  // Signer secret key.
-  issuerSecretKey?: number[] | Uint8Array
-  verificationMethod?: string
-  encrypt?: boolean
-  encryptionKey?: PublicKey
-  // Optional secret key. Ephemeral secret key used by default
-  encryptionSecretKey?: number[] | Uint8Array
-  // unix timestamp
-  validFrom?: number
-  // unix timestamp
-  validUntil?: number
-  // custom issuance date
-  timestamp?: number
-  credentialType?: CredentialType
-  // suite: typeof LinkedDataSignature
-  // documentLoader: any
-  // purpose?: any
-}
+const { base58ToBytes, randomBigInt } = utils
 
 /**
  * Create new verifiable credential
  */
-export async function createVerifiableCredential(claims: Claims, opts: CreateCredentialOpts = {}): Promise<VerifiableCredential> {
+export async function createVerifiableCredential(claims: Record<string, any>, opts: CreateCredentialOpts = {}): Promise<VerifiableCredential> {
   const vcType = [DEFAULT_VC_TYPE, CredentialType.AlbusCredential]
 
   if (opts.credentialType) {
@@ -162,14 +108,6 @@ export async function createVerifiableCredential(claims: Claims, opts: CreateCre
   return vc
 }
 
-export type SingCredentialOpts = {
-  signerSecretKey: Uint8Array
-  verificationMethod: string
-  controller?: string
-  purpose?: string
-  date?: Date
-}
-
 /**
  * Sign a verifiable credential with the provided options.
  *
@@ -191,11 +129,6 @@ export async function signCredential(vc: W3CCredential, opts: SingCredentialOpts
     ...vc,
     proof,
   }
-}
-
-export type EncryptCredentialOpts = {
-  pubkey: PublicKey
-  esk?: number[] | Uint8Array
 }
 
 /**
@@ -242,17 +175,8 @@ export async function decryptCredentialIfNeeded(vc: VerifiableCredential, secret
   return vc
 }
 
-export type CreatePresentationOpts = {
-  holderSecretKey: ArrayLike<number>
-  holderDid?: string
-  credentials: VerifiableCredential[]
-  challenge?: bigint
-  date?: string | Date
-  presentationType?: string | string[]
-}
-
 /**
- * Create new verifiable presentation
+ * Creates a verifiable presentation.
  */
 export async function createVerifiablePresentation(opts: CreatePresentationOpts) {
   const holderKeypair = Keypair.fromSecretKey(Uint8Array.from(opts.holderSecretKey))
@@ -281,6 +205,9 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
   })
 }
 
+/**
+ * Signs a verifiable presentation.
+ */
 export async function signPresentation(vp: W3CPresentation, opts: {
   verificationMethod?: string
   controller?: string
@@ -315,11 +242,6 @@ export async function encryptPresentation(vp: VerifiablePresentation, opts: Encr
     verifiableCredential[i] = await encryptCredential(verifiableCredential[i], opts)
   }
   return { ...vp, verifiableCredential }
-}
-
-export type VerifyCredentialOpts = {
-  decryptionKey?: ArrayLike<number>
-  resolver?: Resolvable
 }
 
 /**
@@ -385,15 +307,6 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   return cred
 }
 
-export type VerifyPresentationOpts = {
-  // Used to decrypt verifiable credential subject
-  decryptionKey?: number[] | Uint8Array
-  decryptionRethrow?: boolean
-  // By default, the challenge is the holder's public key.
-  challenge?: Uint8Array
-  resolver?: Resolvable
-}
-
 /**
  * Verify presentation
  */
@@ -437,26 +350,6 @@ export async function verifyPresentation(vp: VerifiablePresentation, opts: Verif
   return { ...vp, verifiableCredential }
 }
 
-type CredentialProof = {
-  created: string
-  verificationMethod?: string
-  proofValue: string
-  proofPurpose?: string
-} & Proof
-
-type PresentationProof = {
-  challenge: string
-} & CredentialProof
-
-export type CreateCredentialProof = {
-  msg: bigint
-  signerSecretKey: Uint8Array
-  verificationMethod: string
-  controller?: string
-  purpose?: string
-  date?: Date
-}
-
 /**
  * Parse credential proof.
  */
@@ -468,12 +361,10 @@ export function parseCredentialProof(proofValue: string) {
   const bytes = base58ToBytes(proofValue.substring(1))
   const signature = Signature.newFromCompressed(bytes.slice(0, 64))
   const issuerPubkey = BabyJubPubkey.newFromCompressed(bytes.slice(64, 96))
-  const credentialRoot = bytesToBigInt(bytes.slice(96, 128))
 
   return {
     signature: [...signature.R8, signature.S],
     issuerPubkey: issuerPubkey.p,
-    credentialRoot,
   }
 }
 
@@ -494,7 +385,6 @@ export function createCredentialProof(opts: CreateCredentialProof): CredentialPr
   const proofValue = MultiBase.encode(Uint8Array.from([
     ...signature.compress(),
     ...signerPubkey.compress(),
-    ...bigintToBytes(opts.msg, 32),
   ]))
 
   if (!opts.verificationMethod && !opts.controller) {
@@ -541,169 +431,97 @@ export function verifyPresentationProof(proof: PresentationProof, pubKey?: Uint8
  * Creates a credential tree based on the given W3C credential and optional depth.
  */
 export async function createCredentialTree(credential: W3CCredential, depth?: number) {
-  return createClaimsTree({
-    meta: getCredentialMeta(credential),
-    ...credential.credentialSubject,
-  }, depth)
-}
+  const issuerDid = typeof credential.issuer === 'string' ? credential.issuer : credential.issuer?.id
 
-/**
- * Creates a claims tree based on the provided claims object and optional depth.
- *
- * @param {Claims} claims - The claims object to create the tree from.
- * @param {number} [depth] - The optional depth of the tree. If not provided, the default depth will be used.
- * @return An object representing the claims tree with various methods for interacting with it.
- */
-export async function createClaimsTree(claims: Claims, depth?: number) {
-  const tree = new SMT()
-  const flattenClaims = flattenObject(claims)
-  const flattenClaimKeys = Object.keys(flattenClaims)
-  const encodeKey = (k: string) => BigInt(flattenClaimKeys.indexOf(k))
-  const treeDepth = depth ?? DEFAULT_CLAIM_TREE_DEPTH
-
-  const res = {
-    root: () => tree.root,
-    /**
-     * Retrieves a value from the tree based on the provided key.
-     */
-    get: async (key: string) => {
-      const proof = await tree.get(encodeKey(key))
-      const siblings = proof.siblings
-      while (siblings.length < treeDepth) {
-        siblings.push(tree.F.zero)
-      }
-      return {
-        found: proof.found,
-        key: proof.key,
-        value: proof.value,
-        siblings,
-      }
-    },
-    /**
-     * Deletes a key from the tree.
-     */
-    delete: (key: string) => tree.delete(encodeKey(key)),
-    /**
-     * Adds a key-value pair to the tree.
-     */
-    add: (key: string, val: any) => tree.add(encodeKey(key), encodeClaimValue(val)),
-    /**
-     * Updates the value associated with the given key in the tree.
-     */
-    update: (key: string, val: any) => tree.update(encodeKey(key), encodeClaimValue(val)),
-    /**
-     * Retrieve ZK information from the given keys.
-     */
-    zkInfo: async (keys: string[]) => {
-      const claimsKey: number[] = []
-      const claimsProof: bigint[][] = []
-      for (const key of keys) {
-        const proof = await res.get(key)
-        claimsKey.push(Number(proof.key))
-        claimsProof.push(proof.siblings)
-      }
-      return {
-        key: utils.bytesToBigInt(claimsKey.reverse()),
-        proof: claimsProof,
-      }
-    },
+  const meta: Record<string, any> = {
+    issuer: encodeClaimValue(issuerDid, true),
+    issuanceDate: w3cDateToUnixTs(credential.issuanceDate),
+    validUntil: credential.validUntil ? w3cDateToUnixTs(credential.validUntil) : 0,
+    validFrom: credential.validFrom ? w3cDateToUnixTs(credential.validFrom) : 0,
   }
 
-  for (const key of flattenClaimKeys) {
-    await res.add(key, flattenClaims[key])
+  // the last credential type is used
+  const type = credential.type.slice(-1)[0]
+  if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
+    meta.type = type
   }
 
-  return res
+  return createClaimsTree({ ...credential.credentialSubject, meta }, depth)
 }
 
-/**
- * Encodes a claim value to a BigInt.
- *
- * @param {string | number | bigint} s - The value to encode.
- * @param hash
- * @return {bigint} - The encoded BigInt value.
- */
-export function encodeClaimValue(s: string | number | bigint, hash = false): bigint {
-  const bytes = new TextEncoder().encode(String(s))
-  if (hash) {
-    return poseidon.hashBytes(bytes)
-  }
-  if (bytes.length > 32) {
-    // TODO: fixme
-    return bytesToBigInt(bytes.slice(0, 32))
-    // throw new Error('The maximum size for a claim is limited to 32 bytes.')
-  }
-  return bytesToBigInt(bytes)
+export type CreateCredentialOpts = {
+  issuerDid?: string
+  // Signer secret key.
+  issuerSecretKey?: number[] | Uint8Array
+  verificationMethod?: string
+  encrypt?: boolean
+  encryptionKey?: PublicKey
+  // Optional secret key. Ephemeral secret key used by default
+  encryptionSecretKey?: number[] | Uint8Array
+  // unix timestamp
+  validFrom?: number
+  // unix timestamp
+  validUntil?: number
+  // custom issuance date
+  timestamp?: number
+  credentialType?: CredentialType
+  // suite: typeof LinkedDataSignature
+  // documentLoader: any
+  // purpose?: any
 }
 
-/**
- * Decodes a claim value from a BigInt.
- *
- * @param {bigint} s - The bigint to decode.
- * @return {string} The decoded claim value.
- */
-export function decodeClaimValue(s: bigint): string {
-  return bytesToString(bigintToBytes(s))
+export type SingCredentialOpts = {
+  signerSecretKey: Uint8Array
+  verificationMethod: string
+  controller?: string
+  purpose?: string
+  date?: Date
 }
 
-/**
- * Recursively flattens an object by converting nested properties into a flat structure.
- *
- * @param {Record<string, any>} obj - The object to flatten.
- * @param {string} [parentKey] - The parent key for the nested properties.
- * @return {Record<string, any>} The flattened object.
- */
-function flattenObject(obj: Record<string, any>, parentKey?: string): Record<string, any> {
-  let res: Record<string, any> = {}
-  Object.entries(obj).forEach(([key, value]) => {
-    const k = parentKey ? `${parentKey}.${key}` : key
-    if (typeof value === 'object') {
-      res = { ...res, ...flattenObject(value, k) }
-    } else {
-      res[k] = value
-    }
-  })
-  return res
+export type EncryptCredentialOpts = {
+  pubkey: PublicKey
+  esk?: number[] | Uint8Array
 }
 
-// /**
-//  * Unflattens an object with dot-separated keys into a nested object.
-//  *
-//  * @param {Record<string, any>} obj - The flattened object to unflatten
-//  * @return {Record<string, any>} The unflattened nested object
-//  */
-// function unflattenObject(obj: Record<string, any>): Record<string, any> {
-//   return Object.keys(obj).reduce((res, k) => {
-//     k.split('.').reduce(
-//       (acc, e, i, keys) => acc[e] || (acc[e] = Number.isNaN(Number(keys[i + 1]))
-//         ? keys.length - 1 === i
-//           ? obj[k]
-//           : {}
-//         : []),
-//       res,
-//     )
-//     return res
-//   }, {} as any)
-// }
+export type CreatePresentationOpts = {
+  holderSecretKey: ArrayLike<number>
+  holderDid?: string
+  credentials: VerifiableCredential[]
+  challenge?: bigint
+  date?: string | Date
+  presentationType?: string | string[]
+}
 
-/**
- * Recursively normalizes the claims object by trimming string values and returning a new object with normalized values.
- *
- * @param {Claims} claims - the object containing claims to be normalized
- * @return {Record<string, any>} a new object with normalized claim values
- */
-function normalizeClaims(claims: Claims): Record<string, any> {
-  const normalizedClaims: Record<string, any> = {}
+export type VerifyCredentialOpts = {
+  decryptionKey?: ArrayLike<number>
+  resolver?: Resolvable
+}
 
-  for (const key in claims) {
-    let value = claims[key]
-    if (typeof value === 'object') {
-      value = normalizeClaims(value)
-    } else {
-      value = String(value).trim()
-    }
-    normalizedClaims[key] = value
-  }
+export type VerifyPresentationOpts = {
+  // Used to decrypt verifiable credential subject
+  decryptionKey?: number[] | Uint8Array
+  decryptionRethrow?: boolean
+  // By default, the challenge is the holder's public key.
+  challenge?: Uint8Array
+  resolver?: Resolvable
+}
 
-  return normalizedClaims
+type CredentialProof = {
+  created: string
+  verificationMethod?: string
+  proofValue: string
+  proofPurpose?: string
+} & Proof
+
+type PresentationProof = {
+  challenge: string
+} & CredentialProof
+
+export type CreateCredentialProof = {
+  msg: bigint
+  signerSecretKey: Uint8Array
+  verificationMethod: string
+  controller?: string
+  purpose?: string
+  date?: Date
 }

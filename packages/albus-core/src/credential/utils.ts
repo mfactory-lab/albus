@@ -26,8 +26,30 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { DEFAULT_CONTEXT, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from '../credential'
-import type { W3CCredential, W3CPresentation } from '../types'
+import { DEFAULT_CONTEXT, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
+import type { W3CCredential, W3CPresentation } from './types'
+
+/**
+ * Recursively normalizes the claims object by trimming string values and returning a new object with normalized values.
+ *
+ * @param {Record<string, any>} claims - the object containing claims to be normalized
+ * @return {Record<string, any>} a new object with normalized claim values
+ */
+export function normalizeClaims(claims: Record<string, any>): Record<string, any> {
+  const normalizedClaims: Record<string, any> = {}
+
+  for (const key in claims) {
+    let value = claims[key]
+    if (typeof value === 'object') {
+      value = normalizeClaims(value)
+    } else {
+      value = String(value).trim()
+    }
+    normalizedClaims[key] = value
+  }
+
+  return normalizedClaims
+}
 
 export function validateCredentialPayload(payload: W3CCredential): void {
   validateContext(payload['@context'])

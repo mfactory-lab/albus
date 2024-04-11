@@ -29,7 +29,7 @@
 import type { Keypair } from '@solana/web3.js'
 import { DEFAULT_DID } from '../credential'
 import { MultiBase, PrivateKey } from '../crypto'
-import { VerifyType } from '../types'
+import { VerifyType } from '../credential/types'
 
 /**
  * Generates a DID key from the given public key.
