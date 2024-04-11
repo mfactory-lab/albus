@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.6-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.5...@albus-finance/core-v0.3.6-next.6) (2024-04-11)
+
+
+### 🌟 Features
+
+* **core:** add `parseCredentialProof` ([8929966](https://github.com/mfactory-lab/albus/commit/8929966a1e6613b1071a29c96f2306ef51746f6b))
+* **core:** add pex utils ([a48b2b6](https://github.com/mfactory-lab/albus/commit/a48b2b6a52245c60c2b9be5fb1595c5f0ea25e4a))
+
+
+### 🐞 Bug Fixes
+
+* **core:** add new `ClaimsTree` ([6636fb2](https://github.com/mfactory-lab/albus/commit/6636fb2a1426b69e1835273b50f37f0eaac75b44))
+* **core:** code cleanup ([03b93aa](https://github.com/mfactory-lab/albus/commit/03b93aaa2cb57973a9a6d7f49825208dfcfd1df0))
+
+
+### ♻️ Refactors
+
+* **core:** global improvements ([744a57e](https://github.com/mfactory-lab/albus/commit/744a57eb9efe5a6b8bcc5bab40322703e2bec8a5))
+
 ## [0.3.6-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.4...@albus-finance/core-v0.3.6-next.5) (2024-04-10)
 
 
