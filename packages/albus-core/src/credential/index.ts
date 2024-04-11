@@ -51,6 +51,8 @@ import { createClaimsTree, encodeClaimValue } from './tree'
 
 const { base58ToBytes, randomBigInt } = utils
 
+export * from './pex'
+
 /**
  * Create new verifiable credential
  */
