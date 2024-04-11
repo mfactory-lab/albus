@@ -241,7 +241,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
         return true
       }
       case KnownSignals.CredentialRoot:
-        this.data[name] = this.credentialProof?.credentialRoot
+        this.data[name] = this.claimsTree?.root()
         return true
       case KnownSignals.IssuerPublicKey:
         this.data[name] = this.credentialProof?.issuerPubkey
@@ -256,7 +256,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
   private get credentialProof() {
     const proof = ([] as Albus.Proof[]).concat(this.credential.proof).find(p => p.type === ProofType.BJJSignature2021)
     if (!proof?.proofValue) {
-      throw new Error('Invalid credential, expected BJJSignature2021 proof')
+      throw new Error(`Invalid credential, expected ${ProofType.BJJSignature2021} proof`)
     }
     return Albus.credential.parseCredentialProof(proof.proofValue)
   }
