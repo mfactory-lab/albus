@@ -33,3 +33,12 @@
 
 * [Glossary](glossary.md)
 * [Reference list](reference-list.md)
+
+## Links
+
+* [Landing page](https://albus.finance/)
+* [Web app](https://app.albus.finance/)
+* [Notion](https://www.notion.so/albus-protocol/Data-Room-Public-1e370850e94a4108835f7aa4fbbd4f05)
+* [LinkedIn](https://www.linkedin.com/company/albus-protocol/)
+* [X](https://twitter.com/AlbusProtocol)
+* [Telegram](https://t.me/albusprotocol)
