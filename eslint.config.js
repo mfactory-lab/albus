@@ -28,7 +28,7 @@
 import antfu from '@antfu/eslint-config'
 
 export default antfu({
-  stylistic: true, // enable stylistic formatting rules
+  stylistic: true,
   typescript: true,
   yml: false,
   vue: false,
