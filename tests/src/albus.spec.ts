@@ -28,7 +28,7 @@
 
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
-import { CircuitHelper, countryLookup } from '../../packages/circuits'
+import { CircuitHelper, countryLookup } from '../../packages/circuits/src'
 import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus, TxBuilder } from '../../packages/albus-sdk/src'
 import { assertErrorCode, initProvider, payer, provider, requestAirdrop } from './utils'

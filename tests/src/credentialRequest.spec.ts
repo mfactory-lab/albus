@@ -95,6 +95,7 @@ describe('credentialRequest', async () => {
       mint: mintAddress,
       issuer: issuerAddress,
       specId,
+      uri: 'https://presentation.json',
     })
     assert.ok(!!signature)
   })
