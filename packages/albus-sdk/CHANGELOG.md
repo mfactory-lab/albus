@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.3.0-next.24](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.23...@albus-finance/sdk-v0.3.0-next.24) (2024-04-16)
+
 ## [0.3.0-next.23](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.22...@albus-finance/sdk-v0.3.0-next.23) (2024-04-16)
 
 
