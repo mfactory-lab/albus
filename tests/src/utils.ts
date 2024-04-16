@@ -62,9 +62,9 @@ export function initMetaplex(payerKeypair: Keypair) {
 export function initProvider(keypair: Keypair, opts?: ConfirmOptions) {
   opts = {
     ...opts,
-    skipPreflight: true,
+    // skipPreflight: true,
     commitment: 'confirmed',
-    preflightCommitment: 'confirmed',
+    // preflightCommitment: 'confirmed',
   }
   return new AnchorProvider(
     new Connection('http://127.0.0.1:8899', opts),

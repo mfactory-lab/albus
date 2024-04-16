@@ -33,7 +33,15 @@ import { Keypair } from '@solana/web3.js'
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
 import { AlbusClient } from '../../packages/albus-sdk/src'
 import { AlbusSwapClient, CurveType } from '../../packages/albus-swap-sdk/src'
-import { createTestData, createTestProofRequest, deleteTestData, initProvider, payer, provider, requestAirdrop } from './utils'
+import {
+  createTestData,
+  createTestProofRequest,
+  deleteTestData,
+  initProvider,
+  payer,
+  provider,
+  requestAirdrop,
+} from './utils'
 
 async function tokenBalance(addr: PublicKey) {
   const acc = await getAccount(provider.connection, addr)

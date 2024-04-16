@@ -51,7 +51,15 @@ import {
 } from '../../packages/albus-stake-pool-sdk/src'
 import { MINIMUM_RESERVE_LAMPORTS } from '../../packages/albus-stake-pool-sdk/src/constants'
 import { getValidatorListAccount } from '../../packages/albus-stake-pool-sdk/src/utils'
-import { createTestData, createTestProofRequest, deleteTestData, initProvider, payer, provider, requestAirdrop } from './utils'
+import {
+  createTestData,
+  createTestProofRequest,
+  deleteTestData,
+  initProvider,
+  payer,
+  provider,
+  requestAirdrop,
+} from './utils'
 
 describe('albusStakePool', async () => {
   const user = Keypair.generate()
