@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0-next.22](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.20...@albus-finance/sdk-v0.3.0-next.22) (2024-04-16)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix proof builder credential root ([0521e27](https://github.com/mfactory-lab/albus/commit/0521e27248518883a7c1b31ae467611c539ada48))
+* **sdk:** fixed `txBuilder`, fixed `ProofInputBuilder` ([b8cae0f](https://github.com/mfactory-lab/albus/commit/b8cae0fa8e495ab1cd09205cbbee9f2065b9b4ee))
+* **sdk:** fixed version ([11f9226](https://github.com/mfactory-lab/albus/commit/11f92267104f4073b606a5193eaf79b0a873c8d9))
+* **sdk:** new `ClaimsTree` ([fbfafa4](https://github.com/mfactory-lab/albus/commit/fbfafa44d80a075a80672d3a33ec12545a1cb8ea))
+* **sdk:** refactored credential manager ([a20abc1](https://github.com/mfactory-lab/albus/commit/a20abc190d64ea02074b164bcf4e8fd5b4eb67ea))
+
 ## [0.3.0-next.20](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.19...@albus-finance/sdk-v0.3.0-next.20) (2024-04-10)
 
 ## [0.3.0-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.17...@albus-finance/sdk-v0.3.0-next.19) (2024-04-10)
