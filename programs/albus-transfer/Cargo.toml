@@ -11,6 +11,7 @@ repository.workspace = true
 crate-type = ["cdylib", "lib"]
 
 [features]
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
@@ -21,4 +22,4 @@ testing = []
 [dependencies]
 albus-solana-verifier.workspace = true
 anchor-lang.workspace = true
-anchor-spl.workspace = true
+anchor-spl = { workspace = true, features = ["associated_token", "token", "token_2022", "token_2022_extensions"] }

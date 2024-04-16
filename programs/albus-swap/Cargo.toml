@@ -11,6 +11,7 @@ repository.workspace = true
 crate-type = ["cdylib", "lib"]
 
 [features]
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
@@ -24,7 +25,7 @@ fuzz = ["arbitrary", "roots"]
 [dependencies]
 albus-solana-verifier.workspace = true
 anchor-lang.workspace = true
-anchor-spl.workspace = true
+anchor-spl = { workspace = true, features = ["token", "token_2022"] }
 arrayref = "0.3.6"
 solana-program = "^1.17.6"
 spl-math = { version = "0.2", features = ["no-entrypoint"] }

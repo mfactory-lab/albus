@@ -34,12 +34,12 @@
   },
   "dependencies": {
     "@albus-finance/core": "workspace:^",
-    "@coral-xyz/anchor": "^0.29.0",
-    "@irys/sdk": "^0.1.21",
+    "@coral-xyz/anchor": "^0.30.0",
+    "@irys/sdk": "^0.1.22",
     "@metaplex-foundation/beet": "^0.7.2",
-    "@metaplex-foundation/beet-solana": "^0.4.0",
+    "@metaplex-foundation/beet-solana": "^0.4.1",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
-    "@solana/web3.js": "^1.68.0",
+    "@solana/web3.js": "^1.91.1",
     "lodash-es": "^4.17.21"
   },
   "devDependencies": {

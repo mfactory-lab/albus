@@ -2,8 +2,8 @@
 resolver = "2"
 members = [
     "programs/*",
-    "packages/solana-verifier",
-    "packages/groth16-solana",
+    "crates/solana-verifier",
+    "crates/groth16-solana",
 ]
 
 [workspace.package]
@@ -16,10 +16,10 @@ license = "AGPL-3.0"
 publish = false
 
 [workspace.dependencies]
-albus-solana-verifier = { path = "packages/solana-verifier" }
-anchor-lang = "0.29.0"
-anchor-spl = "0.29.0"
-groth16-solana = { path = "packages/groth16-solana" }
+albus-solana-verifier = { path = "crates/solana-verifier" }
+anchor-lang = "0.30.0"
+anchor-spl = { version = "0.30.0", default-features = false }
+groth16-solana = { path = "crates/groth16-solana" }
 solana-program = "*"
 solana-security-txt = { version = "1.1.1" }
 

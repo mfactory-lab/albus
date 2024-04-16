@@ -37,7 +37,7 @@ use anchor_spl::metadata::mpl_token_metadata::instructions::{
 };
 use anchor_spl::metadata::mpl_token_metadata::types::{PrintSupply, TokenStandard};
 use anchor_spl::metadata::Metadata as MetadataProgram;
-use anchor_spl::token::Token;
+use anchor_spl::token::Token as TokenProgram;
 
 pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
@@ -66,7 +66,7 @@ pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
         .update_authority(&ctx.accounts.albus_authority, true)
         .system_program(&ctx.accounts.system_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
-        .spl_token_program(&ctx.accounts.token_program)
+        .spl_token_program(Some(&ctx.accounts.token_program))
         .print_supply(PrintSupply::Zero)
         .is_mutable(true)
         .invoke_signed(&[&signer_seeds])?;
@@ -175,7 +175,7 @@ pub struct CreateCredential<'info> {
     pub authority: Signer<'info>,
 
     /// SPL Token program.
-    pub token_program: Program<'info, Token>,
+    pub token_program: Program<'info, TokenProgram>,
 
     /// SPL Associated Token program.
     pub ata_program: Program<'info, AssociatedTokenProgram>,

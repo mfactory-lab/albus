@@ -52,10 +52,10 @@ bump: ## Bump program version
 	cd ./programs/$(PROGRAM)/ && cargo bump
 
 build: ## Build program
-	anchor build -p $(PROGRAM) --idl-ts ./packages/albus-sdk/src/idl --arch sbf -- --features "$(BUILD_FEATURES)"
+	anchor build -p $(PROGRAM) -i ../../packages/albus-sdk/src/idl -- --features "$(BUILD_FEATURES) idl-build"
 
 test: ## Test integration (localnet)
-	anchor test --arch sbf --skip-lint --provider.cluster localnet -- --features testing
+	anchor test --skip-lint --provider.cluster localnet -- --features testing
 
 test-unit: ## Test unit
 	cargo clippy --all-features -- --allow clippy::result_large_err

@@ -34,7 +34,11 @@ declare_id!("ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe");
 pub mod albus_transfer {
     use albus_solana_verifier::AlbusVerifier;
     use anchor_lang::system_program;
-    use anchor_spl::token;
+    use anchor_spl::token::transfer as token_transfer;
+    use anchor_spl::token::Mint;
+    use anchor_spl::token::Token;
+    use anchor_spl::token::TokenAccount;
+    use anchor_spl::token::Transfer;
 
     use super::*;
 
@@ -64,10 +68,10 @@ pub mod albus_transfer {
             .check_owner(ctx.accounts.sender.key())
             .run()?;
 
-        token::transfer(
+        token_transfer(
             CpiContext::new(
                 ctx.accounts.token_program.to_account_info(),
-                token::Transfer {
+                Transfer {
                     from: ctx.accounts.source.to_account_info(),
                     to: ctx.accounts.destination.to_account_info(),
                     authority: ctx.accounts.sender.to_account_info(),
@@ -106,21 +110,21 @@ pub mod albus_transfer {
         #[account(mut)]
         pub receiver: AccountInfo<'info>,
 
-        pub token_mint: Box<Account<'info, token::Mint>>,
+        pub token_mint: Box<Account<'info, Mint>>,
 
         #[account(
             mut,
             associated_token::mint = token_mint,
             associated_token::authority = sender,
         )]
-        pub source: Account<'info, token::TokenAccount>,
+        pub source: Account<'info, TokenAccount>,
 
         #[account(
             mut,
             associated_token::mint = token_mint,
             associated_token::authority = receiver,
         )]
-        pub destination: Account<'info, token::TokenAccount>,
+        pub destination: Account<'info, TokenAccount>,
 
         /// CHECK: account checked in [AlbusVerifier]
         pub policy: AccountInfo<'info>,
@@ -128,7 +132,7 @@ pub mod albus_transfer {
         /// CHECK: account checked in [AlbusVerifier]
         pub proof_request: AccountInfo<'info>,
 
-        pub token_program: Program<'info, token::Token>,
+        pub token_program: Program<'info, Token>,
 
         pub system_program: Program<'info, System>,
     }
