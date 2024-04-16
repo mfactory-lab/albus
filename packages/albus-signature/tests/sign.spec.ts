@@ -103,8 +103,9 @@ describe('vc', async () => {
   const credential = {
     '@context': [
       // 'https://www.w3.org/ns/credentials/v2',
-      'https://www.w3.org/credentials/examples/v1',
-      'https://w3id.org/security/data-integrity/v1',
+      'https://www.w3.org/2018/credentials/v1',
+      // 'https://www.w3.org/credentials/examples/v1',
+      // 'https://w3id.org/security/data-integrity/v1',
       // 'https://w3id.org/openbadges/v2',
     ],
     'id': 'did:example:b34ca6cd37bbf23',
