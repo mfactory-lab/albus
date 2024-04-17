@@ -52,7 +52,7 @@ bump: ## Bump program version
 	cd ./programs/$(PROGRAM)/ && cargo bump
 
 build: ## Build program
-	anchor build -p $(PROGRAM) -i ../../packages/albus-sdk/src/idl -- --features "$(BUILD_FEATURES)"
+	anchor build -p $(PROGRAM) -- --features "$(BUILD_FEATURES)"
 
 test: ## Test integration (localnet)
 	anchor test --skip-lint --provider.cluster localnet -- --features testing

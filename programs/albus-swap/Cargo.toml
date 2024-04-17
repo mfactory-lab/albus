@@ -24,10 +24,11 @@ fuzz = ["arbitrary", "roots"]
 
 [dependencies]
 albus-solana-verifier.workspace = true
-anchor-lang.workspace = true
-anchor-spl = { workspace = true, features = ["token", "token_2022"] }
+# workspace version does not work with solita
+anchor-lang = { version = "0.29.0" }
+anchor-spl = { version = "0.29.0", features = ["token"], default-features = false }
 arrayref = "0.3.6"
-solana-program = "^1.17.6"
+solana-program.workspace = true
 spl-math = { version = "0.2", features = ["no-entrypoint"] }
 spl-token = { version = "4.0.0", features = ["no-entrypoint"] }
 arbitrary = { version = "1.3", features = ["derive"], optional = true }

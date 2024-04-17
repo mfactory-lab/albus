@@ -66,7 +66,7 @@ pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
         .update_authority(&ctx.accounts.albus_authority, true)
         .system_program(&ctx.accounts.system_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
-        .spl_token_program(Some(&ctx.accounts.token_program))
+        .spl_token_program(&ctx.accounts.token_program)
         .print_supply(PrintSupply::Zero)
         .is_mutable(true)
         .invoke_signed(&[&signer_seeds])?;

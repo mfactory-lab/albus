@@ -17,10 +17,10 @@ publish = false
 
 [workspace.dependencies]
 albus-solana-verifier = { path = "crates/solana-verifier" }
-anchor-lang = "0.30.0"
-anchor-spl = { version = "0.30.0", default-features = false }
+#anchor-lang = { version = "0.30.0" }
+#anchor-spl = { version = "0.30.0", default-features = false }
 groth16-solana = { path = "crates/groth16-solana" }
-solana-program = "*"
+solana-program = "1.17.31"
 solana-security-txt = { version = "1.1.1" }
 
 [profile.release]
