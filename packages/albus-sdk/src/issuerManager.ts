@@ -170,7 +170,7 @@ export class IssuerManager extends BaseManager {
         code: props.code,
         name: props.name,
         description: props.description ?? '',
-        authority: props.keypair.publicKey,
+        authority: props.authority ?? props.keypair.publicKey,
         pubkey: props.keypair.publicKey,
         zkPubkey: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.keypair.secretKey)),
       },
@@ -246,6 +246,7 @@ export type CreateIssuerProps = {
   code: string
   name: string
   description?: string
+  authority?: PublicKey
   keypair: Signer
 }
 

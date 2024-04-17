@@ -36,6 +36,7 @@ export type AlbusNftCode = 'DC' | 'ID'
 
 export type Wallet = {
   publicKey: PublicKey
+  signMessage?: (message: Uint8Array) => Promise<Uint8Array>
   signTransaction: <T extends Transaction | VersionedTransaction>(tx: T) => Promise<T>
   signAllTransactions: <T extends Transaction | VersionedTransaction>(txs: T[]) => Promise<T[]>
 }

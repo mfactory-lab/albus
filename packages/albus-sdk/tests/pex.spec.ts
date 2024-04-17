@@ -42,8 +42,8 @@ describe('pex', async () => {
     id: '1',
     input_descriptors: [
       {
-        id: 'albus_id_card',
-        name: 'Albus ID Card',
+        id: 'albus_issuer',
+        name: 'Albus Issuer',
         purpose: 'To verify Albus credentials',
         constraints: {
           fields: [

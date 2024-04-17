@@ -1,13 +1,13 @@
-import { Issuer } from './Issuer'
 import { Circuit } from './Circuit'
-import { Policy } from './Policy'
-import { ServiceProvider } from './ServiceProvider'
-import { Trustee } from './Trustee'
-import { InvestigationRequest } from './InvestigationRequest'
-import { InvestigationRequestShare } from './InvestigationRequestShare'
-import { ProofRequest } from './ProofRequest'
 import { CredentialRequest } from './CredentialRequest'
 import { CredentialSpec } from './CredentialSpec'
+import { InvestigationRequest } from './InvestigationRequest'
+import { InvestigationRequestShare } from './InvestigationRequestShare'
+import { Issuer } from './Issuer'
+import { Policy } from './Policy'
+import { ProofRequest } from './ProofRequest'
+import { ServiceProvider } from './ServiceProvider'
+import { Trustee } from './Trustee'
 
 export * from './Circuit'
 export * from './CredentialRequest'
@@ -21,14 +21,14 @@ export * from './ServiceProvider'
 export * from './Trustee'
 
 export const accountProviders = {
-  Issuer,
   Circuit,
-  Policy,
-  ServiceProvider,
-  Trustee,
-  InvestigationRequest,
-  InvestigationRequestShare,
-  ProofRequest,
   CredentialRequest,
   CredentialSpec,
+  InvestigationRequest,
+  InvestigationRequestShare,
+  Issuer,
+  Policy,
+  ProofRequest,
+  ServiceProvider,
+  Trustee,
 }

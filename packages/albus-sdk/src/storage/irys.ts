@@ -263,8 +263,11 @@ export class IrysStorageDriver implements StorageDriver {
   ): Promise<WebIrys> {
     const wallet: IrysWalletAdapter = {
       publicKey: this.provider.publicKey,
-      signMessage: async (_message: Uint8Array) => {
-        throw new Error('Not implemented')
+      signMessage: async (message: Uint8Array) => {
+        if (typeof this.provider.wallet?.signMessage !== 'function') {
+          throw new TypeError('No `signMessage` function found on the wallet adapter')
+        }
+        return this.provider.wallet.signMessage(message)
       },
       signTransaction: (transaction: Transaction) =>
         this.provider.wallet.signTransaction(transaction),
