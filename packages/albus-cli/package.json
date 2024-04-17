@@ -13,19 +13,19 @@
   "bin": {
     "albus": "./dist/index.mjs"
   },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
-    "cli": "node ./dist/index.mjs",
+    "start": "node ./dist/index.mjs",
     "run": "vite-node ./src/index.ts --",
     "dev": "vite build --watch",
     "build": "vite build",
-    "release": "pnpm build & release-it",
-    "prepublishOnly": "pnpm build"
+    "release": "npm run build && release-it",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@albus-finance/core": "workspace:^",
