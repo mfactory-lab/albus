@@ -28,7 +28,7 @@
 
 import { Buffer } from 'node:buffer'
 import { readFileSync } from 'node:fs'
-import { Keypair } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 import { capitalize } from '@/utils'
@@ -37,6 +37,7 @@ type Opts = {
   name?: string
   description?: string
   signerKeypair?: string
+  authority?: string
 }
 
 /**
@@ -53,16 +54,21 @@ export async function create(code: string, opts: Opts) {
     log.info('New signer keypair was generated!')
     log.info(`|- SecretKey: [${keypair.secretKey}]`)
     log.info(`|- PublicKey: ${keypair.publicKey}`)
+    log.info(`\n`)
   }
+
+  const authority = new PublicKey(opts.authority ? opts.authority : keypair.publicKey)
 
   const { signature, address } = await client.issuer.create({
     code,
     name: opts.name ?? capitalize(code),
     description: opts.description,
     keypair,
+    authority,
   })
 
   log.info('\nDone')
   log.info(`Signature: ${signature}`)
+  log.info(`Authority: ${authority}`)
   log.info(`Address: ${address}`)
 }

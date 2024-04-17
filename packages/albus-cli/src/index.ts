@@ -157,6 +157,7 @@ issuer.command('create')
   .argument('code', 'Issuer code')
   .option('--name <string>', 'Issuer name')
   .option('--signerKeypair <string>', '(optional) Path to the signer keypair file')
+  .option('--authority <string>', '(optional) Authority address')
   .option('--description <string>', '(optional) Short description')
   .action(actions.issuer.create)
 
