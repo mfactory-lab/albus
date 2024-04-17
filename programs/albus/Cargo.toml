@@ -26,7 +26,7 @@ mainnet = []
 
 [dependencies]
 anchor-lang = { workspace = true, features = ["init-if-needed"] }
-anchor-spl = { workspace = true, features = ["associated_token", "metadata", "token", "token_2022", "token_2022_extensions"] }
+anchor-spl = { workspace = true, features = ["associated_token", "metadata", "token", "token_2022"] }
 groth16-solana = { workspace = true, optional = true }
 solana-program = { workspace = true }
 solana-security-txt = { workspace = true }

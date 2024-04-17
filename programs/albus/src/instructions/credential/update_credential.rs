@@ -43,21 +43,21 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
         }
         Some(req) => {
             if !cmp_pubkeys(&req.credential_mint, ctx.accounts.mint.key) {
-                msg!("Credential mint mismatch");
+                msg!("Error: Credential mint mismatch");
                 return Err(AlbusError::Unauthorized.into());
             }
             match &ctx.accounts.credential_request_issuer {
                 None => {
-                    msg!("Credential request issuer not set");
+                    msg!("Error: Credential request issuer not set");
                     return Err(AlbusError::Unauthorized.into());
                 }
                 Some(issuer) => {
                     if !cmp_pubkeys(&req.issuer, &issuer.key()) {
-                        msg!("Credential request issuer mismatch");
+                        msg!("Error: Credential request issuer mismatch");
                         return Err(AlbusError::Unauthorized.into());
                     }
                     if !cmp_pubkeys(&issuer.authority, ctx.accounts.authority.key) {
-                        msg!("Credential request issuer authority mismatch");
+                        msg!("Error: Credential request issuer authority mismatch");
                         return Err(AlbusError::Unauthorized.into());
                     }
                 }

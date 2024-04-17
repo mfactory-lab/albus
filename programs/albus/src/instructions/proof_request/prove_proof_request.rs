@@ -106,9 +106,9 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
                         msg!("Error: This issuer is inactive");
                         return Err(AlbusError::Unauthorized.into());
                     }
-                    let zk_authority = iss.zk_authority();
-                    req.public_inputs[s.index] = zk_authority.0;
-                    req.public_inputs[s.index + 1] = zk_authority.1;
+                    let pk = iss.zk_pubkey();
+                    req.public_inputs[s.index] = pk.0;
+                    req.public_inputs[s.index + 1] = pk.1;
                     req.issuer = iss.key();
                 }
             }

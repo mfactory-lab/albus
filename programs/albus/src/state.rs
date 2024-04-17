@@ -73,17 +73,17 @@ pub const MAX_ISSUER_DESC_LEN: usize = 64;
 #[account]
 #[derive(InitSpace)]
 pub struct Issuer {
-    /// The public key of the issuer
+    /// Signing public key
     pub pubkey: Pubkey,
-    /// Public key in zk compatible (BabuJubJub curve) format
+    /// Signing public key in zk format (BJJ Point)
     pub zk_pubkey: [u8; 64],
-    /// The authority of the issuer
+    /// The authority of the issuer that manages the issuer
     pub authority: Pubkey,
     /// Issuer status
     pub is_disabled: bool,
     /// Creation date
     pub created_at: i64,
-    /// PDA bump.
+    /// PDA bump
     pub bump: u8,
     /// Uniq code of the issuer
     #[max_len(MAX_ISSUER_CODE_LEN)]
@@ -109,7 +109,7 @@ impl Issuer {
         self.is_disabled
     }
 
-    pub fn zk_authority(&self) -> ([u8; 32], [u8; 32]) {
+    pub fn zk_pubkey(&self) -> ([u8; 32], [u8; 32]) {
         (
             self.zk_pubkey[..32].try_into().unwrap(),
             self.zk_pubkey[32..].try_into().unwrap(),
