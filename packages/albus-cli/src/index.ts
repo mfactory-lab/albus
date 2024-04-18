@@ -118,23 +118,59 @@ investigation.command('show')
 // VC Management
 // ------------------------------------------
 
-const vc = cli.command('vc')
+const cred = cli.command('cred')
   .description('Credential Management')
 
-vc.command('all', { isDefault: true })
+cred.command('all', { isDefault: true })
   .description('Show all user credentials')
   .option('--owner <pubkey>', '(optional) nft owner address')
   .action(actions.credential.showAll)
 
-vc.command('find')
+cred.command('find')
   .description('Find credentials')
   .action(actions.credential.find)
 
-vc.command('issue')
+cred.command('issue')
   .description('Issue new VC')
   .option('--provider <string>', 'KYC provider unique code')
   .option('-e,--encrypt', '(optional) Encrypt VC with holder public key')
   .action(actions.credential.issue)
+
+///
+/// Credentials Spec Management
+///
+
+const credSpec = cli.command('cred-spec')
+  .description('Credential Spec Management')
+
+credSpec.command('all', { isDefault: true })
+  .description('Show all credential specs')
+  .option('--name <string>', 'Filter by name')
+  .option('--issuer <string>', 'Filter by issuer')
+  .action(actions.credentialSpec.showAll)
+
+credSpec.command('show')
+  .description('Show credential spec data')
+  .argument('<address>', 'Credential Spec address')
+  .action(actions.credentialSpec.show)
+
+///
+/// Credentials Request Management
+///
+
+const credReq = cli.command('cred-req')
+  .description('Credential Request Management')
+
+credReq.command('all', { isDefault: true })
+  .description('Show all credential requests')
+  .option('--name <string>', 'Filter by name')
+  .option('--owner <string>', 'Filter by owner')
+  .action(actions.credentialRequest.showAll)
+
+credReq.command('show')
+  .description('Show credential request data')
+  .argument('<address>', 'Credential Request address')
+  .action(actions.credentialRequest.show)
 
 ///
 /// Issuer Management
