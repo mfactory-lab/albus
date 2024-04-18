@@ -47,7 +47,7 @@ import { CredentialType, PresentationType, ProofType, VerifyType } from './types
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { normalizeClaims, validateCredentialPayload, validatePresentationPayload } from './utils'
 import { DEFAULT_CONTEXT, DEFAULT_DID, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
-import { ClaimsTree, encodeClaimValue } from './tree'
+import { ClaimsTree } from './tree'
 
 const { base58ToBytes, randomBigInt } = utils
 
@@ -299,11 +299,10 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 
   const claimsTree = await createCredentialTree(cred)
 
-  proof.credentialRoot = claimsTree.root
   proof.issuerPubkey = BabyJubPubkey.newFromCompressed(issuerPubkey).p
   proof.signature = [...signature.R8, signature.S]
 
-  if (!eddsa.verifyPoseidon(proof.credentialRoot, signature, proof.issuerPubkey)) {
+  if (!eddsa.verifyPoseidon(claimsTree.root, signature, proof.issuerPubkey)) {
     throw new Error('Proof verification failed')
   }
 
@@ -437,7 +436,7 @@ export async function createCredentialTree(credential: W3CCredential, depth?: nu
   const issuerDid = typeof credential.issuer === 'string' ? credential.issuer : credential.issuer?.id
 
   const meta: Record<string, any> = {
-    issuer: encodeClaimValue(issuerDid, true),
+    issuer: ClaimsTree.encodeValue(issuerDid, true),
     issuanceDate: w3cDateToUnixTs(credential.issuanceDate),
     validUntil: credential.validUntil ? w3cDateToUnixTs(credential.validUntil) : 0,
     validFrom: credential.validFrom ? w3cDateToUnixTs(credential.validFrom) : 0,
