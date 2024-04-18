@@ -1,0 +1,42 @@
+{
+  "name": "@albus-finance/ui",
+  "version": "0.0.1",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/albus-ui"
+  },
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "files": [],
+  "scripts": {
+    "dev": "vite --port 3333 --mode dev",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@albus-finance/core": "workspace:^",
+    "@albus-finance/sdk": "workspace:^",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
+    "@solana/web3.js": "^1.87.6",
+    "@vueuse/core": "^10.9.0",
+    "pinia": "^2.1.7",
+    "solana-wallets-vue": "^0.6.1",
+    "vue": "^3.4.23",
+    "vue-router": "^4.3.1",
+    "sass": "^1.75.0",
+    "quasar": "^2.15.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@quasar/extras": "^1.16.11",
+    "@quasar/vite-plugin": "^1.6.0",
+    "unplugin-auto-import": "^0.17.5",
+    "unplugin-vue-components": "^0.26.0",
+    "vite-plugin-pages": "^0.32.1",
+    "vite-plugin-vue-layouts": "^0.11.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
