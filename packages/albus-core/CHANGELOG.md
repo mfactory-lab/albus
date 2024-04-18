@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.6-next.8](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.7...@albus-finance/core-v0.3.6-next.8) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* upgrade anchor to `0.30.0` ([2bdb9d2](https://github.com/mfactory-lab/albus/commit/2bdb9d24720373c8d87fbb5c02dac59cb04773e1))
+
+
+### ♻️ Refactors
+
+* **core:** code cleanup ([0938541](https://github.com/mfactory-lab/albus/commit/0938541a7b806fe51a8ebbf8ff66119bf3124ca2))
+
 ## [0.3.6-next.7](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.6...@albus-finance/core-v0.3.6-next.7) (2024-04-16)
 
 ## [0.3.6-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.5...@albus-finance/core-v0.3.6-next.6) (2024-04-11)
