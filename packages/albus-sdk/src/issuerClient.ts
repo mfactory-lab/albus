@@ -26,10 +26,9 @@
  * The developer of this program can be contacted at <info@finance>.
  */
 
-import type { VerifiableCredential, VerifiablePresentation } from '@albus-finance/core'
 import { credential } from '@albus-finance/core'
 import type { Connection, Keypair, PublicKeyInitData } from '@solana/web3.js'
-import type { IPresentationDefinition } from '@sphereon/pex'
+import type { ArgumentsType } from 'vitest'
 import type { Wallet } from './types'
 import type { ClientOptions } from './client'
 import { AlbusClient } from './client'
@@ -103,8 +102,8 @@ export class AlbusIssuerClient {
   /**
    * Create a credential with the provided claims and options.
    */
-  createCredential(claims: Record<string, any>, opts: credential.CreateCredentialOpts) {
-    return credential.createVerifiableCredential(claims, opts)
+  createCredential(...args: ArgumentsType<typeof credential.createVerifiableCredential>) {
+    return credential.createVerifiableCredential(...args)
   }
 
   /**
@@ -120,29 +119,29 @@ export class AlbusIssuerClient {
   /**
    * Verify a credential.
    */
-  verifyCredential(vc: VerifiableCredential, opts?: credential.VerifyCredentialOpts) {
-    return credential.verifyCredential(vc, opts)
+  verifyCredential(...args: ArgumentsType<typeof credential.verifyCredential>) {
+    return credential.verifyCredential(...args)
   }
 
   /**
    * Verify a presentation.
    */
-  verifyPresentation(vp: VerifiablePresentation, opts?: credential.VerifyPresentationOpts) {
-    return credential.verifyPresentation(vp, opts)
+  verifyPresentation(...args: ArgumentsType<typeof credential.verifyPresentation>) {
+    return credential.verifyPresentation(...args)
   }
 
   /**
    * Encrypts the verifiable presentation with the given options.
    */
-  encryptPresentation(vp: VerifiablePresentation, opts: credential.EncryptCredentialOpts) {
-    return credential.encryptPresentation(vp, opts)
+  encryptPresentation(...args: ArgumentsType<typeof credential.encryptPresentation>) {
+    return credential.encryptPresentation(...args)
   }
 
   /**
    * The evaluatePresentation compares what is expected from a presentation with a presentationDefinition.
    * presentationDefinition: It can be either v1 or v2 of presentationDefinition
    */
-  evaluatePresentation(definition: IPresentationDefinition, vp: VerifiablePresentation) {
-    return credential.PexHelper.evaluatePresentation(definition, vp)
+  evaluatePresentation(...args: ArgumentsType<typeof credential.PexHelper.evaluatePresentation>) {
+    return credential.PexHelper.evaluatePresentation(...args)
   }
 }

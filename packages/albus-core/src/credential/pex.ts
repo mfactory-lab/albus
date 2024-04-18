@@ -26,11 +26,19 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { IPresentationDefinition } from '@sphereon/pex'
+import type { EvaluationResults, IPresentationDefinition, PresentationResult, SelectResults, Validated } from '@sphereon/pex'
 import { PEX } from '@sphereon/pex'
 import type { OriginalVerifiableCredential } from '@sphereon/ssi-types'
 import type { VerifiableCredential, VerifiablePresentation } from './types'
 import { createVerifiablePresentation } from '.'
+
+export type {
+  IPresentationDefinition,
+  PresentationResult,
+  EvaluationResults,
+  SelectResults,
+  Validated,
+}
 
 export type CreatePresentationExchangeOpts = {
   definition: IPresentationDefinition
@@ -87,7 +95,7 @@ export class PexHelper {
   /**
    * The evaluatePresentation compares what is expected from a presentation with a presentationDefinition.
    */
-  static evaluatePresentation(def: IPresentationDefinition, vp: VerifiablePresentation) {
+  static evaluatePresentation(def: IPresentationDefinition, vp: VerifiablePresentation): EvaluationResults {
     return this.pex.evaluatePresentation(def, vp as any)
   }
 }
