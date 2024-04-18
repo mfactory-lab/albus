@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import type { VerifiableCredential, VerifiablePresentation } from '@albus-finance/core'
 import { credential } from '@albus-finance/core'
 import type { Connection, Keypair, PublicKeyInitData } from '@solana/web3.js'
@@ -109,6 +108,16 @@ export class AlbusIssuerClient {
   }
 
   /**
+   * Update the credential.
+   */
+  updateCredential(props: UpdateCredentialProps & { credentialRequest: PublicKeyInitData }, opts?: SendOpts) {
+    return this.client.credential.update({
+      credentialRequest: props.credentialRequest,
+      uri: props.uri,
+    }, opts)
+  }
+
+  /**
    * Verify a credential.
    */
   verifyCredential(vc: VerifiableCredential, opts?: credential.VerifyCredentialOpts) {
@@ -123,26 +132,10 @@ export class AlbusIssuerClient {
   }
 
   /**
-   * Issue a new credential, and return the URI of the uploaded credential.
+   * Encrypts the verifiable presentation with the given options.
    */
-  async issueCredential(claims: Record<string, any>, opts: credential.CreateCredentialOpts, selfCheck = true) {
-    const vc = await this.createCredential(claims, opts)
-    if (selfCheck) {
-      await credential.verifyCredential(vc)
-    }
-    return this.client.storage.upload(
-      Buffer.from(JSON.stringify(vc)),
-    )
-  }
-
-  /**
-   * Update the credential.
-   */
-  async updateCredential(props: UpdateCredentialProps & { credentialRequest: PublicKeyInitData }, opts?: SendOpts) {
-    return this.client.credential.update({
-      credentialRequest: props.credentialRequest,
-      uri: props.uri,
-    }, opts)
+  encryptPresentation(vp: VerifiablePresentation, opts: credential.EncryptCredentialOpts) {
+    return credential.encryptPresentation(vp, opts)
   }
 
   /**
