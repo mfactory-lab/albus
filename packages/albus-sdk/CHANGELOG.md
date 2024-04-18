@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.26](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.25...@albus-finance/sdk-v0.3.0-next.26) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* export types ([ed3a421](https://github.com/mfactory-lab/albus/commit/ed3a4215a3a65273554652ca1901b0c85005523c))
+
 ## [0.3.0-next.25](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.24...@albus-finance/sdk-v0.3.0-next.25) (2024-04-18)
 
 
