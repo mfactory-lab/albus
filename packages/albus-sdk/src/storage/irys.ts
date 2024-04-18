@@ -27,7 +27,6 @@
  */
 
 import type {
-  Connection,
   Keypair,
   PublicKey,
   SendOptions,
@@ -57,7 +56,6 @@ export type IrysWalletAdapter = {
   signAllTransactions?: (transactions: Transaction[]) => Promise<Transaction[]>
   sendTransaction: (
     transaction: Transaction,
-    connection: Connection,
     options?: SendOptions & { signers?: Signer[] }
   ) => Promise<TransactionSignature>
 }
@@ -78,10 +76,7 @@ export class IrysStorageDriver implements StorageDriver {
   protected _irys: WebIrys | NodeIrys | null = null
   protected _options: IrysOptions
 
-  constructor(
-    readonly provider: ClientProvider,
-    options: IrysOptions = {},
-  ) {
+  constructor(readonly provider: ClientProvider, options: IrysOptions = {}) {
     this._options = {
       providerUrl: provider.connection.rpcEndpoint,
       ...options,
@@ -265,7 +260,7 @@ export class IrysStorageDriver implements StorageDriver {
       publicKey: this.provider.publicKey,
       signMessage: async (message: Uint8Array) => {
         if (typeof this.provider.wallet?.signMessage !== 'function') {
-          throw new TypeError('No `signMessage` function found on the wallet adapter')
+          throw new TypeError('Wallet does not support signing messages')
         }
         return this.provider.wallet.signMessage(message)
       },
@@ -275,7 +270,6 @@ export class IrysStorageDriver implements StorageDriver {
         this.provider.wallet.signAllTransactions(transactions),
       sendTransaction: (
         transaction: Transaction,
-        connection: Connection,
         options: SendOptions & { signers?: Signer[] } = {},
       ): Promise<TransactionSignature> => {
         const { signers = [], ...sendOptions } = options
@@ -309,21 +303,17 @@ export class IrysError extends Error {
   constructor(message: string, cause?: Error) {
     super(message)
     this.cause = cause
-    this.message
-        = `${this.message
-         }\n\n${
-         this.cause ? `\n\nCaused By: ${this.cause}` : ''
-         }\n`
+    this.message = `${this.message}\n\n${this.cause ? `\n\nCaused By: ${this.cause}` : ''}\n`
   }
 }
 
 /** @group Errors */
 export class FailedToInitializeIrysError extends IrysError {
   readonly name: string = 'FailedToInitializeIrysError'
+
   constructor(cause: Error) {
-    const message
-        = 'Irys could not be initialized. '
-        + 'Please check the underlying error below for more details.'
+    const message = 'Irys could not be initialized. '
+      + 'Please check the underlying error below for more details.'
     super(message, cause)
   }
 }
@@ -331,11 +321,11 @@ export class FailedToInitializeIrysError extends IrysError {
 /** @group Errors */
 export class FailedToConnectToIrysAddressError extends IrysError {
   readonly name: string = 'FailedToConnectToIrysAddressError'
+
   constructor(address: string, cause: Error) {
-    const message
-        = `Irys could not connect to the provided address [${address}]. `
-        + 'Please ensure the provided address is valid. Some valid addresses include: '
-        + '"https://node1.irys.xyz" for mainnet and "https://devnet.irys.xyz" for devnet'
+    const message = `Irys could not connect to the provided address [${address}]. `
+      + 'Please ensure the provided address is valid. Some valid addresses include: '
+      + '"https://node1.irys.xyz" for mainnet and "https://devnet.irys.xyz" for devnet'
     super(message, cause)
   }
 }
@@ -343,19 +333,20 @@ export class FailedToConnectToIrysAddressError extends IrysError {
 /** @group Errors */
 export class AssetUploadFailedError extends IrysError {
   readonly name: string = 'AssetUploadFailedError'
+
   constructor(status: number) {
-    const message
-        = `The asset could not be uploaded to the Irys network and `
-        + `returned the following status code [${status}].`
+    const message = `The asset could not be uploaded to the Irys network and `
+      + `returned the following status code [${status}].`
     super(message)
   }
 }
+
 export class IrysWithdrawError extends IrysError {
   readonly name: string = 'IrysWithdrawError'
+
   constructor(error: string) {
-    const message
-        = `The balance could not be withdrawn from the Irys network and `
-        + `returned the following error: ${error}.`
+    const message = `The balance could not be withdrawn from the Irys network and `
+      + `returned the following error: ${error}.`
     super(message)
   }
 }
