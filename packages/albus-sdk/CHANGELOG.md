@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.27](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.26...@albus-finance/sdk-v0.3.0-next.27) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** remove useless `encryptPresentation` ([00d78d0](https://github.com/mfactory-lab/albus/commit/00d78d02c7c1d20e9f4eaea9282adf7b835cdfbf))
+
 ## [0.3.0-next.26](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.25...@albus-finance/sdk-v0.3.0-next.26) (2024-04-18)
 
 
