@@ -10,7 +10,7 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
     "@metaplex-foundation/beet": "^0.7.1",
-    "@solana/web3.js": "^1.77.3"
+    "@solana/web3.js": "^1.87.7"
   },
   "devDependencies": {
     "@metaplex-foundation/solita": "^0.20.0"
