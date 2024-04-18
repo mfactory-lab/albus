@@ -26,6 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
+import { Buffer } from 'node:buffer'
 import type {
   Keypair,
   PublicKey,
@@ -91,7 +92,7 @@ export class IrysStorageDriver implements StorageDriver {
 
   async getUploadPriceForFiles(files: StorageFile[]): Promise<number> {
     const bytes: number = files.reduce((sum, file) => {
-      return sum + HEADER_SIZE + Math.max(MINIMUM_SIZE, file.buffer.byteLength)
+      return sum + HEADER_SIZE + Math.max(MINIMUM_SIZE, Buffer.from(file).byteLength)
     }, 0)
 
     return this.getUploadPrice(bytes)
@@ -105,12 +106,12 @@ export class IrysStorageDriver implements StorageDriver {
   async uploadAll(files: StorageFile[]): Promise<string[]> {
     const irys = await this.irys()
     const amount = await this.getUploadPrice(
-      files.reduce((acc, file) => acc + file.buffer.byteLength, 0),
+      files.reduce((acc, file) => acc + Buffer.from(file).byteLength, 0),
     )
     await this.fund(amount)
 
     const promises = files.map(async (file) => {
-      const irysTx = irys.createTransaction(file, {
+      const irysTx = irys.createTransaction(Buffer.from(file), {
         // tags: getMetaplexFileTagsWithContentType(file),
       })
       await irysTx.sign()

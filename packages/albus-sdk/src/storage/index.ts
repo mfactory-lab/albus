@@ -1,6 +1,4 @@
-import type { Buffer } from 'node:buffer'
-
-export type StorageFile = Buffer
+export type StorageFile = Uint8Array | string
 
 export type StorageDriver = {
   getUploadPrice: (bytes: number) => Promise<number>
