@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0-next.25](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.24...@albus-finance/sdk-v0.3.0-next.25) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `encryptPresentation` to issuer client ([f177fb6](https://github.com/mfactory-lab/albus/commit/f177fb627ee5e3657de82cbe66a6cfe4dc84d085))
+* **sdk:** fixed `StorageFile` ([0a48578](https://github.com/mfactory-lab/albus/commit/0a48578478ed75002448a801dcb414a3b9ce73a1))
+* **sdk:** fixed irys adapter ([7c90808](https://github.com/mfactory-lab/albus/commit/7c908087ae7339c663371fc5f753b744efa64a2c))
+* **sdk:** new idl and client ([e7cfde3](https://github.com/mfactory-lab/albus/commit/e7cfde367be7f1deeb20cbbd94d4a3538549bdb0))
+
 ## [0.3.0-next.24](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.23...@albus-finance/sdk-v0.3.0-next.24) (2024-04-16)
 
 ## [0.3.0-next.23](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.22...@albus-finance/sdk-v0.3.0-next.23) (2024-04-16)
