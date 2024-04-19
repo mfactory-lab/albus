@@ -38,11 +38,14 @@ pub fn handler(ctx: Context<CreateCredentialSpec>, data: CreateCredentialSpecDat
         return Err(AlbusError::Unauthorized.into());
     }
 
+    let timestamp = Clock::get()?.unix_timestamp;
+
     let spec = &mut ctx.accounts.credential_spec;
     spec.bump = ctx.bumps.credential_spec;
     spec.issuer = issuer.key();
     spec.name = data.name;
     spec.uri = data.uri;
+    spec.created_at = timestamp;
 
     Ok(())
 }
