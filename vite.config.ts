@@ -8,7 +8,7 @@ import dts from 'vite-plugin-dts'
 
 const inline: string[] = [
   // TODO: fixme this libs doesn't support commonjs, used for `albus-issuer` and `albus-verifier`
-  '@sphereon/pex',
+  // '@sphereon/pex',
   'lodash-es',
   'key-did-resolver',
   'multiformats/bases/base58',

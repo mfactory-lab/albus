@@ -37,7 +37,7 @@ export default antfu({
     'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
     'ts/consistent-type-definitions': ['error', 'type'],
     'curly': ['error', 'all'],
-    // 'node/prefer-global/process': 'off',
+    'node/prefer-global/process': 'off',
     'no-console': 'off',
   },
 })

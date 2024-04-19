@@ -36,8 +36,6 @@ import { clusterByEnv, lamportsToSol } from '@/utils'
 
 const VERSION = import.meta.env.VERSION
 const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
-// eslint-disable-next-line node/prefer-global/process
-const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/albus.json`
 
 const originFactory = log.methodFactory
 log.methodFactory = function (name, lvl, logger) {
@@ -55,7 +53,7 @@ cli
   .allowExcessArguments(false)
   .option('-e, --env <ENV>', 'env [dev, stage, prod]', 'dev')
   .option('-c, --cluster <CLUSTER>', 'solana cluster')
-  .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair', DEFAULT_KEYPAIR)
+  .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair')
   .option('-l, --log-level <LEVEL>', 'log level', (l: any) => l && log.setLevel(l), DEFAULT_LOG_LEVEL)
   .hook('preAction', async (command: Command) => {
     const opts = command.opts() as any
