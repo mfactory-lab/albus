@@ -131,13 +131,6 @@ export class AlbusIssuerClient {
   }
 
   /**
-   * Encrypts the verifiable presentation with the given options.
-   */
-  encryptPresentation(...args: ArgumentsType<typeof credential.encryptPresentation>) {
-    return credential.encryptPresentation(...args)
-  }
-
-  /**
    * The evaluatePresentation compares what is expected from a presentation with a presentationDefinition.
    * presentationDefinition: It can be either v1 or v2 of presentationDefinition
    */

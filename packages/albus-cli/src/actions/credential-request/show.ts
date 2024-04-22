@@ -25,19 +25,49 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-import antfu from '@antfu/eslint-config'
 
-export default antfu({
-  stylistic: true,
-  typescript: true,
-  yml: false,
-  vue: false,
-  rules: {
-    'antfu/consistent-list-newline': 'off',
-    'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
-    'ts/consistent-type-definitions': ['error', 'type'],
-    'curly': ['error', 'all'],
-    'node/prefer-global/process': 'off',
-    'no-console': 'off',
-  },
-})
+import log from 'loglevel'
+import type { CredentialRequest } from '@albus-finance/sdk'
+import { CredentialRequestStatus } from '@albus-finance/sdk'
+import { useContext } from '@/context'
+
+export async function show(addr: string) {
+  const { client } = useContext()
+  view(await client.credentialRequest.load(addr))
+}
+
+type Opts = {
+  owner?: string
+  issuer?: string
+  credentialSpec?: string
+  credentialMint?: string
+  status?: string
+}
+
+export async function showAll(opts: Opts) {
+  const { client } = useContext()
+
+  const credentials = await client.credentialRequest.find({
+    owner: opts.owner,
+    issuer: opts.issuer,
+    credentialSpec: opts.credentialSpec,
+    credentialMint: opts.credentialMint,
+    status: CredentialRequestStatus[opts.status ?? 0],
+  })
+
+  if (credentials.length > 0) {
+    const delim = '-'.repeat(80)
+    log.info(delim)
+    for (const { pubkey, data } of credentials) {
+      log.info('address:', pubkey.toBase58())
+      if (data) {
+        view(data)
+        log.info(delim)
+      }
+    }
+  }
+}
+
+function view(data: CredentialRequest) {
+  log.info(data?.pretty())
+}

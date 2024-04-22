@@ -25,19 +25,5 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-import antfu from '@antfu/eslint-config'
 
-export default antfu({
-  stylistic: true,
-  typescript: true,
-  yml: false,
-  vue: false,
-  rules: {
-    'antfu/consistent-list-newline': 'off',
-    'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
-    'ts/consistent-type-definitions': ['error', 'type'],
-    'curly': ['error', 'all'],
-    'node/prefer-global/process': 'off',
-    'no-console': 'off',
-  },
-})
+export * from './show'

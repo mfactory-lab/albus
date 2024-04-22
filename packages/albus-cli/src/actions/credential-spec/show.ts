@@ -25,19 +25,47 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-import antfu from '@antfu/eslint-config'
 
-export default antfu({
-  stylistic: true,
-  typescript: true,
-  yml: false,
-  vue: false,
-  rules: {
-    'antfu/consistent-list-newline': 'off',
-    'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
-    'ts/consistent-type-definitions': ['error', 'type'],
-    'curly': ['error', 'all'],
-    'node/prefer-global/process': 'off',
-    'no-console': 'off',
-  },
-})
+import log from 'loglevel'
+import type { CredentialSpec } from '@albus-finance/sdk'
+import { useContext } from '@/context'
+
+export async function show(addr: string) {
+  const { client } = useContext()
+  view(await client.credentialSpec.load(addr))
+}
+
+type Opts = {
+  name?: string
+  issuer?: string
+}
+
+export async function showAll(opts: Opts) {
+  const { client } = useContext()
+
+  const credentials = await client.credentialSpec.find({
+    name: opts.name,
+    issuer: opts.issuer,
+  })
+
+  if (credentials.length > 0) {
+    const delim = '-'.repeat(80)
+    log.info(delim)
+    for (const { pubkey, data } of credentials) {
+      log.info('address:', pubkey.toBase58())
+      if (data) {
+        view(data)
+        log.info(delim)
+      }
+    }
+  }
+}
+
+function view(data: CredentialSpec) {
+  log.info(data?.pretty())
+  // log.info('issuer:', data?.issuer.toBase58())
+  // log.info('name:', data?.name)
+  // log.info('uri:', data?.uri)
+  // log.info('createdAt:', Number(data?.createdAt ?? 0))
+  // log.info('credentialRequestCount:', Number(data?.credentialRequestCount ?? 0))
+}
