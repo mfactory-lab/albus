@@ -6,9 +6,9 @@ export const circomkit = new Circomkit({
   verbose: false,
 })
 
-export async function prepareInput(issuerKeypair: Keypair, claims: Record<string, any>, usedClaims: string[] = []) {
+export async function prepareInput(issuerKeypair: Keypair, claims: Record<string, any>, usedClaims: string[] = [], depth?: number) {
   const issuerPk = crypto.eddsa.prv2pub(issuerKeypair.secretKey)
-  const tree = await credential.ClaimsTree.from(claims)
+  const tree = await credential.ClaimsTree.from(claims, { depth })
   const signature = crypto.eddsa.signPoseidon(issuerKeypair.secretKey, tree.root)
 
   const claimsProof: bigint[][] = []
