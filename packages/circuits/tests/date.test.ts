@@ -38,7 +38,7 @@ describe('date', async () => {
     })
     const date = [1989, 11, 30]
     await circuit.expectPass({
-      in: credential.encodeClaimValue(date.join('-')),
+      in: credential.ClaimsTree.encodeValue(date.join('-')),
     }, {
       out: date,
     })

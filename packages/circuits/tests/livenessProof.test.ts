@@ -28,7 +28,7 @@
 
 import { Keypair } from '@solana/web3.js'
 import { describe, it } from 'vitest'
-import { encodeClaimValue } from '../../albus-core/src/credential'
+import { ClaimsTree } from '../../albus-core/src/credential'
 import { circomkit, prepareInput } from './common'
 
 describe('likenessProof', async () => {
@@ -61,7 +61,7 @@ describe('likenessProof', async () => {
   it('valid', async () => {
     const input = await generateInput(claims, {
       timestamp,
-      expectedType: encodeClaimValue(claims.livenessType),
+      expectedType: ClaimsTree.encodeValue(claims.livenessType),
     })
     await circuit.expectPass(input)
   })
@@ -74,7 +74,7 @@ describe('likenessProof', async () => {
       },
     }, {
       timestamp,
-      expectedType: encodeClaimValue(claims.livenessType),
+      expectedType: ClaimsTree.encodeValue(claims.livenessType),
     })
     await circuit.expectFail(input)
   })
