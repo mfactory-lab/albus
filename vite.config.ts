@@ -6,6 +6,16 @@ import type { BuildOptions, UserConfig } from 'vite'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
+// export default defineConfig({
+//   test: {
+//     globals: true,
+//     include: ['packages/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+//     environment: 'node',
+//     // environment: 'jsdom',
+//     testTimeout: 20000,
+//   },
+// } as any)
+
 const inline: string[] = [
   // TODO: fixme this libs doesn't support commonjs, used for `albus-issuer` and `albus-verifier`
   // '@sphereon/pex',
@@ -88,16 +98,6 @@ function viteBuild(path: string, options: BuildOptions = {}): BuildOptions {
     options,
   )
 }
-
-// export default defineConfig({
-//   test: {
-//     globals: true,
-//     include: ['packages/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
-//     environment: 'node',
-//     // environment: 'jsdom',
-//     testTimeout: 20000,
-//   },
-// } as any)
 
 const isObject = (item: unknown): item is Record<string, unknown> => Boolean(item && typeof item === 'object' && !Array.isArray(item))
 

@@ -1,6 +1,7 @@
 {
-  "private": true,
   "type": "module",
+  "private": true,
+  "packageManager": "pnpm@9.0.6",
   "license": "AGPL-3.0",
   "scripts": {
     "cli": "pnpm -F @albus-finance/cli run start",
@@ -18,7 +19,7 @@
     "syncpack": "syncpack fix-mismatches"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.14.0",
+    "@antfu/eslint-config": "^2.16.3",
     "@rollup/plugin-inject": "^5.0.5",
     "@types/node": "^20.0.0",
     "@vitest/ui": "^1.4.0",
@@ -32,11 +33,6 @@
     "vite-plugin-node-polyfills": "^0.21.0",
     "vitest": "^1.4.0"
   },
-  "resolutions": {
-    "circom_tester": "0.0.20",
-    "ffjavascript": "0.2.63"
-  },
-  "packageManager": "pnpm@8.14.2",
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
@@ -49,9 +45,10 @@
         "esbuild",
         "snarkjs"
       ]
-    },
-    "patchedDependencies": {
-      "@sphereon/pex@3.3.1": "patches/@sphereon__pex@3.3.1.patch"
     }
+  },
+  "resolutions": {
+    "circom_tester": "0.0.20",
+    "ffjavascript": "0.2.63"
   }
 }

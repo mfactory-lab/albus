@@ -28,16 +28,24 @@
 import antfu from '@antfu/eslint-config'
 
 export default antfu({
+  gitignore: true,
   stylistic: true,
   typescript: true,
-  yml: false,
+  yml: true,
+  toml: true,
   vue: false,
   rules: {
     'antfu/consistent-list-newline': 'off',
     'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
+
     'ts/consistent-type-definitions': ['error', 'type'],
+    'ts/consistent-type-imports': 'off',
+
     'curly': ['error', 'all'],
+
     'node/prefer-global/process': 'off',
+    'node/prefer-global/buffer': 'off',
+
     'no-console': 'off',
   },
 })
