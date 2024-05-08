@@ -70,7 +70,6 @@ cli
     console.log('\n')
   })
   .hook('postAction', (_c: Command) => {
-    // eslint-disable-next-line node/prefer-global/process
     process.exit()
   })
 
@@ -483,6 +482,6 @@ cli.parseAsync().catch((e) => {
   if (e.logs) {
     log.error(JSON.stringify(e.logs, null, 2))
   }
-  // eslint-disable-next-line node/prefer-global/process
+
   process.exit()
 })

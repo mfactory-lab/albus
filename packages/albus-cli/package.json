@@ -13,12 +13,12 @@
   "bin": {
     "albus": "./dist/index.mjs"
   },
-  "engines": {
-    "node": ">=16.0.0"
-  },
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "start": "node ./dist/index.mjs",
     "run": "vite-node ./src/index.ts --",
