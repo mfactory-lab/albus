@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0-next.31](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.30...@albus-finance/sdk-v0.3.0-next.31) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **ci:** fixed release action ([df776ab](https://github.com/mfactory-lab/albus/commit/df776abb3686a82d67c7998715a4a429f190e431))
+* replase `prerelease` to `prepublishOnly` ([d5b360c](https://github.com/mfactory-lab/albus/commit/d5b360c6a322c89d619d4041bf2f943e6940a6fd))
+
 ## [0.3.0-next.30](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.29...@albus-finance/sdk-v0.3.0-next.30) (2024-05-10)
 
 ## [0.3.0-next.29](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.28...@albus-finance/sdk-v0.3.0-next.29) (2024-05-10)
