@@ -84,10 +84,11 @@ impl<'a, 'info> AlbusVerifier<'a, 'info> {
         if !cmp_pubkeys(acc.owner, ALBUS_PROGRAM_ID)
             && !cmp_pubkeys(acc.owner, ALBUS_DEV_PROGRAM_ID)
         {
+            msg!("AlbusVerifierError: Invalid program account {}", acc.key);
             return Err(ProgramError::IllegalOwner);
         }
         if acc.data_is_empty() {
-            msg!("Error: Program account {} is empty", acc.key);
+            msg!("AlbusVerifierError: Program account {} is empty", acc.key);
             return Err(ProgramError::UninitializedAccount);
         }
         Ok(())
