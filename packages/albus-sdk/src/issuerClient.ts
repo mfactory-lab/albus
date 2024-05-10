@@ -27,7 +27,7 @@
  */
 
 import { credential } from '@albus-finance/core'
-import type { Connection, Keypair, PublicKey, PublicKeyInitData } from '@solana/web3.js'
+import type { Connection, Keypair, PublicKeyInitData } from '@solana/web3.js'
 import type { ArgumentsType } from 'vitest'
 import type { Wallet } from './types'
 import type { ClientOptions } from './client'
@@ -40,7 +40,6 @@ import type {
 } from './credentialSpecManager'
 import type { FindCredentialRequestProps } from './credentialRequestManager'
 import type { SendOpts } from './utils'
-import type { Issuer } from './generated'
 import { CredentialRequestStatus } from './generated'
 
 export class AlbusIssuerClient {
@@ -59,33 +58,33 @@ export class AlbusIssuerClient {
     )
   }
 
-  issuer?: { pubkey: PublicKey, data: Issuer }
-
-  async init() {
-    if (!this.client.provider.publicKey) {
-      return
-    }
-    // Try to find the issuer account by the authority public key
-    await this.findIssuerByAuthority()
-  }
-
-  /**
-   * Finds the issuer account by the authority public key and sets the `issuer` property.
-   *
-   * @throws {IssuerNotFound} - If the issuer account is not found.
-   */
-  async findIssuerByAuthority() {
-    const [iss] = await this.client.issuer.find({
-      authority: this.client.provider.publicKey,
-    })
-    if (!iss) {
-      throw new IssuerNotFound()
-    }
-    this.issuer = {
-      pubkey: iss.pubkey,
-      data: iss.data!,
-    }
-  }
+  // issuer?: { pubkey: PublicKey, data: Issuer }
+  //
+  // async init() {
+  //   if (!this.client.provider.publicKey) {
+  //     return
+  //   }
+  //   // Try to find the issuer account by the authority public key
+  //   await this.findIssuerByAuthority()
+  // }
+  //
+  // /**
+  //  * Finds the issuer account by the authority public key and sets the `issuer` property.
+  //  *
+  //  * @throws {IssuerNotFound} - If the issuer account is not found.
+  //  */
+  // async findIssuerByAuthority() {
+  //   const [iss] = await this.client.issuer.find({
+  //     authority: this.client.provider.publicKey,
+  //   })
+  //   if (!iss) {
+  //     throw new IssuerNotFound()
+  //   }
+  //   this.issuer = {
+  //     pubkey: iss.pubkey,
+  //     data: iss.data!,
+  //   }
+  // }
 
   /**
    * Create a new credential spec.
@@ -173,17 +172,18 @@ export class AlbusIssuerClient {
    *
    * @param {object} props - The properties for rejecting the credential request.
    * @param {PublicKeyInitData} props.credentialRequest - The credential request to reject.
+   * @param {PublicKeyInitData} props.issuer - The issuer of the credential request.
    * @param {string} [props.message] - Optional message for rejecting the credential request.
    * @param {SendOpts} [opts] - Optional send options.
    */
-  async rejectCredentialRequest(props: { credentialRequest: PublicKeyInitData, message?: string }, opts?: SendOpts) {
+  async rejectCredentialRequest(props: { credentialRequest: PublicKeyInitData, issuer: PublicKeyInitData, message?: string }, opts?: SendOpts) {
     const txBuilder = this.client.credential.txBuilder
 
     // Add instructions to reject the credential request
     txBuilder.addInstruction(
       ...this.client.credentialRequest.updateIx({
         credentialRequest: props.credentialRequest,
-        issuer: this.issuer!.pubkey,
+        issuer: props.issuer,
         status: CredentialRequestStatus.Rejected,
         message: props.message,
       }).instructions,
@@ -205,17 +205,18 @@ export class AlbusIssuerClient {
    *
    * @param {object} props - The properties for approving the credential request.
    * @param {PublicKeyInitData} props.credentialRequest - The credential request to approve.
+   * @param {PublicKeyInitData} props.issuer - The issuer of the credential request.
    * @param {string} props.uri - The URI of the credential.
    * @param {SendOpts} [opts] - Optional send options.
    */
-  async approveCredentialRequest(props: { credentialRequest: PublicKeyInitData, uri: string }, opts?: SendOpts) {
+  async approveCredentialRequest(props: { credentialRequest: PublicKeyInitData, issuer: PublicKeyInitData, uri: string }, opts?: SendOpts) {
     const txBuilder = this.client.credential.txBuilder
 
     // Add instructions to approve the credential request
     txBuilder.addInstruction(
       ...this.client.credentialRequest.updateIx({
         credentialRequest: props.credentialRequest,
-        issuer: this.issuer!.pubkey,
+        issuer: props.issuer,
         status: CredentialRequestStatus.Approved,
       }).instructions,
     )
