@@ -26,6 +26,17 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { pluginViteConfig } from '../../vite.config'
+import { defineConfig } from 'vitest/config'
 
-export default pluginViteConfig(import.meta.url)
+export default defineConfig({
+  test: {
+    globals: true,
+    include: ['./tests/**/*.spec.ts'],
+    testTimeout: 30000,
+    environment: 'node',
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+    ],
+  },
+})
