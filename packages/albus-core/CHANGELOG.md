@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.3.6-next.11](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.10...@albus-finance/core-v0.3.6-next.11) (2024-05-10)
+
 ## [0.3.6-next.10](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.9...@albus-finance/core-v0.3.6-next.10) (2024-05-10)
 
 
