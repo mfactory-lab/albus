@@ -65,8 +65,8 @@ describe('albusStakePool', async () => {
   const user = Keypair.generate()
   const vote = Keypair.generate()
 
-  const client = new AlbusClient(provider).local()
-  const userClient = new AlbusClient(initProvider(user)).local()
+  const client = new AlbusClient(provider).local().debug(true)
+  const userClient = new AlbusClient(initProvider(user)).local().debug(true)
 
   let stakePool: PublicKey
   let stakePoolMint: PublicKey
@@ -231,8 +231,6 @@ describe('albusStakePool', async () => {
 
   it('can deposit stake with valid proof request', async () => {
     const proofRequest = await createTestProofRequest(userClient, client, 'stakePool')
-    console.log(`proofRequestPubkey: ${proofRequest}`)
-
     const { keypair } = await addTestStakeAccount(vote.publicKey)
 
     const { instructions, signers } = await depositStake(
@@ -241,6 +239,8 @@ describe('albusStakePool', async () => {
       user.publicKey,
       vote.publicKey,
       keypair.publicKey,
+      undefined,
+      proofRequest,
     )
 
     const tx = new Transaction().add(...instructions)
@@ -257,8 +257,6 @@ describe('albusStakePool', async () => {
     const votePubkey = vote.publicKey
 
     const proofRequest = await createTestProofRequest(userClient, client, 'stakePool', ProofRequestStatus.Rejected)
-    console.log(`proofRequestPubkey: ${proofRequest}`)
-
     const { keypair } = await addTestStakeAccount(votePubkey)
 
     const { instructions, signers } = await depositStake(
@@ -267,6 +265,8 @@ describe('albusStakePool', async () => {
       user.publicKey,
       votePubkey,
       keypair.publicKey,
+      undefined,
+      proofRequest,
     )
 
     const tx = new Transaction().add(...instructions)
