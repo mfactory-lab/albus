@@ -12,7 +12,7 @@
     "docs": "docsify serve ./docs",
     "test:e2e": "pnpm -F @albus-finance/tests run test",
     "test:unit": "vitest --dir ./packages",
-    "lint:fix": "eslint --fix ./packages",
+    "lint:fix": "eslint --fix .",
     "syncpack": "syncpack list-mismatches"
   },
   "devDependencies": {

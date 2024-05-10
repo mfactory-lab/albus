@@ -2,7 +2,7 @@ name: Release(swap-sdk)
 
 on:
   push:
-    branches: [ dev ]
+    branches: [dev]
     paths:
       - packages/albus-swap-sdk/src/**
   workflow_dispatch:
@@ -13,4 +13,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     secrets: inherit
     with:
-      package: "@albus-finance/swap-sdk"
+      package: '@albus-finance/swap-sdk'

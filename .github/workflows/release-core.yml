@@ -2,7 +2,7 @@ name: Release(core)
 
 on:
   push:
-    branches: [ dev ]
+    branches: [dev]
     paths:
       - packages/albus-core/src/**
   workflow_dispatch:
@@ -13,4 +13,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     secrets: inherit
     with:
-      package: "@albus-finance/core"
+      package: '@albus-finance/core'

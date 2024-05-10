@@ -31,15 +31,15 @@ module.exports = antfu({
   gitignore: true,
   stylistic: true,
   typescript: true,
-  yml: true,
+  yaml: true,
   toml: true,
   vue: false,
   rules: {
     'antfu/consistent-list-newline': 'off',
     'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
 
+    'toml/padding-line-between-pairs': 'off',
     'ts/consistent-type-definitions': ['error', 'type'],
-    // 'ts/consistent-type-imports': 'off',
 
     'curly': ['error', 'all'],
 

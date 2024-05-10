@@ -13,4 +13,4 @@ jobs:
         continue-on-error: false # set to true if you don't want to fail jobs
         uses: silas-x/soteria-action@main
         with:
-          solana-version: "1.16.17"
+          solana-version: 1.16.17

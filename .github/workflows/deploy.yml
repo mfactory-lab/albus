@@ -9,7 +9,7 @@ on:
       solana-cluster:
         type: string
         required: false
-        default: 'devnet'
+        default: devnet
     secrets:
       UPGRADE_AUTHORITY:
         required: true
