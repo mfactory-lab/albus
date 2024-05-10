@@ -7,13 +7,7 @@
     "directory": "packages/albus-signature"
   },
   "sideEffects": false,
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
@@ -21,14 +15,14 @@
     "dist"
   ],
   "scripts": {
-    "dev": "vite build --watch",
-    "build": "vite build",
+    "build": "tsup",
+    "_dev": "tsup --watch",
     "test": "vitest",
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
     "release:dry": "release-it --ci --dry-run",
     "release:pre": "release-it --preRelease=next",
-    "prepublishOnly": "vite build"
+    "prepublishOnly": "tsup"
   },
   "dependencies": {
     "@albus-finance/core": "workspace:^",
