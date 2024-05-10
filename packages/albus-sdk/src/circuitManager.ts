@@ -25,7 +25,6 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-
 import * as Albus from '@albus-finance/core'
 import type {
   Commitment,
@@ -34,7 +33,8 @@ import type {
   TransactionInstruction,
 } from '@solana/web3.js'
 import {
-  PublicKey, Transaction } from '@solana/web3.js'
+  PublicKey, Transaction,
+} from '@solana/web3.js'
 import { chunk } from 'lodash-es'
 import { BaseManager } from './base'
 

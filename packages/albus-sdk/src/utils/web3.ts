@@ -96,7 +96,7 @@ export async function getMetadataByAccountInfo(accountInfo: AccountInfo<Buffer>,
     try {
       metadata.json = (await axios.get(metadata.data.uri)).data
     } catch (e) {
-      console.log('Error: Failed to load NFT metadata')
+      console.log(`Error: Failed to load NFT metadata (${metadata.data.uri})`)
       metadata.json = {}
     }
   }
@@ -114,6 +114,7 @@ export async function getMetadataByMint(connection: Connection, mint: PublicKeyI
   if (accountInfo) {
     return getMetadataByAccountInfo(accountInfo, loadJson)
   }
+  return undefined
 }
 
 /**

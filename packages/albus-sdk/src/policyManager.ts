@@ -237,7 +237,7 @@ function preparePolicyRules(props: UpdatePolicyProps) {
     label: r.label ?? '',
     value: Array.from(
       Albus.crypto.ffUtils.beInt2Buff(
-        Albus.credential.encodeClaimValue(
+        Albus.credential.ClaimsTree.encodeValue(
           Array.isArray(r.value) ? new TextDecoder().decode(Uint8Array.from(r.value)) : r.value,
         ),
         32,

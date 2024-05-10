@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { Buffer } from 'node:buffer'
 import type {
   Commitment,
   GetMultipleAccountsConfig,
@@ -35,11 +34,11 @@ import type {
 import {
   PublicKey,
 } from '@solana/web3.js'
-import * as Albus from '@albus-finance/core'
 import { BaseManager } from './base'
 
 import {
   CredentialRequest,
+  createDeleteCredentialRequestInstruction,
   createRequestCredentialInstruction,
   createUpdateCredentialRequestInstruction,
   credentialRequestDiscriminator,
@@ -118,6 +117,9 @@ export class CredentialRequestManager extends BaseManager {
     const authority = this.provider.publicKey
     const issuer = new PublicKey(props.issuer)
 
+    // const req = await this.load(credentialRequest)
+    // req.issuer
+
     const ix = createUpdateCredentialRequestInstruction({
       credentialRequest,
       issuer,
@@ -139,6 +141,36 @@ export class CredentialRequestManager extends BaseManager {
    */
   async update(props: UpdateCredentialRequestProps, opts?: SendOpts) {
     const { instructions } = this.updateIx(props)
+
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+
+    return { signature }
+  }
+
+  /**
+   * Delete the Credential Request instruction.
+   */
+  deleteIx(props: DeleteCredentialRequestProps) {
+    const credentialRequest = new PublicKey(props.credentialRequest)
+    const authority = this.provider.publicKey
+
+    const ix = createDeleteCredentialRequestInstruction({
+      credentialRequest,
+      authority,
+    }, this.programId)
+
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete the Credential Request
+   */
+  async delete(props: DeleteCredentialRequestProps, opts?: SendOpts) {
+    const { instructions } = this.deleteIx(props)
 
     const signature = await this.txBuilder
       .addInstruction(...instructions)
@@ -189,17 +221,6 @@ export class CredentialRequestManager extends BaseManager {
         }
       })
   }
-
-  /**
-   * A function that creates a presentation using the given presentation definition and credentials.
-   * Returns the uri of the created presentation.
-   */
-  async createPresentation(opts: Albus.credential.CreatePresentationExchangeOpts) {
-    const vp = await Albus.credential.createPresentationExchange(opts)
-    return this.client.storage.upload(
-      Buffer.from(JSON.stringify(vp)),
-    )
-  }
 }
 
 export type CreateCredentialRequestProps = {
@@ -218,6 +239,10 @@ export type UpdateCredentialRequestProps = {
   issuer: PublicKeyInitData
   status: number
   message?: string
+}
+
+export type DeleteCredentialRequestProps = {
+  credentialRequest: PublicKeyInitData
 }
 
 export type FindCredentialRequestProps = {
