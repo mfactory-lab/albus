@@ -23,8 +23,7 @@
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
     "release:dry": "release-it --ci --dry-run",
-    "release:pre": "release-it --ci --preRelease=next",
-    "prepublishOnly": "pnpm run build"
+    "release:pre": "release-it --ci --preRelease=next"
   },
   "dependencies": {
     "@albus-finance/core": "workspace:^",

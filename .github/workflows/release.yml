@@ -62,10 +62,11 @@ jobs:
 
       - name: Run release
         run: |
+          pnpm -F ${{ env.PACKAGE }}... build
           if [ ${{ github.ref }} == 'refs/heads/main' ]; then
-            pnpm -F ${{ env.PACKAGE }}... release:ci
+            pnpm -F ${{ env.PACKAGE }} release:ci
           else
-            pnpm -F ${{ env.PACKAGE }}... release:pre
+            pnpm -F ${{ env.PACKAGE }} release:pre
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

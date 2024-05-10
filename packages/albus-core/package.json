@@ -21,8 +21,7 @@
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
     "release:dry": "release-it --ci --dry-run",
-    "release:pre": "release-it --preRelease=next",
-    "prepublishOnly": "pnpm run build"
+    "release:pre": "release-it --preRelease=next"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
