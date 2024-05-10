@@ -30,15 +30,14 @@ import { Keypair } from '@solana/web3.js'
 import { assert, describe, it } from 'vitest'
 import { babyJub, eddsa } from '../src/crypto'
 import {
+  ClaimsTree,
   createCredentialProof,
   createVerifiableCredential,
   createVerifiablePresentation,
   verifyCredential,
   verifyCredentialProof,
-  verifyPresentation,
-} from '../src/credential'
+  verifyPresentation } from '../src/credential'
 import { generateDid } from '../src/utils'
-import { ClaimsTree } from '../src/credential/tree'
 
 describe('credential', () => {
   const claims = {
@@ -100,6 +99,10 @@ describe('credential', () => {
         },
       },
     })
+
+    // console.log(
+    //   JSON.stringify(vc, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2),
+    // )
 
     // assert.ok('issuerPubkey' in vc)
     assert.ok('credentialSubject' in vc)

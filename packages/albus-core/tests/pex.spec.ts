@@ -27,12 +27,13 @@
  */
 
 import { describe, it } from 'vitest'
-import type { InputDescriptorV2 } from '@sphereon/pex-models'
+import type { InputDescriptorV2, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import type { PresentationSignCallBackParams } from '@sphereon/pex'
 import { PEX } from '@sphereon/pex'
 import { Keypair } from '@solana/web3.js'
-import { credential } from '@albus-finance/core'
 import type { IPresentation, IVerifiableCredential, IVerifiablePresentation } from '@sphereon/ssi-types'
+import { createVerifiableCredential } from '../src/credential'
+import { CredentialType } from '../src/credential/types'
 
 describe('pex', async () => {
   const pex = new PEX()
@@ -62,53 +63,90 @@ describe('pex', async () => {
 
   const issuer = Keypair.generate()
 
-  const cred = await credential.createVerifiableCredential({
+  const cred = await createVerifiableCredential({
     givenName: 'Mikayla',
     familyName: 'Halvorson',
     gender: 'female',
     birthDate: '1966-10-02',
-    birthPlace: 'Westland',
-    nationality: 'GB',
-    country: 'GB',
-    countryOfBirth: 'GB',
-    docType: 'ID_CARD',
     docNumber: 'AB123456',
   }, {
+    credentialType: CredentialType.IdCard,
     issuerSecretKey: issuer.secretKey,
   })
 
-  // const credential = {
-  //   '@context': ['https://www.w3.org/ns/credentials/v2'],
-  //   'type': ['VerifiableCredential', 'AlbusCredentialV2'],
-  //   'issuer': 'did:web:albus.finance',
-  //   'issuanceDate': '2024-03-27T17:35:52.540Z',
-  //   'credentialSubject': {
-  //     givenName: 'Mikayla',
-  //     familyName: 'Halvorson',
-  //     gender: 'female',
-  //     birthDate: '1966-10-02',
-  //     birthPlace: 'Westland',
-  //     nationality: 'GB',
-  //     country: 'GB',
-  //     countryOfBirth: 'GB',
-  //     docType: 'ID_CARD',
-  //     docNumber: 'AB123456',
-  //   },
-  //   'proof': [
-  //     {
-  //       type: 'BabyJubJubSignature2021',
-  //       created: '1711560952634',
-  //       verificationMethod: '#eddsa-bjj',
-  //       credentialHash: '5116274216029599390514665569961009758379091985978787472785746168558961665331',
-  //       proofValue: 'abc',
-  //       proofPurpose: 'assertionMethod',
-  //     },
-  //   ],
-  // }
+  const cred2 = await createVerifiableCredential({
+    country: 'UK',
+    docNumber: 'AB123456',
+  }, {
+    credentialType: CredentialType.IdCard,
+    issuerSecretKey: issuer.secretKey,
+  })
 
-  console.log(cred)
+  const credentials = [cred, cred2]
 
   it('works', async () => {
+    const def: PresentationDefinitionV2 = {
+      id: 'ABC123',
+      input_descriptors: [
+        {
+          id: 'id1',
+          purpose: 'Validate credentials that are issued in the UK or GB and confirm that they are specifically either AlbusCredentials or IdCards',
+          constraints: {
+            fields: [
+              {
+                purpose: 'We can only allow GB or UK countries',
+                path: ['$.credentialSubject.country'],
+                filter: {
+                  type: 'string',
+                  enum: ['GB', 'UK'],
+                },
+              },
+              {
+                purpose: 'We can only verify albus credentials',
+                path: ['$.issuer'],
+                filter: {
+                  type: 'string',
+                  pattern: '^did:web:albus.finance$',
+                },
+              },
+              {
+                purpose: 'We can only allow IdCard credentials',
+                path: ['$.type'],
+                filter: {
+                  type: 'array',
+                  contains: {
+                    type: 'string',
+                    const: 'IdCard',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        // {
+        //   id: 'id2',
+        //   purpose: 'Contains birthDate attribute',
+        //   constraints: {
+        //     fields: [
+        //       {
+        //         purpose: 'Contains birthDate attribute',
+        //         path: ['$.credentialSubject.birthDate'],
+        //         filter: {
+        //           type: 'string',
+        //         },
+        //       },
+        //     ],
+        //   },
+        // },
+      ],
+    }
+
+    const res = pex.evaluateCredentials(def, credentials as any)
+
+    console.log(res)
+  })
+
+  it('should evaluate presentation', async () => {
     const cred2 = { ...cred, issuer: 'did:web:albus.finance2' }
 
     const verifiablePresentation = {

@@ -27,127 +27,129 @@
  */
 
 declare module 'snarkjs' {
-  type ProofData = {
-    readonly pi_a: readonly (string | bigint)[]
-    readonly pi_b: readonly (readonly (string | bigint)[])[]
-    readonly pi_c: readonly (string | bigint)[]
-    readonly protocol: string
-    readonly curve: string
-  }
+    type ProofData = {
+      readonly pi_a: readonly (string | bigint)[]
+      readonly pi_b: readonly (readonly (string | bigint)[])[]
+      readonly pi_c: readonly (string | bigint)[]
+      readonly protocol: string
+      readonly curve: string
+    }
 
-  type PublicSignals = readonly (string | bigint)[]
+    type PublicSignals = readonly (string | bigint)[]
 
-  type SNARK = {
-    readonly proof: ProofData
-    readonly publicSignals: PublicSignals
-  }
+    type SNARK = {
+      readonly proof: ProofData
+      readonly publicSignals: PublicSignals
+    }
 
-  type VK = {
-    readonly nPublic: number
-    readonly curve: string
-    readonly protocol: string
-    readonly vk_alpha_1: (string | number | bigint)[]
-    readonly vk_beta_2: (string | number | bigint)[][]
-    readonly vk_gamma_2: (string | number | bigint)[][]
-    readonly vk_delta_2: (string | number | bigint)[][]
-    readonly IC: (string | number | bigint)[][]
-  }
+    type VK = {
+      readonly nPublic: number
+      readonly curve: string
+      readonly protocol: string
+      readonly vk_alpha_1: (string | number | bigint)[]
+      readonly vk_beta_2: (string | number | bigint)[][]
+      readonly vk_gamma_2: (string | number | bigint)[][]
+      readonly vk_delta_2: (string | number | bigint)[][]
+      readonly IC: (string | number | bigint)[][]
+    }
 
-  type R1csInfo = {
-    readonly n8: number
-    readonly prime: number
-    readonly curve: string
-    readonly nVars: number
-    readonly nOutputs: number
-    readonly nPubInputs: number
-    readonly nPrvInputs: number
-    readonly nLabels: number
-    readonly nConstraints: number
-    readonly useCustomGates: any
-    readonly constraints: any
-    readonly map: any
-    readonly customGates: any
-    readonly customGatesUses: any
-  }
+    type R1csInfo = {
+      readonly n8: number
+      readonly prime: number
+      readonly curve: string
+      readonly nVars: number
+      readonly nOutputs: number
+      readonly nPubInputs: number
+      readonly nPrvInputs: number
+      readonly nLabels: number
+      readonly nConstraints: number
+      readonly useCustomGates: any
+      readonly constraints: any
+      readonly map: any
+      readonly customGates: any
+      readonly customGatesUses: any
+    }
 
-  const groth16: {
-    readonly fullProve: (
-      input: {
-        readonly [key: string]:
-          | string | bigint | number
-          | readonly bigint[] | readonly number[]
-          | readonly (readonly bigint[])[] | readonly (readonly number[])[]
-      },
-      wasmFile: string | Uint8Array | { type: string, data: Uint8Array },
-      zkeyFileName: string | Uint8Array | { type: string, data: Uint8Array },
-      logger?: unknown,
-    ) => Promise<SNARK>
-    readonly prove: (
-      zkeyFileName: string,
-      witnessFilename: string,
-      logger?: unknown,
-    ) => Promise<SNARK>
-    readonly verify: (
-      vkVerifier: VK,
-      publicSignals: PublicSignals,
-      proof: ProofData,
-      logger?: unknown,
-    ) => Promise<boolean>
-  }
+    const groth16: {
+      readonly fullProve: (
+        input: {
+          readonly [key: string]:
+            | string | bigint | number
+            | readonly bigint[] | readonly number[]
+            | readonly (readonly bigint[])[] | readonly (readonly number[])[]
+        },
+        wasmFile: string | Uint8Array | { type: string, data: Uint8Array },
+        zkeyFileName: string | Uint8Array | { type: string, data: Uint8Array },
+        logger?: unknown,
+      ) => Promise<SNARK>
+      readonly prove: (
+        zkeyFileName: string,
+        witnessFilename: string,
+        logger?: unknown,
+      ) => Promise<SNARK>
+      readonly verify: (
+        vkVerifier: VK,
+        publicSignals: PublicSignals,
+        proof: ProofData,
+        logger?: unknown,
+      ) => Promise<boolean>
+    }
 
-  const plonk: {
-    exportSolidityCallData: any
-    fullProve: any
-    prove: any
-    setup: any
-    verify: any
-  }
+    const plonk: {
+      exportSolidityCallData: any
+      fullProve: any
+      prove: any
+      setup: any
+      verify: any
+    }
 
-  const powersOfTau: {
-    beacon: any
-    challengeContribute: any
-    contribute: any
-    convert: any
-    exportChallenge: any
-    exportJson: any
-    importResponse: any
-    newAccumulator: any
-    preparePhase2: any
-    truncate: any
-    verify: any
-  }
+    const powersOfTau: {
+      beacon: any
+      challengeContribute: any
+      contribute: any
+      convert: any
+      exportChallenge: any
+      exportJson: any
+      importResponse: any
+      newAccumulator: any
+      preparePhase2: any
+      truncate: any
+      verify: any
+    }
 
-  const r1cs: {
-    exportJson: (r1csName: string, logger?: unknown) => Promise<any>
-    info: (r1csName: string, logger?: unknown) => Promise<R1csInfo>
-    print: (params: object, options: object) => Promise<any>
-  }
+    const r1cs: {
+      exportJson: (r1csName: string, logger?: unknown) => Promise<any>
+      info: (r1csName: string, logger?: unknown) => Promise<R1csInfo>
+      print: (params: object, options: object) => Promise<any>
+    }
 
-  const wtns: {
-    calculate(
-      _input: Record<string, BigNumberish | BigNumberish[]>,
-      wasmFileName: string,
-      wtnsFileName: {
+    const wtns: {
+      calculate: (
+        _input: Record<string, any>,
+        wasmFileName: string,
+        wtnsFileName: {
+          type: string
+        }
+      ) => any
+      exportJson: (wtnsFileName: { type: string }) => Array<bigint>
+      debug: any
+    }
+
+    const zKey: {
+      beacon: any
+      bellmanContribute: any
+      contribute: any
+      exportBellman: any
+      exportJson: any
+      exportSolidityVerifier: any
+      exportVerificationKey: (zkeyName: string | { type: string }) => Promise<VK>
+      importBellman: any
+      newZKey: (r1csName: string, ptauName: string, zkeyName: string | {
         type: string
-      }
-    ): any
-    exportJson(wtnsFileName: { type: string }): Array<bigint>
-    debug: any
-  }
+      }, logger?: unknown) => Promise<any>
+      verifyFromInit: any
+      verifyFromR1cs: any
+    }
 
-  const zKey: {
-    beacon: any
-    bellmanContribute: any
-    contribute: any
-    exportBellman: any
-    exportJson: any
-    exportSolidityVerifier: any
-    exportVerificationKey: (zkeyName: string | { type: string }) => Promise<VK>
-    importBellman: any
-    newZKey: (r1csName: string, ptauName: string, zkeyName: string | { type: string }, logger?: unknown) => Promise<any>
-    verifyFromInit: any
-    verifyFromR1cs: any
-  }
-
-  export { ProofData, PublicSignals, VK, groth16, plonk, powersOfTau, r1cs, wtns, zKey }
+    export { ProofData, PublicSignals, VK, groth16, plonk, powersOfTau, r1cs, wtns, zKey }
 }

@@ -225,7 +225,7 @@ export class SMT {
       oldRoot = this.F.zero
     }
 
-    const inserts = []
+    const inserts: Array<[bigint, bigint[]]> = []
     const deletes = []
 
     let root = this.hash1(key, value)

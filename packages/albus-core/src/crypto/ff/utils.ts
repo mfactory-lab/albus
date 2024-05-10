@@ -7,7 +7,7 @@ export function stringifyBigInts(o: any): any {
   } else if (Array.isArray(o)) {
     return o.map(stringifyBigInts)
   } else if (typeof o === 'object') {
-    const res = {}
+    const res: Record<string, any> = {}
     for (const k in o) {
       res[k] = stringifyBigInts(o[k])
     }

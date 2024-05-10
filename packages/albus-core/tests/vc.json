@@ -1,0 +1,33 @@
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "AlbusCredential"
+  ],
+  "issuer": "did:web:albus.finance",
+  "issuanceDate": "2024-04-23T11:35:16Z",
+  "credentialSubject": {
+    "birthDate": "1989-01-01",
+    "firstName": "Alex",
+    "country": "US",
+    "alumniOf": {
+      "name": "Example University"
+    },
+    "degree": {
+      "type": "BachelorDegree",
+      "name": "Bachelor of Science and Arts",
+      "status": {
+        "value": "ok"
+      }
+    }
+  },
+  "proof": {
+    "type": "BJJSignature2021",
+    "created": "2024-04-23T11:35:16Z",
+    "verificationMethod": "did:web:albus.finance#J8xRyHVp5azyHr4Mjp2Yro5FfA2jCvc5SwVbK1q5R97r",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z2FC2thtq296eQLLkadbm8tP2Hp7hjBZe48syVzWiye6xX1bfnnzHGb65pJeH9RZagxZb1MijwH1sjGbqKDMw3rAs14FQxDkrez5bbe3AYuo9Cvixr8hpajfPdnmohD1AjuFJ"
+  }
+}
