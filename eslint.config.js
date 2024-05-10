@@ -25,9 +25,9 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-import antfu from '@antfu/eslint-config'
+const antfu = require('@antfu/eslint-config').default
 
-export default antfu({
+module.exports = antfu({
   gitignore: true,
   stylistic: true,
   typescript: true,
@@ -39,7 +39,7 @@ export default antfu({
     'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
 
     'ts/consistent-type-definitions': ['error', 'type'],
-    'ts/consistent-type-imports': 'off',
+    // 'ts/consistent-type-imports': 'off',
 
     'curly': ['error', 'all'],
 
