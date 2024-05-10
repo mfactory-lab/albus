@@ -46,8 +46,8 @@ export function clusterUrl(c: Cluster | string) {
   switch (c) {
     case 'mainnet':
     case 'mainnet-beta':
-      if (import.meta.env.CLI_SOLANA_MAINNET_CLUSTER) {
-        return import.meta.env.CLI_SOLANA_MAINNET_CLUSTER
+      if (process.env.CLI_SOLANA_MAINNET_CLUSTER) {
+        return process.env.CLI_SOLANA_MAINNET_CLUSTER
       }
       break
     case 'testnet':
@@ -92,8 +92,8 @@ export function inspectTransaction(tx: Transaction, cluster: Cluster = 'mainnet-
   return {
     base64,
     url: `https://explorer.solana.com/tx/inspector?cluster=${cluster}&message=${encodeURIComponent(
-      base64,
-    )}`,
+            base64,
+        )}`,
   }
 }
 

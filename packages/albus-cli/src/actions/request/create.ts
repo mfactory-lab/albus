@@ -49,10 +49,10 @@ export async function create(policy: string, opts: Opts) {
       serviceCode,
       policyCode,
       expiresIn: opts.expiresIn,
-    }, { commitment: 'confirmed' })
+    }, { confirm: { commitment: 'confirmed' } })
 
     log.info(`Signature: ${signature}`)
-    log.info(exploreTransaction(signature))
+    log.info(exploreTransaction(signature!))
 
     await show(address)
   } catch (e) {

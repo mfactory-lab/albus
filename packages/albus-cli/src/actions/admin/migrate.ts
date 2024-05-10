@@ -40,15 +40,15 @@ export async function migrate(_opts: any) {
 
   // mainnet connection
   const opts = AnchorProvider.defaultOptions()
-  const keypair = import.meta.env.CLI_SOLANA_MAINNET_KEYPAIR
+  const keypair = process.env.CLI_SOLANA_MAINNET_KEYPAIR!
   const wallet = new Wallet(
     Keypair.fromSecretKey(Buffer.from(JSON.parse(
       keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
     ))),
   )
-  const endpoint = import.meta.env.CLI_SOLANA_MAINNET_CLUSTER ?? clusterUrl('mainnet-beta')
+  const endpoint = process.env.CLI_SOLANA_MAINNET_CLUSTER ?? clusterUrl('mainnet-beta')
   const connection = new web3.Connection(endpoint, opts.commitment)
-  const prodClient = new AlbusClient(new AnchorProvider(connection, wallet, opts))
+  const _prodClient = new AlbusClient(new AnchorProvider(connection, wallet, opts))
 
   log.info('Loading from mainnet...')
   const issuers = await client.issuer.find()
