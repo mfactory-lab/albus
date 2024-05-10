@@ -26,24 +26,29 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { resolve } from 'node:path'
-import { pluginViteConfig } from '../../vite.config'
-import { version } from './package.json'
+use crate::errors::AlbusError;
+use crate::state::CredentialRequest;
+use crate::utils::{assert_authorized, cmp_pubkeys};
+use anchor_lang::prelude::*;
 
-export default pluginViteConfig(import.meta.url, {
-  envPrefix: 'CLI_',
-  define: {
-    'import.meta.env.VERSION': JSON.stringify(version),
-  },
-  resolve: {
-    // by default Vite resolves `module` field, which not always a native ESM module
-    // setting this option can bypass that and fallback to cjs version
-    mainFields: [],
-    alias: {
-      '@/': `${resolve(__dirname, 'src')}/`,
-    },
-  },
-  optimizeDeps: {
-    include: ['@coral-xyz/anchor', '@solana/web3.js', '@faker-js/faker'],
-  },
-})
+pub fn handler(ctx: Context<DeleteCredentialRequest>) -> Result<()> {
+    let authority = &ctx.accounts.authority;
+    let req = &ctx.accounts.credential_request;
+
+    if assert_authorized(authority.key).is_err() && !cmp_pubkeys(&req.owner, authority.key) {
+        return Err(AlbusError::Unauthorized.into());
+    }
+
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct DeleteCredentialRequest<'info> {
+    #[account(mut, close = authority)]
+    pub credential_request: Box<Account<'info, CredentialRequest>>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}

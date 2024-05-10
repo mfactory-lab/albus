@@ -66,6 +66,7 @@ pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> 
     req.uri = data.uri;
     req.status = CredentialRequestStatus::Pending;
     req.created_at = timestamp;
+    req.message = Default::default();
     req.bump = ctx.bumps.credential_request;
 
     emit!(CreateCredentialRequestEvent {

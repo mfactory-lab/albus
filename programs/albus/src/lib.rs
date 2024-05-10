@@ -104,6 +104,10 @@ pub mod albus {
         update_credential_request::handler(ctx, data)
     }
 
+    pub fn delete_credential_request(ctx: Context<DeleteCredentialRequest>) -> Result<()> {
+        delete_credential_request::handler(ctx)
+    }
+
     // Credential Spec
 
     pub fn create_credential_spec(
