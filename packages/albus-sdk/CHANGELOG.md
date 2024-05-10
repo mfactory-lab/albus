@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.32](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.31...@albus-finance/sdk-v0.3.0-next.32) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix issuer client, removed useless issuer ([6bcf194](https://github.com/mfactory-lab/albus/commit/6bcf1949fcc52f43c545fdfd551bb41f08dca6a5))
+
 ## [0.3.0-next.31](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.30...@albus-finance/sdk-v0.3.0-next.31) (2024-05-10)
 
 
