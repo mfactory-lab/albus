@@ -44,9 +44,9 @@ export const requestCredentialStruct = new beet.FixableBeetArgsStruct<
  * @property [_writable_] credentialSpec
  * @property [] credentialMint
  * @property [] credentialToken
+ * @property [**signer**] credentialOwner
  * @property [] issuer
- * @property [_writable_, **signer**] payer
- * @property [**signer**] authority
+ * @property [_writable_, **signer**] authority
  * @category Instructions
  * @category RequestCredential
  * @category generated
@@ -56,8 +56,8 @@ export type RequestCredentialInstructionAccounts = {
   credentialSpec: web3.PublicKey
   credentialMint: web3.PublicKey
   credentialToken: web3.PublicKey
+  credentialOwner: web3.PublicKey
   issuer: web3.PublicKey
-  payer: web3.PublicKey
   authority: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
@@ -108,18 +108,18 @@ export function createRequestCredentialInstruction(
       isSigner: false,
     },
     {
+      pubkey: accounts.credentialOwner,
+      isWritable: false,
+      isSigner: true,
+    },
+    {
       pubkey: accounts.issuer,
       isWritable: false,
       isSigner: false,
     },
     {
-      pubkey: accounts.payer,
-      isWritable: true,
-      isSigner: true,
-    },
-    {
       pubkey: accounts.authority,
-      isWritable: false,
+      isWritable: true,
       isSigner: true,
     },
     {

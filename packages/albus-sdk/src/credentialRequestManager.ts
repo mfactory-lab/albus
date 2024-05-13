@@ -67,11 +67,12 @@ export class CredentialRequestManager extends BaseManager {
    * Create new Credential Request instruction.
    */
   createIx(props: CreateCredentialRequestProps) {
-    const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
+    const authority = this.provider.publicKey
+    const credentialOwner = props?.owner ? props.owner.publicKey : authority
 
     const issuer = new PublicKey(props.issuer)
     const credentialMint = new PublicKey(props.mint)
-    const credentialToken = getAssociatedTokenAddress(credentialMint, authority)
+    const credentialToken = getAssociatedTokenAddress(credentialMint, credentialOwner)
     const [credentialSpec] = this.pda.credentialSpec(issuer, props.specId)
     const [address] = this.pda.credentialRequest(credentialSpec, authority)
 
@@ -80,9 +81,9 @@ export class CredentialRequestManager extends BaseManager {
       credentialSpec,
       credentialMint,
       credentialToken,
+      credentialOwner,
       issuer,
       authority,
-      payer: this.provider.publicKey,
     }, {
       data: {
         uri: props.uri ?? '',

@@ -362,18 +362,18 @@
           "isSigner": false
         },
         {
+          "name": "credentialOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
           "name": "issuer",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "authority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {

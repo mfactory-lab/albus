@@ -97,7 +97,7 @@ pub struct RequestCredential<'info> {
             authority.key().as_ref(),
         ],
         bump,
-        payer = payer,
+        payer = authority,
         space = CredentialRequest::space()
     )]
     pub credential_request: Box<Account<'info, CredentialRequest>>,
@@ -109,16 +109,16 @@ pub struct RequestCredential<'info> {
 
     #[account(
         associated_token::mint = credential_mint,
-        associated_token::authority = authority,
+        associated_token::authority = credential_owner,
         constraint = credential_token.amount == 1
     )]
     pub credential_token: Account<'info, TokenAccount>,
 
+    pub credential_owner: Signer<'info>,
+
     pub issuer: Box<Account<'info, Issuer>>,
 
     #[account(mut)]
-    pub payer: Signer<'info>,
-
     pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,
