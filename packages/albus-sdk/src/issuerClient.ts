@@ -193,7 +193,7 @@ export class AlbusIssuerClient {
     txBuilder.addInstruction(
       ...(await this.client.credential.updateIx({
         credentialRequest: props.credentialRequest,
-        uri: `data:,status=rejected`,
+        uri: `data:,status=rejected&ref=cr`,
       })).instructions,
     )
 
