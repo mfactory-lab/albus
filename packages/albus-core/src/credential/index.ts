@@ -48,6 +48,7 @@ import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential
 import { normalizeClaims, validateCredentialPayload, validatePresentationPayload } from './utils'
 import { DEFAULT_CONTEXT, DEFAULT_DID, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
 import { ClaimsTree } from './tree'
+import { albusDidResolver } from './resolver'
 
 const { base58ToBytes, randomBigInt } = utils
 
@@ -259,6 +260,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   const resolver = opts.resolver ?? new Resolver({
     ...WebDidResolver.getResolver(),
     ...KeyDidResolver.getResolver(),
+    ...albusDidResolver(),
   } as ResolverRegistry)
 
   validateCredentialPayload(vc)

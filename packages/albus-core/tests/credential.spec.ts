@@ -78,6 +78,19 @@ describe('credential', () => {
     assert.ok(res)
   })
 
+  // describe('albus did', () => {
+  //   it('can create and verify credential', async () => {
+  //     const vc = await createVerifiableCredential(claims, {
+  //       issuerSecretKey: issuerKeypair.secretKey,
+  //       issuerDid: 'did:albus:issuer:9not3fH8oNjWePPgaQGGtiAnMiZyWBsr3KL8mnMCmvHV?cluster=devnet',
+  //     })
+  //
+  //     const vc2 = await verifyCredential(vc)
+  //
+  //     console.log(vc2)
+  //   })
+  // })
+
   it('can create and verify credential', async () => {
     const holder = Keypair.generate()
 
