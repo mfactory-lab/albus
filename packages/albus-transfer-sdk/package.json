@@ -1,6 +1,5 @@
 {
   "name": "@albus-finance/transfer-sdk",
-  "type": "module",
   "version": "0.2.4",
   "description": "Albus Transfer SDK",
   "repository": {

@@ -1,5 +1,5 @@
 import type { AnchorProvider } from '@coral-xyz/anchor'
-import anchor from '@coral-xyz/anchor'
+import * as anchor from '@coral-xyz/anchor'
 import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
 import {
