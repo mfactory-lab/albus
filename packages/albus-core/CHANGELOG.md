@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.6-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.13...@albus-finance/core-v0.3.6-next.14) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* **ci:** fixed release action ([df776ab](https://github.com/mfactory-lab/albus/commit/df776abb3686a82d67c7998715a4a429f190e431))
+* **core:** inline `@sphereon/pex` ([b87d1f5](https://github.com/mfactory-lab/albus/commit/b87d1f541ebc6fc01ac435f70941d7ee00b8b2b8))
+* global build fixes ([93a9c47](https://github.com/mfactory-lab/albus/commit/93a9c47fde55f2ebef8ebc1bb67945b61c5f7ee0))
+
 ## [0.3.6-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.12...@albus-finance/core-v0.3.6-next.13) (2024-05-10)
 
 ## [0.3.6-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.11...@albus-finance/core-v0.3.6-next.12) (2024-05-10)
