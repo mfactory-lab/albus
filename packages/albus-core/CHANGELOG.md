@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6-next.15](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.14...@albus-finance/core-v0.3.6-next.15) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* BigInt serialize error ([6d39238](https://github.com/mfactory-lab/albus/commit/6d39238e74719f24cf7efbe2adab645d8697c7f4))
+
 ## [0.3.6-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.13...@albus-finance/core-v0.3.6-next.14) (2024-05-13)
 
 
