@@ -9,7 +9,6 @@
   "sideEffects": false,
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
@@ -44,5 +43,9 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "browserslist": [
+    "supports bigint and not dead",
+    "maintained node versions"
+  ]
 }

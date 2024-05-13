@@ -9,8 +9,6 @@ export default defineConfig((options: Options) => ({
   treeshake: true,
   shims: true,
   dts: true,
-  // platform: 'neutral',
-  noExternal: ['key-did-resolver'],
-  // skipNodeModulesBundle: true,
+  noExternal: ['@sphereon/pex', 'key-did-resolver'],
   ...options,
 }))
