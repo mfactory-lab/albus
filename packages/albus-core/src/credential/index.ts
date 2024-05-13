@@ -295,17 +295,19 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   if (proof.proofValue[0] !== 'z') {
     throw new Error('Only base58btc multibase encoding is supported.')
   }
+
   const signatureBytes = base58ToBytes(proof.proofValue.substring(1))
   const signature = Signature.newFromCompressed(signatureBytes.slice(0, 64))
+  const pubKey = BabyJubPubkey.newFromCompressed(issuerPubkey).p
 
   const claimsTree = await createCredentialTree(cred)
 
-  proof.issuerPubkey = BabyJubPubkey.newFromCompressed(issuerPubkey).p.map(String)
-  proof.signature = [...signature.R8, signature.S].map(String)
-
-  if (!eddsa.verifyPoseidon(claimsTree.root, signature, proof.issuerPubkey)) {
+  if (!eddsa.verifyPoseidon(claimsTree.root, signature, pubKey)) {
     throw new Error('Proof verification failed')
   }
+
+  proof.issuerPubkey = pubKey.map(String)
+  proof.signature = [...signature.R8, signature.S].map(String)
 
   return cred
 }
