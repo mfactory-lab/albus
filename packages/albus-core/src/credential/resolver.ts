@@ -12,6 +12,9 @@ enum AccountType {
   Issuer = 'issuer',
 }
 
+/**
+ * Albus DID resolver.
+ */
 export function albusDidResolver(): Record<string, DIDResolver> {
   async function resolve(did: string, parsed: ParsedDID): Promise<DIDResolutionResult> {
     const params = new URLSearchParams(parsed.query)
@@ -64,6 +67,12 @@ export function albusDidResolver(): Record<string, DIDResolver> {
   return { albus: resolve }
 }
 
+/**
+ * Parses the issuer information from the provided account info.
+ *
+ * @param {AccountInfo<Buffer>} accountInfo - The account information containing issuer data.
+ * @return {object} An object containing the parsed pubkey and zkPubkey.
+ */
 function parseIssuer(accountInfo: AccountInfo<Buffer>) {
   const discriminator = accountInfo.data.subarray(0, 8)
   if (!discriminator.equals(Buffer.from([216, 19, 83, 230, 108, 53, 80, 14]))) {
@@ -74,7 +83,16 @@ function parseIssuer(accountInfo: AccountInfo<Buffer>) {
   return { pubkey, zkPubkey }
 }
 
-function generateDidDocument(opts: { pubkey: Uint8Array, zkPubkey: Uint8Array, controller: string }) {
+/**
+ * Generates a DID (Decentralized Identifier) document based on the provided public key, zkPubkey, and controller.
+ *
+ * @param {object} opts
+ * @param {Uint8Array} opts.pubkey - The public key used in the DID document generation.
+ * @param {Uint8Array} opts.zkPubkey - The zero-knowledge public key used in the DID document generation.
+ * @param {string} opts.controller - The controller of the DID.
+ * @return {DIDDocument} The generated DID document.
+ */
+function generateDidDocument(opts: { pubkey: Uint8Array, zkPubkey: Uint8Array, controller: string }): DIDDocument {
   const { pubkey, zkPubkey, controller } = opts
   const publicKeyMultibase = MultiBase.encode(pubkey, MultiBase.codec.ed25519Pub)
 
