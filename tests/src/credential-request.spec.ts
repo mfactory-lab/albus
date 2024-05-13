@@ -156,7 +156,7 @@ describe('credentialRequest', async () => {
       })
       assert.ok(false)
     } catch (e: any) {
-      console.log(e)
+      // console.log(e)
       assertErrorCode(e, 'Unauthorized')
     }
   })
