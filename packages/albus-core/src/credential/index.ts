@@ -300,8 +300,8 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 
   const claimsTree = await createCredentialTree(cred)
 
-  proof.issuerPubkey = BabyJubPubkey.newFromCompressed(issuerPubkey).p
-  proof.signature = [...signature.R8, signature.S]
+  proof.issuerPubkey = BabyJubPubkey.newFromCompressed(issuerPubkey).p.map(String)
+  proof.signature = [...signature.R8, signature.S].map(String)
 
   if (!eddsa.verifyPoseidon(claimsTree.root, signature, proof.issuerPubkey)) {
     throw new Error('Proof verification failed')
