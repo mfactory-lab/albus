@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6-next.16](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.15...@albus-finance/core-v0.3.6-next.16) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* **core:** fix verification bigint error ([c39965a](https://github.com/mfactory-lab/albus/commit/c39965a4610440634bd19918da2df2e007fdc8b6))
+
 ## [0.3.6-next.15](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.14...@albus-finance/core-v0.3.6-next.15) (2024-05-13)
 
 
