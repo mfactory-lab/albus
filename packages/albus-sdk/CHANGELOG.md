@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0-next.33](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.32...@albus-finance/sdk-v0.3.0-next.33) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* credential request payer ([285b7cc](https://github.com/mfactory-lab/albus/commit/285b7cc8f1f6c4aa9496c303208c3b2bb3ab8e70))
+* **sdk:** add `ref=cr` for `rejectCredentialRequest` ([41018ed](https://github.com/mfactory-lab/albus/commit/41018ede193c9ae8deebfbbc430451fb0ebf8d28))
+
 ## [0.3.0-next.32](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.31...@albus-finance/sdk-v0.3.0-next.32) (2024-05-10)
 
 
