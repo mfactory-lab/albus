@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.36](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.35...@albus-finance/sdk-v0.3.0-next.36) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* improved `tsconfig` ([2238973](https://github.com/mfactory-lab/albus/commit/2238973aaf3548577f35d9a94c0fe4d6cf2b487e))
+
 ## [0.3.0-next.35](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.34...@albus-finance/sdk-v0.3.0-next.35) (2024-05-13)
 
 
