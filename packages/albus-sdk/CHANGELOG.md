@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.35](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.34...@albus-finance/sdk-v0.3.0-next.35) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* fixed credentialOwner error ([8da0497](https://github.com/mfactory-lab/albus/commit/8da0497c5c0632cf7ab1a4478049a04f89d901a9))
+
 ## [0.3.0-next.34](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.33...@albus-finance/sdk-v0.3.0-next.34) (2024-05-13)
 
 ## [0.3.0-next.33](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.32...@albus-finance/sdk-v0.3.0-next.33) (2024-05-13)
