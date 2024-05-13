@@ -33,3 +33,5 @@ docker-target
 test-ledger
 .eslintcache
 /.secrets
+
+keypair.json

@@ -642,10 +642,8 @@ export type FullProveProps = {
   throwOnError?: boolean
   txBuilder?: TxBuilder
   // for tests only
-  // eslint-disable-next-line node/prefer-global/buffer
   wasmUri?: Buffer | string
   // for tests only
-  // eslint-disable-next-line node/prefer-global/buffer
   zkeyUri?: Buffer | string
 }
 

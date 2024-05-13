@@ -82,7 +82,7 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Load issuer by zk pubkey (babyjub curve)
+   * Load issuer by zk pubkey
    */
   async loadByZkPubkey(pubkey: [bigint, bigint], noData?: boolean) {
     const accounts = await this.find({
@@ -105,7 +105,7 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Find issuers and return a map
+   * Find issuers and return them as a Map
    */
   async findMapped(props: FindIssuerProps = {}) {
     return (await this.find(props))
@@ -116,7 +116,7 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Find issuers
+   * Find issuers with the given filters
    * @param props
    */
   async find(props: FindIssuerProps = {}) {

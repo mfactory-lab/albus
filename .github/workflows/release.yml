@@ -62,6 +62,7 @@ jobs:
 
       - name: Run release
         run: |
+          pnpm -F ${{ env.PACKAGE }}... build
           if [ ${{ github.ref }} == 'refs/heads/main' ]; then
             pnpm -F ${{ env.PACKAGE }} release:ci
           else
@@ -70,4 +71,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-

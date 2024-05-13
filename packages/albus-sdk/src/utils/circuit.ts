@@ -46,7 +46,7 @@ export function formatCircuitDate(date?: Date): string {
  */
 export function getSignals(symbols: string[], inputs: bigint[]): Record<string, bigint | bigint[] | bigint[][]> {
   let idx = 0
-  const map = {}
+  const map: Record<string, any> = {}
 
   function assignValue(sig: ParseSignalResult): any {
     if (sig.next) {

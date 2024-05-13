@@ -146,6 +146,31 @@ describe('credentialRequest', async () => {
     }
   })
 
+  it('should not allow the issuer to delete a credential request', async () => {
+    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specId)
+    const [credentialRequest] = issuerClient.pda.credentialRequest(credentialSpec, holder.publicKey)
+
+    try {
+      await issuerClient.credentialRequest.delete({
+        credentialRequest,
+      })
+      assert.ok(false)
+    } catch (e: any) {
+      console.log(e)
+      assertErrorCode(e, 'Unauthorized')
+    }
+  })
+
+  it('should allow the holder to delete a credential request', async () => {
+    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specId)
+    const [credentialRequest] = issuerClient.pda.credentialRequest(credentialSpec, holder.publicKey)
+
+    const { signature } = await holderClient.credentialRequest.delete({
+      credentialRequest,
+    })
+    assert.ok(!!signature)
+  })
+
   it('should allow the issuer to delete a credential spec', async () => {
     const { signature } = await issuerClient.credentialSpec.delete({
       name: specId,

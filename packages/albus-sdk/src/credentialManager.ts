@@ -334,10 +334,10 @@ export type CreateCredentialProps = {
 export type UpdateCredentialProps = {
   uri: string
   name?: string
+  // Mint required if credential request is not provided
+  mint?: PublicKeyInitData
   // Optional credential request associated with issuer
   credentialRequest?: PublicKeyInitData
-  issuer?: PublicKeyInitData
-  mint?: PublicKeyInitData
 }
 
 export type DeleteCredentialProps = {

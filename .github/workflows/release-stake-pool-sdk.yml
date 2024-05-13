@@ -2,7 +2,7 @@ name: Release(stake-pool-sdk)
 
 on:
   push:
-    branches: [ dev ]
+    branches: [dev]
     paths:
       - packages/albus-stake-pool-sdk/src/**
   workflow_dispatch:
@@ -13,4 +13,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     secrets: inherit
     with:
-      package: "@albus-finance/stake-pool-sdk"
+      package: '@albus-finance/stake-pool-sdk'

@@ -28,9 +28,9 @@
 
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { assert, beforeAll, describe, it, vi } from 'vitest'
-import { CircuitHelper, countryLookup } from '../../packages/circuits/src'
 import * as Albus from '../../packages/albus-core/src'
 import { AlbusClient, InvestigationStatus, ProofRequestStatus, TxBuilder } from '../../packages/albus-sdk/src'
+import { CircuitHelper, countryLookup } from '../../packages/circuits/src'
 import { assertErrorCode, initProvider, payer, provider, requestAirdrop } from './utils'
 
 describe('albus', async () => {
@@ -99,11 +99,12 @@ describe('albus', async () => {
     vi.spyOn(client.credential, 'load').mockReturnValue(Promise.resolve(credential))
 
     await circuitHelper.setup()
-    const { signals, publicInputs, outputs } = await circuitHelper.info()
+
+    const { signals, publicInputs, publicOutputs } = await circuitHelper.info()
     circuitData.privateSignals = signals.private
     circuitData.publicSignals = signals.public
     circuitData.outputs = signals.output
-    maxPublicInputs = publicInputs + outputs
+    maxPublicInputs = publicInputs + publicOutputs
 
     // airdrops
     await requestAirdrop(payer.publicKey)

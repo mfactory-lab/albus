@@ -40,6 +40,7 @@ import type {
 } from './credentialSpecManager'
 import type { FindCredentialRequestProps } from './credentialRequestManager'
 import type { SendOpts } from './utils'
+import { CredentialRequestStatus } from './generated'
 
 export class AlbusIssuerClient {
   constructor(private readonly client: AlbusClient) {
@@ -56,6 +57,34 @@ export class AlbusIssuerClient {
       AlbusClient.fromKeypair(connection, keypair, opts),
     )
   }
+
+  // issuer?: { pubkey: PublicKey, data: Issuer }
+  //
+  // async init() {
+  //   if (!this.client.provider.publicKey) {
+  //     return
+  //   }
+  //   // Try to find the issuer account by the authority public key
+  //   await this.findIssuerByAuthority()
+  // }
+  //
+  // /**
+  //  * Finds the issuer account by the authority public key and sets the `issuer` property.
+  //  *
+  //  * @throws {IssuerNotFound} - If the issuer account is not found.
+  //  */
+  // async findIssuerByAuthority() {
+  //   const [iss] = await this.client.issuer.find({
+  //     authority: this.client.provider.publicKey,
+  //   })
+  //   if (!iss) {
+  //     throw new IssuerNotFound()
+  //   }
+  //   this.issuer = {
+  //     pubkey: iss.pubkey,
+  //     data: iss.data!,
+  //   }
+  // }
 
   /**
    * Create a new credential spec.
@@ -134,7 +163,75 @@ export class AlbusIssuerClient {
    * The evaluatePresentation compares what is expected from a presentation with a presentationDefinition.
    * presentationDefinition: It can be either v1 or v2 of presentationDefinition
    */
-  evaluatePresentation(...args: ArgumentsType<typeof credential.PexHelper.evaluatePresentation>) {
+  evaluatePresentation(...args: ArgumentsType<typeof credential.PexHelper.evaluatePresentation>): typeof credential.EvaluationResults {
     return credential.PexHelper.evaluatePresentation(...args)
   }
+
+  /**
+   * Add instructions to reject the credential request
+   *
+   * @param {object} props - The properties for rejecting the credential request.
+   * @param {PublicKeyInitData} props.credentialRequest - The credential request to reject.
+   * @param {PublicKeyInitData} props.issuer - The issuer of the credential request.
+   * @param {string} [props.message] - Optional message for rejecting the credential request.
+   * @param {SendOpts} [opts] - Optional send options.
+   */
+  async rejectCredentialRequest(props: { credentialRequest: PublicKeyInitData, issuer: PublicKeyInitData, message?: string }, opts?: SendOpts) {
+    const txBuilder = this.client.credential.txBuilder
+
+    // Add instructions to reject the credential request
+    txBuilder.addInstruction(
+      ...this.client.credentialRequest.updateIx({
+        credentialRequest: props.credentialRequest,
+        issuer: props.issuer,
+        status: CredentialRequestStatus.Rejected,
+        message: props.message,
+      }).instructions,
+    )
+
+    // Add instructions to reject the credential
+    txBuilder.addInstruction(
+      ...(await this.client.credential.updateIx({
+        credentialRequest: props.credentialRequest,
+        uri: `data:,status=rejected&ref=cr`,
+      })).instructions,
+    )
+
+    return txBuilder.sendAndConfirm(opts)
+  }
+
+  /**
+   * Approves a credential request by updating the status to "Approved" and updating the credential with the provided URI.
+   *
+   * @param {object} props - The properties for approving the credential request.
+   * @param {PublicKeyInitData} props.credentialRequest - The credential request to approve.
+   * @param {PublicKeyInitData} props.issuer - The issuer of the credential request.
+   * @param {string} props.uri - The URI of the credential.
+   * @param {SendOpts} [opts] - Optional send options.
+   */
+  async approveCredentialRequest(props: { credentialRequest: PublicKeyInitData, issuer: PublicKeyInitData, uri: string }, opts?: SendOpts) {
+    const txBuilder = this.client.credential.txBuilder
+
+    // Add instructions to approve the credential request
+    txBuilder.addInstruction(
+      ...this.client.credentialRequest.updateIx({
+        credentialRequest: props.credentialRequest,
+        issuer: props.issuer,
+        status: CredentialRequestStatus.Approved,
+      }).instructions,
+    )
+
+    // Add instructions to approve the credential
+    txBuilder.addInstruction(
+      ...(await this.client.credential.updateIx({
+        credentialRequest: props.credentialRequest,
+        uri: props.uri,
+      })).instructions,
+    )
+
+    return txBuilder.sendAndConfirm(opts)
+  }
+}
+
+export class IssuerNotFound extends Error {
 }

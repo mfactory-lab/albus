@@ -1,6 +1,5 @@
 {
   "name": "@albus-finance/cli",
-  "type": "module",
   "version": "0.0.5",
   "private": true,
   "repository": {
@@ -8,22 +7,17 @@
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-cli"
   },
-  "main": "./dist/index.cjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
   "bin": {
-    "albus": "./dist/index.mjs"
+    "albus": "./dist/index.js"
   },
   "engines": {
     "node": ">=16.0.0"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "start": "node ./dist/index.mjs",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "run": "vite-node ./src/index.ts --",
-    "dev": "vite build --watch",
-    "build": "vite build",
     "release": "npm run build && release-it",
     "prepublishOnly": "npm run build"
   },
@@ -37,13 +31,14 @@
     "@solana/web3.js": "^1.91.1",
     "axios": "^1.6.8",
     "chalk": "^4.1.2",
-    "cli-table3": "^0.6.3",
-    "commander": "^11.1.0",
-    "loglevel": "^1.8.1",
+    "cli-table3": "^0.6.4",
+    "commander": "^12.0.0",
+    "dotenv": "^16.4.5",
+    "loglevel": "^1.9.1",
     "snarkjs": "*"
   },
   "devDependencies": {
-    "vite-node": "^0.34.6"
+    "vite-node": "^1.6.0"
   },
   "release-it": {
     "git": false

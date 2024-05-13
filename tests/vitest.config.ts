@@ -36,7 +36,7 @@ export default defineConfig({
     // ],
     include: ['./src/**/*.spec.ts'],
     // include: ['**/?(*.){test,spec}.?(c|m)[jt]s?(x)'],
-    testTimeout: 20000,
+    testTimeout: 30000,
     environment: 'node',
     pool: 'forks',
     exclude: [

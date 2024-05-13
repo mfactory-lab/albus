@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.6-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.12...@albus-finance/core-v0.3.6-next.13) (2024-05-10)
+
+## [0.3.6-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.11...@albus-finance/core-v0.3.6-next.12) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* replase `prerelease` to `prepublishOnly` ([d5b360c](https://github.com/mfactory-lab/albus/commit/d5b360c6a322c89d619d4041bf2f943e6940a6fd))
+
+## [0.3.6-next.11](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.10...@albus-finance/core-v0.3.6-next.11) (2024-05-10)
+
+## [0.3.6-next.10](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.9...@albus-finance/core-v0.3.6-next.10) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **circuits:** add `typeProof`, upgrade circomkit ([3374621](https://github.com/mfactory-lab/albus/commit/33746217fc547db5d753381e8897ba521d802f8f))
+* **core:** tsup integration, global improvements ([660567b](https://github.com/mfactory-lab/albus/commit/660567b44e6fb7f0d3ed6ef938e782b73d346262))
+
 ## [0.3.6-next.9](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.8...@albus-finance/core-v0.3.6-next.9) (2024-04-18)
 
 

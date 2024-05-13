@@ -215,7 +215,7 @@ export class IrysStorageDriver implements StorageDriver {
       }
     }
 
-    // eslint-disable-next-line node/prefer-global/process,no-prototype-builtins
+    // eslint-disable-next-line no-prototype-builtins
     const isNode = typeof window === 'undefined' || window.process?.hasOwnProperty('type')
 
     let irys: WebIrys | NodeIrys

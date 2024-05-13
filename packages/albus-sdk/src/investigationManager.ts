@@ -365,7 +365,7 @@ export class InvestigationManager extends BaseManager {
 
     const newEncryptedShare = await Albus.crypto.XC20P.encryptBytes(
       Albus.crypto.utils.bigintToBytes(secretShare[0]),
-      investigationRequest.encryptionKey,
+      investigationRequest.encryptionKey.toBytes(),
     )
 
     const ix = createRevealSecretShareInstruction({

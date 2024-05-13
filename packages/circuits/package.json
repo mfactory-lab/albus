@@ -1,6 +1,6 @@
 {
   "name": "@albus-finance/circuits",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "Circuits for Albus",
   "license": "AGPL-3.0",
@@ -20,8 +20,8 @@
     "src/**/*.ts"
   ],
   "scripts": {
-    "circom:compile": "circomkit compile",
-    "circom:setup": "circomkit setup",
+    "compile": "circomkit compile",
+    "setup": "circomkit setup",
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
     "release:dry": "release-it --ci --dry-run",
@@ -33,7 +33,7 @@
     "circomlib": "^2.0.5"
   },
   "devDependencies": {
-    "circomkit": "0.0.24",
+    "circomkit": "^0.1.0",
     "release-it-config": "workspace:^"
   },
   "publishConfig": {

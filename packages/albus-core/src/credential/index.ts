@@ -139,23 +139,24 @@ export async function signCredential(vc: W3CCredential, opts: SingCredentialOpts
  */
 export async function encryptCredential(vc: VerifiableCredential, opts: EncryptCredentialOpts): Promise<VerifiableCredential & {
   credentialSubject: {
-    encrypted?: { data: string, key: string }
+    encrypted?: string
   }
 }> {
+  // Already encrypted
   if (vc.credentialSubject?.encrypted !== undefined) {
     return vc
   }
   return {
     ...vc,
     credentialSubject: {
-      encrypted: {
-        data: await XC20P.encrypt(
+      encrypted: [
+        await XC20P.encrypt(
           JSON.stringify(vc.credentialSubject),
-          opts.pubkey,
+          opts.pubkey.toBytes(),
           opts.esk,
         ),
-        key: opts.pubkey.toBase58(),
-      },
+        opts.pubkey.toBase58(),
+      ].join('.'),
     },
   }
 }
@@ -169,9 +170,9 @@ export async function encryptCredential(vc: VerifiableCredential, opts: EncryptC
  */
 export async function decryptCredentialIfNeeded(vc: VerifiableCredential, secretKey: Uint8Array): Promise<VerifiableCredential> {
   let credentialSubject: Record<string, any> = {}
-  if (vc.credentialSubject?.encrypted?.data !== undefined) {
+  if (vc.credentialSubject?.encrypted !== undefined) {
     credentialSubject = JSON.parse(
-      await XC20P.decrypt(vc.credentialSubject.encrypted.data, secretKey),
+      await XC20P.decrypt(String(vc.credentialSubject.encrypted).split('.')[0], secretKey),
     )
     return { ...vc, credentialSubject }
   }
@@ -264,7 +265,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 
   const cred = await decryptCredentialIfNeeded(vc, Uint8Array.from(opts.decryptionKey ?? []))
 
-  // @ts-expect-error ...
+  // @ts-expect-error this is a valid syntax
   const issuerDid = cred.issuer?.id ?? cred.issuer
 
   const result = await resolver.resolve(issuerDid, { accept: 'application/did+json' })
@@ -320,7 +321,7 @@ export async function verifyPresentation(vp: VerifiablePresentation, opts: Verif
 
   validatePresentationPayload(vp as any)
 
-  // @ts-expect-error ...
+  // @ts-expect-error this is a valid syntax
   const holderDid = vp.holder?.id ?? vp.holder
   const result = await resolver.resolve(holderDid, { accept: 'application/did+json' })
 
@@ -445,7 +446,7 @@ export async function createCredentialTree(credential: W3CCredential, depth?: nu
   // the last credential type is used
   const type = credential.type.slice(-1)[0]
   if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
-    meta.type = type
+    meta.type = ClaimsTree.encodeValue(type, true)
   }
 
   return ClaimsTree.from({ ...credential.credentialSubject, meta }, { depth })

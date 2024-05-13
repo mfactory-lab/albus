@@ -1,39 +1,31 @@
 {
   "name": "@albus-finance/core",
-  "version": "0.3.6-next.9",
+  "version": "0.3.6-next.13",
   "repository": {
     "type": "git",
     "url": "https://github.com/mfactory-lab/albus.git",
     "directory": "packages/albus-core"
   },
   "sideEffects": false,
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.mjs",
-  "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "dev": "vite build --watch",
-    "build": "vite build",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "vitest",
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
     "release:dry": "release-it --ci --dry-run",
-    "release:pre": "release-it --preRelease=next",
-    "prepublishOnly": "vite build"
+    "release:pre": "release-it --preRelease=next"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
     "@solana/web3.js": "^1.91.1",
-    "@sphereon/pex": "^3.3.1",
+    "@sphereon/pex": "^3.3.3",
     "@stablelib/ed25519": "^1.0.3",
     "@stablelib/random": "^1.0.2",
     "@stablelib/sha256": "^1.0.1",
@@ -51,5 +43,9 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "browserslist": [
+    "supports bigint and not dead",
+    "maintained node versions"
+  ]
 }

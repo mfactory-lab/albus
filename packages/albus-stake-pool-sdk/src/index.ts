@@ -150,7 +150,7 @@ export async function getStakePoolAccounts(
       }
     } else {
       console.error(
-        `Could not decode. StakePoolAccount Enum is ${a.account.data.readUInt8()}, expected 1 or 2!`,
+                `Could not decode. StakePoolAccount Enum is ${a.account.data.readUInt8()}, expected 1 or 2!`,
       )
       decodedData = undefined
     }
@@ -177,6 +177,7 @@ export async function depositStake(
   validatorVote: PublicKey,
   depositStake: PublicKey,
   poolTokenReceiverAccount?: PublicKey,
+  proofRequest?: PublicKey,
 ) {
   const stakePool = await getStakePoolAccount(connection, stakePoolAddress)
 
@@ -228,12 +229,13 @@ export async function depositStake(
     }).instructions,
   )
 
-  let proofRequest: PublicKey | undefined
-  if (stakePool.account.data.depositPolicy) {
-    [proofRequest] = AlbusClient.pda().proofRequest(
-      stakePool.account.data.depositPolicy,
-      authorizedPubkey,
-    )
+  if (!proofRequest) {
+    if (stakePool.account.data.depositPolicy) {
+      proofRequest = AlbusClient.pda().proofRequest(
+        stakePool.account.data.depositPolicy,
+        authorizedPubkey,
+      )[0]
+    }
   }
 
   instructions.push(
@@ -274,9 +276,9 @@ export async function depositSol(
   const fromBalance = await connection.getBalance(from, 'confirmed')
   if (fromBalance < lamports) {
     throw new Error(
-      `Not enough SOL to deposit into pool. Maximum deposit amount is ${lamportsToSol(
-        fromBalance,
-      )} SOL.`,
+            `Not enough SOL to deposit into pool. Maximum deposit amount is ${lamportsToSol(
+                fromBalance,
+            )} SOL.`,
     )
   }
 
@@ -363,7 +365,7 @@ export async function withdrawStake(
   // Check withdrawFrom balance
   if (tokenAccount.amount < poolAmount) {
     throw new Error(
-      `Not enough token balance to withdraw ${lamportsToSol(poolAmount)} pool tokens.
+            `Not enough token balance to withdraw ${lamportsToSol(poolAmount)} pool tokens.
         Maximum withdraw amount is ${lamportsToSol(tokenAccount.amount)} pool tokens.`,
     )
   }
@@ -425,7 +427,7 @@ export async function withdrawStake(
 
       if (availableForWithdrawal < poolAmount) {
         throw new Error(
-          `Not enough lamports available for withdrawal from ${stakeAccountAddress},
+                    `Not enough lamports available for withdrawal from ${stakeAccountAddress},
             ${poolAmount} asked, ${availableForWithdrawal} available.`,
         )
       }
@@ -436,7 +438,7 @@ export async function withdrawStake(
       })
     } else {
       throw new Error(
-        `Provided stake account is delegated to a vote account ${voteAccount} which does not exist in the stake pool`,
+                `Provided stake account is delegated to a vote account ${voteAccount} which does not exist in the stake pool`,
       )
     }
   } else if (voteAccountAddress) {
@@ -458,7 +460,7 @@ export async function withdrawStake(
     if (availableForWithdrawal < poolAmount) {
       // noinspection ExceptionCaughtLocallyJS
       throw new Error(
-        `Not enough lamports available for withdrawal from ${stakeAccountAddress},
+                `Not enough lamports available for withdrawal from ${stakeAccountAddress},
           ${poolAmount} asked, ${availableForWithdrawal} available.`,
       )
     }
@@ -593,7 +595,7 @@ export async function withdrawSol(
   // Check withdrawFrom balance
   if (tokenAccount.amount < poolAmount) {
     throw new Error(
-      `Not enough token balance to withdraw ${lamportsToSol(poolAmount)} pool tokens.
+            `Not enough token balance to withdraw ${lamportsToSol(poolAmount)} pool tokens.
           Maximum withdraw amount is ${lamportsToSol(tokenAccount.amount)} pool tokens.`,
     )
   }
@@ -624,7 +626,7 @@ export async function withdrawSol(
     }
     if (solWithdrawAuthority.toBase58() !== expectedSolWithdrawAuthority.toBase58()) {
       throw new Error(
-        `Invalid deposit withdraw specified, expected ${expectedSolWithdrawAuthority.toBase58()}, received ${solWithdrawAuthority.toBase58()}`,
+                `Invalid deposit withdraw specified, expected ${expectedSolWithdrawAuthority.toBase58()}, received ${solWithdrawAuthority.toBase58()}`,
       )
     }
   }
@@ -1005,9 +1007,9 @@ export async function stakePoolInfo(connection: Connection, stakePoolAddress: Pu
     epochFee: stakePool.account.data.epochFee,
     nextEpochFee: stakePool.account.data.nextEpochFee,
     preferredDepositValidatorVoteAddress:
-      stakePool.account.data.preferredDepositValidatorVoteAddress,
+        stakePool.account.data.preferredDepositValidatorVoteAddress,
     preferredWithdrawValidatorVoteAddress:
-      stakePool.account.data.preferredWithdrawValidatorVoteAddress,
+        stakePool.account.data.preferredWithdrawValidatorVoteAddress,
     stakeDepositFee: stakePool.account.data.stakeDepositFee,
     stakeWithdrawalFee: stakePool.account.data.stakeWithdrawalFee,
     // CliStakePool the same
@@ -1318,7 +1320,7 @@ export async function addValidatorToPool(
 
   if (validatorInfo) {
     throw new Error(
-      `Stake pool already contains validator ${validatorInfo.voteAccountAddress.toBase58()}, ignoring`,
+            `Stake pool already contains validator ${validatorInfo.voteAccountAddress.toBase58()}, ignoring`,
     )
   }
 

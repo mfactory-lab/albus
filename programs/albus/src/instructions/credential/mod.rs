@@ -33,6 +33,7 @@ pub mod delete_credential_spec;
 pub mod request_credential;
 pub mod update_credential;
 pub mod update_credential_request;
+pub mod delete_credential_request;
 
 pub use self::create_credential::*;
 pub use self::create_credential_spec::*;
@@ -41,3 +42,4 @@ pub use self::delete_credential_spec::*;
 pub use self::request_credential::*;
 pub use self::update_credential::*;
 pub use self::update_credential_request::*;
+pub use self::delete_credential_request::*;

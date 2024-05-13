@@ -58,7 +58,7 @@ export class CircuitHelper {
     const symData = readFileSync(`${this.circomkit.config.dirBuild}/${this.circuit}/${this.circuit}.sym`)
     return {
       ...info,
-      signals: loadSignals(symData.toString(), info.outputs, info.publicInputs, info.privateInputs),
+      signals: loadSignals(symData.toString(), info.publicOutputs, info.publicInputs, info.privateInputs),
     }
   }
 }

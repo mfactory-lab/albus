@@ -308,7 +308,7 @@ function poseidonDecrypt(ciphertext: bigint[], sharedKey: bigint[], length: numb
   return message.slice(0, length)
 }
 
-function poseidonStrategy(state) {
+function poseidonStrategy(state: any[]) {
   assert(state.length > 0)
   assert(state.length < N_ROUNDS_P.length)
 

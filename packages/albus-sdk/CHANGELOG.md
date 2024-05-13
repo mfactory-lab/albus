@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0-next.31](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.30...@albus-finance/sdk-v0.3.0-next.31) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **ci:** fixed release action ([df776ab](https://github.com/mfactory-lab/albus/commit/df776abb3686a82d67c7998715a4a429f190e431))
+* replase `prerelease` to `prepublishOnly` ([d5b360c](https://github.com/mfactory-lab/albus/commit/d5b360c6a322c89d619d4041bf2f943e6940a6fd))
+
+## [0.3.0-next.30](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.29...@albus-finance/sdk-v0.3.0-next.30) (2024-05-10)
+
+## [0.3.0-next.29](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.28...@albus-finance/sdk-v0.3.0-next.29) (2024-05-10)
+
+## [0.3.0-next.28](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.27...@albus-finance/sdk-v0.3.0-next.28) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **core:** tsup integration, global improvements ([660567b](https://github.com/mfactory-lab/albus/commit/660567b44e6fb7f0d3ed6ef938e782b73d346262))
+* **sdk:** tsup integration, new generated files, global improvements ([6cfa59b](https://github.com/mfactory-lab/albus/commit/6cfa59b18379cc32c7a45d901fa140fed8b63c80))
+
 ## [0.3.0-next.27](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.26...@albus-finance/sdk-v0.3.0-next.27) (2024-04-18)
 
 

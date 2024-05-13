@@ -66,6 +66,7 @@ pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> 
     req.uri = data.uri;
     req.status = CredentialRequestStatus::Pending;
     req.created_at = timestamp;
+    req.message = Default::default();
     req.bump = ctx.bumps.credential_request;
 
     emit!(CreateCredentialRequestEvent {
@@ -96,7 +97,7 @@ pub struct RequestCredential<'info> {
             authority.key().as_ref(),
         ],
         bump,
-        payer = authority,
+        payer = payer,
         space = CredentialRequest::space()
     )]
     pub credential_request: Box<Account<'info, CredentialRequest>>,
@@ -116,6 +117,8 @@ pub struct RequestCredential<'info> {
     pub issuer: Box<Account<'info, Issuer>>,
 
     #[account(mut)]
+    pub payer: Signer<'info>,
+
     pub authority: Signer<'info>,
 
     pub system_program: Program<'info, System>,

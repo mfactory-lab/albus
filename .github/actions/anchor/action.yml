@@ -1,5 +1,5 @@
-name: 'Setup Anchor Development Environment'
-description: 'Sets up the Anchor'
+name: Setup Anchor Development Environment
+description: Sets up the Anchor
 
 branding:
   icon: anchor
@@ -7,21 +7,21 @@ branding:
 
 inputs:
   anchor-version:
-    description: 'The version of anchor to use.'
+    description: The version of anchor to use.
     required: false
-    default: 'v0.29.0'
+    default: v0.29.0
   solana-key:
-    description: 'The private key to use for the solana sdk.'
+    description: The private key to use for the solana sdk.
     required: false
   solana-cluster:
-    description: 'The cluster to use for the solana sdk.'
+    description: The cluster to use for the solana sdk.
     required: false
-    default: 'devnet'
+    default: devnet
   run:
-    description: 'The command(s) to run.'
+    description: The command(s) to run.
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Shell Setup
       run: |

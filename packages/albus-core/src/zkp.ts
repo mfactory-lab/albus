@@ -188,7 +188,7 @@ export function bytesToFinite(bytes: ArrayLike<number>) {
  * Convert G1 (snarkjs) to bytes
  * @param p
  */
-export function encodeG1(p) {
+export function encodeG1(p: any[] | readonly (string | bigint)[]) {
   return p.map(BigInt)
     .reduce((a, b) => a.concat(Array.from(finiteToBytes(b).reverse())), [] as number[])
     .slice(0, 64)
@@ -198,7 +198,7 @@ export function encodeG1(p) {
  * Convert G2 (snarkjs) to bytes
  * @param p
  */
-function encodeG2(p): number[] {
+function encodeG2(p: any[] | readonly (readonly (string | bigint)[])[]): number[] {
   return p.reduce((a, b) => a.concat(Array.from(finiteToBytes(b[0])).concat(Array.from(finiteToBytes(b[1]))).reverse()), [] as number[]).slice(0, 128)
 }
 

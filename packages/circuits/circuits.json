@@ -60,6 +60,20 @@
       "issuerSignature"
     ]
   },
+  "typeProof": {
+    "file": "typeProof",
+    "template": "TypeProof",
+    "params": [4, 1],
+    "pubs": [
+      "timestamp",
+      "expectedType",
+      "claimsKey",
+      "claimsProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature"
+    ]
+  },
   "residenceProof": {
     "file": "residenceProof",
     "template": "ResidenceProof",

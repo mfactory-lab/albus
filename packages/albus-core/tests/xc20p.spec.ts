@@ -37,7 +37,7 @@ describe('xc20p', async () => {
     const user2 = Keypair.generate()
     const data = 16140409637481046961916843704899482470641809764070610558947396269571678949363n
     const bytes = bigintToBytes(data)
-    const encBytes = await XC20P.encryptBytes(bytes, user1.publicKey, user2.secretKey)
+    const encBytes = await XC20P.encryptBytes(bytes, user1.publicKey.toBytes(), user2.secretKey)
     const decBytes = await XC20P.decryptBytes(encBytes, user1.secretKey)
 
     assert.equal(bytesToBigInt(decBytes), data)

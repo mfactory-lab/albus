@@ -28,7 +28,6 @@
 
 // eslint-disable-next-line no-template-curly-in-string
 const version = '${version}'
-// eslint-disable-next-line node/prefer-global/process
 const packageName = process.env.npm_package_name
 const scope = packageName.split('/')[1]
 

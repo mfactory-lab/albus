@@ -8,18 +8,27 @@ homepage.workspace = true
 repository.workspace = true
 
 [lib]
-crate-type = ["cdylib", "lib"]
+crate-type = [
+  "cdylib",
+  "lib"
+]
 
 [features]
-idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+idl-build = [
+  "anchor-lang/idl-build",
+  "anchor-spl/idl-build"
+]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
-cpi = ["no-entrypoint"]
+cpi = [ "no-entrypoint" ]
 devnet = []
 testing = []
 
 [dependencies]
 albus-solana-verifier.workspace = true
 anchor-lang = { version = "0.29.0" }
-anchor-spl = { version = "0.29.0", features = ["associated_token", "token"], default-features = false }
+anchor-spl = { version = "0.29.0", features = [
+  "associated_token",
+  "token"
+], default-features = false }

@@ -71,7 +71,7 @@ describe('attendanceProof', async () => {
 
   it('should pass if valid input', async () => {
     const input = await generateInput(claims, {
-      expectedEvent: credential.encodeClaimValue(claims.event),
+      expectedEvent: credential.ClaimsTree.encodeValue(claims.event),
       expectedDateFrom: claims.meta.issuanceDate,
       expectedDateTo: 0,
     })
@@ -80,7 +80,7 @@ describe('attendanceProof', async () => {
 
   it('should fail if invalid event code', async () => {
     const input = await generateInput(claims, {
-      expectedEvent: credential.encodeClaimValue('test'),
+      expectedEvent: credential.ClaimsTree.encodeValue('test'),
       expectedDateFrom: 0,
       expectedDateTo: 0,
     })
@@ -89,7 +89,7 @@ describe('attendanceProof', async () => {
 
   it('should fail if invalid from date', async () => {
     const input = await generateInput(claims, {
-      expectedEvent: credential.encodeClaimValue(claims.event),
+      expectedEvent: credential.ClaimsTree.encodeValue(claims.event),
       expectedDateFrom: claims.meta.issuanceDate + 86400,
       expectedDateTo: 0,
     })
@@ -98,7 +98,7 @@ describe('attendanceProof', async () => {
 
   it('should fail if invalid to date', async () => {
     const input = await generateInput(claims, {
-      expectedEvent: credential.encodeClaimValue(claims.event),
+      expectedEvent: credential.ClaimsTree.encodeValue(claims.event),
       expectedDateFrom: 0,
       expectedDateTo: claims.meta.issuanceDate - 86400,
     })

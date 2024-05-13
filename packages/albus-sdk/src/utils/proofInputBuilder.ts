@@ -28,7 +28,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * Generated proof input data.
    * @readonly
    */
-  readonly data = {} as { claimsKey?: any, claimsProof?: any } & T
+  readonly data: Record<string, any> = {} as { claimsKey?: any, claimsProof?: any } & T
 
   constructor(private credential: VerifiableCredential) {
   }
@@ -99,7 +99,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
    */
   async initClaimsTree() {
     const treeDepth = this.claimsTreeDepth
-      // try to find merkle proof in the circuit public signals and get the merkle tree depth
+    // try to find merkle proof in the circuit public signals and get the merkle tree depth
       ?? this.publicSignals.find(s => s?.name === 'claimsProof')?.next?.size
 
     this.claimsTree = await Albus.credential.createCredentialTree(this.credential, treeDepth)

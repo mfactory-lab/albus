@@ -52,6 +52,10 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
                     return Err(AlbusError::Unauthorized.into());
                 }
                 Some(issuer) => {
+                    if issuer.is_disabled {
+                        msg!("Error: Credential request issuer is disabled");
+                        return Err(AlbusError::Unauthorized.into());
+                    }
                     if !cmp_pubkeys(&req.issuer, &issuer.key()) {
                         msg!("Error: Credential request issuer mismatch");
                         return Err(AlbusError::Unauthorized.into());
@@ -69,7 +73,7 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
     let metadata = &ctx.accounts.metadata_account;
 
     UpdateV1CpiBuilder::new(&ctx.accounts.metadata_program)
-        .metadata(&ctx.accounts.metadata_account.to_account_info())
+        .metadata(&metadata.to_account_info())
         .authority(&ctx.accounts.albus_authority)
         // .token(Some(&ctx.accounts.token_account))
         .mint(&ctx.accounts.mint)

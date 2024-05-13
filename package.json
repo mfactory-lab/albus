@@ -1,43 +1,35 @@
 {
   "private": true,
-  "type": "module",
+  "packageManager": "pnpm@9.1.0",
   "license": "AGPL-3.0",
   "scripts": {
-    "cli": "pnpm -F @albus-finance/cli run start",
-    "cli:run": "pnpm -F @albus-finance/cli run run",
     "dev": "pnpm -r --parallel --filter=./packages/** run dev",
-    "dev:ui": "pnpm -F @albus-finance/ui dev",
+    "circuits": "pnpm -F circuits",
+    "core": "pnpm -F @albus-finance/core",
+    "sdk": "pnpm -F @albus-finance/sdk",
+    "swap": "pnpm -F @albus-finance/swap-sdk",
+    "transfer": "pnpm -F @albus-finance/transfer-sdk",
     "docs": "docsify serve ./docs",
-    "release:core": "pnpm -F @albus-finance/core release",
-    "release:sdk": "pnpm -F @albus-finance/sdk release",
-    "release:swap": "pnpm -F @albus-finance/swap-sdk release",
-    "release:transfer": "pnpm -F @albus-finance/transfer-sdk release",
     "test:e2e": "pnpm -F @albus-finance/tests run test",
     "test:unit": "vitest --dir ./packages",
-    "lint:fix": "eslint --fix ./packages",
-    "commit": "git-cz",
-    "syncpack": "syncpack fix-mismatches"
+    "lint:fix": "eslint --fix .",
+    "syncpack": "syncpack list-mismatches"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.14.0",
-    "@rollup/plugin-inject": "^5.0.5",
+    "@antfu/eslint-config": "^2.17.0",
     "@types/node": "^20.0.0",
-    "@vitest/ui": "^1.4.0",
+    "@vitest/ui": "^1.6.0",
     "buffer": "^6.0.3",
     "docsify-cli": "^4.4.4",
-    "eslint": "^9.0.0",
-    "syncpack": "^12.3.0",
-    "typescript": "^5.4.3",
-    "vite": "^5.2.6",
-    "vite-plugin-dts": "3.6.4",
+    "eslint": "^9.2.0",
+    "syncpack": "^12.3.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vite-plugin-dts": "^3.9.1",
     "vite-plugin-node-polyfills": "^0.21.0",
-    "vitest": "^1.4.0"
+    "vitest": "^1.6.0"
   },
-  "resolutions": {
-    "circom_tester": "0.0.20",
-    "ffjavascript": "0.2.63"
-  },
-  "packageManager": "pnpm@8.14.2",
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
@@ -51,8 +43,14 @@
         "snarkjs"
       ]
     },
-    "_patchedDependencies": {
-      "@sphereon/pex@3.3.1": "patches/@sphereon__pex@3.3.1.patch"
+    "pnpm": {
+      "patchedDependencies": {
+        "@sphereon/pex@3.3.3": "patches/@sphereon__pex@3.3.3.patch"
+      }
     }
+  },
+  "resolutions": {
+    "circom_tester": "0.0.20",
+    "ffjavascript": "0.2.63"
   }
 }

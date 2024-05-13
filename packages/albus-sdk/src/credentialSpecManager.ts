@@ -165,10 +165,6 @@ export class CredentialSpecManager extends BaseManager {
         }
       })
   }
-
-  async validate() {
-
-  }
 }
 
 export type CreateCredentialSpecProps = {

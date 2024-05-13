@@ -37,7 +37,7 @@ pub fn handler(
     let req = &mut ctx.accounts.credential_request;
 
     if data.message.len() > MAX_CRED_REQ_MSG_LEN {
-        msg!("Message too long, max {}", MAX_CRED_REQ_MSG_LEN);
+        msg!("Error: Message too long, max {}", MAX_CRED_REQ_MSG_LEN);
         return Err(AlbusError::InvalidData.into());
     }
 
