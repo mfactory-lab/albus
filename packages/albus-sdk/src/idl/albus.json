@@ -367,8 +367,13 @@
           "isSigner": false
         },
         {
-          "name": "authority",
+          "name": "payer",
           "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
           "isSigner": true
         },
         {

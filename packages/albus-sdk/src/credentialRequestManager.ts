@@ -26,14 +26,11 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type {
-  Commitment,
-  GetMultipleAccountsConfig,
-  PublicKeyInitData,
-} from '@solana/web3.js'
 import {
-  PublicKey,
-} from '@solana/web3.js'
+  type Commitment,
+  type GetMultipleAccountsConfig,
+  type Keypair, PublicKey,
+  type PublicKeyInitData } from '@solana/web3.js'
 import { BaseManager } from './base'
 
 import {
@@ -70,7 +67,8 @@ export class CredentialRequestManager extends BaseManager {
    * Create new Credential Request instruction.
    */
   createIx(props: CreateCredentialRequestProps) {
-    const authority = this.provider.publicKey
+    const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
+
     const issuer = new PublicKey(props.issuer)
     const credentialMint = new PublicKey(props.mint)
     const credentialToken = getAssociatedTokenAddress(credentialMint, authority)
@@ -84,6 +82,7 @@ export class CredentialRequestManager extends BaseManager {
       credentialToken,
       issuer,
       authority,
+      payer: this.provider.publicKey,
     }, {
       data: {
         uri: props.uri ?? '',
@@ -102,9 +101,14 @@ export class CredentialRequestManager extends BaseManager {
   async create(props: CreateCredentialRequestProps, opts?: SendOpts) {
     const { address, instructions } = this.createIx(props)
 
-    const signature = await this.txBuilder
+    const builder = this.txBuilder
       .addInstruction(...instructions)
-      .sendAndConfirm(opts)
+
+    if (props?.owner) {
+      builder.addSigner(props.owner)
+    }
+
+    const signature = await builder.sendAndConfirm(opts)
 
     return { address, signature }
   }
@@ -230,6 +234,8 @@ export type CreateCredentialRequestProps = {
   issuer: PublicKeyInitData
   /// Credential specification identifier
   specId: string
+  /// Owner of the credential
+  owner?: Keypair
   /// Presentation URI
   uri?: string
 }
