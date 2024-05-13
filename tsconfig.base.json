@@ -1,4 +1,6 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Default",
   "compilerOptions": {
     "target": "esnext",
     "lib": [
@@ -11,12 +13,18 @@
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
+    "noUnusedLocals": true,
     "noUnusedParameters": true,
     "useUnknownInCatchVariables": true,
     "declaration": true,
+    "declarationMap": true,
     "importHelpers": false,
+    "inlineSources": false,
     "sourceMap": true,
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
     "skipLibCheck": true
-  }
+  },
+  "exclude": ["node_modules"]
 }
