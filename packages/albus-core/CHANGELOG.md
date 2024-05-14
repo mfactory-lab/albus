@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.6-next.17](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.16...@albus-finance/core-v0.3.6-next.17) (2024-05-14)
+
+
+### 🌟 Features
+
+* **core:** add albus did resolver ([bcb3616](https://github.com/mfactory-lab/albus/commit/bcb36163bb37dc5b324fcf1b87c111a236ee3f5c))
+
+
+### 🐞 Bug Fixes
+
+* **core:** update resolver docs ([35a5592](https://github.com/mfactory-lab/albus/commit/35a5592094a329e077985a74825d1f66d7646db1))
+* improved `tsconfig` ([2238973](https://github.com/mfactory-lab/albus/commit/2238973aaf3548577f35d9a94c0fe4d6cf2b487e))
+
+
+### ♻️ Refactors
+
+* **core:** credential creation improvements ([fe4addc](https://github.com/mfactory-lab/albus/commit/fe4addceb944a7ca5e385908e80f94e843be68b2))
+
 ## [0.3.6-next.16](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.15...@albus-finance/core-v0.3.6-next.16) (2024-05-13)
 
 
