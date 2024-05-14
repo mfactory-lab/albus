@@ -13,8 +13,6 @@
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "useUnknownInCatchVariables": true,
     "declaration": true,
     "declarationMap": true,
