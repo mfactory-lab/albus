@@ -48,4 +48,12 @@ module.exports = antfu({
 
     'no-console': 'off',
   },
+  ignores: [
+    '.git/',
+    '**/node_modules/',
+    '**/dist/',
+    '**/coverage/',
+    // 'packages/**/src/generated/',
+    // '**/*.js',
+  ],
 })

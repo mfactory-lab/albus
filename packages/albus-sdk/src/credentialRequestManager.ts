@@ -198,12 +198,12 @@ export class CredentialRequestManager extends BaseManager {
       }
     }
 
-    if (props.owner) {
-      builder.addFilter('owner', new PublicKey(props.owner))
+    if (props.authority) {
+      builder.addFilter('authority', new PublicKey(props.authority))
     }
 
-    if (props.issuer) {
-      builder.addFilter('issuer', new PublicKey(props.issuer))
+    if (props.credentialOwner) {
+      builder.addFilter('credentialOwner', new PublicKey(props.credentialOwner))
     }
 
     if (props.credentialSpec) {
@@ -212,6 +212,10 @@ export class CredentialRequestManager extends BaseManager {
 
     if (props.credentialMint) {
       builder.addFilter('credentialMint', new PublicKey(props.credentialMint))
+    }
+
+    if (props.issuer) {
+      builder.addFilter('issuer', new PublicKey(props.issuer))
     }
 
     if (props.status) {
@@ -253,8 +257,9 @@ export type DeleteCredentialRequestProps = {
 }
 
 export type FindCredentialRequestProps = {
-  owner?: PublicKeyInitData
+  authority?: PublicKeyInitData
   issuer?: PublicKeyInitData
+  credentialOwner?: PublicKeyInitData
   credentialSpec?: PublicKeyInitData
   credentialMint?: PublicKeyInitData
   status?: number

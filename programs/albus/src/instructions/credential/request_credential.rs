@@ -59,9 +59,10 @@ pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> 
     spec.credential_request_count += 1;
 
     let req = &mut ctx.accounts.credential_request;
+    req.authority = ctx.accounts.authority.key();
+    req.credential_owner = ctx.accounts.credential_owner.key();
     req.credential_spec = spec.key();
     req.credential_mint = mint.key();
-    req.owner = ctx.accounts.authority.key();
     req.issuer = issuer.key();
     req.uri = data.uri;
     req.status = CredentialRequestStatus::Pending;
@@ -70,9 +71,10 @@ pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> 
     req.bump = ctx.bumps.credential_request;
 
     emit!(CreateCredentialRequestEvent {
+        authority: req.authority,
+        credential_owner: req.credential_owner,
         credential_spec: req.credential_spec,
         credential_mint: req.credential_mint,
-        owner: req.owner,
         issuer: req.issuer,
         uri: req.uri.to_owned(),
         timestamp,
