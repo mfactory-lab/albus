@@ -26,5 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './show'
-export * from './remove'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+export async function remove(credentialRequest: string) {
+  const { client } = useContext()
+
+   await client.credentialRequest.delete({credentialRequest})
+
+  log.info('Credential request was deleted')
+}
