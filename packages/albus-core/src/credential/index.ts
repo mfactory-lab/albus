@@ -46,7 +46,7 @@ import { encodeDidKey, w3cDate, w3cDateToUnixTs } from '../utils'
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { normalizeClaims, validateCredentialPayload, validatePresentationPayload } from './utils'
-import { DEFAULT_CONTEXT, DEFAULT_DID, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
+import { DEFAULT_CONTEXT, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
 import { ClaimsTree } from './tree'
 import { albusDidResolver } from './resolver'
 
@@ -59,24 +59,18 @@ export * from './pex'
  * Create new verifiable credential
  */
 export async function createVerifiableCredential(claims: Record<string, any>, opts: CreateCredentialOpts = {}): Promise<VerifiableCredential> {
-  const vcType = [DEFAULT_VC_TYPE, CredentialType.AlbusCredential]
-
-  if (opts.credentialType) {
-    vcType.push(opts.credentialType)
-  }
-
   const normalizedClaims = normalizeClaims(claims)
 
   let vc: VerifiableCredential = {
-    '@context': [DEFAULT_CONTEXT],
-    'type': vcType,
-    'issuer': opts.issuerDid ?? DEFAULT_DID,
+    '@context': [DEFAULT_CONTEXT, ...opts.context ?? []],
+    'type': [DEFAULT_VC_TYPE, CredentialType.AlbusCredential, ...(opts.credentialType ? [opts.credentialType] : [])],
+    'issuer': opts.issuerDid,
     'issuanceDate': w3cDate(opts?.timestamp ? new Date(opts.timestamp * 1000) : undefined),
     'credentialSubject': normalizedClaims,
     'proof': undefined,
   }
 
-  // Revocation
+  // TODO: Revocation
   // vc.credentialStatus = {
   //   id: 'did:albus:abc111222333',
   //   type: 'AlbusRevocationStatusV1',
@@ -472,6 +466,7 @@ export type CreateCredentialOpts = {
   // custom issuance date
   timestamp?: number
   credentialType?: CredentialType
+  context?: string[]
   // suite: typeof LinkedDataSignature
   // documentLoader: any
   // purpose?: any

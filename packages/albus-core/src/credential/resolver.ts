@@ -84,11 +84,12 @@ function parseIssuer(accountInfo: AccountInfo<Buffer>) {
 }
 
 /**
- * Generates a DID (Decentralized Identifier) document based on the provided public key, zkPubkey, and controller.
+ * Generates a DID (Decentralized Identifier) document based on the provided public key,
+ * BJJ public key, and controller.
  *
  * @param {object} opts
  * @param {Uint8Array} opts.pubkey - The public key used in the DID document generation.
- * @param {Uint8Array} opts.zkPubkey - The zero-knowledge public key used in the DID document generation.
+ * @param {Uint8Array} opts.zkPubkey - The BJJ public key used in the DID document generation.
  * @param {string} opts.controller - The controller of the DID.
  * @return {DIDDocument} The generated DID document.
  */
