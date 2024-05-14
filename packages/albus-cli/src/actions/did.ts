@@ -30,7 +30,9 @@ import { utils } from '@albus-finance/core'
 import { Keypair } from '@solana/web3.js'
 import { useContext } from '@/context'
 
-type Opts = {}
+type Opts = {
+  // ...
+}
 
 export async function generate(_opts: Opts) {
   const { config } = useContext()

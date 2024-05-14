@@ -52,7 +52,9 @@ describe('credentialRequestManager', async () => {
     issuerSecretKey: issuer.secretKey,
   })
 
-  const client = new AlbusClient(new AnchorProvider(
+  console.log(credential)
+
+  const _client = new AlbusClient(new AnchorProvider(
     new Connection(clusterApiUrl('devnet')),
     new Wallet(holder),
     AnchorProvider.defaultOptions(),
@@ -63,7 +65,7 @@ describe('credentialRequestManager', async () => {
   })
 
   it('works', async () => {
-    const def = {
+    const _def = {
       id: '1',
       input_descriptors: [
         {

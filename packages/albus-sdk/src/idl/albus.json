@@ -2758,7 +2758,7 @@
       "name": "CreateCredentialRequestEvent",
       "fields": [
         {
-          "name": "authortiy",
+          "name": "authority",
           "type": "publicKey",
           "index": false
         },

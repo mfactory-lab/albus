@@ -32,7 +32,7 @@ import { useContext } from '@/context'
 export async function remove(credentialRequest: string) {
   const { client } = useContext()
 
-   await client.credentialRequest.delete({credentialRequest})
+  await client.credentialRequest.delete({ credentialRequest })
 
   log.info('Credential request was deleted')
 }
