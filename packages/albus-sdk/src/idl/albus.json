@@ -354,6 +354,15 @@
         {
           "name": "credentialMint",
           "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint account of the NFT.",
+            ""
+          ]
+        },
+        {
+          "name": "credentialMetadata",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -375,6 +384,29 @@
           "name": "authority",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "albusAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Instructions sysvar account.",
+            ""
+          ]
+        },
+        {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Token Metadata program.",
+            ""
+          ]
         },
         {
           "name": "systemProgram",
@@ -2107,6 +2139,9 @@
         "fields": [
           {
             "name": "uri",
+            "docs": [
+              "Presentation uri"
+            ],
             "type": "string"
           }
         ]

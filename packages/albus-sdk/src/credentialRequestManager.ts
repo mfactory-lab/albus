@@ -30,7 +30,9 @@ import {
   type Commitment,
   type GetMultipleAccountsConfig,
   type Keypair, PublicKey,
-  type PublicKeyInitData } from '@solana/web3.js'
+  type PublicKeyInitData, SYSVAR_INSTRUCTIONS_PUBKEY,
+} from '@solana/web3.js'
+import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata/dist/src/generated'
 import { BaseManager } from './base'
 
 import {
@@ -41,7 +43,7 @@ import {
   credentialRequestDiscriminator,
 } from './generated'
 import type { SendOpts } from './utils'
-import { getAssociatedTokenAddress } from './utils'
+import { getAssociatedTokenAddress, getMetadataPDA } from './utils'
 
 export class CredentialRequestManager extends BaseManager {
   /**
@@ -77,6 +79,8 @@ export class CredentialRequestManager extends BaseManager {
     const [address] = this.pda.credentialRequest(credentialSpec, authority)
 
     const ix = createRequestCredentialInstruction({
+      albusAuthority: this.pda.authority()[0],
+      credentialMetadata: getMetadataPDA(credentialMint),
       credentialRequest: address,
       credentialSpec,
       credentialMint,
@@ -84,6 +88,8 @@ export class CredentialRequestManager extends BaseManager {
       credentialOwner,
       issuer,
       authority,
+      metadataProgram: METADATA_PROGRAM_ID,
+      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, {
       data: {
         uri: props.uri ?? '',

@@ -25,35 +25,19 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-use crate::errors::AlbusError;
 use crate::events::CreateCredentialRequestEvent;
 use crate::state::{CredentialRequest, CredentialRequestStatus, CredentialSpec, Issuer};
-use crate::utils::cmp_pubkeys;
 use crate::ID;
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, TokenAccount};
-use solana_program::program_option::COption;
+use anchor_lang::solana_program::sysvar;
+use anchor_spl::metadata::mpl_token_metadata::instructions::UpdateV1CpiBuilder;
+use anchor_spl::metadata::mpl_token_metadata::types::Data;
+use anchor_spl::metadata::Metadata as MetadataProgram;
+use anchor_spl::metadata::MetadataAccount;
+use anchor_spl::token::TokenAccount;
 
 pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> Result<()> {
-    let (albus_authority, _) = Pubkey::find_program_address(&[ID.as_ref()], ctx.program_id);
-    let token_account = &ctx.accounts.credential_token;
-
-    match token_account.delegate {
-        COption::None => {
-            msg!("Missing delegate authority");
-            return Err(AlbusError::Unauthorized.into());
-        }
-        COption::Some(delegate) => {
-            if !cmp_pubkeys(&delegate, &albus_authority) {
-                msg!("Delegate authority mismatch");
-                return Err(AlbusError::Unauthorized.into());
-            }
-        }
-    }
-
     let timestamp = Clock::get()?.unix_timestamp;
-    let mint = &ctx.accounts.credential_mint;
-    let issuer = &ctx.accounts.issuer;
 
     let spec = &mut ctx.accounts.credential_spec;
     spec.credential_request_count += 1;
@@ -61,14 +45,36 @@ pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> 
     let req = &mut ctx.accounts.credential_request;
     req.authority = ctx.accounts.authority.key();
     req.credential_owner = ctx.accounts.credential_owner.key();
+    req.credential_mint = ctx.accounts.credential_mint.key();
     req.credential_spec = spec.key();
-    req.credential_mint = mint.key();
-    req.issuer = issuer.key();
+    req.issuer = ctx.accounts.issuer.key();
     req.uri = data.uri;
     req.status = CredentialRequestStatus::Pending;
     req.created_at = timestamp;
     req.message = Default::default();
     req.bump = ctx.bumps.credential_request;
+
+    // Reset credential if needed
+    let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
+    let metadata = &ctx.accounts.credential_metadata;
+
+    UpdateV1CpiBuilder::new(&ctx.accounts.metadata_program)
+        .metadata(&metadata.to_account_info())
+        .authority(&ctx.accounts.albus_authority)
+        .token(Some(&ctx.accounts.credential_token.to_account_info()))
+        .mint(&ctx.accounts.credential_mint.to_account_info())
+        .payer(&ctx.accounts.authority)
+        .sysvar_instructions(&ctx.accounts.sysvar_instructions)
+        .system_program(&ctx.accounts.system_program)
+        .data(Data {
+            name: metadata.name.to_string(),
+            symbol: metadata.symbol.to_string(),
+            // empty uri means pending credential
+            uri: Default::default(),
+            seller_fee_basis_points: metadata.seller_fee_basis_points,
+            creators: metadata.creators.clone(),
+        })
+        .invoke_signed(&[&signer_seeds])?;
 
     emit!(CreateCredentialRequestEvent {
         authority: req.authority,
@@ -85,6 +91,7 @@ pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> 
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct RequestCredentialData {
+    /// Presentation uri
     pub uri: String,
 }
 
@@ -107,7 +114,13 @@ pub struct RequestCredential<'info> {
     #[account(mut, has_one = issuer)]
     pub credential_spec: Box<Account<'info, CredentialSpec>>,
 
-    pub credential_mint: Account<'info, Mint>,
+    /// Mint account of the NFT.
+    ///
+    /// CHECK: account checked in CPI
+    pub credential_mint: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub credential_metadata: Account<'info, MetadataAccount>,
 
     #[account(
         associated_token::mint = credential_mint,
@@ -122,6 +135,21 @@ pub struct RequestCredential<'info> {
 
     #[account(mut)]
     pub authority: Signer<'info>,
+
+    /// CHECK:
+    #[account(mut, seeds = [ID.as_ref()], bump)]
+    pub albus_authority: AccountInfo<'info>,
+
+    /// Instructions sysvar account.
+    ///
+    /// CHECK: account constraints checked in account trait
+    #[account(address = sysvar::instructions::id())]
+    pub sysvar_instructions: UncheckedAccount<'info>,
+
+    /// Token Metadata program.
+    ///
+    /// CHECK: account checked in CPI
+    pub metadata_program: Program<'info, MetadataProgram>,
 
     pub system_program: Program<'info, System>,
 }

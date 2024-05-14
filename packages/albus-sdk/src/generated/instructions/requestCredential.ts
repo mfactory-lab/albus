@@ -43,10 +43,14 @@ export const requestCredentialStruct = new beet.FixableBeetArgsStruct<
  * @property [_writable_] credentialRequest
  * @property [_writable_] credentialSpec
  * @property [] credentialMint
+ * @property [_writable_] credentialMetadata
  * @property [] credentialToken
  * @property [**signer**] credentialOwner
  * @property [] issuer
  * @property [_writable_, **signer**] authority
+ * @property [_writable_] albusAuthority
+ * @property [] sysvarInstructions
+ * @property [] metadataProgram
  * @category Instructions
  * @category RequestCredential
  * @category generated
@@ -55,10 +59,14 @@ export type RequestCredentialInstructionAccounts = {
   credentialRequest: web3.PublicKey
   credentialSpec: web3.PublicKey
   credentialMint: web3.PublicKey
+  credentialMetadata: web3.PublicKey
   credentialToken: web3.PublicKey
   credentialOwner: web3.PublicKey
   issuer: web3.PublicKey
   authority: web3.PublicKey
+  albusAuthority: web3.PublicKey
+  sysvarInstructions: web3.PublicKey
+  metadataProgram: web3.PublicKey
   systemProgram?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
@@ -103,6 +111,11 @@ export function createRequestCredentialInstruction(
       isSigner: false,
     },
     {
+      pubkey: accounts.credentialMetadata,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
       pubkey: accounts.credentialToken,
       isWritable: false,
       isSigner: false,
@@ -121,6 +134,21 @@ export function createRequestCredentialInstruction(
       pubkey: accounts.authority,
       isWritable: true,
       isSigner: true,
+    },
+    {
+      pubkey: accounts.albusAuthority,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.sysvarInstructions,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.metadataProgram,
+      isWritable: false,
+      isSigner: false,
     },
     {
       pubkey: accounts.systemProgram ?? web3.SystemProgram.programId,
