@@ -18,8 +18,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "run": "vite-node ./src/index.ts --",
-    "release": "npm run build && release-it",
-    "prepublishOnly": "npm run build"
+    "postinstall": "npm run build"
   },
   "dependencies": {
     "@albus-finance/core": "workspace:^",
@@ -39,8 +38,5 @@
   },
   "devDependencies": {
     "vite-node": "^1.6.0"
-  },
-  "release-it": {
-    "git": false
   }
 }
