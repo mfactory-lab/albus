@@ -165,6 +165,22 @@ importers:
         specifier: workspace:^
         version: link:../release-it-config
 
+  packages/albus-did-resolver:
+    dependencies:
+      '@albus-finance/core':
+        specifier: workspace:^
+        version: link:../albus-core
+      '@solana/web3.js':
+        specifier: '*'
+        version: 1.91.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      did-resolver:
+        specifier: ^3.2.2
+        version: 3.2.2
+    devDependencies:
+      release-it-config:
+        specifier: workspace:^
+        version: link:../release-it-config
+
   packages/albus-sdk:
     dependencies:
       '@albus-finance/core':
