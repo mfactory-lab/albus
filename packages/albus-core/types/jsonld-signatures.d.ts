@@ -1,4 +1,4 @@
-declare module 'types/jsonld-signatures' {
+declare module 'jsonld-signatures' {
 
   import type LinkedDataSignature from 'jsonld-signatures/suites/LinkedDataSignature'
   import type AuthenticationProofPurpose from 'jsonld-signatures/purposes/AuthenticationProofPurpose'
@@ -410,7 +410,7 @@ declare module 'jsonld-signatures/suites/LinkedDataProof' {
       verificationMethod?: any
     }>
 
-    matchProof({ proof }: { proof: object }): Promise<boolean>
+    matchProof(opts: { document: any, purpose: any, documentLoader: any, expansionMap: any, proof: object }): Promise<boolean>
   }
 }
 
