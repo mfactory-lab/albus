@@ -1,0 +1,27 @@
+{
+  "name": "ALBUS Digital Credential",
+  "image": "https://arweave.net/-RX1vgX0qdH-IdhovS0KuJCtqC1Eh3uM9UfSZBBZVVE",
+  "external_url": "https://albus.finance",
+  "vc": {
+    "@context": [
+      "https://www.w3.org/2018/credentials/v1"
+    ],
+    "type": [
+      "VerifiableCredential",
+      "AlbusCredential"
+    ],
+    "issuer": "did:albus:issuer:9not3fH8oNjWePPgaQGGtiAnMiZyWBsr3KL8mnMCmvHV?cluster=devnet",
+    "issuanceDate": "2024-05-14T12:53:34Z",
+    "credentialSubject": {
+      "encrypted": "Zkf+UYTLZKn5wwsVBawYV27yIgKzvptK9mhwnz/cm2mmaJqoblJIbgeJd96RsdUC8LrXEezImj61Je8pDwVLf5QRgu3+TBtQghXFJwTGDEIKe62clG+FM+np6EfTnxvD5CQbNMT1/Bhm.2j9ywQJWaydU9vzqcU2sjJjK6aFfvhaKS2zejik4hMvG"
+    },
+    "proof": {
+      "type": "BJJSignature2021",
+      "created": "2024-05-14T12:53:34Z",
+      "verificationMethod": "did:albus:issuer:9not3fH8oNjWePPgaQGGtiAnMiZyWBsr3KL8mnMCmvHV?cluster=devnet#E6H9ExkyJd4Scs3xVkkAPDmUcJ28wmBRqegUDfzfnbUg",
+      "proofPurpose": "assertionMethod",
+      "proofValue": "z2EAipuYqVV453cLUmGGVBpr1Z6r6y4ctFtSdz5emvCeFc2vbKYogGvkcFYb7uav3ab5y9h8DEmM78wm8fPZrSJZT5vMvvdPk44Hmefxr7AUrAEVznnSQG5SJSQHmcc7sG4WY"
+    },
+    "validUntil": "2025-05-14T12:53:34Z"
+  }
+}

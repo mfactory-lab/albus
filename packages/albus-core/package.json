@@ -23,6 +23,10 @@
     "release:pre": "release-it --preRelease=next"
   },
   "dependencies": {
+    "@digitalcredentials/ed25519-signature-2020": "^4.0.0",
+    "@digitalcredentials/ed25519-verification-key-2020": "^4.0.0",
+    "@digitalcredentials/jsonld": "^6.0.0",
+    "@digitalcredentials/jsonld-signatures": "^10.0.1",
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
     "@solana/web3.js": "^1.91.1",
     "@sphereon/pex": "^3.3.3",
@@ -39,6 +43,7 @@
     "web-did-resolver": "^2.0.27"
   },
   "devDependencies": {
+    "@types/jsonld": "^1.5.13",
     "release-it-config": "workspace:^"
   },
   "publishConfig": {

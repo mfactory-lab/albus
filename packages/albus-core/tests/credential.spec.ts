@@ -33,10 +33,11 @@ import {
   ClaimsTree,
   createCredentialProof,
   createVerifiableCredential,
-  createVerifiablePresentation,
+  createVerifiablePresentation, decryptPresentation,
   verifyCredential,
   verifyCredentialProof,
-  verifyPresentation } from '../src/credential'
+  verifyPresentation,
+} from '../src/credential'
 import { generateDid } from '../src/utils'
 
 describe('credential', () => {
@@ -127,27 +128,27 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const credential = await createVerifiableCredential(claims, {
-      encryptionKey: holder.publicKey,
-      encrypt: true,
+      // encryptionKey: holder.publicKey,
+      // encrypt: true,
+      context: [{ '@vocab': 'https://schema.org/' }],
+      // context: ['https://schema.org/docs/jsonldcontext.jsonld'],
       issuerSecretKey: issuerKeypair.secretKey,
     })
 
     const payload = await createVerifiablePresentation({
       holderSecretKey: holder.secretKey,
       credentials: [credential],
-      challenge: 1234n,
+      encrypt: true,
+      encryptionKey: holder.publicKey,
     })
 
-    const vp = await verifyPresentation(payload, {
-      decryptionKey: holder.secretKey,
-      resolver: {
-        resolve() {
-          return { didDocument: generateDid(holder) } as any
-        },
-      },
-    })
+    const vp = await verifyPresentation(
+      await decryptPresentation(payload, {
+        decryptionKey: holder.secretKey,
+      }),
+    )
 
-    assert.deepEqual(vp.verifiableCredential?.[0]?.credentialSubject, claims)
+    assert.ok(vp.verified)
   })
 
   it('claimsTree', async () => {

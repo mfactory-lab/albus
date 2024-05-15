@@ -118,6 +118,18 @@ importers:
 
   packages/albus-core:
     dependencies:
+      '@digitalcredentials/ed25519-signature-2020':
+        specifier: ^4.0.0
+        version: 4.0.0(expo-crypto@12.8.1(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)))
+      '@digitalcredentials/ed25519-verification-key-2020':
+        specifier: ^4.0.0
+        version: 4.0.0
+      '@digitalcredentials/jsonld':
+        specifier: ^6.0.0
+        version: 6.0.0(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld-signatures':
+        specifier: ^10.0.1
+        version: 10.0.1(expo-crypto@12.8.1(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)))
       '@metaplex-foundation/mpl-token-metadata':
         specifier: ^3.2.1
         version: 3.2.1(@metaplex-foundation/umi@0.9.1)
@@ -161,6 +173,9 @@ importers:
         specifier: ^2.0.27
         version: 2.0.27
     devDependencies:
+      '@types/jsonld':
+        specifier: ^1.5.13
+        version: 1.5.13
       release-it-config:
         specifier: workspace:^
         version: link:../release-it-config
@@ -1383,9 +1398,17 @@ packages:
     resolution: {integrity: sha512-GrfITgp1guFbExZckj2q6LOxxm08PFSScr0lBYtDRezJa6CTpA9XQ8yXSSXE3LvpEi5/2uOMFxxIfKAtL1J2ww==}
     engines: {node: '>=18'}
 
+  '@digitalcredentials/http-client@1.2.2':
+    resolution: {integrity: sha512-YOwaE+vUDSwiDhZT0BbXSWVg+bvp1HA1eg/gEc8OCwCOj9Bn9FRQdu8P9Y/fnYqyFCioDwwTRzGxgJLl50baEg==}
+    engines: {node: '>=12.0.0'}
+
   '@digitalcredentials/jsonld-signatures@10.0.1':
     resolution: {integrity: sha512-r7yx25SUkyzX7ZGnvzZCtoMH+udbhM3VnHN0rcLv/PW57mpj3lf1lYdu+7Hl24L26H+mUD42otCg4sbVLaZl8Q==}
     engines: {node: '>=18'}
+
+  '@digitalcredentials/jsonld@6.0.0':
+    resolution: {integrity: sha512-5tTakj0/GsqAJi8beQFVMQ97wUJZnuxViW9xRuAATL6eOBIefGBwHkVryAgEq2I4J/xKgb/nEyw1ZXX0G8wQJQ==}
+    engines: {node: '>=12'}
 
   '@digitalcredentials/keypair@1.0.5':
     resolution: {integrity: sha512-g0QvhJMTSFCoUkEvSeggwVTJa2jFkQXjf/mpTn9sePkz+5OouMEDfXUWL61juTaxK5JWPEFc0PKlolXzHaHHHQ==}
@@ -1397,6 +1420,10 @@ packages:
 
   '@digitalcredentials/open-badges-context@2.1.0':
     resolution: {integrity: sha512-VK7X5u6OoBFxkyIFplNqUPVbo+8vFSAEoam8tSozpj05KPfcGw41Tp5p9fqMnY38oPfwtZR2yDNSctj/slrE0A==}
+
+  '@digitalcredentials/rdf-canonize@1.0.0':
+    resolution: {integrity: sha512-z8St0Ex2doecsExCFK1uI4gJC+a5EqYYu1xpRH1pKmqSS9l/nxfuVxexNFyaeEum4dUdg1EetIC2rTwLIFhPRA==}
+    engines: {node: '>=12'}
 
   '@digitalcredentials/security-document-loader@5.0.0':
     resolution: {integrity: sha512-j35IvGQtfFarpGo+fDtCZMmwb25bJbuw9xycSf6ogdE+ouWpMePkKgDj3jQOQIzsEdj1OEa66aMl1BQlduasPA==}
@@ -2878,6 +2905,9 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
+  '@types/jsonld@1.5.13':
+    resolution: {integrity: sha512-n7fUU6W4kSYK8VQlf/LsE9kddBHPKhODoVOjsZswmve+2qLwBy6naWxs/EiuSZN9NU0N06Ra01FR+j87C62T0A==}
+
   '@types/keyv@3.1.4':
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
 
@@ -2989,6 +3019,14 @@ packages:
   '@typescript-eslint/visitor-keys@7.8.0':
     resolution: {integrity: sha512-q4/gibTNBQNA0lGyYQCmWRS5D15n8rXh4QjK3KV+MBPlTYHpfBUT3D3PaPR/HeNiI9W6R7FvlkcGhNyAoP+caA==}
     engines: {node: ^18.18.0 || >=20.0.0}
+
+  '@unimodules/core@7.1.2':
+    resolution: {integrity: sha512-lY+e2TAFuebD3vshHMIRqru3X4+k7Xkba4Wa7QsDBd+ex4c4N2dHAO61E2SrGD9+TRBD8w/o7mzK6ljbqRnbyg==}
+    deprecated: 'replaced by the ''expo'' package, learn more: https://blog.expo.dev/whats-new-in-expo-modules-infrastructure-7a7cdda81ebc'
+
+  '@unimodules/react-native-adapter@6.3.9':
+    resolution: {integrity: sha512-i9/9Si4AQ8awls+YGAKkByFbeAsOPgUNeLoYeh2SQ3ddjxJ5ZJDtq/I74clDnpDcn8zS9pYlcDJ9fgVJa39Glw==}
+    deprecated: 'replaced by the ''expo'' package, learn more: https://blog.expo.dev/whats-new-in-expo-modules-infrastructure-7a7cdda81ebc'
 
   '@urql/core@2.3.6':
     resolution: {integrity: sha512-PUxhtBh7/8167HJK6WqBv6Z0piuiaZHQGYbhwpNL9aIQmLROPEdaUYkY4wh45wPQXcTpnd11l0q3Pw+TI11pdw==}
@@ -3265,6 +3303,9 @@ packages:
 
   asap@2.0.6:
     resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==}
+
+  asmcrypto.js@0.22.0:
+    resolution: {integrity: sha512-usgMoyXjMbx/ZPdzTSXExhMPur2FTdz/Vo5PVx2gIaBcdAAJNOFlsdgqveM8Cff7W0v+xrf9BwjOV26JSAF9qA==}
 
   asmcrypto.js@2.3.2:
     resolution: {integrity: sha512-3FgFARf7RupsZETQ1nHnhLUUvpcttcCq1iZCaVAbJZbCZ5VNRrNyvpDyHTOb0KC3llFcsyOT/a99NZcCbeiEsA==}
@@ -3905,6 +3946,9 @@ packages:
   compare-func@2.0.0:
     resolution: {integrity: sha512-zHig5N+tPWARooBnb0Zx1MFcdfpyJrfTJ3Y5L+IFvUm8rM74hHz66z0gw0x4tijh5CorKkKUCnW82R2vmpeCRA==}
 
+  compare-versions@3.6.0:
+    resolution: {integrity: sha512-W6Af2Iw1z4CB7q4uU4hv646dW9GQuBM+YpC0UvUCWSD8w90SJjp+ujJuXaEMtAXBtSqGfMPuFOVn4/+FlaqfBA==}
+
   component-type@1.2.2:
     resolution: {integrity: sha512-99VUHREHiN5cLeHm3YLq312p6v+HUEcwtLCAtelvUDI6+SH5g5Cr85oNR2S1o6ywzL0ykMbuwLzM2ANocjEOIA==}
 
@@ -4141,6 +4185,10 @@ packages:
   dargs@8.1.0:
     resolution: {integrity: sha512-wAV9QHOsNbwnWdNW2FYvE1P56wtgSbM+3SZcdGiWQILwVjACCXDCI3Ai8QlCjMDB8YK5zySiXZYBiwGmNY3lnw==}
     engines: {node: '>=12'}
+
+  data-uri-to-buffer@3.0.1:
+    resolution: {integrity: sha512-WboRycPNsVw3B3TL559F7kuBUM4d8CgMEvk6xEJlOp7OBPjt6G7z8WMWlD2rOFZLk6OYfFIUGsCOWzcQH9K2og==}
+    engines: {node: '>= 6'}
 
   data-uri-to-buffer@4.0.1:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
@@ -4828,12 +4876,21 @@ packages:
     peerDependencies:
       expo: '*'
 
+  expo-modules-autolinking@0.0.3:
+    resolution: {integrity: sha512-azkCRYj/DxbK4udDuDxA9beYzQTwpJ5a9QA0bBgha2jHtWdFGF4ZZWSY+zNA5mtU3KqzYt8jWHfoqgSvKyu1Aw==}
+    hasBin: true
+
   expo-modules-autolinking@1.10.3:
     resolution: {integrity: sha512-pn4n2Dl4iRh/zUeiChjRIe1C7EqOw1qhccr85viQV7W6l5vgRpY0osE51ij5LKg/kJmGRcJfs12+PwbdTplbKw==}
     hasBin: true
 
   expo-modules-core@1.11.12:
     resolution: {integrity: sha512-/e8g4kis0pFLer7C0PLyx98AfmztIM6gU9jLkYnB1pU9JAfQf904XEi3bmszO7uoteBQwSL6FLp1m3TePKhDaA==}
+
+  expo-random@14.0.1:
+    resolution: {integrity: sha512-gX2mtR9o+WelX21YizXUCD/y+a4ZL+RDthDmFkHxaYbdzjSYTn8u/igoje/l3WEO+/RYspmqUFa8w/ckNbt6Vg==}
+    peerDependencies:
+      expo: '*'
 
   expo@50.0.14:
     resolution: {integrity: sha512-yLPdxCMVAbmeEIpzzyAuJ79wvr6ToDDtQmuLDMAgWtjqP8x3CGddXxUe07PpKEQgzwJabdHvCLP5Bv94wMFIjQ==}
@@ -4897,6 +4954,15 @@ packages:
 
   fbjs@3.0.5:
     resolution: {integrity: sha512-ztsSx77JBtkuMrEypfhgc3cI0+0h+svqeie7xHbh1k/IKdcydnvadp/mUaGgjAOXQmQSxsqgaRhS3q9fy+1kxg==}
+
+  fetch-blob@2.1.2:
+    resolution: {integrity: sha512-YKqtUDwqLyfyMnmbw8XD6Q8j9i/HggKtPEI+pZ1+8bvheBu78biSmNaXWusx1TauGqtUUGx/cBb1mKdq2rLYow==}
+    engines: {node: ^10.17.0 || >=12.3.0}
+    peerDependencies:
+      domexception: '*'
+    peerDependenciesMeta:
+      domexception:
+        optional: true
 
   fetch-blob@3.2.0:
     resolution: {integrity: sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==}
@@ -5791,6 +5857,9 @@ packages:
     resolution: {integrity: sha512-u4sej9B1LPSxTGKB/HiuzvEQnXH0ECYkSVQU39koSwmFAxhlEAFl9RdTvLv4TOTQUgBS5O3O5fwUxk6byBZ+IQ==}
     engines: {node: '>=10'}
 
+  isomorphic-webcrypto@2.3.8:
+    resolution: {integrity: sha512-XddQSI0WYlSCjxtm1AI8kWQOulf7hAN3k3DclF1sxDJZqOe0pcsOt675zvWW91cZH9hYs3nlA3Ev8QK5i80SxQ==}
+
   isomorphic-ws@4.0.1:
     resolution: {integrity: sha512-BhBvN2MBpWTaSHdWRb/bwdZJ1WaehQ2L1KngkCkfLUGF0mAWAT1sQUQacEmQ0jXkFw/czDXPNQSL5u2/Krsz1w==}
     peerDependencies:
@@ -6036,6 +6105,20 @@ packages:
     peerDependenciesMeta:
       web-streams-polyfill:
         optional: true
+
+  ky-universal@0.8.2:
+    resolution: {integrity: sha512-xe0JaOH9QeYxdyGLnzUOVGK4Z6FGvDVzcXFTdrYA1f33MZdEa45sUDaMBy98xQMcsd2XIBrTXRrRYnegcSdgVQ==}
+    engines: {node: '>=10.17'}
+    peerDependencies:
+      ky: '>=0.17.0'
+      web-streams-polyfill: '>=2.0.0'
+    peerDependenciesMeta:
+      web-streams-polyfill:
+        optional: true
+
+  ky@0.25.1:
+    resolution: {integrity: sha512-PjpCEWlIU7VpiMVrTwssahkYXX1by6NCT0fhTUX34F3DTinARlgMpriuroolugFPcMgpPWrOW4mTb984Qm1RXA==}
+    engines: {node: '>=10'}
 
   ky@0.33.3:
     resolution: {integrity: sha512-CasD9OCEQSFIam2U8efFK81Yeg8vNMTBUqtMOHlrcWQHqUX3HeCl9Dr31u4toV7emlH8Mymk5+9p0lL6mKb/Xw==}
@@ -6705,6 +6788,10 @@ packages:
       encoding:
         optional: true
 
+  node-fetch@3.0.0-beta.9:
+    resolution: {integrity: sha512-RdbZCEynH2tH46+tj0ua9caUHVWrd/RHnRfvly2EVdqGmI3ndS1Vn/xjm5KuGejDt2RNDQsVRLPNd2QPwcewVg==}
+    engines: {node: ^10.17 || >=12.3}
+
   node-fetch@3.3.2:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -7329,6 +7416,11 @@ packages:
 
   react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+
+  react-native-securerandom@0.1.1:
+    resolution: {integrity: sha512-CozcCx0lpBLevxiXEb86kwLRalBCHNjiGPlw3P7Fi27U6ZLdfjOCNRHD1LtBKcvPvI3TvkBXB3GOtLvqaYJLGw==}
+    peerDependencies:
+      react-native: '*'
 
   react-native-securerandom@1.0.1:
     resolution: {integrity: sha512-ibuDnd3xi17HyD5CkilOXGPFpS9Z1oifjyHFwUl8NMzcQcpruM0ZX8ytr3A4rCeAsaBHjz69r78Xgd6vUswv1Q==}
@@ -10156,6 +10248,14 @@ snapshots:
       '@noble/ed25519': 1.7.3
       base-x: 4.0.0
 
+  '@digitalcredentials/http-client@1.2.2(web-streams-polyfill@3.3.3)':
+    dependencies:
+      ky: 0.25.1
+      ky-universal: 0.8.2(ky@0.25.1)(web-streams-polyfill@3.3.3)
+    transitivePeerDependencies:
+      - domexception
+      - web-streams-polyfill
+
   '@digitalcredentials/jsonld-signatures@10.0.1(expo-crypto@12.8.1(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(msrcrypto@1.5.8)(react-native-securerandom@1.0.1(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)))':
     dependencies:
       '@digitalbazaar/security-context': 1.0.1
@@ -10169,6 +10269,18 @@ snapshots:
       - msrcrypto
       - react-native-securerandom
 
+  '@digitalcredentials/jsonld@6.0.0(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(web-streams-polyfill@3.3.3)':
+    dependencies:
+      '@digitalcredentials/http-client': 1.2.2(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/rdf-canonize': 1.0.0(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))
+      canonicalize: 1.0.8
+      lru-cache: 6.0.0
+    transitivePeerDependencies:
+      - domexception
+      - expo
+      - react-native
+      - web-streams-polyfill
+
   '@digitalcredentials/keypair@1.0.5': {}
 
   '@digitalcredentials/lru-memoize@2.1.4':
@@ -10176,6 +10288,14 @@ snapshots:
       lru-cache: 6.0.0
 
   '@digitalcredentials/open-badges-context@2.1.0': {}
+
+  '@digitalcredentials/rdf-canonize@1.0.0(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))':
+    dependencies:
+      fast-text-encoding: 1.0.6
+      isomorphic-webcrypto: 2.3.8(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))
+    transitivePeerDependencies:
+      - expo
+      - react-native
 
   '@digitalcredentials/security-document-loader@5.0.0(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))':
     dependencies:
@@ -12711,6 +12831,8 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
+  '@types/jsonld@1.5.13': {}
+
   '@types/keyv@3.1.4':
     dependencies:
       '@types/node': 20.11.30
@@ -12852,6 +12974,17 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.8.0
       eslint-visitor-keys: 3.4.3
+
+  '@unimodules/core@7.1.2':
+    dependencies:
+      compare-versions: 3.6.0
+    optional: true
+
+  '@unimodules/react-native-adapter@6.3.9':
+    dependencies:
+      expo-modules-autolinking: 0.0.3
+      invariant: 2.2.4
+    optional: true
 
   '@urql/core@2.3.6(graphql@15.8.0)':
     dependencies:
@@ -13216,6 +13349,8 @@ snapshots:
     optional: true
 
   asap@2.0.6: {}
+
+  asmcrypto.js@0.22.0: {}
 
   asmcrypto.js@2.3.2: {}
 
@@ -13988,6 +14123,9 @@ snapshots:
       array-ify: 1.0.0
       dot-prop: 5.3.0
 
+  compare-versions@3.6.0:
+    optional: true
+
   component-type@1.2.2: {}
 
   compressible@2.0.18:
@@ -14276,6 +14414,8 @@ snapshots:
   dag-map@1.0.2: {}
 
   dargs@8.1.0: {}
+
+  data-uri-to-buffer@3.0.1: {}
 
   data-uri-to-buffer@4.0.1: {}
 
@@ -15158,6 +15298,15 @@ snapshots:
     dependencies:
       expo: 50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10)
 
+  expo-modules-autolinking@0.0.3:
+    dependencies:
+      chalk: 4.1.2
+      commander: 7.2.0
+      fast-glob: 3.3.2
+      find-up: 5.0.0
+      fs-extra: 9.1.0
+    optional: true
+
   expo-modules-autolinking@1.10.3:
     dependencies:
       '@expo/config': 8.5.4
@@ -15172,6 +15321,12 @@ snapshots:
   expo-modules-core@1.11.12:
     dependencies:
       invariant: 2.2.4
+
+  expo-random@14.0.1(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10)):
+    dependencies:
+      base64-js: 1.5.1
+      expo: 50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    optional: true
 
   expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10):
     dependencies:
@@ -15267,6 +15422,8 @@ snapshots:
       ua-parser-js: 1.0.37
     transitivePeerDependencies:
       - encoding
+
+  fetch-blob@2.1.2: {}
 
   fetch-blob@3.2.0:
     dependencies:
@@ -16190,6 +16347,24 @@ snapshots:
 
   isomorphic-timers-promises@1.0.1: {}
 
+  isomorphic-webcrypto@2.3.8(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)):
+    dependencies:
+      '@peculiar/webcrypto': 1.4.6
+      asmcrypto.js: 0.22.0
+      b64-lite: 1.4.0
+      b64u-lite: 1.1.0
+      msrcrypto: 1.5.8
+      str2buf: 1.3.0
+      webcrypto-shim: 0.1.7
+    optionalDependencies:
+      '@unimodules/core': 7.1.2
+      '@unimodules/react-native-adapter': 6.3.9
+      expo-random: 14.0.1(expo@50.0.14(@babel/core@7.24.3)(@react-native/babel-preset@0.74.81(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3)))(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      react-native-securerandom: 0.1.1(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))
+    transitivePeerDependencies:
+      - expo
+      - react-native
+
   isomorphic-ws@4.0.1(ws@7.5.9(bufferutil@4.0.8)(utf-8-validate@5.0.10)):
     dependencies:
       ws: 7.5.9(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -16486,6 +16661,18 @@ snapshots:
       node-fetch: 3.3.2
     optionalDependencies:
       web-streams-polyfill: 3.3.3
+
+  ky-universal@0.8.2(ky@0.25.1)(web-streams-polyfill@3.3.3):
+    dependencies:
+      abort-controller: 3.0.0
+      ky: 0.25.1
+      node-fetch: 3.0.0-beta.9
+    optionalDependencies:
+      web-streams-polyfill: 3.3.3
+    transitivePeerDependencies:
+      - domexception
+
+  ky@0.25.1: {}
 
   ky@0.33.3: {}
 
@@ -17198,6 +17385,13 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
+  node-fetch@3.0.0-beta.9:
+    dependencies:
+      data-uri-to-buffer: 3.0.1
+      fetch-blob: 2.1.2
+    transitivePeerDependencies:
+      - domexception
+
   node-fetch@3.3.2:
     dependencies:
       data-uri-to-buffer: 4.0.1
@@ -17861,6 +18055,12 @@ snapshots:
   react-is@17.0.2: {}
 
   react-is@18.2.0: {}
+
+  react-native-securerandom@0.1.1(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)):
+    dependencies:
+      base64-js: 1.5.1
+      react-native: 0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)
+    optional: true
 
   react-native-securerandom@1.0.1(react-native@0.74.0(@babel/core@7.24.3)(@babel/preset-env@7.24.3(@babel/core@7.24.3))(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)):
     dependencies:
