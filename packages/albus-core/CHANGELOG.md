@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.6-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.17...@albus-finance/core-v0.3.6-next.19) (2024-05-15)
+
+
+### 🌟 Features
+
+* **core:** add custom `Ed25519Signature2020` ([5397758](https://github.com/mfactory-lab/albus/commit/53977587a0914d50e2dbcb152e6ac8e76050ca74))
+* new presentation signature `Ed25519Signature2020` ([52eb9a5](https://github.com/mfactory-lab/albus/commit/52eb9a5be13d4716432b944e1db2facfe6bca8c6))
+
+
+### 🐞 Bug Fixes
+
+* **core:** fix version ([3a9f776](https://github.com/mfactory-lab/albus/commit/3a9f77662e90260a606ffb5fbb1ca956ada71205))
+
 ## [0.3.6-next.17](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.16...@albus-finance/core-v0.3.6-next.17) (2024-05-14)
 
 
