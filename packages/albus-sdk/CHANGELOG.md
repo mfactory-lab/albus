@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.39](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.38...@albus-finance/sdk-v0.3.0-next.39) (2024-05-15)
+
+
+### 🐞 Bug Fixes
+
+* request credential and reset nft ([701b0ee](https://github.com/mfactory-lab/albus/commit/701b0ee9eb7a5121682f463080b00e63b15908b0))
+
 ## [0.3.0-next.38](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.37...@albus-finance/sdk-v0.3.0-next.38) (2024-05-14)
 
 
