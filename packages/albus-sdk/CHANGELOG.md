@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0-next.38](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.37...@albus-finance/sdk-v0.3.0-next.38) (2024-05-14)
+
+
+### 🐞 Bug Fixes
+
+* add credential request owner and authority ([3ed1707](https://github.com/mfactory-lab/albus/commit/3ed170793f9be4e64a17f3f8de3a76906c843bbc))
+
 ## [0.3.0-next.37](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.36...@albus-finance/sdk-v0.3.0-next.37) (2024-05-14)
 
 ## [0.3.0-next.36](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.35...@albus-finance/sdk-v0.3.0-next.36) (2024-05-13)
