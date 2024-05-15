@@ -23,10 +23,6 @@
     "release:pre": "release-it --preRelease=next"
   },
   "dependencies": {
-    "@digitalcredentials/ed25519-signature-2020": "^4.0.0",
-    "@digitalcredentials/ed25519-verification-key-2020": "^4.0.0",
-    "@digitalcredentials/jsonld": "^6.0.0",
-    "@digitalcredentials/jsonld-signatures": "^10.0.1",
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
     "@solana/web3.js": "^1.91.1",
     "@sphereon/pex": "^3.3.3",
@@ -36,13 +32,16 @@
     "@stablelib/x25519": "^1.0.3",
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "axios": "^1.6.8",
+    "crypto-ld": "^7.0.0",
     "did-resolver": "^3.2.2",
+    "jsonld-signatures": "^11.2.1",
     "key-did-resolver": "^3.0.0",
     "snarkjs": "*",
     "uint8arrays": "^3.1.1",
     "web-did-resolver": "^2.0.27"
   },
   "devDependencies": {
+    "@types/crypto-ld": "^7.0.4",
     "@types/jsonld": "^1.5.13",
     "release-it-config": "workspace:^"
   },

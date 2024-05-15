@@ -33,10 +33,8 @@ import type { Resolvable, ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
-import { Ed25519Signature2020 } from '@digitalcredentials/ed25519-signature-2020'
-import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verification-key-2020'
 import { securityLoader } from '@digitalcredentials/security-document-loader'
-import jsigs from '@digitalcredentials/jsonld-signatures'
+import jsigs from 'jsonld-signatures'
 import { PublicKey as BabyJubPubkey, MultiBase, PrivateKey, Signature, XC20P, eddsa, utils } from '../crypto'
 import { encodeDidKey, w3cDate, w3cDateToUnixTs } from '../utils'
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
@@ -45,6 +43,7 @@ import { normalizeClaims, validateCredentialPayload, validatePresentationPayload
 import { DEFAULT_CONTEXT, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
 import { ClaimsTree } from './tree'
 import { albusDidResolver } from './resolver'
+import { Ed25519Signature2020, Ed25519VerificationKey2020 } from './crypto'
 
 const { base58ToBytes } = utils
 
@@ -258,7 +257,6 @@ export async function signPresentation(vp: W3CPresentation, opts: SignPresentati
 
   const suite = new Ed25519Signature2020({
     key: await Ed25519VerificationKey2020.from({
-      type: 'Ed25519VerificationKey2020',
       controller: opts.controller,
       publicKeyMultibase,
       privateKeyMultibase,
