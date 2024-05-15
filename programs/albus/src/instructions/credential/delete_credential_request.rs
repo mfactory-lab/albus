@@ -35,7 +35,7 @@ pub fn handler(ctx: Context<DeleteCredentialRequest>) -> Result<()> {
     let authority = &ctx.accounts.authority;
     let req = &ctx.accounts.credential_request;
 
-    if assert_authorized(authority.key).is_err() && !cmp_pubkeys(&req.owner, authority.key) {
+    if assert_authorized(authority.key).is_err() && !cmp_pubkeys(&req.authority, authority.key) {
         return Err(AlbusError::Unauthorized.into());
     }
 

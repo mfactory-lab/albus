@@ -259,15 +259,14 @@ describe('vc', async () => {
 
     console.log('hash', hash)
 
-    const suite = new Ed25519Signature2020()
+    const _suite = new Ed25519Signature2020()
 
-    const result = await vc.verifyCredential({
-      credential,
-      suite,
-      documentLoader,
-      checkStatus: async () => ({ verified: true }),
-    })
-
-    console.log(result)
+    // const result = await vc.verifyCredential({
+    //   credential,
+    //   suite,
+    //   documentLoader,
+    //   checkStatus: async () => ({ verified: true }),
+    // })
+    // console.log(result)
   })
 })

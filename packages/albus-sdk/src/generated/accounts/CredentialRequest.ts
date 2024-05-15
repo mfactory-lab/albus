@@ -19,9 +19,10 @@ import {
  * @category generated
  */
 export type CredentialRequestArgs = {
+  authority: web3.PublicKey
+  credentialOwner: web3.PublicKey
   credentialSpec: web3.PublicKey
   credentialMint: web3.PublicKey
-  owner: web3.PublicKey
   issuer: web3.PublicKey
   status: CredentialRequestStatus
   createdAt: beet.bignum
@@ -42,9 +43,10 @@ export const credentialRequestDiscriminator = [
  */
 export class CredentialRequest implements CredentialRequestArgs {
   private constructor(
+    readonly authority: web3.PublicKey,
+    readonly credentialOwner: web3.PublicKey,
     readonly credentialSpec: web3.PublicKey,
     readonly credentialMint: web3.PublicKey,
-    readonly owner: web3.PublicKey,
     readonly issuer: web3.PublicKey,
     readonly status: CredentialRequestStatus,
     readonly createdAt: beet.bignum,
@@ -58,9 +60,10 @@ export class CredentialRequest implements CredentialRequestArgs {
    */
   static fromArgs(args: CredentialRequestArgs) {
     return new CredentialRequest(
+      args.authority,
+      args.credentialOwner,
       args.credentialSpec,
       args.credentialMint,
-      args.owner,
       args.issuer,
       args.status,
       args.createdAt,
@@ -175,9 +178,10 @@ export class CredentialRequest implements CredentialRequestArgs {
    */
   pretty() {
     return {
+      authority: this.authority.toBase58(),
+      credentialOwner: this.credentialOwner.toBase58(),
       credentialSpec: this.credentialSpec.toBase58(),
       credentialMint: this.credentialMint.toBase58(),
-      owner: this.owner.toBase58(),
       issuer: this.issuer.toBase58(),
       status: `CredentialRequestStatus.${CredentialRequestStatus[this.status]}`,
       createdAt: (() => {
@@ -210,9 +214,10 @@ export const credentialRequestBeet = new beet.FixableBeetStruct<
 >(
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
+    ['authority', beetSolana.publicKey],
+    ['credentialOwner', beetSolana.publicKey],
     ['credentialSpec', beetSolana.publicKey],
     ['credentialMint', beetSolana.publicKey],
-    ['owner', beetSolana.publicKey],
     ['issuer', beetSolana.publicKey],
     ['status', credentialRequestStatusBeet],
     ['createdAt', beet.i64],

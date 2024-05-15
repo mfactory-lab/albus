@@ -30,9 +30,15 @@ import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
-import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import { AlbusClient } from '../../packages/albus-sdk/src'
-import { assertErrorCode, initMetaplex, initProvider, payer, provider, requestAirdrop } from './utils'
+import {
+  assertErrorCode, assertErrorMessage,
+  initMetaplex,
+  initProvider,
+  payer,
+  provider,
+  requestAirdrop,
+} from './utils'
 
 describe('credentialRequest', async () => {
   const issuer = Keypair.generate()
@@ -101,18 +107,25 @@ describe('credentialRequest', async () => {
   })
 
   it('should not allow requesting a credential with unauthorized credentials', async () => {
-    const mint = await createMint(provider.connection, holder, holder.publicKey, null, 0)
-    const tokenAccount = await getOrCreateAssociatedTokenAccount(provider.connection, holder, mint, holder.publicKey)
-    await mintTo(provider.connection, holder, tokenAccount.mint, tokenAccount.address, holder, 1)
+    const { nft } = await mx
+      .nfts()
+      .create({
+        uri: 'https://test.json',
+        name: 'Dummy NFT',
+        sellerFeeBasisPoints: 0,
+        symbol: `ALBUS-DC`,
+        tokenOwner: holder.publicKey,
+      })
+
     try {
       await holderClient.credentialRequest.create({
-        mint,
+        mint: nft.mint.address,
         issuer: issuerAddress,
         specId,
       })
       assert.ok(false)
     } catch (e: any) {
-      assertErrorCode(e, 'Unauthorized')
+      assertErrorMessage(e, 'Invalid authority type')
     }
   })
 
@@ -156,7 +169,7 @@ describe('credentialRequest', async () => {
       })
       assert.ok(false)
     } catch (e: any) {
-      console.log(e)
+      // console.log(e)
       assertErrorCode(e, 'Unauthorized')
     }
   })

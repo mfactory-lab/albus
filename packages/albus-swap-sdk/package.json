@@ -1,6 +1,5 @@
 {
   "name": "@albus-finance/swap-sdk",
-  "type": "module",
   "version": "0.1.5-next.4",
   "description": "Albus Swap SDK",
   "repository": {

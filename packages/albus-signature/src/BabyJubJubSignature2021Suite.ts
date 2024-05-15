@@ -17,6 +17,8 @@ const {
 const SUITE_CONTEXT_URL = ''
 const MULTIBASE_BASE58BTC_HEADER = 'z'
 
+// @ref: https://github.com/hypersign-protocol/BabyJubJubSignature2021Suite
+
 export class BabyJubJubSignature2021Suite extends LinkedDataSignature {
   verificationKey?: string
   proofSignatureKey: string

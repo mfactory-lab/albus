@@ -30,7 +30,8 @@ import { Keypair } from '@solana/web3.js'
 import { beforeAll, describe, it } from 'vitest'
 import type { WitnessTester } from 'circomkit'
 import { crypto } from '@albus-finance/core'
-import { circomkit, countryLookup, prepareInput } from './common'
+import { countryLookup } from '../src'
+import { circomkit, prepareInput } from './common'
 
 describe('residenceProof', async () => {
   const issuerKeypair = Keypair.generate()

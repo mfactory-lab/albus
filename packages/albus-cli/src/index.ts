@@ -172,6 +172,11 @@ credReq.command('show')
   .argument('<address>', 'Credential Request address')
   .action(actions.credentialRequest.show)
 
+credReq.command('delete')
+  .description('Delete credential request data')
+  .argument('<address>', 'Credential Request address')
+  .action(actions.credentialRequest.remove)
+
 // ------------------------------------------
 /// Issuer Management
 // ------------------------------------------

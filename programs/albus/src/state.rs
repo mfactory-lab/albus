@@ -549,12 +549,14 @@ pub const MAX_CRED_REQ_MSG_LEN: usize = 128;
 #[account]
 #[derive(InitSpace)]
 pub struct CredentialRequest {
+    /// Credential request creator
+    pub authority: Pubkey,
+    /// Credential owner
+    pub credential_owner: Pubkey,
     /// The [CredentialSpec] associated with this request
     pub credential_spec: Pubkey,
     /// Credential mint address
     pub credential_mint: Pubkey,
-    /// Credential request creator
-    pub owner: Pubkey,
     /// The [Issuer] associated with this request
     pub issuer: Pubkey,
     /// Status of the request

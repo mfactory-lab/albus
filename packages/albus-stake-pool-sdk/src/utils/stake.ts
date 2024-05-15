@@ -56,7 +56,7 @@ export async function prepareWithdrawAccounts(
   const validatorListAcc = await connection.getAccountInfo(stakePool.validatorList)
   const validatorList = ValidatorListLayout.decode(validatorListAcc?.data) as ValidatorList
 
-  if (!validatorList?.validators || validatorList?.validators.length == 0) {
+  if (!validatorList?.validators || validatorList?.validators.length === 0) {
     throw new Error('No accounts found')
   }
 
@@ -78,7 +78,7 @@ export async function prepareWithdrawAccounts(
       continue
     }
 
-    const stakeAccountAddress = await findStakeProgramAddress(
+    const stakeAccountAddress = findStakeProgramAddress(
       STAKE_POOL_PROGRAM_ID,
       validator.voteAccountAddress,
       stakePoolAddress,
@@ -98,7 +98,7 @@ export async function prepareWithdrawAccounts(
 
     const transientStakeLamports = validator.transientStakeLamports.toNumber() - minBalance
     if (transientStakeLamports > 0) {
-      const transientStakeAccountAddress = await findTransientStakeProgramAddress(
+      const transientStakeAccountAddress = findTransientStakeProgramAddress(
         STAKE_POOL_PROGRAM_ID,
         validator.voteAccountAddress,
         stakePoolAddress,
@@ -137,10 +137,10 @@ export async function prepareWithdrawAccounts(
   }
 
   for (const type of ['preferred', 'active', 'transient', 'reserve']) {
-    const filteredAccounts = accounts.filter(a => a.type == type)
+    const filteredAccounts = accounts.filter(a => a.type === type)
 
     for (const { stakeAddress, voteAddress, lamports } of filteredAccounts) {
-      if (lamports <= minBalance && type == 'transient') {
+      if (lamports <= minBalance && type === 'transient') {
         continue
       }
 
@@ -162,12 +162,12 @@ export async function prepareWithdrawAccounts(
       withdrawFrom.push({ stakeAddress, voteAddress, poolAmount })
       remainingAmount -= poolAmount
 
-      if (remainingAmount == 0) {
+      if (remainingAmount === 0) {
         break
       }
     }
 
-    if (remainingAmount == 0) {
+    if (remainingAmount === 0) {
       break
     }
   }

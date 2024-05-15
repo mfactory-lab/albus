@@ -13,15 +13,21 @@
     "test:e2e": "pnpm -F @albus-finance/tests run test",
     "test:unit": "vitest --dir ./packages",
     "lint:fix": "eslint --fix .",
-    "syncpack": "syncpack list-mismatches"
+    "syncpack": "syncpack list-mismatches",
+    "postinstall": "husky"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.17.0",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@commitlint/config-pnpm-scopes": "^19.1.0",
     "@types/node": "^20.0.0",
     "@vitest/ui": "^1.6.0",
     "buffer": "^6.0.3",
     "docsify-cli": "^4.4.4",
     "eslint": "^9.2.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "syncpack": "^12.3.2",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5",
@@ -43,14 +49,17 @@
         "snarkjs"
       ]
     },
-    "pnpm": {
-      "patchedDependencies": {
-        "@sphereon/pex@3.3.3": "patches/@sphereon__pex@3.3.3.patch"
-      }
+    "_patchedDependencies": {
+      "@sphereon/pex@3.3.3": "patches/@sphereon__pex@3.3.3.patch"
     }
   },
   "resolutions": {
     "circom_tester": "0.0.20",
     "ffjavascript": "0.2.63"
+  },
+  "lint-staged": {
+    "**/*.{js,json,json5,jsonc,md,ts,yaml,yml,toml}": [
+      "eslint --fix"
+    ]
   }
 }

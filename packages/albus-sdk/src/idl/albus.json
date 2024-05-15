@@ -1,5 +1,5 @@
 {
-  "version": "0.0.29",
+  "version": "0.0.30",
   "name": "albus",
   "instructions": [
     {
@@ -354,6 +354,15 @@
         {
           "name": "credentialMint",
           "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint account of the NFT.",
+            ""
+          ]
+        },
+        {
+          "name": "credentialMetadata",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -362,19 +371,42 @@
           "isSigner": false
         },
         {
+          "name": "credentialOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
           "name": "issuer",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "payer",
+          "name": "authority",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "authority",
+          "name": "albusAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sysvarInstructions",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false,
+          "docs": [
+            "Instructions sysvar account.",
+            ""
+          ]
+        },
+        {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Token Metadata program.",
+            ""
+          ]
         },
         {
           "name": "systemProgram",
@@ -1223,6 +1255,20 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "authority",
+            "docs": [
+              "Credential request creator"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "credentialOwner",
+            "docs": [
+              "Credential owner"
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "credentialSpec",
             "docs": [
               "The [CredentialSpec] associated with this request"
@@ -1233,13 +1279,6 @@
             "name": "credentialMint",
             "docs": [
               "Credential mint address"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "owner",
-            "docs": [
-              "Credential request creator"
             ],
             "type": "publicKey"
           },
@@ -2100,6 +2139,9 @@
         "fields": [
           {
             "name": "uri",
+            "docs": [
+              "Presentation uri"
+            ],
             "type": "string"
           }
         ]
@@ -2751,17 +2793,22 @@
       "name": "CreateCredentialRequestEvent",
       "fields": [
         {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "credentialOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
           "name": "credentialSpec",
           "type": "publicKey",
           "index": false
         },
         {
           "name": "credentialMint",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "owner",
           "type": "publicKey",
           "index": false
         },

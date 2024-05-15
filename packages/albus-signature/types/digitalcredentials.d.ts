@@ -1,7 +1,7 @@
 declare module '@digitalcredentials/did-io';
 declare module '@digitalcredentials/did-method-key';
 declare module '@digitalcredentials/vc' {
-  import type { VerifiableCredential, W3CCredential } from '@albus-finance/core'
+  import type { VerifiableCredential, VerifiablePresentation, W3CCredential } from '@albus-finance/core'
 
   type DocumentLoader = unknown
   type Suite = unknown
@@ -15,6 +15,13 @@ declare module '@digitalcredentials/vc' {
   export function verifyCredential(options: {
     credential: VerifiableCredential
     suite: Suite
+    documentLoader: DocumentLoader
+  }): Promise<VerifiableCredential>
+
+  export function signPresentation(options: {
+    presentation: VerifiablePresentation
+    suite: Suite
+    challenge: string
     documentLoader: DocumentLoader
   }): Promise<VerifiableCredential>
 }

@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.3.6-next.17](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.16...@albus-finance/core-v0.3.6-next.17) (2024-05-14)
+
+
+### 🌟 Features
+
+* **core:** add albus did resolver ([bcb3616](https://github.com/mfactory-lab/albus/commit/bcb36163bb37dc5b324fcf1b87c111a236ee3f5c))
+
+
+### 🐞 Bug Fixes
+
+* **core:** update resolver docs ([35a5592](https://github.com/mfactory-lab/albus/commit/35a5592094a329e077985a74825d1f66d7646db1))
+* improved `tsconfig` ([2238973](https://github.com/mfactory-lab/albus/commit/2238973aaf3548577f35d9a94c0fe4d6cf2b487e))
+
+
+### ♻️ Refactors
+
+* **core:** credential creation improvements ([fe4addc](https://github.com/mfactory-lab/albus/commit/fe4addceb944a7ca5e385908e80f94e843be68b2))
+
+## [0.3.6-next.16](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.15...@albus-finance/core-v0.3.6-next.16) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* **core:** fix verification bigint error ([c39965a](https://github.com/mfactory-lab/albus/commit/c39965a4610440634bd19918da2df2e007fdc8b6))
+
+## [0.3.6-next.15](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.14...@albus-finance/core-v0.3.6-next.15) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* BigInt serialize error ([6d39238](https://github.com/mfactory-lab/albus/commit/6d39238e74719f24cf7efbe2adab645d8697c7f4))
+
+## [0.3.6-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.13...@albus-finance/core-v0.3.6-next.14) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* **ci:** fixed release action ([df776ab](https://github.com/mfactory-lab/albus/commit/df776abb3686a82d67c7998715a4a429f190e431))
+* **core:** inline `@sphereon/pex` ([b87d1f5](https://github.com/mfactory-lab/albus/commit/b87d1f541ebc6fc01ac435f70941d7ee00b8b2b8))
+* global build fixes ([93a9c47](https://github.com/mfactory-lab/albus/commit/93a9c47fde55f2ebef8ebc1bb67945b61c5f7ee0))
+
 ## [0.3.6-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.12...@albus-finance/core-v0.3.6-next.13) (2024-05-10)
 
 ## [0.3.6-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.11...@albus-finance/core-v0.3.6-next.12) (2024-05-10)

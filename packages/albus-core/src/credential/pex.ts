@@ -45,7 +45,7 @@ export type CreatePresentationExchangeOpts = {
   credentials: VerifiableCredential[]
   holderSecretKey: number[] | Uint8Array
   holderDid?: string
-  challenge?: bigint
+  challenge?: string
   date?: string | Date
 }
 

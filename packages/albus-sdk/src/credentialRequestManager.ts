@@ -30,7 +30,9 @@ import {
   type Commitment,
   type GetMultipleAccountsConfig,
   type Keypair, PublicKey,
-  type PublicKeyInitData } from '@solana/web3.js'
+  type PublicKeyInitData, SYSVAR_INSTRUCTIONS_PUBKEY,
+} from '@solana/web3.js'
+import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata/dist/src/generated'
 import { BaseManager } from './base'
 
 import {
@@ -41,7 +43,7 @@ import {
   credentialRequestDiscriminator,
 } from './generated'
 import type { SendOpts } from './utils'
-import { getAssociatedTokenAddress } from './utils'
+import { getAssociatedTokenAddress, getMetadataPDA } from './utils'
 
 export class CredentialRequestManager extends BaseManager {
   /**
@@ -67,22 +69,27 @@ export class CredentialRequestManager extends BaseManager {
    * Create new Credential Request instruction.
    */
   createIx(props: CreateCredentialRequestProps) {
-    const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
+    const authority = this.provider.publicKey
+    const credentialOwner = props?.owner ? props.owner.publicKey : authority
 
     const issuer = new PublicKey(props.issuer)
     const credentialMint = new PublicKey(props.mint)
-    const credentialToken = getAssociatedTokenAddress(credentialMint, authority)
+    const credentialToken = getAssociatedTokenAddress(credentialMint, credentialOwner)
     const [credentialSpec] = this.pda.credentialSpec(issuer, props.specId)
     const [address] = this.pda.credentialRequest(credentialSpec, authority)
 
     const ix = createRequestCredentialInstruction({
+      albusAuthority: this.pda.authority()[0],
+      credentialMetadata: getMetadataPDA(credentialMint),
       credentialRequest: address,
       credentialSpec,
       credentialMint,
       credentialToken,
+      credentialOwner,
       issuer,
       authority,
-      payer: this.provider.publicKey,
+      metadataProgram: METADATA_PROGRAM_ID,
+      sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, {
       data: {
         uri: props.uri ?? '',
@@ -197,12 +204,12 @@ export class CredentialRequestManager extends BaseManager {
       }
     }
 
-    if (props.owner) {
-      builder.addFilter('owner', new PublicKey(props.owner))
+    if (props.authority) {
+      builder.addFilter('authority', new PublicKey(props.authority))
     }
 
-    if (props.issuer) {
-      builder.addFilter('issuer', new PublicKey(props.issuer))
+    if (props.credentialOwner) {
+      builder.addFilter('credentialOwner', new PublicKey(props.credentialOwner))
     }
 
     if (props.credentialSpec) {
@@ -211,6 +218,10 @@ export class CredentialRequestManager extends BaseManager {
 
     if (props.credentialMint) {
       builder.addFilter('credentialMint', new PublicKey(props.credentialMint))
+    }
+
+    if (props.issuer) {
+      builder.addFilter('issuer', new PublicKey(props.issuer))
     }
 
     if (props.status) {
@@ -252,8 +263,9 @@ export type DeleteCredentialRequestProps = {
 }
 
 export type FindCredentialRequestProps = {
-  owner?: PublicKeyInitData
+  authority?: PublicKeyInitData
   issuer?: PublicKeyInitData
+  credentialOwner?: PublicKeyInitData
   credentialSpec?: PublicKeyInitData
   credentialMint?: PublicKeyInitData
   status?: number

@@ -87,31 +87,19 @@ export function generateDid(keypair: Keypair, controller = DEFAULT_DID) {
       'https://w3id.org/security/suites/x25519-2020/v1',
       // 'https://www.w3.org/ns/data-integrity/v1',
       // 'https://w3id.org/security/multikey/v1',
-      {
-        '@base': controller,
-      },
     ],
     'id': controller,
     'assertionMethod': verificationMethod.map(m => m.id),
     'authentication': verificationMethod.map(m => m.id),
     'keyAgreement': [
-      {
-        id: `${controller}#${publicKeyMultibase}`,
-        type: 'X25519KeyAgreementKey2020',
-        controller,
-        publicKeyMultibase,
-      },
+      { ...verificationMethod[0], type: 'X25519KeyAgreementKey2020' },
     ],
     'verificationMethod': verificationMethod,
     'service': [
       {
         id: `${controller}#linkeddomains`,
         type: 'LinkedDomains',
-        serviceEndpoint: {
-          origins: [
-            'https://albus.finance/',
-          ],
-        },
+        serviceEndpoint: 'https://albus.finance/',
       },
       // {
       //   id: `${id}#eecc-registry`,

@@ -27,25 +27,44 @@
  */
 const antfu = require('@antfu/eslint-config').default
 
-module.exports = antfu({
-  gitignore: true,
-  stylistic: true,
-  typescript: true,
-  yaml: true,
-  toml: true,
-  vue: false,
-  rules: {
-    'antfu/consistent-list-newline': 'off',
-    'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
+module.exports = antfu(
+  {
+    gitignore: true,
+    stylistic: true,
+    typescript: true,
+    yaml: true,
+    toml: true,
+    vue: false,
+    ignores: [
+      '**/build/**',
+      '**/dist/**',
+      '**/coverage/**',
+    ],
+  }, {
+    rules: {
+      'antfu/consistent-list-newline': 'off',
+      'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
 
-    'toml/padding-line-between-pairs': 'off',
-    'ts/consistent-type-definitions': ['error', 'type'],
+      'toml/padding-line-between-pairs': 'off',
+      'ts/consistent-type-definitions': ['error', 'type'],
 
-    'curly': ['error', 'all'],
+      'curly': ['error', 'all'],
 
-    'node/prefer-global/process': 'off',
-    'node/prefer-global/buffer': 'off',
+      'node/prefer-global/process': 'off',
+      'node/prefer-global/buffer': 'off',
 
-    'no-console': 'off',
+      'no-console': 'off',
+    },
   },
-})
+  {
+    files: [
+      '**/generated/**',
+    ],
+    rules: {
+      'ts/no-use-before-define': 'off',
+      'jsdoc/require-property-description': 'off',
+      'jsdoc/check-property-names': 'off',
+      'jsdoc/require-property-name': 'off',
+    },
+  },
+)

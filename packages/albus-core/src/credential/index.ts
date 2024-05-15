@@ -33,49 +33,44 @@ import type { Resolvable, ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
 import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
-import {
-  PublicKey as BabyJubPubkey,
-  MultiBase,
-  PrivateKey,
-  Signature,
-  XC20P,
-  eddsa,
-  utils,
-} from '../crypto'
+import { Ed25519Signature2020 } from '@digitalcredentials/ed25519-signature-2020'
+import { Ed25519VerificationKey2020 } from '@digitalcredentials/ed25519-verification-key-2020'
+import { securityLoader } from '@digitalcredentials/security-document-loader'
+import jsigs from '@digitalcredentials/jsonld-signatures'
+import { PublicKey as BabyJubPubkey, MultiBase, PrivateKey, Signature, XC20P, eddsa, utils } from '../crypto'
 import { encodeDidKey, w3cDate, w3cDateToUnixTs } from '../utils'
-import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
+import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import { normalizeClaims, validateCredentialPayload, validatePresentationPayload } from './utils'
-import { DEFAULT_CONTEXT, DEFAULT_DID, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
+import { DEFAULT_CONTEXT, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
 import { ClaimsTree } from './tree'
+import { albusDidResolver } from './resolver'
 
-const { base58ToBytes, randomBigInt } = utils
+const { base58ToBytes } = utils
 
 export * from './tree'
 export * from './pex'
+
+export function defaultDocumentLoader(): IDocumentLoader {
+  const loader = securityLoader()
+  return loader.build()
+}
 
 /**
  * Create new verifiable credential
  */
 export async function createVerifiableCredential(claims: Record<string, any>, opts: CreateCredentialOpts = {}): Promise<VerifiableCredential> {
-  const vcType = [DEFAULT_VC_TYPE, CredentialType.AlbusCredential]
-
-  if (opts.credentialType) {
-    vcType.push(opts.credentialType)
-  }
-
   const normalizedClaims = normalizeClaims(claims)
 
-  let vc: VerifiableCredential = {
-    '@context': [DEFAULT_CONTEXT],
-    'type': vcType,
-    'issuer': opts.issuerDid ?? DEFAULT_DID,
+  let vc: W3CCredential = {
+    '@context': [DEFAULT_CONTEXT, ...opts.context ?? []],
+    'type': [DEFAULT_VC_TYPE, CredentialType.AlbusCredential, ...(opts.credentialType ? [opts.credentialType] : [])],
+    'issuer': opts.issuerDid,
     'issuanceDate': w3cDate(opts?.timestamp ? new Date(opts.timestamp * 1000) : undefined),
     'credentialSubject': normalizedClaims,
-    'proof': undefined,
   }
 
-  // Revocation
+  // TODO: Revocation
   // vc.credentialStatus = {
   //   id: 'did:albus:abc111222333',
   //   type: 'AlbusRevocationStatusV1',
@@ -105,10 +100,10 @@ export async function createVerifiableCredential(claims: Record<string, any>, op
     if (!opts.encryptionKey) {
       throw new Error('encryption key is required')
     }
-    vc = await encryptCredential(vc, { pubkey: opts.encryptionKey, esk: opts.encryptionSecretKey })
+    vc = await encryptCredential(<VerifiableCredential>vc, { pubkey: opts.encryptionKey, esk: opts.encryptionSecretKey })
   }
 
-  return vc
+  return <VerifiableCredential>vc
 }
 
 /**
@@ -166,17 +161,39 @@ export async function encryptCredential(vc: VerifiableCredential, opts: EncryptC
  *
  * @param {VerifiableCredential} vc - The VerifiableCredential to decrypt if needed.
  * @param {Uint8Array} secretKey - The secret key used for decryption.
+ * @param {Uint8Array} epk - Optional ephemeral public key used for decryption.
  * @return {Promise<VerifiableCredential>} The VerifiableCredential with decrypted credential subject if needed.
  */
-export async function decryptCredentialIfNeeded(vc: VerifiableCredential, secretKey: Uint8Array): Promise<VerifiableCredential> {
+export async function decryptCredentialIfNeeded(vc: VerifiableCredential, secretKey: Uint8Array, epk?: Uint8Array): Promise<VerifiableCredential> {
   let credentialSubject: Record<string, any> = {}
   if (vc.credentialSubject?.encrypted !== undefined) {
     credentialSubject = JSON.parse(
-      await XC20P.decrypt(String(vc.credentialSubject.encrypted).split('.')[0], secretKey),
+      await XC20P.decrypt(String(vc.credentialSubject.encrypted).split('.')[0], secretKey, epk),
     )
     return { ...vc, credentialSubject }
   }
   return vc
+}
+
+/**
+ * Decrypts a verifiable presentation with the given options.
+ *
+ * @param {VerifiablePresentation} vp - The verifiable presentation to decrypt.
+ * @param {DecryptPresentationOpts} opts - The options for decryption.
+ * @return {Promise<VerifiablePresentation>} The decrypted verifiable presentation.
+ */
+export async function decryptPresentation(vp: VerifiablePresentation, opts: DecryptPresentationOpts): Promise<VerifiablePresentation> {
+  const verifiableCredential: VerifiableCredential[] = []
+  for (const vc of [].concat(vp.verifiableCredential)) {
+    try {
+      verifiableCredential.push(await decryptCredentialIfNeeded(vc, Uint8Array.from(opts.decryptionKey), opts.epk))
+    } catch (e) {
+      if (opts.throwOnError) {
+        throw e
+      }
+    }
+  }
+  return { ...vp, verifiableCredential }
 }
 
 /**
@@ -190,57 +207,71 @@ export async function createVerifiablePresentation(opts: CreatePresentationOpts)
     throw new Error('no credentials provided')
   }
 
-  const vp: W3CPresentation = {
-    '@context': [DEFAULT_CONTEXT],
+  let vp: W3CPresentation = {
+    '@context': [
+      DEFAULT_CONTEXT,
+      {
+        AlbusPresentation: 'albus:AlbusPresentation',
+      },
+    ],
     'type': [
       DEFAULT_VP_TYPE,
       PresentationType.AlbusPresentation,
-      ...(opts.presentationType ? [].concat(opts.presentationType) : []),
+      ...(opts.type ? [].concat(opts.type) : []),
     ],
-    'issuanceDate': w3cDate(opts.date),
     'holder': holderDid,
     'verifiableCredential': opts.credentials,
   }
 
-  return signPresentation(vp, {
+  vp = await signPresentation(vp, {
     controller: holderDid,
-    challenge: opts.challenge ?? randomBigInt(),
+    challenge: opts.challenge ?? holderKeypair.publicKey.toBase58(),
     signerSecretKey: Uint8Array.from(opts.holderSecretKey),
   })
+
+  if (opts.encrypt) {
+    if (!opts.encryptionKey) {
+      throw new Error('encryption key is required')
+    }
+    vp = await encryptPresentation(vp, {
+      pubkey: opts.encryptionKey,
+      esk: opts.encryptionSecretKey,
+    })
+  }
+
+  return <VerifiablePresentation>vp
 }
 
 /**
  * Signs a verifiable presentation.
  */
-export async function signPresentation(vp: W3CPresentation, opts: {
-  verificationMethod?: string
-  controller?: string
-  challenge: bigint
-  signerSecretKey: Uint8Array
-}): Promise<VerifiablePresentation> {
+export async function signPresentation(vp: W3CPresentation, opts: SignPresentationOpts): Promise<VerifiablePresentation> {
   const signer = Keypair.fromSecretKey(opts.signerSecretKey)
+  const publicKeyMultibase = MultiBase.encode(signer.publicKey.toBytes(), MultiBase.codec.ed25519Pub)
+  const privateKeyMultibase = MultiBase.encode(signer.secretKey, MultiBase.codec.ed25519Priv)
 
-  const proof = createCredentialProof({
-    controller: opts.controller,
-    msg: opts.challenge,
-    purpose: 'authentication',
-    signerSecretKey: signer.secretKey,
-    verificationMethod: opts.verificationMethod,
+  const documentLoader = opts.documentLoader ?? defaultDocumentLoader()
+
+  const purpose = new jsigs.purposes.AuthenticationProofPurpose({
+    challenge: opts.challenge,
   })
 
-  return {
-    ...vp,
-    proof: {
-      ...proof,
-      challenge: String(opts.challenge),
-    },
-  }
+  const suite = new Ed25519Signature2020({
+    key: await Ed25519VerificationKey2020.from({
+      type: 'Ed25519VerificationKey2020',
+      controller: opts.controller,
+      publicKeyMultibase,
+      privateKeyMultibase,
+    }),
+  })
+
+  return jsigs.sign(vp, { documentLoader, purpose, suite })
 }
 
 /**
  * Encrypts the verifiable presentation with the given options.
  */
-export async function encryptPresentation(vp: VerifiablePresentation, opts: EncryptCredentialOpts) {
+export async function encryptPresentation(vp: W3CPresentation, opts: EncryptCredentialOpts) {
   const verifiableCredential = [].concat(vp.verifiableCredential)
   for (let i = 0; i < verifiableCredential.length; i++) {
     verifiableCredential[i] = await encryptCredential(verifiableCredential[i], opts)
@@ -259,6 +290,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   const resolver = opts.resolver ?? new Resolver({
     ...WebDidResolver.getResolver(),
     ...KeyDidResolver.getResolver(),
+    ...albusDidResolver(),
   } as ResolverRegistry)
 
   validateCredentialPayload(vc)
@@ -295,17 +327,19 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   if (proof.proofValue[0] !== 'z') {
     throw new Error('Only base58btc multibase encoding is supported.')
   }
+
   const signatureBytes = base58ToBytes(proof.proofValue.substring(1))
   const signature = Signature.newFromCompressed(signatureBytes.slice(0, 64))
+  const pubKey = BabyJubPubkey.newFromCompressed(issuerPubkey).p
 
   const claimsTree = await createCredentialTree(cred)
 
-  proof.issuerPubkey = BabyJubPubkey.newFromCompressed(issuerPubkey).p
-  proof.signature = [...signature.R8, signature.S]
-
-  if (!eddsa.verifyPoseidon(claimsTree.root, signature, proof.issuerPubkey)) {
+  if (!eddsa.verifyPoseidon(claimsTree.root, signature, pubKey)) {
     throw new Error('Proof verification failed')
   }
+
+  proof.issuerPubkey = pubKey.map(String)
+  proof.signature = [...signature.R8, signature.S].map(String)
 
   return cred
 }
@@ -313,44 +347,20 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 /**
  * Verify presentation
  */
-export async function verifyPresentation(vp: VerifiablePresentation, opts: VerifyPresentationOpts = {}): Promise<VerifiablePresentation> {
-  const resolver = opts.resolver ?? new Resolver({
-    ...WebDidResolver.getResolver(),
-    ...KeyDidResolver.getResolver(),
-  } as ResolverRegistry)
-
+export async function verifyPresentation(vp: VerifiablePresentation, opts: VerifyPresentationOpts = {}) {
   validatePresentationPayload(vp as any)
 
-  // @ts-expect-error this is a valid syntax
-  const holderDid = vp.holder?.id ?? vp.holder
-  const result = await resolver.resolve(holderDid, { accept: 'application/did+json' })
-
-  const vm = (result.didDocument?.verificationMethod ?? [])
-    .find(vm => vm.type === VerifyType.BJJVerificationKey2021)
-
-  if (!vm) {
-    throw new Error(`unable to find ${VerifyType.BJJVerificationKey2021} verification method`)
+  let challenge = opts.challenge
+  if (!challenge) {
+    const proofs: Proof[] = [].concat(vp.proof)
+    challenge = proofs[0].challenge
   }
 
-  if (!(verifyPresentationProof(vp.proof as PresentationProof, base58ToBytes(vm.publicKeyBase58)))) {
-    throw new Error('proof verification failed')
-  }
+  const documentLoader = opts.documentLoader ?? defaultDocumentLoader()
+  const purpose = new jsigs.purposes.AuthenticationProofPurpose({ challenge })
+  const suite = new Ed25519Signature2020()
 
-  const verifiableCredential: VerifiableCredential[] = []
-
-  // TODO: remove ?
-  for (const vc of [].concat(vp.verifiableCredential)) {
-    try {
-      verifiableCredential.push(await decryptCredentialIfNeeded(vc, Uint8Array.from(opts.decryptionKey)))
-    } catch (e) {
-      if (opts.decryptionRethrow) {
-        throw e
-      }
-      console.log(`Error: unable to decrypt credential (${e})`)
-    }
-  }
-
-  return { ...vp, verifiableCredential }
+  return jsigs.verify(vp, { purpose, documentLoader, suite })
 }
 
 /**
@@ -418,19 +428,6 @@ export function verifyCredentialProof(msg: bigint, proof: string, pubKey?: Uint8
 }
 
 /**
- * Verify the presentation proof.
- */
-export function verifyPresentationProof(proof: PresentationProof, pubKey?: Uint8Array) {
-  switch (proof.type) {
-    case ProofType.BJJSignature2021: {
-      return verifyCredentialProof(BigInt(proof.challenge), proof.proofValue, pubKey)
-    }
-    default:
-      throw new Error(`unsupported credential proof type ${proof.type}`)
-  }
-}
-
-/**
  * Creates a credential tree based on the given W3C credential and optional depth.
  */
 export async function createCredentialTree(credential: W3CCredential, depth?: number) {
@@ -452,6 +449,12 @@ export async function createCredentialTree(credential: W3CCredential, depth?: nu
   return ClaimsTree.from({ ...credential.credentialSubject, meta }, { depth })
 }
 
+export type IDocumentLoader = (url: string) => Promise<{
+  contextUrl?: string
+  documentUrl?: string
+  document: any
+}>
+
 export type CreateCredentialOpts = {
   issuerDid?: string
   // Signer secret key.
@@ -460,7 +463,7 @@ export type CreateCredentialOpts = {
   encrypt?: boolean
   encryptionKey?: PublicKey
   // Optional secret key. Ephemeral secret key used by default
-  encryptionSecretKey?: number[] | Uint8Array
+  encryptionSecretKey?: Uint8Array
   // unix timestamp
   validFrom?: number
   // unix timestamp
@@ -468,6 +471,7 @@ export type CreateCredentialOpts = {
   // custom issuance date
   timestamp?: number
   credentialType?: CredentialType
+  context?: string[] | object[]
   // suite: typeof LinkedDataSignature
   // documentLoader: any
   // purpose?: any
@@ -482,17 +486,24 @@ export type SingCredentialOpts = {
 }
 
 export type EncryptCredentialOpts = {
+  // Public key used for encryption
   pubkey: PublicKey
-  esk?: number[] | Uint8Array
+  // Optional secret key. Ephemeral secret key used by default
+  esk?: Uint8Array
 }
 
 export type CreatePresentationOpts = {
   holderSecretKey: ArrayLike<number>
-  holderDid?: string
   credentials: VerifiableCredential[]
-  challenge?: bigint
+  // Optional DID of the holder, default did:key
+  holderDid?: string
+  encrypt?: boolean
+  encryptionKey?: PublicKey
+  // Optional secret key. Ephemeral secret key used by default
+  encryptionSecretKey?: Uint8Array
+  challenge?: string
   date?: string | Date
-  presentationType?: string | string[]
+  type?: string | string[]
 }
 
 export type VerifyCredentialOpts = {
@@ -500,13 +511,25 @@ export type VerifyCredentialOpts = {
   resolver?: Resolvable
 }
 
-export type VerifyPresentationOpts = {
-  // Used to decrypt verifiable credential subject
+export type SignPresentationOpts = {
+  challenge: string
+  signerSecretKey: Uint8Array
+  verificationMethod?: string
+  controller?: string
+  documentLoader?: IDocumentLoader
+}
+
+export type DecryptPresentationOpts = {
   decryptionKey?: number[] | Uint8Array
-  decryptionRethrow?: boolean
+  throwOnError?: boolean
+  // Optional public key. Ephemeral public key used by default
+  epk?: Uint8Array
+}
+
+export type VerifyPresentationOpts = {
   // By default, the challenge is the holder's public key.
-  challenge?: Uint8Array
-  resolver?: Resolvable
+  challenge?: string
+  documentLoader?: IDocumentLoader
 }
 
 type CredentialProof = {
@@ -515,10 +538,6 @@ type CredentialProof = {
   proofValue: string
   proofPurpose?: string
 } & Proof
-
-type PresentationProof = {
-  challenge: string
-} & CredentialProof
 
 export type CreateCredentialProof = {
   msg: bigint

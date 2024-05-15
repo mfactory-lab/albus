@@ -129,7 +129,7 @@ export type VerifiablePresentation = Verifiable<W3CPresentation>
 
 export type Verifiable<T> = T & { proof: Proof | Proof[] }
 
-export type Proof = Extensible<{ type: string, proofValue?: string, verificationMethod?: string }>
+export type Proof = Extensible<{ type: string, proofValue?: string, challenge?: string, verificationMethod?: string }>
 
 // https://www.w3.org/TR/vc-data-model/#credential-subject
 export type CredentialSubject = Extensible<LinkedDataObject>
