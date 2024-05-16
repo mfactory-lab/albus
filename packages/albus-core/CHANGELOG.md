@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.6-next.20](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.19...@albus-finance/core-v0.3.6-next.20) (2024-05-16)
+
+
+### 🌟 Features
+
+* **core:** add did resolver ([1ce8ed9](https://github.com/mfactory-lab/albus/commit/1ce8ed904f1b81cf035b8b9a4567d1b5799859ae))
+* **core:** fix tsup external ([f01a1cd](https://github.com/mfactory-lab/albus/commit/f01a1cda174f6ce0ce1ccf3c49d682d71725357e))
+* **core:** implemented document loader ([b65eb40](https://github.com/mfactory-lab/albus/commit/b65eb401fef5feb05590d7f0d2671f19d8b64844))
+
 ## [0.3.6-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.17...@albus-finance/core-v0.3.6-next.19) (2024-05-15)
 
 
