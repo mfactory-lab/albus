@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6-next.21](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.20...@albus-finance/core-v0.3.6-next.21) (2024-05-16)
+
+
+### 🐞 Bug Fixes
+
+* **core:** add schema.org vocab for credential context ([5f72b58](https://github.com/mfactory-lab/albus/commit/5f72b5827079b731da2c3acb14aefaf40c3a8232))
+
 ## [0.3.6-next.20](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.19...@albus-finance/core-v0.3.6-next.20) (2024-05-16)
 
 
