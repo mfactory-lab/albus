@@ -76,7 +76,8 @@ export class Ed25519Signature2020 extends LinkedDataSignature {
     }
 
     if (!_includesContext({
-      document: verificationMethod, contextUrl,
+      document: verificationMethod,
+      contextUrl,
     })) {
       throw new TypeError(
         `The verification method (key) must contain "${contextUrl}" context.`,
@@ -108,9 +109,7 @@ export class Ed25519Signature2020 extends LinkedDataSignature {
 
     const { document } = await documentLoader(verificationMethod)
 
-    verificationMethod = typeof document === 'string'
-      ? JSON.parse(document)
-      : document
+    verificationMethod = typeof document === 'string' ? JSON.parse(document) : document
 
     await this.assertVerificationMethod({ verificationMethod })
 
@@ -124,7 +123,6 @@ export class Ed25519Signature2020 extends LinkedDataSignature {
   }
 
   async updateProof({ proof }) {
-    console.log(this.key)
     // extending classes may do more
     return proof
   }

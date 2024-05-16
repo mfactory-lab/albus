@@ -148,6 +148,8 @@ describe('credential', () => {
       }),
     )
 
+    // console.log(JSON.stringify(vp, null, 2))
+
     assert.ok(vp.verified)
   })
 

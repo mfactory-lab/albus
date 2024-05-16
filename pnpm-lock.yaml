@@ -145,18 +145,27 @@ importers:
       axios:
         specifier: ^1.6.8
         version: 1.6.8(debug@4.3.4)
+      credentials-context:
+        specifier: ^2.0.0
+        version: 2.0.0
       crypto-ld:
         specifier: ^7.0.0
         version: 7.0.0
+      did-context:
+        specifier: ^3.1.1
+        version: 3.1.1
       did-resolver:
         specifier: ^3.2.2
         version: 3.2.2
+      ed25519-signature-2020-context:
+        specifier: ^1.1.0
+        version: 1.1.0
+      jsonld-document-loader:
+        specifier: ^2.0.0
+        version: 2.0.0
       jsonld-signatures:
         specifier: ^11.2.1
         version: 11.2.1(web-streams-polyfill@3.3.3)
-      key-did-resolver:
-        specifier: ^3.0.0
-        version: 3.0.0
       snarkjs:
         specifier: '*'
         version: 0.7.3
@@ -166,6 +175,9 @@ importers:
       web-did-resolver:
         specifier: ^2.0.27
         version: 2.0.27
+      x25519-key-agreement-2020-context:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@types/crypto-ld':
         specifier: ^7.0.4
@@ -4356,10 +4368,6 @@ packages:
     resolution: {integrity: sha512-trfYco6AoZ+rKhKnxA0hgX0HAbVP/s808/EuDSe2JDzUnCp/xAsli35Orvk67UrTEcwuxZqYZDmfA2RXJgxVvA==}
     engines: {node: '>= 10.0.0'}
 
-  bigint-mod-arith@3.3.1:
-    resolution: {integrity: sha512-pX/cYW3dCa87Jrzv6DAr8ivbbJRzEX5yGhdt8IutnX/PCIXfpx+mabWNK/M8qqh+zQ0J3thftUBHW0ByuUlG0w==}
-    engines: {node: '>=10.4.0'}
-
   bignumber.js@9.1.2:
     resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
 
@@ -7101,6 +7109,10 @@ packages:
     resolution: {integrity: sha512-CtFyIBZApeVvs6QgyS7Gcp8h1dUs+1XNHcV4Sr6O9ItPaL0hVgqe47Tgs3RNH0A5Bc4p3UFPKAJVHKSOQq4mhQ==}
     engines: {node: '>=12'}
 
+  jsonld-document-loader@2.0.0:
+    resolution: {integrity: sha512-my1JVfV1Usx8Yme2VWQAUf+TwlFI7UEJWBrTy0NX+HAQG3Z0H8K7d63R9Fe6GBNP8k3HwQwVYwYTgnDpy4GRpg==}
+    engines: {node: '>=16'}
+
   jsonld-signatures@11.2.1:
     resolution: {integrity: sha512-RNaHTEeRrX0jWeidPCwxMq/E/Ze94zFyEZz/v267ObbCHQlXhPO7GtkY6N5PSHQfQhZPXa8NlMBg5LiDF4dNbA==}
     engines: {node: '>=14'}
@@ -7133,10 +7145,6 @@ packages:
   keccak@3.0.4:
     resolution: {integrity: sha512-3vKuW0jV8J3XNTzvfyicFR5qvxrSAGl7KIhvgOu5cmWwM7tZRj3fMbj/pfIf4be7aznbc+prBWGjywox/g2Y6Q==}
     engines: {node: '>=10.0.0'}
-
-  key-did-resolver@3.0.0:
-    resolution: {integrity: sha512-IyEq64AdS6lUwtn3YSvGpu7KAGA2x5+fjRCUIa8+ccSLmWrODV/ICM5aa6hHV/19EPWef8/e322r9sQJJ6/3qA==}
-    engines: {node: '>=14.14'}
 
   keyv@3.1.0:
     resolution: {integrity: sha512-9ykJ/46SN/9KPM/sichzQ7OvXyGDYKGTaDlKMGCAlg2UK8KRy4jb0d8sFc+0Tt0YYnThq8X2RZgCg74RPxgcVA==}
@@ -7738,14 +7746,6 @@ packages:
   muggle-string@0.3.1:
     resolution: {integrity: sha512-ckmWDJjphvd/FvZawgygcUeQCxzvohjFO5RxTjj4eq8kw359gFF3E1brjfI+viLMxss5JrHTDRHZvu2/tuy0Qg==}
 
-  multiformats@11.0.2:
-    resolution: {integrity: sha512-b5mYMkOkARIuVZCpvijFj9a6m5wMVLC7cf/jIPd5D/ARDOfLC5+IFkbgDXQgcU2goIsTD/O9NY4DI/Mt4OGvlg==}
-    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
-
-  multiformats@12.1.3:
-    resolution: {integrity: sha512-eajQ/ZH7qXZQR2AgtfpmSMizQzmyYVmCql7pdhldPuYQi4atACekbJaQplk6dWyIi10jCaFnd6pqvcEFXjbaJw==}
-    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
-
   multiformats@9.9.0:
     resolution: {integrity: sha512-HoMUjhH9T8DDBNT+6xzkrd9ga/XiBI4xLr58LJACwK6G3HTOPeMz4nB4KJs33L2BelrIJa7P0VuNaVF3hMYfjg==}
 
@@ -7824,9 +7824,6 @@ packages:
 
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
-
-  nist-weierstrauss@1.6.1:
-    resolution: {integrity: sha512-FpjCOnPV/s3ZVIkeldCVSml2K4lruabPbBgoEitpCK1JL0KTVoWb56CFTU6rZn5i6VqAjdwcOp0FDwJACPmeFA==}
 
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
@@ -9764,17 +9761,11 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
-  uint8arrays@2.1.10:
-    resolution: {integrity: sha512-Q9/hhJa2836nQfEJSZTmr+pg9+cDJS9XEAp7N2Vg5MzL3bK/mkMVfjscRGYruP9jNda6MAdf4QD/y78gSzkp6A==}
-
   uint8arrays@3.1.0:
     resolution: {integrity: sha512-ei5rfKtoRO8OyOIor2Rz5fhzjThwIHJZ3uyDPnDHTXbP0aMQ1RN/6AI5B5d9dBxJOU+BvOAk7ZQ1xphsX8Lrog==}
 
   uint8arrays@3.1.1:
     resolution: {integrity: sha512-+QJa8QRnbdXVpHYjLoTpJIdCTiw9Ir62nocClWuXIq2JIh4Uta0cQsTSpFL678p2CN8B+XSApwcU+pQEqVpKWg==}
-
-  uint8arrays@4.0.10:
-    resolution: {integrity: sha512-AnJNUGGDJAgFw/eWu/Xb9zrVKEGlwJJCaeInlf3BkecE/zcTobk5YXYIPNQJO1q5Hh1QZrQQHf0JvcHqz2hqoA==}
 
   unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
@@ -10034,9 +10025,6 @@ packages:
   validator@13.11.0:
     resolution: {integrity: sha512-Ii+sehpSfZy+At5nPdnyMhx78fEoPDkR2XW/zimHEL3MyGJQOCQ7WeP20jPYRz7ZCpcKLB21NxuXHF3bxjStBQ==}
     engines: {node: '>= 0.10'}
-
-  varint@6.0.0:
-    resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
 
   varuint-bitcoin@1.1.2:
     resolution: {integrity: sha512-4EVb+w4rx+YfVM32HQX42AbbT7/1f5zwAYhIujKXKk8NQK+JfRVl3pqT3hjNn/L+RstigmGGKVwHA/P0wgITZw==}
@@ -16426,8 +16414,6 @@ snapshots:
     dependencies:
       bindings: 1.5.0
 
-  bigint-mod-arith@3.3.1: {}
-
   bignumber.js@9.1.2: {}
 
   binary-extensions@2.3.0: {}
@@ -19621,6 +19607,8 @@ snapshots:
 
   jsonld-document-loader@1.2.1: {}
 
+  jsonld-document-loader@2.0.0: {}
+
   jsonld-signatures@11.2.1(web-streams-polyfill@3.3.3):
     dependencies:
       '@digitalbazaar/security-context': 1.0.1
@@ -19664,15 +19652,6 @@ snapshots:
       node-addon-api: 2.0.2
       node-gyp-build: 4.8.0
       readable-stream: 3.6.2
-
-  key-did-resolver@3.0.0:
-    dependencies:
-      '@stablelib/ed25519': 1.0.3
-      bigint-mod-arith: 3.3.1
-      multiformats: 11.0.2
-      nist-weierstrauss: 1.6.1
-      uint8arrays: 4.0.10
-      varint: 6.0.0
 
   keyv@3.1.0:
     dependencies:
@@ -20340,10 +20319,6 @@ snapshots:
 
   muggle-string@0.3.1: {}
 
-  multiformats@11.0.2: {}
-
-  multiformats@12.1.3: {}
-
   multiformats@9.9.0: {}
 
   multistream@4.1.0:
@@ -20417,11 +20392,6 @@ snapshots:
       type-fest: 2.19.0
 
   nice-try@1.0.5: {}
-
-  nist-weierstrauss@1.6.1:
-    dependencies:
-      multiformats: 9.9.0
-      uint8arrays: 2.1.10
 
   no-case@3.0.4:
     dependencies:
@@ -22613,10 +22583,6 @@ snapshots:
   uglify-js@3.17.4:
     optional: true
 
-  uint8arrays@2.1.10:
-    dependencies:
-      multiformats: 9.9.0
-
   uint8arrays@3.1.0:
     dependencies:
       multiformats: 9.9.0
@@ -22624,10 +22590,6 @@ snapshots:
   uint8arrays@3.1.1:
     dependencies:
       multiformats: 9.9.0
-
-  uint8arrays@4.0.10:
-    dependencies:
-      multiformats: 12.1.3
 
   unbox-primitive@1.0.2:
     dependencies:
@@ -22901,8 +22863,6 @@ snapshots:
       builtins: 5.0.1
 
   validator@13.11.0: {}
-
-  varint@6.0.0: {}
 
   varuint-bitcoin@1.1.2:
     dependencies:
