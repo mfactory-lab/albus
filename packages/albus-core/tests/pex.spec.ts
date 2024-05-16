@@ -26,14 +26,14 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { describe, it } from 'vitest'
+import { assert, describe, it } from 'vitest'
 import type { InputDescriptorV2, PresentationDefinitionV2 } from '@sphereon/pex-models'
 import type { PresentationSignCallBackParams } from '@sphereon/pex'
 import { PEX } from '@sphereon/pex'
 import { Keypair } from '@solana/web3.js'
 import type { IPresentation, IVerifiableCredential, IVerifiablePresentation } from '@sphereon/ssi-types'
-import { createVerifiableCredential } from '../src/credential'
-import { CredentialType } from '../src/credential/types'
+import { createPresentationExchange, createVerifiableCredential } from '../src/credential'
+import { CredentialType } from '../src'
 
 describe('pex', async () => {
   const pex = new PEX()
@@ -49,10 +49,13 @@ describe('pex', async () => {
         constraints: {
           fields: [
             {
-              path: ['$.issuer'],
+              path: ['$.type'],
               filter: {
-                type: 'string',
-                const: 'did:web:albus.finance',
+                type: 'array',
+                contains: {
+                  type: 'string',
+                  const: 'IdCard',
+                },
               },
             },
           ],
@@ -70,6 +73,7 @@ describe('pex', async () => {
     birthDate: '1966-10-02',
     docNumber: 'AB123456',
   }, {
+    issuerDid: 'did:albus:issuer:9not3fH8oNjWePPgaQGGtiAnMiZyWBsr3KL8mnMCmvHV',
     credentialType: CredentialType.IdCard,
     issuerSecretKey: issuer.secretKey,
   })
@@ -78,11 +82,24 @@ describe('pex', async () => {
     country: 'UK',
     docNumber: 'AB123456',
   }, {
+    issuerDid: 'did:albus:issuer:9not3fH8oNjWePPgaQGGtiAnMiZyWBsr3KL8mnMCmvHV',
     credentialType: CredentialType.IdCard,
     issuerSecretKey: issuer.secretKey,
   })
 
   const credentials = [cred, cred2]
+
+  it('should create Presentation Exchange', async () => {
+    const keypair = Keypair.generate()
+
+    const res = await createPresentationExchange({
+      holderSecretKey: keypair.secretKey,
+      definition: presentationDefinitionV2,
+      credentials,
+    })
+
+    assert.ok(!!res.proof)
+  })
 
   it('works', async () => {
     const def: PresentationDefinitionV2 = {
@@ -149,7 +166,7 @@ describe('pex', async () => {
   it('should evaluate presentation', async () => {
     const cred2 = { ...cred, issuer: 'did:web:albus.finance2' }
 
-    const verifiablePresentation = {
+    const _verifiablePresentation = {
       '@context': [
         'https://www.w3.org/2018/credentials/v1',
         'https://identity.foundation/presentation-exchange/submission/v1',
@@ -169,6 +186,8 @@ describe('pex', async () => {
       const { signatureOptions, proofOptions } = options // extract the orignially supploed signature and proof Options
       // const privateKeyBase58 = signatureOptions.privateKey // Please check keyEncoding from signatureOptions first!
 
+      console.log(signatureOptions)
+      console.log(proofOptions)
       console.log(proof)
 
       /**

@@ -61,7 +61,7 @@ export async function createVerifiableCredential(claims: Record<string, any>, op
   const normalizedClaims = normalizeClaims(claims)
 
   let vc: W3CCredential = {
-    '@context': [DEFAULT_CONTEXT, ...opts.context ?? []],
+    '@context': [DEFAULT_CONTEXT, { '@vocab': 'https://schema.org/' }, ...(opts.context ?? [])],
     'type': [DEFAULT_VC_TYPE, CredentialType.AlbusCredential, ...(opts.credentialType ? [opts.credentialType] : [])],
     'issuer': opts.issuerDid,
     'issuanceDate': w3cDate(opts?.timestamp ? new Date(opts.timestamp * 1000) : undefined),
