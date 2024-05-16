@@ -31,9 +31,7 @@ import { Keypair } from '@solana/web3.js'
 
 import type { Resolvable, ResolverRegistry } from 'did-resolver'
 import { Resolver } from 'did-resolver'
-import * as KeyDidResolver from 'key-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
-import { securityLoader } from '@digitalcredentials/security-document-loader'
 import jsigs from 'jsonld-signatures'
 import { PublicKey as BabyJubPubkey, MultiBase, PrivateKey, Signature, XC20P, eddsa, utils } from '../crypto'
 import { encodeDidKey, w3cDate, w3cDateToUnixTs } from '../utils'
@@ -42,8 +40,9 @@ import { CredentialType, PresentationType, ProofType, VerifyType } from './types
 import { normalizeClaims, validateCredentialPayload, validatePresentationPayload } from './utils'
 import { DEFAULT_CONTEXT, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
 import { ClaimsTree } from './tree'
-import { albusDidResolver } from './resolver'
+import { albusDidResolver, keyDidResolver } from './did-resolver'
 import { Ed25519Signature2020, Ed25519VerificationKey2020 } from './crypto'
+import { securityLoader } from './documentLoader'
 
 const { base58ToBytes } = utils
 
@@ -287,7 +286,7 @@ export async function encryptPresentation(vp: W3CPresentation, opts: EncryptCred
 export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCredentialOpts = {}): Promise<VerifiableCredential> {
   const resolver = opts.resolver ?? new Resolver({
     ...WebDidResolver.getResolver(),
-    ...KeyDidResolver.getResolver(),
+    ...keyDidResolver(),
     ...albusDidResolver(),
   } as ResolverRegistry)
 

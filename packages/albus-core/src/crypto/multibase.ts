@@ -37,6 +37,7 @@ const MULTIBASE_HEADER = {
 const MULTICODEC_HEADER = {
   ed25519Priv: 0x8026,
   ed25519Pub: 0xED01,
+  x25519Pub: 0xEC01,
 }
 
 export class MultiBase {
