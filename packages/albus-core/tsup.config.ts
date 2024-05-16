@@ -12,6 +12,9 @@ export default defineConfig((options: Options) => ({
   noExternal: [
     // used in @sphereon/pex
     'string.prototype.matchall',
+    // ESM only
+    'crypto-ld',
+    'jsonld-document-loader',
     // 'key-did-resolver',
   ],
   ...options,

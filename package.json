@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm -r --parallel --filter=./packages/** run dev",
     "circuits": "pnpm -F circuits",
+    "cli": "pnpm -F @albus-finance/cli",
     "core": "pnpm -F @albus-finance/core",
     "sdk": "pnpm -F @albus-finance/sdk",
     "ui": "pnpm -F @albus-finance/ui",
