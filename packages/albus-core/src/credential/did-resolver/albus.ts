@@ -1,9 +1,9 @@
 import type { DIDDocument, DIDResolutionResult, DIDResolver, ParsedDID } from 'did-resolver'
 import type { AccountInfo, Cluster } from '@solana/web3.js'
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js'
-import { PublicKey as BJJPubkey, MultiBase } from '../crypto'
-import { bytesToBigInt } from '../crypto/utils'
-import { VerifyType } from './types'
+import { PublicKey as BJJPubkey, MultiBase } from '../../crypto'
+import { bytesToBigInt } from '../../crypto/utils'
+import { VerifyType } from '../types'
 
 const SERVICE_ENDPOINT = 'https://albus.finance/'
 const DEFAULT_CLUSTER = 'mainnet-beta'
@@ -15,7 +15,7 @@ enum AccountType {
 /**
  * Albus DID resolver.
  */
-export function albusDidResolver(): Record<string, DIDResolver> {
+export function getResolver(): Record<string, DIDResolver> {
   async function resolve(did: string, parsed: ParsedDID): Promise<DIDResolutionResult> {
     const params = new URLSearchParams(parsed.query)
 
