@@ -1,8 +1,8 @@
 import { LDKeyPair } from 'crypto-ld'
+import * as ed from '@noble/ed25519'
 import { base58ToBytes, base64ToBytes, bytesToBase64url } from '../../crypto/utils'
 import { MultiBase } from '../../crypto'
-import { assertKeyBytes } from './utils'
-import ed25519 from './ed25519'
+import { Ed25519, assertKeyBytes } from './utils'
 
 const MULTIBASE_BASE58BTC_HEADER = 'z'
 const MULTICODEC_ED25519_PUB_HEADER = new Uint8Array([0xED, 0x01])
@@ -136,9 +136,10 @@ export class Ed25519VerificationKey2020 extends LDKeyPair {
     let keypair: { publicKey: any, secretKey: any }
 
     if (seed) {
-      keypair = await ed25519.generateKeyPairFromSeed(seed)
+      ed.utils.randomPrivateKey()
+      keypair = Ed25519.generateKeyPairFromSeed(seed)
     } else {
-      keypair = await ed25519.generateKeyPair()
+      keypair = Ed25519.generateKeyPair()
     }
 
     const publicKeyMultibase = MultiBase.encode(keypair.publicKey, MultiBase.codec.ed25519Pub)
@@ -245,8 +246,7 @@ export class Ed25519VerificationKey2020 extends LDKeyPair {
     const publicKey = bytesToBase64url(this._publicKeyBuffer)
     const serialized = `{"crv":"Ed25519","kty":"OKP","x":"${publicKey}"}`
     const data = new TextEncoder().encode(serialized)
-    return bytesToBase64url(
-      new Uint8Array(await ed25519.sha256digest({ data })))
+    return bytesToBase64url(new Uint8Array(Ed25519.sha256Digest(data)))
   }
 
   /**
@@ -309,7 +309,7 @@ export class Ed25519VerificationKey2020 extends LDKeyPair {
         if (!privateKeyBuffer) {
           throw new Error('A private key is not available for signing.')
         }
-        return ed25519.sign(privateKeyBuffer, data)
+        return Ed25519.sign(data, privateKeyBuffer)
       },
       id: this.id,
     }
@@ -323,7 +323,7 @@ export class Ed25519VerificationKey2020 extends LDKeyPair {
         if (!publicKeyBuffer) {
           throw new Error('A public key is not available for verifying.')
         }
-        return ed25519.verify(publicKeyBuffer, data, signature)
+        return Ed25519.verify(signature, data, publicKeyBuffer)
       },
       id: this.id,
     }

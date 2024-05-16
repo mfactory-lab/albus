@@ -1,4 +1,31 @@
 import base64url from 'base64url'
+import { ed25519 } from '@noble/curves/ed25519'
+import { sha256 } from '@noble/hashes/sha256'
+
+export class Ed25519 {
+  static generateKeyPairFromSeed(seed: Uint8Array) {
+    const publicKey = ed25519.getPublicKey(seed)
+    const secretKey = new Uint8Array(64)
+    secretKey.set(seed)
+    secretKey.set(publicKey, 32)
+    return {
+      publicKey,
+      secretKey,
+    }
+  }
+
+  static generateKeyPair() {
+    return this.generateKeyPairFromSeed(ed25519.utils.randomPrivateKey())
+  }
+
+  static sign = (
+    message: Parameters<typeof ed25519.sign>[0],
+    secretKey: Parameters<typeof ed25519.sign>[1],
+  ) => ed25519.sign(message, secretKey.slice(0, 32))
+
+  static verify = ed25519.verify
+  static sha256Digest = (msg: Uint8Array | string) => sha256(msg)
+}
 
 export function createJws({ encodedHeader, verifyData }) {
   const buffer = Buffer.concat([
@@ -19,15 +46,6 @@ export function decodeBase64UrlToString(string: string) {
 
 /**
  * Asserts that key bytes have a type of Uint8Array and a specific length.
- *
- * @throws {TypeError|SyntaxError} - Throws a Type or Syntax error.
- *
- * @param {object} options - Options to use.
- * @param {Uint8Array} options.bytes - The bytes being checked.
- * @param {number} [options.expectedLength] - The expected bytes' length.
- * @param {string} [options.code] - An optional code for the error.
- *
- * @returns {undefined} Returns on success throws on error.
  */
 export function assertKeyBytes({ bytes, expectedLength = 32, code = undefined }) {
   if (!(bytes instanceof Uint8Array)) {
