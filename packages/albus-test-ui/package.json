@@ -16,21 +16,21 @@
   "dependencies": {
     "@albus-finance/core": "workspace:^",
     "@albus-finance/sdk": "workspace:^",
+    "@ledgerhq/errors": "6.16.3",
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.91.1",
     "@vueuse/core": "^10.9.0",
     "pinia": "^2.1.7",
+    "quasar": "^2.15.3",
+    "sass": "^1.75.0",
     "solana-wallets-vue": "^0.6.1",
     "vue": "^3.4.23",
-    "vue-router": "^4.3.1",
-    "sass": "^1.75.0",
-    "quasar": "^2.15.3",
-    "@ledgerhq/errors": "6.16.3"
+    "vue-router": "^4.3.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
     "@quasar/extras": "^1.16.11",
     "@quasar/vite-plugin": "^1.6.0",
+    "@vitejs/plugin-vue": "^5.0.4",
     "unplugin-auto-import": "^0.17.5",
     "unplugin-vue-components": "^0.26.0",
     "vite-plugin-pages": "^0.32.1",
