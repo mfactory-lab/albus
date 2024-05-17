@@ -56,7 +56,7 @@ export class MultiBase {
 
   static decode(data: string, codec?: number) {
     if (data[0] !== MULTIBASE_HEADER.base58btc) {
-      throw new Error('invalid format, only `base58` is supported')
+      throw new Error('Only base58btc multibase encoding is supported.')
     }
     const bytes = base58ToBytes(data.slice(1))
     if (codec) {

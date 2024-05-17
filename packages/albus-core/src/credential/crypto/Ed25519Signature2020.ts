@@ -1,10 +1,9 @@
 import jsigs from 'jsonld-signatures'
-import { base58ToBytes, bytesToBase58 } from '../../crypto/utils'
+import { MultiBase } from '../../crypto'
 import { Ed25519VerificationKey2020 } from './Ed25519VerificationKey2020'
 
 const SUITE_CONTEXT_URL = 'https://w3id.org/security/suites/ed25519-2020/v1'
 const SUITE_CONTEXT_URL_2018 = 'https://w3id.org/security/suites/ed25519-2018/v1'
-const MULTIBASE_BASE58BTC_HEADER = 'z'
 
 const {
   suites: { LinkedDataSignature },
@@ -38,7 +37,7 @@ export class Ed25519Signature2020 extends LinkedDataSignature {
       throw new Error('A signer API has not been specified.')
     }
     const signatureBytes = await this.signer.sign({ data: verifyData })
-    proof.proofValue = MULTIBASE_BASE58BTC_HEADER + bytesToBase58(signatureBytes)
+    proof.proofValue = MultiBase.encode(signatureBytes)
     return proof
   }
 
@@ -51,11 +50,7 @@ export class Ed25519Signature2020 extends LinkedDataSignature {
       throw new TypeError(
         'The proof does not include a valid "proofValue" property.')
     }
-    if (proofValue[0] !== MULTIBASE_BASE58BTC_HEADER) {
-      throw new Error('Only base58btc multibase encoding is supported.')
-    }
-    const signatureBytes = base58ToBytes(proofValue.substring(1))
-
+    const signatureBytes = MultiBase.decode(proofValue)
     let { verifier } = this
     if (!verifier) {
       const key = await this.LDKeyClass.from(verificationMethod)
@@ -148,6 +143,10 @@ export class Ed25519Signature2020 extends LinkedDataSignature {
       return verificationMethod.id === this.key.id
     }
     return verificationMethod === this.key.id
+  }
+
+  static encodeProofValue(signatureBytes: number[] | Uint8Array) {
+    return MultiBase.encode(Uint8Array.from(signatureBytes))
   }
 }
 

@@ -30,6 +30,9 @@ import type { F1Field } from './ff'
 import { Scalar } from './ff'
 import { Poseidon, poseidon } from './poseidon'
 
+/**
+ * Sparse Merkle Tree
+ */
 export class SMT {
   F: F1Field
   db: SMTMemDb
