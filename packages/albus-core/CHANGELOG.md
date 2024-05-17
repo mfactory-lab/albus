@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6-next.22](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.21...@albus-finance/core-v0.3.6-next.22) (2024-05-16)
+
+
+### 🐞 Bug Fixes
+
+* fix build for `cjs` ([11d257c](https://github.com/mfactory-lab/albus/commit/11d257c9fc93b71bfd18df92240de1c585db014c))
+
 ## [0.3.6-next.21](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.20...@albus-finance/core-v0.3.6-next.21) (2024-05-16)
 
 
