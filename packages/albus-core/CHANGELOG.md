@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.6-next.23 (2024-05-17)
+
+
+### 🐞 Bug Fixes
+
+* **signature:** fixed deps ([ca238d4](https://github.com/mfactory-lab/albus/commit/ca238d442d9c4636c7ca1f944c2fe5b51647cc65))
+
 ## [0.3.6-next.22](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.21...@albus-finance/core-v0.3.6-next.22) (2024-05-16)
 
 
