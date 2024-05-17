@@ -49,9 +49,8 @@ const { base58ToBytes } = utils
 export * from './tree'
 export * from './pex'
 
-export function defaultDocumentLoader(): IDocumentLoader {
-  const loader = securityLoader()
-  return loader.build()
+export function defaultDocumentLoader() {
+  return securityLoader()
 }
 
 /**
@@ -248,7 +247,7 @@ export async function signPresentation(vp: W3CPresentation, opts: SignPresentati
   const publicKeyMultibase = MultiBase.encode(signer.publicKey.toBytes(), MultiBase.codec.ed25519Pub)
   const privateKeyMultibase = MultiBase.encode(signer.secretKey, MultiBase.codec.ed25519Priv)
 
-  const documentLoader = opts.documentLoader ?? defaultDocumentLoader()
+  const documentLoader = opts.documentLoader ?? defaultDocumentLoader().build()
 
   const purpose = new jsigs.purposes.AuthenticationProofPurpose({
     challenge: opts.challenge,
@@ -353,7 +352,7 @@ export async function verifyPresentation(vp: VerifiablePresentation, opts: Verif
     challenge = proofs[0].challenge
   }
 
-  const documentLoader = opts.documentLoader ?? defaultDocumentLoader()
+  const documentLoader = opts.documentLoader ?? defaultDocumentLoader().build()
   const purpose = new jsigs.purposes.AuthenticationProofPurpose({ challenge })
   const suite = new Ed25519Signature2020()
 

@@ -4,7 +4,6 @@ import didContext from 'did-context'
 import ed25519 from 'ed25519-signature-2020-context'
 import x25519 from 'x25519-key-agreement-2020-context'
 import cred from 'credentials-context'
-import HtmlEntities from 'html-entities'
 import { JsonLdDocumentLoader } from 'jsonld-document-loader'
 import { Resolver, type ResolverRegistry } from 'did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
@@ -41,7 +40,7 @@ export const httpClientHandler = {
     } catch (e: any) {
       throw new Error(`NotFoundError loading "${params.url}": ${e.message}`)
     }
-    const responseTextDecoded = HtmlEntities.decode(await result.text())
+    const responseTextDecoded = await result.text()
     return JSON.parse(responseTextDecoded)
   },
 }
