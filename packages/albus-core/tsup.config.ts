@@ -10,8 +10,6 @@ export default defineConfig((options: Options) => ({
   shims: true,
   dts: true,
   noExternal: [
-    // used in @sphereon/pex
-    'string.prototype.matchall',
     // ESM only
     'crypto-ld',
     'jsonld-document-loader',

@@ -23,9 +23,9 @@
     "release:pre": "release-it --preRelease=next"
   },
   "dependencies": {
+    "@albus-finance/pex": "^3.3.3",
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
     "@solana/web3.js": "^1.91.1",
-    "@sphereon/pex": "^3.3.3",
     "@stablelib/ed25519": "^1.0.3",
     "@stablelib/random": "^1.0.2",
     "@stablelib/sha256": "^1.0.1",

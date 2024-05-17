@@ -28,8 +28,8 @@
 
 import { assert, describe, it } from 'vitest'
 import type { InputDescriptorV2, PresentationDefinitionV2 } from '@sphereon/pex-models'
-import type { PresentationSignCallBackParams } from '@sphereon/pex'
-import { PEX } from '@sphereon/pex'
+import type { PresentationSignCallBackParams } from '@albus-finance/pex'
+import { PEX } from '@albus-finance/pex'
 import { Keypair } from '@solana/web3.js'
 import type { IPresentation, IVerifiableCredential, IVerifiablePresentation } from '@sphereon/ssi-types'
 import { createPresentationExchange, createVerifiableCredential } from '../src/credential'

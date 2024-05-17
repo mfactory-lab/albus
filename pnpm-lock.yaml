@@ -118,15 +118,15 @@ importers:
 
   packages/albus-core:
     dependencies:
+      '@albus-finance/pex':
+        specifier: ^3.3.3
+        version: 3.3.3
       '@metaplex-foundation/mpl-token-metadata':
         specifier: ^3.2.1
         version: 3.2.1(@metaplex-foundation/umi@0.9.1)
       '@solana/web3.js':
         specifier: ^1.91.1
         version: 1.91.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@sphereon/pex':
-        specifier: ^3.3.3
-        version: 3.3.3
       '@stablelib/ed25519':
         specifier: ^1.0.3
         version: 1.0.3
@@ -481,6 +481,10 @@ packages:
   '@aashutoshrathi/word-wrap@1.2.6':
     resolution: {integrity: sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==}
     engines: {node: '>=0.10.0'}
+
+  '@albus-finance/pex@3.3.3':
+    resolution: {integrity: sha512-JzCAqs9vFNdWrhDDbhFWZ3zFq6oxJyRR9+kDNbErUZBKNNHwe9wvi2V8h2DHxatXBNyZlTcXbw2XWt9jKMfj2A==}
+    engines: {node: '>=18'}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -3336,10 +3340,6 @@ packages:
 
   '@sphereon/pex-models@2.2.4':
     resolution: {integrity: sha512-pGlp+wplneE1+Lk3U48/2htYKTbONMeG5/x7vhO6AnPUOsnOXeJdftPrBYWVSzz/JH5GJptAc6+pAyYE1zMu4Q==}
-
-  '@sphereon/pex@3.3.3':
-    resolution: {integrity: sha512-CXwdEcMTUh2z/5AriBn3OuShEG06l2tgiIr7qDJthnkez8DQ3sZo2vr4NEQWKKAL+DeAWAI4FryQGO4KuK7yfg==}
-    engines: {node: '>=18'}
 
   '@sphereon/ssi-types@0.22.0':
     resolution: {integrity: sha512-YPJAZlKmzNALXK8ohP3ETxj1oVzL4+M9ljj3fD5xrbacvYax1JPCVKc8BWSubGcQckKHPbgbpcS7LYEeghyT9Q==}
@@ -10563,6 +10563,21 @@ snapshots:
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
+  '@albus-finance/pex@3.3.3':
+    dependencies:
+      '@astronautlabs/jsonpath': 1.1.2
+      '@sd-jwt/decode': 0.6.1
+      '@sd-jwt/present': 0.6.1
+      '@sd-jwt/types': 0.6.1
+      '@sphereon/pex-models': 2.2.4
+      '@sphereon/ssi-types': 0.22.0
+      ajv: 8.12.0
+      ajv-formats: 2.1.1(ajv@8.12.0)
+      jwt-decode: 3.1.2
+      nanoid: 3.3.7
+      string.prototype.matchall: 4.0.11
+      uint8arrays: 3.1.1
+
   '@ampproject/remapping@2.3.0':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.5
@@ -14839,21 +14854,6 @@ snapshots:
       webcrypto-shim: 0.1.7
 
   '@sphereon/pex-models@2.2.4': {}
-
-  '@sphereon/pex@3.3.3':
-    dependencies:
-      '@astronautlabs/jsonpath': 1.1.2
-      '@sd-jwt/decode': 0.6.1
-      '@sd-jwt/present': 0.6.1
-      '@sd-jwt/types': 0.6.1
-      '@sphereon/pex-models': 2.2.4
-      '@sphereon/ssi-types': 0.22.0
-      ajv: 8.12.0
-      ajv-formats: 2.1.1(ajv@8.12.0)
-      jwt-decode: 3.1.2
-      nanoid: 3.3.7
-      string.prototype.matchall: 4.0.11
-      uint8arrays: 3.1.1
 
   '@sphereon/ssi-types@0.22.0':
     dependencies:

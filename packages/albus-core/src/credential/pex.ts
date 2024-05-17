@@ -26,8 +26,8 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { EvaluationResults, IPresentationDefinition, PresentationResult, SelectResults, Validated } from '@sphereon/pex'
-import { PEX } from '@sphereon/pex'
+import type { EvaluationResults, IPresentationDefinition, PresentationResult, SelectResults, Validated } from '@albus-finance/pex'
+import { PEX } from '@albus-finance/pex'
 import type { OriginalVerifiableCredential } from '@sphereon/ssi-types'
 import type { VerifiableCredential, VerifiablePresentation } from './types'
 import { createVerifiablePresentation } from '.'
