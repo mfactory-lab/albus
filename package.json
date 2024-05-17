@@ -50,9 +50,6 @@
         "esbuild",
         "snarkjs"
       ]
-    },
-    "_patchedDependencies": {
-      "@sphereon/pex@3.3.3": "patches/@sphereon__pex@3.3.3.patch"
     }
   },
   "resolutions": {
