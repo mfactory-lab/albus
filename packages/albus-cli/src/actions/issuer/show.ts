@@ -45,7 +45,7 @@ export async function showAll() {
   log.info(`Found ${accounts.length} accounts`)
 
   const table = new Table({
-    head: ['#', 'Address', 'Authority', 'Code', 'Name', 'Created'],
+    head: ['#', 'Address', 'Authority', 'Pubkey', 'Code', 'Name', 'Created'],
   })
 
   let i = 0
@@ -54,6 +54,7 @@ export async function showAll() {
       String(++i),
       String(pubkey),
       String(data!.authority),
+      String(data!.pubkey),
       String(data!.code),
       String(data!.name),
       String(new Date(Number(data!.createdAt) * 1000).toISOString()),
