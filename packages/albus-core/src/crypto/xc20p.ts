@@ -100,7 +100,7 @@ export class XC20P {
     const iv = bytes.subarray(0, XC20P_IV_LENGTH)
     const tag = bytes.subarray(XC20P_IV_LENGTH, XC20P_IV_LENGTH + XC20P_TAG_LENGTH)
     const ciphertext = bytes.subarray(XC20P_IV_LENGTH + XC20P_TAG_LENGTH, -XC20P_EPK_LENGTH)
-    const epkPub = epk ?? bytes.subarray(-XC20P_EPK_LENGTH)
+    const epkPub = epk ? convertPublicKeyToX25519(epk) : bytes.subarray(-XC20P_EPK_LENGTH)
 
     // normalize the key into an uint array
     const ed25519Key = makeKeypair(privateKey).secretKey

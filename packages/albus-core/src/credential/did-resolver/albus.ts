@@ -49,8 +49,9 @@ export function getResolver(): Record<string, DIDResolver> {
       err = `resolver_error: ${error}`
     }
 
-    const contentType
-      = typeof didDocument?.['@context'] !== 'undefined' ? 'application/did+ld+json' : 'application/did+json'
+    const contentType = typeof didDocument?.['@context'] !== 'undefined'
+      ? 'application/did+ld+json'
+      : 'application/did+json'
 
     return {
       didDocument,
