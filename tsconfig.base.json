@@ -10,6 +10,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "allowJs": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,

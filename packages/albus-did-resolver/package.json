@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
+    "_dev": "tsup --watch",
     "test": "vitest",
     "release": "release-it",
     "release:ci": "release-it --ci -VV",

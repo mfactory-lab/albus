@@ -34,7 +34,7 @@ export default defineConfig({
     // setupFiles: [
     //   './tests/setup.ts',
     // ],
-    include: ['./src/**/*.spec.ts'],
+    include: ['./src/**/*.{test,spec}.ts'],
     // include: ['**/?(*.){test,spec}.?(c|m)[jt]s?(x)'],
     testTimeout: 30000,
     environment: 'node',

@@ -3,7 +3,7 @@
   "packageManager": "pnpm@9.1.0",
   "license": "AGPL-3.0",
   "scripts": {
-    "dev": "pnpm -r --parallel --filter=./packages/** run dev",
+    "dev": "pnpm --parallel --filter=./packages/** run dev",
     "circuits": "pnpm -F circuits",
     "cli": "pnpm -F @albus-finance/cli",
     "core": "pnpm -F @albus-finance/core",
