@@ -28,13 +28,11 @@
 
 import type { Buffer } from 'node:buffer'
 import fs from 'node:fs'
-import { toMetaplexFile } from '@metaplex-foundation/js'
 import { parseSignal } from '@albus-finance/sdk'
 import axios from 'axios'
 import chalk from 'chalk'
 import log from 'loglevel'
 import * as snarkjs from 'snarkjs'
-import { downloadFile } from '@/utils'
 import { useContext } from '@/context'
 
 type Opts = {
@@ -48,16 +46,18 @@ type Opts = {
  * Create a new Circuit
  */
 export async function create(circuitId: string, opts: Opts) {
-  const { metaplex, client, config } = useContext()
+  const { client, config } = useContext()
 
-  for (const ext of ['r1cs', 'wasm', 'sym']) {
-    if (!fs.existsSync(`${config.circuitPath}/${circuitId}.${ext}`)) {
+  const circuitPath = `${config.circuitPath}/build/${circuitId}`
+
+  for (const ext of ['r1cs', 'sym']) {
+    if (!fs.existsSync(`${circuitPath}/${circuitId}.${ext}`)) {
       log.error(chalk.red(`Invalid circuit, \`${ext}\` file not found`))
       return
     }
   }
 
-  const r1csInfo = await snarkjs.r1cs.info(`${config.circuitPath}/${circuitId}.r1cs`)
+  const r1csInfo = await snarkjs.r1cs.info(`${circuitPath}/${circuitId}.r1cs`)
 
   const zKeyFile = { type: 'mem', data: new Uint8Array() }
   let zkeyUri: string
@@ -66,37 +66,39 @@ export async function create(circuitId: string, opts: Opts) {
     zkeyUri = opts.zkey
     zKeyFile.data = await fetchBytes(opts.zkey)
   } else {
-    const zKeyFileExists = fs.existsSync(`${config.circuitPath}/${circuitId}.zkey`)
+    const zKeyFileExists = fs.existsSync(`${circuitPath}/groth16_pkey.zkey`)
+
     if (!zKeyFileExists) {
-      log.info('No zKey file found...')
-
-      const power = Math.ceil(Math.log2(r1csInfo.nVars)).toString().padStart(2, '0')
-
-      // Download PowersOfTau from Hermez
-      if (!fs.existsSync(`${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`)) {
-        log.info(`Downloading powersOfTau with power ${power} from Hermez`)
-        await downloadFile(
-        `https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${power}.ptau`,
-        `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
-        )
-      }
-
-      log.info('Generating keys...')
-
-      await snarkjs.zKey.newZKey(
-        `${config.circuitPath}/${circuitId}.r1cs`,
-        `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
-        zKeyFile,
-      )
-
-      fs.writeFileSync(`${config.circuitPath}/${circuitId}.zkey`, zKeyFile.data)
+      log.info('No zKey file found, please setup circuit ...')
+      // const power = Math.ceil(Math.log2(r1csInfo.nVars)).toString().padStart(2, '0')
+      //
+      // // Download PowersOfTau from Hermez
+      // if (!fs.existsSync(`${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`)) {
+      //   log.info(`Downloading powersOfTau with power ${power} from Hermez`)
+      //   await downloadFile(
+      //     `https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_${power}.ptau`,
+      //     `${config.circuitPath}/powersOfTau28_hez_final_${power}.ptau`,
+      //   )
+      // }
+      //
+      // log.info('Generating keys...')
+      //
+      // await snarkjs.zKey.newZKey(
+      //     `${circuitPath}/${circuitId}.r1cs`,
+      //     `${circuitPath}/../ptau/powersOfTau28_hez_final_${power}.ptau`,
+      //     zKeyFile,
+      // )
+      //
+      // fs.writeFileSync(`${circuitPath}/groth16_pkey.zkey`, zKeyFile.data)
     } else {
-      const file = fs.readFileSync(`${config.circuitPath}/${circuitId}.zkey`)
+      const file = fs.readFileSync(`${circuitPath}/groth16_pkey.zkey`)
       zKeyFile.data = Uint8Array.from(file)
     }
 
     log.info('Uploading zKey file...')
-    zkeyUri = await metaplex.storage().upload(toMetaplexFile(zKeyFile.data, 'circuit.zkey'))
+
+    // zkeyUri = await metaplex.storage().upload(toMetaplexFile(zKeyFile.data, 'circuit.zkey'))
+    zkeyUri = await client.storage.upload(zKeyFile.data)
 
     log.info('Done')
     log.info(`Uri: ${zkeyUri}`)
@@ -106,9 +108,12 @@ export async function create(circuitId: string, opts: Opts) {
   if (opts.wasm) {
     wasmUri = opts.wasm
   } else {
-    const wasmFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.wasm`)
+    const wasmFile = fs.readFileSync(`${circuitPath}/${circuitId}_js/${circuitId}.wasm`)
     log.info('Uploading wasm file...')
-    wasmUri = await metaplex.storage().upload(toMetaplexFile(wasmFile, 'circuit.wasm'))
+
+    // wasmUri = await metaplex.storage().upload(toMetaplexFile(wasmFile, 'circuit.wasm'))
+    wasmUri = zkeyUri = await client.storage.upload(wasmFile)
+
     log.info('Done')
     log.info(`Uri: ${wasmUri}`)
   }
@@ -116,12 +121,8 @@ export async function create(circuitId: string, opts: Opts) {
   log.info(`Using zKey uri ${zkeyUri}`)
   log.info(`Using wasm uri ${wasmUri}`)
 
-  log.info('Exporting verification Key...')
-  const vk = await snarkjs.zKey.exportVerificationKey(zKeyFile)
-  fs.writeFileSync(`${config.circuitPath}/${circuitId}.vk.json`, JSON.stringify(vk))
-
   log.info('Loading signals...')
-  const symFile = fs.readFileSync(`${config.circuitPath}/${circuitId}.sym`)
+  const symFile = fs.readFileSync(`${circuitPath}/${circuitId}.sym`)
   const signals = loadSignals(symFile.toString(), r1csInfo.nOutputs, r1csInfo.nPubInputs, r1csInfo.nPrvInputs)
 
   log.info('Creating circuit...')
@@ -138,6 +139,11 @@ export async function create(circuitId: string, opts: Opts) {
 
   log.info('Done')
   log.info(`Signature: ${signature}`)
+
+  // log.info('Exporting verification Key...')
+  // const vk = await snarkjs.zKey.exportVerificationKey(zKeyFile)
+  const vk = JSON.parse(fs.readFileSync(`${circuitPath}/groth16_vkey.json`).toString())
+  // fs.writeFileSync(`${config.circuitPath}/${circuitId}.vk.json`, JSON.stringify(vk))
 
   log.info('Updating VK...')
   const { signatures } = await client.circuit.updateVk({ code: circuitId, vk })
