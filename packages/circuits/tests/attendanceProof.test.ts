@@ -38,7 +38,7 @@ describe('attendanceProof', async () => {
   const claims = {
     event: 'solana-breakpoint',
     meta: {
-      issuanceDate: 1697035000,
+      validFrom: 1697035000,
     },
   }
 
@@ -46,9 +46,11 @@ describe('attendanceProof', async () => {
     'expectedEvent',
     'expectedDateFrom',
     'expectedDateTo',
+    'eventKey',
+    'eventProof',
+    'meta_validFromKey',
+    'meta_validFromProof',
     'credentialRoot',
-    'claimsKey',
-    'claimsProof',
     'issuerPk',
     'issuerSignature',
     'trusteePublicKey',
@@ -64,7 +66,7 @@ describe('attendanceProof', async () => {
 
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = {}) {
     return {
-      ...(await prepareInput(issuerKeypair, claims, ['event', 'meta.issuanceDate'])),
+      ...(await prepareInput(issuerKeypair, claims, ['event', 'meta.validFrom'])),
       ...params,
     } as any
   }
@@ -72,7 +74,7 @@ describe('attendanceProof', async () => {
   it('should pass if valid input', async () => {
     const input = await generateInput(claims, {
       expectedEvent: credential.ClaimsTree.encodeValue(claims.event),
-      expectedDateFrom: claims.meta.issuanceDate,
+      expectedDateFrom: claims.meta.validFrom,
       expectedDateTo: 0,
     })
     await circuit.expectPass(input)
@@ -90,7 +92,7 @@ describe('attendanceProof', async () => {
   it('should fail if invalid from date', async () => {
     const input = await generateInput(claims, {
       expectedEvent: credential.ClaimsTree.encodeValue(claims.event),
-      expectedDateFrom: claims.meta.issuanceDate + 86400,
+      expectedDateFrom: claims.meta.validFrom + 86400,
       expectedDateTo: 0,
     })
     await circuit.expectFail(input)
@@ -100,7 +102,7 @@ describe('attendanceProof', async () => {
     const input = await generateInput(claims, {
       expectedEvent: credential.ClaimsTree.encodeValue(claims.event),
       expectedDateFrom: 0,
-      expectedDateTo: claims.meta.issuanceDate - 86400,
+      expectedDateTo: claims.meta.validFrom - 86400,
     })
     await circuit.expectFail(input)
   })

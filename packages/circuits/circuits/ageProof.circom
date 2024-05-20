@@ -4,7 +4,6 @@ include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/eddsaposeidon.circom";
 include "circomlib/circuits/babyjub.circom";
 include "utils/age.circom";
-include "utils/binary.circom";
 include "utils/date.circom";
 include "utils/poseidon.circom";
 include "utils/encryptionProof.circom";
@@ -16,10 +15,12 @@ template AgeProof(credentialDepth, shamirN, shamirK) {
 
   // Claims
   signal input birthDate; // 2001-01-02
-  signal input meta_validUntil; // timestamp
+  signal input birthDateKey;
+  signal input birthDateProof[credentialDepth];
 
-  signal input claimsKey;
-  signal input claimsProof[2][credentialDepth];
+  signal input meta_validUntil; // unix timestamp
+  signal input meta_validUntilKey;
+  signal input meta_validUntilProof[credentialDepth];
 
   signal input credentialRoot;
 
@@ -44,6 +45,7 @@ template AgeProof(credentialDepth, shamirN, shamirK) {
   // Expiration check
   var validUntil = Str2Timestamp()(meta_validUntil);
   var isNotExpired = LessThan(32)([timestamp, validUntil]);
+  // validUntil can be zero
   isNotExpired * validUntil === validUntil;
 
   // Issuer signature check
@@ -60,8 +62,8 @@ template AgeProof(credentialDepth, shamirN, shamirK) {
   component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
   mtp.value <== [birthDate, meta_validUntil];
-  mtp.key <== Num2Bytes(2)(claimsKey);
-  mtp.siblings <== claimsProof;
+  mtp.key <== [birthDateKey, meta_validUntilKey];
+  mtp.siblings <== [birthDateProof, meta_validUntilProof];
 
   // Derive secret key
   component secret = Poseidon(3);

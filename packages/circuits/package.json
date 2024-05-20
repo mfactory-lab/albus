@@ -22,6 +22,7 @@
   "scripts": {
     "compile": "circomkit compile",
     "setup": "circomkit setup",
+    "vkey": "circomkit vkey",
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
     "release:dry": "release-it --ci --dry-run",

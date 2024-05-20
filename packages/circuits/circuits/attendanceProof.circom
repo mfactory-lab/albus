@@ -2,7 +2,6 @@ pragma circom 2.1.6;
 
 include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/eddsaposeidon.circom";
-include "utils/binary.circom";
 include "utils/date.circom";
 include "utils/merkleProof.circom";
 
@@ -13,10 +12,12 @@ template AttendanceProof(credentialDepth) {
 
   // Claims
   signal input event; // event id
-  signal input meta_issuanceDate; // unix timestamp
+  signal input eventKey;
+  signal input eventProof[credentialDepth];
 
-  signal input claimsKey;
-  signal input claimsProof[2][credentialDepth];
+  signal input meta_validFrom; // unix timestamp
+  signal input meta_validFromKey;
+  signal input meta_validFromProof[credentialDepth];
 
   signal input credentialRoot;
 
@@ -26,8 +27,8 @@ template AttendanceProof(credentialDepth) {
   event === expectedEvent;
 
   // Event date validation
-  var issuanceDate = Str2Timestamp()(meta_issuanceDate);
-  var date = dateToNum(timestampToDate(issuanceDate));
+  var validFrom = Str2Timestamp()(meta_validFrom);
+  var date = dateToNum(timestampToDate(validFrom));
 
   component isGreater = GreaterEqThan(32);
   isGreater.in[0] <-- date;
@@ -52,9 +53,9 @@ template AttendanceProof(credentialDepth) {
   // Data integrity check
   component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
-  mtp.value <== [event, meta_issuanceDate];
-  mtp.key <== Num2Bytes(2)(claimsKey);
-  mtp.siblings <== claimsProof;
+  mtp.value <== [event, meta_validFrom];
+  mtp.key <== [eventKey, meta_validFromKey];
+  mtp.siblings <== [eventProof, meta_validFromProof];
 }
 
 // component main{public [
@@ -63,8 +64,8 @@ template AttendanceProof(credentialDepth) {
 //   expectedDateTo,
 //   eventKey,
 //   eventProof,
-//   meta_issuanceDateKey,
-//   meta_issuanceDateProof,
+//   meta_validFromKey,
+//   meta_validFromProof,
 //   credentialRoot,
 //   issuerPk,
 //   issuerSignature

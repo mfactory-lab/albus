@@ -3,27 +3,28 @@ pragma circom 2.1.6;
 include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/eddsaposeidon.circom";
 include "utils/array.circom";
-include "utils/binary.circom";
 include "utils/date.circom";
 include "utils/merkleProof.circom";
 
-template TypeProof(credentialDepth, typesN) {
+template CredentialTypeProof(credentialDepth, typesN) {
   signal input timestamp; // unix timestamp
   signal input expectedType[typesN];
 
   // Claims
-  signal input meta_type;
-  signal input meta_validUntil;
+  signal input meta_type; // SumsubSelfie
+  signal input meta_typeKey;
+  signal input meta_typeProof[credentialDepth];
 
-  signal input claimsKey;
-  signal input claimsProof[2][credentialDepth];
+  signal input meta_validUntil; // unix timestamp
+  signal input meta_validUntilKey;
+  signal input meta_validUntilProof[credentialDepth];
 
   signal input credentialRoot;
 
   signal input issuerPk[2]; // [Ax, Ay]
   signal input issuerSignature[3]; // [R8x, R8y, S]
 
-  // Is valid credential type
+  // Is valid liveness type
   component res = IN(typesN);
   res.value <== expectedType;
   res.in <== meta_type;
@@ -48,6 +49,18 @@ template TypeProof(credentialDepth, typesN) {
   component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
   mtp.value <== [meta_type, meta_validUntil];
-  mtp.key <== Num2Bytes(2)(claimsKey);
-  mtp.siblings <== claimsProof;
+  mtp.key <== [meta_typeKey, meta_validUntilKey];
+  mtp.siblings <== [meta_typeProof, meta_validUntilProof];
 }
+
+// component main{public [
+//   timestamp,
+//   expectedType,
+//   meta_typeKey,
+//   meta_typeProof,
+//   meta_validUntilKey,
+//   meta_validUntilProof,
+//   credentialRoot,
+//   issuerPk,
+//   issuerSignature
+// ]} = CredentialTypeProof(4);

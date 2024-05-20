@@ -2,6 +2,7 @@ pragma circom 2.1.6;
 
 include "circomlib/circuits/gates.circom";
 include "circomlib/circuits/comparators.circom";
+include "binary.circom";
 include "date.circom";
 
 template AgeRange() {

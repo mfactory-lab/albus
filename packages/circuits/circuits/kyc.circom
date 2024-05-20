@@ -23,22 +23,37 @@ template Config() {
 }
 
 template Kyc(credentialDepth, countryLookupSize, shamirN, shamirK) {
-  var totalClaims = 6;
-
   signal input config;
   signal input timestamp;
   signal input countryLookup[countryLookupSize]; // 16 countries per lookup
 
   // Claims
   signal input givenName; // John
-  signal input familyName; // Doe
-  signal input birthDate; // 2001-01-02
-  signal input country; // US
-  signal input docNumber; // EF122345
-  signal input meta_validUntil; // timestamp
+  signal input givenNameKey;
+  signal input givenNameProof[credentialDepth];
 
-  signal input claimsKey;
-  signal input claimsProof[totalClaims][credentialDepth];
+  signal input familyName; // Doe
+  signal input familyNameKey;
+  signal input familyNameProof[credentialDepth];
+
+  signal input birthDate; // 2001-01-02
+  signal input birthDateKey;
+  signal input birthDateProof[credentialDepth];
+
+  signal input country; // US
+  signal input countryKey;
+  signal input countryProof[credentialDepth];
+
+  signal input docNumber; // EF122345
+  signal input docNumberKey;
+  signal input docNumberProof[credentialDepth];
+
+  signal input meta_validUntil; // timestamp
+  signal input meta_validUntilKey;
+  signal input meta_validUntilProof[credentialDepth];
+
+  // total used claims in this circuit
+  var totalClaims = 6;
 
   signal input credentialRoot;
 
@@ -79,8 +94,8 @@ template Kyc(credentialDepth, countryLookupSize, shamirN, shamirK) {
   component mtp = MerkleProof(totalClaims, credentialDepth);
   mtp.root <== credentialRoot;
   mtp.value <== [givenName, familyName, birthDate, country, docNumber, meta_validUntil];
-  mtp.key <== Num2Bytes(totalClaims)(claimsKey);
-  mtp.siblings <== claimsProof;
+  mtp.key <== [givenNameKey, familyNameKey, birthDateKey, countryKey, docNumberKey, meta_validUntilKey];
+  mtp.siblings <== [givenNameProof, familyNameProof, birthDateProof, countryProof, docNumberProof, meta_validUntilProof];
 
   // Expiration check
   var validUntil = Str2Timestamp()(meta_validUntil);
@@ -91,7 +106,7 @@ template Kyc(credentialDepth, countryLookupSize, shamirN, shamirK) {
   var secret = Poseidon(3)([userPrivateKey, credentialRoot, timestamp]);
 
   // Encrypt data and generate trustee shares
-  component enc = EncryptionProof(totalClaims-1, shamirN, shamirK);
+  component enc = EncryptionProof(5, shamirN, shamirK);
   enc.data <== [givenName, familyName, birthDate, country, docNumber];
   enc.userPrivateKey <== userPrivateKey;
   enc.trusteePublicKey <== trusteePublicKey;
@@ -116,20 +131,30 @@ template Kyc(credentialDepth, countryLookupSize, shamirN, shamirK) {
   age.valid === 1;
 
   // Country validation
-  component countryProof = CountryProof(countryLookupSize);
-  countryProof.selectionMode <== cfg.countrySelectionMode;
-  countryProof.lookup <== countryLookup;
-  countryProof.country <== country;
+  component countryCheck = CountryProof(countryLookupSize);
+  countryCheck.selectionMode <== cfg.countrySelectionMode;
+  countryCheck.lookup <== countryLookup;
+  countryCheck.country <== country;
 }
 
 // component main{public [
 //   config,
 //   timestamp,
 //   countryLookup,
-//   claimsKey,
-//   claimsProof,
+//   givenNameKey,
+//   givenNameProof,
+//   familyNameKey,
+//   familyNameProof,
+//   birthDateKey,
+//   birthDateProof,
+//   countryKey,
+//   countryProof,
+//   docNumberKey,
+//   docNumberProof,
+//   meta_validUntilKey,
+//   meta_validUntilProof,
 //   credentialRoot,
 //   issuerPk,
 //   issuerSignature,
 //   trusteePublicKey
-// ]} = Main(5, 2, 3, 2);
+// ]} = Kyc(5, 2, 3, 2);

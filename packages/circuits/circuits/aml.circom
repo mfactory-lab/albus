@@ -6,16 +6,16 @@ include "utils/array.circom";
 include "utils/date.circom";
 include "utils/merkleProof.circom";
 
-template LivenessProof(credentialDepth, typesN) {
-  signal input timestamp;
-  signal input expectedType[typesN];
+template AML(credentialDepth) {
+  signal input timestamp; // unix timestamp
+  signal input expectedSpecId; // ABC123
 
   // Claims
-  signal input livenessType; // e.g. SumsubSelfie
-  signal input livenessTypeKey;
-  signal input livenessTypeProof[credentialDepth];
+  signal input specId;
+  signal input specIdKey;
+  signal input specIdProof[credentialDepth];
 
-  signal input meta_validUntil; // unix timestamp
+  signal input meta_validUntil; // timestamp
   signal input meta_validUntilKey;
   signal input meta_validUntilProof[credentialDepth];
 
@@ -24,15 +24,13 @@ template LivenessProof(credentialDepth, typesN) {
   signal input issuerPk[2]; // [Ax, Ay]
   signal input issuerSignature[3]; // [R8x, R8y, S]
 
-  // Is valid liveness type
-  component res = IN(typesN);
-  res.value <== expectedType;
-  res.in <== livenessType;
-  res.out === 1;
+  // Is valid credential spec
+  specId === expectedSpecId;
 
   // Expiration check
   var validUntil = Str2Timestamp()(meta_validUntil);
   var isNotExpired = LessThan(32)([timestamp, validUntil]);
+  // validUntil can be zero
   isNotExpired * validUntil === validUntil;
 
   // Issuer signature check
@@ -48,19 +46,7 @@ template LivenessProof(credentialDepth, typesN) {
   // Data integrity check
   component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
-  mtp.value <== [livenessType, meta_validUntil];
-  mtp.key <== [livenessTypeKey, meta_validUntilKey];
-  mtp.siblings <== [livenessTypeProof, meta_validUntilProof];
+  mtp.value <== [specId, meta_validUntil];
+  mtp.key <== [specIdKey, meta_validUntilKey];
+  mtp.siblings <== [specIdProof, meta_validUntilProof];
 }
-
-// component main{public [
-//   timestamp,
-//   expectedType,
-//   typeKey,
-//   typeProof,
-//   meta_validUntilKey,
-//   meta_validUntilProof,
-//   credentialRoot,
-//   issuerPk,
-//   issuerSignature
-// ]} = LivenessProof(4);

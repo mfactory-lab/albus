@@ -36,7 +36,8 @@ describe('smt', async () => {
       await smt.add(BigInt(i), BigInt(i))
       console.log(`add ${i}`)
     }
-    // TODO: add tests
     console.log(await smt.get(17))
   })
+
+  // TODO: add tests
 })
