@@ -453,7 +453,7 @@ pub struct ProofRequest {
     pub identifier: u64,
     /// Timestamp for when the request was created
     pub created_at: i64,
-    /// Timestamp for when the request will expire
+    /// Timestamp for when the request expires
     pub expired_at: i64,
     /// Timestamp for when the `proof` was verified
     pub verified_at: i64,
@@ -592,6 +592,7 @@ pub enum CredentialRequestStatus {
     Rejected,
 }
 
+pub const MAX_CRED_SPEC_CODE_LEN: usize = 16;
 pub const MAX_CRED_SPEC_NAME_LEN: usize = 32;
 pub const MAX_CRED_SPEC_URI_LEN: usize = 200;
 
@@ -600,6 +601,9 @@ pub const MAX_CRED_SPEC_URI_LEN: usize = 200;
 pub struct CredentialSpec {
     /// The [Issuer] associated with this spec
     pub issuer: Pubkey,
+    /// Unique code identifying the spec
+    #[max_len(MAX_CRED_SPEC_CODE_LEN)]
+    pub code: String,
     /// The name of the credential spec
     #[max_len(MAX_CRED_SPEC_NAME_LEN)]
     pub name: String,

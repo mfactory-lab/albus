@@ -43,6 +43,7 @@ pub fn handler(ctx: Context<CreateCredentialSpec>, data: CreateCredentialSpecDat
     let spec = &mut ctx.accounts.credential_spec;
     spec.bump = ctx.bumps.credential_spec;
     spec.issuer = issuer.key();
+    spec.code = data.code;
     spec.name = data.name;
     spec.uri = data.uri;
     spec.created_at = timestamp;
@@ -52,6 +53,7 @@ pub fn handler(ctx: Context<CreateCredentialSpec>, data: CreateCredentialSpecDat
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateCredentialSpecData {
+    pub code: String,
     pub name: String,
     pub uri: String,
 }
@@ -64,7 +66,7 @@ pub struct CreateCredentialSpec<'info> {
         seeds = [
             CredentialSpec::SEED,
             issuer.key().as_ref(),
-            data.name.as_bytes(),
+            data.code.as_bytes(),
         ],
         bump,
         payer = authority,
