@@ -1342,6 +1342,13 @@
             "type": "publicKey"
           },
           {
+            "name": "code",
+            "docs": [
+              "Unique code identifying the spec"
+            ],
+            "type": "string"
+          },
+          {
             "name": "name",
             "docs": [
               "The name of the credential spec"
@@ -1764,7 +1771,7 @@
           {
             "name": "expiredAt",
             "docs": [
-              "Timestamp for when the request will expire"
+              "Timestamp for when the request expires"
             ],
             "type": "i64"
           },
@@ -2121,6 +2128,10 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "code",
+            "type": "string"
+          },
           {
             "name": "name",
             "type": "string"

@@ -16,6 +16,7 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
  */
 export type CredentialSpecArgs = {
   issuer: web3.PublicKey
+  code: string
   name: string
   credentialRequestCount: beet.bignum
   createdAt: beet.bignum
@@ -34,6 +35,7 @@ export const credentialSpecDiscriminator = [243, 229, 68, 49, 149, 173, 133, 95]
 export class CredentialSpec implements CredentialSpecArgs {
   private constructor(
     readonly issuer: web3.PublicKey,
+    readonly code: string,
     readonly name: string,
     readonly credentialRequestCount: beet.bignum,
     readonly createdAt: beet.bignum,
@@ -47,6 +49,7 @@ export class CredentialSpec implements CredentialSpecArgs {
   static fromArgs(args: CredentialSpecArgs) {
     return new CredentialSpec(
       args.issuer,
+      args.code,
       args.name,
       args.credentialRequestCount,
       args.createdAt,
@@ -161,6 +164,7 @@ export class CredentialSpec implements CredentialSpecArgs {
   pretty() {
     return {
       issuer: this.issuer.toBase58(),
+      code: this.code,
       name: this.name,
       credentialRequestCount: (() => {
         const x = <{ toNumber: () => number }> this.credentialRequestCount
@@ -203,6 +207,7 @@ export const credentialSpecBeet = new beet.FixableBeetStruct<
   [
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['issuer', beetSolana.publicKey],
+    ['code', beet.utf8String],
     ['name', beet.utf8String],
     ['credentialRequestCount', beet.u64],
     ['createdAt', beet.i64],

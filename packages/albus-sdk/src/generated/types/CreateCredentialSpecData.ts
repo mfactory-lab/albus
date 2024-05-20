@@ -8,6 +8,7 @@
 import * as beet from '@metaplex-foundation/beet'
 
 export type CreateCredentialSpecData = {
+  code: string
   name: string
   uri: string
 }
@@ -19,6 +20,7 @@ export type CreateCredentialSpecData = {
 export const createCredentialSpecDataBeet
   = new beet.FixableBeetArgsStruct<CreateCredentialSpecData>(
     [
+      ['code', beet.utf8String],
       ['name', beet.utf8String],
       ['uri', beet.utf8String],
     ],
