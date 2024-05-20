@@ -1,5 +1,5 @@
 {
-  "amlProof": {
+  "aml": {
     "file": "aml",
     "template": "AML",
     "params": [5],
