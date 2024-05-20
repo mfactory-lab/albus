@@ -31,8 +31,8 @@ import { createMint, getAccount, getOrCreateAssociatedTokenAccount, mintTo } fro
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
-import { AlbusClient } from '@albus-finance/sdk'
-import { AlbusSwapClient, CurveType } from '@albus-finance/swap-sdk'
+import { AlbusSwapClient, CurveType } from '../../packages/albus-swap-sdk/src'
+import { AlbusClient } from '../../packages/albus-sdk/src'
 import {
   createTestData,
   createTestProofRequest,
