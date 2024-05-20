@@ -115,7 +115,7 @@ investigation.command('show')
   .action(actions.investigation.show)
 
 // ------------------------------------------
-// VC Management
+// Credential Management
 // ------------------------------------------
 
 const cred = cli.command('cred')
@@ -145,14 +145,20 @@ const credSpec = cli.command('cred-spec')
 
 credSpec.command('all', { isDefault: true })
   .description('Show all credential specs')
+  .option('--code <string>', 'Filter by code')
   .option('--name <string>', 'Filter by name')
-  .option('--issuer <string>', 'Filter by issuer')
+  .option('--issuer <address>', 'Filter by issuer')
   .action(actions.credentialSpec.showAll)
 
 credSpec.command('show')
-  .description('Show credential spec data')
+  .description('Show Credential Spec')
   .argument('<address>', 'Credential Spec address')
   .action(actions.credentialSpec.show)
+
+credSpec.command('delete')
+  .description('Delete Credential Spec')
+  .argument('<address>', 'Credential Spec address')
+  .action(actions.credentialSpec.remove)
 
 // ------------------------------------------
 /// Credentials Request Management
@@ -168,12 +174,12 @@ credReq.command('all', { isDefault: true })
   .action(actions.credentialRequest.showAll)
 
 credReq.command('show')
-  .description('Show credential request data')
+  .description('Show credential request')
   .argument('<address>', 'Credential Request address')
   .action(actions.credentialRequest.show)
 
 credReq.command('delete')
-  .description('Delete credential request data')
+  .description('Delete credential request')
   .argument('<address>', 'Credential Request address')
   .action(actions.credentialRequest.remove)
 

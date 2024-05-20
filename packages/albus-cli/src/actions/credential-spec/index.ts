@@ -27,3 +27,4 @@
  */
 
 export * from './show'
+export * from './remove'

@@ -36,6 +36,7 @@ export async function show(addr: string) {
 }
 
 type Opts = {
+  code?: string
   name?: string
   issuer?: string
 }
@@ -44,6 +45,7 @@ export async function showAll(opts: Opts) {
   const { client } = useContext()
 
   const credentials = await client.credentialSpec.find({
+    code: opts.code,
     name: opts.name,
     issuer: opts.issuer,
   })

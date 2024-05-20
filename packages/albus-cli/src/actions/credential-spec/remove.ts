@@ -27,49 +27,17 @@
  */
 
 import log from 'loglevel'
-import type { CredentialRequest } from '@albus-finance/sdk'
-import { CredentialRequestStatus } from '@albus-finance/sdk'
 import { useContext } from '@/context'
 
-export async function show(addr: string) {
-  const { client } = useContext()
-  view(await client.credentialRequest.load(addr))
-}
-
-type Opts = {
-  authority?: string
-  issuer?: string
-  credentialSpec?: string
-  credentialMint?: string
-  credentialOwner?: string
-  status?: string
-}
-
-export async function showAll(opts: Opts) {
+export async function remove(addr: string) {
   const { client } = useContext()
 
-  const credentials = await client.credentialRequest.find({
-    issuer: opts.issuer,
-    authority: opts.authority,
-    credentialOwner: opts.credentialOwner,
-    credentialSpec: opts.credentialSpec,
-    credentialMint: opts.credentialMint,
-    status: CredentialRequestStatus[opts.status ?? 0],
+  const spec = await client.credentialSpec.load(addr)
+
+  await client.credentialSpec.delete({
+    code: spec.code,
+    issuer: spec.issuer,
   })
 
-  if (credentials.length > 0) {
-    const delim = '-'.repeat(80)
-    log.info(delim)
-    for (const { pubkey, data } of credentials) {
-      log.info('address:', pubkey.toBase58())
-      if (data) {
-        view(data)
-        log.info(delim)
-      }
-    }
-  }
-}
-
-function view(data: CredentialRequest) {
-  log.info(data?.pretty())
+  log.info('Credential spec was deleted')
 }
