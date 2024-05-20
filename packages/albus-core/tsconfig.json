@@ -5,10 +5,5 @@
     "rootDir": "src",
     "strictNullChecks": false,
     "outDir": "dist"
-  },
-  "include": [
-    "src",
-    "types",
-    "tests"
-  ]
+  }
 }

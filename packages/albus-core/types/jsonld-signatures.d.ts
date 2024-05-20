@@ -510,9 +510,7 @@ declare module 'jsonld-signatures/suites/LinkedDataSignature' {
       proofSet?: any
       documentLoader: Function
       expansionMap?: Function
-    }): Promise<{
-      Uint8Array
-    }>
+    }): Promise<Uint8Array>
 
     getVerificationMethod({ proof, documentLoader }: { proof: any, documentLoader: Function }): Promise<any>
 

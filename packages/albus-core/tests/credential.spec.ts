@@ -130,7 +130,7 @@ describe('credential', () => {
     const credential = await createVerifiableCredential(claims, {
       // encryptionKey: holder.publicKey,
       // encrypt: true,
-      context: [{ '@vocab': 'https://schema.org/' }],
+      // context: [{ '@vocab': 'https://schema.org/' }],
       // context: ['https://schema.org/docs/jsonldcontext.jsonld'],
       issuerSecretKey: issuerKeypair.secretKey,
     })
@@ -142,13 +142,13 @@ describe('credential', () => {
       encryptionKey: holder.publicKey,
     })
 
-    const vp = await verifyPresentation(
-      await decryptPresentation(payload, {
-        decryptionKey: holder.secretKey,
-      }),
-    )
+    const decryptedPayload = await decryptPresentation(payload, {
+      decryptionKey: holder.secretKey,
+    })
 
-    // console.log(JSON.stringify(vp, null, 2))
+    console.log(JSON.stringify(decryptedPayload, null, 2))
+
+    const vp = await verifyPresentation(decryptedPayload)
 
     assert.ok(vp.verified)
   })
