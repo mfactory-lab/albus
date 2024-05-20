@@ -143,7 +143,7 @@ describe('proof builder', async () => {
       5,
       proofInput.data.timestamp,
     )
-      .map(Albus.credential.decodeClaimValue)
+      .map(Albus.credential.ClaimsTree.decodeValue)
 
     assert.equal(decryptedData[0], credential.credentialSubject.givenName)
     assert.equal(decryptedData[1], credential.credentialSubject.familyName)

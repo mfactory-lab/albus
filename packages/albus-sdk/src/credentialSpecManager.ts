@@ -34,6 +34,7 @@ import type {
 import {
   PublicKey,
 } from '@solana/web3.js'
+import { capitalize } from 'lodash-es'
 import { BaseManager } from './base'
 
 import {
@@ -44,6 +45,7 @@ import {
 } from './generated'
 import type { SendOpts } from './utils'
 
+const MAX_CRED_SPEC_CODE_LEN = 16
 const MAX_CRED_SPEC_NAME_LEN = 32
 
 export class CredentialSpecManager extends BaseManager {
@@ -69,10 +71,14 @@ export class CredentialSpecManager extends BaseManager {
   async createIx(props: CreateCredentialSpecProps) {
     const authority = this.provider.publicKey
     const issuer = new PublicKey(props.issuer)
-    const [address] = this.pda.credentialSpec(issuer, props.name)
+    const [address] = this.pda.credentialSpec(issuer, props.code)
 
-    if (props.name.length > MAX_CRED_SPEC_NAME_LEN) {
-      throw new Error(`Credential spec name length must be less or equal than ${MAX_CRED_SPEC_NAME_LEN} bytes`)
+    if (props.code.length > MAX_CRED_SPEC_CODE_LEN) {
+      throw new Error(`Code length must be less or equal than ${MAX_CRED_SPEC_CODE_LEN} bytes`)
+    }
+
+    if (props.name && props.name.length > MAX_CRED_SPEC_NAME_LEN) {
+      throw new Error(`Name length must be less or equal than ${MAX_CRED_SPEC_NAME_LEN} bytes`)
     }
 
     const ix = createCreateCredentialSpecInstruction({
@@ -81,7 +87,8 @@ export class CredentialSpecManager extends BaseManager {
       issuer,
     }, {
       data: {
-        name: props.name,
+        code: props.code,
+        name: props.name ?? capitalize(props.code),
         uri: props.uri ?? '',
       },
     }, this.programId)
@@ -108,7 +115,7 @@ export class CredentialSpecManager extends BaseManager {
   deleteIx(props: DeleteCredentialSpecProps) {
     const authority = this.provider.publicKey
     const issuer = new PublicKey(props.issuer)
-    const [address] = this.pda.credentialSpec(issuer, props.name)
+    const [address] = this.pda.credentialSpec(issuer, props.code)
 
     const ix = createDeleteCredentialSpecInstruction({
       authority,
@@ -149,6 +156,10 @@ export class CredentialSpecManager extends BaseManager {
       }
     }
 
+    if (props.code) {
+      builder.addFilter('code', props.code)
+    }
+
     if (props.name) {
       builder.addFilter('name', props.name)
     }
@@ -169,16 +180,19 @@ export class CredentialSpecManager extends BaseManager {
 
 export type CreateCredentialSpecProps = {
   issuer: PublicKeyInitData
-  name: string
+  code: string
+  // Default value is code
+  name?: string
   uri?: string
 }
 
 export type DeleteCredentialSpecProps = {
-  name: string
+  code: string
   issuer: PublicKeyInitData
 }
 
 export type FindCredentialSpecProps = {
+  code?: string
   name?: string
   issuer?: PublicKeyInitData
   noData?: boolean

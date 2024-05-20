@@ -351,3 +351,11 @@ export class IrysWithdrawError extends IrysError {
     super(message)
   }
 }
+
+// function getMetaplexFileTagsWithContentType(file: StorageFile) {
+//   if (!file.contentType) {
+//     return file.tags
+//   }
+//
+//   return [{ name: 'Content-Type', value: file.contentType }, ...file.tags]
+// }

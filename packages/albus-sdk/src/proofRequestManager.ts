@@ -395,7 +395,7 @@ export class ProofRequestManager extends BaseManager {
     const txBuilder = props.txBuilder ?? this.txBuilder
 
     if (publicInputs.length > inputsLimit.withProof) {
-      const inputChunks = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
+      const inputChunks: any[] = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
         txBuilder.addTransaction(
           new Transaction().add(createProveProofRequestInstruction(
@@ -535,7 +535,7 @@ export class ProofRequestManager extends BaseManager {
         verify: props.verify ?? false,
         proof,
         issuer,
-        // @ts-expect-error readonly
+        // @ts-expect-error fix readonly
         publicSignals,
         txBuilder: props.txBuilder,
       })

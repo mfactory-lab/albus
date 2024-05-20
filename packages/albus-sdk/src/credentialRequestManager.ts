@@ -75,7 +75,16 @@ export class CredentialRequestManager extends BaseManager {
     const issuer = new PublicKey(props.issuer)
     const credentialMint = new PublicKey(props.mint)
     const credentialToken = getAssociatedTokenAddress(credentialMint, credentialOwner)
-    const [credentialSpec] = this.pda.credentialSpec(issuer, props.specId)
+
+    let credentialSpec: PublicKey
+    if (props.spec) {
+      credentialSpec = new PublicKey(props.spec)
+    } else if (props.specCode) {
+      [credentialSpec] = this.pda.credentialSpec(issuer, props.specCode)
+    } else {
+      throw new Error('Either `spec` or `specCode` must be provided')
+    }
+
     const [address] = this.pda.credentialRequest(credentialSpec, authority)
 
     const ix = createRequestCredentialInstruction({
@@ -103,7 +112,7 @@ export class CredentialRequestManager extends BaseManager {
   }
 
   /**
-   * Create new Credential Request.
+   * Create a new Credential Request.
    */
   async create(props: CreateCredentialRequestProps, opts?: SendOpts) {
     const { address, instructions } = this.createIx(props)
@@ -243,8 +252,10 @@ export type CreateCredentialRequestProps = {
   mint: PublicKeyInitData
   /// Issuer address
   issuer: PublicKeyInitData
-  /// Credential specification identifier
-  specId: string
+  /// Credential specification address
+  spec?: PublicKeyInitData
+  /// Credential specification code
+  specCode?: string
   /// Owner of the credential
   owner?: Keypair
   /// Presentation URI

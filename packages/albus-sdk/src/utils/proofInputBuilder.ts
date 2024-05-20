@@ -1,6 +1,5 @@
 import * as Albus from '@albus-finance/core'
 import type { VerifiableCredential } from '@albus-finance/core'
-import { ProofType } from '@albus-finance/core'
 import type { Circuit, Policy } from '../generated'
 import { KnownSignals } from '../types'
 import type { ParseSignalResult } from './circuit'
@@ -28,7 +27,7 @@ export class ProofInputBuilder<T = Record<string, any>> {
    * Generated proof input data.
    * @readonly
    */
-  readonly data: Record<string, any> = {} as { claimsKey?: any, claimsProof?: any } & T
+  readonly data = {} as T
 
   constructor(private credential: VerifiableCredential) {
   }
@@ -78,9 +77,12 @@ export class ProofInputBuilder<T = Record<string, any>> {
   async build() {
     await this.initClaimsTree()
     await Promise.all([this.applyPrivateSignals(), this.applyPublicSignals()])
-    if (this.data.claimsKey !== undefined) {
-      this.data.claimsKey = Albus.crypto.utils.bytesToBigInt(this.data.claimsKey.reverse())
-    }
+
+    // packing credential proof key to bigint
+    // if (this.data.credentialProofKey !== undefined) {
+    //   this.data.credentialProofKey = Albus.crypto.utils.bytesToBigInt(this.data.credentialProofKey.reverse())
+    // }
+
     return this
   }
 
@@ -100,9 +102,12 @@ export class ProofInputBuilder<T = Record<string, any>> {
   async initClaimsTree() {
     const treeDepth = this.claimsTreeDepth
     // try to find merkle proof in the circuit public signals and get the merkle tree depth
-      ?? this.publicSignals.find(s => s?.name === 'claimsProof')?.next?.size
+    //   ?? this.publicSignals.find(s => s?.name === 'claimsProof')?.next?.size
 
-    this.claimsTree = await Albus.credential.createCredentialTree(this.credential, treeDepth)
+    this.claimsTree = await Albus.credential.createCredentialTree(
+      this.credential,
+      { depth: treeDepth },
+    )
   }
 
   /**
@@ -191,18 +196,16 @@ export class ProofInputBuilder<T = Record<string, any>> {
       throw new Error(`claim "${claim}" is not found in the credential`)
     }
     this.data[signal.name] = proof.value
-
-    // this.data[`${signal.name}Key`] = proof.key
-    // this.data[`${signal.name}Proof`] = proof.siblings
-
-    if (this.data.claimsKey === undefined) {
-      this.data.claimsKey = []
-    }
-    if (this.data.claimsProof === undefined) {
-      this.data.claimsProof = []
-    }
-    this.data.claimsKey.push(Number(proof.key))
-    this.data.claimsProof.push(proof.siblings)
+    this.data[`${signal.name}Key`] = proof.key
+    this.data[`${signal.name}Proof`] = proof.siblings
+    // if (this.data.credentialProofKey === undefined) {
+    //   this.data.credentialProofKey = []
+    // }
+    // if (this.data.credentialProof === undefined) {
+    //   this.data.credentialProof = []
+    // }
+    // this.data.credentialProofKey.push(Number(proof.key))
+    // this.data.credentialProof.push(proof.siblings)
   }
 
   /**
@@ -253,9 +256,9 @@ export class ProofInputBuilder<T = Record<string, any>> {
   }
 
   private get credentialProof() {
-    const proof = ([] as Albus.Proof[]).concat(this.credential.proof).find(p => p.type === ProofType.BJJSignature2021)
+    const proof = ([] as Albus.Proof[]).concat(this.credential.proof).find(p => p.type === Albus.ProofType.BJJSignature2021)
     if (!proof?.proofValue) {
-      throw new Error(`Invalid credential, expected ${ProofType.BJJSignature2021} proof`)
+      throw new Error(`Invalid credential, expected ${Albus.ProofType.BJJSignature2021} proof`)
     }
     return Albus.credential.parseCredentialProof(proof.proofValue)
   }
