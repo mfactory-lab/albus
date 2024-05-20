@@ -49,7 +49,7 @@ describe('credentialRequest', async () => {
   const issuerClient = new AlbusClient(initProvider(issuer)).local()
   const mx = initMetaplex(payer)
 
-  const specId = 'AML'
+  const specCode = 'AML'
 
   let mintAddress: PublicKey
   let issuerAddress: PublicKey
@@ -75,7 +75,7 @@ describe('credentialRequest', async () => {
 
   it('should create a credential spec for the issuer', async () => {
     const { signature } = await issuerClient.credentialSpec.create({
-      name: specId,
+      code: specCode,
       issuer: issuerAddress,
       uri: 'https://pdefinition.json',
     })
@@ -85,7 +85,7 @@ describe('credentialRequest', async () => {
   it('should not allow to create a spec if is not authorized issuer', async () => {
     try {
       await holderClient.credentialSpec.create({
-        name: 'test',
+        code: 'test',
         issuer: issuerAddress,
       })
       assert.ok(false)
@@ -100,7 +100,7 @@ describe('credentialRequest', async () => {
     const { signature } = await holderClient.credentialRequest.create({
       mint: mintAddress,
       issuer: issuerAddress,
-      specId,
+      specCode,
       uri: 'https://presentation.json',
     })
     assert.ok(!!signature)
@@ -121,7 +121,7 @@ describe('credentialRequest', async () => {
       await holderClient.credentialRequest.create({
         mint: nft.mint.address,
         issuer: issuerAddress,
-        specId,
+        specCode,
       })
       assert.ok(false)
     } catch (e: any) {
@@ -130,7 +130,7 @@ describe('credentialRequest', async () => {
   })
 
   it('should allow the issuer to update a credential', async () => {
-    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specId)
+    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specCode)
     const [credentialRequest] = issuerClient.pda.credentialRequest(credentialSpec, holder.publicKey)
 
     const data = {
@@ -146,7 +146,7 @@ describe('credentialRequest', async () => {
   })
 
   it('should not allow the holder to update a credential', async () => {
-    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specId)
+    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specCode)
     const [credentialRequest] = issuerClient.pda.credentialRequest(credentialSpec, holder.publicKey)
     try {
       await holderClient.credential.update({
@@ -160,7 +160,7 @@ describe('credentialRequest', async () => {
   })
 
   it('should not allow the issuer to delete a credential request', async () => {
-    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specId)
+    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specCode)
     const [credentialRequest] = issuerClient.pda.credentialRequest(credentialSpec, holder.publicKey)
 
     try {
@@ -175,7 +175,7 @@ describe('credentialRequest', async () => {
   })
 
   it('should allow the holder to delete a credential request', async () => {
-    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specId)
+    const [credentialSpec] = issuerClient.pda.credentialSpec(issuerAddress, specCode)
     const [credentialRequest] = issuerClient.pda.credentialRequest(credentialSpec, holder.publicKey)
 
     const { signature } = await holderClient.credentialRequest.delete({
@@ -186,7 +186,7 @@ describe('credentialRequest', async () => {
 
   it('should allow the issuer to delete a credential spec', async () => {
     const { signature } = await issuerClient.credentialSpec.delete({
-      name: specId,
+      code: specCode,
       issuer: issuerAddress,
     })
     assert.ok(!!signature)
