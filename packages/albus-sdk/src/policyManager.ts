@@ -26,9 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as Albus from '@albus-finance/core'
 import type { Commitment, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
+import { credential, crypto } from '@albus-finance/core'
 import { BaseManager } from './base'
 import {
   Policy,
@@ -232,18 +232,27 @@ export class PolicyManager extends BaseManager {
 }
 
 function preparePolicyRules(props: UpdatePolicyProps) {
-  return props.rules?.map(r => ({
-    key: r.key,
-    label: r.label ?? '',
-    value: Array.from(
-      Albus.crypto.ffUtils.beInt2Buff(
-        Albus.credential.ClaimsTree.encodeValue(
-          Array.isArray(r.value) ? new TextDecoder().decode(Uint8Array.from(r.value)) : r.value,
-        ),
+  return props.rules?.map((r) => {
+    let value: Uint8Array
+
+    // raw bytes
+    if (Array.isArray(r.value) || r.value instanceof Uint8Array) {
+      const arr = new Uint8Array(32)
+      arr.set(Uint8Array.from(r.value))
+      value = arr.reverse()
+    } else {
+      value = crypto.ffUtils.beInt2Buff(
+        credential.ClaimsTree.encodeValue(r.value, { hash: r.hash }),
         32,
-      ),
-    ),
-  })) ?? []
+      )
+    }
+
+    return {
+      key: r.key,
+      label: r.label ?? '',
+      value: Array.from(value),
+    }
+  }) ?? []
 }
 
 export type CreatePolicyProps = {
@@ -260,8 +269,9 @@ export type UpdatePolicyProps = {
   retentionPeriod?: number
   rules?: Array<{
     key: string
-    value: string | number | bigint | number[]
+    value: string | number | bigint | number[] | Uint8Array
     label?: string
+    hash?: boolean
   }>
 }
 
