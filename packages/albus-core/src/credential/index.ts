@@ -34,15 +34,15 @@ import { Resolver } from 'did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
 import jsigs from 'jsonld-signatures'
 import { PublicKey as BabyJubPubkey, MultiBase, PrivateKey, Signature, XC20P, eddsa, utils } from '../crypto'
-import { encodeDidKey, w3cDate, w3cDateToUnixTs } from '../utils'
+import { encodeDidKey, w3cDate } from '../utils'
 import type { Proof, VerifiableCredential, VerifiablePresentation, W3CCredential, W3CPresentation } from './types'
 import { CredentialType, PresentationType, ProofType, VerifyType } from './types'
 import { normalizeClaims, validateCredentialPayload, validatePresentationPayload } from './utils'
 import { DEFAULT_CONTEXT, DEFAULT_VC_TYPE, DEFAULT_VP_TYPE } from './constants'
-import { ClaimsTree } from './tree'
 import { albusDidResolver, keyDidResolver } from './did-resolver'
 import { Ed25519Signature2020, Ed25519VerificationKey2020 } from './crypto'
 import { securityLoader } from './documentLoader'
+import { createCredentialTree } from './tree'
 
 const { base58ToBytes } = utils
 
@@ -423,28 +423,6 @@ export function verifyCredentialProof(msg: bigint, proof: string, pubKey?: Uint8
   return eddsa.verifyPoseidon(msg, signature, BabyJubPubkey.newFromCompressed(_pubkey).p)
 }
 
-/**
- * Creates a credential tree based on the given W3C credential and optional depth.
- */
-export async function createCredentialTree(credential: W3CCredential, depth?: number) {
-  const issuerDid = typeof credential.issuer === 'string' ? credential.issuer : credential.issuer?.id
-
-  const meta: Record<string, any> = {
-    issuer: ClaimsTree.encodeValue(issuerDid, true),
-    issuanceDate: w3cDateToUnixTs(credential.issuanceDate),
-    validUntil: credential.validUntil ? w3cDateToUnixTs(credential.validUntil) : 0,
-    validFrom: credential.validFrom ? w3cDateToUnixTs(credential.validFrom) : 0,
-  }
-
-  // the last credential type is used
-  const type = credential.type.slice(-1)[0]
-  if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
-    meta.type = ClaimsTree.encodeValue(type, true)
-  }
-
-  return ClaimsTree.from({ ...credential.credentialSubject, meta }, { depth })
-}
-
 export type IDocumentLoader = (url: string) => Promise<{
   contextUrl?: string
   documentUrl?: string
@@ -466,7 +444,7 @@ export type CreateCredentialOpts = {
   validUntil?: number
   // custom issuance date
   timestamp?: number
-  credentialType?: CredentialType
+  credentialType?: CredentialType | string
   context?: string[] | object[]
   // suite: typeof LinkedDataSignature
   // documentLoader: any

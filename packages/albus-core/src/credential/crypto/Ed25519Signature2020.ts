@@ -5,11 +5,7 @@ import { Ed25519VerificationKey2020 } from './Ed25519VerificationKey2020'
 const SUITE_CONTEXT_URL = 'https://w3id.org/security/suites/ed25519-2020/v1'
 const SUITE_CONTEXT_URL_2018 = 'https://w3id.org/security/suites/ed25519-2018/v1'
 
-const {
-  suites: { LinkedDataSignature },
-} = jsigs
-
-export class Ed25519Signature2020 extends LinkedDataSignature {
+export class Ed25519Signature2020 extends jsigs.suites.LinkedDataSignature {
   static CONTEXT_URL = SUITE_CONTEXT_URL
 
   requiredKeyType: string

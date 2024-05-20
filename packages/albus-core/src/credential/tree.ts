@@ -28,20 +28,86 @@
 
 import { SMT, poseidon } from '../crypto'
 import { bigintToBytes, bytesToBigInt, bytesToString } from '../crypto/utils'
-import { DEFAULT_CLAIM_TREE_DEPTH } from './constants'
+import { w3cDateToUnixTs } from '../utils'
+import { DEFAULT_VC_TYPE } from './constants'
+import type { W3CCredential } from './types'
+import { CredentialType } from './types'
 
-export type Claims = Record<string, any>
+type Claim = string | number | bigint
+export type Claims = Record<string, Claim>
 
-export type ClaimsTreeOptions = { depth?: number }
+export type CredentialTreeOpts = { depth?: number }
 
+export const DEFAULT_TREE_DEPTH = 5 // 2^5-1 = 16 elements
+
+/**
+ * Creates a credential tree based on the given W3C credential and optional depth.
+ */
+export async function createCredentialTree(credential: W3CCredential, opts?: CredentialTreeOpts) {
+  const meta: Record<string, any> = {}
+
+  const issuer = typeof credential.issuer === 'string'
+    ? credential.issuer
+    : credential.issuer?.id ?? ''
+
+  if (issuer) {
+    meta.issuer = new ClaimValue(issuer, { hash: true })
+  }
+
+  meta.validUntil = credential.validUntil ? w3cDateToUnixTs(credential.validUntil) : 0
+  meta.validFrom = credential.validFrom
+    ? w3cDateToUnixTs(credential.validFrom)
+    : credential.issuanceDate
+      ? w3cDateToUnixTs(credential.issuanceDate)
+      : 0
+
+  const type = credential.type.slice(-1)[0]
+  if (![DEFAULT_VC_TYPE, CredentialType.AlbusCredential].includes(type)) {
+    meta.type = new ClaimValue(type, { hash: true })
+  }
+
+  return ClaimsTree.from({ ...credential.credentialSubject, meta }, opts)
+}
+
+/**
+ * Represents a claim value.
+ */
+export class ClaimValue {
+  constructor(readonly value: Claim | ClaimValue, readonly opts?: { hash?: boolean }) {
+  }
+
+  encode(): bigint {
+    if (this.value instanceof ClaimValue) {
+      return this.value.encode()
+    }
+
+    const bytes = new TextEncoder().encode(String(this.value))
+
+    if (this.opts?.hash) {
+      return poseidon.hashBytes(bytes)
+    }
+
+    if (bytes.length > 32) {
+      // throw new Error('The maximum size for a claim is limited to 32 bytes.')
+      return bytesToBigInt(bytes.slice(0, 32))
+      // return poseidon.hashBytes(bytes)
+    }
+
+    return bytesToBigInt(bytes)
+  }
+}
+
+/**
+ * Represents a merkle claims tree.
+ */
 export class ClaimsTree {
   private readonly smt: SMT = new SMT()
   private keys: string[] = []
 
-  private constructor(readonly opts?: ClaimsTreeOptions) {
+  private constructor(readonly opts?: CredentialTreeOpts) {
   }
 
-  static async from(claims: Claims, opts?: ClaimsTreeOptions) {
+  static async from(claims: Record<string, any>, opts?: CredentialTreeOpts) {
     const tree = new ClaimsTree(opts)
     const flattenClaims = flattenObject(claims)
     for (const key in flattenClaims) {
@@ -53,28 +119,19 @@ export class ClaimsTree {
   /**
    * Encodes a claim value to a BigInt.
    */
-  static encodeValue(s: string | number | bigint, hash = false): bigint {
-    const bytes = new TextEncoder().encode(String(s))
-    if (hash) {
-      return poseidon.hashBytes(bytes)
-    }
-    if (bytes.length > 32) {
-      // TODO: refactory
-      return bytesToBigInt(bytes.slice(0, 32))
-      // throw new Error('The maximum size for a claim is limited to 32 bytes.')
-    }
-    return bytesToBigInt(bytes)
+  static encodeValue(value: Claim | ClaimValue, opts?: { hash?: boolean }): bigint {
+    return new ClaimValue(value, opts).encode()
   }
 
   /**
    * Decodes a claim value from a BigInt.
    */
-  static decodeValue(s: bigint): string {
-    return bytesToString(bigintToBytes(s))
+  static decodeValue(value: bigint): string {
+    return bytesToString(bigintToBytes(value))
   }
 
   get treeDepth() {
-    return this.opts?.depth ?? DEFAULT_CLAIM_TREE_DEPTH
+    return this.opts?.depth ?? DEFAULT_TREE_DEPTH
   }
 
   get root() {
@@ -124,38 +181,22 @@ export class ClaimsTree {
     return this.smt.update(this.encodeKey(key), ClaimsTree.encodeValue(val))
   }
 
-  /**
-   * Retrieve ZK information from the given keys.
-   */
-  async zkInfo(keys: string[]) {
-    const claimsKey: number[] = []
-    const proof: bigint[][] = []
-    for (const k of keys) {
-      const { key, siblings } = await this.get(k)
-      claimsKey.push(Number(key))
-      proof.push(siblings)
-    }
-    return {
-      key: bytesToBigInt(claimsKey.reverse()),
-      proof,
-    }
-  }
-}
-
-/**
- * Encodes a claim value to a BigInt.
- * @deprecated - Please use ClaimsTree.encodeValue
- */
-export function encodeClaimValue(s: string | number | bigint, hash = false): bigint {
-  return ClaimsTree.encodeValue(s, hash)
-}
-
-/**
- * Decodes a claim value from a BigInt.
- * @deprecated - Please use ClaimsTree.decodeClaimValue
- */
-export function decodeClaimValue(s: bigint): string {
-  return ClaimsTree.decodeValue(s)
+  // /**
+  //  * Retrieve proof from the given keys.
+  //  */
+  // async proof(keys?: string[]) {
+  //   const proofKey: number[] = []
+  //   const proof: bigint[][] = []
+  //   for (const k of keys ?? this.keys) {
+  //     const { key, siblings } = await this.get(k)
+  //     proofKey.push(Number(key))
+  //     proof.push(siblings)
+  //   }
+  //   return {
+  //     key: bytesToBigInt(proofKey.reverse()),
+  //     proof,
+  //   }
+  // }
 }
 
 /**
@@ -177,17 +218,3 @@ function flattenObject(obj: Record<string, any>, parentKey?: string): Record<str
   })
   return res
 }
-
-// function unflattenObject(obj: Record<string, any>): Record<string, any> {
-//   return Object.keys(obj).reduce((res, k) => {
-//     k.split('.').reduce(
-//       (acc, e, i, keys) => acc[e] || (acc[e] = Number.isNaN(Number(keys[i + 1]))
-//         ? keys.length - 1 === i
-//           ? obj[k]
-//           : {}
-//         : []),
-//       res,
-//     )
-//     return res
-//   }, {} as any)
-// }

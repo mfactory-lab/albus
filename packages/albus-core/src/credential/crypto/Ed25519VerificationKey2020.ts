@@ -1,5 +1,4 @@
 import { LDKeyPair } from 'crypto-ld'
-import * as ed from '@noble/ed25519'
 import { base58ToBytes, base64ToBytes, bytesToBase64url } from '../../crypto/utils'
 import { MultiBase } from '../../crypto'
 import { Ed25519, assertKeyBytes } from './utils'
@@ -136,7 +135,6 @@ export class Ed25519VerificationKey2020 extends LDKeyPair {
     let keypair: { publicKey: any, secretKey: any }
 
     if (seed) {
-      ed.utils.randomPrivateKey()
       keypair = Ed25519.generateKeyPairFromSeed(seed)
     } else {
       keypair = Ed25519.generateKeyPair()
