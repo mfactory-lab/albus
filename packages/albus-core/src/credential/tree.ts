@@ -174,11 +174,7 @@ export class ClaimsTree {
    */
   async add(key: string, val: any) {
     this.keys.push(key)
-
     await this.smt.add(this.encodeKey(key), ClaimsTree.encodeValue(val))
-
-    console.log('add', key, this.encodeKey(key), ClaimsTree.encodeValue(val))
-    console.log('get', await this.smt.get(this.encodeKey(key)))
   }
 
   /**
