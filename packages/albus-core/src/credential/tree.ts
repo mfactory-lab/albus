@@ -89,7 +89,10 @@ export class ClaimValue {
 
     if (bytes.length > 32) {
       // throw new Error('The maximum size for a claim is limited to 32 bytes.')
-      return bytesToBigInt(bytes.slice(0, 32))
+      return poseidon.hashBytes(bytes)
+
+      // doesnt work correctly
+      // return bytesToBigInt(bytes.slice(0, 32))
       // return poseidon.hashBytes(bytes)
     }
 
@@ -169,9 +172,13 @@ export class ClaimsTree {
   /**
    * Adds a key-value pair to the tree.
    */
-  add(key: string, val: any) {
+  async add(key: string, val: any) {
     this.keys.push(key)
-    return this.smt.add(this.encodeKey(key), ClaimsTree.encodeValue(val))
+
+    await this.smt.add(this.encodeKey(key), ClaimsTree.encodeValue(val))
+
+    console.log('add', key, this.encodeKey(key), ClaimsTree.encodeValue(val))
+    console.log('get', await this.smt.get(this.encodeKey(key)))
   }
 
   /**
