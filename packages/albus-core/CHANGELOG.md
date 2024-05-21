@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.6-next.26 (2024-05-21)
+
+
+### 🐞 Bug Fixes
+
+* **core:** fixed credential tree value encoding ([a7a7c8a](https://github.com/mfactory-lab/albus/commit/a7a7c8ab7f956d026f18c57670ce0c16a85236f2))
+
 ## 0.3.6-next.25 (2024-05-20)
 
 ## 0.3.6-next.24 (2024-05-18)
