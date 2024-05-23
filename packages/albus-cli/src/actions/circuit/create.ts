@@ -112,7 +112,7 @@ export async function create(circuitId: string, opts: Opts) {
     log.info('Uploading wasm file...')
 
     // wasmUri = await metaplex.storage().upload(toMetaplexFile(wasmFile, 'circuit.wasm'))
-    wasmUri = zkeyUri = await client.storage.upload(wasmFile)
+    wasmUri = await client.storage.upload(wasmFile)
 
     log.info('Done')
     log.info(`Uri: ${wasmUri}`)
