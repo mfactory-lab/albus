@@ -151,10 +151,12 @@ describe('proof builder', async () => {
     assert.equal(decryptedData[3], credential.credentialSubject.country)
     assert.equal(decryptedData[4], credential.credentialSubject.docNumber)
 
-    await Albus.zkp.verifyProof({
+    const verified = await Albus.zkp.verifyProof({
       vk: Albus.zkp.decodeVerifyingKey(circuit.vk),
       proof: proofRequest.proof,
       publicInput: proofRequest.publicSignals as any,
     })
+
+    assert.ok(verified)
   })
 })

@@ -87,11 +87,11 @@ export class ClaimValue {
       return poseidon.hashBytes(bytes)
     }
 
+    // TODO: find better solution
     if (bytes.length > 32) {
       // throw new Error('The maximum size for a claim is limited to 32 bytes.')
       return poseidon.hashBytes(bytes)
-
-      // doesnt work correctly
+      // doesn't work correctly
       // return bytesToBigInt(bytes.slice(0, 32))
       // return poseidon.hashBytes(bytes)
     }
