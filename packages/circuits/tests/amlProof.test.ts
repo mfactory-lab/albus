@@ -50,7 +50,7 @@ describe('aml', async () => {
   // }
 
   const claims = {
-    specId: 'abc123',
+    specId: '4xBXgNbECegxPRLzmTqV5eHbDwbRvkde7fxWo4Pw7vtX',
     meta: {
       validUntil: timestamp + 1,
     },

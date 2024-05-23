@@ -3,15 +3,21 @@ pragma circom 2.1.6;
 include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/eddsaposeidon.circom";
 include "utils/country.circom";
+include "utils/date.circom";
 include "utils/merkleProof.circom";
 
 template ResidenceProof(credentialDepth, lookupN) {
+  signal input timestamp; // unix timestamp
   signal input selectionMode; // 1 - inclusion, 0 - exclusion
   signal input countryLookup[lookupN]; // 16 countries per lookup
 
   signal input country; // US
   signal input countryKey;
   signal input countryProof[credentialDepth];
+
+  signal input meta_validUntil; // unix timestamp
+  signal input meta_validUntilKey;
+  signal input meta_validUntilProof[credentialDepth];
 
   signal input credentialRoot;
 
@@ -20,12 +26,17 @@ template ResidenceProof(credentialDepth, lookupN) {
 
   assert(selectionMode <= 1);
 
+  // Expiration check
+  var validUntil = Str2Timestamp()(meta_validUntil);
+  var isNotExpired = LessThan(32)([timestamp, validUntil]);
+  isNotExpired * validUntil === validUntil;
+
   // Data integrity check
-  component mtp = MerkleProof(1, credentialDepth);
+  component mtp = MerkleProof(2, credentialDepth);
   mtp.root <== credentialRoot;
-  mtp.value <== [country];
-  mtp.key <== [countryKey];
-  mtp.siblings <== [countryProof];
+  mtp.value <== [country, meta_validUntil];
+  mtp.key <== [countryKey, meta_validUntilKey];
+  mtp.siblings <== [countryProof, meta_validUntilProof];
 
   // Issuer signature check
   component eddsa = EdDSAPoseidonVerifier();
@@ -45,11 +56,14 @@ template ResidenceProof(credentialDepth, lookupN) {
 }
 
 // component main{public [
+//   timestamp,
 //   selectionMode,
 //   countryLookup,
 //   credentialRoot,
 //   countryKey,
 //   countryProof,
+//   meta_validUntilKey,
+//   meta_validUntilProof,
 //   issuerPk,
 //   issuerSignature
 // ]} = CountryPolicy(5, 2);

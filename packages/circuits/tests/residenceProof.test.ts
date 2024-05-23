@@ -39,8 +39,13 @@ describe('residenceProof', async () => {
   const credentialDepth = 5
   const countryLookupSize = 1
 
+  const timestamp = 1697035401 // 2023-10-11 14:43
+
   const claims = {
     country: 'GB',
+    meta: {
+      validUntil: timestamp + 1,
+    },
   }
 
   let circuit: WitnessTester<[
@@ -64,7 +69,8 @@ describe('residenceProof', async () => {
 
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = {}) {
     return {
-      ...(await prepareInput(issuerKeypair, claims, ['country'])),
+      ...(await prepareInput(issuerKeypair, claims, ['country', 'meta.validUntil'])),
+      timestamp,
       ...params,
     } as any
   }

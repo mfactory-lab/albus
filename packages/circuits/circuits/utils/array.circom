@@ -2,7 +2,7 @@ pragma circom 2.1.6;
 
 include "circomlib/circuits/comparators.circom";
 
-template IN (n) {
+template IN(n) {
   signal input in;
   signal input value[n];
   signal output out;

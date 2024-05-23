@@ -102,6 +102,8 @@
       "countryLookup",
       "countryKey",
       "countryProof",
+      "meta_validUntilKey",
+      "meta_validUntilProof",
       "credentialRoot",
       "issuerPk",
       "issuerSignature"
