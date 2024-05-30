@@ -54,7 +54,7 @@ pub fn initialize_account<'info>(
 ) -> Result<()> {
     let current_lamports = target_account.try_lamports()?;
     if current_lamports == 0 {
-        // if account doesn't have any lamports initialize it with conventional create_account
+        // if an account doesn't have any lamports initialize it with conventional create_account
         let lamports = Rent::get()?.minimum_balance(len);
         let cpi_accounts = anchor_lang::system_program::CreateAccount {
             from: payer,
@@ -93,7 +93,7 @@ pub fn initialize_account<'info>(
         let cpi_accounts = anchor_lang::system_program::Assign {
             account_to_assign: target_account,
         };
-        let cpi_context = anchor_lang::context::CpiContext::new(system_program, cpi_accounts);
+        let cpi_context = CpiContext::new(system_program, cpi_accounts);
         anchor_lang::system_program::assign(cpi_context.with_signer(seeds), owner)?;
     }
     Ok(())
