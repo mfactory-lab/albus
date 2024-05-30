@@ -33,11 +33,19 @@ import { useContext } from '@/context'
 export async function remove(addrOrCode: string) {
   const { client } = useContext()
   let addr: PublicKey
+
   try {
     addr = new PublicKey(addrOrCode)
   } catch (e) {
     addr = client.pda.circuit(addrOrCode)[0]
   }
+
+  const circuit = await client.circuit.load(addr)
+
+  if (!circuit) {
+    throw new Error('Circuit not found')
+  }
+
   const { signature } = await client.circuit.deleteById(addr)
   log.info(`Signature: ${signature}`)
 }

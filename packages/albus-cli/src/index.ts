@@ -68,6 +68,9 @@ cli
     console.log(chalk.dim(`# Version: ${VERSION}`))
     console.log(chalk.dim(`# Program: ${client.programId}`))
     console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
+
+    console.log(chalk.dim(`# Priority fee: ${client.options.priorityFee} microlamports`))
+
     console.log(chalk.dim(`# Cluster: ${cluster}`))
     console.log(chalk.dim(`# Env: ${opts.env}`))
     console.log('\n')

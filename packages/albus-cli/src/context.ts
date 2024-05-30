@@ -45,6 +45,8 @@ export function useContext() {
 
 export function initContext({ cluster, env, keypair }: { cluster: Cluster, env: AlbusClientEnv, keypair: string }) {
   const opts = AnchorProvider.defaultOptions()
+  opts.commitment = 'confirmed'
+
   const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
   const connection = new web3.Connection(endpoint, opts.commitment)
 
@@ -61,7 +63,10 @@ export function initContext({ cluster, env, keypair }: { cluster: Cluster, env: 
 
   const wallet = new Wallet(Keypair.fromSecretKey(Buffer.from(JSON.parse(keypairBuffer.toString()))))
   const provider = new AnchorProvider(connection, wallet, opts)
-  const client = new AlbusClient(provider).env(env).debug()
+  const client = new AlbusClient(provider)
+    .configure('priorityFee', 100000)
+    .env(env)
+    .debug()
   const metaplex = Metaplex.make(provider.connection)
     .use(keypairIdentity(wallet.payer))
     .use(irysStorage({

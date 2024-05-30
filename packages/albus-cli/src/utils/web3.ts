@@ -91,9 +91,7 @@ export function inspectTransaction(tx: Transaction, cluster: Cluster = 'mainnet-
   const base64 = tx.serializeMessage().toString('base64')
   return {
     base64,
-    url: `https://explorer.solana.com/tx/inspector?cluster=${cluster}&message=${encodeURIComponent(
-            base64,
-        )}`,
+    url: `https://explorer.solana.com/tx/inspector?cluster=${cluster}&message=${encodeURIComponent(base64)}`,
   }
 }
 
