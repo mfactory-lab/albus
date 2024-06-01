@@ -149,8 +149,8 @@ export class CircuitManager extends BaseManager {
     const [circuit] = this.pda.circuit(props.code)
 
     // TODO: refactory
-    const icFirstSize = 8
-    const icChunkSize = 15
+    const icFirstSize = 7
+    const icChunkSize = 14
     const vk = Albus.zkp.encodeVerifyingKey(props.vk)
 
     const instructions: TransactionInstruction[] = []

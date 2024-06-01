@@ -15,7 +15,8 @@ export type PriorityFeeLoader = (tx: Transaction) => Promise<number>
 
 export class TxBuilder {
   txs: Array<{ tx: Transaction, signers?: Signer[] }> = []
-  private priorityFeeLoader: PriorityFeeLoader | undefined
+  private priorityFee?: number | bigint
+  private priorityFeeLoader?: PriorityFeeLoader
 
   constructor(readonly provider: ClientProvider) {
     this.addTransaction(new Transaction(), [])
@@ -41,11 +42,7 @@ export class TxBuilder {
   }
 
   withPriorityFee(microLamports: number | bigint) {
-    if (microLamports > 0) {
-      for (const { tx } of this.txs) {
-        tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: BigInt(microLamports) }))
-      }
-    }
+    this.priorityFee = microLamports
     return this
   }
 
@@ -60,7 +57,11 @@ export class TxBuilder {
       const txs = this.txs.filter(({ tx }) => tx.instructions.length > 0)
 
       // apply priority fee
-      if (this.priorityFeeLoader) {
+      if (this.priorityFee && this.priorityFee > 0) {
+        for (const { tx } of this.txs) {
+          tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: BigInt(this.priorityFee) }))
+        }
+      } else if (this.priorityFeeLoader) {
         for (const { tx } of this.txs) {
           const microLamports = await this.priorityFeeLoader(tx)
           tx.instructions = [
@@ -93,13 +94,18 @@ export class TxBuilder {
 
     // apply priority fee
     if (opts?.priorityFee !== undefined) {
-      this.withPriorityFee(opts.priorityFee)
+      for (const { tx } of this.txs) {
+        tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: BigInt(opts?.priorityFee) }))
+      }
+    } else if (this.priorityFee && this.priorityFee > 0) {
+      for (const { tx } of this.txs) {
+        tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: BigInt(this.priorityFee) }))
+      }
     } else if (this.priorityFeeLoader) {
       const microLamports = await this.priorityFeeLoader(this.txs[0].tx)
-      this.txs[0].tx.instructions = [
-        ComputeBudgetProgram.setComputeUnitPrice({ microLamports }),
-        ...this.txs[0].tx.instructions,
-      ]
+      for (const { tx } of this.txs) {
+        tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports }))
+      }
     }
 
     try {
