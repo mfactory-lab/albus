@@ -37,9 +37,6 @@ import { clusterByEnv, lamportsToSol } from '@/utils'
 
 dotenvConfig()
 
-const VERSION = process.env.VERSION ?? '0.0.1'
-const DEFAULT_LOG_LEVEL = process.env.CLI_LOG_LEVEL ?? 'info'
-
 const originFactory = log.methodFactory
 log.methodFactory = function (name, lvl, logger) {
   const originMethod = originFactory(name, lvl, logger)
@@ -52,12 +49,12 @@ log.methodFactory = function (name, lvl, logger) {
 
 cli
   .name('cli')
-  .version(VERSION)
+  .version(process.env.VERSION ?? '0.0.1')
   .allowExcessArguments(false)
-  .option('-e, --env <ENV>', 'env [dev, stage, prod]', 'dev')
-  .option('-c, --cluster <CLUSTER>', 'solana cluster')
+  .option('-e, --env <ENV>', 'env [dev, stage, prod]', process.env.CLI_ENV ?? 'dev')
+  .option('-c, --cluster <CLUSTER>', 'solana cluster', process.env.CLI_SOLANA_CLUSTER)
+  .option('-l, --log-level <LEVEL>', 'log level', process.env.CLI_LOG_LEVEL ?? 'info')
   .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair')
-  .option('-l, --log-level <LEVEL>', 'log level', DEFAULT_LOG_LEVEL)
   .hook('preAction', async (command: Command) => {
     const opts = command.opts() as any
     log.setLevel(opts.logLevel)
@@ -65,7 +62,7 @@ cli
       opts.cluster = clusterByEnv(opts.env)
     }
     const { provider, cluster, client } = initContext(opts)
-    console.log(chalk.dim(`# Version: ${VERSION}`))
+    console.log(chalk.dim(`# Version: ${command.version()}`))
     console.log(chalk.dim(`# Program: ${client.programId}`))
     console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
 
