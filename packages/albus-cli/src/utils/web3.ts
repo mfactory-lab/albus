@@ -32,14 +32,18 @@ import * as anchor from '@coral-xyz/anchor'
 import { AlbusClientEnv } from '@albus-finance/sdk'
 import { useContext } from '../context'
 
-export function clusterByEnv(env: AlbusClientEnv) {
+export function clusterApiUrlByEnv(env: AlbusClientEnv) {
+  let cluster: string
   switch (env) {
     case AlbusClientEnv.DEV:
-      return 'devnet'
+      cluster = process.env.CLI_SOLANA_DEVNET_CLUSTER ?? 'devnet'
+      break
     case AlbusClientEnv.STAGE:
     case AlbusClientEnv.PROD:
-      return 'mainnet-beta'
+      cluster = process.env.CLI_SOLANA_MAINNET_CLUSTER ?? 'mainnet-beta'
+      break
   }
+  return cluster.startsWith('http') ? cluster : clusterApiUrl(cluster as any)
 }
 
 export function clusterUrl(c: Cluster | string) {
@@ -51,7 +55,15 @@ export function clusterUrl(c: Cluster | string) {
       }
       break
     case 'testnet':
-      return 'https://testnet.rpcpool.com'
+      if (process.env.CLI_SOLANA_TESTNET_CLUSTER) {
+        return process.env.CLI_SOLANA_TESTNET_CLUSTER
+      }
+      break
+    case 'devnet':
+      if (process.env.CLI_SOLANA_DEVNET_CLUSTER) {
+        return process.env.CLI_SOLANA_DEVNET_CLUSTER
+      }
+      break
   }
   return clusterApiUrl(c as any)
 }

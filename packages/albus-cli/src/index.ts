@@ -33,7 +33,7 @@ import log from 'loglevel'
 import { config as dotenvConfig } from 'dotenv'
 import { initContext, useContext } from '@/context'
 import * as actions from '@/actions'
-import { clusterByEnv, lamportsToSol } from '@/utils'
+import { clusterApiUrlByEnv, lamportsToSol } from '@/utils'
 
 dotenvConfig()
 
@@ -51,24 +51,26 @@ cli
   .name('cli')
   .version(process.env.VERSION ?? '0.0.1')
   .allowExcessArguments(false)
-  .option('-e, --env <ENV>', 'env [dev, stage, prod]', process.env.CLI_ENV ?? 'dev')
-  .option('-c, --cluster <CLUSTER>', 'solana cluster', process.env.CLI_SOLANA_CLUSTER)
-  .option('-l, --log-level <LEVEL>', 'log level', process.env.CLI_LOG_LEVEL ?? 'info')
+  .option('-c, --cluster <CLUSTER>', 'solana cluster')
   .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair')
+  .option('-e, --env <ENV>', 'env [dev, stage, prod]', process.env.CLI_ENV ?? 'dev')
+  .option('-l, --log-level <LEVEL>', 'log level', process.env.CLI_LOG_LEVEL ?? 'info')
   .hook('preAction', async (command: Command) => {
     const opts = command.opts() as any
     log.setLevel(opts.logLevel)
     if (!opts.cluster) {
-      opts.cluster = clusterByEnv(opts.env)
+      opts.cluster = clusterApiUrlByEnv(opts.env)
     }
     const { provider, cluster, client } = initContext(opts)
     console.log(chalk.dim(`# Version: ${command.version()}`))
     console.log(chalk.dim(`# Program: ${client.programId}`))
     console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
 
-    console.log(chalk.dim(`# Priority fee: ${client.options.priorityFee} microlamports`))
+    if (client.options.priorityFee) {
+      console.log(chalk.dim(`# Priority Fee: ${client.options.priorityFee} microlamports`))
+    }
 
-    console.log(chalk.dim(`# Cluster: ${cluster}`))
+    console.log(chalk.dim(`# Rpc Url: ${cluster}`))
     console.log(chalk.dim(`# Env: ${opts.env}`))
     console.log('\n')
   })

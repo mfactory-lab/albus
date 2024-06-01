@@ -34,7 +34,6 @@ import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import type { AlbusClientEnv } from '@albus-finance/sdk'
 import { AlbusClient } from '@albus-finance/sdk'
-import { clusterUrl } from './utils'
 import config from './config'
 
 let context: Context
@@ -45,10 +44,9 @@ export function useContext() {
 
 export function initContext({ cluster, env, keypair }: { cluster: Cluster, env: AlbusClientEnv, keypair: string }) {
   const opts = AnchorProvider.defaultOptions()
-  opts.commitment = 'confirmed'
+  // opts.commitment = 'confirmed'
 
-  const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
-  const connection = new web3.Connection(endpoint, opts.commitment)
+  const connection = new web3.Connection(cluster, opts.commitment)
 
   let keypairBuffer: Buffer
   if (keypair) {
@@ -64,7 +62,7 @@ export function initContext({ cluster, env, keypair }: { cluster: Cluster, env: 
   const wallet = new Wallet(Keypair.fromSecretKey(Buffer.from(JSON.parse(keypairBuffer.toString()))))
   const provider = new AnchorProvider(connection, wallet, opts)
   const client = new AlbusClient(provider)
-    .configure('priorityFee', 100000)
+    .configure('priorityFee', Number(process.env.CLI_PRIORITY_FEE ?? 0))
     .env(env)
     .debug()
   const metaplex = Metaplex.make(provider.connection)
