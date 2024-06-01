@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0-next.48 (2024-06-01)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed priority fee ([a9b0742](https://github.com/mfactory-lab/albus/commit/a9b074207699b658231eb255cfd23538104e2c36))
+
 ## 0.3.0-next.47 (2024-05-21)
 
 ## 0.3.0-next.46 (2024-05-20)
