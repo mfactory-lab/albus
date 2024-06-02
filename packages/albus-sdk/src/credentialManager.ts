@@ -293,6 +293,12 @@ async function getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialPr
       if (props?.throwOnError) {
         throw e
       }
+      return {
+        data: {
+          status: 'error',
+          message: String(e),
+        },
+      } as unknown as VerifiableCredential
     }
   }
   return {
