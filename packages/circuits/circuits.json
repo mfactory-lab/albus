@@ -95,7 +95,7 @@
   "residenceProof": {
     "file": "residenceProof",
     "template": "ResidenceProof",
-    "params": [5, 2],
+    "params": [6, 2],
     "pubs": [
       "timestamp",
       "selectionMode",

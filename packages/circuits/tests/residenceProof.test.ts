@@ -36,14 +36,31 @@ import { circomkit, prepareInput } from './common'
 describe('residenceProof', async () => {
   const issuerKeypair = Keypair.generate()
 
-  const credentialDepth = 5
-  const countryLookupSize = 1
+  const credentialDepth = 6
+  const countryLookupSize = 2
 
   const timestamp = 1697035401 // 2023-10-11 14:43
 
   const claims = {
-    country: 'GB',
+    // country: 'GB',
+    as: 'Shtorm LTD',
+    asname: 'SHTORM-AS',
+    city: 'Kyiv',
+    country: 'UA',
+    hosting: 'false',
+    ip: '12.33.11.33',
+    isp: 'TEST',
+    lat: '48.3322',
+    lon: '31.2581',
+    mobile: 'false',
+    offset: '0',
+    org: 'ABC Ltd.',
+    proxy: 'false',
+    region: '35',
+    timezone: 'Europe/Kyiv',
+    zip: '23001',
     meta: {
+      validFrom: timestamp - 10,
       validUntil: timestamp + 1,
     },
   }
@@ -69,7 +86,7 @@ describe('residenceProof', async () => {
 
   async function generateInput(claims: Record<string, any>, params: Record<string, any> = {}) {
     return {
-      ...(await prepareInput(issuerKeypair, claims, ['country', 'meta.validUntil'])),
+      ...(await prepareInput(issuerKeypair, claims, ['country', 'meta.validUntil'], credentialDepth)),
       timestamp,
       ...params,
     } as any
@@ -80,8 +97,12 @@ describe('residenceProof', async () => {
       selectionMode: 1,
       countryLookup: [
         crypto.utils.bytesToBigInt(countryLookup(['UA', 'GB'])),
+        0n,
       ],
     })
+
+    console.log('input', input)
+
     await circuit.expectPass(input)
   })
 
