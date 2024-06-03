@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0-next.49 (2024-06-02)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** verbose credential message ([96d4c77](https://github.com/mfactory-lab/albus/commit/96d4c779b59669c77ba155bb044d8fc2fb2a7456))
+
 ## 0.3.0-next.48 (2024-06-01)
 
 
