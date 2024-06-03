@@ -1,6 +1,6 @@
 [package]
 name = "albus"
-version = "0.0.31"
+version = "0.0.32"
 description = "Albus Protocol on-chain program"
 edition = { workspace = true }
 authors = { workspace = true }
