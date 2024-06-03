@@ -470,6 +470,11 @@ admin.command('close')
   .description('Close and account')
   .action(actions.admin.close)
 
+admin.command('withdraw')
+  .description('Withdraw albus authority balance')
+  .action(actions.admin.withdraw)
+
+//
 // ------------------------------------------
 
 const swap = cli.command('swap')

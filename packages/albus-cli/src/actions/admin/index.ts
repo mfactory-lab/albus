@@ -29,6 +29,7 @@
 import * as Albus from '@albus-finance/core'
 import {
   createAdminCloseAccountInstruction,
+  createAdminWithdrawInstruction,
   policyDiscriminator,
   proofRequestDiscriminator,
   trusteeDiscriminator,
@@ -109,6 +110,19 @@ async function closeAccount(pubkey: PublicKey) {
     authority: client.provider.publicKey,
     account: pubkey,
   }, client.programId)
+  const sig = await client.provider.sendAndConfirm(new Transaction().add(ix))
+  log.info(`Signature: ${sig}`)
+}
+
+export async function withdraw() {
+  const { client } = useContext()
+  log.info(`Withdrawing ...`)
+
+  const ix = createAdminWithdrawInstruction({
+    albusAuthority: client.pda.authority()[0],
+    authority: client.provider.publicKey,
+  }, client.programId)
+
   const sig = await client.provider.sendAndConfirm(new Transaction().add(ix))
   log.info(`Signature: ${sig}`)
 }
