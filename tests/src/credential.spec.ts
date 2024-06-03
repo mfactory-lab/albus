@@ -31,14 +31,14 @@ import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 
 import { assert, beforeAll, describe, it, vi } from 'vitest'
-import * as Albus from '../../packages/albus-core/src'
-import * as sdkUtils from '../../packages/albus-sdk/src/utils'
 import {
   AlbusClient,
   getAssociatedTokenAddress,
   getMasterEditionPDA,
   getMetadataPDA,
 } from '../../packages/albus-sdk/src'
+import * as Albus from '../../packages/albus-core/src'
+import * as sdkUtils from '../../packages/albus-sdk/src/utils'
 import { assertErrorMessage, initMetaplex, initProvider, payer, provider, requestAirdrop } from './utils'
 
 describe('albusCredential', async () => {
@@ -68,6 +68,10 @@ describe('albusCredential', async () => {
     await requestAirdrop(payer.publicKey)
     await requestAirdrop(holder.publicKey)
     // await requestAirdrop(updateAuthority)
+
+    console.log(`Payer ${payer.publicKey}`)
+    console.log(`Issuer ${issuer.publicKey}`)
+    console.log(`Holder ${holder.publicKey}`)
 
     vi.spyOn(sdkUtils, 'loadNft')
       .mockImplementation(async (c, m) => {
@@ -153,8 +157,18 @@ describe('albusCredential', async () => {
   // })
 
   it('should delete credential', async () => {
-    await holderClient.credential.delete({ mint: credentialMint })
+    const { signature } = await holderClient.credential.delete({ mint: credentialMint })
     const token = getAssociatedTokenAddress(credentialMint, client.provider.publicKey)
+
+    const tx = await client.provider.connection.getParsedTransaction(signature)
+    const balances = {}
+    for (let i = 0; i < tx.transaction.message.accountKeys.length; i++) {
+      const acc = tx.transaction.message.accountKeys[i]
+      balances[acc.pubkey.toBase58()] = {
+        pre: tx.meta.preBalances[i],
+        post: tx.meta.postBalances[i],
+      }
+    }
 
     // Then the NFT accounts no longer exist.
     const accounts = await mx
@@ -166,6 +180,22 @@ describe('albusCredential', async () => {
         getMasterEditionPDA(credentialMint),
       ])
 
+    // {
+    //   GVEBaeAT5DooHHoKgopT6gS5Jzz8qsMchZEhxTp8Ap83: { pre: 99956022600, post: 99966527200 },
+    //   '5RpgxgE6ZxzKNJ8XePXWLZ8zvZoRqTZf3iP2C9a7TLWZ': { pre: 2853600, post: 0 },
+    //   '5rxgvnYPCZQ96LdFa52BfjLNsZFDfKayBJQxbpTEiZWb': { pre: 2039280, post: 0 },
+    //   '8N8eXhpv67PxUinZzheX42KKv2qNUrqZs8aD6D5AciRP': { pre: 1461600, post: 1461600 },
+    //   HH5TcLDSEWCP6irvvSZzpjBoYKDSpgeq3t7HkMFwAdi8: { pre: 0, post: 0 },
+    //   HpgAiSsNV7iTz89bnkeKrbnobKxBtpjpif21mr6M4yUk: { pre: 15616720, post: 10000000 },
+    //   '11111111111111111111111111111111': { pre: 1, post: 1 },
+    //   ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp: { pre: 1141440, post: 1141440 },
+    //   metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s: { pre: 1141440, post: 1141440 },
+    //   Sysvar1nstructions1111111111111111111111111: { pre: 0, post: 0 },
+    //   TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: { pre: 929020800, post: 929020800 }
+    // }
+
+    assert.ok(balances[holder.publicKey.toBase58()].post > balances[holder.publicKey.toBase58()].pre)
+    // assert.ok(postBalance > preBalance, 'holder received rent fee')
     assert.equal(accounts[0]?.exists, true, 'mint account still exists because of SPL Token')
     assert.equal(accounts[1]?.exists, false, 'token account no longer exists')
     // assert.equal(accounts[2]?.exists, false, 'metadata account no longer exists')
