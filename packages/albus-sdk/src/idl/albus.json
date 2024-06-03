@@ -1,5 +1,5 @@
 {
-  "version": "0.0.31",
+  "version": "0.0.32",
   "name": "albus",
   "instructions": [
     {
@@ -1144,6 +1144,27 @@
       "accounts": [
         {
           "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "adminWithdraw",
+      "accounts": [
+        {
+          "name": "albusAuthority",
           "isMut": true,
           "isSigner": false
         },

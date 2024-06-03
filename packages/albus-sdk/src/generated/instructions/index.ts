@@ -1,4 +1,5 @@
 export * from './adminCloseAccount'
+export * from './adminWithdraw'
 export * from './createCircuit'
 export * from './createCredential'
 export * from './createCredentialSpec'
