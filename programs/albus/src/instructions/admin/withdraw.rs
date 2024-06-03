@@ -26,23 +26,36 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::utils::{assert_authorized, close};
-use anchor_lang::prelude::*;
+use crate::{utils::assert_authorized, ID};
+use anchor_lang::{prelude::*, system_program};
 
-pub fn handler(ctx: Context<AdminCloseAccount>) -> Result<()> {
-    assert_authorized(ctx.accounts.authority.key).and_then(|_| {
-        close(
-            ctx.accounts.account.to_account_info(),
-            ctx.accounts.authority.to_account_info(),
+pub fn handler(ctx: Context<AdminWithdraw>) -> Result<()> {
+    assert_authorized(ctx.accounts.authority.key)?;
+
+    let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
+
+    let amount = ctx.accounts.albus_authority.get_lamports();
+
+    system_program::transfer(
+        CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            system_program::Transfer {
+                from: ctx.accounts.albus_authority.to_account_info(),
+                to: ctx.accounts.authority.to_account_info(),
+            },
         )
-    })
+        .with_signer(&[&signer_seeds[..]]),
+        amount,
+    )?;
+
+    Ok(())
 }
 
 #[derive(Accounts)]
-pub struct AdminCloseAccount<'info> {
+pub struct AdminWithdraw<'info> {
     /// CHECK:
-    #[account(mut)]
-    pub account: UncheckedAccount<'info>,
+    #[account(mut, seeds = [ID.as_ref()], bump)]
+    pub albus_authority: AccountInfo<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,

@@ -246,6 +246,10 @@ pub mod albus {
     // Admin
 
     pub fn admin_close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
-        close_account::close_account(ctx)
+        close_account::handler(ctx)
+    }
+
+    pub fn admin_withdraw(ctx: Context<AdminWithdraw>) -> Result<()> {
+        withdraw::handler(ctx)
     }
 }

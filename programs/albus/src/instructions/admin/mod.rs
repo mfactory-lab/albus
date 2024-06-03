@@ -27,5 +27,6 @@
  */
 
 pub mod close_account;
+pub mod withdraw;
 
-pub use self::close_account::*;
+pub use self::{close_account::*, withdraw::*};
