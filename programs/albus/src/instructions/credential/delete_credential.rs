@@ -27,17 +27,16 @@
  */
 
 use crate::ID;
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::sysvar;
-use anchor_spl::metadata::mpl_token_metadata::instructions::{
-    BurnV1CpiBuilder, ThawDelegatedAccountCpiBuilder,
+use anchor_lang::{prelude::*, solana_program::sysvar};
+use anchor_spl::{
+    metadata::{
+        mpl_token_metadata::instructions::{BurnV1CpiBuilder, ThawDelegatedAccountCpiBuilder},
+        Metadata as MetadataProgram,
+    },
+    token::Token,
 };
-use anchor_spl::metadata::Metadata as MetadataProgram;
-use anchor_spl::token::spl_token::instruction::AuthorityType;
-use anchor_spl::token::{set_authority, SetAuthority, Token};
 
 pub fn handler(ctx: Context<DeleteCredential>) -> Result<()> {
-    // assert_authorized(ctx.accounts.authority.key)?;
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
 
     ThawDelegatedAccountCpiBuilder::new(&ctx.accounts.metadata_program)
@@ -48,20 +47,8 @@ pub fn handler(ctx: Context<DeleteCredential>) -> Result<()> {
         .token_program(&ctx.accounts.token_program)
         .invoke_signed(&[&signer_seeds])?;
 
-    set_authority(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            SetAuthority {
-                account_or_mint: ctx.accounts.token_account.to_account_info(),
-                current_authority: ctx.accounts.authority.to_account_info(),
-            },
-        ),
-        AuthorityType::AccountOwner,
-        Some(ctx.accounts.albus_authority.key()),
-    )?;
-
     BurnV1CpiBuilder::new(&ctx.accounts.metadata_program)
-        .authority(&ctx.accounts.albus_authority)
+        .authority(&ctx.accounts.authority)
         .metadata(&ctx.accounts.metadata_account)
         .token(&ctx.accounts.token_account)
         .mint(&ctx.accounts.mint)
@@ -69,7 +56,7 @@ pub fn handler(ctx: Context<DeleteCredential>) -> Result<()> {
         .spl_token_program(&ctx.accounts.token_program)
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
         .system_program(&ctx.accounts.system_program)
-        .invoke_signed(&[&signer_seeds])?;
+        .invoke()?;
 
     Ok(())
 }
