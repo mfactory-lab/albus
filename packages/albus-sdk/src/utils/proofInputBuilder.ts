@@ -101,8 +101,8 @@ export class ProofInputBuilder<T = Record<string, any>> {
    */
   async initClaimsTree() {
     const treeDepth = this.claimsTreeDepth
-    // try to find merkle proof in the circuit public signals and get the merkle tree depth
-    //   ?? this.publicSignals.find(s => s?.name === 'claimsProof')?.next?.size
+      // try to find merkle proof in the circuit public signals and get the merkle tree depth
+      ?? this.publicSignals.find(s => s?.name.endsWith('Proof') && s?.size > 1)?.size
 
     this.claimsTree = await Albus.credential.createCredentialTree(
       this.credential,
