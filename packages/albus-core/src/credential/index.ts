@@ -47,6 +47,7 @@ import type { AlbusResolverOpts } from './did-resolver/albus'
 
 const { base58ToBytes } = utils
 
+export { AlbusResolverOpts }
 export * from './tree'
 export * from './pex'
 
