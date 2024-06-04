@@ -46,6 +46,7 @@ export async function remove(addrOrCode: string) {
     throw new Error('Circuit not found')
   }
 
+  log.info('Removing circuit...')
   const { signature } = await client.circuit.deleteById(addr)
   log.info(`Signature: ${signature}`)
 }

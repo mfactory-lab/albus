@@ -34,8 +34,8 @@ import { useContext } from '@/context'
 export async function show(addr: string | PublicKey) {
   const { client } = useContext()
   const circuit = await client.circuit.load(addr)
-  log.info({ address: addr, ...circuit.pretty() })
-  // log.info(JSON.stringify({ address: addr, ...circuit.pretty() }, null, 2))
+  // log.info({ address: addr, ...circuit.pretty() })
+  log.info(JSON.stringify({ address: addr, ...circuit.pretty() }, null, 2))
 }
 
 export async function showAll() {
