@@ -43,6 +43,7 @@ import { albusDidResolver, keyDidResolver } from './did-resolver'
 import { Ed25519Signature2020, Ed25519VerificationKey2020 } from './crypto'
 import { securityLoader } from './documentLoader'
 import { createCredentialTree } from './tree'
+import type { AlbusResolverOpts } from './did-resolver/albus'
 
 const { base58ToBytes } = utils
 
@@ -286,7 +287,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   const resolver = opts.resolver ?? new Resolver({
     ...WebDidResolver.getResolver(),
     ...keyDidResolver(),
-    ...albusDidResolver(),
+    ...albusDidResolver(opts.albusResolver),
   } as ResolverRegistry)
 
   validateCredentialPayload(vc)
@@ -297,6 +298,11 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
   const issuerDid = cred.issuer?.id ?? cred.issuer
 
   const result = await resolver.resolve(issuerDid, { accept: 'application/did+json' })
+
+  if (result.didResolutionMetadata.error) {
+    throw new Error(`${result.didResolutionMetadata.error}. ${result.didResolutionMetadata.message}`)
+  }
+
   if (!result.didDocument?.verificationMethod) {
     throw new Error('Invalid issuer, no verification methods found')
   }
@@ -483,6 +489,7 @@ export type CreatePresentationOpts = {
 export type VerifyCredentialOpts = {
   decryptionKey?: ArrayLike<number>
   resolver?: Resolvable
+  albusResolver?: AlbusResolverOpts
 }
 
 export type SignPresentationOpts = {
