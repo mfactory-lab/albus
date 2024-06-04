@@ -35,7 +35,6 @@ import type {
 } from '@solana/web3.js'
 import {
   ComputeBudgetProgram,
-
   Keypair,
   PublicKey,
   SYSVAR_INSTRUCTIONS_PUBKEY,
@@ -287,6 +286,7 @@ async function getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialPr
       return await Albus.credential.verifyCredential(nft.json.vc, {
         decryptionKey: props?.decryptionKey,
         resolver: props?.resolver,
+        albusResolver: props?.albusResolver,
       })
     } catch (e) {
       console.log(`Credential Verification Error: ${e}`)
@@ -355,6 +355,7 @@ export type LoadCredentialProps = {
   decryptionKey?: number[] | Uint8Array
   throwOnError?: boolean
   resolver?: Resolver
+  albusResolver?: Albus.credential.AlbusResolverOpts
 }
 
 export type LoadAllCredentialProps = {
