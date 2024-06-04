@@ -489,6 +489,7 @@ export class ProofRequestManager extends BaseManager {
 
     const credential = await this.credential.load(props.vc, {
       decryptionKey: props.decryptionKey ?? props.userPrivateKey,
+      albusResolver: props.albusResolver,
     })
 
     const proofInput = await new ProofInputBuilder(credential)
@@ -646,6 +647,8 @@ export type FullProveProps = {
   wasmUri?: Buffer | string
   // for tests only
   zkeyUri?: Buffer | string
+  // Albus resolver options
+  albusResolver?: Albus.credential.AlbusResolverOpts
 }
 
 export type FullProveInternalProps = {
