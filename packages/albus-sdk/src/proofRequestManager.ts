@@ -388,7 +388,8 @@ export class ProofRequestManager extends BaseManager {
 
     // extending public inputs, length more than 19 does not fit into one transaction
     // a transaction's maximum size is 1,232 bytes
-    const inputsLimit = { withProof: 19, withoutProof: 28 }
+    // TODO: smart calculation
+    const inputsLimit = { withProof: 18, withoutProof: 26 }
 
     this.logger.log('prove', 'init', { proof, publicInputs })
 
