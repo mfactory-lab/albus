@@ -70,8 +70,8 @@ cli
       console.log(chalk.dim(`# Priority Fee: ${client.options.priorityFee} microlamports`))
     }
 
-    console.log(chalk.dim(`# Rpc Url: ${cluster}`))
     console.log(chalk.dim(`# Env: ${opts.env}`))
+    console.log(chalk.dim(`# Rpc Url: ${cluster}`))
     console.log('\n')
   })
   .hook('postAction', (_c: Command) => {
