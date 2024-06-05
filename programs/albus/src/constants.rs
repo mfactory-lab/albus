@@ -45,7 +45,7 @@ pub const ISSUER_PK_SIGNAL: &str = "issuerPk";
 
 /// Timestamp signal name used in Albus circuits
 pub const TIMESTAMP_SIGNAL: &str = "timestamp";
-pub const TIMESTAMP_THRESHOLD: u16 = 30;
+pub const TIMESTAMP_THRESHOLD: u16 = 60;
 
 /// Albus NFT symbols begin with this prefix
 pub const NFT_SYMBOL_PREFIX: &str = "ALBUS";
