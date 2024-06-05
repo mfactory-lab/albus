@@ -1,3 +1,6 @@
+// program scopes
+const scopes = ['program', 'swap', 'stake-pool', 'transfer']
+
 module.exports = {
   extends: [
     '@commitlint/config-conventional',
@@ -38,5 +41,6 @@ module.exports = {
         'security',
       ],
     ],
+    'scope-enum': [2, 'always', scopes],
   },
 }
