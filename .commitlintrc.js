@@ -1,5 +1,5 @@
 // program scopes
-const scopes = ['program', 'swap', 'stake-pool', 'transfer']
+// const scopes = ['program', 'swap', 'stake-pool', 'transfer']
 
 module.exports = {
   extends: [
@@ -41,6 +41,6 @@ module.exports = {
         'security',
       ],
     ],
-    'scope-enum': [2, 'always', scopes],
+    // 'scope-enum': [2, 'always', scopes],
   },
 }
