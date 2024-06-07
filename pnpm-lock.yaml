@@ -290,6 +290,9 @@ importers:
       '@metaplex-foundation/beet':
         specifier: ^0.7.2
         version: 0.7.2
+      '@metaplex-foundation/beet-solana':
+        specifier: ^0.4.1
+        version: 0.4.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@solana/spl-token':
         specifier: ^0.3.9
         version: 0.3.11(@solana/web3.js@1.91.8(bufferutil@4.0.8)(utf-8-validate@5.0.10))(bufferutil@4.0.8)(fastestsmallesttextencoderdecoder@1.0.22)(utf-8-validate@5.0.10)

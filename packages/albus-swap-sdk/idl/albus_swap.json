@@ -1,5 +1,5 @@
 {
-  "version": "0.0.5",
+  "version": "0.0.6",
   "name": "albus_swap",
   "instructions": [
     {
@@ -771,6 +771,27 @@
   ],
   "types": [
     {
+      "name": "CurveInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "curveType",
+            "type": "u8"
+          },
+          {
+            "name": "curveParameters",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "FeesInfo",
       "type": {
         "kind": "struct",
@@ -806,83 +827,6 @@
           {
             "name": "hostFeeDenominator",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "CurveInfo",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "curveType",
-            "type": "u8"
-          },
-          {
-            "name": "curveParameters",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "CurveType",
-      "docs": [
-        "Curve types supported by the token-swap program."
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "ConstantProduct"
-          },
-          {
-            "name": "ConstantPrice"
-          },
-          {
-            "name": "Offset"
-          }
-        ]
-      }
-    },
-    {
-      "name": "TradeDirection",
-      "docs": [
-        "The direction of a trade, since curves can be specialized to treat each",
-        "token differently (by adding offsets or weights)"
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "AtoB"
-          },
-          {
-            "name": "BtoA"
-          }
-        ]
-      }
-    },
-    {
-      "name": "RoundDirection",
-      "docs": [
-        "The direction to round.  Used for pool token to trading token conversions to",
-        "avoid losing value on any deposit or withdrawal."
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Floor"
-          },
-          {
-            "name": "Ceiling"
           }
         ]
       }

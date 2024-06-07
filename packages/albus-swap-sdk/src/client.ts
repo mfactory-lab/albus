@@ -13,7 +13,7 @@ import {
   getAssociatedTokenAddress, getAssociatedTokenAddressSync,
 } from '@solana/spl-token'
 
-import type { CurveType } from './generated'
+import type { CurveInfo } from './generated'
 import {
   PROGRAM_ID,
   TokenSwap,
@@ -147,7 +147,7 @@ export class AlbusSwapClient {
     }
   }
 
-  private getTokenSwapSpace(curve: { curveType: CurveType, curveParameters: number[] }) {
+  private getTokenSwapSpace(curve: CurveInfo) {
     return TokenSwap.byteSize({
       bumpSeed: 0,
       curve,
@@ -524,7 +524,7 @@ export type CreateTokenSwapProps = {
   addLiquidityPolicy?: PublicKey
   /// Swap curve info for pool, including CurveType and anything
   /// else that may be required
-  curveType: CurveType
+  curveType: number
   curveParameters?: ArrayLike<number> /* 32 */
   /// All swap fees
   fees: {
