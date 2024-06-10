@@ -65,7 +65,16 @@ deploy: build ## Deploy program
 	anchor deploy -p $(PROGRAM) --provider.cluster $(CLUSTER) --program-keypair $(PROGRAM_KEYPAIR)
 
 upgrade: build ## Upgrade program
-	anchor upgrade -p $(PROGRAM_ID) --provider.cluster $(CLUSTER) ./target/deploy/$(PROGRAM).so
+	solana program deploy -u $(SOLANA_CLUSTER) --upgrade-authority $(WALLET) --program-id $(PROGRAM_ID) \
+		--max-sign-attempts 200 \
+		--with-compute-unit-price 25000 \
+		--use-rpc \
+		./target/deploy/$(PROGRAM).so
+	#anchor deploy -p $(PROGRAM) --provider.cluster $(CLUSTER) -- \
+#        --upgrade-authority $(WALLET) \
+#        --max-sign-attempts 100 \
+#        --with-compute-unit-price 71428
+	#anchor upgrade -p $(PROGRAM_ID) --provider.cluster $(CLUSTER) ./target/deploy/$(PROGRAM).so
 
 verify: build ## Verify program
 	anchor verify $(PROGRAM_ID) --provider.cluster $(CLUSTER)
