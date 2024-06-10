@@ -31,7 +31,7 @@ import { createMint, getAccount, getOrCreateAssociatedTokenAccount, mintTo } fro
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
-import { AlbusSwapClient, CurveType } from '../../packages/albus-swap-sdk/src'
+import { AlbusSwapClient } from '../../packages/albus-swap-sdk/src'
 import { AlbusClient } from '../../packages/albus-sdk/src'
 import {
   createTestData,
@@ -113,7 +113,7 @@ describe('albusSwap', async () => {
       tokenB: swapTokenB.address,
       swapPolicy: policy,
       addLiquidityPolicy: policy,
-      curveType: CurveType.ConstantProduct,
+      curveType: 0, // constant product
       curveParameters: [],
       fees: {
         tradeFeeNumerator: 0,

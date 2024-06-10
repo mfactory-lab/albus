@@ -145,7 +145,7 @@ describe('albusCredential', async () => {
   })
 
   it('should load a credential', async () => {
-    const vc = await holderClient.credential.load(credentialMint, { resolver })
+    const vc = await holderClient.credential.load(credentialMint, { throwOnError: true, resolver })
     assert.deepEqual(vc, credential.vc)
   })
 

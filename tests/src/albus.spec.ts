@@ -89,6 +89,7 @@ describe('albus', async () => {
     retentionPeriod: 0,
     rules: [
       { key: 'config', value: [18, 100, 1] },
+      { key: 'countryLookup', value: countryLookup(['US', 'DE', 'FR']).reverse() },
       { key: 'countryLookup', value: countryLookup(['UA', 'GB']).reverse() },
     ] as any[],
   }
