@@ -28,6 +28,7 @@
 
 use crate::utils::Signals;
 use anchor_lang::prelude::*;
+use std::collections::HashMap;
 
 #[cfg(feature = "verify-on-chain")]
 use groth16_solana::Proof;
@@ -167,7 +168,7 @@ impl Circuit {
     }
 
     #[inline]
-    pub fn signals_count<T: AsRef<str>>(signals: impl IntoIterator<Item = T>) -> usize {
+    pub fn signals_count<T: AsRef<str>>(signals: &[T]) -> usize {
         Signals::new(signals).len()
     }
 
@@ -176,7 +177,7 @@ impl Circuit {
         let mut vec = Vec::with_capacity(self.outputs.len() + self.public_signals.len());
         vec.extend_from_slice(self.outputs.as_slice());
         vec.extend_from_slice(self.public_signals.as_slice());
-        Signals::new(vec)
+        Signals::new(&vec)
     }
 }
 
@@ -225,12 +226,14 @@ impl Policy {
 
     #[inline]
     pub fn apply_rules(&self, public_inputs: &mut [[u8; 32]], signals: &Signals) {
+        let mut used_indices = HashMap::with_capacity(self.rules.len());
         for rule in &self.rules {
-            let (name, idx) = rule.parse();
-            if let Some(signal) = signals.get(name) {
-                let index = signal.index + idx.unwrap_or_default() as usize;
-                if let Some(i) = public_inputs.get_mut(index) {
-                    *i = rule.value;
+            if let Some(signal) = signals.get(&rule.key) {
+                let idx = used_indices.entry(&rule.key).or_insert(0);
+                let index = signal.index + *idx;
+                if let Some(slot) = public_inputs.get_mut(index) {
+                    *slot = rule.value;
+                    *idx += 1;
                 }
             }
         }
@@ -248,18 +251,6 @@ pub struct PolicyRule {
     pub value: [u8; 32],
     #[max_len(MAX_POLICY_RULE_LABEL_LEN)]
     pub label: String,
-}
-
-impl PolicyRule {
-    pub const DELIMITER: char = '.';
-
-    /// Parses the name of a policy rule and returns a tuple with the name and length
-    pub fn parse(&self) -> (&str, Option<u8>) {
-        let mut split = self.key.splitn(2, Self::DELIMITER);
-        let name = split.next().unwrap_or_default();
-        let len = split.next().and_then(|len| len.parse().ok());
-        (name, len)
-    }
 }
 
 #[account]
@@ -658,19 +649,19 @@ mod test {
                     label: "".to_string(),
                 },
                 PolicyRule {
-                    key: "issuerPk.0".to_string(),
-                    value: num_to_bytes(1),
+                    key: "countryLookup".to_string(),
+                    value: [0; 32],
                     label: "".to_string(),
                 },
                 PolicyRule {
-                    key: "issuerPk.1".to_string(),
-                    value: num_to_bytes(2),
+                    key: "countryLookup".to_string(),
+                    value: [0; 32],
                     label: "".to_string(),
                 },
             ],
         };
 
-        let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"].to_vec());
+        let signals = Signals::new(&["minAge", "maxAge", "countryLookup[2]"]);
         let mut public_inputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
 
         policy.apply_rules(&mut public_inputs, &signals);

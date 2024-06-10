@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::ops::Index;
 
 type SignalKey = String;
@@ -38,7 +38,7 @@ pub struct SignalValue {
 }
 
 pub struct Signals {
-    data: BTreeMap<SignalKey, SignalValue>,
+    data: HashMap<SignalKey, SignalValue>,
     count: usize,
 }
 
@@ -51,24 +51,14 @@ impl Index<&str> for Signals {
 }
 
 impl Signals {
-    pub fn new<T: AsRef<str>, I: IntoIterator<Item = T>>(signals: I) -> Self {
+    pub fn new<T: AsRef<str>>(signals: &[T]) -> Self {
         let mut count = 0;
-
-        let data = signals
-            .into_iter()
-            .map(|signal| {
-                let (name, size) = Self::parse_signal(signal.as_ref());
-                count += size;
-                (
-                    name.into(),
-                    SignalValue {
-                        index: count - size,
-                        size,
-                    },
-                )
-            })
-            .collect();
-
+        let mut data = HashMap::with_capacity(signals.len());
+        for signal in signals {
+            let (name, size) = Self::parse_signal(signal.as_ref());
+            data.insert(name.into(), SignalValue { index: count, size });
+            count += size;
+        }
         Self { data, count }
     }
 
@@ -154,7 +144,7 @@ mod tests {
 
     #[test]
     fn test_signals() {
-        let signals = Signals::new([
+        let signals = Signals::new(&[
             "currentDate",
             "minAge",
             "maxAge",
