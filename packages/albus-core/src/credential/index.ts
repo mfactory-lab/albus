@@ -300,7 +300,7 @@ export async function verifyCredential(vc: VerifiableCredential, opts: VerifyCre
 
   const result = await resolver.resolve(issuerDid, { accept: 'application/did+json' })
 
-  if (result.didResolutionMetadata.error) {
+  if (result.didResolutionMetadata?.error !== undefined) {
     throw new Error(`${result.didResolutionMetadata.error}. ${result.didResolutionMetadata.message}`)
   }
 
