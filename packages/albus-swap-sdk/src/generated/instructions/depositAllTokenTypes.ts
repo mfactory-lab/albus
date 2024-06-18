@@ -40,6 +40,7 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _depositAllTokenTypes_ instruction
  *
+ * @property [] proofRequest (optional)
  * @property [] tokenSwap
  * @property [] authority
  * @property [**signer**] userTransferAuthority
@@ -54,6 +55,7 @@ export const depositAllTokenTypesStruct = new beet.BeetArgsStruct<
  * @category generated
  */
 export type DepositAllTokenTypesInstructionAccounts = {
+  proofRequest?: web3.PublicKey
   tokenSwap: web3.PublicKey
   authority: web3.PublicKey
   userTransferAuthority: web3.PublicKey
@@ -74,6 +76,9 @@ export const depositAllTokenTypesInstructionDiscriminator = [
 /**
  * Creates a _DepositAllTokenTypes_ instruction.
  *
+ * Optional accounts that are not provided default to the program ID since
+ * this was indicated in the IDL from which this instruction was generated.
+ *
  * @param accounts that will be accessed while the instruction is processed
  * @param args to provide as instruction data to the program
  *
@@ -91,6 +96,11 @@ export function createDepositAllTokenTypesInstruction(
     ...args,
   })
   const keys: web3.AccountMeta[] = [
+    {
+      pubkey: accounts.proofRequest ?? programId,
+      isWritable: false,
+      isSigner: false,
+    },
     {
       pubkey: accounts.tokenSwap,
       isWritable: false,

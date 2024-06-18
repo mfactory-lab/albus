@@ -2,17 +2,31 @@
 resolver = "2"
 members = [
   "programs/*",
-  "packages/solana-verifier",
-  "packages/groth16-solana",
+  "crates/solana-verifier",
+  "crates/groth16-solana",
 ]
 
+[workspace.package]
+edition = "2021"
+version = "0.0.0"
+authors = [ "Albus Team" ]
+repository = "https://github.com/mfactory-lab/albus"
+homepage = "https://albus.finance"
+license = "AGPL-3.0"
+publish = false
+
+[workspace.dependencies]
+albus-solana-verifier = { path = "crates/solana-verifier" }
+# anchor-lang = { version = "0.30.0" }
+# anchor-spl = { version = "0.30.0", default-features = false }
+groth16-solana = { path = "crates/groth16-solana" }
+solana-program = "1.17.31"
+solana-security-txt = { version = "1.1.1" }
+
 [profile.release]
-codegen-units = 1
 lto = "fat"
+codegen-units = 1
 overflow-checks = true
-opt-level = "z"
-#panic = 'abort'
-#strip = true
 
 [profile.release.build-override]
 opt-level = 3

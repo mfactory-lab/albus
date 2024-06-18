@@ -29,11 +29,10 @@
 import * as Albus from '@albus-finance/core'
 import type {
   Commitment,
-  ConfirmOptions,
   GetMultipleAccountsConfig,
   PublicKeyInitData,
 } from '@solana/web3.js'
-import { Keypair, PublicKey, Transaction } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import type {
   InvestigationStatus,
@@ -50,6 +49,7 @@ import {
   investigationRequestDiscriminator,
   investigationRequestShareDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 import { getSignals } from './utils'
 
 export class InvestigationManager extends BaseManager {
@@ -191,41 +191,7 @@ export class InvestigationManager extends BaseManager {
       })
   }
 
-  /**
-   * Delete {@link InvestigationRequest}
-   * Only investigation creator can delete it
-   */
-  async delete(props: DeleteInvestigationProps, opts?: ConfirmOptions) {
-    const authority = this.provider.publicKey
-    const investigationRequestAddr = new PublicKey(props.investigationRequest)
-    const investigationRequest = await this.load(investigationRequestAddr)
-
-    const ix = createDeleteInvestigationRequestInstruction({
-      investigationRequest: new PublicKey(props.investigationRequest),
-      anchorRemainingAccounts: investigationRequest.trustees.map(pubkey => ({
-        pubkey: this.pda.investigationRequestShare(investigationRequestAddr, pubkey)[0],
-        isSigner: false,
-        isWritable: true,
-      })),
-      authority,
-    }, this.programId)
-
-    try {
-      const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { signature }
-    } catch (e: any) {
-      throw errorFromCode(e.code) ?? e
-    }
-  }
-
-  /**
-   * Create new {@link InvestigationRequest}
-   */
-  async create(props: CreateInvestigationProps, opts?: ConfirmOptions) {
+  async createIx(props: CreateInvestigationProps) {
     const authority = this.provider.publicKey
 
     const proofRequest = await this.proofRequest.load(props.proofRequest)
@@ -259,19 +225,19 @@ export class InvestigationManager extends BaseManager {
     const selectedTrustees = (signals.trusteePublicKey as bigint[][] ?? [])
       .map(p => this.pda.trustee(Albus.zkp.packPubkey(p))[0])
 
-    const [investigationRequest] = this.pda.investigationRequest(props.proofRequest, authority)
+    const [address] = this.pda.investigationRequest(props.proofRequest, authority)
 
-    this.trace('create', `investigationRequest: ${investigationRequest}`)
-    this.trace('create', `selectedTrustees`, selectedTrustees.map(p => p.toString()))
+    this.logger.log('create', `investigationRequest: ${address}`)
+    this.logger.log('create', `selectedTrustees`, selectedTrustees.map(p => p.toString()))
 
     const ix = createCreateInvestigationRequestInstruction({
-      investigationRequest,
+      investigationRequest: address,
       proofRequest: new PublicKey(props.proofRequest),
       serviceProvider: proofRequest.serviceProvider,
       authority,
       anchorRemainingAccounts: selectedTrustees.length > 0
         ? selectedTrustees.map(pubkey => ({
-          pubkey: this.pda.investigationRequestShare(investigationRequest, pubkey)[0],
+          pubkey: this.pda.investigationRequestShare(address, pubkey)[0],
           isSigner: false,
           isWritable: true,
         }))
@@ -283,22 +249,65 @@ export class InvestigationManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      address,
+      selectedTrustees,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Create new {@link InvestigationRequest}
+   */
+  async create(props: CreateInvestigationProps, opts?: SendOpts) {
+    const { address, selectedTrustees, instructions } = await this.createIx(props)
     try {
-      const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return { address: investigationRequest, selectedTrustees, signature }
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+      return { address, selectedTrustees, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
   }
 
+  async deleteIx(props: DeleteInvestigationProps) {
+    const authority = this.provider.publicKey
+    const investigationRequestAddr = new PublicKey(props.investigationRequest)
+    const investigationRequest = await this.load(investigationRequestAddr)
+
+    const ix = createDeleteInvestigationRequestInstruction({
+      investigationRequest: new PublicKey(props.investigationRequest),
+      anchorRemainingAccounts: investigationRequest.trustees.map(pubkey => ({
+        pubkey: this.pda.investigationRequestShare(investigationRequestAddr, pubkey)[0],
+        isSigner: false,
+        isWritable: true,
+      })),
+      authority,
+    }, this.programId)
+
+    return {
+      instructions: [ix],
+    }
+  }
+
   /**
-   * Reveal a secret share for {@link InvestigationRequest}
+   * Delete {@link InvestigationRequest}
+   * Only investigation creator can delete it
    */
-  async revealShare(props: RevealShareProps, opts?: ConfirmOptions) {
+  async delete(props: DeleteInvestigationProps, opts?: SendOpts) {
+    const { instructions } = await this.deleteIx(props)
+    try {
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+      return { signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  async revealShareIx(props: RevealShareProps) {
     const authority = this.provider.publicKey
 
     const investigationRequest = await this.load(props.investigationRequest)
@@ -321,8 +330,8 @@ export class InvestigationManager extends BaseManager {
     const babyJubKey = Albus.zkp.getBabyJubPrivateKey(Keypair.fromSecretKey(props.encryptionKey))
     const ePk = babyJubKey.public().p
 
-    this.trace('revealShare', 'ePublicKey:', ePk)
-    this.trace('revealShare', 'trusteePublicKey:', signals.trusteePublicKey)
+    this.logger.log('revealShare', 'ePublicKey:', ePk)
+    this.logger.log('revealShare', 'trusteePublicKey:', signals.trusteePublicKey)
 
     const index = (signals.trusteePublicKey as bigint[][] ?? [])
       .findIndex(pk => String(pk) === String(ePk))
@@ -334,8 +343,8 @@ export class InvestigationManager extends BaseManager {
     const [trustee] = this.pda.trustee(babyJubKey.public().compress())
     const [investigationRequestShare] = this.pda.investigationRequestShare(props.investigationRequest, trustee)
 
-    this.trace('revealShare', `trusteeAddress: ${trustee}`)
-    this.trace('revealShare', `investigationRequestShareAddress: ${investigationRequestShare}`)
+    this.logger.log('revealShare', `trusteeAddress: ${trustee}`)
+    this.logger.log('revealShare', `investigationRequestShareAddress: ${investigationRequestShare}`)
 
     const encryptedShare = signals.encryptedShare?.[index]
     if (!encryptedShare) {
@@ -345,18 +354,18 @@ export class InvestigationManager extends BaseManager {
     const userPublicKey = signals.userPublicKey as [bigint, bigint]
     const sharedKey = Albus.zkp.generateEcdhSharedKey(props.encryptionKey, userPublicKey)
 
-    this.trace('revealShare', `userPublicKey:`, userPublicKey)
-    this.trace('revealShare', `encryptionKey:`, props.encryptionKey)
-    this.trace('revealShare', `encryptedShare:`, encryptedShare)
-    this.trace('revealShare', `sharedKey:`, sharedKey)
+    this.logger.log('revealShare', `userPublicKey:`, userPublicKey)
+    this.logger.log('revealShare', `encryptionKey:`, props.encryptionKey)
+    this.logger.log('revealShare', `encryptedShare:`, encryptedShare)
+    this.logger.log('revealShare', `sharedKey:`, sharedKey)
 
     const secretShare = Albus.crypto.Poseidon.decrypt(encryptedShare, sharedKey, 1, signals.timestamp as bigint)
 
-    this.trace('revealShare', `secretShare:`, secretShare)
+    this.logger.log('revealShare', `secretShare:`, secretShare)
 
     const newEncryptedShare = await Albus.crypto.XC20P.encryptBytes(
       Albus.crypto.utils.bigintToBytes(secretShare[0]),
-      investigationRequest.encryptionKey,
+      investigationRequest.encryptionKey.toBytes(),
     )
 
     const ix = createRevealSecretShareInstruction({
@@ -371,12 +380,24 @@ export class InvestigationManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      investigationRequest: new PublicKey(props.investigationRequest),
+      investigationRequestShare,
+      userPublicKey,
+      secretShare,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Reveal a secret share for {@link InvestigationRequest}
+   */
+  async revealShare(props: RevealShareProps, opts?: SendOpts) {
+    const { instructions, investigationRequest, userPublicKey, secretShare } = await this.revealShareIx(props)
     try {
-      const tx = new Transaction().add(ix)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
       return { address: investigationRequest, userPublicKey, secretShare, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -406,7 +427,7 @@ export class InvestigationManager extends BaseManager {
       }
       const encBytes = Uint8Array.from(data?.share ?? [])
       if (encBytes.length === 0) {
-        this.trace('decryptData', `skip empty ${pubkey}...`)
+        this.logger.log('decryptData', `skip empty ${pubkey}...`)
         continue
       }
       const shareBytes = await Albus.crypto.XC20P.decryptBytes(encBytes, encKeypair.secretKey)
@@ -414,7 +435,7 @@ export class InvestigationManager extends BaseManager {
       decryptedShares.set(data.index, share)
     }
 
-    this.trace('decryptData', 'decryptedShares', Array.from(decryptedShares.entries()))
+    this.logger.log('decryptData', 'decryptedShares', Array.from(decryptedShares.entries()))
 
     const secret = Albus.crypto.reconstructShamirSecret(
       Albus.crypto.babyJub.F,
@@ -422,7 +443,7 @@ export class InvestigationManager extends BaseManager {
       Array.from(decryptedShares.entries()),
     )
 
-    this.trace('decryptData', 'secret', secret)
+    this.logger.log('decryptData', 'secret', secret)
 
     const { proofRequest, circuit } = await this.proofRequest.loadFull(investigationRequest.proofRequest, ['circuit'])
 

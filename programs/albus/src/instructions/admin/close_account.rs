@@ -29,7 +29,7 @@
 use crate::utils::{assert_authorized, close};
 use anchor_lang::prelude::*;
 
-pub fn close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
+pub fn handler(ctx: Context<AdminCloseAccount>) -> Result<()> {
     assert_authorized(ctx.accounts.authority.key).and_then(|_| {
         close(
             ctx.accounts.account.to_account_info(),

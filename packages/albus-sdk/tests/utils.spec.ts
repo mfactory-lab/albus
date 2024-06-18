@@ -27,7 +27,7 @@
  */
 
 import { assert, describe, it } from 'vitest'
-import { getSignals } from '../src/utils'
+import { getSignals } from '../src'
 
 describe('sdk.utils', () => {
   it('can generate signals map', async () => {

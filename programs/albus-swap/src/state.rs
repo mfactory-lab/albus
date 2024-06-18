@@ -71,8 +71,14 @@ pub struct TokenSwap {
     /// calculates swaps, deposits, and withdrawals
     pub curve: CurveInfo,
 
-    /// Albus policy
-    pub policy: Option<Pubkey>,
+    /// Swap policy address (Albus)
+    pub swap_policy: Option<Pubkey>,
+
+    /// Add liquidity policy address (Albus)
+    pub add_liquidity_policy: Option<Pubkey>,
+
+    /// Reserved for future use
+    pub _reserved: [u8; 64],
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Copy, Clone, Default)]

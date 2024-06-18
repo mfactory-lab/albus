@@ -27,66 +27,85 @@
  */
 
 import type { Keypair } from '@solana/web3.js'
-import { DEFAULT_DID } from '../credential'
-import { MultiBase, babyJub, eddsa } from '../crypto'
-import { bytesToBase58 } from '../crypto/utils'
-import { VerifyType } from '../types'
+import { DEFAULT_DID } from '../credential/constants'
+import { MultiBase, PrivateKey } from '../crypto'
+import { VerifyType } from '../credential/types'
 
+/**
+ * Generates a DID key from the given public key.
+ *
+ * @param {Uint8Array} publicKey - The public key to encode.
+ * @return {string} The encoded DID key.
+ */
 export function encodeDidKey(publicKey: Uint8Array): string {
-  return `did:key:${MultiBase.encodePubkey(publicKey)}`
+  return `did:key:${MultiBase.encode(publicKey, MultiBase.codec.ed25519Pub)}`
 }
 
+/**
+ * Decode a DID key from a string representation.
+ *
+ * @param {string} did - The string representation of the DID key.
+ * @return {Uint8Array} The decoded DID key as a Uint8Array.
+ */
 export function decodeDidKey(did: string): Uint8Array {
   if (!did.startsWith('did:key:')) {
     throw new Error('did:key invalid format')
   }
-  return MultiBase.decodePubkey(did.slice(8))
+  return MultiBase.decode(did.slice(8), MultiBase.codec.ed25519Pub)
 }
 
-export function generateDid(keypair: Keypair, id = DEFAULT_DID) {
-  const bjPubkey = babyJub.packPoint(eddsa.prv2pub(keypair.secretKey))
+/**
+ * Generates a DID (Decentralized Identifier) document based on the given keypair and controller.
+ *
+ * @param {Keypair} keypair - the keypair used to generate the DID
+ * @param {string} [controller] - the controller of the DID
+ * @return {object} the generated DID document
+ */
+export function generateDid(keypair: Keypair, controller = DEFAULT_DID) {
+  const publicKeyMultibase = MultiBase.encode(keypair.publicKey.toBytes(), MultiBase.codec.ed25519Pub)
+  const publicKeyBJJ = new PrivateKey(keypair.secretKey).public().toBase58()
 
   const verificationMethod = [
     {
-      id: '#eddsa-bjj',
-      type: VerifyType.EddsaBJJVerificationKey,
-      controller: id,
-      publicKeyBase58: bytesToBase58(bjPubkey),
+      id: `${controller}#${publicKeyMultibase}`,
+      type: VerifyType.Ed25519VerificationKey2020,
+      controller,
+      publicKeyMultibase,
     },
     {
-      id: '#ed25519-2018',
-      type: 'Ed25519VerificationKey2018',
-      controller: id,
-      publicKeyBase58: keypair.publicKey.toBase58(),
-    },
-    {
-      id: '#ed25519-2020',
-      type: 'Ed25519VerificationKey2020',
-      controller: encodeDidKey(keypair.publicKey.toBytes()),
-      publicKeyMultibase: MultiBase.encodePubkey(keypair.publicKey.toBytes()),
+      id: `${controller}#${publicKeyBJJ}`,
+      type: VerifyType.BJJVerificationKey2021,
+      controller,
+      publicKeyBase58: publicKeyBJJ,
     },
   ]
 
   return {
     '@context': [
       'https://www.w3.org/ns/did/v1',
-      'https://www.w3.org/ns/data-integrity/v1',
-      'https://w3id.org/security/multikey/v1',
+      'https://w3id.org/security/suites/ed25519-2020/v1',
+      'https://w3id.org/security/suites/x25519-2020/v1',
+      // 'https://www.w3.org/ns/data-integrity/v1',
+      // 'https://w3id.org/security/multikey/v1',
     ],
-    'id': id,
-    'verificationMethod': verificationMethod,
-    'authentication': verificationMethod.map(m => m.id),
+    'id': controller,
     'assertionMethod': verificationMethod.map(m => m.id),
+    'authentication': verificationMethod.map(m => m.id),
+    'keyAgreement': [
+      { ...verificationMethod[0], type: 'X25519KeyAgreementKey2020' },
+    ],
+    'verificationMethod': verificationMethod,
     'service': [
       {
-        id: '#linkeddomains',
+        id: `${controller}#linkeddomains`,
         type: 'LinkedDomains',
-        serviceEndpoint: {
-          origins: [
-            'https://albus.finance/',
-          ],
-        },
+        serviceEndpoint: 'https://albus.finance/',
       },
+      // {
+      //   id: `${id}#eecc-registry`,
+      //   type: 'CredentialRegistry',
+      //   serviceEndpoint: 'https://ssi.eecc.de/api/registry/vcs/',
+      // },
     ],
   }
 }

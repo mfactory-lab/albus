@@ -30,7 +30,9 @@ export type TokenSwapArgs = {
   poolFeeAccount: web3.PublicKey
   fees: FeesInfo
   curve: CurveInfo
-  policy: beet.COption<web3.PublicKey>
+  swapPolicy: beet.COption<web3.PublicKey>
+  addLiquidityPolicy: beet.COption<web3.PublicKey>
+  reserved: number[] /* size: 64 */
 }
 
 export const tokenSwapDiscriminator = [135, 144, 215, 161, 140, 125, 41, 96]
@@ -54,7 +56,9 @@ export class TokenSwap implements TokenSwapArgs {
     readonly poolFeeAccount: web3.PublicKey,
     readonly fees: FeesInfo,
     readonly curve: CurveInfo,
-    readonly policy: beet.COption<web3.PublicKey>,
+    readonly swapPolicy: beet.COption<web3.PublicKey>,
+    readonly addLiquidityPolicy: beet.COption<web3.PublicKey>,
+    readonly reserved: number[], /* size: 64 */
   ) {}
 
   /**
@@ -73,7 +77,9 @@ export class TokenSwap implements TokenSwapArgs {
       args.poolFeeAccount,
       args.fees,
       args.curve,
-      args.policy,
+      args.swapPolicy,
+      args.addLiquidityPolicy,
+      args.reserved,
     )
   }
 
@@ -193,7 +199,9 @@ export class TokenSwap implements TokenSwapArgs {
       poolFeeAccount: this.poolFeeAccount.toBase58(),
       fees: this.fees,
       curve: this.curve,
-      policy: this.policy,
+      swapPolicy: this.swapPolicy,
+      addLiquidityPolicy: this.addLiquidityPolicy,
+      reserved: this.reserved,
     }
   }
 }
@@ -221,7 +229,9 @@ export const tokenSwapBeet = new beet.FixableBeetStruct<
     ['poolFeeAccount', beetSolana.publicKey],
     ['fees', feesInfoBeet],
     ['curve', curveInfoBeet],
-    ['policy', beet.coption(beetSolana.publicKey)],
+    ['swapPolicy', beet.coption(beetSolana.publicKey)],
+    ['addLiquidityPolicy', beet.coption(beetSolana.publicKey)],
+    ['reserved', beet.uniformFixedSizeArray(beet.u8, 64)],
   ],
   TokenSwap.fromArgs,
   'TokenSwap',

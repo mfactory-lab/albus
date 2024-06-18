@@ -1,5 +1,6 @@
-import { AlbusSwapClient, createCloseAccountInstruction } from '@albus-finance/swap-sdk'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import {
+  AlbusSwapClient,
+} from '@albus-finance/swap-sdk'
 import log from 'loglevel'
 import Table from 'cli-table3'
 import { useContext } from '@/context'
@@ -13,7 +14,7 @@ export async function findAll() {
   log.info(`Found: ${pools.length} swap pools`)
 
   const table = new Table({
-    head: ['#', 'Address', 'Mint', 'Policy'],
+    head: ['#', 'Address', 'Mint', 'Swap Policy', 'Add Liquidity Policy'],
   })
 
   let i = 0
@@ -22,7 +23,8 @@ export async function findAll() {
       String(++i),
       String(pubkey),
       String(data?.poolMint),
-      String(data?.policy),
+      String(data?.swapPolicy),
+      String(data?.addLiquidityPolicy),
     ])
   }
 
@@ -37,27 +39,23 @@ export async function closeAll() {
 
   for (const { pubkey } of pools) {
     log.info(`Close: ${pubkey}`)
-    const ix = createCloseAccountInstruction({
-      authority: provider.publicKey,
-      account: pubkey,
-    })
-    const signature = await provider.sendAndConfirm(new Transaction().add(ix))
+    const { signature } = await client.closeTokenSwap({ tokenSwap: pubkey })
     log.info(`Signature: ${signature}`)
   }
 
   log.info('Done')
 }
 
-export async function close(addr: string) {
-  const { provider } = useContext()
-
-  const account = new PublicKey(addr)
-  const ix = createCloseAccountInstruction({
-    authority: provider.publicKey,
-    account,
-  })
-
-  const signature = await provider.sendAndConfirm(new Transaction().add(ix))
-
-  log.info(`Signature: ${signature}`)
-}
+// export async function close(addr: string) {
+//   const { provider } = useContext()
+//
+//   const account = new PublicKey(addr)
+//   const ix = createCloseAccountInstruction({
+//     authority: provider.publicKey,
+//     account,
+//   })
+//
+//   const signature = await provider.sendAndConfirm(new Transaction().add(ix))
+//
+//   log.info(`Signature: ${signature}`)
+// }

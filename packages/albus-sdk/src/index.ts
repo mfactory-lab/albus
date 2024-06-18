@@ -28,4 +28,5 @@
 
 export * from './generated'
 export * from './client'
+export * from './issuerClient'
 export * from './utils'

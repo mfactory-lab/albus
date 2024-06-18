@@ -30,11 +30,10 @@ import { Keypair } from '@solana/web3.js'
 import { assert, describe, it } from 'vitest'
 import { babyJub, eddsa } from '../src/crypto'
 import {
-  createClaimsTree,
+  ClaimsTree,
   createCredentialProof,
   createVerifiableCredential,
-  createVerifiablePresentation,
-  encryptVerifiablePresentation,
+  createVerifiablePresentation, decryptPresentation,
   verifyCredential,
   verifyCredentialProof,
   verifyPresentation,
@@ -68,17 +67,30 @@ describe('credential', () => {
   ]))
 
   it('can create and verify credential proof', async () => {
-    const claimsTree = await createClaimsTree(claims)
+    const claimsTree = await ClaimsTree.from(claims)
     const issuerKeypair = Keypair.generate()
     const pubkey = babyJub.packPoint(eddsa.prv2pub(issuerKeypair.secretKey))
     const proof = createCredentialProof({
-      rootHash: claimsTree.root,
+      msg: claimsTree.root,
       signerSecretKey: issuerKeypair.secretKey,
-      verificationMethod: '',
+      verificationMethod: 'did:example:123456#key-1',
     })
-    const res = verifyCredentialProof(proof, pubkey)
+    const res = verifyCredentialProof(claimsTree.root, proof.proofValue, pubkey)
     assert.ok(res)
   })
+
+  // describe('albus did', () => {
+  //   it('can create and verify credential', async () => {
+  //     const vc = await createVerifiableCredential(claims, {
+  //       issuerSecretKey: issuerKeypair.secretKey,
+  //       issuerDid: 'did:albus:issuer:9not3fH8oNjWePPgaQGGtiAnMiZyWBsr3KL8mnMCmvHV?cluster=devnet',
+  //     })
+  //
+  //     const vc2 = await verifyCredential(vc)
+  //
+  //     console.log(vc2)
+  //   })
+  // })
 
   it('can create and verify credential', async () => {
     const holder = Keypair.generate()
@@ -88,8 +100,6 @@ describe('credential', () => {
       encrypt: true,
       issuerSecretKey: issuerKeypair.secretKey,
     })
-
-    // console.log(JSON.stringify(data, null, 2))
 
     // assert.ok('name' in data.credentialSubject?.alumniOf ?? {})
     assert.ok('encrypted' in data.credentialSubject)
@@ -104,6 +114,10 @@ describe('credential', () => {
       },
     })
 
+    // console.log(
+    //   JSON.stringify(vc, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2),
+    // )
+
     // assert.ok('issuerPubkey' in vc)
     assert.ok('credentialSubject' in vc)
     assert.ok(vc.credentialSubject?.alumniOf?.name, claims.alumniOf.name)
@@ -114,56 +128,29 @@ describe('credential', () => {
     const holder = Keypair.generate()
 
     const credential = await createVerifiableCredential(claims, {
-      encryptionKey: holder.publicKey,
-      encrypt: true,
+      // encryptionKey: holder.publicKey,
+      // encrypt: true,
+      // context: [{ '@vocab': 'https://schema.org/' }],
+      // context: ['https://schema.org/docs/jsonldcontext.jsonld'],
       issuerSecretKey: issuerKeypair.secretKey,
     })
 
     const payload = await createVerifiablePresentation({
       holderSecretKey: holder.secretKey,
-      exposedFields: ['birthDate', 'degree.type'],
       credentials: [credential],
-    })
-
-    // assert.ok('encrypted' in payload.verifiableCredential![0]!.credentialSubject)
-
-    const vp = await verifyPresentation(payload, { decryptionKey: holder.secretKey })
-
-    assert.deepEqual(vp.verifiableCredential?.[0]?.credentialSubject, {
-      birthDate: claims.birthDate.split('-').join(''),
-      degree: { type: claims.degree.type },
-    })
-  })
-
-  it('can create presentation with all exposed claims', async () => {
-    const holder = Keypair.generate()
-
-    const credential = await createVerifiableCredential(claims, {
-      encryptionKey: holder.publicKey,
       encrypt: true,
-      issuerSecretKey: issuerKeypair.secretKey,
+      encryptionKey: holder.publicKey,
     })
 
-    console.log(JSON.stringify(credential, null, 2))
-
-    const presentation = await createVerifiablePresentation({
-      holderSecretKey: holder.secretKey,
-      credentials: [credential],
+    const decryptedPayload = await decryptPresentation(payload, {
+      decryptionKey: holder.secretKey,
     })
 
-    const encryptedPresentation = await encryptVerifiablePresentation(presentation, {
-      pubkey: holder.publicKey,
-    })
+    console.log(JSON.stringify(decryptedPayload, null, 2))
 
-    // console.log(JSON.stringify(encryptedPresentation, null, 2))
+    const vp = await verifyPresentation(decryptedPayload)
 
-    const vp = await verifyPresentation(encryptedPresentation, { decryptionKey: holder.secretKey })
-
-    const { '@proof': proof, ...exposedClaims } = vp.verifiableCredential?.[0]?.credentialSubject as any
-
-    assert.ok(vp.verifiableCredential?.length === 1)
-    assert.deepEqual(exposedClaims, claims)
-    assert.deepEqual(Object.keys(proof), Object.keys(exposedClaims))
+    assert.ok(vp.verified)
   })
 
   it('claimsTree', async () => {
@@ -186,23 +173,12 @@ describe('credential', () => {
       country5: 'US',
     }
 
-    const tree = await createClaimsTree(claims)
+    const tree = await ClaimsTree.from(claims)
 
     // console.log((await tree.get('degree.university.name')))
 
     assert.equal((await tree.get('birthDate')).key, 7n)
     assert.equal((await tree.get('degree.university.name')).key, 2n)
-    assert.equal((await tree.get('test2.0.name')).value, 1n)
+    assert.equal((await tree.get('test2.0.name')).value, ClaimsTree.encodeValue(1))
   })
-
-  // it('resolver', async () => {
-  //   const resolver = new Resolver({
-  //     ...WebDidResolver.getResolver(),
-  //     ...KeyDidResolver.getResolver(),
-  //   } as ResolverRegistry)
-  //
-  //   const res = await resolver.resolve('did:web:issuer.albus.finance:sumsub')
-  //
-  //   console.log(res.didDocument.verificationMethod)
-  // })
 })

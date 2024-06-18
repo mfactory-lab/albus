@@ -31,13 +31,15 @@ import { Keypair } from '@solana/web3.js'
 import log from 'loglevel'
 import { useContext } from '@/context'
 
-type Opts = {}
+type Opts = {
+  // ...
+}
 
 /**
  * Generate new Identity NFT
  */
 export async function create(_opts: Opts) {
-  const { keypair, metaplex, config } = useContext()
+  const { metaplex, config } = useContext()
 
   // const identity = new Identity()
   // identity.accounts = [

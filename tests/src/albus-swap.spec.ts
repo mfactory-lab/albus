@@ -31,9 +31,17 @@ import { createMint, getAccount, getOrCreateAssociatedTokenAccount, mintTo } fro
 import type { PublicKey } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import { afterAll, assert, beforeAll, describe, it } from 'vitest'
-import { AlbusClient } from '../../packages/albus-sdk'
-import { AlbusSwapClient, CurveType } from '../../packages/albus-swap-sdk/src'
-import { airdrop, createTestData, createTestProofRequest, deleteTestData, newProvider, payer, provider } from './utils'
+import { AlbusSwapClient } from '../../packages/albus-swap-sdk/src'
+import { AlbusClient } from '../../packages/albus-sdk/src'
+import {
+  createTestData,
+  createTestProofRequest,
+  deleteTestData,
+  initProvider,
+  payer,
+  provider,
+  requestAirdrop,
+} from './utils'
 
 async function tokenBalance(addr: PublicKey) {
   const acc = await getAccount(provider.connection, addr)
@@ -44,9 +52,9 @@ describe('albusSwap', async () => {
   const user = Keypair.generate()
 
   const client = new AlbusClient(provider).local()
-  const userClient = new AlbusClient(newProvider(user)).local()
+  const userClient = new AlbusClient(initProvider(user)).local()
   const swapClient = new AlbusSwapClient(provider)
-  const userSwapClient = new AlbusSwapClient(newProvider(user))
+  const userSwapClient = new AlbusSwapClient(initProvider(user))
 
   const tokenSwap = Keypair.generate()
   const swapAuthority = swapClient.swapAuthority(tokenSwap.publicKey)
@@ -63,8 +71,8 @@ describe('albusSwap', async () => {
   let userPoolToken: Account
 
   beforeAll(async () => {
-    await airdrop(payer.publicKey)
-    await airdrop(user.publicKey)
+    await requestAirdrop(payer.publicKey)
+    await requestAirdrop(user.publicKey)
 
     // create mint accounts
     tokenA = await createMint(provider.connection, payer, payer.publicKey, null, 9)
@@ -103,8 +111,9 @@ describe('albusSwap', async () => {
       destination: poolFeeAccount.address,
       tokenA: swapTokenA.address,
       tokenB: swapTokenB.address,
-      policy,
-      curveType: CurveType.ConstantProduct,
+      swapPolicy: policy,
+      addLiquidityPolicy: policy,
+      curveType: 0, // constant product
       curveParameters: [],
       fees: {
         tradeFeeNumerator: 0,
@@ -144,6 +153,8 @@ describe('albusSwap', async () => {
   it('can deposit single token', async () => {
     const beforeBalance = await tokenBalance(swapTokenA.address)
 
+    const proofRequest = await createTestProofRequest(userClient, client, 'swap')
+
     await userSwapClient.depositSingleTokenTypeExactAmountIn({
       tokenSwap: tokenSwap.publicKey,
       poolMint,
@@ -153,6 +164,7 @@ describe('albusSwap', async () => {
       swapTokenB: swapTokenB.address,
       sourceTokenAmount: 1_000_000_000,
       minimumPoolTokenAmount: 0,
+      proofRequest,
     })
 
     const afterBalance = await tokenBalance(swapTokenA.address)

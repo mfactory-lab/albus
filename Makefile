@@ -6,7 +6,6 @@
 ENV ?= dev # dev, stage, prod
 PROGRAM ?= albus
 PROGRAM_KEYPAIR ?= ./target/deploy/$(PROGRAM)-keypair.json
-CIRCUITS_PATH ?= ./packages/circuits
 
 ifeq ($(ENV),prod)
 	# The `prod` environment uses its own keypair
@@ -47,16 +46,16 @@ info: ## Info
 
 sdk: build ## Generate new sdk
 	pnpm -F @albus-finance/sdk generate
-	pnpm lint:fix
+	pnpm eslint ./packages/albus-sdk/src/generated --fix
 
 bump: ## Bump program version
 	cd ./programs/$(PROGRAM)/ && cargo bump
 
 build: ## Build program
-	anchor build -p $(PROGRAM) --arch sbf -- --features "$(BUILD_FEATURES)"
+	anchor build -p $(PROGRAM) -- --features "$(BUILD_FEATURES)"
 
 test: ## Test integration (localnet)
-	anchor test --arch sbf --skip-lint --provider.cluster localnet -- --features testing
+	anchor test --skip-lint --provider.cluster localnet -- --features testing
 
 test-unit: ## Test unit
 	cargo clippy --all-features -- --allow clippy::result_large_err
@@ -66,7 +65,16 @@ deploy: build ## Deploy program
 	anchor deploy -p $(PROGRAM) --provider.cluster $(CLUSTER) --program-keypair $(PROGRAM_KEYPAIR)
 
 upgrade: build ## Upgrade program
-	anchor upgrade -p $(PROGRAM_ID) --provider.cluster $(CLUSTER) ./target/deploy/$(PROGRAM).so
+	solana program deploy -u $(SOLANA_CLUSTER) --upgrade-authority $(WALLET) --program-id $(PROGRAM_ID) \
+		--max-sign-attempts 200 \
+		--with-compute-unit-price 25000 \
+		--use-rpc \
+		./target/deploy/$(PROGRAM).so
+	#anchor deploy -p $(PROGRAM) --provider.cluster $(CLUSTER) -- \
+#        --upgrade-authority $(WALLET) \
+#        --max-sign-attempts 100 \
+#        --with-compute-unit-price 71428
+	#anchor upgrade -p $(PROGRAM_ID) --provider.cluster $(CLUSTER) ./target/deploy/$(PROGRAM).so
 
 verify: build ## Verify program
 	anchor verify $(PROGRAM_ID) --provider.cluster $(CLUSTER)
@@ -92,16 +100,6 @@ spool-deploy: ## Deploy stake pool
 #endif
 #target/network_changed:
 #	echo $(NETWORK) > target/network_changed
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-# Parse args
-args := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-
-circom: ## Build circom (e.g. make circom AgePolicy)
-	circom $(CIRCUITS_PATH)/$(args).circom -p bn128 -l node_modules --r1cs --wasm --sym -o $(CIRCUITS_PATH) && \
-	mv $(CIRCUITS_PATH)/$(args)_js/$(args).wasm $(CIRCUITS_PATH)/ && \
-	rm -rf $(CIRCUITS_PATH)/$(args)_js
 
 %::
 	@true

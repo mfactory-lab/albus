@@ -27,6 +27,11 @@
  */
 
 import { fromString, toString } from 'uint8arrays'
+import { randomBytes } from '@stablelib/random'
+
+export function randomBigInt(): bigint {
+  return bytesToBigInt(randomBytes(32))
+}
 
 export function hexToString(hex: string): string {
   return new TextDecoder().decode(hexToBytes(hex))

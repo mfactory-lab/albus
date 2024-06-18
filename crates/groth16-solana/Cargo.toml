@@ -1,0 +1,12 @@
+[package]
+name = "groth16-solana"
+version = "0.0.3"
+edition = "2021"
+
+[dependencies]
+solana-program.workspace = true
+
+[dev-dependencies]
+ark-bn254 = "0.4.0"
+ark-serialize = "0.4.0"
+dhat = "0.3.2"

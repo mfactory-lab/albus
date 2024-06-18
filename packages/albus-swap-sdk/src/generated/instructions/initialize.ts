@@ -22,7 +22,8 @@ import { curveInfoBeet } from '../types/CurveInfo'
 export type InitializeInstructionArgs = {
   feesInput: FeesInfo
   curveInput: CurveInfo
-  policy: beet.COption<web3.PublicKey>
+  swapPolicy: beet.COption<web3.PublicKey>
+  addLiquidityPolicy: beet.COption<web3.PublicKey>
 }
 /**
  * @category Instructions
@@ -38,7 +39,8 @@ export const initializeStruct = new beet.FixableBeetArgsStruct<
     ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['feesInput', feesInfoBeet],
     ['curveInput', curveInfoBeet],
-    ['policy', beet.coption(beetSolana.publicKey)],
+    ['swapPolicy', beet.coption(beetSolana.publicKey)],
+    ['addLiquidityPolicy', beet.coption(beetSolana.publicKey)],
   ],
   'InitializeInstructionArgs',
 )

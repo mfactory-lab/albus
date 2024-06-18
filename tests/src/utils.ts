@@ -26,14 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { readFileSync } from 'node:fs'
 import { Metaplex, irysStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
-import type { PublicKeyInitData } from '@solana/web3.js'
+import type { ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import { assert } from 'vitest'
-import { ProofRequestStatus } from '../../packages/albus-sdk'
-import type { AlbusClient } from '../../packages/albus-sdk'
+import { ProofRequestStatus } from '../../packages/albus-sdk/src'
+import type { AlbusClient } from '../../packages/albus-sdk/src'
 
 export const payer = Keypair.fromSecretKey(Uint8Array.from([
   46, 183, 156, 94, 55, 128, 248, 0, 49, 70, 183, 244, 178, 0, 0, 236,
@@ -42,9 +41,12 @@ export const payer = Keypair.fromSecretKey(Uint8Array.from([
   148, 253, 191, 58, 219, 119, 104, 89, 225, 26, 244, 119, 160, 6, 156, 227,
 ]))
 
-export const provider = newProvider(payer)
+export const provider = initProvider(payer)
 
-export function netMetaplex(payerKeypair: Keypair) {
+/**
+ * Initializes a Metaplex instance with the given payer keypair.
+ */
+export function initMetaplex(payerKeypair: Keypair) {
   return Metaplex.make(provider.connection)
     .use(keypairIdentity(payerKeypair))
     .use(irysStorage({
@@ -54,27 +56,53 @@ export function netMetaplex(payerKeypair: Keypair) {
     }))
 }
 
-export function newProvider(keypair: Keypair) {
-  const opts = AnchorProvider.defaultOptions()
+/**
+ * Initializes the provider with the given keypair and options.
+ */
+export function initProvider(keypair: Keypair, opts?: ConfirmOptions) {
+  opts = {
+    ...opts,
+    // skipPreflight: true,
+    commitment: 'confirmed',
+    // preflightCommitment: 'confirmed',
+  }
   return new AnchorProvider(
-    new Connection('http://localhost:8899', opts),
+    new Connection('http://127.0.0.1:8899', opts),
     new Wallet(keypair),
-    opts,
+    {
+      ...AnchorProvider.defaultOptions(),
+      ...opts,
+    },
   )
 }
 
-export async function airdrop(addr: PublicKeyInitData, amount = 100) {
-  await provider.connection.confirmTransaction(
-    await provider.connection.requestAirdrop(new PublicKey(addr), amount * LAMPORTS_PER_SOL),
-  )
+/**
+ * Requests an airdrop of a specified amount of SOL to the given public key address.
+ */
+export async function requestAirdrop(addr: PublicKeyInitData, amount = 100) {
+  const { connection } = provider
+  const signature = await connection.requestAirdrop(new PublicKey(addr), amount * LAMPORTS_PER_SOL)
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash()
+  await connection.confirmTransaction({ blockhash, lastValidBlockHeight, signature })
 }
 
+/**
+ * Sleeps for a specified amount of time.
+ */
+export const sleep = (delay: number) => new Promise(resolve => setTimeout(resolve, delay))
+
+/**
+ * Asserts that the error message contains the specified message.
+ */
+export function assertErrorMessage(error: { logs?: string[] }, msg: string) {
+  assert.ok(String((error?.logs ?? []).join('')).includes(msg))
+}
+
+/**
+ * Asserts that the given error object has the specified error code.
+ */
 export function assertErrorCode(error: { logs?: string[] }, code: string) {
-  assert.ok(String((error?.logs ?? []).join('')).includes(`Error Code: ${code}`))
-}
-
-export function loadFixture(name: string) {
-  return readFileSync(`./fixtures/${name}`)
+  assertErrorMessage(error, `Error Code: ${code}`)
 }
 
 export async function createTestProofRequest(client: AlbusClient, adminClient: AlbusClient, prefix: string, status?: ProofRequestStatus) {

@@ -28,9 +28,10 @@
 
 use crate::utils::Signals;
 use anchor_lang::prelude::*;
+use std::collections::HashMap;
 
 #[cfg(feature = "verify-on-chain")]
-use groth16_solana::{Proof, VK};
+use groth16_solana::Proof;
 
 #[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct ProofData {
@@ -66,19 +67,6 @@ impl VerificationKey {
     }
 }
 
-#[cfg(feature = "verify-on-chain")]
-impl From<VerificationKey> for VK {
-    fn from(value: VerificationKey) -> Self {
-        Self {
-            alpha: value.alpha,
-            beta: value.beta,
-            gamma: value.gamma,
-            delta: value.delta,
-            ic: value.ic,
-        }
-    }
-}
-
 pub const MAX_ISSUER_CODE_LEN: usize = 32;
 pub const MAX_ISSUER_NAME_LEN: usize = 32;
 pub const MAX_ISSUER_DESC_LEN: usize = 64;
@@ -86,17 +74,17 @@ pub const MAX_ISSUER_DESC_LEN: usize = 64;
 #[account]
 #[derive(InitSpace)]
 pub struct Issuer {
-    /// Signer Public key
+    /// Signing public key
     pub pubkey: Pubkey,
-    /// Public key (babyjub curve)
+    /// Signing public key in zk format (BJJ Point)
     pub zk_pubkey: [u8; 64],
-    /// Authority account of the issuer
+    /// The authority of the issuer that manages the issuer
     pub authority: Pubkey,
     /// Issuer status
     pub is_disabled: bool,
     /// Creation date
     pub created_at: i64,
-    /// PDA bump.
+    /// PDA bump
     pub bump: u8,
     /// Uniq code of the issuer
     #[max_len(MAX_ISSUER_CODE_LEN)]
@@ -129,51 +117,6 @@ impl Issuer {
         )
     }
 }
-
-//
-// On-chain credential
-//
-// pub const MAX_CREDENTIAL_URI_LEN: usize = 200;
-//
-// #[account]
-// #[derive(InitSpace)]
-// pub struct Credential {
-//     /// Authority of the credential
-//     pub authority: Pubkey,
-//     /// Credential's [Issuer]
-//     pub issuer: Pubkey,
-//     /// Auto-increment issuer specific identifier
-//     pub identifier: u32,
-//     /// Creation date
-//     pub created_at: i64,
-//     /// Processing date
-//     pub processed_at: i64,
-//     /// PDA bump.
-//     pub bump: u8,
-//     /// Issuance status
-//     pub status: CredentialStatus,
-//     /// Credential payload uri
-//     #[max_len(MAX_CREDENTIAL_URI_LEN)]
-//     pub uri: String,
-// }
-//
-// impl Credential {
-//     pub const SEED: &'static [u8] = b"credential";
-//
-//     #[inline]
-//     pub fn space() -> usize {
-//         8 + Self::INIT_SPACE
-//     }
-// }
-//
-// #[repr(u8)]
-// #[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
-// pub enum CredentialStatus {
-//     #[default]
-//     Pending,
-//     Issued,
-//     Rejected,
-// }
 
 pub const MAX_CIRCUIT_CODE_LEN: usize = 16;
 pub const MAX_CIRCUIT_NAME_LEN: usize = 32;
@@ -225,7 +168,7 @@ impl Circuit {
     }
 
     #[inline]
-    pub fn signals_count<T: AsRef<str>>(signals: impl IntoIterator<Item = T>) -> usize {
+    pub fn signals_count<T: AsRef<str>>(signals: &[T]) -> usize {
         Signals::new(signals).len()
     }
 
@@ -234,7 +177,7 @@ impl Circuit {
         let mut vec = Vec::with_capacity(self.outputs.len() + self.public_signals.len());
         vec.extend_from_slice(self.outputs.as_slice());
         vec.extend_from_slice(self.public_signals.as_slice());
-        Signals::new(vec)
+        Signals::new(&vec)
     }
 }
 
@@ -283,12 +226,14 @@ impl Policy {
 
     #[inline]
     pub fn apply_rules(&self, public_inputs: &mut [[u8; 32]], signals: &Signals) {
+        let mut used_indices = HashMap::with_capacity(self.rules.len());
         for rule in &self.rules {
-            let (name, idx) = rule.parse();
-            if let Some(signal) = signals.get(name) {
-                let index = signal.index + idx.unwrap_or_default() as usize;
-                if let Some(i) = public_inputs.get_mut(index) {
-                    *i = rule.value;
+            if let Some(signal) = signals.get(&rule.key) {
+                let idx = used_indices.entry(&rule.key).or_insert(0);
+                let index = signal.index + *idx;
+                if let Some(slot) = public_inputs.get_mut(index) {
+                    *slot = rule.value;
+                    *idx += 1;
                 }
             }
         }
@@ -306,18 +251,6 @@ pub struct PolicyRule {
     pub value: [u8; 32],
     #[max_len(MAX_POLICY_RULE_LABEL_LEN)]
     pub label: String,
-}
-
-impl PolicyRule {
-    pub const DELIMITER: char = '.';
-
-    /// Parses the name of a policy rule and returns a tuple with the name and length
-    pub fn parse(&self) -> (&str, Option<u8>) {
-        let mut split = self.key.splitn(2, Self::DELIMITER);
-        let name = split.next().unwrap_or_default();
-        let len = split.next().and_then(|len| len.parse().ok());
-        (name, len)
-    }
 }
 
 #[account]
@@ -511,7 +444,7 @@ pub struct ProofRequest {
     pub identifier: u64,
     /// Timestamp for when the request was created
     pub created_at: i64,
-    /// Timestamp for when the request will expire
+    /// Timestamp for when the request expires
     pub expired_at: i64,
     /// Timestamp for when the `proof` was verified
     pub verified_at: i64,
@@ -557,6 +490,135 @@ pub enum ProofRequestStatus {
     Rejected,
 }
 
+// On-chain credential
+//
+// pub const MAX_CREDENTIAL_URI_LEN: usize = 200;
+//
+// #[account]
+// #[derive(InitSpace)]
+// pub struct Credential {
+//     /// Authority of the credential
+//     pub authority: Pubkey,
+//     /// Credential's [Issuer]
+//     pub issuer: Pubkey,
+//     /// Auto-increment issuer specific identifier
+//     pub identifier: u32,
+//     /// Creation date
+//     pub created_at: i64,
+//     /// Processing date
+//     pub processed_at: i64,
+//     /// PDA bump.
+//     pub bump: u8,
+//     /// Issuance status
+//     pub status: CredentialStatus,
+//     /// Credential payload uri
+//     #[max_len(MAX_CREDENTIAL_URI_LEN)]
+//     pub uri: String,
+// }
+//
+// impl Credential {
+//     pub const SEED: &'static [u8] = b"credential";
+//
+//     #[inline]
+//     pub fn space() -> usize {
+//         8 + Self::INIT_SPACE
+//     }
+// }
+//
+// #[repr(u8)]
+// #[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
+// pub enum CredentialStatus {
+//     #[default]
+//     Pending,
+//     Issued,
+//     Rejected,
+// }
+
+pub const MAX_CRED_REQ_URI_LEN: usize = 200;
+pub const MAX_CRED_REQ_MSG_LEN: usize = 128;
+
+#[account]
+#[derive(InitSpace)]
+pub struct CredentialRequest {
+    /// Credential request creator
+    pub authority: Pubkey,
+    /// Credential owner
+    pub credential_owner: Pubkey,
+    /// The [CredentialSpec] associated with this request
+    pub credential_spec: Pubkey,
+    /// Credential mint address
+    pub credential_mint: Pubkey,
+    /// The [Issuer] associated with this request
+    pub issuer: Pubkey,
+    /// Status of the request
+    pub status: CredentialRequestStatus,
+    /// Creation date
+    pub created_at: i64,
+    /// PDA bump
+    pub bump: u8,
+    /// Presentation definition
+    #[max_len(MAX_CRED_REQ_URI_LEN)]
+    pub uri: String,
+    /// Rejection message
+    #[max_len(MAX_CRED_REQ_MSG_LEN)]
+    pub message: String,
+}
+
+impl CredentialRequest {
+    pub const SEED: &'static [u8] = b"credential-request";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
+}
+
+#[repr(u8)]
+#[derive(AnchorSerialize, AnchorDeserialize, Default, Eq, PartialEq, Clone, InitSpace)]
+pub enum CredentialRequestStatus {
+    #[default]
+    Pending,
+    InProgress,
+    Approved,
+    Rejected,
+}
+
+pub const MAX_CRED_SPEC_CODE_LEN: usize = 16;
+pub const MAX_CRED_SPEC_NAME_LEN: usize = 32;
+pub const MAX_CRED_SPEC_URI_LEN: usize = 200;
+
+#[account]
+#[derive(InitSpace)]
+pub struct CredentialSpec {
+    /// The [Issuer] associated with this spec
+    pub issuer: Pubkey,
+    /// Unique code identifying the spec
+    #[max_len(MAX_CRED_SPEC_CODE_LEN)]
+    pub code: String,
+    /// The name of the credential spec
+    #[max_len(MAX_CRED_SPEC_NAME_LEN)]
+    pub name: String,
+    /// Total number of credential requests associated with this spec
+    pub credential_request_count: u64,
+    /// Creation date
+    pub created_at: i64,
+    /// PDA bump
+    pub bump: u8,
+    /// Presentation definition
+    /// https://identity.foundation/presentation-exchange/#presentation-definition
+    #[max_len(MAX_CRED_SPEC_URI_LEN)]
+    pub uri: String,
+}
+
+impl CredentialSpec {
+    pub const SEED: &'static [u8] = b"credential-spec";
+
+    #[inline]
+    pub fn space() -> usize {
+        8 + Self::INIT_SPACE
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -587,19 +649,19 @@ mod test {
                     label: "".to_string(),
                 },
                 PolicyRule {
-                    key: "issuerPk.0".to_string(),
-                    value: num_to_bytes(1),
+                    key: "countryLookup".to_string(),
+                    value: [0; 32],
                     label: "".to_string(),
                 },
                 PolicyRule {
-                    key: "issuerPk.1".to_string(),
-                    value: num_to_bytes(2),
+                    key: "countryLookup".to_string(),
+                    value: [0; 32],
                     label: "".to_string(),
                 },
             ],
         };
 
-        let signals = Signals::new(["minAge", "maxAge", "issuerPk[2]"].to_vec());
+        let signals = Signals::new(&["minAge", "maxAge", "countryLookup[2]"]);
         let mut public_inputs = vec![[0; 32], [1; 32], [2; 32], [3; 32]];
 
         policy.apply_rules(&mut public_inputs, &signals);

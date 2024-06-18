@@ -1,23 +1,34 @@
 [package]
 name = "albus-transfer"
 version = "0.0.3"
-homepage = "https://albus.finance"
-repository = "https://github.com/mfactory-lab/albus"
-license = "AGPL-3.0"
-edition = "2021"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
 
 [lib]
-crate-type = ["cdylib", "lib"]
+crate-type = [
+  "cdylib",
+  "lib"
+]
 
 [features]
+idl-build = [
+  "anchor-lang/idl-build",
+  "anchor-spl/idl-build"
+]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
-cpi = ["no-entrypoint"]
+cpi = [ "no-entrypoint" ]
 devnet = []
 testing = []
 
 [dependencies]
-albus-solana-verifier = { path = "../../packages/solana-verifier" }
-anchor-lang = { version = "0.29.0"}
-anchor-spl = { version = "0.29.0" }
+albus-solana-verifier.workspace = true
+anchor-lang = { version = "0.29.0" }
+anchor-spl = { version = "0.29.0", features = [
+  "associated_token",
+  "token"
+], default-features = false }

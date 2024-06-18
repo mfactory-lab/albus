@@ -29,12 +29,11 @@
 import * as Albus from '@albus-finance/core'
 import type {
   Commitment,
-  ConfirmOptions,
   GetMultipleAccountsConfig,
   PublicKeyInitData,
   Signer,
 } from '@solana/web3.js'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 
 import {
@@ -44,6 +43,7 @@ import {
   errorFromCode,
   issuerDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 
 export class IssuerManager extends BaseManager {
   /**
@@ -68,11 +68,11 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Load issuer by ed25519 pubkey
+   * Load issuer by authority
    */
-  async loadByPubkey(pubkey: PublicKeyInitData, noData?: boolean) {
+  async loadByAuthority(authority: PublicKeyInitData, noData?: boolean) {
     const accounts = await this.find({
-      pubkey,
+      authority,
       noData,
     })
     if (accounts.length === 0) {
@@ -82,7 +82,7 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Load issuer by zk pubkey (babyjub curve)
+   * Load issuer by zk pubkey
    */
   async loadByZkPubkey(pubkey: [bigint, bigint], noData?: boolean) {
     const accounts = await this.find({
@@ -105,7 +105,7 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Find issuers and return a map
+   * Find issuers and return them as a Map
    */
   async findMapped(props: FindIssuerProps = {}) {
     return (await this.find(props))
@@ -116,7 +116,7 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Find issuers
+   * Find issuers with the given filters
    * @param props
    */
   async find(props: FindIssuerProps = {}) {
@@ -157,17 +157,12 @@ export class IssuerManager extends BaseManager {
       }))
   }
 
-  /**
-   * Create a new issuer
-   * @param props
-   * @param opts
-   */
-  async create(props: CreateIssuerProps, opts?: ConfirmOptions) {
+  createIx(props: CreateIssuerProps) {
     const authority = this.provider.publicKey
-    const [issuer] = this.pda.issuer(props.code)
+    const [address] = this.pda.issuer(props.code)
 
-    const instruction = createCreateIssuerInstruction({
-      issuer,
+    const ix = createCreateIssuerInstruction({
+      issuer: address,
       authority,
     },
     {
@@ -175,43 +170,53 @@ export class IssuerManager extends BaseManager {
         code: props.code,
         name: props.name,
         description: props.description ?? '',
+        authority: props.authority ?? props.keypair.publicKey,
         pubkey: props.keypair.publicKey,
         zkPubkey: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.keypair.secretKey)),
       },
     }, this.programId)
 
+    return {
+      address,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Create a new issuer.
+   */
+  async create(props: CreateIssuerProps, opts?: SendOpts) {
+    const { instructions, address } = this.createIx(props)
     try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
-      return {
-        address: issuer,
-        signature,
-      }
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+      return { address, signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
     }
   }
 
-  /**
-   * Delete issuer
-   * @param props
-   * @param opts
-   */
-  async delete(props: DeleteIssuerProps, opts?: ConfirmOptions) {
+  deleteIx(props: DeleteIssuerProps) {
     const authority = this.provider.publicKey
-    const instruction = createDeleteIssuerInstruction({
+    const ix = createDeleteIssuerInstruction({
       issuer: new PublicKey(props.issuer),
       authority,
     }, this.programId)
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete an existing issuer.
+   */
+  async delete(props: DeleteIssuerProps, opts?: SendOpts) {
+    const { instructions } = this.deleteIx(props)
     try {
-      const tx = new Transaction().add(instruction)
-      const signature = await this.provider.sendAndConfirm(tx, [], {
-        ...this.provider.opts,
-        ...opts,
-      })
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
       return { signature }
     } catch (e: any) {
       throw errorFromCode(e.code) ?? e
@@ -219,9 +224,7 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Convert issuer `babyjub` pubkey to bytes
-   * @param pubkey
-   * @private
+   * Convert issuer zk-pubkey to bytes.
    */
   private zkPubkeyToBytes(pubkey: [bigint, bigint]) {
     return pubkey.reduce((bytes: number[], i) => {
@@ -233,7 +236,7 @@ export class IssuerManager extends BaseManager {
 export type FindIssuerProps = {
   code?: string
   authority?: PublicKeyInitData
-  pubkey?: PublicKeyInitData
+  pubkey?: Iterable<number>
   zkPubkey?: Iterable<number>
   active?: boolean
   noData?: boolean
@@ -243,6 +246,7 @@ export type CreateIssuerProps = {
   code: string
   name: string
   description?: string
+  authority?: PublicKey
   keypair: Signer
 }
 

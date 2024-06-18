@@ -25,19 +25,46 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-import antfu from '@antfu/eslint-config'
+const antfu = require('@antfu/eslint-config').default
 
-export default antfu({
-  stylistic: true, // enable stylistic formatting rules
-  typescript: true,
-  yml: false,
-  vue: false,
-  rules: {
-    'antfu/consistent-list-newline': 'off',
-    'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
-    'ts/consistent-type-definitions': ['error', 'type'],
-    'curly': ['error', 'all'],
-    // 'node/prefer-global/process': 'off',
-    'no-console': 'off',
+module.exports = antfu(
+  {
+    gitignore: true,
+    stylistic: true,
+    typescript: true,
+    yaml: true,
+    toml: true,
+    vue: false,
+    ignores: [
+      '**/build/**',
+      '**/dist/**',
+      '**/coverage/**',
+    ],
+  }, {
+    rules: {
+      'antfu/consistent-list-newline': 'off',
+      'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
+
+      'toml/padding-line-between-pairs': 'off',
+      'ts/consistent-type-definitions': ['error', 'type'],
+
+      'curly': ['error', 'all'],
+
+      'node/prefer-global/process': 'off',
+      'node/prefer-global/buffer': 'off',
+
+      'no-console': 'off',
+    },
   },
-})
+  {
+    files: [
+      '**/generated/**',
+    ],
+    rules: {
+      'ts/no-use-before-define': 'off',
+      'jsdoc/require-property-description': 'off',
+      'jsdoc/check-property-names': 'off',
+      'jsdoc/require-property-name': 'off',
+    },
+  },
+)

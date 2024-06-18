@@ -1,5 +1,2 @@
 export * from './CurveInfo'
-export * from './CurveType'
 export * from './FeesInfo'
-export * from './RoundDirection'
-export * from './TradeDirection'

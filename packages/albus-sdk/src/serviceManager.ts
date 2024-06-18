@@ -27,7 +27,12 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type { Commitment, ConfirmOptions, GetAccountInfoConfig, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
+import type {
+  Commitment,
+  GetAccountInfoConfig,
+  GetMultipleAccountsConfig,
+  PublicKeyInitData,
+} from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
 import type { UpdateServiceProviderData } from './generated'
@@ -38,6 +43,7 @@ import {
   createUpdateServiceProviderInstruction,
   serviceProviderDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 
 export class ServiceManager extends BaseManager {
   /**
@@ -148,17 +154,12 @@ export class ServiceManager extends BaseManager {
       }, new Map<string, ServiceProvider | null>())
   }
 
-  /**
-   * Add new {@link ServiceProvider}
-   * @param props
-   * @param opts
-   */
-  async create(props: CreateServiceProps, opts?: ConfirmOptions) {
+  createIx(props: CreateServiceProps) {
     const authority = this.provider.publicKey
-    const [serviceProvider] = this.pda.serviceProvider(props.code)
+    const [address] = this.pda.serviceProvider(props.code)
 
     const ix = createCreateServiceProviderInstruction({
-      serviceProvider,
+      serviceProvider: address,
       authority,
     }, {
       data: {
@@ -172,21 +173,26 @@ export class ServiceManager extends BaseManager {
       },
     }, this.programId)
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts)
-
-    return { address: serviceProvider, signature }
+    return {
+      address,
+      instructions: [ix],
+    }
   }
 
   /**
-   * Update a {@link ServiceProvider}
-   *
-   * @param {UpdateServiceProps} props - The properties for updating the service.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns Promise<{signature:string}>
+   * Add new {@link ServiceProvider}
    */
-  async update(props: UpdateServiceProps, opts?: ConfirmOptions) {
+  async create(props: CreateServiceProps, opts?: SendOpts) {
+    const { address, instructions } = this.createIx(props)
+
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+
+    return { address, signature }
+  }
+
+  updateIx(props: UpdateServiceProps) {
     const ix = createUpdateServiceProviderInstruction({
       authority: this.provider.publicKey,
       serviceProvider: new PublicKey(props.serviceProvider),
@@ -206,23 +212,25 @@ export class ServiceManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Update a {@link ServiceProvider}.
+   */
+  async update(props: UpdateServiceProps, opts?: SendOpts) {
+    const { instructions } = this.updateIx(props)
+
     const signature = await this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
       .sendAndConfirm(opts)
 
     return { signature }
   }
 
-  /**
-   * Delete a {@link ServiceProvider} by its code
-   * Require admin authority
-   *
-   * @param {code} props - The properties for deleting the service.
-   * @param props.code
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns Promise<{signature:string}>
-   */
-  async delete(props: { code: string }, opts?: ConfirmOptions) {
+  deleteIx(props: { code: string }) {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.pda.serviceProvider(props.code)
     const ix = createDeleteServiceProviderInstruction({
@@ -230,8 +238,20 @@ export class ServiceManager extends BaseManager {
       authority,
     }, this.programId)
 
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete a {@link ServiceProvider} by its code
+   * Require admin authority
+   */
+  async delete(props: { code: string }, opts?: SendOpts) {
+    const { instructions } = this.deleteIx(props)
+
     const signature = await this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
       .sendAndConfirm(opts)
 
     return { signature }

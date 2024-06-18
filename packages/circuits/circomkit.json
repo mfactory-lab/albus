@@ -1,0 +1,12 @@
+{
+  "protocol": "groth16",
+  "prime": "bn128",
+  "version": "2.1.5",
+  "optimization": 2,
+  "inspect": true,
+  "include": ["node_modules"],
+  "groth16numContributions": 1,
+  "groth16askForEntropy": false,
+  "logLevel": "INFO",
+  "verbose": true
+}

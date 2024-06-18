@@ -112,24 +112,24 @@ createErrorFromCodeLookup.set(0x1774, () => new InvalidDataError())
 createErrorFromNameLookup.set('InvalidData', () => new InvalidDataError())
 
 /**
- * IncorrectOwner: 'Incorrect owner'
+ * InvalidOwner: 'Invalid owner'
  *
  * @category Errors
  * @category generated
  */
-export class IncorrectOwnerError extends Error {
+export class InvalidOwnerError extends Error {
   readonly code: number = 0x1775
-  readonly name: string = 'IncorrectOwner'
+  readonly name: string = 'InvalidOwner'
   constructor() {
-    super('Incorrect owner')
+    super('Invalid owner')
     if (typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, IncorrectOwnerError)
+      Error.captureStackTrace(this, InvalidOwnerError)
     }
   }
 }
 
-createErrorFromCodeLookup.set(0x1775, () => new IncorrectOwnerError())
-createErrorFromNameLookup.set('IncorrectOwner', () => new IncorrectOwnerError())
+createErrorFromCodeLookup.set(0x1775, () => new InvalidOwnerError())
+createErrorFromNameLookup.set('InvalidOwner', () => new InvalidOwnerError())
 
 /**
  * InvalidMetadata: 'Invalid metadata'

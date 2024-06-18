@@ -1,38 +1,43 @@
 {
   "private": true,
-  "type": "module",
+  "packageManager": "pnpm@9.1.0",
   "license": "AGPL-3.0",
   "scripts": {
-    "cli": "node ./packages/albus-cli/dist/index.cjs",
-    "cli:run": "pnpm -F @albus-finance/cli run run",
-    "dev": "pnpm -r --parallel --filter=./packages/** run dev",
+    "dev": "pnpm --parallel --filter=./packages/** run dev",
+    "circuits": "pnpm -F circuits run",
+    "cli": "pnpm -F @albus-finance/cli run",
+    "core": "pnpm -F @albus-finance/core run",
+    "sdk": "pnpm -F @albus-finance/sdk run",
+    "ui": "pnpm -F @albus-finance/ui run",
+    "swap": "pnpm -F @albus-finance/swap-sdk run",
+    "transfer": "pnpm -F @albus-finance/transfer-sdk run",
     "docs": "docsify serve ./docs",
-    "release:core": "pnpm -F @albus-finance/core release",
-    "release:sdk": "pnpm -F @albus-finance/sdk release",
-    "release:swap": "pnpm -F @albus-finance/swap-sdk release",
-    "release:transfer": "pnpm -F @albus-finance/transfer-sdk release",
-    "test:e2e": "pnpm -F @albus/tests run test",
+    "test:e2e": "pnpm -F @albus-finance/tests run test",
     "test:unit": "vitest --dir ./packages",
-    "lint:fix": "eslint --fix ./packages",
-    "commit": "git-cz",
-    "syncpack": "syncpack fix-mismatches"
+    "lint:fix": "eslint --fix .",
+    "syncpack": "syncpack list-mismatches",
+    "postinstall": "husky"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.2",
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
-    "@rollup/plugin-inject": "^5.0.5",
+    "@antfu/eslint-config": "^2.18.0",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@commitlint/config-pnpm-scopes": "^19.1.0",
     "@types/node": "^20.0.0",
-    "@vitest/ui": "^0.34.6",
+    "@vitest/ui": "^1.6.0",
     "buffer": "^6.0.3",
     "docsify-cli": "^4.4.4",
-    "eslint": "^8.55.0",
-    "syncpack": "^11.2.1",
-    "typescript": "5.2.2",
-    "vite": "^5.0.5",
-    "vite-plugin-dts": "^3.6.4",
-    "vitest": "^0.34.6"
+    "eslint": "^9.2.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "syncpack": "^12.3.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vite-plugin-dts": "^3.9.1",
+    "vite-plugin-node-polyfills": "^0.21.0",
+    "vitest": "^1.6.0"
   },
-  "packageManager": "pnpm@8.6.2",
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
@@ -46,5 +51,14 @@
         "snarkjs"
       ]
     }
+  },
+  "resolutions": {
+    "circom_tester": "0.0.20",
+    "ffjavascript": "0.2.63"
+  },
+  "lint-staged": {
+    "**/*.{js,json,json5,jsonc,md,ts,yaml,yml,toml}": [
+      "eslint --fix"
+    ]
   }
 }

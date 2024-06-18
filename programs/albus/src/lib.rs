@@ -25,6 +25,7 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
+#![doc = include_str!("../README.md")]
 
 mod constants;
 mod errors;
@@ -32,6 +33,9 @@ mod events;
 mod instructions;
 mod state;
 mod utils;
+
+#[cfg(feature = "custom-heap")]
+mod allocator;
 
 use anchor_lang::prelude::*;
 use instructions::*;
@@ -43,13 +47,16 @@ declare_id!("ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi");
 declare_id!("ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp");
 
 #[cfg(not(feature = "no-entrypoint"))]
-solana_security_txt::security_txt! {
-    name: "Albus",
-    project_url: "https://albus.finance",
-    contacts: "email:info@albus.finance,twitter:@AlbusProtocol",
-    policy: "https://github.com/mfactory-lab/albus/blob/master/SECURITY.md",
-    preferred_languages: "en",
-    source_code: "https://github.com/mfactory-lab/albus"
+pub mod security {
+    use solana_security_txt::security_txt;
+    security_txt! {
+        name: "Albus",
+        project_url: "https://albus.finance",
+        contacts: "email:info@albus.finance,twitter:@AlbusProtocol",
+        policy: "https://github.com/mfactory-lab/albus/blob/master/SECURITY.md",
+        preferred_languages: "en",
+        source_code: "https://github.com/mfactory-lab/albus"
+    }
 }
 
 #[program]
@@ -81,6 +88,37 @@ pub mod albus {
 
     pub fn delete_credential(ctx: Context<DeleteCredential>) -> Result<()> {
         delete_credential::handler(ctx)
+    }
+
+    pub fn request_credential(
+        ctx: Context<RequestCredential>,
+        data: RequestCredentialData,
+    ) -> Result<()> {
+        request_credential::handler(ctx, data)
+    }
+
+    pub fn update_credential_request(
+        ctx: Context<UpdateCredentialRequest>,
+        data: UpdateCredentialRequestData,
+    ) -> Result<()> {
+        update_credential_request::handler(ctx, data)
+    }
+
+    pub fn delete_credential_request(ctx: Context<DeleteCredentialRequest>) -> Result<()> {
+        delete_credential_request::handler(ctx)
+    }
+
+    // Credential Spec
+
+    pub fn create_credential_spec(
+        ctx: Context<CreateCredentialSpec>,
+        data: CreateCredentialSpecData,
+    ) -> Result<()> {
+        create_credential_spec::handler(ctx, data)
+    }
+
+    pub fn delete_credential_spec(ctx: Context<DeleteCredentialSpec>) -> Result<()> {
+        delete_credential_spec::handler(ctx)
     }
 
     // Circuit
@@ -208,6 +246,10 @@ pub mod albus {
     // Admin
 
     pub fn admin_close_account(ctx: Context<AdminCloseAccount>) -> Result<()> {
-        close_account::close_account(ctx)
+        close_account::handler(ctx)
+    }
+
+    pub fn admin_withdraw(ctx: Context<AdminWithdraw>) -> Result<()> {
+        withdraw::handler(ctx)
     }
 }

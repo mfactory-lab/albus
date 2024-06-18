@@ -34,8 +34,9 @@ import type { F1Field } from './ff'
  *
  * @param field The finite field to use.
  * @param k The minimum number of shares required to reconstruct the secret (defines degree of polynomial).
- * @param shares Shares of the participants to reconstruct the secret. Each is a 2-tuple containing the share index =x and the value =y.
- * @returns {string} The reconstructed secret as stringifies field element.
+ * @param shares Shares of the participants to reconstruct the secret.
+ *  Each is a 2-tuple containing the share index =x, and the value =y.
+ * @returns {string} The reconstructed secret as stringifies a field element.
  */
 export function reconstructShamirSecret(field: F1Field, k: number, shares: [number, bigint | string][]): bigint {
   if (shares.length < k) {

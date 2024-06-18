@@ -1,35 +1,29 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Default",
   "compilerOptions": {
     "target": "esnext",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "module": "esnext",
-    "lib": ["dom", "es6"],
-    "noEmitOnError": true,
-
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-
     "moduleResolution": "node",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true,
-
-    "importHelpers": true,
-
-    "pretty": true,
-
-    "noPropertyAccessFromIndexSignature": false,
-
+    "allowJs": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "useUnknownInCatchVariables": true,
-    "preserveWatchOutput": true,
-
     "noImplicitAny": false,
-
-    "typeRoots": ["./node_modules/@types/", "./types", "./node_modules"],
-    "types": ["node"]
-  }
+    "useUnknownInCatchVariables": true,
+    "declaration": true,
+    "declarationMap": true,
+    "importHelpers": false,
+    "inlineSources": false,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules"]
 }

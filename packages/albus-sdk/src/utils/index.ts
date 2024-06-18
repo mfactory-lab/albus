@@ -27,5 +27,8 @@
  */
 
 export * from './circuit'
+export * from './logger'
+export * from './proofInputBuilder'
+export * from './txBuilder'
 export * from './wallet'
 export * from './web3'

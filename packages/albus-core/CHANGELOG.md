@@ -1,5 +1,228 @@
 # Changelog
 
+## 0.3.6-next.31 (2024-06-10)
+
+## 0.3.6-next.30 (2024-06-04)
+
+## 0.3.6-next.29 (2024-06-04)
+
+## 0.3.6-next.28 (2024-05-23)
+
+## 0.3.6-next.27 (2024-05-21)
+
+## 0.3.6-next.26 (2024-05-21)
+
+
+### 🐞 Bug Fixes
+
+* **core:** fixed credential tree value encoding ([a7a7c8a](https://github.com/mfactory-lab/albus/commit/a7a7c8ab7f956d026f18c57670ce0c16a85236f2))
+
+## 0.3.6-next.25 (2024-05-20)
+
+## 0.3.6-next.24 (2024-05-18)
+
+## 0.3.6-next.23 (2024-05-17)
+
+
+### 🐞 Bug Fixes
+
+* **signature:** fixed deps ([ca238d4](https://github.com/mfactory-lab/albus/commit/ca238d442d9c4636c7ca1f944c2fe5b51647cc65))
+
+## [0.3.6-next.22](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.21...@albus-finance/core-v0.3.6-next.22) (2024-05-16)
+
+
+### 🐞 Bug Fixes
+
+* fix build for `cjs` ([11d257c](https://github.com/mfactory-lab/albus/commit/11d257c9fc93b71bfd18df92240de1c585db014c))
+
+## [0.3.6-next.21](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.20...@albus-finance/core-v0.3.6-next.21) (2024-05-16)
+
+
+### 🐞 Bug Fixes
+
+* **core:** add schema.org vocab for credential context ([5f72b58](https://github.com/mfactory-lab/albus/commit/5f72b5827079b731da2c3acb14aefaf40c3a8232))
+
+## [0.3.6-next.20](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.19...@albus-finance/core-v0.3.6-next.20) (2024-05-16)
+
+
+### 🌟 Features
+
+* **core:** add did resolver ([1ce8ed9](https://github.com/mfactory-lab/albus/commit/1ce8ed904f1b81cf035b8b9a4567d1b5799859ae))
+* **core:** fix tsup external ([f01a1cd](https://github.com/mfactory-lab/albus/commit/f01a1cda174f6ce0ce1ccf3c49d682d71725357e))
+* **core:** implemented document loader ([b65eb40](https://github.com/mfactory-lab/albus/commit/b65eb401fef5feb05590d7f0d2671f19d8b64844))
+
+## [0.3.6-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.17...@albus-finance/core-v0.3.6-next.19) (2024-05-15)
+
+
+### 🌟 Features
+
+* **core:** add custom `Ed25519Signature2020` ([5397758](https://github.com/mfactory-lab/albus/commit/53977587a0914d50e2dbcb152e6ac8e76050ca74))
+* new presentation signature `Ed25519Signature2020` ([52eb9a5](https://github.com/mfactory-lab/albus/commit/52eb9a5be13d4716432b944e1db2facfe6bca8c6))
+
+
+### 🐞 Bug Fixes
+
+* **core:** fix version ([3a9f776](https://github.com/mfactory-lab/albus/commit/3a9f77662e90260a606ffb5fbb1ca956ada71205))
+
+## [0.3.6-next.17](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.16...@albus-finance/core-v0.3.6-next.17) (2024-05-14)
+
+
+### 🌟 Features
+
+* **core:** add albus did resolver ([bcb3616](https://github.com/mfactory-lab/albus/commit/bcb36163bb37dc5b324fcf1b87c111a236ee3f5c))
+
+
+### 🐞 Bug Fixes
+
+* **core:** update resolver docs ([35a5592](https://github.com/mfactory-lab/albus/commit/35a5592094a329e077985a74825d1f66d7646db1))
+* improved `tsconfig` ([2238973](https://github.com/mfactory-lab/albus/commit/2238973aaf3548577f35d9a94c0fe4d6cf2b487e))
+
+
+### ♻️ Refactors
+
+* **core:** credential creation improvements ([fe4addc](https://github.com/mfactory-lab/albus/commit/fe4addceb944a7ca5e385908e80f94e843be68b2))
+
+## [0.3.6-next.16](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.15...@albus-finance/core-v0.3.6-next.16) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* **core:** fix verification bigint error ([c39965a](https://github.com/mfactory-lab/albus/commit/c39965a4610440634bd19918da2df2e007fdc8b6))
+
+## [0.3.6-next.15](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.14...@albus-finance/core-v0.3.6-next.15) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* BigInt serialize error ([6d39238](https://github.com/mfactory-lab/albus/commit/6d39238e74719f24cf7efbe2adab645d8697c7f4))
+
+## [0.3.6-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.13...@albus-finance/core-v0.3.6-next.14) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* **ci:** fixed release action ([df776ab](https://github.com/mfactory-lab/albus/commit/df776abb3686a82d67c7998715a4a429f190e431))
+* **core:** inline `@sphereon/pex` ([b87d1f5](https://github.com/mfactory-lab/albus/commit/b87d1f541ebc6fc01ac435f70941d7ee00b8b2b8))
+* global build fixes ([93a9c47](https://github.com/mfactory-lab/albus/commit/93a9c47fde55f2ebef8ebc1bb67945b61c5f7ee0))
+
+## [0.3.6-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.12...@albus-finance/core-v0.3.6-next.13) (2024-05-10)
+
+## [0.3.6-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.11...@albus-finance/core-v0.3.6-next.12) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* replase `prerelease` to `prepublishOnly` ([d5b360c](https://github.com/mfactory-lab/albus/commit/d5b360c6a322c89d619d4041bf2f943e6940a6fd))
+
+## [0.3.6-next.11](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.10...@albus-finance/core-v0.3.6-next.11) (2024-05-10)
+
+## [0.3.6-next.10](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.9...@albus-finance/core-v0.3.6-next.10) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **circuits:** add `typeProof`, upgrade circomkit ([3374621](https://github.com/mfactory-lab/albus/commit/33746217fc547db5d753381e8897ba521d802f8f))
+* **core:** tsup integration, global improvements ([660567b](https://github.com/mfactory-lab/albus/commit/660567b44e6fb7f0d3ed6ef938e782b73d346262))
+
+## [0.3.6-next.9](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.8...@albus-finance/core-v0.3.6-next.9) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* export types ([ed3a421](https://github.com/mfactory-lab/albus/commit/ed3a4215a3a65273554652ca1901b0c85005523c))
+
+## [0.3.6-next.8](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.7...@albus-finance/core-v0.3.6-next.8) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* upgrade anchor to `0.30.0` ([2bdb9d2](https://github.com/mfactory-lab/albus/commit/2bdb9d24720373c8d87fbb5c02dac59cb04773e1))
+
+
+### ♻️ Refactors
+
+* **core:** code cleanup ([0938541](https://github.com/mfactory-lab/albus/commit/0938541a7b806fe51a8ebbf8ff66119bf3124ca2))
+
+## [0.3.6-next.7](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.6...@albus-finance/core-v0.3.6-next.7) (2024-04-16)
+
+## [0.3.6-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.5...@albus-finance/core-v0.3.6-next.6) (2024-04-11)
+
+
+### 🌟 Features
+
+* **core:** add `parseCredentialProof` ([8929966](https://github.com/mfactory-lab/albus/commit/8929966a1e6613b1071a29c96f2306ef51746f6b))
+* **core:** add pex utils ([a48b2b6](https://github.com/mfactory-lab/albus/commit/a48b2b6a52245c60c2b9be5fb1595c5f0ea25e4a))
+
+
+### 🐞 Bug Fixes
+
+* **core:** add new `ClaimsTree` ([6636fb2](https://github.com/mfactory-lab/albus/commit/6636fb2a1426b69e1835273b50f37f0eaac75b44))
+* **core:** code cleanup ([03b93aa](https://github.com/mfactory-lab/albus/commit/03b93aaa2cb57973a9a6d7f49825208dfcfd1df0))
+
+
+### ♻️ Refactors
+
+* **core:** global improvements ([744a57e](https://github.com/mfactory-lab/albus/commit/744a57eb9efe5a6b8bcc5bab40322703e2bec8a5))
+
+## [0.3.6-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.4...@albus-finance/core-v0.3.6-next.5) (2024-04-10)
+
+
+### 🐞 Bug Fixes
+
+* **core:** credential improved ([a060968](https://github.com/mfactory-lab/albus/commit/a060968139a2c01891bea924090ccbe8bb11b265))
+
+## [0.3.6-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.3...@albus-finance/core-v0.3.6-next.4) (2024-04-08)
+
+
+### 🐞 Bug Fixes
+
+* **core:** global improvements ([ea71592](https://github.com/mfactory-lab/albus/commit/ea71592388cb813fa18b1ec13a0c7d014dc55fdc))
+
+## [0.3.6-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.2...@albus-finance/core-v0.3.6-next.3) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* add inline deps for commonjs ([b48c56e](https://github.com/mfactory-lab/albus/commit/b48c56ea8b750d0fb048fe5cf8bf1b2c1b0b54eb))
+
+## [0.3.6-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.1...@albus-finance/core-v0.3.6-next.2) (2024-03-26)
+
+
+### 🌟 Features
+
+* new circuits, circomkit integration ([7e0c96d](https://github.com/mfactory-lab/albus/commit/7e0c96de363c65e635a88039bc53b207127656c7))
+* **program:** request credential feature ([a2a0f26](https://github.com/mfactory-lab/albus/commit/a2a0f26c114e80afa634b161215d92a4176eafa3))
+
+
+### 🐞 Bug Fixes
+
+* **core:** fixed `encodeClaimValue` ([950ec47](https://github.com/mfactory-lab/albus/commit/950ec47419ed1f1b9932c60ca46c25d318c9c027))
+* **core:** improved credential utils ([5766ff4](https://github.com/mfactory-lab/albus/commit/5766ff468480c5a1374d1fc3b9236289dc14c8b2))
+* **core:** remove circuit tests ([87727a8](https://github.com/mfactory-lab/albus/commit/87727a88af52048ba39993c9550ac01552f290e2))
+
+## [0.3.6-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.0...@albus-finance/core-v0.3.6-next.1) (2024-02-05)
+
+
+### 🐞 Bug Fixes
+
+* **core:** update snarkjs version ([75c321b](https://github.com/mfactory-lab/albus/commit/75c321bed6398e541f65feb325b43a89738b500a))
+
+## [0.3.6-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.5...@albus-finance/core-v0.3.6-next.0) (2024-02-02)
+
+
+### 🐞 Bug Fixes
+
+* **core:** new encode claim ([d0c6b53](https://github.com/mfactory-lab/albus/commit/d0c6b531adcafca9cf66b861f5d47c46b2dc84e9))
+
+## [v0.3.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.5...@albus-finance/core-v0.3.6-next.0) (2023-12-04)
+
+## [v0.3.5-next.0](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.5...@albus-finance/core-v0.3.6-next.0) (2023-12-05)
+
+
+### ♻️ Refactors
+
+* apply new lint rules ([bb30025](https://github.com/mfactory-lab/albus/commit/bb30025be223a559db2b4bf81466425f81f514f0))
+
 ## [0.3.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.3-next.3...@albus-finance/core-v0.3.5) (2023-12-04)
 
 

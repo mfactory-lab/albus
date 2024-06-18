@@ -35,7 +35,8 @@ use std::io::{self, Write};
 pub fn close<'info>(acc: AccountInfo<'info>, sol_destination: AccountInfo<'info>) -> Result<()> {
     // Transfer lamports from the account to the sol_destination.
     let dest_starting_lamports = sol_destination.lamports();
-    **sol_destination.lamports.borrow_mut() = dest_starting_lamports.checked_add(acc.lamports()).unwrap();
+    **sol_destination.lamports.borrow_mut() =
+        dest_starting_lamports.checked_add(acc.lamports()).unwrap();
     **acc.lamports.borrow_mut() = 0;
 
     acc.assign(&system_program::ID);
@@ -53,7 +54,7 @@ pub fn initialize_account<'info>(
 ) -> Result<()> {
     let current_lamports = target_account.try_lamports()?;
     if current_lamports == 0 {
-        // if account doesn't have any lamports initialize it with conventional create_account
+        // if an account doesn't have any lamports initialize it with conventional create_account
         let lamports = Rent::get()?.minimum_balance(len);
         let cpi_accounts = anchor_lang::system_program::CreateAccount {
             from: payer,
@@ -68,7 +69,9 @@ pub fn initialize_account<'info>(
         )?;
     } else {
         // fund the account for rent exemption
-        let required_lamports = Rent::get()?.minimum_balance(len).saturating_sub(current_lamports);
+        let required_lamports = Rent::get()?
+            .minimum_balance(len)
+            .saturating_sub(current_lamports);
         if required_lamports > 0 {
             let cpi_accounts = anchor_lang::system_program::Transfer {
                 from: payer,
@@ -82,12 +85,15 @@ pub fn initialize_account<'info>(
             account_to_allocate: target_account.clone(),
         };
         let cpi_context = CpiContext::new(system_program.clone(), cpi_accounts);
-        anchor_lang::system_program::allocate(cpi_context.with_signer(seeds), len.try_into().unwrap())?;
+        anchor_lang::system_program::allocate(
+            cpi_context.with_signer(seeds),
+            len.try_into().unwrap(),
+        )?;
         // assign to the program
         let cpi_accounts = anchor_lang::system_program::Assign {
             account_to_assign: target_account,
         };
-        let cpi_context = anchor_lang::context::CpiContext::new(system_program, cpi_accounts);
+        let cpi_context = CpiContext::new(system_program, cpi_accounts);
         anchor_lang::system_program::assign(cpi_context.with_signer(seeds), owner)?;
     }
     Ok(())
@@ -111,7 +117,10 @@ impl Write for BpfWriter<&mut [u8]> {
             return Ok(0);
         }
 
-        let amt = cmp::min(self.inner.len().saturating_sub(self.pos as usize), buf.len());
+        let amt = cmp::min(
+            self.inner.len().saturating_sub(self.pos as usize),
+            buf.len(),
+        );
         sol_memcpy(&mut self.inner[(self.pos as usize)..], buf, amt);
         self.pos += amt as u64;
         Ok(amt)
@@ -125,7 +134,10 @@ impl Write for BpfWriter<&mut [u8]> {
         if self.write(buf)? == buf.len() {
             Ok(())
         } else {
-            Err(io::Error::new(io::ErrorKind::WriteZero, "failed to write whole buffer"))
+            Err(io::Error::new(
+                io::ErrorKind::WriteZero,
+                "failed to write whole buffer",
+            ))
         }
     }
 }

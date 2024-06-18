@@ -1,5 +1,5 @@
 {
-  "version": "0.0.25",
+  "version": "0.0.33",
   "name": "albus",
   "instructions": [
     {
@@ -142,8 +142,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Token Metadata program.",
-            ""
+            "Token Metadata program."
           ]
         },
         {
@@ -175,12 +174,21 @@
           "isSigner": false
         },
         {
-          "name": "tokenAccount",
+          "name": "credentialRequest",
           "isMut": false,
           "isSigner": false,
+          "isOptional": true,
           "docs": [
-            "Destination token account (required for pNFT).",
-            ""
+            "(Optional) Credential request."
+          ]
+        },
+        {
+          "name": "credentialRequestIssuer",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "(Optional) Credential request issuer."
           ]
         },
         {
@@ -189,10 +197,6 @@
           "isSigner": false,
           "docs": [
             "Mint account of the NFT.",
-            "The account will be initialized if necessary.",
-            "",
-            "Must be a signer if:",
-            "* the mint account does not exist.",
             ""
           ]
         },
@@ -201,24 +205,13 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Metadata account of the NFT.",
-            "This account must be uninitialized.",
-            ""
+            "Metadata account of the NFT."
           ]
         },
         {
           "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "metadataProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Token Metadata program.",
-            ""
-          ]
+          "isMut": true,
+          "isSigner": true
         },
         {
           "name": "sysvarInstructions",
@@ -230,12 +223,18 @@
           ]
         },
         {
-          "name": "systemProgram",
+          "name": "metadataProgram",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "System program."
+            "Token Metadata program.",
+            ""
           ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -335,6 +334,204 @@
           "docs": [
             "System program."
           ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "requestCredential",
+      "accounts": [
+        {
+          "name": "credentialRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "credentialSpec",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "credentialMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Mint account of the NFT.",
+            ""
+          ]
+        },
+        {
+          "name": "credentialMetadata",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "credentialToken",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "credentialOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "albusAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sysvarInstructions",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Instructions sysvar account.",
+            ""
+          ]
+        },
+        {
+          "name": "metadataProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Token Metadata program.",
+            ""
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "RequestCredentialData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateCredentialRequest",
+      "accounts": [
+        {
+          "name": "credentialRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdateCredentialRequestData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteCredentialRequest",
+      "accounts": [
+        {
+          "name": "credentialRequest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createCredentialSpec",
+      "accounts": [
+        {
+          "name": "credentialSpec",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateCredentialSpecData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deleteCredentialSpec",
+      "accounts": [
+        {
+          "name": "credentialSpec",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "issuer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -962,85 +1159,30 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "adminWithdraw",
+      "accounts": [
+        {
+          "name": "albusAuthority",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
-    {
-      "name": "Issuer",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "pubkey",
-            "docs": [
-              "Signer Public key"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "zkPubkey",
-            "docs": [
-              "Public key (babyjub curve)"
-            ],
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
-          },
-          {
-            "name": "authority",
-            "docs": [
-              "Authority account of the issuer"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "isDisabled",
-            "docs": [
-              "Issuer status"
-            ],
-            "type": "bool"
-          },
-          {
-            "name": "createdAt",
-            "docs": [
-              "Creation date"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "PDA bump."
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "code",
-            "docs": [
-              "Uniq code of the issuer"
-            ],
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "docs": [
-              "The name of the issuer"
-            ],
-            "type": "string"
-          },
-          {
-            "name": "description",
-            "docs": [
-              "Short description"
-            ],
-            "type": "string"
-          }
-        ]
-      }
-    },
     {
       "name": "Circuit",
       "type": {
@@ -1129,6 +1271,382 @@
       }
     },
     {
+      "name": "CredentialRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Credential request creator"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "credentialOwner",
+            "docs": [
+              "Credential owner"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "credentialSpec",
+            "docs": [
+              "The [CredentialSpec] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "credentialMint",
+            "docs": [
+              "Credential mint address"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "issuer",
+            "docs": [
+              "The [Issuer] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Status of the request"
+            ],
+            "type": {
+              "defined": "CredentialRequestStatus"
+            }
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "Presentation definition"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "message",
+            "docs": [
+              "Rejection message"
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CredentialSpec",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "docs": [
+              "The [Issuer] associated with this spec"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "code",
+            "docs": [
+              "Unique code identifying the spec"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the credential spec"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "credentialRequestCount",
+            "docs": [
+              "Total number of credential requests associated with this spec"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "uri",
+            "docs": [
+              "Presentation definition",
+              "https://identity.foundation/presentation-exchange/#presentation-definition"
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InvestigationRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Investigation service authority public key"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "encryptionKey",
+            "docs": [
+              "The key that is used for secret sharing encryption"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "proofRequest",
+            "docs": [
+              "The [ProofRequest] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "proofRequestOwner",
+            "docs": [
+              "The public key of the user who owns the [ProofRequest]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "serviceProvider",
+            "docs": [
+              "The [ServiceProvider] associated with [ProofRequest]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "requiredShareCount",
+            "docs": [
+              "Required number of shares used to reconstruct the secret"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "revealedShareCount",
+            "docs": [
+              "Revealed number of shares used to reconstruct the secret"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Investigation processing status"
+            ],
+            "type": {
+              "defined": "InvestigationStatus"
+            }
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "trustees",
+            "docs": [
+              "[Trustee] accounts that were used for secret sharing"
+            ],
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InvestigationRequestShare",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "investigationRequest",
+            "docs": [
+              "The address of the [InvestigationRequest]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "proofRequestOwner",
+            "docs": [
+              "The public key of the user who owns the [ProofRequest]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "trustee",
+            "docs": [
+              "The address of the [Trustee]"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "index",
+            "docs": [
+              "Share position"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "revealedAt",
+            "docs": [
+              "Revelation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Revelation status"
+            ],
+            "type": {
+              "defined": "RevelationStatus"
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "share",
+            "docs": [
+              "Encrypted share"
+            ],
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Issuer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pubkey",
+            "docs": [
+              "Signing public key"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "zkPubkey",
+            "docs": [
+              "Signing public key in zk format (BJJ Point)"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The authority of the issuer that manages the issuer"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "isDisabled",
+            "docs": [
+              "Issuer status"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Creation date"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "code",
+            "docs": [
+              "Uniq code of the issuer"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the issuer"
+            ],
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "docs": [
+              "Short description"
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "Policy",
       "type": {
         "kind": "struct",
@@ -1211,6 +1729,132 @@
             "type": {
               "vec": {
                 "defined": "PolicyRule"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProofRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "serviceProvider",
+            "docs": [
+              "The [ServiceProvider] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "policy",
+            "docs": [
+              "The [Policy] associated with this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "circuit",
+            "docs": [
+              "The [Circuit] used for proof generation"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "issuer",
+            "docs": [
+              "The [Issuer] used for proof generation"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "docs": [
+              "Proof request creator"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "identifier",
+            "docs": [
+              "Auto-increment service specific identifier"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "Timestamp for when the request was created"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "expiredAt",
+            "docs": [
+              "Timestamp for when the request expires"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "verifiedAt",
+            "docs": [
+              "Timestamp for when the `proof` was verified"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "provedAt",
+            "docs": [
+              "Timestamp for when the user was added the `proof`"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "retentionEndDate",
+            "docs": [
+              "Timestamp indicating when the data will no longer be stored"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Status of the request"
+            ],
+            "type": {
+              "defined": "ProofRequestStatus"
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "proof",
+            "docs": [
+              "Proof payload"
+            ],
+            "type": {
+              "option": {
+                "defined": "ProofData"
+              }
+            }
+          },
+          {
+            "name": "publicInputs",
+            "docs": [
+              "Public inputs that are used to verify the `proof`"
+            ],
+            "type": {
+              "vec": {
+                "array": [
+                  "u8",
+                  32
+                ]
               }
             }
           }
@@ -1382,294 +2026,6 @@
           }
         ]
       }
-    },
-    {
-      "name": "InvestigationRequest",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "docs": [
-              "Investigation service authority public key"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "encryptionKey",
-            "docs": [
-              "The key that is used for secret sharing encryption"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "proofRequest",
-            "docs": [
-              "The [ProofRequest] associated with this request"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "proofRequestOwner",
-            "docs": [
-              "The public key of the user who owns the [ProofRequest]"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "serviceProvider",
-            "docs": [
-              "The [ServiceProvider] associated with [ProofRequest]"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "requiredShareCount",
-            "docs": [
-              "Required number of shares used to reconstruct the secret"
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "revealedShareCount",
-            "docs": [
-              "Revealed number of shares used to reconstruct the secret"
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "status",
-            "docs": [
-              "Investigation processing status"
-            ],
-            "type": {
-              "defined": "InvestigationStatus"
-            }
-          },
-          {
-            "name": "createdAt",
-            "docs": [
-              "Creation date"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "PDA bump"
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "trustees",
-            "docs": [
-              "[Trustee] accounts that were used for secret sharing"
-            ],
-            "type": {
-              "vec": "publicKey"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "InvestigationRequestShare",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "investigationRequest",
-            "docs": [
-              "The address of the [InvestigationRequest]"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "proofRequestOwner",
-            "docs": [
-              "The public key of the user who owns the [ProofRequest]"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "trustee",
-            "docs": [
-              "The address of the [Trustee]"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "index",
-            "docs": [
-              "Share position"
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "createdAt",
-            "docs": [
-              "Creation date"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "revealedAt",
-            "docs": [
-              "Revelation date"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "status",
-            "docs": [
-              "Revelation status"
-            ],
-            "type": {
-              "defined": "RevelationStatus"
-            }
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "PDA bump"
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "share",
-            "docs": [
-              "Encrypted share"
-            ],
-            "type": "bytes"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ProofRequest",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "serviceProvider",
-            "docs": [
-              "The [ServiceProvider] associated with this request"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "policy",
-            "docs": [
-              "The [Policy] associated with this request"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "circuit",
-            "docs": [
-              "The [Circuit] used for proof generation"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "issuer",
-            "docs": [
-              "The [Issuer] used for proof generation"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "owner",
-            "docs": [
-              "Proof request creator"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "identifier",
-            "docs": [
-              "Auto-increment service specific identifier"
-            ],
-            "type": "u64"
-          },
-          {
-            "name": "createdAt",
-            "docs": [
-              "Timestamp for when the request was created"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "expiredAt",
-            "docs": [
-              "Timestamp for when the request will expire"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "verifiedAt",
-            "docs": [
-              "Timestamp for when the `proof` was verified"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "provedAt",
-            "docs": [
-              "Timestamp for when the user was added the `proof`"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "retentionEndDate",
-            "docs": [
-              "Timestamp indicating when the data will no longer be stored"
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "status",
-            "docs": [
-              "Status of the request"
-            ],
-            "type": {
-              "defined": "ProofRequestStatus"
-            }
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "PDA bump"
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "proof",
-            "docs": [
-              "Proof payload"
-            ],
-            "type": {
-              "option": {
-                "defined": "ProofData"
-              }
-            }
-          },
-          {
-            "name": "publicInputs",
-            "docs": [
-              "Public inputs that are used to verify the `proof`"
-            ],
-            "type": {
-              "vec": {
-                "array": [
-                  "u8",
-                  32
-                ]
-              }
-            }
-          }
-        ]
-      }
     }
   ],
   "types": [
@@ -1789,6 +2145,41 @@
       }
     },
     {
+      "name": "CreateCredentialSpecData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequestCredentialData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "uri",
+            "docs": [
+              "Presentation uri"
+            ],
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateCredentialData",
       "type": {
         "kind": "struct",
@@ -1799,6 +2190,26 @@
           },
           {
             "name": "name",
+            "type": {
+              "option": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateCredentialRequestData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "status",
+            "type": {
+              "defined": "CredentialRequestStatus"
+            }
+          },
+          {
+            "name": "message",
             "type": "string"
           }
         ]
@@ -1854,6 +2265,10 @@
           {
             "name": "description",
             "type": "string"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
           },
           {
             "name": "pubkey",
@@ -2194,6 +2609,90 @@
       }
     },
     {
+      "name": "ContactInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "value",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CredentialRequestStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "InProgress"
+          },
+          {
+            "name": "Approved"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InvestigationStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "InProgress"
+          },
+          {
+            "name": "UnderReview"
+          },
+          {
+            "name": "Resolved"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PolicyRule",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "docs": [
+              "Scalar Field"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "label",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "ProofData",
       "type": {
         "kind": "struct",
@@ -2224,6 +2723,43 @@
                 64
               ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProofRequestStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Proved"
+          },
+          {
+            "name": "Verified"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RevelationStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "RevealedByUser"
+          },
+          {
+            "name": "RevealedByTrustee"
           }
         ]
       }
@@ -2282,110 +2818,79 @@
           }
         ]
       }
-    },
-    {
-      "name": "PolicyRule",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "key",
-            "type": "string"
-          },
-          {
-            "name": "value",
-            "docs": [
-              "Scalar Field"
-            ],
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "label",
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ContactInfo",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "kind",
-            "type": "u8"
-          },
-          {
-            "name": "value",
-            "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "InvestigationStatus",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Pending"
-          },
-          {
-            "name": "InProgress"
-          },
-          {
-            "name": "UnderReview"
-          },
-          {
-            "name": "Resolved"
-          }
-        ]
-      }
-    },
-    {
-      "name": "RevelationStatus",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Pending"
-          },
-          {
-            "name": "RevealedByUser"
-          },
-          {
-            "name": "RevealedByTrustee"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ProofRequestStatus",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Pending"
-          },
-          {
-            "name": "Proved"
-          },
-          {
-            "name": "Verified"
-          },
-          {
-            "name": "Rejected"
-          }
-        ]
-      }
     }
   ],
   "events": [
+    {
+      "name": "CreateCredentialRequestEvent",
+      "fields": [
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "credentialOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "credentialSpec",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "credentialMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "issuer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "uri",
+          "type": "string",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "CreateInvestigationRequestEvent",
+      "fields": [
+        {
+          "name": "investigationRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequestOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
     {
       "name": "CreateProofRequestEvent",
       "fields": [
@@ -2401,6 +2906,36 @@
         },
         {
           "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "DeleteInvestigationRequestEvent",
+      "fields": [
+        {
+          "name": "investigationRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequest",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "proofRequestOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "authority",
           "type": "publicKey",
           "index": false
         },
@@ -2433,36 +2968,6 @@
     },
     {
       "name": "ProveEvent",
-      "fields": [
-        {
-          "name": "proofRequest",
-          "type": "publicKey",
-          "index": true
-        },
-        {
-          "name": "serviceProvider",
-          "type": "publicKey",
-          "index": true
-        },
-        {
-          "name": "circuit",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "owner",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "VerifyEvent",
       "fields": [
         {
           "name": "proofRequest",
@@ -2569,55 +3074,25 @@
       ]
     },
     {
-      "name": "CreateInvestigationRequestEvent",
+      "name": "VerifyEvent",
       "fields": [
-        {
-          "name": "investigationRequest",
-          "type": "publicKey",
-          "index": false
-        },
         {
           "name": "proofRequest",
           "type": "publicKey",
-          "index": false
+          "index": true
         },
         {
-          "name": "proofRequestOwner",
+          "name": "serviceProvider",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "circuit",
           "type": "publicKey",
           "index": false
         },
         {
-          "name": "authority",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "DeleteInvestigationRequestEvent",
-      "fields": [
-        {
-          "name": "investigationRequest",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "proofRequest",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "proofRequestOwner",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "authority",
+          "name": "owner",
           "type": "publicKey",
           "index": false
         },
@@ -2657,8 +3132,8 @@
     },
     {
       "code": 6005,
-      "name": "IncorrectOwner",
-      "msg": "Incorrect owner"
+      "name": "InvalidOwner",
+      "msg": "Invalid owner"
     },
     {
       "code": 6006,

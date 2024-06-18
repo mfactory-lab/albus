@@ -42,9 +42,15 @@ import { ProofRequestManager } from './proofRequestManager'
 import { ServiceManager } from './serviceManager'
 import { TrusteeManager } from './trusteeManager'
 import type { Wallet, WithRequired } from './types'
+import type { Logger, PriorityFeeLoader } from './utils'
 import { NodeWallet } from './utils'
-import idl from './idl/albus.json'
 import { DEV_PROGRAM_ID } from './constants'
+import { CredentialSpecManager } from './credentialSpecManager'
+import { CredentialRequestManager } from './credentialRequestManager'
+import type { IrysOptions } from './storage/irys'
+import { IrysStorageDriver } from './storage/irys'
+import idl from './idl/albus.json'
+import type { StorageDriver } from './storage'
 
 export enum AlbusClientEnv { DEV = 'dev', STAGE = 'stage', PROD = 'prod' }
 
@@ -54,6 +60,8 @@ export class AlbusClient {
   readonly policy: PolicyManager
   readonly service: ServiceManager
   readonly credential: CredentialManager
+  readonly credentialSpec: CredentialSpecManager
+  readonly credentialRequest: CredentialRequestManager
   readonly trustee: TrusteeManager
   readonly issuer: IssuerManager
   readonly investigation: InvestigationManager
@@ -76,6 +84,8 @@ export class AlbusClient {
     this.policy = new PolicyManager(this)
     this.service = new ServiceManager(this)
     this.credential = new CredentialManager(this)
+    this.credentialSpec = new CredentialSpecManager(this)
+    this.credentialRequest = new CredentialRequestManager(this)
     this.trustee = new TrusteeManager(this)
     this.proofRequest = new ProofRequestManager(this)
     this.investigation = new InvestigationManager(this)
@@ -84,21 +94,22 @@ export class AlbusClient {
   /**
    * Initialize a new `AlbusClient` from the provided {@link wallet}.
    */
-  static fromWallet(connection: Connection, wallet?: Wallet, opts?: ConfirmOptions) {
+  static fromWallet(connection: Connection, wallet?: Wallet, opts?: ClientOptions) {
     return new this(
       new AnchorProvider(
         connection,
         // @ts-expect-error anonymous
         wallet ?? { publicKey: PublicKey.default },
-        { ...AnchorProvider.defaultOptions(), ...opts },
+        { ...AnchorProvider.defaultOptions(), ...opts?.confirmOptions },
       ),
+      opts,
     )
   }
 
   /**
    * Initialize a new `AlbusClient` from the provided {@link keypair}.
    */
-  static fromKeypair(connection: Connection, keypair: Keypair, opts?: ConfirmOptions) {
+  static fromKeypair(connection: Connection, keypair: Keypair, opts?: ClientOptions) {
     return AlbusClient.fromWallet(connection, new NodeWallet(keypair), opts)
   }
 
@@ -113,13 +124,24 @@ export class AlbusClient {
    * Retrieves an instance of the PdaManager associated with the current instance's program ID.
    */
   get pda() {
-    return new PdaManager(this.programId)
+    return AlbusClient.pda(this.programId)
+  }
+
+  /**
+   * Returns the storage driver based on the selected storage driver option.
+   */
+  get storage(): StorageDriver {
+    switch (this.options.storage?.driver) {
+      case 'irys':
+      default:
+        return new IrysStorageDriver(this.provider, this.options.storage?.options)
+    }
   }
 
   /**
    * Get the current program ID.
    */
-  get programId() {
+  get programId(): PublicKey {
     return this.options.programId ?? PROGRAM_ID
   }
 
@@ -150,15 +172,29 @@ export class AlbusClient {
 
   /**
    * Local environment.
+   * Uses the dev program ID.
    */
   local() {
     return this.configure('programId', DEV_PROGRAM_ID)
   }
 }
 
-export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> & { opts?: ConfirmOptions }
+export type ClientProvider = WithRequired<Provider, 'publicKey' | 'sendAndConfirm' | 'sendAll'> &
+  { wallet: Wallet, opts?: ConfirmOptions }
 
 export type ClientOptions = {
+  /// Custom Program ID
   programId?: PublicKey
+  /// Enable debugging
   debug?: boolean
-}
+  /// Logger
+  logger?: Logger
+  /// Storage driver
+  storage?: { driver: string, options?: IrysOptions | Record<string, any> }
+  /// Priority fee to be used with the transaction builder, in micro-lamports
+  priorityFee?: number
+  /// Priority fee callback to be used with the transaction builder
+  priorityFeeLoader?: PriorityFeeLoader
+  /// Confirm options
+  confirmOptions?: ConfirmOptions
+} & Record<string, any>

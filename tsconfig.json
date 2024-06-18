@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "emitDeclarationOnly": false,
-    "noEmit": true
-  },
-  "include": ["packages/**/types"],
-  "exclude": ["node_modules", "lib"]
-}

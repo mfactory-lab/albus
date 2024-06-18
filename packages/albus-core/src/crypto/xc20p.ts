@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import type { PublicKey } from '@solana/web3.js'
 import { hash } from '@stablelib/sha256'
 import type { KeyPair } from '@stablelib/x25519'
 import { randomBytes } from '@stablelib/random'
@@ -35,7 +34,6 @@ import { convertPublicKeyToX25519, convertSecretKeyToX25519 } from '@stablelib/e
 import { NONCE_LENGTH, TAG_LENGTH, XChaCha20Poly1305 } from '@stablelib/xchacha20poly1305'
 import * as u8a from 'uint8arrays'
 import { concat } from 'uint8arrays'
-import { Keypair } from '@solana/web3.js'
 import {
   base58ToBytes,
   base64ToBytes,
@@ -48,10 +46,6 @@ export const XC20P_IV_LENGTH = NONCE_LENGTH
 export const XC20P_TAG_LENGTH = TAG_LENGTH
 export const XC20P_EPK_LENGTH = 32
 
-// A 64-byte private key on the Ed25519 curve.
-// In string form it is base58-encoded
-type PrivateKey = number[] | string | Uint8Array
-
 const ECDH_ES_XC20PKW_ALG = 'ECDH-ES+XC20PKW'
 const ECDH_ES_XC20PKW_KEYLEN = 256
 
@@ -62,6 +56,11 @@ type Envelope = {
   aad?: Uint8Array
 }
 
+// A 64-byte private key on the Ed25519 curve.
+// In string form it is base58-encoded
+type PublicKey = Uint8Array
+type PrivateKey = Uint8Array | number[] | string
+
 type Encrypter = (cleartext: Uint8Array, aad?: Uint8Array) => Envelope
 type Decrypter = (ciphertext: Uint8Array, tag: Uint8Array, iv: Uint8Array, aad?: Uint8Array) => Uint8Array | null
 
@@ -71,7 +70,7 @@ export class XC20P {
    */
   static async encryptBytes(bytes: Uint8Array, pubKey: PublicKey, esk?: PrivateKey): Promise<Uint8Array> {
     const ekp = esk ? convertSecretKeyToX25519Keypair(esk) : generateKeyPair()
-    const sharedSecret = sharedKey(ekp.secretKey, convertPublicKeyToX25519(pubKey.toBytes()))
+    const sharedSecret = sharedKey(ekp.secretKey, convertPublicKeyToX25519(pubKey))
     const kek = concatKDF(
       sharedSecret,
       ECDH_ES_XC20PKW_KEYLEN,
@@ -101,7 +100,7 @@ export class XC20P {
     const iv = bytes.subarray(0, XC20P_IV_LENGTH)
     const tag = bytes.subarray(XC20P_IV_LENGTH, XC20P_IV_LENGTH + XC20P_TAG_LENGTH)
     const ciphertext = bytes.subarray(XC20P_IV_LENGTH + XC20P_TAG_LENGTH, -XC20P_EPK_LENGTH)
-    const epkPub = epk ?? bytes.subarray(-XC20P_EPK_LENGTH)
+    const epkPub = epk ? convertPublicKeyToX25519(epk) : bytes.subarray(-XC20P_EPK_LENGTH)
 
     // normalize the key into an uint array
     const ed25519Key = makeKeypair(privateKey).secretKey
@@ -139,16 +138,20 @@ export class XC20P {
  * Create a Solana keypair object from a x25519 private key
  * @param privateKey
  */
-export function makeKeypair(privateKey: PrivateKey): Keypair {
+export function makeKeypair(privateKey: PrivateKey): KeyPair {
+  let secretKey: Uint8Array
   if (Array.isArray(privateKey)) {
-    return Keypair.fromSecretKey(Uint8Array.from(privateKey))
+    secretKey = Uint8Array.from(privateKey)
+  } else if (typeof privateKey === 'string') {
+    secretKey = base58ToBytes(privateKey)
+  } else {
+    secretKey = privateKey
   }
-
-  if (typeof privateKey === 'string') {
-    return Keypair.fromSecretKey(base58ToBytes(privateKey))
+  if (secretKey.byteLength !== 64) {
+    throw new Error('bad secret key size')
   }
-
-  return Keypair.fromSecretKey(privateKey)
+  const publicKey = secretKey.slice(32, 64)
+  return { secretKey, publicKey }
 }
 
 function xc20pEncrypter(key: Uint8Array): Encrypter {

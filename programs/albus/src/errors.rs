@@ -40,8 +40,8 @@ pub enum AlbusError {
     Expired,
     #[msg("Invalid data")]
     InvalidData,
-    #[msg("Incorrect owner")]
-    IncorrectOwner,
+    #[msg("Invalid owner")]
+    InvalidOwner,
     #[msg("Invalid metadata")]
     InvalidMetadata,
     #[msg("Proof verification failed")]

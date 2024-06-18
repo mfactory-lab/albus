@@ -28,41 +28,43 @@
 
 import { base58ToBytes, bytesToBase58 } from './utils'
 
-/**
- * https://github.com/multiformats/multibase/blob/master/multibase.csv
- * https://github.com/multiformats/multicodec/blob/master/table.csv
- */
+// https://github.com/multiformats/multibase/blob/master/multibase.csv
+const MULTIBASE_HEADER = {
+  base58btc: 'z',
+}
+
+// https://github.com/multiformats/multicodec/blob/master/table.csv
+const MULTICODEC_HEADER = {
+  ed25519Priv: 0x8026,
+  ed25519Pub: 0xED01,
+  x25519Pub: 0xEC01,
+}
+
 export class MultiBase {
-  static encode(codec: number, data: Uint8Array) {
-    const bytes = new Uint8Array(data.length + 2)
-    bytes[0] = (codec >> 8) & 0xFF
-    bytes[1] = codec & 0xFF
-    bytes.set(data, 2)
-    return `z${bytesToBase58(bytes)}`
-  }
+  static codec = MULTICODEC_HEADER
 
-  static decode(data: string) {
-    if (data[0] !== 'z') {
-      throw new Error('invalid format, only `base58` is supported')
+  static encode(data: Uint8Array, codec = 0) {
+    if (codec > 0) {
+      const bytes = new Uint8Array(data.length + 2)
+      bytes[0] = (codec >> 8) & 0xFF
+      bytes[1] = codec & 0xFF
+      bytes.set(data, 2)
+      return `${MULTIBASE_HEADER.base58btc}${bytesToBase58(bytes)}`
     }
-    return base58ToBytes(data.slice(1))
+    return `${MULTIBASE_HEADER.base58btc}${bytesToBase58(data)}`
   }
 
-  /**
-   * Encode public key (ed25519)
-   */
-  static encodePubkey(pubkey: Uint8Array) {
-    return MultiBase.encode(0xED01, pubkey)
-  }
-
-  /**
-   * Decode public key (ed25519)
-   */
-  static decodePubkey(pubkey: string) {
-    const bytes = MultiBase.decode(pubkey)
-    if (bytes[0] !== 0xED || bytes[1] !== 0x01) {
-      throw new Error('invalid codec, only `ed25519` is supported')
+  static decode(data: string, codec?: number) {
+    if (data[0] !== MULTIBASE_HEADER.base58btc) {
+      throw new Error('Only base58btc multibase encoding is supported.')
     }
-    return bytes.slice(2)
+    const bytes = base58ToBytes(data.slice(1))
+    if (codec) {
+      if (bytes[0] !== ((codec >> 8) & 0xFF) || bytes[1] !== (codec & 0xFF)) {
+        throw new Error('decoding failed, codec mismatch')
+      }
+      return bytes.slice(2)
+    }
+    return bytes
   }
 }

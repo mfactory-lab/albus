@@ -1,8 +1,299 @@
 # Changelog
 
+## 0.3.0-next.54 (2024-06-10)
+
+## 0.3.0-next.53 (2024-06-04)
+
+## 0.3.0-next.52 (2024-06-04)
+
+## 0.3.0-next.51 (2024-06-04)
+
+## 0.3.0-next.50 (2024-06-03)
+
+## 0.3.0-next.49 (2024-06-02)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** verbose credential message ([96d4c77](https://github.com/mfactory-lab/albus/commit/96d4c779b59669c77ba155bb044d8fc2fb2a7456))
+
+## 0.3.0-next.48 (2024-06-01)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed priority fee ([a9b0742](https://github.com/mfactory-lab/albus/commit/a9b074207699b658231eb255cfd23538104e2c36))
+
+## 0.3.0-next.47 (2024-05-21)
+
+## 0.3.0-next.46 (2024-05-20)
+
+## 0.3.0-next.45 (2024-05-18)
+
+## 0.3.0-next.44 (2024-05-17)
+
+## [0.3.0-next.43](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.42...@albus-finance/sdk-v0.3.0-next.43) (2024-05-16)
+
+## [0.3.0-next.42](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.41...@albus-finance/sdk-v0.3.0-next.42) (2024-05-16)
+
+## [0.3.0-next.41](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.40...@albus-finance/sdk-v0.3.0-next.41) (2024-05-16)
+
+## [0.3.0-next.40](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.39...@albus-finance/sdk-v0.3.0-next.40) (2024-05-15)
+
+## [0.3.0-next.39](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.38...@albus-finance/sdk-v0.3.0-next.39) (2024-05-15)
+
+
+### 🐞 Bug Fixes
+
+* request credential and reset nft ([701b0ee](https://github.com/mfactory-lab/albus/commit/701b0ee9eb7a5121682f463080b00e63b15908b0))
+
+## [0.3.0-next.38](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.37...@albus-finance/sdk-v0.3.0-next.38) (2024-05-14)
+
+
+### 🐞 Bug Fixes
+
+* add credential request owner and authority ([3ed1707](https://github.com/mfactory-lab/albus/commit/3ed170793f9be4e64a17f3f8de3a76906c843bbc))
+
+## [0.3.0-next.37](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.36...@albus-finance/sdk-v0.3.0-next.37) (2024-05-14)
+
+## [0.3.0-next.36](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.35...@albus-finance/sdk-v0.3.0-next.36) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* improved `tsconfig` ([2238973](https://github.com/mfactory-lab/albus/commit/2238973aaf3548577f35d9a94c0fe4d6cf2b487e))
+
+## [0.3.0-next.35](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.34...@albus-finance/sdk-v0.3.0-next.35) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* fixed credentialOwner error ([8da0497](https://github.com/mfactory-lab/albus/commit/8da0497c5c0632cf7ab1a4478049a04f89d901a9))
+
+## [0.3.0-next.34](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.33...@albus-finance/sdk-v0.3.0-next.34) (2024-05-13)
+
+## [0.3.0-next.33](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.32...@albus-finance/sdk-v0.3.0-next.33) (2024-05-13)
+
+
+### 🐞 Bug Fixes
+
+* credential request payer ([285b7cc](https://github.com/mfactory-lab/albus/commit/285b7cc8f1f6c4aa9496c303208c3b2bb3ab8e70))
+* **sdk:** add `ref=cr` for `rejectCredentialRequest` ([41018ed](https://github.com/mfactory-lab/albus/commit/41018ede193c9ae8deebfbbc430451fb0ebf8d28))
+
+## [0.3.0-next.32](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.31...@albus-finance/sdk-v0.3.0-next.32) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix issuer client, removed useless issuer ([6bcf194](https://github.com/mfactory-lab/albus/commit/6bcf1949fcc52f43c545fdfd551bb41f08dca6a5))
+
+## [0.3.0-next.31](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.30...@albus-finance/sdk-v0.3.0-next.31) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **ci:** fixed release action ([df776ab](https://github.com/mfactory-lab/albus/commit/df776abb3686a82d67c7998715a4a429f190e431))
+* replase `prerelease` to `prepublishOnly` ([d5b360c](https://github.com/mfactory-lab/albus/commit/d5b360c6a322c89d619d4041bf2f943e6940a6fd))
+
+## [0.3.0-next.30](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.29...@albus-finance/sdk-v0.3.0-next.30) (2024-05-10)
+
+## [0.3.0-next.29](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.28...@albus-finance/sdk-v0.3.0-next.29) (2024-05-10)
+
+## [0.3.0-next.28](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.27...@albus-finance/sdk-v0.3.0-next.28) (2024-05-10)
+
+
+### 🐞 Bug Fixes
+
+* **core:** tsup integration, global improvements ([660567b](https://github.com/mfactory-lab/albus/commit/660567b44e6fb7f0d3ed6ef938e782b73d346262))
+* **sdk:** tsup integration, new generated files, global improvements ([6cfa59b](https://github.com/mfactory-lab/albus/commit/6cfa59b18379cc32c7a45d901fa140fed8b63c80))
+
+## [0.3.0-next.27](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.26...@albus-finance/sdk-v0.3.0-next.27) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** remove useless `encryptPresentation` ([00d78d0](https://github.com/mfactory-lab/albus/commit/00d78d02c7c1d20e9f4eaea9282adf7b835cdfbf))
+
+## [0.3.0-next.26](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.25...@albus-finance/sdk-v0.3.0-next.26) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* export types ([ed3a421](https://github.com/mfactory-lab/albus/commit/ed3a4215a3a65273554652ca1901b0c85005523c))
+
+## [0.3.0-next.25](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.24...@albus-finance/sdk-v0.3.0-next.25) (2024-04-18)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `encryptPresentation` to issuer client ([f177fb6](https://github.com/mfactory-lab/albus/commit/f177fb627ee5e3657de82cbe66a6cfe4dc84d085))
+* **sdk:** fixed `StorageFile` ([0a48578](https://github.com/mfactory-lab/albus/commit/0a48578478ed75002448a801dcb414a3b9ce73a1))
+* **sdk:** fixed irys adapter ([7c90808](https://github.com/mfactory-lab/albus/commit/7c908087ae7339c663371fc5f753b744efa64a2c))
+* **sdk:** new idl and client ([e7cfde3](https://github.com/mfactory-lab/albus/commit/e7cfde367be7f1deeb20cbbd94d4a3538549bdb0))
+
+## [0.3.0-next.24](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.23...@albus-finance/sdk-v0.3.0-next.24) (2024-04-16)
+
+## [0.3.0-next.23](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.22...@albus-finance/sdk-v0.3.0-next.23) (2024-04-16)
+
+
+### 🐞 Bug Fixes
+
+* upgrade anchor to `0.30.0` ([2bdb9d2](https://github.com/mfactory-lab/albus/commit/2bdb9d24720373c8d87fbb5c02dac59cb04773e1))
+
+
+### ♻️ Refactors
+
+* add `crates` directory ([116b56b](https://github.com/mfactory-lab/albus/commit/116b56b4e23e425414ce06dc03bf4e864d10d51e))
+
+## [0.3.0-next.22](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.20...@albus-finance/sdk-v0.3.0-next.22) (2024-04-16)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix proof builder credential root ([0521e27](https://github.com/mfactory-lab/albus/commit/0521e27248518883a7c1b31ae467611c539ada48))
+* **sdk:** fixed `txBuilder`, fixed `ProofInputBuilder` ([b8cae0f](https://github.com/mfactory-lab/albus/commit/b8cae0fa8e495ab1cd09205cbbee9f2065b9b4ee))
+* **sdk:** fixed version ([11f9226](https://github.com/mfactory-lab/albus/commit/11f92267104f4073b606a5193eaf79b0a873c8d9))
+* **sdk:** new `ClaimsTree` ([fbfafa4](https://github.com/mfactory-lab/albus/commit/fbfafa44d80a075a80672d3a33ec12545a1cb8ea))
+* **sdk:** refactored credential manager ([a20abc1](https://github.com/mfactory-lab/albus/commit/a20abc190d64ea02074b164bcf4e8fd5b4eb67ea))
+
+## [0.3.0-next.20](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.19...@albus-finance/sdk-v0.3.0-next.20) (2024-04-10)
+
+## [0.3.0-next.19](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.17...@albus-finance/sdk-v0.3.0-next.19) (2024-04-10)
+
+
+### 🌟 Features
+
+* **sdk:** add `CredentialRequestManager.createPresentation` ([68fbb44](https://github.com/mfactory-lab/albus/commit/68fbb4410f8466be944c257860113610df53b3fc))
+* **sdk:** add new generated files ([1f4c973](https://github.com/mfactory-lab/albus/commit/1f4c973376471f5f2444ec51237a117c37d694a8))
+* **sdk:** add pex helper, improved issuer client, ([b6847aa](https://github.com/mfactory-lab/albus/commit/b6847aab9a6cbaa300a80ed68421ea5014b27798))
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix version ([ca9aef0](https://github.com/mfactory-lab/albus/commit/ca9aef01bae2071cfb4fe1868c868a207f1bd578))
+* **sdk:** global refactory ([b1ec097](https://github.com/mfactory-lab/albus/commit/b1ec097ae916931833d7332c506a37383134d78c))
+
+
+### ♻️ Refactors
+
+* **sdk:** global improvements ([23c303f](https://github.com/mfactory-lab/albus/commit/23c303f8526a9b2204d73c9b2ce4abc246ff812a))
+
+## [0.3.0-next.17](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.16...@albus-finance/sdk-v0.3.0-next.17) (2024-03-26)
+
+## [0.3.0-next.16](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.15...@albus-finance/sdk-v0.3.0-next.16) (2024-03-26)
+
+## [0.3.0-next.15](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.14...@albus-finance/sdk-v0.3.0-next.15) (2024-03-26)
+
+## [0.3.0-next.14](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.13...@albus-finance/sdk-v0.3.0-next.14) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* add issuer pubkey field ([91201c9](https://github.com/mfactory-lab/albus/commit/91201c977ee72f83873431db4854781e452b219e))
+
+## [0.3.0-next.13](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.12...@albus-finance/sdk-v0.3.0-next.13) (2024-03-26)
+
+
+### ♻️ Refactors
+
+* **sdk:** improved priority fee ([c58b493](https://github.com/mfactory-lab/albus/commit/c58b493057b7e344156423359939c2efba710a39))
+
+## [0.3.0-next.12](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.11...@albus-finance/sdk-v0.3.0-next.12) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed `irys/sdk` import ([0b30888](https://github.com/mfactory-lab/albus/commit/0b30888f44999eb051567948d6435530abd614ea))
+
+## [0.3.0-next.11](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.10...@albus-finance/sdk-v0.3.0-next.11) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `@irys/sdk` dep ([99423a5](https://github.com/mfactory-lab/albus/commit/99423a557999ea26f95fad3b3686a7421409455b))
+
+## [0.3.0-next.10](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.9...@albus-finance/sdk-v0.3.0-next.10) (2024-03-26)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** remove dynamic import from irys storage driver ([5c2331b](https://github.com/mfactory-lab/albus/commit/5c2331b44a56dc2c65bce1ca2d188ec6f779ba8f))
+
+## [0.3.0-next.9](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.8...@albus-finance/sdk-v0.3.0-next.9) (2024-03-26)
+
+
+### 🌟 Features
+
+* **sdk:** add priority fee loader ([ec02efd](https://github.com/mfactory-lab/albus/commit/ec02efd357786224f5479e4c2a40e933ce2220d2))
+
+## [0.3.0-next.8](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.7...@albus-finance/sdk-v0.3.0-next.8) (2024-03-25)
+
+
+### 🌟 Features
+
+* add irys storage driver ([1b0d86b](https://github.com/mfactory-lab/albus/commit/1b0d86bf0ce0f28baae5d1ad02323c4a9a3e80b7))
+* **sdk:** new sdk, credential request manager, credential spec manager, add issuer client ([d6307f7](https://github.com/mfactory-lab/albus/commit/d6307f707b4535775824f2919d730f1497967616))
+
+
+### ♻️ Refactors
+
+* **sdk:** add global priority fee, separate instructions ([cd54ad4](https://github.com/mfactory-lab/albus/commit/cd54ad491880f3fc1e2ea2d0ec3e3df01eb28c5c))
+
+## [0.3.0-next.7](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.6...@albus-finance/sdk-v0.3.0-next.7) (2024-02-05)
+
+## [0.3.0-next.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.4...@albus-finance/sdk-v0.3.0-next.6) (2024-02-05)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix lodash esm error ([e58be45](https://github.com/mfactory-lab/albus/commit/e58be45fb4af8eebb0bac4d50fd70226ea878463))
+* **sdk:** fix version ([b2cb012](https://github.com/mfactory-lab/albus/commit/b2cb0124b94d340f5793ade8fefd325c8ec5eed5))
+* **sdk:** global improvements ([922462b](https://github.com/mfactory-lab/albus/commit/922462b7e0926b10c6c861e57d85a18493913bc8))
+
+## [v0.2.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.4...@albus-finance/sdk-v0.3.0-next.6) (2023-12-19)
+
+## [0.3.0-next.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.3...@albus-finance/sdk-v0.3.0-next.4) (2024-01-09)
+
+
+### 🌟 Features
+
+* **sdk:** support create and prove request with `txBuilder` ([3f1051b](https://github.com/mfactory-lab/albus/commit/3f1051bbe7b8dbc5244c73a0018ff1bdc5677b80))
+
+## [0.3.0-next.3](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.2...@albus-finance/sdk-v0.3.0-next.3) (2024-01-05)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `mint` for credential listener callback ([852911e](https://github.com/mfactory-lab/albus/commit/852911ed86975283852f0867ffd2f0a6c5d08d1c))
+
+## [0.3.0-next.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.0-next.1...@albus-finance/sdk-v0.3.0-next.2) (2024-01-05)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fixed credential `addListener` ([e3d0651](https://github.com/mfactory-lab/albus/commit/e3d065165eab8fad5b9c2f53b97c19c64cfaa27e))
+
+## [0.3.0-next.1](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.3.0-next.1) (2024-01-05)
+
+
+### 🌟 Features
+
+* **sdk:** add credential listener ([4ee83f1](https://github.com/mfactory-lab/albus/commit/4ee83f1865fbe91582ff86b73dc1d3ab8021f247))
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** add `deleteByAddr` for `policyManager` ([309e0d2](https://github.com/mfactory-lab/albus/commit/309e0d206a9a9139edd077cb234175127456cde2))
+* **sdk:** version ([3d92bde](https://github.com/mfactory-lab/albus/commit/3d92bdea1e4ba7d4c819ca8b266309764f032862))
+
+
+### ♻️ Refactors
+
+* **sdk:** code cleanup ([9fb02df](https://github.com/mfactory-lab/albus/commit/9fb02df138c11f29d9f5115f0fe8951494187430))
+
 ## [0.2.6](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.2.6) (2023-12-19)
 
-## [v0.2.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.2.6) (2023-12-04)
+## [v0.2.4](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.5-next.6...@albus-finance/sdk-v0.3.0-next.1) (2023-12-04)
 
 ## [v0.2.2](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.2.2-next.21...@albus-finance/sdk-v0.2.4) (2023-11-17)
 

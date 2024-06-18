@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as Albus from '@albus-finance/core'
 import { ProofRequestStatus } from '@albus-finance/sdk'
 import { PublicKey } from '@solana/web3.js'
 import Table from 'cli-table3'
@@ -36,10 +35,12 @@ import { useContext } from '@/context'
 export async function show(addr: string | PublicKey) {
   const { client } = useContext()
   const proofRequest = await client.proofRequest.load(addr)
-  const proof = Albus.zkp.decodeProof(proofRequest.proof!)
-  const publicInputs = Albus.zkp.decodePublicSignals(proofRequest.publicInputs ?? [])
 
-  log.info({ address: addr, ...proofRequest.pretty(), proof, publicInputs })
+  log.info({ address: addr, ...proofRequest.pretty() })
+
+  if (proofRequest.proof) {
+    log.info({ address: addr, ...proofRequest.pretty() })
+  }
 }
 
 type ShowAllOpts = {

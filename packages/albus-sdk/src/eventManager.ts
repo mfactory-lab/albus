@@ -24,7 +24,7 @@ export class EventManager<IDL extends Idl = Idl> {
     eventName: E,
     callback: (event: IdlEvents<IDL>[E], slot: number, signature: string) => void,
   ): number {
-    return this._events.addEventListener(eventName, (event: any, slot: number, signature: string) => {
+    return this._events.addEventListener(String(eventName), (event: any, slot: number, signature: string) => {
       if (signature !== SIMULATION_SIGNATURE) {
         callback(event, slot, signature)
       }

@@ -26,9 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import * as Albus from '@albus-finance/core'
-import type { Commitment, ConfirmOptions, PublicKeyInitData } from '@solana/web3.js'
+import type { Commitment, PublicKeyInitData } from '@solana/web3.js'
 import { PublicKey } from '@solana/web3.js'
+import { credential, crypto } from '@albus-finance/core'
 import { BaseManager } from './base'
 import {
   Policy,
@@ -37,6 +37,7 @@ import {
   createUpdatePolicyInstruction,
   policyDiscriminator,
 } from './generated'
+import type { SendOpts } from './utils'
 
 const ID_SEPARATOR = '_'
 
@@ -100,22 +101,14 @@ export class PolicyManager extends BaseManager {
     })
   }
 
-  /**
-   * Add a new policy with the specified properties.
-   *
-   * @param {CreatePolicyProps} props - The properties for creating the policy.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{ signature:string, address: PublicKey }>} A Promise that resolves to the result of creating the policy, including its signature and address.
-   * @throws {Error} Throws an error if there is an issue creating the policy or if the transaction fails to confirm.
-   */
-  async create(props: CreatePolicyProps, opts?: ConfirmOptions) {
+  createIx(props: CreatePolicyProps) {
     const authority = this.provider.publicKey
     const [circuit] = this.pda.circuit(props.circuitCode)
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
-    const [policy] = this.pda.policy(serviceProvider, props.code)
+    const [address] = this.pda.policy(serviceProvider, props.code)
 
     const ix = createCreatePolicyInstruction({
-      policy,
+      policy: address,
       circuit,
       serviceProvider,
       authority,
@@ -130,28 +123,30 @@ export class PolicyManager extends BaseManager {
       },
     }, this.programId)
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts)
-
-    return { address: policy, signature }
+    return {
+      address,
+      instructions: [ix],
+    }
   }
 
   /**
-   * Update a policy with the specified properties.
-   *
-   * @param {UpdatePolicyProps} props - The properties for creating the policy.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{ signature:string, address: PublicKey }>} A Promise that resolves to the result of creating the policy, including its signature and address.
-   * @throws {Error} Throws an error if there is an issue creating the policy or if the transaction fails to confirm.
+   * Add a new policy with the specified properties.
    */
-  async update(props: UpdatePolicyProps, opts?: ConfirmOptions) {
+  async create(props: CreatePolicyProps, opts?: SendOpts) {
+    const { instructions, address } = this.createIx(props)
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+    return { address, signature }
+  }
+
+  updateIx(props: UpdatePolicyProps) {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
-    const [policy] = this.pda.policy(serviceProvider, props.code)
+    const [address] = this.pda.policy(serviceProvider, props.code)
 
     const ix = createUpdatePolicyInstruction({
-      policy,
+      policy: address,
       serviceProvider,
       authority,
     }, {
@@ -164,22 +159,24 @@ export class PolicyManager extends BaseManager {
       },
     }, this.programId)
 
-    const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts)
-
-    return { address: policy, signature }
+    return {
+      address,
+      instructions: [ix],
+    }
   }
 
   /**
-   * Delete a policy based on the specified properties.
-   *
-   * @param {DeletePolicyProps} props - The properties for deleting the policy.
-   * @param {ConfirmOptions} [opts] - Optional confirmation options for the transaction.
-   * @returns {Promise<{signature: string}>} A Promise that resolves to the result of deleting the policy, including its signature.
-   * @throws {Error} Throws an error if there is an issue deleting the policy or if the transaction fails to confirm.
+   * Update a policy with the specified properties.
    */
-  async delete(props: DeletePolicyProps, opts?: ConfirmOptions) {
+  async update(props: UpdatePolicyProps, opts?: SendOpts) {
+    const { instructions, address } = this.updateIx(props)
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+    return { address, signature }
+  }
+
+  deleteIx(props: DeletePolicyProps) {
     const authority = this.provider.publicKey
     const [serviceProvider] = this.pda.serviceProvider(props.serviceCode)
     const [policy] = this.pda.policy(serviceProvider, props.code)
@@ -190,8 +187,44 @@ export class PolicyManager extends BaseManager {
       authority,
     }, this.programId)
 
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete a policy based on the specified properties.
+   */
+  async delete(props: DeletePolicyProps, opts?: SendOpts) {
+    const { instructions } = this.deleteIx(props)
     const signature = await this.txBuilder
-      .addInstruction(ix)
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
+    return { signature }
+  }
+
+  async deleteByAddrIx(addr: PublicKeyInitData) {
+    const policy = await this.load(addr)
+
+    const ix = createDeletePolicyInstruction({
+      policy: new PublicKey(addr),
+      serviceProvider: policy.serviceProvider,
+      authority: this.provider.publicKey,
+    }, this.programId)
+
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete policy by address.
+   */
+  async deleteByAddr(addr: PublicKeyInitData, opts?: SendOpts) {
+    const { instructions } = await this.deleteByAddrIx(addr)
+
+    const signature = await this.txBuilder
+      .addInstruction(...instructions)
       .sendAndConfirm(opts)
 
     return { signature }
@@ -199,16 +232,27 @@ export class PolicyManager extends BaseManager {
 }
 
 function preparePolicyRules(props: UpdatePolicyProps) {
-  return props.rules?.map(r => ({
-    key: r.key,
-    label: r.label ?? '',
-    value: Array.from(
-      Albus.crypto.ffUtils.beInt2Buff(
-        Albus.credential.encodeClaimValue(r.value),
+  return props.rules?.map((r) => {
+    let value: Uint8Array
+
+    // raw bytes
+    if (Array.isArray(r.value) || r.value instanceof Uint8Array) {
+      const arr = new Uint8Array(32)
+      arr.set(Uint8Array.from(r.value))
+      value = arr.reverse()
+    } else {
+      value = crypto.ffUtils.beInt2Buff(
+        credential.ClaimsTree.encodeValue(r.value, { hash: r.hash }),
         32,
-      ),
-    ),
-  })) ?? []
+      )
+    }
+
+    return {
+      key: r.key,
+      label: r.label ?? '',
+      value: Array.from(value),
+    }
+  }) ?? []
 }
 
 export type CreatePolicyProps = {
@@ -225,8 +269,9 @@ export type UpdatePolicyProps = {
   retentionPeriod?: number
   rules?: Array<{
     key: string
-    value: string | number | bigint
+    value: string | number | bigint | number[] | Uint8Array
     label?: string
+    hash?: boolean
   }>
 }
 

@@ -1,4 +1,4 @@
-import { bytesToHex, hexToBytes } from '../utils'
+import { base58ToBytes, bytesToBase58, bytesToHex, hexToBytes } from '../utils'
 import { babyJub } from './babyjub'
 import { eddsa } from './eddsa'
 
@@ -30,7 +30,11 @@ export class Signature {
     return this.compress().toString()
   }
 
-  hex(): string {
+  toBase58(): string {
+    return bytesToBase58(this.compress())
+  }
+
+  toHex(): string {
     return bytesToHex(this.compress())
   }
 }
@@ -47,7 +51,7 @@ export class PublicKey {
       throw new Error('buf must be 32 bytes')
     }
     // const bufLE = utils.swapEndianness(buf);
-    const p = babyJub.unpackPoint(buf)
+    const p = babyJub.unpackPoint(Uint8Array.from(buf))
     if (p == null) {
       throw new Error('unpackPoint failed')
     }
@@ -59,6 +63,10 @@ export class PublicKey {
     return PublicKey.newFromCompressed(buff)
   }
 
+  static newFromBase58(str: string): PublicKey {
+    return PublicKey.newFromCompressed(base58ToBytes(str))
+  }
+
   compress(): Uint8Array {
     // return utils.swapEndianness(babyJub.packPoint(this.p));
     return babyJub.packPoint(this.p)
@@ -68,7 +76,11 @@ export class PublicKey {
     return this.compress().toString()
   }
 
-  hex(): string {
+  toBase58(): string {
+    return bytesToBase58(this.compress())
+  }
+
+  toHex(): string {
     return bytesToHex(this.compress())
   }
 
@@ -87,11 +99,23 @@ export class PrivateKey {
     this.sk = buf
   }
 
+  static newFromHex(str: string): PrivateKey {
+    return new PrivateKey(hexToBytes(str))
+  }
+
+  static newFromBase58(str: string): PrivateKey {
+    return new PrivateKey(base58ToBytes(str))
+  }
+
   toString(): string {
     return this.sk.toString()
   }
 
-  hex(): string {
+  toBase58(): string {
+    return bytesToBase58(this.sk)
+  }
+
+  toHex(): string {
     return bytesToHex(this.sk)
   }
 

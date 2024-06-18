@@ -1,12 +1,9 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.6",
   "name": "albus_swap",
   "instructions": [
     {
       "name": "initialize",
-      "docs": [
-        "Processes an [Initialize](enum.Instruction.html)."
-      ],
       "accounts": [
         {
           "name": "authority",
@@ -85,7 +82,13 @@
           }
         },
         {
-          "name": "policy",
+          "name": "swapPolicy",
+          "type": {
+            "option": "publicKey"
+          }
+        },
+        {
+          "name": "addLiquidityPolicy",
           "type": {
             "option": "publicKey"
           }
@@ -94,9 +97,6 @@
     },
     {
       "name": "swap",
-      "docs": [
-        "Processes an [Swap](enum.Instruction.html)."
-      ],
       "accounts": [
         {
           "name": "proofRequest",
@@ -201,10 +201,13 @@
     },
     {
       "name": "depositAllTokenTypes",
-      "docs": [
-        "Processes an [DepositAllTokenTypes](enum.Instruction.html)."
-      ],
       "accounts": [
+        {
+          "name": "proofRequest",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
         {
           "name": "tokenSwap",
           "isMut": false,
@@ -297,9 +300,6 @@
     },
     {
       "name": "withdrawAllTokenTypes",
-      "docs": [
-        "Processes an [WithdrawAllTokenTypes](enum.Instruction.html)."
-      ],
       "accounts": [
         {
           "name": "tokenSwap",
@@ -401,10 +401,13 @@
     },
     {
       "name": "depositSingleTokenType",
-      "docs": [
-        "Processes DepositSingleTokenTypeExactAmountIn"
-      ],
       "accounts": [
+        {
+          "name": "proofRequest",
+          "isMut": false,
+          "isSigner": false,
+          "isOptional": true
+        },
         {
           "name": "tokenSwap",
           "isMut": false,
@@ -485,9 +488,6 @@
     },
     {
       "name": "withdrawSingleTokenType",
-      "docs": [
-        "Processes a [WithdrawSingleTokenTypeExactAmountOut](enum.Instruction.html)."
-      ],
       "accounts": [
         {
           "name": "tokenSwap",
@@ -576,17 +576,62 @@
       ]
     },
     {
-      "name": "closeAccount",
+      "name": "close",
       "accounts": [
         {
-          "name": "account",
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenSwap",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "authority",
+          "name": "swapTokenA",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token_a Swap Account to potentially withdraw from."
+          ]
+        },
+        {
+          "name": "swapTokenB",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token_b Swap Account to potentially withdraw from."
+          ]
+        },
+        {
+          "name": "destTokenA",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token_a user Account to credit."
+          ]
+        },
+        {
+          "name": "destTokenB",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token_b user Account to credit."
+          ]
+        },
+        {
+          "name": "payer",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Pool Token program id."
+          ]
         },
         {
           "name": "systemProgram",
@@ -691,12 +736,33 @@
             }
           },
           {
-            "name": "policy",
+            "name": "swapPolicy",
             "docs": [
-              "Albus policy"
+              "Swap policy address (Albus)"
             ],
             "type": {
               "option": "publicKey"
+            }
+          },
+          {
+            "name": "addLiquidityPolicy",
+            "docs": [
+              "Add liquidity policy address (Albus)"
+            ],
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "reserved",
+            "docs": [
+              "Reserved for future use"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
             }
           }
         ]
@@ -704,6 +770,27 @@
     }
   ],
   "types": [
+    {
+      "name": "CurveInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "curveType",
+            "type": "u8"
+          },
+          {
+            "name": "curveParameters",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "FeesInfo",
       "type": {
@@ -740,83 +827,6 @@
           {
             "name": "hostFeeDenominator",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "CurveInfo",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "curveType",
-            "type": "u8"
-          },
-          {
-            "name": "curveParameters",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "CurveType",
-      "docs": [
-        "Curve types supported by the token-swap program."
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "ConstantProduct"
-          },
-          {
-            "name": "ConstantPrice"
-          },
-          {
-            "name": "Offset"
-          }
-        ]
-      }
-    },
-    {
-      "name": "TradeDirection",
-      "docs": [
-        "The direction of a trade, since curves can be specialized to treat each",
-        "token differently (by adding offsets or weights)"
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "AtoB"
-          },
-          {
-            "name": "BtoA"
-          }
-        ]
-      }
-    },
-    {
-      "name": "RoundDirection",
-      "docs": [
-        "The direction to round.  Used for pool token to trading token conversions to",
-        "avoid losing value on any deposit or withdrawal."
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Floor"
-          },
-          {
-            "name": "Ceiling"
           }
         ]
       }

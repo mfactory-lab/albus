@@ -30,14 +30,12 @@ import type { Command } from 'commander'
 import { program as cli } from 'commander'
 import chalk from 'chalk'
 import log from 'loglevel'
+import { config as dotenvConfig } from 'dotenv'
 import { initContext, useContext } from '@/context'
 import * as actions from '@/actions'
-import { clusterByEnv, lamportsToSol } from '@/utils'
+import { clusterApiUrlByEnv, lamportsToSol } from '@/utils'
 
-const VERSION = import.meta.env.VERSION
-const DEFAULT_LOG_LEVEL = import.meta.env.CLI_LOG_LEVEL || 'info'
-// eslint-disable-next-line node/prefer-global/process
-const DEFAULT_KEYPAIR = import.meta.env.CLI_SOLANA_KEYPAIR || `${process.env.HOME}/.config/solana/id.json`
+dotenvConfig()
 
 const originFactory = log.methodFactory
 log.methodFactory = function (name, lvl, logger) {
@@ -51,28 +49,32 @@ log.methodFactory = function (name, lvl, logger) {
 
 cli
   .name('cli')
-  .version(VERSION)
+  .version(process.env.VERSION ?? '0.0.1')
   .allowExcessArguments(false)
-  .option('-e, --env <ENV>', 'env [dev, stage, prod]', 'dev')
   .option('-c, --cluster <CLUSTER>', 'solana cluster')
-  .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair', DEFAULT_KEYPAIR)
-  .option('-l, --log-level <LEVEL>', 'log level', (l: any) => l && log.setLevel(l), DEFAULT_LOG_LEVEL)
+  .option('-k, --keypair <KEYPAIR>', 'filepath or URL to a keypair')
+  .option('-e, --env <ENV>', 'env [dev, stage, prod]', process.env.CLI_ENV ?? 'dev')
+  .option('-l, --log-level <LEVEL>', 'log level', process.env.CLI_LOG_LEVEL ?? 'info')
   .hook('preAction', async (command: Command) => {
     const opts = command.opts() as any
     log.setLevel(opts.logLevel)
     if (!opts.cluster) {
-      opts.cluster = clusterByEnv(opts.env)
+      opts.cluster = clusterApiUrlByEnv(opts.env)
     }
     const { provider, cluster, client } = initContext(opts)
-    console.log(chalk.dim(`# Version: ${VERSION}`))
-    console.log(chalk.dim(`# Program Address: ${client.programId}`))
+    console.log(chalk.dim(`# Version: ${command.version()}`))
+    console.log(chalk.dim(`# Program: ${client.programId}`))
     console.log(chalk.dim(`# Keypair: ${provider.wallet.publicKey}`))
-    console.log(chalk.dim(`# Cluster: ${cluster}`))
+
+    if (client.options.priorityFee) {
+      console.log(chalk.dim(`# Priority Fee: ${client.options.priorityFee} microlamports`))
+    }
+
     console.log(chalk.dim(`# Env: ${opts.env}`))
+    console.log(chalk.dim(`# Rpc Url: ${cluster}`))
     console.log('\n')
   })
   .hook('postAction', (_c: Command) => {
-    // eslint-disable-next-line node/prefer-global/process
     process.exit()
   })
 
@@ -115,30 +117,77 @@ investigation.command('show')
   .action(actions.investigation.show)
 
 // ------------------------------------------
-// VC Management
+// Credential Management
 // ------------------------------------------
 
-const vc = cli.command('vc')
+const cred = cli.command('cred')
   .description('Credential Management')
 
-vc.command('all', { isDefault: true })
+cred.command('all', { isDefault: true })
   .description('Show all user credentials')
   .option('--owner <pubkey>', '(optional) nft owner address')
   .action(actions.credential.showAll)
 
-vc.command('find')
+cred.command('find')
   .description('Find credentials')
   .action(actions.credential.find)
 
-vc.command('issue')
+cred.command('issue')
   .description('Issue new VC')
   .option('--provider <string>', 'KYC provider unique code')
   .option('-e,--encrypt', '(optional) Encrypt VC with holder public key')
   .action(actions.credential.issue)
 
-///
+// ------------------------------------------
+/// Credentials Spec Management
+// ------------------------------------------
+
+const credSpec = cli.command('cred-spec')
+  .description('Credential Spec Management')
+
+credSpec.command('all', { isDefault: true })
+  .description('Show all credential specs')
+  .option('--code <string>', 'Filter by code')
+  .option('--name <string>', 'Filter by name')
+  .option('--issuer <address>', 'Filter by issuer')
+  .action(actions.credentialSpec.showAll)
+
+credSpec.command('show')
+  .description('Show Credential Spec')
+  .argument('<address>', 'Credential Spec address')
+  .action(actions.credentialSpec.show)
+
+credSpec.command('delete')
+  .description('Delete Credential Spec')
+  .argument('<address>', 'Credential Spec address')
+  .action(actions.credentialSpec.remove)
+
+// ------------------------------------------
+/// Credentials Request Management
+// ------------------------------------------
+
+const credReq = cli.command('cred-req')
+  .description('Credential Request Management')
+
+credReq.command('all', { isDefault: true })
+  .description('Show all credential requests')
+  .option('--name <string>', 'Filter by name')
+  .option('--owner <string>', 'Filter by owner')
+  .action(actions.credentialRequest.showAll)
+
+credReq.command('show')
+  .description('Show credential request')
+  .argument('<address>', 'Credential Request address')
+  .action(actions.credentialRequest.show)
+
+credReq.command('delete')
+  .description('Delete credential request')
+  .argument('<address>', 'Credential Request address')
+  .action(actions.credentialRequest.remove)
+
+// ------------------------------------------
 /// Issuer Management
-///
+// ------------------------------------------
 
 const issuer = cli.command('issuer')
   .description('Issuer Management')
@@ -162,6 +211,7 @@ issuer.command('create')
   .argument('code', 'Issuer code')
   .option('--name <string>', 'Issuer name')
   .option('--signerKeypair <string>', '(optional) Path to the signer keypair file')
+  .option('--authority <string>', '(optional) Authority address')
   .option('--description <string>', '(optional) Short description')
   .action(actions.issuer.create)
 
@@ -170,9 +220,9 @@ issuer.command('delete')
   .argument('code', 'issuer code')
   .action(actions.issuer.remove)
 
-///
+// ------------------------------------------
 /// Circuit Management
-///
+// ------------------------------------------
 
 const circuit = cli.command('circuit')
   .description('Circuit Management')
@@ -205,9 +255,9 @@ circuit.command('delete')
   .argument('addr', 'circuit address')
   .action(actions.circuit.remove)
 
-///
+// ------------------------------------------
 /// Service Management
-///
+// ------------------------------------------
 
 const service = cli.command('service')
   .description('Service Management')
@@ -256,7 +306,7 @@ const policy = cli.command('policy')
 policy.command('all', { isDefault: true })
   .description('Show all policies')
   .option('-s, --serviceCode <string>', 'Filter by service code')
-  .option('-s, --circuitCode <string>', 'Filter by circuit code')
+  .option('-c, --circuitCode <string>', 'Filter by circuit code')
   .action(actions.policy.showAll)
 
 policy.command('show')
@@ -301,7 +351,6 @@ const trustee = cli.command('trustee')
 trustee.command('create')
   .description('Create new Trustee')
   .argument('name', 'The name of the trustee')
-  .option('--email <string>', '(optional) Email')
   .option('--email <string>', '(optional) Email')
   .option('--authority <string>', '(optional) Authority')
   .option('--encryptionKey <string>', '(optional) Path to the encryption key')
@@ -426,19 +475,25 @@ admin.command('close')
   .description('Close and account')
   .action(actions.admin.close)
 
+admin.command('withdraw')
+  .description('Withdraw albus authority balance')
+  .action(actions.admin.withdraw)
+
+//
 // ------------------------------------------
 
 const swap = cli.command('swap')
+
 swap.command('all')
   .action(actions.swap.findAll)
 
 swap.command('closeAll')
   .action(actions.swap.closeAll)
 
-swap.command('close')
-  .argument('<pubkey>', 'Account address')
-  .description('Close and account')
-  .action(actions.swap.close)
+// swap.command('close')
+//   .argument('<pubkey>', 'Account address')
+//   .description('Close and account')
+//   .action(actions.swap.close)
 
 // ------------------------------------------
 
@@ -452,6 +507,5 @@ cli.parseAsync().catch((e) => {
   if (e.logs) {
     log.error(JSON.stringify(e.logs, null, 2))
   }
-  // eslint-disable-next-line node/prefer-global/process
   process.exit()
 })

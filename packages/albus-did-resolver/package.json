@@ -1,0 +1,38 @@
+{
+  "name": "@albus-finance/did-resolver",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfactory-lab/albus.git",
+    "directory": "packages/albus-did-resolver"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "_dev": "tsup --watch",
+    "test": "vitest",
+    "release": "release-it",
+    "release:ci": "release-it --ci -VV",
+    "release:dry": "release-it --ci --dry-run",
+    "release:pre": "release-it --preRelease=next",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@albus-finance/core": "workspace:^",
+    "@solana/web3.js": "*",
+    "did-resolver": "^3.2.2"
+  },
+  "devDependencies": {
+    "release-it-config": "workspace:^"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

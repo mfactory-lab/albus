@@ -26,7 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { Buffer } from 'node:buffer'
 import { Metaplex, irysStorage, keypairIdentity } from '@metaplex-foundation/js'
 import { AnchorProvider, Wallet, web3 } from '@coral-xyz/anchor'
@@ -34,7 +34,6 @@ import type { Cluster } from '@solana/web3.js'
 import { Keypair } from '@solana/web3.js'
 import type { AlbusClientEnv } from '@albus-finance/sdk'
 import { AlbusClient } from '@albus-finance/sdk'
-import { clusterUrl } from './utils'
 import config from './config'
 
 let context: Context
@@ -45,21 +44,30 @@ export function useContext() {
 
 export function initContext({ cluster, env, keypair }: { cluster: Cluster, env: AlbusClientEnv, keypair: string }) {
   const opts = AnchorProvider.defaultOptions()
-  const endpoint = cluster.startsWith('http') ? cluster : clusterUrl(cluster)
-  const connection = new web3.Connection(endpoint, opts.commitment)
+  // opts.commitment = 'confirmed'
 
-  const wallet = new Wallet(
-    Keypair.fromSecretKey(Buffer.from(JSON.parse(
-      keypair.startsWith('[') && keypair.endsWith(']') ? keypair : readFileSync(keypair).toString(),
-    ))),
-  )
+  const connection = new web3.Connection(cluster, opts.commitment)
+
+  let keypairBuffer: Buffer
+  if (keypair) {
+    keypairBuffer = readFileSync(keypair)
+  } else if (existsSync('keypair.json')) {
+    keypairBuffer = readFileSync('keypair.json')
+  } else if (process.env.CLI_SOLANA_KEYPAIR) {
+    keypairBuffer = readFileSync(process.env.CLI_SOLANA_KEYPAIR)
+  } else {
+    throw new Error('Please specify a keypair argument or create a `keypair.json` file')
+  }
+
+  const wallet = new Wallet(Keypair.fromSecretKey(Buffer.from(JSON.parse(keypairBuffer.toString()))))
   const provider = new AnchorProvider(connection, wallet, opts)
-  const client = new AlbusClient(provider).env(env).debug()
+  const client = new AlbusClient(provider)
+    .configure('priorityFee', Number(process.env.CLI_PRIORITY_FEE ?? 0))
+    .env(env)
+    .debug()
   const metaplex = Metaplex.make(provider.connection)
     .use(keypairIdentity(wallet.payer))
     .use(irysStorage({
-      // address: 'https://node1.irys.xyz',
-      // address: 'https://devnet.irys.xyz',
       providerUrl: connection.rpcEndpoint,
       timeout: 60000,
     }))

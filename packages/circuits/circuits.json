@@ -1,0 +1,112 @@
+{
+  "aml": {
+    "file": "aml",
+    "template": "AML",
+    "params": [5],
+    "pubs": [
+      "timestamp",
+      "expectedSpecId",
+      "specIdKey",
+      "specIdProof",
+      "meta_validUntilKey",
+      "meta_validUntilProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature"
+    ]
+  },
+  "ageProof": {
+    "file": "ageProof",
+    "template": "AgeProof",
+    "params": [5, 3, 2],
+    "pubs": [
+      "timestamp",
+      "ageRange",
+      "birthDateKey",
+      "birthDateProof",
+      "meta_validUntilKey",
+      "meta_validUntilProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature",
+      "trusteePublicKey"
+    ]
+  },
+  "attendanceProof": {
+    "file": "attendanceProof",
+    "template": "AttendanceProof",
+    "params": [5],
+    "pubs": [
+      "expectedEvent",
+      "expectedDateFrom",
+      "expectedDateTo",
+      "eventKey",
+      "eventProof",
+      "meta_validUntilKey",
+      "meta_validUntilProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature",
+      "trusteePublicKey"
+    ]
+  },
+  "kyc": {
+    "file": "kyc",
+    "template": "Kyc",
+    "params": [5, 2, 3, 2],
+    "pubs": [
+      "config",
+      "timestamp",
+      "countryLookup",
+      "givenNameKey",
+      "givenNameProof",
+      "familyNameKey",
+      "familyNameProof",
+      "birthDateKey",
+      "birthDateProof",
+      "countryKey",
+      "countryProof",
+      "docNumberKey",
+      "docNumberProof",
+      "meta_validUntilKey",
+      "meta_validUntilProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature",
+      "trusteePublicKey"
+    ]
+  },
+  "livenessProof": {
+    "file": "livenessProof",
+    "template": "LivenessProof",
+    "params": [4, 1],
+    "pubs": [
+      "timestamp",
+      "expectedType",
+      "livenessTypeKey",
+      "livenessTypeProof",
+      "meta_validUntilKey",
+      "meta_validUntilProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature"
+    ]
+  },
+  "residenceProof": {
+    "file": "residenceProof",
+    "template": "ResidenceProof",
+    "params": [6, 2],
+    "pubs": [
+      "timestamp",
+      "selectionMode",
+      "countryLookup",
+      "countryKey",
+      "countryProof",
+      "meta_validUntilKey",
+      "meta_validUntilProof",
+      "credentialRoot",
+      "issuerPk",
+      "issuerSignature"
+    ]
+  }
+}

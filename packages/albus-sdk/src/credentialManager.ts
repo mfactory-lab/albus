@@ -29,30 +29,76 @@
 import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
-import type { ConfirmOptions, PublicKeyInitData, Signer } from '@solana/web3.js'
-import { ComputeBudgetProgram, Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js'
+import type {
+  ClientSubscriptionId,
+  PublicKeyInitData,
+} from '@solana/web3.js'
+import {
+  ComputeBudgetProgram,
+  Keypair,
+  PublicKey,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+} from '@solana/web3.js'
 import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
-import { CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX } from './constants'
 import {
-  createCreateCredentialInstruction,
-  createDeleteCredentialInstruction,
-  createUpdateCredentialInstruction,
+  CREDENTIAL_NAME,
+  CREDENTIAL_SYMBOL_CODE,
+  NFT_SYMBOL_PREFIX,
+} from './constants'
+import {
+  createCreateCredentialInstruction, createDeleteCredentialInstruction, createUpdateCredentialInstruction,
 } from './generated'
-import type { ExtendedMetadata } from './utils'
+import type { ExtendedMetadata, SendOpts } from './utils'
 import {
   getAssociatedTokenAddress,
-  getMasterEditionPDA,
+  getMasterEditionPDA, getMetadataByAccountInfo,
   getMetadataPDA,
   getParsedNftAccountsByOwner,
   loadNft,
 } from './utils'
 
 export class CredentialManager extends BaseManager {
+  private subscriptions = new Map<string, ClientSubscriptionId>()
+
   /**
-   * Create new Credential NFT.
+   * Register a callback to be invoked whenever the credential account changes
    */
-  async create(props?: CreateCredentialProps, opts?: TxOpts) {
+  async addListener(mint: PublicKeyInitData, callback: CredentialChangeCallback, props?: LoadCredentialProps) {
+    const mintPubkey = new PublicKey(mint)
+    const key = String(mintPubkey)
+    await this.removeListener(key)
+    this.subscriptions[key] = this.provider.connection
+      .onAccountChange(getMetadataPDA(mint), async (acc) => {
+        const metadata = await getMetadataByAccountInfo(acc, true)
+        const credentialInfo = await getCredentialInfo(metadata, props)
+        callback(credentialInfo, mintPubkey)
+      })
+  }
+
+  /**
+   * Deregister an account notification callback
+   */
+  removeListener(mint: PublicKeyInitData) {
+    const key = String(new PublicKey(mint))
+    if (this.subscriptions.has(key)) {
+      return this.provider.connection.removeAccountChangeListener(this.subscriptions[key])
+    }
+  }
+
+  /**
+   * Deregister all callbacks
+   */
+  async removeAllListener() {
+    for (const subscriptionId of this.subscriptions.values()) {
+      await this.provider.connection.removeAccountChangeListener(subscriptionId)
+    }
+  }
+
+  /**
+   * Create credential instruction.
+   */
+  createIx(props?: CreateCredentialProps) {
     const mint = Keypair.generate()
     const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
     const tokenAccount = getAssociatedTokenAddress(mint.publicKey, authority)
@@ -69,31 +115,59 @@ export class CredentialManager extends BaseManager {
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, this.programId)
 
+    return {
+      mint,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Create new Credential NFT.
+   */
+  async create(props?: CreateCredentialProps, opts?: SendOpts) {
+    const { mint, instructions } = this.createIx(props)
+
     const builder = this.txBuilder
       .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
-      .addInstruction(ix)
+      .addInstruction(...instructions)
       .addSigner(mint)
 
     if (props?.owner) {
       builder.addSigner(props.owner)
     }
 
-    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+    const signature = await builder.sendAndConfirm(opts)
 
     return { mintAddress: mint.publicKey, signature }
   }
 
   /**
-   * Update credential data.
-   * Require admin authority
+   * Update credential instruction.
    */
-  async update(props: UpdateCredentialProps, opts?: TxOpts) {
-    const mint = new PublicKey(props.mint)
-    const tokenAccount = getAssociatedTokenAddress(mint, new PublicKey(props.owner))
+  async updateIx(props: UpdateCredentialProps) {
+    // const owner = new PublicKey(props.owner)
+    // const tokenAccount = getAssociatedTokenAddress(mint, owner)
+
+    let mint: PublicKey | undefined
+    let credentialRequest: PublicKey | undefined
+    let credentialRequestIssuer: PublicKey | undefined
+    if (props.credentialRequest) {
+      credentialRequest = new PublicKey(props.credentialRequest)
+      const credentialRequestAccount = await this.client.credentialRequest.load(credentialRequest)
+      credentialRequestIssuer = credentialRequestAccount.issuer
+      mint = credentialRequestAccount.credentialMint
+    } else {
+      if (!props.mint) {
+        throw new Error('Missing mint address')
+      }
+      mint = new PublicKey(props.mint)
+    }
 
     const ix = createUpdateCredentialInstruction({
       mint,
-      tokenAccount,
+      // tokenAccount,
+      credentialRequest,
+      credentialRequestIssuer,
       albusAuthority: this.pda.authority()[0],
       metadataAccount: getMetadataPDA(mint),
       authority: this.provider.publicKey,
@@ -106,17 +180,28 @@ export class CredentialManager extends BaseManager {
       },
     }, this.programId)
 
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Update credential data.
+   */
+  async update(props: UpdateCredentialProps, opts?: SendOpts) {
+    const { instructions } = await this.updateIx(props)
+
     const signature = await this.txBuilder
-      .addInstruction(ix)
-      .sendAndConfirm(opts?.confirm, opts?.feePayer)
+      .addInstruction(...instructions)
+      .sendAndConfirm(opts)
 
     return { signature }
   }
 
   /**
-   * Delete credential and burn credential NFT.
+   * Delete credential instruction.
    */
-  async delete(props: DeleteCredentialProps, opts?: TxOpts) {
+  deleteIx(props: DeleteCredentialProps) {
     const mint = new PublicKey(props.mint)
     const authority = props?.owner ? props.owner.publicKey : this.provider.publicKey
     const tokenAccount = getAssociatedTokenAddress(mint, authority)
@@ -132,32 +217,42 @@ export class CredentialManager extends BaseManager {
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     }, this.programId)
 
-    const builder = this.txBuilder.addInstruction(ix)
+    return {
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Delete credential and burn credential NFT.
+   */
+  async delete(props: DeleteCredentialProps, opts?: SendOpts) {
+    const { instructions } = this.deleteIx(props)
+
+    const builder = this.txBuilder
+      .addInstruction(...instructions)
 
     if (props?.owner) {
       builder.addSigner(props.owner)
     }
 
-    const signature = await builder.sendAndConfirm(opts?.confirm, opts?.feePayer)
+    const signature = await builder.sendAndConfirm(opts)
 
     return { signature }
   }
 
   /**
-   * Load a credential associated with a specified address.
-   * This function retrieves, verifies, and optionally decrypts the credential.
+   * Load credential associated with a specified address.
    */
   async load(mintAddr: PublicKeyInitData, props: LoadCredentialProps = { throwOnError: true }) {
     const nft = await loadNft(this.provider.connection, mintAddr, {
       authority: this.pda.authority()[0],
       code: CREDENTIAL_SYMBOL_CODE,
     })
-    return this.getCredentialInfo(nft, props)
+    return getCredentialInfo(nft, props)
   }
 
   /**
    * Load all credentials for the provided owner.
-   * @param props
    */
   async loadAll(props: LoadAllCredentialProps = {}) {
     const accounts = await getParsedNftAccountsByOwner(
@@ -175,30 +270,40 @@ export class CredentialManager extends BaseManager {
     for (const account of accounts) {
       result.push({
         address: account.mint,
-        credential: await this.getCredentialInfo(account, props),
+        credential: await getCredentialInfo(account, props),
       })
     }
     return result
   }
+}
 
-  private async getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
-    if (nft.json?.vc !== undefined) {
-      try {
-        return await Albus.credential.verifyCredential(nft.json.vc, {
-          decryptionKey: props?.decryptionKey,
-          resolver: props?.resolver,
-        })
-      } catch (e) {
-        console.log(`Credential Verification Error: ${e}`)
-        if (props?.throwOnError) {
-          throw e
-        }
+/**
+ * Get credential info, verify and decrypt if necessary.
+ */
+async function getCredentialInfo(nft: ExtendedMetadata, props?: LoadCredentialProps) {
+  if (nft.json?.vc !== undefined) {
+    try {
+      return await Albus.credential.verifyCredential(nft.json.vc, {
+        decryptionKey: props?.decryptionKey,
+        resolver: props?.resolver,
+        albusResolver: props?.albusResolver,
+      })
+    } catch (e) {
+      console.log(`Credential Verification Error: ${e}`)
+      if (props?.throwOnError) {
+        throw e
       }
+      return {
+        data: {
+          status: 'error',
+          message: String(e),
+        },
+      } as unknown as VerifiableCredential
     }
-    return {
-      data: parseUriData(nft.data.uri),
-    } as unknown as VerifiableCredential
   }
+  return {
+    data: parseUriData(nft.data.uri),
+  } as unknown as VerifiableCredential
 }
 
 /**
@@ -218,10 +323,10 @@ function parseUriData(uri: string) {
   return data
 }
 
-export type TxOpts = {
-  confirm?: ConfirmOptions
-  feePayer?: Signer
-}
+/**
+ * Callback function for credential change notifications
+ */
+type CredentialChangeCallback = (vc: VerifiableCredential, mint: PublicKey) => void
 
 export type CredentialInfo = {
   address: PublicKey
@@ -233,10 +338,12 @@ export type CreateCredentialProps = {
 }
 
 export type UpdateCredentialProps = {
-  owner: PublicKeyInitData
-  mint: PublicKeyInitData
   uri: string
   name?: string
+  // Mint required if credential request is not provided
+  mint?: PublicKeyInitData
+  // Optional credential request associated with issuer
+  credentialRequest?: PublicKeyInitData
 }
 
 export type DeleteCredentialProps = {
@@ -248,6 +355,7 @@ export type LoadCredentialProps = {
   decryptionKey?: number[] | Uint8Array
   throwOnError?: boolean
   resolver?: Resolver
+  albusResolver?: Albus.credential.AlbusResolverOpts
 }
 
 export type LoadAllCredentialProps = {
