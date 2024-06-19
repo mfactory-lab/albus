@@ -13,58 +13,20 @@ Albus Protocol provides on-chain Zero-Knowledge-based verification infrastructur
   <!--<a href="https://github.com/mfactory-lab/albus/actions"><img alt="Build Status" src="https://github.com/mfactory-lab/albus/actions/workflows/test.yaml/badge.svg" /></a>-->
   <a target="_blank" href="https://github.com/mfactory-lab/albus/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/coral-xyz/xnft?color=red" /></a>
   <a target="_blank" href="https://discord.gg/albusProtocol"><img alt="Discord" src="https://img.shields.io/badge/discord-online-6A7EC2" /></a>
-  <a target="_blank" href="https://github.com/mfactory-lab/albus/wiki"><img alt="Docs" src="https://img.shields.io/badge/docs-wiki-blue" /></a>
+  <a target="_blank" href="https://docs.albus.finance"><img alt="Docs" src="https://img.shields.io/badge/docs-gitbook-blue" /></a>
 </p>
 
-# Website and lite paper
+# Websites
 
-- [Albus landing page](https://albus.finance/)
-- [Albus application website](https://app.albus.finance/)
-- [Albus litepaper](https://albus.finance/assets/ALBUS%20LITEPAPER%20v2.02%20Sep23-86978e72.pdf)
+- [Landing page](https://albus.finance/)
+- [App](https://app.albus.finance/)
 
 # Documentation
-
-- [What is Albus Protocol?](https://github.com/mfactory-lab/albus/wiki#what-is-albus-protocol)
-  - [Problem](https://github.com/mfactory-lab/albus/wiki#problem)
-  - [Solution](https://github.com/mfactory-lab/albus/wiki#solution)
-  - [Example](https://github.com/mfactory-lab/albus/wiki#example)
-  - [Benefits](https://github.com/mfactory-lab/albus/wiki#benefits)
-  - [Use cases](https://github.com/mfactory-lab/albus/wiki#use-cases)
-- [Architecture](https://github.com/mfactory-lab/albus/wiki/architecture)
-- [User workflows](https://github.com/mfactory-lab/albus/wiki/user-workflows)
-  - [Business user workflow](https://github.com/mfactory-lab/albus/wiki/user-workflows#business-user-workflow)
-  - [End user workflow](https://github.com/mfactory-lab/albus/wiki/user-workflows#end-user-workflows)
-    - [Wizard](https://github.com/mfactory-lab/albus/wiki/user-workflows#wizard)
-    - [Request for Certificate](https://github.com/mfactory-lab/albus/wiki/user-workflows#request-for-certificate)
-    - [Document digitisation](https://github.com/mfactory-lab/albus/wiki/user-workflows#document-digitisation)
-- [Glossary](https://github.com/mfactory-lab/albus/wiki/Glossary)
-  - [For users](https://github.com/mfactory-lab/albus/wiki/Glossary#for-users)
-    - [Entities and modules](https://github.com/mfactory-lab/albus/wiki/Glossary#entities-and-modules)
-    - [General terms](https://github.com/mfactory-lab/albus/wiki/Glossary#general-terms)
-  - [For developers](https://github.com/mfactory-lab/albus/wiki/Glossary#for-developers)
-- [Albus CLI](https://github.com/mfactory-lab/albus/wiki/Albus-CLI)
-  - [Usage](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#usage)
-  - [Commands](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#commands)
-    - [Identity](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#identity)
-    - [Verifiable Credentials (VC)](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#verifiable-credentials-vc)
-    - [Proof generation](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#proof-generation)
-    - [Verification](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#verification)
-    - [Circuit management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#circuit-management)
-    - [Web3 protocol management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#web3-service-management)
-    - [Certificate Request management](https://github.com/mfactory-lab/albus/wiki/Albus-CLI#zkp-request-management)
-- [Integration](https://github.com/mfactory-lab/albus/wiki/Integration)
-  - [On-chain component (Rust)](https://github.com/mfactory-lab/albus/wiki/Integration#on-chain-component-rust)
-    - [Installation](https://github.com/mfactory-lab/albus/wiki/Integration#installation)
-    - [Usage](https://github.com/mfactory-lab/albus/wiki/Integration#usage)
-  - [Off-chain component (TypeScript)](https://github.com/mfactory-lab/albus/wiki/Integration#off-chain-component-typescript)
-    - [Installation](https://github.com/mfactory-lab/albus/wiki/Integration#installation-1)
-    - [Initialization](https://github.com/mfactory-lab/albus/wiki/Integration#initialization)
-    - [Methods available to Web3 businesses](https://github.com/mfactory-lab/albus/wiki/Integration#methods-available-to-web3-businesses)
-    - [Internal methods of Albus Protocol](https://github.com/mfactory-lab/albus/wiki/Integration#internal-methods-of-albus-protocol)
-- [Reference list](https://github.com/mfactory-lab/albus/wiki/Reference-list)
+- [Docs](https://docs.albus.finance/)
+- [Lite paper](https://albus.finance/assets/ALBUS%20LITEPAPER%20v2.02%20Sep23-86978e72.pdf)
 
 # Contacts
 
-- Alexander Ray, co-founder, CEO, technology/architecture [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/alex-a-ray/)<br>
-- Sonny Wolfson, co-founder, CBDO [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/sonny-wolfson-22297621/)<br>
-- Leo Krassovitski, co-founder, COO, UI/UX/frontend [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/leonid-krassovitski/)
+- Alexander Ray, Co-Founder & CEO, Strategy/Architecture [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/alex-a-ray/)<br>
+- Sonny Wolfson, Co-Founder & CBDO, Business Development [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/sonny-wolfson-22297621/)<br>
+- Leo Krassovitski, Co-Founder & COO, Operations [![LinkedIn logo](https://github.com/mfactory-lab/albus/blob/main/docs/assets/linkedin-a75760c5.svg)](https://www.linkedin.com/in/leonid-krassovitski/)

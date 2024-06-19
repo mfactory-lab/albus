@@ -26,7 +26,16 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './create'
-export * from './remove'
-export * from './show'
-export * from './find'
+import log from 'loglevel'
+import type { PublicKey } from '@solana/web3.js'
+import { useContext } from '@/context'
+
+/**
+ * Find Issuer
+ */
+export async function find(pubkey: string | PublicKey) {
+  const { client } = useContext()
+  const issuer = await client.issuer.find({ pubkey })
+
+  log.info(`Address: ${issuer[0]?.pubkey}`)
+}

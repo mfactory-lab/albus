@@ -201,6 +201,11 @@ issuer.command('show')
   .argument('<address>', 'Issuer address')
   .action(actions.issuer.show)
 
+issuer.command('find')
+  .description('Find issuer')
+  .argument('<publicKey>', 'Issuer publicKey')
+  .action(actions.issuer.find)
+
 issuer.command('create')
   .description('Create new issuer')
   .argument('code', 'Issuer code')
