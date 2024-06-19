@@ -12,19 +12,18 @@ ifeq ($(ENV),prod)
 	PROGRAM_KEYPAIR = ./target/deploy/$(PROGRAM)-keypair-prod.json
 	BUILD_FEATURES = mainnet
 	CLUSTER = mainnet
-	SOLANA_CLUSTER = mainnet-beta
+	SOLANA_CLUSTER ?= mainnet-beta
 else ifeq ($(ENV),stage)
-#	BUILD_FEATURES = verify-on-chain
 	CLUSTER = mainnet
-	SOLANA_CLUSTER = mainnet-beta
+	SOLANA_CLUSTER ?= mainnet-beta
 else
 	BUILD_FEATURES = devnet
 	CLUSTER = devnet
-	SOLANA_CLUSTER = devnet
+	SOLANA_CLUSTER ?= devnet
 endif
 
 # Get the program ID by program name from the Anchor.toml file
-PROGRAM_ID = $(shell sed -n 's/^ *${PROGRAM}.*=.*"\([^"]*\)".*/\1/p' Anchor.toml | head -1)
+PROGRAM_ID = $(shell sed -n '/\[programs.${CLUSTER}\]/,/\[/ s/^albus *= *"\(.*\)"/\1/p' Anchor.toml | head -1)
 
 # Get wallet address from the Anchor.toml file
 WALLET = $(shell sed -n '/\[provider\]/,/\[/ s/^wallet[[:space:]]*=[[:space:]]*"\(.*\)"/\1/p' Anchor.toml | head -1)
@@ -39,6 +38,7 @@ info: ## Info
 	@echo "ENV: $(ENV)"
 	@echo "CLUSTER: $(CLUSTER)"
 	@echo "SOLANA_CLUSTER: $(SOLANA_CLUSTER)"
+	@echo "PROGRAM_ID: $(PROGRAM_ID)"
 	@echo "PROGRAM_KEYPAIR: $(PROGRAM_KEYPAIR)"
 	@echo "BUILD_FEATURES: $(BUILD_FEATURES)"
 	@echo "WALLET: $$(solana address -k $(WALLET))"
@@ -65,16 +65,22 @@ deploy: build ## Deploy program
 	anchor deploy -p $(PROGRAM) --provider.cluster $(CLUSTER) --program-keypair $(PROGRAM_KEYPAIR)
 
 upgrade: build ## Upgrade program
-	solana program deploy -u $(SOLANA_CLUSTER) --upgrade-authority $(WALLET) --program-id $(PROGRAM_ID) \
-		--max-sign-attempts 200 \
-		--with-compute-unit-price 25000 \
-		--use-rpc \
-		./target/deploy/$(PROGRAM).so
+	#solana program deploy -u $(SOLANA_CLUSTER) --upgrade-authority $(WALLET) --program-id $(PROGRAM_ID) \
+#		--max-sign-attempts 200 \
+#		--with-compute-unit-price 25000 \
+#		./target/deploy/$(PROGRAM).so
 	#anchor deploy -p $(PROGRAM) --provider.cluster $(CLUSTER) -- \
 #        --upgrade-authority $(WALLET) \
 #        --max-sign-attempts 100 \
 #        --with-compute-unit-price 71428
-	#anchor upgrade -p $(PROGRAM_ID) --provider.cluster $(CLUSTER) ./target/deploy/$(PROGRAM).so
+	anchor upgrade -p $(PROGRAM_ID) --provider.cluster $(SOLANA_CLUSTER) ./target/deploy/$(PROGRAM).so
+
+recover: ## Continue upgrade program
+	solana program deploy -u $(SOLANA_CLUSTER) \
+		--buffer ./recover.json \
+		--upgrade-authority $(WALLET) \
+		--program-id $(PROGRAM_ID) \
+		./target/deploy/$(PROGRAM).so
 
 verify: build ## Verify program
 	anchor verify $(PROGRAM_ID) --provider.cluster $(CLUSTER)
