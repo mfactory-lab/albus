@@ -34,3 +34,4 @@ test-ledger
 /.secrets
 
 keypair.json
+recover.json

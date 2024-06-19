@@ -27,8 +27,8 @@
  */
 
 import log from 'loglevel'
+import type { PublicKey } from '@solana/web3.js'
 import { useContext } from '@/context'
-import { PublicKey } from '@solana/web3.js'
 
 /**
  * Find Issuer
