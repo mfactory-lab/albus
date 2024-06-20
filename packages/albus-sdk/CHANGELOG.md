@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2-next.1 (2024-06-20)
+
+
+### 🐞 Bug Fixes
+
+* **sdk:** fix issuer create `authority` ([126a82a](https://github.com/mfactory-lab/albus/commit/126a82ad67e624e00c9b4d06f7392f4139d433f3))
+
 ## 0.3.2-next.0 (2024-06-20)
 
 ## 0.3.0-next.55 (2024-06-20)
