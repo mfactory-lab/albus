@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0-next.55 (2024-06-20)
+
+
+### 🌟 Features
+
+* update and register issuer ([131f8f7](https://github.com/mfactory-lab/albus/commit/131f8f74696cad04e0cce454c32eb420cfc48992))
+
 ## 0.3.0-next.54 (2024-06-10)
 
 ## 0.3.0-next.53 (2024-06-04)
