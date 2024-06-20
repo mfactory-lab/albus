@@ -69,6 +69,10 @@ pub mod albus {
         create_issuer::handler(ctx, data)
     }
 
+    pub fn update_issuer(ctx: Context<UpdateIssuer>, data: UpdateIssuerData) -> Result<()> {
+        update_issuer::handler(ctx, data)
+    }
+
     pub fn delete_issuer(ctx: Context<DeleteIssuer>) -> Result<()> {
         delete_issuer::handler(ctx)
     }

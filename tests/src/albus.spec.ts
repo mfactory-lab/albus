@@ -120,10 +120,26 @@ describe('albus', async () => {
       const { signature, address } = await client.issuer.create({
         code: issuerCode,
         name: issuerCode,
-        keypair: issuer,
+        signer: issuer,
       })
       assert.ok(!!signature)
       assert.ok(!!address)
+    } catch (e) {
+      console.log(e)
+      assert.ok(false)
+    }
+  })
+
+  it('should allow to update an issuer', async () => {
+    try {
+      const { signature } = await client.issuer.update({
+        code: issuerCode,
+        name: 'test',
+        // signer: issuer,
+      })
+      assert.ok(!!signature)
+      const issuer = await client.issuer.loadById(issuerCode)
+      assert.equal(issuer.name, 'test')
     } catch (e) {
       console.log(e)
       assert.ok(false)

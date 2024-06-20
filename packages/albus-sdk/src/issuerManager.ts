@@ -40,8 +40,8 @@ import {
   Issuer,
   createCreateIssuerInstruction,
   createDeleteIssuerInstruction,
-  errorFromCode,
-  issuerDiscriminator,
+  createUpdateIssuerInstruction,
+  errorFromCode, issuerDiscriminator,
 } from './generated'
 import type { SendOpts } from './utils'
 
@@ -59,12 +59,12 @@ export class IssuerManager extends BaseManager {
   }
 
   /**
-   * Load issuer by {@link id}
-   * @param id
+   * Load issuer by {@link code}
+   * @param code
    * @param commitment
    */
-  async loadById(id: string, commitment?: Commitment) {
-    return this.load(this.pda.issuer(id)[0], commitment)
+  async loadById(code: string, commitment?: Commitment) {
+    return this.load(this.pda.issuer(code)[0], commitment)
   }
 
   /**
@@ -170,9 +170,9 @@ export class IssuerManager extends BaseManager {
         code: props.code,
         name: props.name,
         description: props.description ?? '',
-        authority: props.authority ?? props.keypair.publicKey,
-        pubkey: props.keypair.publicKey,
-        zkPubkey: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.keypair.secretKey)),
+        authority: props.authority ?? props.signer.publicKey,
+        pubkey: props.signer.publicKey,
+        zkPubkey: this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.signer.secretKey)),
       },
     }, this.programId)
 
@@ -187,6 +187,46 @@ export class IssuerManager extends BaseManager {
    */
   async create(props: CreateIssuerProps, opts?: SendOpts) {
     const { instructions, address } = this.createIx(props)
+    try {
+      const signature = await this.txBuilder
+        .addInstruction(...instructions)
+        .sendAndConfirm(opts)
+      return { address, signature }
+    } catch (e: any) {
+      throw errorFromCode(e.code) ?? e
+    }
+  }
+
+  updateIx(props: UpdateIssuerProps) {
+    const authority = this.provider.publicKey
+    const [address] = this.pda.issuer(props.code)
+
+    const ix = createUpdateIssuerInstruction({
+      issuer: address,
+      authority,
+    },
+    {
+      data: {
+        name: props.name ?? null,
+        description: props.description ?? null,
+        newAuthority: props.newAuthority ?? null,
+        pubkey: props.signer?.publicKey ?? null,
+        zkPubkey: props.signer ? this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.signer.secretKey)) : null,
+        isDisabled: props.isDisabled ?? null,
+      },
+    }, this.programId)
+
+    return {
+      address,
+      instructions: [ix],
+    }
+  }
+
+  /**
+   * Update an existing issuer.
+   */
+  async update(props: UpdateIssuerProps, opts?: SendOpts) {
+    const { instructions, address } = this.updateIx(props)
     try {
       const signature = await this.txBuilder
         .addInstruction(...instructions)
@@ -236,7 +276,7 @@ export class IssuerManager extends BaseManager {
 export type FindIssuerProps = {
   code?: string
   authority?: PublicKeyInitData
-  pubkey?: Iterable<number>
+  pubkey?: PublicKeyInitData
   zkPubkey?: Iterable<number>
   active?: boolean
   noData?: boolean
@@ -247,7 +287,17 @@ export type CreateIssuerProps = {
   name: string
   description?: string
   authority?: PublicKey
-  keypair: Signer
+  signer: Signer
+}
+
+export type UpdateIssuerProps = {
+  code: string
+  name?: string
+  description?: string
+  newAuthority?: PublicKey
+  signer?: Signer
+  // only admin can disable an issuer
+  isDisabled?: boolean
 }
 
 export type DeleteIssuerProps = {

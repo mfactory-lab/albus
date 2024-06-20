@@ -28,6 +28,8 @@
 
 pub mod create_issuer;
 pub mod delete_issuer;
+pub mod update_issuer;
 
 pub use self::create_issuer::*;
 pub use self::delete_issuer::*;
+pub use self::update_issuer::*;

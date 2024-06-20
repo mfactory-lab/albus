@@ -62,7 +62,7 @@ describe('credentialRequest', async () => {
     const { address } = await adminClient.issuer.create({
       code: 'aml-issuer',
       name: 'aml-issuer',
-      keypair: issuer,
+      signer: issuer,
     })
     issuerAddress = address
   }, 20000)

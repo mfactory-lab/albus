@@ -26,8 +26,40 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './create'
-export * from './remove'
-export * from './show'
-export * from './find'
-export * from './update'
+import { Buffer } from 'node:buffer'
+import { readFileSync } from 'node:fs'
+import { Keypair } from '@solana/web3.js'
+import log from 'loglevel'
+import { useContext } from '@/context'
+import { capitalize } from '@/utils'
+
+type Opts = {
+  name?: string
+  description?: string
+  signerKeypair?: string
+  newAuthority?: string
+  isDisabled?: boolean
+}
+
+/**
+ * Update an issuer
+ */
+export async function update(code: string, opts: Opts) {
+  const { client } = useContext()
+
+  const signer = opts.signerKeypair
+    ? Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.signerKeypair).toString())))
+    : undefined
+
+  const { signature } = await client.issuer.update({
+    code,
+    name: opts.name ?? capitalize(code),
+    description: opts.description,
+    newAuthority: opts.newAuthority,
+    isDisabled: opts.isDisabled,
+    signer,
+  })
+
+  log.info('\nDone')
+  log.info(`Signature: ${signature}`)
+}

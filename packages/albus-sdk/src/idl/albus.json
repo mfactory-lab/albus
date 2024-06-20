@@ -1,5 +1,5 @@
 {
-  "version": "0.0.33",
+  "version": "0.0.34",
   "name": "albus",
   "instructions": [
     {
@@ -26,6 +26,34 @@
           "name": "data",
           "type": {
             "defined": "CreateIssuerData"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateIssuer",
+      "accounts": [
+        {
+          "name": "issuer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "UpdateIssuerData"
           }
         }
       ]
@@ -2281,6 +2309,55 @@
                 "u8",
                 64
               ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateIssuerData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "description",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "pubkey",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "zkPubkey",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  64
+                ]
+              }
+            }
+          },
+          {
+            "name": "newAuthority",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "isDisabled",
+            "type": {
+              "option": "bool"
             }
           }
         ]

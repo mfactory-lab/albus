@@ -63,7 +63,7 @@ export async function create(code: string, opts: Opts) {
     code,
     name: opts.name ?? capitalize(code),
     description: opts.description,
-    keypair,
+    signer: keypair,
     authority,
   })
 

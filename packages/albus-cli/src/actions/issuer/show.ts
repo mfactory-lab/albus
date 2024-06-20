@@ -30,6 +30,7 @@ import type { PublicKey } from '@solana/web3.js'
 import Table from 'cli-table3'
 import log from 'loglevel'
 import { useContext } from '@/context'
+import { shortenAddress } from '@/utils'
 
 export async function show(addr: string | PublicKey) {
   const { client } = useContext()
@@ -45,7 +46,7 @@ export async function showAll() {
   log.info(`Found ${accounts.length} accounts`)
 
   const table = new Table({
-    head: ['#', 'Address', 'Authority', 'Pubkey', 'Code', 'Name', 'Created'],
+    head: ['#', 'Address', 'Authority', 'Pubkey', 'Code', 'Name', 'Disabled', 'Created'],
   })
 
   let i = 0
@@ -53,10 +54,11 @@ export async function showAll() {
     table.push([
       String(++i),
       String(pubkey),
-      String(data!.authority),
-      String(data!.pubkey),
+      String(shortenAddress(data!.authority)),
+      String(shortenAddress(data!.pubkey)),
       String(data!.code),
       String(data!.name),
+      Boolean(data?.isDisabled),
       String(new Date(Number(data!.createdAt) * 1000).toISOString()),
     ])
   }

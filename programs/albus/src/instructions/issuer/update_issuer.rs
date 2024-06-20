@@ -32,49 +32,60 @@ use anchor_lang::prelude::*;
 use crate::state::Issuer;
 use crate::utils::{assert_authorized, cmp_pubkeys};
 
-pub fn handler(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()> {
-    let timestamp = Clock::get()?.unix_timestamp;
+pub fn handler(ctx: Context<UpdateIssuer>, data: UpdateIssuerData) -> Result<()> {
+    let issuer = &mut ctx.accounts.issuer;
     let is_admin = assert_authorized(ctx.accounts.authority.key).is_ok();
+    let is_authorized = is_admin || cmp_pubkeys(&issuer.authority, ctx.accounts.authority.key);
 
-    if !is_admin && !cmp_pubkeys(&data.authority, ctx.accounts.authority.key) {
-        msg!("Error: Authority does not match");
+    if !is_authorized {
         return Err(AlbusError::Unauthorized.into());
     }
 
-    let issuer = &mut ctx.accounts.issuer;
-    issuer.authority = data.authority;
-    issuer.code = data.code;
-    issuer.name = data.name;
-    issuer.description = data.description;
-    issuer.is_disabled = !is_admin;
-    issuer.pubkey = data.pubkey;
-    issuer.zk_pubkey = data.zk_pubkey;
-    issuer.bump = ctx.bumps.issuer;
-    issuer.created_at = timestamp;
+    if let Some(name) = data.name {
+        issuer.name = name;
+    }
+
+    if let Some(description) = data.description {
+        issuer.description = description;
+    }
+
+    if let Some(authority) = data.new_authority {
+        issuer.authority = authority;
+    }
+
+    if let Some(pubkey) = data.pubkey {
+        issuer.pubkey = pubkey;
+        if let Some(zk_pubkey) = data.zk_pubkey {
+            issuer.zk_pubkey = zk_pubkey;
+        } else {
+            msg!("ZK pubkey is required");
+            return Err(AlbusError::Unauthorized.into());
+        }
+    }
+
+    // Admin updates
+    if is_admin {
+        if let Some(is_disabled) = data.is_disabled {
+            issuer.is_disabled = is_disabled;
+        }
+    }
 
     Ok(())
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateIssuerData {
-    pub code: String,
-    pub name: String,
-    pub description: String,
-    pub authority: Pubkey,
-    pub pubkey: Pubkey,
-    pub zk_pubkey: [u8; 64],
+pub struct UpdateIssuerData {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub pubkey: Option<Pubkey>,
+    pub zk_pubkey: Option<[u8; 64]>,
+    pub new_authority: Option<Pubkey>,
+    pub is_disabled: Option<bool>,
 }
 
 #[derive(Accounts)]
-#[instruction(data: CreateIssuerData)]
-pub struct CreateIssuer<'info> {
-    #[account(
-        init,
-        seeds = [Issuer::SEED, data.code.as_bytes()],
-        bump,
-        payer = authority,
-        space = Issuer::space()
-    )]
+pub struct UpdateIssuer<'info> {
+    #[account(mut)]
     pub issuer: Box<Account<'info, Issuer>>,
 
     #[account(mut)]
