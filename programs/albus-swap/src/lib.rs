@@ -706,6 +706,19 @@ pub mod albus_swap {
         Ok(())
     }
 
+    // TODO: remove in mainnet
+    pub fn update(
+        ctx: Context<UpdatePool>,
+        swap_policy: Option<Pubkey>,
+        add_liquidity_policy: Option<Pubkey>,
+    ) -> Result<()> {
+        let token_swap = &mut ctx.accounts.token_swap;
+        token_swap.swap_policy = swap_policy;
+        token_swap.swap_policy = add_liquidity_policy;
+        Ok(())
+    }
+
+    // TODO: remove in mainnet
     pub fn close(ctx: Context<ClosePool>) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
         let token_a_amount = ctx.accounts.swap_token_a.amount;
@@ -746,6 +759,17 @@ pub mod albus_swap {
 
         Ok(())
     }
+}
+
+#[derive(Accounts)]
+pub struct UpdatePool<'info> {
+    /// CHECK: safe
+    pub authority: AccountInfo<'info>,
+    #[account(mut)]
+    pub token_swap: Box<Account<'info, TokenSwap>>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]

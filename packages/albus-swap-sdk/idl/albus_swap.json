@@ -576,6 +576,45 @@
       ]
     },
     {
+      "name": "update",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenSwap",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "swapPolicy",
+          "type": {
+            "option": "publicKey"
+          }
+        },
+        {
+          "name": "addLiquidityPolicy",
+          "type": {
+            "option": "publicKey"
+          }
+        }
+      ]
+    },
+    {
       "name": "close",
       "accounts": [
         {

@@ -500,6 +500,12 @@ swap.command('all')
 swap.command('closeAll')
   .action(actions.swap.closeAll)
 
+swap.command('update')
+  .argument('<pubkey>', 'Swap Pool address')
+  .option('--swapPolicy <pubkey>', 'Swap policy')
+  .option('--addLiquidityPolicy <pubkey>', 'Add liquidity policy')
+  .action(actions.swap.update)
+
 // swap.command('close')
 //   .argument('<pubkey>', 'Account address')
 //   .description('Close and account')

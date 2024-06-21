@@ -5,6 +5,8 @@ import log from 'loglevel'
 import Table from 'cli-table3'
 import { useContext } from '@/context'
 
+export * from './update'
+
 export async function findAll() {
   const { provider } = useContext()
 

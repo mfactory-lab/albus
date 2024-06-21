@@ -22,6 +22,7 @@ import {
   createDepositSingleTokenTypeInstruction,
   createInitializeInstruction,
   createSwapInstruction,
+  createUpdateInstruction,
   createWithdrawAllTokenTypesInstruction,
   createWithdrawSingleTokenTypeInstruction, tokenSwapDiscriminator,
 } from './generated'
@@ -69,6 +70,32 @@ export class AlbusSwapClient {
         destTokenB,
         swapTokenA: tokenSwap.tokenA,
         swapTokenB: tokenSwap.tokenB,
+      }),
+    )
+
+    const signature = await this.provider.sendAndConfirm(tx, [], opts)
+
+    return {
+      signature,
+    }
+  }
+
+  /**
+   * Update Token Swap
+   */
+  async updateTokenSwap(props: UpdateTokenSwapProps, opts?: ConfirmOptions) {
+    const payer = this.provider.publicKey
+    const swapAuthority = this.swapAuthority(props.tokenSwap)
+
+    const tx = new Transaction()
+    tx.add(
+      createUpdateInstruction({
+        payer,
+        tokenSwap: props.tokenSwap,
+        authority: swapAuthority,
+      }, {
+        swapPolicy: props.swapPolicy ?? null,
+        addLiquidityPolicy: props.addLiquidityPolicy ?? null,
       }),
     )
 
@@ -502,6 +529,14 @@ export type LoadAllProps = {
 
 export type CloseTokenSwapProps = {
   tokenSwap: PublicKey
+}
+
+export type UpdateTokenSwapProps = {
+  tokenSwap: PublicKey
+  /// Albus policy address
+  swapPolicy?: PublicKey
+  /// Albus policy address
+  addLiquidityPolicy?: PublicKey
 }
 
 export type CreateTokenSwapProps = {
