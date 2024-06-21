@@ -26,7 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-import assert from 'node:assert'
+// eslint-disable-next-line unicorn/prefer-node-protocol
+import assert from 'assert'
+
 import { randomBytes } from '@stablelib/random'
 import { F1Field, Scalar, utils } from '../ff'
 import { bytesToBigInt } from '../utils'

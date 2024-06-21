@@ -32,7 +32,7 @@ import {
   type Keypair, PublicKey,
   type PublicKeyInitData, SYSVAR_INSTRUCTIONS_PUBKEY,
 } from '@solana/web3.js'
-import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata/dist/src/generated'
+import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 import { BaseManager } from './base'
 
 import {

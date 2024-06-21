@@ -209,7 +209,7 @@ export class IssuerManager extends BaseManager {
       data: {
         name: props.name ?? null,
         description: props.description ?? null,
-        newAuthority: props.newAuthority ?? null,
+        newAuthority: props.newAuthority ? new PublicKey(props.newAuthority) : null,
         pubkey: props.signer?.publicKey ?? null,
         zkPubkey: props.signer ? this.zkPubkeyToBytes(Albus.crypto.eddsa.prv2pub(props.signer.secretKey)) : null,
         isDisabled: props.isDisabled ?? null,
@@ -294,7 +294,7 @@ export type UpdateIssuerProps = {
   code: string
   name?: string
   description?: string
-  newAuthority?: PublicKey
+  newAuthority?: PublicKeyInitData
   signer?: Signer
   // only admin can disable an issuer
   isDisabled?: boolean

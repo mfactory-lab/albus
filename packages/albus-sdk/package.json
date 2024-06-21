@@ -1,6 +1,5 @@
 {
   "name": "@albus-finance/sdk",
-  "_type": "module",
   "version": "0.3.2-next.1",
   "description": "Albus Protocol SDK",
   "repository": {
@@ -9,8 +8,23 @@
     "directory": "packages/albus-sdk"
   },
   "sideEffects": false,
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "exports": {
+    "browser": {
+      "import": "./dist/index.browser.mjs",
+      "require": "./dist/index.browser.cjs"
+    },
+    "node": {
+      "import": "./dist/index.node.mjs",
+      "require": "./dist/index.node.cjs"
+    },
+    "types": "./dist/types/index.d.ts"
+  },
+  "browser": {
+    "./dist/index.node.cjs": "./dist/index.browser.cjs",
+    "./dist/index.node.mjs": "./dist/index.browser.mjs"
+  },
+  "main": "./dist/index.node.cjs",
+  "module": "./dist/index.node.mjs",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
