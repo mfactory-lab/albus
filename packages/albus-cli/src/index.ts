@@ -222,7 +222,7 @@ issuer.command('update')
   .option('--description <string>', '(optional) Short description')
   .option('--signerKeypair <string>', '(optional) Path to the signer keypair file')
   .option('--newAuthority <string>', '(optional) Authority address')
-  .option('--isDisabled', '(optional) Disable issuer')
+  .option('--isDisabled [value]', '(optional) Disable issuer')
   .action(actions.issuer.update)
 
 issuer.command('delete')

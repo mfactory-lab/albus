@@ -38,7 +38,7 @@ type Opts = {
   description?: string
   signerKeypair?: string
   newAuthority?: string
-  isDisabled?: boolean
+  isDisabled?: string | boolean
 }
 
 /**
@@ -51,12 +51,14 @@ export async function update(code: string, opts: Opts) {
     ? Keypair.fromSecretKey(Buffer.from(JSON.parse(readFileSync(opts.signerKeypair).toString())))
     : undefined
 
+  const isDisabled = opts.isDisabled === 'true' || opts.isDisabled === true
+
   const { signature } = await client.issuer.update({
     code,
     name: opts.name ?? capitalize(code),
     description: opts.description,
     newAuthority: opts.newAuthority,
-    isDisabled: opts.isDisabled,
+    isDisabled,
     signer,
   })
 
