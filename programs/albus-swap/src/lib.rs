@@ -714,7 +714,7 @@ pub mod albus_swap {
     ) -> Result<()> {
         let token_swap = &mut ctx.accounts.token_swap;
         token_swap.swap_policy = swap_policy;
-        token_swap.swap_policy = add_liquidity_policy;
+        token_swap.add_liquidity_policy = add_liquidity_policy;
         Ok(())
     }
 
