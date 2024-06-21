@@ -1,8 +1,8 @@
-import type { PublicKey } from '@solana/web3.js'
 import type { MessageSignerWalletAdapterProps, SignerWalletAdapterProps } from '@solana/wallet-adapter-base'
 import type { Ref } from 'vue'
 import { computed } from 'vue'
 import { useWallet } from 'solana-wallets-vue'
+import type { PublicKey } from '@solana/web3.js'
 
 export type AnchorWallet = {
   publicKey: PublicKey

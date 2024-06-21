@@ -2,7 +2,7 @@
 
 The Anti-Money Laundering (AML) Officer feature ensures that end users of Web3 businesses comply with AML regulations. An AML Officer is essentially a type of Issuer that conducts AML checks and issues AML credentials for users who pass these checks. This role can be filled by an in-house employee of a Web3 business or by some other trusted entity.
 
-In their Albus workspace, AML Officers define AML credential specifications, in which they set the claims that the AML credentials must include. These claims are the user data from one or multiple credentials of a user that they obtain from a KYC or other provider. This data serves as input for AML checks, which AML Officers can perform via the user interface in Albus or via their own backend using Albus SDK. Certain claims, for example liveness checks, can be mandatory for all credentials. 
+In their Albus workspace, AML Officers define AML credential specifications, in which they set the claims that the AML credentials must include. These claims are the user data from one or multiple credentials of a user that they obtain from a KYC or other provider. This data serves as input for AML checks, which AML Officers can perform via the user interface in Albus or via their own backend using Albus SDK. Certain claims, for example liveness checks, can be mandatory for all credentials.
 
 Once an AML Officer creates a spec for an AML credential, users can submit a request for this AML credential. If a user already has the required claim(s) in their existing credentials, this data is passed to the AML Officer for AML verification. If not, the user has to obtain credentials with the missing claims from a KYC or other provider.
 

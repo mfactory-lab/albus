@@ -120,7 +120,7 @@ npm install @albus-finance/sdk@^0.2
 * Initialize the Albus client (in a browser)
 
 ```ts
-const network = clusterApiUrl("devnet")
+const network = clusterApiUrl('devnet')
 const wallet = window.solana // Phantom crypto wallet
 const client = AlbusClient.fromWallet(new Connection(network), wallet)
 ```
@@ -128,7 +128,7 @@ const client = AlbusClient.fromWallet(new Connection(network), wallet)
 * Initialize the Albus client (on a validator node)
 
 ```ts
-const network = clusterApiUrl("devnet")
+const network = clusterApiUrl('devnet')
 const keypair = Keypair.fromSecretCode('...')
 const client = AlbusClient.fromKeypair(new Connection(network), keypair)
 ```
@@ -185,7 +185,7 @@ client.proofRequest.create({ serviceCode: string, policyCode: string })
 _Example_
 
 ```ts
-import { SERVICE_CODE, POLICY_CODE } from '@/config'
+import { POLICY_CODE, SERVICE_CODE } from '@/config'
 
 // Retrieves a service provider's code via a list of all service providers
 const services = await client.service.find()
@@ -249,7 +249,7 @@ await client.proofRequest.fullProve(props)
 This method deletes a proof request (Certificate).
 
 ```ts
-await client.proofRequest.delete({ proofRequest: PublicKeyInitData})
+await client.proofRequest.delete({ proofRequest: PublicKeyInitData })
 ```
 
 _Example_
@@ -266,9 +266,9 @@ await client.proofRequest.delete({ proofRequest })
 This method retrieves a list of all credentials.
 
 ```ts
-const credentials = await client.credential.loadAll({ 
+const credentials = await client.credential.loadAll({
   decryptionKey: [
-      // bytes
+    // bytes
   ],
 })
 ```
@@ -284,7 +284,7 @@ import { Keypair } from '@solana/web3.js'
 
 const ekp = Keypair.fromSeed('<SEED_PHRASE>') // Contains the seed phrase used to generate a decryption key when creating the credential
 
-await client.credential.loadAll({ 
+await client.credential.loadAll({
   decryptionKey: ekp.secretKey,
 })
 ```
@@ -313,7 +313,7 @@ This method updates a service provider.
 ```ts
 const props = {
   name: string,
-  website: string, 
+  website: string,
   secretShareThreshold: number,
   trustees: [PublicKey.default()],
   contactInfo: {
@@ -356,7 +356,7 @@ const props = {
     kind: 1,
     value: 'test@email',
   },
-  serviceProvider: "ArrNHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8",
+  serviceProvider: 'ArrNHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8',
   newAuthority: '7dkvaBTSHxqUHc9uvN7VBeL1yKHUngStv7C96dgkzXAK',
   trustees: ['6GkdHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8', 'nRg3aBTSHxqUHc9uvN7VBeL1yKHUngStv7C96dgkzXAK']
 }
@@ -377,10 +377,10 @@ const trustees = await client.trustee.find()
 This method associates a Trustee(s) with a specific service provider.
 
 ```ts
-await client.service.update({ 
-  serviceProvider: PublicKey.default(), 
+await client.service.update({
+  serviceProvider: PublicKey.default(),
   trustees: [
-      // Public key(s)
+    // Public key(s)
   ],
 })
 ```
@@ -418,11 +418,11 @@ const props = {
   name: string,
   retentionPeriod: number,
   rules: [
-      // ...
+    // ...
   ] as Array<{
-    key: string;
-    value: string | number | bigint;
-    label?: string;
+    key: string
+    value: string | number | bigint
+    label?: string
   }>
 }
 
@@ -453,19 +453,19 @@ const props = {
   circuitCode,
   code: 'age_policy_code',
   description: 'Age policy description',
-  expirationPeriod: 31622400, 
+  expirationPeriod: 31622400,
   name: 'Swap for users over 18 years old',
   retentionPeriod: 2142300,
   rules: [
     {
-      key: "minAge",
-      value: "18",
-      label: "" // (Optional) decription
+      key: 'minAge',
+      value: '18',
+      label: '' // (Optional) decription
     },
-      {
-      key: "maxAge",
-      value: "60",
-      label: "" // (Optional) decription
+    {
+      key: 'maxAge',
+      value: '60',
+      label: '' // (Optional) decription
     },
   ],
   serviceCode
@@ -487,9 +487,9 @@ const props = {
   name: string,
   retentionPeriod: number,
   rules: Array<{
-    key: string;
-    value: string | number | bigint;
-    label?: string;
+    key: string
+    value: string | number | bigint
+    label?: string
   }>,
   serviceCode: string
 }

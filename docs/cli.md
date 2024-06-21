@@ -34,7 +34,7 @@ pnpm cli admin sp add -h
 
 ### Identity
 
-Create an identity and store it as NFT. 
+Create an identity and store it as NFT.
 It identifies the NFT holder as the Albus holder and stores its state:
 
 ```bash
@@ -140,7 +140,7 @@ pnpm cli request show <ADDR>
 Find and show a ZKP request based on a DeFi service's PDA, circuit NFT's mint address, and/or ZKP request owner's address:
 
 ```bash
-pnpm cli request find --sp <CODE> --owner <ADDR> --circuit <ADDR> 
+pnpm cli request find --sp <CODE> --owner <ADDR> --circuit <ADDR>
 ```
 
 Show all ZKP requests with optional filters by service provider's PDA, circuit NFT's mint address, and/or ZKP NFT's mint address:

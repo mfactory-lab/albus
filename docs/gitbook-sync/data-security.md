@@ -17,7 +17,7 @@ layout:
 Albus Protocol handles three types of user data:
 
 - Digital credentials.
-- Retained user data. 
+- Retained user data.
 - Data for AML checks.
 
 ## Digital credentials

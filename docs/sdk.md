@@ -16,14 +16,14 @@ npm install @albus-finance/sdk@^0.2
 
 ### Init client (Browser)
 ```ts
-const network = clusterApiUrl("devnet")
+const network = clusterApiUrl('devnet')
 const wallet = window.solana // Phantom
 const client = AlbusClient.fromWallet(new Connection(network), wallet)
 ```
 
 ### Init client (Node)
 ```ts
-const network = clusterApiUrl("devnet")
+const network = clusterApiUrl('devnet')
 const keypair = Keypair.fromSecretCode('...')
 const client = AlbusClient.fromKeypair(new Connection(network), keypair)
 ```
@@ -44,7 +44,7 @@ client.proofRequest.create({ serviceCode: string, policyCode: string })
 
 **Example**
 ```ts
-import { SERVICE_CODE, POLICY_CODE } from '@/config'
+import { POLICY_CODE, SERVICE_CODE } from '@/config'
 
 // to find out the service code, you can download all services and find your service in them, or immediately add the service code from the config
 const services = await client.service.find()
@@ -99,7 +99,7 @@ Data that is passed to the `fullProve` method:
 
 Delete certificate
 ```ts
-await client.proofRequest.delete({ proofRequest: PublicKeyInitData})
+await client.proofRequest.delete({ proofRequest: PublicKeyInitData })
 ```
 
 **Example**
@@ -115,9 +115,9 @@ await client.proofRequest.delete({ proofRequest })
 Load credentials
 
 ```ts
-const credentials = await client.credential.loadAll({ 
+const credentials = await client.credential.loadAll({
   decryptionKey: [
-      // bytes
+    // bytes
   ],
 })
 ```
@@ -131,7 +131,7 @@ import { Keypair } from '@solana/web3.js'
 // Seed phrase that was used to create the encryption key when creating the credential
 const ekp = Keypair.fromSeed('seed phrase...')
 
-await client.credential.loadAll({ 
+await client.credential.loadAll({
   decryptionKey: ekp.secretKey,
 })
 ```
@@ -151,7 +151,6 @@ const mint = credential.address
 await client.credential.revoke({ mint })
 ```
 
-
 ### Services API
 
 Load services
@@ -168,13 +167,13 @@ const service = services.filter(s => s.data?.authority.toBase58() === publicKey.
 Update service
 ```ts
 const props = {
-  name: "acme",
-  website: "https://example.com", 
+  name: 'acme',
+  website: 'https://example.com',
   secretShareThreshold: 2,
   trustees: [PublicKey.default()],
   contactInfo: {
     kind: 0,
-    value: "...",
+    value: '...',
   },
   serviceProvider: PublicKey.default(),
   newAuthority: PublicKey.default(),
@@ -192,7 +191,7 @@ const props = {
     kind: 1,
     value: 'test@email',
   },
-  serviceProvider: "ArrNHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8",
+  serviceProvider: 'ArrNHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8',
   newAuthority: '7dkvaBTSHxqUHc9uvN7VBeL1yKHUngStv7C96dgkzXAK',
   trustees: ['6GkdHy59LQ3E9VczX7B3YQiN2AK4A9dbEPKeFU8kq1P8', 'nRg3aBTSHxqUHc9uvN7VBeL1yKHUngStv7C96dgkzXAK']
 }
@@ -204,8 +203,8 @@ Data that is passed to the `update` method:
 - `name`: Service name
 - `website`: Service website
 - `secretShareThreshold`: The number of shares into which the user data encryption key is split
-- `contactInfo`: 
-  - `kind`: Сontact type 
+- `contactInfo`:
+  - `kind`: Сontact type
   - `value`: Contact
 - `serviceProvider`: Service provider address
 - `newAuthority`: Address of the new authority
@@ -217,17 +216,17 @@ Data that is passed to the `update` method:
 >- `2`: Discord
 
 ### Trustees API
-Load trustees 
+Load trustees
 ```ts
 const trustees = await client.trustee.find()
 ```
 
 Add trustee to service
 ```ts
-await client.service.update({ 
-  serviceProvider: PublicKey.default(), 
+await client.service.update({
+  serviceProvider: PublicKey.default(),
   trustees: [
-      // public keys...
+    // public keys...
   ],
 })
 ```
@@ -242,7 +241,6 @@ Data that is passed to the `update` method:
 - `serviceProvider`: Service address
 - `trustees` : Trustee service addresses
 
-
 ### Circuits API
 Circuits
 ```ts
@@ -252,27 +250,26 @@ await client.circuit.find()
 ### Policies API
 Load policies
 ```ts
-const policies = client.policy.find({ serviceCode: "..." })
+const policies = client.policy.find({ serviceCode: '...' })
 ```
 > `serviceCode` can be found in the service entity
-
 
 Create Policy
 ```ts
 const props = {
-  circuitCode: "agePolicy",
-  serviceCode: "acme",
-  code: "p1",
-  description: "",
+  circuitCode: 'agePolicy',
+  serviceCode: 'acme',
+  code: 'p1',
+  description: '',
   expirationPeriod: 0,
-  name: "Age policy",
+  name: 'Age policy',
   retentionPeriod: 0,
   rules: [
-      // ...
+    // ...
   ] as Array<{
-    key: string;
-    value: string | number | bigint;
-    label?: string;
+    key: string
+    value: string | number | bigint
+    label?: string
   }>
 }
 
@@ -288,19 +285,19 @@ const props = {
   circuitCode,
   code: 'age_policy_code',
   description: 'Description of your policy',
-  expirationPeriod: 31622400, 
+  expirationPeriod: 31622400,
   name: 'Swap for users over 18 years old',
   retentionPeriod: 2142300,
   rules: [
     {
-      key: "minAge",
-      value: "18",
-      label: "" // Some information (optional)
+      key: 'minAge',
+      value: '18',
+      label: '' // Some information (optional)
     },
-      {
-      key: "maxAge",
-      value: "60",
-      label: "" // Some information (optional)
+    {
+      key: 'maxAge',
+      value: '60',
+      label: '' // Some information (optional)
     },
   ],
   serviceCode
@@ -329,9 +326,9 @@ const props = {
   name: string,
   retentionPeriod: number,
   rules: Array<{
-    key: string;
-    value: string | number | bigint;
-    label?: string;
+    key: string
+    value: string | number | bigint
+    label?: string
   }>,
   serviceCode: string
 }
@@ -345,7 +342,7 @@ Delete policy
 ```ts
 const serviceCode = service.data.code // service code
 const policy = policies[0] // for example we took the first policy
-const code = policy.data.code //policy code
+const code = policy.data.code // policy code
 
 client.policy.delete({ serviceCode: string, code: string })
 ```
@@ -358,4 +355,3 @@ const props = {
 }
 client.policy.delete(props)
 ```
-

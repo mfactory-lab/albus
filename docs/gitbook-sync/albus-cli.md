@@ -163,7 +163,7 @@ pnpm cli request show <ADDRESS>
 * Find and show a proof request based on a Web3 protocol's PDA, circuit NFT's mint address, and/or proof request owner's address:
 
 ```bash
-pnpm cli request find --sp <CODE> --owner <ADDRESS> --circuit <ADDRESS> 
+pnpm cli request find --sp <CODE> --owner <ADDRESS> --circuit <ADDRESS>
 ```
 
 * Show all proof requests with optional filters by service provider's PDA, circuit NFT's mint address, and/or ZKP NFT's mint address:

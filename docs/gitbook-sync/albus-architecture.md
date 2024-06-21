@@ -46,7 +46,7 @@ The frontend layer includes five accounts that provide their users with the foll
   * View ZK Proof Requests (Compliance Certificates) of end users
 * **Trustee account**:
   * Store key shares for retained user data
-  * Provide key shares to verified authorised entities based on their disclosure requests 
+  * Provide key shares to verified authorised entities based on their disclosure requests
 * **Authorised entity account**:
   * Submit requests to disclose retained data to Trustees
   * Use key shares of Trustees to reconstruct a decryption key for decrypting retained user data
@@ -91,7 +91,7 @@ Albus interacts with the following external entities:
 - **Issuer**: a trusted third-party entity that verifies end users and, in case of successful verification, issues Verifiable Credentials for them (e.g., KYC provider).
 - **Issuer node**: a Node.js node that issues Verifiable Credentials for users in case an Issuer cannot provide user data (claims) in the W3C Verifiable Credential format. It runs **Adapters** that fetch user data from an Issuer and convert it to the W3C Verifiable Credential format. Each Adapter is dedicated to a specific Issuer.
 - **Trustee**: a trusted compliance partner that holds a share of the key required to decrypt retained user data in case it is required by an authorised entity with a legitimate request.
-- **Authorised entity**: an individual or an entity authorised to access retained user data for a legitimate purpose (e.g., conduct an investigation or an audit). 
+- **Authorised entity**: an individual or an entity authorised to access retained user data for a legitimate purpose (e.g., conduct an investigation or an audit).
 
 {% hint style="info" %}
 For detailed definitions, please refer to the [Glossary](/docs/gitbook-sync/glossary.md).
