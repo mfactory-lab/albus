@@ -2,6 +2,7 @@
   "private": true,
   "packageManager": "pnpm@9.1.0",
   "license": "AGPL-3.0",
+  "workspaces": ["packages/*"],
   "scripts": {
     "dev": "pnpm --parallel --filter=./packages/** run dev",
     "circuits": "pnpm -F circuits run",
@@ -19,7 +20,7 @@
     "postinstall": "husky"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.18.0",
+    "@antfu/eslint-config": "^2.21.1",
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@commitlint/config-pnpm-scopes": "^19.1.0",
@@ -27,17 +28,20 @@
     "@vitest/ui": "^1.6.0",
     "buffer": "^6.0.3",
     "docsify-cli": "^4.4.4",
-    "eslint": "^9.2.0",
+    "eslint": "^9.5.0",
     "husky": "^9.0.11",
-    "lint-staged": "^15.2.2",
+    "lint-staged": "^15.2.7",
     "syncpack": "^12.3.2",
     "tsup": "^8.1.0",
     "typescript": "^5.5.2",
     "vite": "^5.3.1",
     "vite-plugin-dts": "^3.9.1",
-    "vite-plugin-node-polyfills": "^0.21.0",
+    "vite-plugin-node-polyfills": "^0.22.0",
     "vitest": "^1.6.0"
   },
+  "trustedDependencies": [
+    "@albus-finance/cli"
+  ],
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
