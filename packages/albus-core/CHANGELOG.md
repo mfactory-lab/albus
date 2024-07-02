@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.3.6-next.34](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.33...@albus-finance/core-v0.3.6-next.34) (2024-07-02)
+
 ## [0.3.6-next.33](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.32...@albus-finance/core-v0.3.6-next.33) (2024-07-02)
 
 
