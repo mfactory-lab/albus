@@ -119,8 +119,8 @@ importers:
   packages/albus-core:
     dependencies:
       '@albus-finance/pex':
-        specifier: ^3.3.3
-        version: 3.3.3
+        specifier: ^3.3.4
+        version: 3.3.4
       '@metaplex-foundation/mpl-token-metadata':
         specifier: ^3.2.1
         version: 3.2.1(@metaplex-foundation/umi@0.9.1)
@@ -380,8 +380,8 @@ importers:
 
 packages:
 
-  '@albus-finance/pex@3.3.3':
-    resolution: {integrity: sha512-JzCAqs9vFNdWrhDDbhFWZ3zFq6oxJyRR9+kDNbErUZBKNNHwe9wvi2V8h2DHxatXBNyZlTcXbw2XWt9jKMfj2A==}
+  '@albus-finance/pex@3.3.4':
+    resolution: {integrity: sha512-B8FYpI81OQ73GlKyX8Wws3rXZC3llBWGbv0kKQWwHBT7mKL5Qg3M+scWNv9WHmGx5htDiX8JO+Yogcyl5EUBnA==}
     engines: {node: '>=18'}
 
   '@antfu/eslint-config@2.21.1':
@@ -6405,7 +6405,7 @@ packages:
 
 snapshots:
 
-  '@albus-finance/pex@3.3.3':
+  '@albus-finance/pex@3.3.4':
     dependencies:
       '@astronautlabs/jsonpath': 1.1.2
       '@sd-jwt/decode': 0.6.1
