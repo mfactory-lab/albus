@@ -1,6 +1,6 @@
 {
   "name": "@albus-finance/sdk",
-  "version": "0.3.2-next.2",
+  "version": "0.3.2-next.3",
   "description": "Albus Protocol SDK",
   "repository": {
     "type": "git",
@@ -36,7 +36,7 @@
     "generate": "DEBUG='(solita|rustbin):(info|error)' solita",
     "release": "release-it",
     "release:ci": "release-it --ci -VV",
-    "release:dry": "release-it --ci --dry-run",
+    "release:dry": "release-it --ci --preRelease=next --dry-run",
     "release:pre": "release-it --ci --preRelease=next"
   },
   "dependencies": {
