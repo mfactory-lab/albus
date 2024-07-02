@@ -78,7 +78,7 @@ export class PexHelper {
 
   /**
    * The selectFrom method is a helper function that helps filter out the verifiable credentials
-   * which can not be selected and returns the selectable credentials.
+   * which cannot be selected and returns the selectable credentials.
    */
   static selectFrom(def: IPresentationDefinition, creds: VerifiableCredential[]) {
     return this.pex.selectFrom(def, creds as OriginalVerifiableCredential[])
