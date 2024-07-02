@@ -1,12 +1,13 @@
 {
   "name": "release-it-config",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": ".release-it.js",
   "scripts": {
     "release": "release-it --ci"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^8.0.1",
-    "release-it": "^17.2.1"
+    "release-it": "^17.4.1",
+    "release-it-pnpm": "^4.6.2"
   }
 }

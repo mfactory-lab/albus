@@ -49,6 +49,7 @@ module.exports = {
     },
   },
   plugins: {
+    'release-it-pnpm': {},
     '@release-it/conventional-changelog': {
       path: '.',
       // ignoreRecommendedBump: false,
@@ -74,12 +75,12 @@ module.exports = {
   },
   hooks: {
     // release-it doesn't support `pnpm publish` only `npm publish`
-    'after:bump': 'pnpm publish --access public --no-git-checks',
+    // 'after:bump': 'pnpm publish --access public --no-git-checks',
     // eslint-disable-next-line no-template-curly-in-string
     'after:release': 'echo 🥳 Successfully released ${name}:${version}',
   },
   npm: {
-    publish: false,
+    publish: true,
     ignoreVersion: false,
     // skipChecks: true,
   },
