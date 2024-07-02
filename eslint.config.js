@@ -32,6 +32,7 @@ module.exports = antfu(
     gitignore: true,
     stylistic: true,
     typescript: true,
+    markdown: true,
     yaml: true,
     toml: true,
     vue: false,
@@ -39,6 +40,7 @@ module.exports = antfu(
       '**/build/**',
       '**/dist/**',
       '**/coverage/**',
+      'pnpm-lock.yaml',
     ],
   }, {
     rules: {
