@@ -33,6 +33,7 @@ const scope = packageName.split('/')[1]
 
 module.exports = {
   verbose: true,
+  debug: true,
   git: {
     push: true,
     tagName: `${packageName}-v${version}`,
@@ -49,10 +50,9 @@ module.exports = {
     },
   },
   plugins: {
-    'release-it-pnpm': {},
     '@release-it/conventional-changelog': {
       path: '.',
-      // ignoreRecommendedBump: false,
+      ignoreRecommendedBump: false,
       gitRawCommitsOpts: {
         path: '.',
       },
@@ -72,6 +72,7 @@ module.exports = {
         ],
       },
     },
+    'release-it-pnpm': {},
   },
   hooks: {
     // release-it doesn't support `pnpm publish` only `npm publish`
