@@ -52,7 +52,7 @@ module.exports = {
   plugins: {
     '@release-it/conventional-changelog': {
       path: '.',
-      ignoreRecommendedBump: false,
+      // ignoreRecommendedBump: false,
       gitRawCommitsOpts: {
         path: '.',
       },
