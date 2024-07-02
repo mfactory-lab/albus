@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.6-next.33](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.32...@albus-finance/core-v0.3.6-next.33) (2024-07-02)
+
+
+### 🐞 Bug Fixes
+
+* **core:** fixed pex type error ([06fd49c](https://github.com/mfactory-lab/albus/commit/06fd49c5f9e8cb1c409ca4589a21731ab47c403f))
+* **core:** new pex version ([44543e1](https://github.com/mfactory-lab/albus/commit/44543e1fe458268fc82e37091d33f6daff58a77c))
+
 ## 0.3.6-next.32 (2024-06-21)
 
 ## 0.3.6-next.31 (2024-06-10)
