@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2-next.6 (2024-07-02)
+
+
+### 🐞 Bug Fixes
+
+* release-it config ([3082bc0](https://github.com/mfactory-lab/albus/commit/3082bc0d1bb1e65860a9d48e3c8c86f34aa6cb32))
+
 ## 0.0.1-next.0 (2024-07-02)
 
 ## [0.3.2-next.5](https://github.com/mfactory-lab/albus/compare/@albus-finance/sdk-v0.3.2-next.4...@albus-finance/sdk-v0.3.2-next.5) (2024-07-02)
