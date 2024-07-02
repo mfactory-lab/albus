@@ -39,6 +39,8 @@ module.exports = {
     tagName: `${packageName}-v${version}`,
     commitsPath: '.',
     commitMessage: `chore(${scope}): release ${version} [no ci]`,
+    requireCommits: true,
+    requireCommitsFail: false,
     requireCleanWorkingDir: false,
   },
   github: {
@@ -52,7 +54,6 @@ module.exports = {
   plugins: {
     '@release-it/conventional-changelog': {
       path: '.',
-      // ignoreRecommendedBump: false,
       gitRawCommitsOpts: {
         path: '.',
       },
@@ -72,18 +73,21 @@ module.exports = {
         ],
       },
     },
-    'release-it-pnpm': {},
+    // buggy
+    // 'release-it-pnpm': {},
   },
   hooks: {
     // release-it doesn't support `pnpm publish` only `npm publish`
     // 'after:bump': 'pnpm publish --access public --no-git-checks',
+    'after:git:release': [
+      'pnpm publish --access public --no-git-checks',
+    ],
     // eslint-disable-next-line no-template-curly-in-string
     'after:release': 'echo 🥳 Successfully released ${name}:${version}',
   },
   npm: {
-    publish: true,
-    ignoreVersion: false,
-    // skipChecks: true,
+    publish: false,
+    versionArgs: ['--workspaces false'],
   },
   // publishConfig: {
   //   access: 'public',
