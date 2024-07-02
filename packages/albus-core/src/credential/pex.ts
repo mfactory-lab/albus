@@ -29,6 +29,7 @@
 import type { EvaluationResults, IPresentationDefinition, PresentationResult, SelectResults, Validated } from '@albus-finance/pex'
 import { PEX } from '@albus-finance/pex'
 import type { OriginalVerifiableCredential } from '@sphereon/ssi-types'
+import type { PresentationEvaluationResults } from '@albus-finance/pex/dist/main/lib/evaluation/core'
 import type { VerifiableCredential, VerifiablePresentation } from './types'
 import { createVerifiablePresentation } from '.'
 
@@ -95,7 +96,7 @@ export class PexHelper {
   /**
    * The evaluatePresentation compares what is expected from a presentation with a presentationDefinition.
    */
-  static evaluatePresentation(def: IPresentationDefinition, vp: VerifiablePresentation): EvaluationResults {
+  static evaluatePresentation(def: IPresentationDefinition, vp: VerifiablePresentation): PresentationEvaluationResults {
     return this.pex.evaluatePresentation(def, vp as any)
   }
 }
