@@ -70,6 +70,7 @@ export async function showAll(opts: ShowAllOpts) {
     policy: opts.policy,
     policyId: opts.policyId,
     status: opts.status,
+    // skipUser: true,
   })
 
   const table = new Table({

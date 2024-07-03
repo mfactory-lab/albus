@@ -71,7 +71,8 @@ cli
     }
 
     console.log(chalk.dim(`# Env: ${opts.env}`))
-    console.log(chalk.dim(`# Rpc Url: ${cluster}`))
+    console.log(chalk.dim(`# Rpc commitment: ${provider.connection.commitment}`))
+    console.log(chalk.dim(`# Rpc url: ${cluster}`))
     console.log('\n')
   })
   .hook('postAction', (_c: Command) => {
