@@ -31,7 +31,9 @@ import { readFileSync } from 'node:fs'
 import { Keypair } from '@solana/web3.js'
 import type { PublicKey } from '@solana/web3.js'
 import log from 'loglevel'
+import Table from 'cli-table3'
 import { useContext } from '@/context'
+import { shortenAddress } from '@/utils'
 
 type Opts = {
   encryptionKey?: string
@@ -65,4 +67,32 @@ export async function show(addr: string | PublicKey, opts: Opts) {
 
     log.info(decryptedData)
   }
+}
+
+export async function showAll() {
+  const { client } = useContext()
+
+  const accounts = await client.investigation.find()
+
+  log.info(`Found ${accounts.length} accounts`)
+
+  const table = new Table({
+    head: ['#', 'Address', 'Authority', 'ProofReq', 'ProofReqOwner', 'Shares', 'Status', 'Created'],
+  })
+
+  let i = 0
+  for (const { pubkey, data } of accounts) {
+    table.push([
+      String(++i),
+      String(pubkey),
+      String(shortenAddress(data!.authority)),
+      String(shortenAddress(data!.proofRequest)),
+      String(shortenAddress(data!.proofRequestOwner)),
+      String(`${data!.revealedShareCount}/${data!.requiredShareCount}`),
+      String(data?.status),
+      String(new Date(Number(data!.createdAt) * 1000).toISOString()),
+    ])
+  }
+
+  console.log(table.toString())
 }

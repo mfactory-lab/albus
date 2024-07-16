@@ -26,5 +26,14 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-export * from './show'
-export * from './delete'
+import type { PublicKey } from '@solana/web3.js'
+import log from 'loglevel'
+import { useContext } from '@/context'
+
+export async function deleteInvestigation(addr: string | PublicKey) {
+  const { client } = useContext()
+  const { signature } = await client.investigation.delete({
+    investigationRequest: addr,
+  })
+  log.info(`Deleted investigation ${addr} (${signature})`)
+}

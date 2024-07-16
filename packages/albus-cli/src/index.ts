@@ -111,6 +111,10 @@ id.command('new')
 const investigation = cli.command('investigation')
   .description('Investigation Management')
 
+investigation.command('all', { isDefault: true })
+  .description('Show all investigations')
+  .action(actions.investigation.showAll)
+
 investigation.command('show')
   .description('Show investigation request')
   .argument('<address>', 'Investigation address')
