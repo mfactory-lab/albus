@@ -474,15 +474,15 @@ describe('albus', async () => {
     })
 
     it('can reconstruct secret key and decrypt data', async () => {
-      // const result = await client.investigation.decryptData({
-      //   investigationRequest: investigationAddress,
-      //   encryptionKey: investigator.secretKey,
-      // })
-      // assert.equal(String(result.claims.birthDate.value), credential.credentialSubject.birthDate)
-      // // console.log(result)
-
-      // TODO: implement
-      assert.ok(true)
+      const result = await client.investigation.decryptData({
+        investigationRequest: investigationAddress,
+        encryptionKey: investigator.secretKey,
+      })
+      assert.equal(String(result.givenName), credential.credentialSubject.givenName)
+      assert.equal(String(result.familyName), credential.credentialSubject.familyName)
+      assert.equal(String(result.birthDate), credential.credentialSubject.birthDate)
+      assert.equal(String(result.country), credential.credentialSubject.country)
+      assert.equal(String(result.docNumber), credential.credentialSubject.docNumber)
     })
 
     it('can delete investigation request', async () => {
