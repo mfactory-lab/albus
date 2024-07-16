@@ -27,20 +27,13 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type {
-  Commitment,
-  ConfirmOptions,
-  GetMultipleAccountsConfig,
-  PublicKeyInitData,
-} from '@solana/web3.js'
+import type { Commitment, ConfirmOptions, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js'
 import { chunk } from 'lodash-es'
 import type { SendOpts, TxBuilder } from './utils'
+import { ProofInputBuilder, getSolanaTimestamp } from './utils'
 import { BaseManager } from './base'
-import type {
-  ProofData,
-  ProofRequestStatus,
-} from './generated'
+import type { ProofData, ProofRequestStatus } from './generated'
 import {
   Circuit,
   Issuer,
@@ -55,7 +48,6 @@ import {
   proofRequestDiscriminator,
 } from './generated'
 import { KnownSignals } from './types'
-import { ProofInputBuilder, getSignals, getSolanaTimestamp } from './utils'
 
 export class ProofRequestManager extends BaseManager {
   private get service() {
@@ -307,72 +299,64 @@ export class ProofRequestManager extends BaseManager {
    * Decrypts data using the provided secret and signals.
    */
   decryptData(props: DecryptProofRequestDataProps) {
-    const { secret, signals } = props
-    const nonce = signals.timestamp as bigint
-    const encryptedData = (signals.encryptedData ?? []) as bigint[]
-    const decryptLength = encryptedData.length - 1 - (encryptedData.length - 1 % 3)
-
-    const data = Albus.crypto.Poseidon.decrypt(encryptedData, [secret, secret], decryptLength, nonce)
-
-    this.logger.log(`Decrypted data:`, data)
-
-    return {
-      claims: {
-        birthDate: {
-          proof: signals.birthDateProof,
-          key: signals.birthDateKey,
-          value: data[0],
-        },
-      },
-      credentialRoot: signals.credentialRoot,
-      issuerPk: signals.issuerPk, // [Ax, Ay]
-      issuerSignature: signals.issuerSignature, // [R8x, R8y, S]
-      userPublicKey: signals.userPublicKey,
-    }
-  }
-
-  async generateVerifiablePresentation(props: GenerateVerifiablePresentationProps) {
-    const { proofRequest, circuit } = await this.loadFull(props.proofRequest, ['circuit'])
-
-    if (!circuit) {
-      throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
-    }
-
-    const signals = getSignals(
-      [...circuit?.outputs ?? [], ...circuit?.publicSignals ?? []],
-      proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
+    const data = Albus.crypto.Poseidon.decrypt(
+      props.encryptedData,
+      [props.secret, props.secret],
+      props.encryptedSignals.length,
+      props.nonce,
     )
 
-    const secret = Albus.crypto.Poseidon.hash([
-      Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey),
-      signals.credentialRoot as bigint,
-      signals.timestamp as bigint,
-    ])
+    const result = {}
+    for (let i = 0; i < props.encryptedSignals.length; i++) {
+      const key = props.encryptedSignals[i]
+      result[key] = Albus.credential.ClaimsTree.decodeValue(data[i])
+    }
 
-    const data = this.decryptData({ secret, signals })
-
-    const vc = await Albus.credential.createVerifiableCredential({
-      birthDate: data.claims.birthDate.value,
-      customProof: {
-        type: 'BJJSignature2021',
-        rootHash: data.credentialRoot,
-        verificationMethod: '#eddsa-bjj',
-        proofPurpose: 'assertionMethod',
-        proofValue: {
-          ax: data.issuerPk[0],
-          ay: data.issuerPk[1],
-          r8x: data.issuerSignature[0],
-          r8y: data.issuerSignature[1],
-          s: data.issuerSignature[2],
-        },
-      },
-    })
-
-    return Albus.credential.createVerifiablePresentation({
-      holderSecretKey: props.userPrivateKey,
-      credentials: [vc],
-    })
+    return result
   }
+
+  // async generateVerifiablePresentation(props: GenerateVerifiablePresentationProps) {
+  //   const { proofRequest, circuit } = await this.loadFull(props.proofRequest, ['circuit'])
+  //
+  //   if (!circuit) {
+  //     throw new Error(`Unable to find Circuit account at ${proofRequest.circuit}`)
+  //   }
+  //
+  //   const signals = getSignals(
+  //     [...circuit?.outputs ?? [], ...circuit?.publicSignals ?? []],
+  //     proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
+  //   )
+  //
+  //   const secret = Albus.crypto.Poseidon.hash([
+  //     Albus.zkp.formatPrivKeyForBabyJub(props.userPrivateKey),
+  //     signals.credentialRoot as bigint,
+  //     signals.timestamp as bigint,
+  //   ])
+  //
+  //   const data = this.decryptData({ secret, signals })
+  //
+  //   const vc = await Albus.credential.createVerifiableCredential({
+  //     birthDate: data.claims.birthDate.value,
+  //     customProof: {
+  //       type: 'BJJSignature2021',
+  //       rootHash: data.credentialRoot,
+  //       verificationMethod: '#eddsa-bjj',
+  //       proofPurpose: 'assertionMethod',
+  //       proofValue: {
+  //         ax: data.issuerPk[0],
+  //         ay: data.issuerPk[1],
+  //         r8x: data.issuerSignature[0],
+  //         r8y: data.issuerSignature[1],
+  //         s: data.issuerSignature[2],
+  //       },
+  //     },
+  //   })
+  //
+  //   return Albus.credential.createVerifiablePresentation({
+  //     holderSecretKey: props.userPrivateKey,
+  //     credentials: [vc],
+  //   })
+  // }
 
   /**
    * Prove a proof request by providing the necessary proof and public signals.
@@ -680,5 +664,7 @@ export type GenerateVerifiablePresentationProps = {
 
 export type DecryptProofRequestDataProps = {
   secret: bigint
-  signals: Record<string, any>
+  nonce?: bigint
+  encryptedData: bigint[]
+  encryptedSignals: string[]
 }

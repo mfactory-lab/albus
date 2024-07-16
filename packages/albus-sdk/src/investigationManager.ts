@@ -27,18 +27,10 @@
  */
 
 import * as Albus from '@albus-finance/core'
-import type {
-  Commitment,
-  GetMultipleAccountsConfig,
-  PublicKeyInitData,
-} from '@solana/web3.js'
+import type { Commitment, GetMultipleAccountsConfig, PublicKeyInitData } from '@solana/web3.js'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { BaseManager } from './base'
-import type {
-  InvestigationStatus,
-  ProofRequest,
-  RevelationStatus,
-} from './generated'
+import type { InvestigationStatus, ProofRequest, RevelationStatus } from './generated'
 import {
   InvestigationRequest,
   InvestigationRequestShare,
@@ -423,6 +415,7 @@ export class InvestigationManager extends BaseManager {
     const decryptedShares = new Map<number, bigint>()
     for (const { data, pubkey } of shares) {
       if (data === null || decryptedShares.has(data.index)) {
+        console.log('skipped')
         continue
       }
       const encBytes = Uint8Array.from(data?.share ?? [])
@@ -456,7 +449,20 @@ export class InvestigationManager extends BaseManager {
       proofRequest.publicInputs.map(Albus.crypto.utils.bytesToBigInt),
     )
 
-    return this.proofRequest.decryptData({ secret, signals })
+    // TODO: refactory
+    const encryptedSignals = circuit.privateSignals
+      .filter(s => !s.startsWith('meta_') && s !== 'userPrivateKey')
+
+    if (!signals.encryptedData) {
+      throw new Error('Unable to find encrypted data in circuit')
+    }
+
+    return this.proofRequest.decryptData({
+      nonce: signals.timestamp as bigint,
+      encryptedData: signals.encryptedData as bigint[],
+      encryptedSignals,
+      secret,
+    })
   }
 }
 
