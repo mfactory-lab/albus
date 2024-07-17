@@ -46,7 +46,7 @@
     "@metaplex-foundation/beet": "^0.7.2",
     "@metaplex-foundation/beet-solana": "^0.4.1",
     "@metaplex-foundation/mpl-token-metadata": "^2.13.0",
-    "@solana/web3.js": "^1.91.1",
+    "@solana/web3.js": "^1.95.1",
     "axios": "^1.6.8",
     "lodash-es": "^4.17.21"
   },

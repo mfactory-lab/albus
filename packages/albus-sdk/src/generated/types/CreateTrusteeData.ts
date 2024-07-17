@@ -10,7 +10,7 @@ import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 
 export type CreateTrusteeData = {
-  key: number[] /* size: 32 */
+  pubkey: number[] /* size: 32 */
   name: string
   email: string
   website: string
@@ -24,7 +24,7 @@ export type CreateTrusteeData = {
 export const createTrusteeDataBeet
   = new beet.FixableBeetArgsStruct<CreateTrusteeData>(
     [
-      ['key', beet.uniformFixedSizeArray(beet.u8, 32)],
+      ['pubkey', beet.uniformFixedSizeArray(beet.u8, 32)],
       ['name', beet.utf8String],
       ['email', beet.utf8String],
       ['website', beet.utf8String],

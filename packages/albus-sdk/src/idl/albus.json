@@ -191,7 +191,14 @@
           ]
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "data",
+          "type": {
+            "defined": "CreateCredentialData"
+          }
+        }
+      ]
     },
     {
       "name": "updateCredential",
@@ -202,21 +209,12 @@
           "isSigner": false
         },
         {
-          "name": "credentialRequest",
+          "name": "issuer",
           "isMut": false,
           "isSigner": false,
           "isOptional": true,
           "docs": [
-            "(Optional) Credential request."
-          ]
-        },
-        {
-          "name": "credentialRequestIssuer",
-          "isMut": false,
-          "isSigner": false,
-          "isOptional": true,
-          "docs": [
-            "(Optional) Credential request issuer."
+            "(Optional) Credential issuer."
           ]
         },
         {
@@ -2173,6 +2171,20 @@
       }
     },
     {
+      "name": "CreateCredentialData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "issuer",
+            "type": {
+              "option": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "CreateCredentialSpecData",
       "type": {
         "kind": "struct",
@@ -2213,14 +2225,14 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "uri",
-            "type": "string"
-          },
-          {
             "name": "name",
             "type": {
               "option": "string"
             }
+          },
+          {
+            "name": "uri",
+            "type": "string"
           }
         ]
       }
@@ -2624,7 +2636,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "key",
+            "name": "pubkey",
             "type": {
               "array": [
                 "u8",

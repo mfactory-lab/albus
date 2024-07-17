@@ -41,8 +41,7 @@ export const updateCredentialStruct = new beet.FixableBeetArgsStruct<
  * Accounts required by the _updateCredential_ instruction
  *
  * @property [_writable_] albusAuthority
- * @property [] credentialRequest (optional)
- * @property [] credentialRequestIssuer (optional)
+ * @property [] issuer (optional)
  * @property [] mint
  * @property [_writable_] metadataAccount
  * @property [_writable_, **signer**] authority
@@ -54,8 +53,7 @@ export const updateCredentialStruct = new beet.FixableBeetArgsStruct<
  */
 export type UpdateCredentialInstructionAccounts = {
   albusAuthority: web3.PublicKey
-  credentialRequest?: web3.PublicKey
-  credentialRequestIssuer?: web3.PublicKey
+  issuer?: web3.PublicKey
   mint: web3.PublicKey
   metadataAccount: web3.PublicKey
   authority: web3.PublicKey
@@ -98,12 +96,7 @@ export function createUpdateCredentialInstruction(
       isSigner: false,
     },
     {
-      pubkey: accounts.credentialRequest ?? programId,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.credentialRequestIssuer ?? programId,
+      pubkey: accounts.issuer ?? programId,
       isWritable: false,
       isSigner: false,
     },

@@ -8,16 +8,34 @@
 import * as splToken from '@solana/spl-token'
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
+import type {
+  CreateCredentialData } from '../types/CreateCredentialData'
+import {
+  createCredentialDataBeet,
+} from '../types/CreateCredentialData'
 
 /**
  * @category Instructions
  * @category CreateCredential
  * @category generated
  */
-export const createCredentialStruct = new beet.BeetArgsStruct<{
-  instructionDiscriminator: number[] /* size: 8 */
-}>(
-  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
+export type CreateCredentialInstructionArgs = {
+  data: CreateCredentialData
+}
+/**
+ * @category Instructions
+ * @category CreateCredential
+ * @category generated
+ */
+export const createCredentialStruct = new beet.FixableBeetArgsStruct<
+  CreateCredentialInstructionArgs & {
+    instructionDiscriminator: number[] /* size: 8 */
+  }
+>(
+  [
+    ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
+    ['data', createCredentialDataBeet],
+  ],
   'CreateCredentialInstructionArgs',
 )
 /**
@@ -65,16 +83,20 @@ export const createCredentialInstructionDiscriminator = [
  * this was indicated in the IDL from which this instruction was generated.
  *
  * @param accounts that will be accessed while the instruction is processed
+ * @param args to provide as instruction data to the program
+ *
  * @category Instructions
  * @category CreateCredential
  * @category generated
  */
 export function createCreateCredentialInstruction(
   accounts: CreateCredentialInstructionAccounts,
+  args: CreateCredentialInstructionArgs,
   programId = new web3.PublicKey('ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi'),
 ) {
   const [data] = createCredentialStruct.serialize({
     instructionDiscriminator: createCredentialInstructionDiscriminator,
+    ...args,
   })
   const keys: web3.AccountMeta[] = [
     {

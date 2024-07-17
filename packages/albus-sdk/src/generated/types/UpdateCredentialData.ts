@@ -8,8 +8,8 @@
 import * as beet from '@metaplex-foundation/beet'
 
 export type UpdateCredentialData = {
-  uri: string
   name: beet.COption<string>
+  uri: string
 }
 
 /**
@@ -19,8 +19,8 @@ export type UpdateCredentialData = {
 export const updateCredentialDataBeet
   = new beet.FixableBeetArgsStruct<UpdateCredentialData>(
     [
-      ['uri', beet.utf8String],
       ['name', beet.coption(beet.utf8String)],
+      ['uri', beet.utf8String],
     ],
     'UpdateCredentialData',
   )

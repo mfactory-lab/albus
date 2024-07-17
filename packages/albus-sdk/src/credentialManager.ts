@@ -29,10 +29,7 @@
 import { PROGRAM_ID as METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 import type { VerifiableCredential } from '@albus-finance/core'
 import * as Albus from '@albus-finance/core'
-import type {
-  ClientSubscriptionId,
-  PublicKeyInitData,
-} from '@solana/web3.js'
+import type { PublicKeyInitData } from '@solana/web3.js'
 import {
   ComputeBudgetProgram,
   Keypair,
@@ -42,6 +39,7 @@ import {
 import type { Resolver } from 'did-resolver'
 import { BaseManager } from './base'
 import {
+  CREATE_CREDENTIAL_CU,
   CREDENTIAL_NAME,
   CREDENTIAL_SYMBOL_CODE,
   NFT_SYMBOL_PREFIX,
@@ -59,7 +57,7 @@ import {
 } from './utils'
 
 export class CredentialManager extends BaseManager {
-  private subscriptions = new Map<string, ClientSubscriptionId>()
+  private subscriptions = new Map<string, number>()
 
   /**
    * Register a callback to be invoked whenever the credential account changes
@@ -113,6 +111,10 @@ export class CredentialManager extends BaseManager {
       metadataAccount: getMetadataPDA(mint.publicKey),
       metadataProgram: METADATA_PROGRAM_ID,
       sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+    }, {
+      data: {
+        issuer: props?.issuer ? new PublicKey(props?.issuer) : null,
+      },
     }, this.programId)
 
     return {
@@ -128,7 +130,7 @@ export class CredentialManager extends BaseManager {
     const { mint, instructions } = this.createIx(props)
 
     const builder = this.txBuilder
-      .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }))
+      .addInstruction(ComputeBudgetProgram.setComputeUnitLimit({ units: CREATE_CREDENTIAL_CU }))
       .addInstruction(...instructions)
       .addSigner(mint)
 
@@ -149,12 +151,12 @@ export class CredentialManager extends BaseManager {
     // const tokenAccount = getAssociatedTokenAddress(mint, owner)
 
     let mint: PublicKey | undefined
+    let issuer: PublicKey | undefined
     let credentialRequest: PublicKey | undefined
-    let credentialRequestIssuer: PublicKey | undefined
     if (props.credentialRequest) {
       credentialRequest = new PublicKey(props.credentialRequest)
       const credentialRequestAccount = await this.client.credentialRequest.load(credentialRequest)
-      credentialRequestIssuer = credentialRequestAccount.issuer
+      issuer = credentialRequestAccount.issuer
       mint = credentialRequestAccount.credentialMint
     } else {
       if (!props.mint) {
@@ -165,9 +167,7 @@ export class CredentialManager extends BaseManager {
 
     const ix = createUpdateCredentialInstruction({
       mint,
-      // tokenAccount,
-      credentialRequest,
-      credentialRequestIssuer,
+      issuer,
       albusAuthority: this.pda.authority()[0],
       metadataAccount: getMetadataPDA(mint),
       authority: this.provider.publicKey,
@@ -335,6 +335,7 @@ export type CredentialInfo = {
 
 export type CreateCredentialProps = {
   owner?: Keypair
+  issuer?: PublicKeyInitData
 }
 
 export type UpdateCredentialProps = {
@@ -344,6 +345,7 @@ export type UpdateCredentialProps = {
   mint?: PublicKeyInitData
   // Optional credential request associated with issuer
   credentialRequest?: PublicKeyInitData
+  issuer?: PublicKeyInitData
 }
 
 export type DeleteCredentialProps = {

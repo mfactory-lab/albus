@@ -122,7 +122,7 @@ export class TrusteeManager extends BaseManager {
       authority,
     }, {
       data: {
-        key: props.key,
+        pubkey: props.key,
         name: props.name,
         email: props.email,
         website: props.website,
@@ -137,7 +137,7 @@ export class TrusteeManager extends BaseManager {
   }
 
   /**
-   * Add new trustee
+   * Add a new trustee
    */
   async create(props: CreateTrusteeProps, opts?: SendOpts) {
     const { address, instructions } = this.createIx(props)

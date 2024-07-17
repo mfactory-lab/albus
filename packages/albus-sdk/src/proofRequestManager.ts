@@ -48,6 +48,7 @@ import {
   proofRequestDiscriminator,
 } from './generated'
 import { KnownSignals } from './types'
+import { PROVE_PROOF_REQUEST_CU, VERIFY_PROOF_REQUEST_CU } from './constants'
 
 export class ProofRequestManager extends BaseManager {
   private get service() {
@@ -280,7 +281,7 @@ export class ProofRequestManager extends BaseManager {
 
     txBuilder.addTransaction(
       new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: props.computeUnits ?? 400_000 }))
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: props.computeUnits ?? VERIFY_PROOF_REQUEST_CU }))
       // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 220 * 1024 }))
         .add(createVerifyProofRequestInstruction({
           proofRequest,
@@ -298,7 +299,7 @@ export class ProofRequestManager extends BaseManager {
   /**
    * Decrypts data using the provided secret and signals.
    */
-  decryptData(props: DecryptProofRequestDataProps) {
+  decryptData(props: DecryptProofRequestDataProps): Record<string, string> {
     const data = Albus.crypto.Poseidon.decrypt(
       props.encryptedData,
       [props.secret, props.secret],
@@ -383,51 +384,55 @@ export class ProofRequestManager extends BaseManager {
       const inputChunks: any[] = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
       for (let i = 0; i < inputChunks.length; i++) {
         txBuilder.addTransaction(
-          new Transaction().add(createProveProofRequestInstruction(
-            {
-              proofRequest,
-              circuit,
-              policy,
-              authority,
-            },
-            {
-              data: {
-                reset: i === 0,
-                publicInputs: inputChunks[i],
-                proof: null,
+          new Transaction()
+            .add(ComputeBudgetProgram.setComputeUnitLimit({ units: PROVE_PROOF_REQUEST_CU }))
+            .add(createProveProofRequestInstruction(
+              {
+                proofRequest,
+                circuit,
+                policy,
+                authority,
               },
-            },
-            this.programId,
-          )),
+              {
+                data: {
+                  reset: i === 0,
+                  publicInputs: inputChunks[i],
+                  proof: null,
+                },
+              },
+              this.programId,
+            )),
         )
       }
     }
 
     txBuilder.addTransaction(
-      new Transaction().add(createProveProofRequestInstruction(
-        {
-          proofRequest,
-          circuit,
-          policy,
-          issuer: props.issuer,
-          authority,
-        },
-        {
-          data: {
-            reset: publicInputs.length <= inputsLimit.withProof,
-            publicInputs: publicInputs.slice(-inputsLimit.withProof),
-            proof,
+      new Transaction()
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: PROVE_PROOF_REQUEST_CU }))
+        .add(createProveProofRequestInstruction(
+          {
+            proofRequest,
+            circuit,
+            policy,
+            issuer: props.issuer,
+            authority,
           },
-        },
-        this.programId,
-      )),
+          {
+            data: {
+              reset: publicInputs.length <= inputsLimit.withProof,
+              publicInputs: publicInputs.slice(-inputsLimit.withProof),
+              proof,
+            },
+          },
+          this.programId,
+        )),
     )
 
     if (props.verify) {
       this.logger.log('prove', 'createVerifyProofRequestInstruction (setComputeUnitLimit: 400_000)')
       txBuilder.addTransaction(
         new Transaction()
-          .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 600_000 }))
+          .add(ComputeBudgetProgram.setComputeUnitLimit({ units: VERIFY_PROOF_REQUEST_CU }))
         // .add(ComputeBudgetProgram.requestHeapFrame({ bytes: 500 * 1024 }))
           .add(createVerifyProofRequestInstruction({
             proofRequest,
@@ -510,7 +515,7 @@ export class ProofRequestManager extends BaseManager {
         input: proofInput.data,
       }
 
-      this.logger.log('fullProve', 'proving...', proofData)
+      // this.logger.log('fullProve', 'proving...', proofData)
       const { proof, publicSignals } = await Albus.zkp.generateProof(proofData)
 
       this.logger.log('fullProve', 'sending transaction...')

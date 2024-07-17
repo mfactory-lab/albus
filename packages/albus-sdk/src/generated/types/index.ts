@@ -1,5 +1,6 @@
 export * from './ContactInfo'
 export * from './CreateCircuitData'
+export * from './CreateCredentialData'
 export * from './CreateCredentialSpecData'
 export * from './CreateInvestigationRequestData'
 export * from './CreateIssuerData'
