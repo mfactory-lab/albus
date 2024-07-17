@@ -63,6 +63,7 @@ describe('credentialRequest', async () => {
       code: 'aml-issuer',
       name: 'aml-issuer',
       signer: issuer,
+      authority: issuer.publicKey,
     })
     issuerAddress = address
   }, 20000)
@@ -95,7 +96,7 @@ describe('credentialRequest', async () => {
   })
 
   it('should allow requesting a credential', async () => {
-    const { mintAddress: address } = await holderClient.credential.create()
+    const { mintAddress: address } = await holderClient.credential.create({ issuer: issuerAddress })
     mintAddress = address
     const { signature } = await holderClient.credentialRequest.create({
       mint: mintAddress,

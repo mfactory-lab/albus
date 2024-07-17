@@ -497,7 +497,7 @@ describe('albus', async () => {
         try {
           await newClient.investigation.load(investigationAddress)
           assert.ok(false)
-        } catch (e) {
+        } catch {
           assert.ok(true)
         }
       } catch (e) {
