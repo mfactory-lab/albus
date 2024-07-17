@@ -66,7 +66,7 @@ pub fn handler<'info>(
         }
 
         for (idx, acc) in &mut ctx.remaining_accounts.iter().enumerate() {
-            // share account is not already created
+            // a share account is not yet created
             if acc.data_is_empty() {
                 let trustee = data.trustees[idx];
 

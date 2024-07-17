@@ -43,7 +43,7 @@ pub fn handler(ctx: Context<CreateTrustee>, data: CreateTrusteeData) -> Result<(
         ctx.accounts.authority.key()
     };
 
-    trustee.key = data.key;
+    trustee.key = data.pubkey;
     trustee.name = data.name;
     trustee.email = data.email;
     trustee.website = data.website;
@@ -56,7 +56,7 @@ pub fn handler(ctx: Context<CreateTrustee>, data: CreateTrusteeData) -> Result<(
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateTrusteeData {
-    pub key: [u8; 32],
+    pub pubkey: [u8; 32],
     pub name: String,
     pub email: String,
     pub website: String,
@@ -68,7 +68,7 @@ pub struct CreateTrusteeData {
 pub struct CreateTrustee<'info> {
     #[account(
         init,
-        seeds = [Trustee::SEED, data.key.as_ref()],
+        seeds = [Trustee::SEED, data.pubkey.as_ref()],
         bump,
         payer = authority,
         space = Trustee::space()

@@ -45,7 +45,7 @@ use crate::{
 pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> Result<()> {
     let req = &mut ctx.accounts.proof_request;
 
-    if !cmp_pubkeys(&req.owner, &ctx.accounts.authority.key()) {
+    if !cmp_pubkeys(&req.owner, ctx.accounts.authority.key) {
         msg!("Error: Only request owner can prove it!");
         return Err(AlbusError::Unauthorized.into());
     }
