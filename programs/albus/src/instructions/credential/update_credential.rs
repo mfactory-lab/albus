@@ -27,7 +27,7 @@
  */
 
 use crate::errors::AlbusError;
-use crate::state::{CredentialRequest, Issuer};
+use crate::state::Issuer;
 use crate::utils::{assert_authorized, cmp_pubkeys};
 use crate::ID;
 use anchor_lang::prelude::*;
@@ -37,40 +37,38 @@ use anchor_spl::metadata::Metadata as MetadataProgram;
 use anchor_spl::metadata::MetadataAccount;
 
 pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
-    match &ctx.accounts.credential_request {
-        None => {
-            assert_authorized(ctx.accounts.authority.key)?;
-        }
-        Some(req) => {
-            if !cmp_pubkeys(&req.credential_mint, ctx.accounts.mint.key) {
-                msg!("Error: Credential mint mismatch");
-                return Err(AlbusError::Unauthorized.into());
-            }
-            match &ctx.accounts.credential_request_issuer {
-                None => {
-                    msg!("Error: Credential request issuer not set");
-                    return Err(AlbusError::Unauthorized.into());
-                }
-                Some(issuer) => {
-                    if issuer.is_disabled {
-                        msg!("Error: Credential request issuer is disabled");
-                        return Err(AlbusError::Unauthorized.into());
-                    }
-                    if !cmp_pubkeys(&req.issuer, &issuer.key()) {
-                        msg!("Error: Credential request issuer mismatch");
-                        return Err(AlbusError::Unauthorized.into());
-                    }
-                    if !cmp_pubkeys(&issuer.authority, ctx.accounts.authority.key) {
-                        msg!("Error: Credential request issuer authority mismatch");
-                        return Err(AlbusError::Unauthorized.into());
-                    }
-                }
-            }
-        }
-    }
-
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
     let metadata = &ctx.accounts.metadata_account;
+
+    match &ctx.accounts.issuer {
+        Some(issuer) => {
+            if issuer.is_disabled {
+                msg!("Error: Issuer is disabled");
+                return Err(AlbusError::Unauthorized.into());
+            }
+            if !cmp_pubkeys(&issuer.authority, ctx.accounts.authority.key) {
+                msg!("Error: Issuer authority mismatch");
+                return Err(AlbusError::Unauthorized.into());
+            }
+            // Only an authorized issuer can update the credential
+            if let Some(creators) = &metadata.creators {
+                let found = creators
+                    .iter()
+                    .find(|&c| cmp_pubkeys(&c.address, &issuer.key()));
+                if found.is_none() {
+                    msg!("Error: Issuer authority mismatch");
+                    return Err(AlbusError::Unauthorized.into());
+                }
+            } else {
+                msg!("Error: Credential is not owned by an issuer");
+                return Err(AlbusError::Unauthorized.into());
+            }
+        }
+        None => {
+            // superuser can update any credential
+            assert_authorized(ctx.accounts.authority.key)?;
+        }
+    }
 
     UpdateV1CpiBuilder::new(&ctx.accounts.metadata_program)
         .metadata(&metadata.to_account_info())
@@ -95,8 +93,8 @@ pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Re
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateCredentialData {
-    pub uri: String,
     pub name: Option<String>,
+    pub uri: String,
 }
 
 #[derive(Accounts)]
@@ -105,16 +103,9 @@ pub struct UpdateCredential<'info> {
     #[account(mut, seeds = [ID.as_ref()], bump)]
     pub albus_authority: AccountInfo<'info>,
 
-    /// (Optional) Credential request.
-    pub credential_request: Option<Box<Account<'info, CredentialRequest>>>,
+    /// (Optional) Credential issuer.
+    pub issuer: Option<Box<Account<'info, Issuer>>>,
 
-    /// (Optional) Credential request issuer.
-    pub credential_request_issuer: Option<Box<Account<'info, Issuer>>>,
-
-    // /// Destination token account.
-    // ///
-    // /// CHECK: account checked in CPI
-    // pub token_account: UncheckedAccount<'info>,
     /// Mint account of the NFT.
     ///
     /// CHECK: account checked in CPI

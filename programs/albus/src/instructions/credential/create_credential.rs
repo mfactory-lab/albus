@@ -35,23 +35,17 @@ use anchor_spl::metadata::mpl_token_metadata::instructions::MintV1CpiBuilder;
 use anchor_spl::metadata::mpl_token_metadata::instructions::{
     CreateV1CpiBuilder, DelegateStandardV1CpiBuilder, FreezeDelegatedAccountCpiBuilder,
 };
-use anchor_spl::metadata::mpl_token_metadata::types::{PrintSupply, TokenStandard};
+use anchor_spl::metadata::mpl_token_metadata::types::{Creator, PrintSupply, TokenStandard};
 use anchor_spl::metadata::Metadata as MetadataProgram;
 use anchor_spl::token::Token as TokenProgram;
 
-pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
+pub fn handler(ctx: Context<CreateCredential>, data: CreateCredentialData) -> Result<()> {
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];
-
     let payer: &AccountInfo = &ctx.accounts.payer;
 
-    // Albus payer
-    // let balance = ctx.accounts.albus_authority.lamports();
-    // requires 0.0219862 SOL
-    // if balance > 25_000_000 {
-    //     payer = &ctx.accounts.albus_authority;
-    // }
+    let mut builder = CreateV1CpiBuilder::new(&ctx.accounts.metadata_program);
 
-    CreateV1CpiBuilder::new(&ctx.accounts.metadata_program)
+    builder
         .name(CREDENTIAL_NAME.into())
         .uri(Default::default())
         .symbol(format!("{}-{}", NFT_SYMBOL_PREFIX, CREDENTIAL_SYMBOL_CODE))
@@ -68,8 +62,18 @@ pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
         .sysvar_instructions(&ctx.accounts.sysvar_instructions)
         .spl_token_program(&ctx.accounts.token_program)
         .print_supply(PrintSupply::Zero)
-        .is_mutable(true)
-        .invoke_signed(&[&signer_seeds])?;
+        .is_mutable(true);
+
+    // authorize an issuer
+    if let Some(address) = data.issuer {
+        builder.creators(vec![Creator {
+            address,
+            verified: false,
+            share: 100,
+        }]);
+    }
+
+    builder.invoke_signed(&[&signer_seeds])?;
 
     MintV1CpiBuilder::new(&ctx.accounts.token_program)
         .token(&ctx.accounts.token_account)
@@ -125,6 +129,11 @@ pub fn handler(ctx: Context<CreateCredential>) -> Result<()> {
     // lock_builder.invoke_signed(&[&signer_seeds])?;
 
     Ok(())
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct CreateCredentialData {
+    pub issuer: Option<Pubkey>,
 }
 
 #[derive(Accounts)]

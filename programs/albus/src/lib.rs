@@ -79,8 +79,11 @@ pub mod albus {
 
     // Credential
 
-    pub fn create_credential(ctx: Context<CreateCredential>) -> Result<()> {
-        create_credential::handler(ctx)
+    pub fn create_credential(
+        ctx: Context<CreateCredential>,
+        data: CreateCredentialData,
+    ) -> Result<()> {
+        create_credential::handler(ctx, data)
     }
 
     pub fn update_credential(
