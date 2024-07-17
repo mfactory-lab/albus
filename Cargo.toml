@@ -2,6 +2,8 @@
 resolver = "2"
 members = [
   "programs/*",
+  #  "crates/albus-client",
+  #  "crates/albus-swap-client",
   "crates/solana-verifier",
   "crates/groth16-solana",
 ]
@@ -12,21 +14,27 @@ version = "0.0.0"
 authors = [ "Albus Team" ]
 repository = "https://github.com/mfactory-lab/albus"
 homepage = "https://albus.finance"
+documentation = "https://docs.albus.finance"
 license = "AGPL-3.0"
 publish = false
 
 [workspace.dependencies]
 albus-solana-verifier = { path = "crates/solana-verifier" }
-# anchor-lang = { version = "0.30.0" }
-# anchor-spl = { version = "0.30.0", default-features = false }
+# anchor-lang = { version = "0.30.1", features = [
+#  "init-if-needed",
+#  "interface-instructions",
+#  "allow-missing-optionals",
+# ] }
+# anchor-spl = { version = "0.30.1" }
 groth16-solana = { path = "crates/groth16-solana" }
-solana-program = "1.17.31"
+solana-program = { version = "*", default-features = false }
 solana-security-txt = { version = "1.1.1" }
 
 [profile.release]
 lto = "fat"
 codegen-units = 1
 overflow-checks = true
+# opt-level = "z"
 
 [profile.release.build-override]
 opt-level = 3

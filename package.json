@@ -12,6 +12,7 @@
     "sdk": "pnpm -F @albus-finance/sdk run",
     "ui": "pnpm -F @albus-finance/ui run",
     "swap": "pnpm -F @albus-finance/swap-sdk run",
+    "spool": "pnpm -F @albus-finance/stake-pool-sdk run",
     "transfer": "pnpm -F @albus-finance/transfer-sdk run",
     "docs": "docsify serve ./docs",
     "test:e2e": "pnpm -F @albus-finance/tests run test",
