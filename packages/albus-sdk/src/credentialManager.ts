@@ -162,6 +162,7 @@ export class CredentialManager extends BaseManager {
       if (!props.mint) {
         throw new Error('Missing mint address')
       }
+      issuer = props.issuer ? new PublicKey(props.issuer) : undefined
       mint = new PublicKey(props.mint)
     }
 
