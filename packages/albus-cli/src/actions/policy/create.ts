@@ -27,6 +27,7 @@
  */
 
 import log from 'loglevel'
+import { crypto } from '@albus-finance/core'
 import { useContext } from '@/context'
 import { capitalize } from '@/utils'
 
@@ -55,9 +56,21 @@ export async function create(opts: Opts) {
     rules: opts.rules?.map((r) => {
       const rr = r.split(':')
       if (rr.length < 2 || rr[1] === undefined) {
-        throw new Error(`Invalid rule ${rr}, should be in format \`{key}:{value}\``)
+        throw new Error(`Invalid rule ${rr}, should be in format \`{key}:{value}:{label}\``)
       }
-      return { key: String(rr[0]), value: String(rr[1]), label: rr[2] ?? rr[1] }
+
+      let bytes: Uint8Array
+      if (rr[1].startsWith('[') && rr[1].endsWith(']')) {
+        bytes = Uint8Array.from(JSON.parse(rr[1]))
+      } else {
+        bytes = crypto.utils.bigintToBytes(BigInt(rr[1]))
+      }
+
+      return {
+        key: String(rr[0]),
+        value: bytes,
+        label: rr[2] ?? rr[0],
+      }
     }),
   })
 
