@@ -74,23 +74,33 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
 
         // validate timestamp
         if let Some(s) = signals.get(TIMESTAMP_SIGNAL) {
-            let input = bytes_to_num(req.public_inputs[s.index]);
-            if (input as i64) < timestamp - TIMESTAMP_THRESHOLD as i64 {
-                msg!("Error: Invalid timestamp, new proof required");
+            if let Some(bytes) = req.public_inputs.get(s.index) {
+                let input = bytes_to_num(*bytes);
+                if (input as i64) < timestamp - TIMESTAMP_THRESHOLD as i64 {
+                    msg!("Error: Invalid timestamp, new proof required");
+                    return Err(AlbusError::InvalidData.into());
+                }
+            } else {
+                msg!("Error: Missing timestamp, new proof required");
                 return Err(AlbusError::InvalidData.into());
             }
         }
 
         // validate expiration
         if let Some(s) = signals.get(META_VALID_UNTIL_SIGNAL) {
-            let input = bytes_to_num(req.public_inputs[s.index]);
-            let valid_until = i64::try_from(input).expect("failed to parse `meta_validUntil`");
-            if valid_until <= timestamp {
-                msg!("Error: credential is expired");
-                return Err(AlbusError::Expired.into());
-            }
-            if req.expired_at == 0 || valid_until < req.expired_at {
-                req.expired_at = valid_until;
+            if let Some(bytes) = req.public_inputs.get(s.index) {
+                let input = bytes_to_num(*bytes);
+                let valid_until = i64::try_from(input).expect("failed to parse `meta_validUntil`");
+                if valid_until <= timestamp {
+                    msg!("Error: credential is expired");
+                    return Err(AlbusError::Expired.into());
+                }
+                if req.expired_at == 0 || valid_until < req.expired_at {
+                    req.expired_at = valid_until;
+                }
+            } else {
+                msg!("Error: credential is missing `meta_validUntil`");
+                return Err(AlbusError::InvalidData.into());
             }
         }
 
