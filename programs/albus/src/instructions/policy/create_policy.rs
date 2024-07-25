@@ -28,6 +28,7 @@
 
 use anchor_lang::prelude::*;
 
+use crate::errors::AlbusError;
 use crate::state::{Circuit, ServiceProvider};
 use crate::state::{Policy, PolicyRule};
 
@@ -66,7 +67,7 @@ pub struct CreatePolicyData {
 #[derive(Accounts)]
 #[instruction(data: CreatePolicyData)]
 pub struct CreatePolicy<'info> {
-    #[account(mut)]
+    #[account(mut, has_one = authority @ AlbusError::Unauthorized)]
     pub service_provider: Box<Account<'info, ServiceProvider>>,
 
     pub circuit: Box<Account<'info, Circuit>>,
