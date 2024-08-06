@@ -62,7 +62,7 @@ export function initMetaplex(payerKeypair: Keypair) {
 export function initProvider(keypair: Keypair, opts?: ConfirmOptions) {
   opts = {
     ...opts,
-    // skipPreflight: true,
+    skipPreflight: true,
     commitment: 'confirmed',
     // preflightCommitment: 'confirmed',
   }
