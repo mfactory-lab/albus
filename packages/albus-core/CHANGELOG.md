@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.6-next.35 (2024-08-06)
+
+
+### 🐞 Bug Fixes
+
+* improved `ProofRequestManager`, optimize proof request cu ([2835478](https://github.com/mfactory-lab/albus/commit/283547808cad73132030d1f5d63555f4fd136cf2))
+
 ## [0.3.6-next.34](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.33...@albus-finance/core-v0.3.6-next.34) (2024-07-02)
 
 ## [0.3.6-next.33](https://github.com/mfactory-lab/albus/compare/@albus-finance/core-v0.3.6-next.32...@albus-finance/core-v0.3.6-next.33) (2024-07-02)
