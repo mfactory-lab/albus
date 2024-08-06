@@ -43,7 +43,10 @@ export abstract class BaseManager {
   }
 
   get txBuilder() {
-    return this._txBuilder ?? new TxBuilder(this.client.provider)
+    return this._txBuilder ?? new TxBuilder(this.client.provider, {
+      logger: this.logger,
+      simulate: this.client.options.txSimulate,
+    })
       .withPriorityFeeLoader(this.client.options?.priorityFeeLoader)
       .withPriorityFee(this.client.options?.priorityFee ?? 0)
   }

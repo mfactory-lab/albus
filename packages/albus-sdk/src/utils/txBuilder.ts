@@ -10,16 +10,26 @@ import {
 } from '@solana/web3.js'
 import type { ClientProvider } from '../client'
 import { errorFromCode } from '../generated'
+import { type IFullLogger, type Logger, toFullLogger } from './logger'
 
 export type PriorityFeeLoader = (tx: Transaction) => Promise<number>
 
 export class TxBuilder {
   txs: Array<{ tx: Transaction, signers?: Signer[] }> = []
+
   private priorityFee?: number | bigint
   private priorityFeeLoader?: PriorityFeeLoader
+  private logger?: IFullLogger
 
-  constructor(readonly provider: ClientProvider) {
+  constructor(readonly provider: ClientProvider, private readonly opts?: { simulate?: boolean, logger?: Logger }) {
     this.addTransaction(new Transaction(), [])
+    if (opts?.logger) {
+      this.setLogger(opts.logger)
+    }
+  }
+
+  setLogger(logger: Logger) {
+    this.logger = toFullLogger(logger)
   }
 
   addTransaction(tx: Transaction, signers?: Signer[]) {
@@ -71,6 +81,17 @@ export class TxBuilder {
         }
       }
 
+      for (const { tx, signers } of txs) {
+        if (this.opts?.simulate && this.provider.simulate) {
+          try {
+            const res = await this.provider.simulate(tx, signers, opts?.commitment)
+            this.logger?.log('simulation', res)
+          } catch (e) {
+            this.logger?.error('simulation', e)
+          }
+        }
+      }
+
       return await this.provider.sendAll(txs, {
         ...this.provider.opts,
         ...opts,
@@ -105,6 +126,15 @@ export class TxBuilder {
       const microLamports = await this.priorityFeeLoader(this.txs[0].tx)
       for (const { tx } of this.txs) {
         tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports }))
+      }
+    }
+
+    if (this.opts?.simulate && this.provider.simulate) {
+      try {
+        const res = await this.provider.simulate(this.txs[0].tx, this.txs[0].signers, opts?.confirm?.commitment)
+        this.logger?.log('simulation', res)
+      } catch (e) {
+        this.logger?.error('simulation', e)
       }
     }
 

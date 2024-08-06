@@ -92,10 +92,10 @@ export async function loadNft(connection: Connection, mint: PublicKeyInitData, v
  */
 export async function getMetadataByAccountInfo(accountInfo: AccountInfo<Buffer>, loadJson = false) {
   const metadata = sanitizeMetadata(Metadata.fromAccountInfo(accountInfo)[0]) as ExtendedMetadata
-  if (loadJson) {
+  if (loadJson && isValidUrl(metadata.data.uri)) {
     try {
       metadata.json = (await axios.get(metadata.data.uri)).data
-    } catch (e) {
+    } catch {
       console.log(`Error: Failed to load NFT metadata (${metadata.data.uri})`)
       metadata.json = {}
     }
@@ -300,4 +300,13 @@ export function getAssociatedTokenAddress(
     [owner.toBuffer(), programId.toBuffer(), mint.toBuffer()],
     associatedTokenProgramId,
   )[0]
+}
+
+function isValidUrl(url: string, validProtocols = ['http:', 'https:']): boolean {
+  try {
+    const parsedUrl = new URL(url)
+    return validProtocols.includes(parsedUrl.protocol)
+  } catch {
+    return false
+  }
 }

@@ -189,6 +189,8 @@ export type ClientOptions = {
   debug?: boolean
   /// Logger
   logger?: Logger
+  /// Simulate transactions and log them
+  txSimulate?: boolean
   /// Storage driver
   storage?: { driver: string, options?: IrysOptions | Record<string, any> }
   /// Priority fee to be used with the transaction builder, in micro-lamports
