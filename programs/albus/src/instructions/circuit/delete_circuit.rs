@@ -28,8 +28,7 @@
 
 use anchor_lang::prelude::*;
 
-use crate::state::Circuit;
-use crate::utils::assert_authorized;
+use crate::{state::Circuit, utils::assert_authorized};
 
 pub fn handler(ctx: Context<DeleteCircuit>) -> Result<()> {
     assert_authorized(ctx.accounts.authority.key)

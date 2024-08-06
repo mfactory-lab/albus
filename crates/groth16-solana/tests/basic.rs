@@ -1,7 +1,4 @@
-use ark_serialize::CanonicalDeserialize;
-use ark_serialize::CanonicalSerialize;
-use ark_serialize::Compress;
-use ark_serialize::Validate;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize, Compress, Validate};
 use groth16_solana::{Groth16Verifier, Proof, VK};
 use solana_program::alt_bn128::AltBn128Error;
 

@@ -1,18 +1,17 @@
 //! Simple constant price swap curve, set at init
-use {
-    crate::{
-        curve::calculator::{
-            map_zero_to_none, CurveCalculator, DynPack, RoundDirection, SwapWithoutFeesResult,
-            TradeDirection, TradingTokenResult,
-        },
-        errors::SwapError,
+use arrayref::{array_mut_ref, array_ref};
+use solana_program::{
+    program_error::ProgramError,
+    program_pack::{IsInitialized, Pack, Sealed},
+};
+use spl_math::{checked_ceil_div::CheckedCeilDiv, precise_number::PreciseNumber, uint::U256};
+
+use crate::{
+    curve::calculator::{
+        map_zero_to_none, CurveCalculator, DynPack, RoundDirection, SwapWithoutFeesResult,
+        TradeDirection, TradingTokenResult,
     },
-    arrayref::{array_mut_ref, array_ref},
-    solana_program::{
-        program_error::ProgramError,
-        program_pack::{IsInitialized, Pack, Sealed},
-    },
-    spl_math::{checked_ceil_div::CheckedCeilDiv, precise_number::PreciseNumber, uint::U256},
+    errors::SwapError,
 };
 
 /// Get the amount of pool tokens for the given amount of token A or B.
@@ -262,6 +261,8 @@ impl DynPack for ConstantPriceCurve {
 
 #[cfg(test)]
 mod tests {
+    use proptest::prelude::*;
+
     use super::*;
     use crate::curve::calculator::{
         test::{
@@ -271,7 +272,6 @@ mod tests {
         },
         INITIAL_SWAP_POOL_AMOUNT,
     };
-    use proptest::prelude::*;
 
     #[test]
     fn swap_calculation_no_price() {

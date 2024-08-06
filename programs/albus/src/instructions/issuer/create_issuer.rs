@@ -26,11 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::errors::AlbusError;
 use anchor_lang::prelude::*;
 
-use crate::state::Issuer;
-use crate::utils::{assert_authorized, cmp_pubkeys};
+use crate::{
+    errors::AlbusError,
+    state::Issuer,
+    utils::{assert_authorized, cmp_pubkeys},
+};
 
 pub fn handler(ctx: Context<CreateIssuer>, data: CreateIssuerData) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;

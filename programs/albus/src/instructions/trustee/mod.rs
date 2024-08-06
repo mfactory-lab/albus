@@ -31,7 +31,4 @@ pub mod delete_trustee;
 pub mod update_trustee;
 pub mod verify_trustee;
 
-pub use self::create_trustee::*;
-pub use self::delete_trustee::*;
-pub use self::update_trustee::*;
-pub use self::verify_trustee::*;
+pub use self::{create_trustee::*, delete_trustee::*, update_trustee::*, verify_trustee::*};

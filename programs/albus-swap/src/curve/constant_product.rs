@@ -1,18 +1,17 @@
 //! The Uniswap invariant calculator.
 
-use {
-    crate::{
-        curve::calculator::{
-            map_zero_to_none, CurveCalculator, DynPack, RoundDirection, SwapWithoutFeesResult,
-            TradeDirection, TradingTokenResult,
-        },
-        errors::SwapError,
+use solana_program::{
+    program_error::ProgramError,
+    program_pack::{IsInitialized, Pack, Sealed},
+};
+use spl_math::{checked_ceil_div::CheckedCeilDiv, precise_number::PreciseNumber};
+
+use crate::{
+    curve::calculator::{
+        map_zero_to_none, CurveCalculator, DynPack, RoundDirection, SwapWithoutFeesResult,
+        TradeDirection, TradingTokenResult,
     },
-    solana_program::{
-        program_error::ProgramError,
-        program_pack::{IsInitialized, Pack, Sealed},
-    },
-    spl_math::{checked_ceil_div::CheckedCeilDiv, precise_number::PreciseNumber},
+    errors::SwapError,
 };
 
 /// ConstantProductCurve struct implementing CurveCalculator
@@ -278,6 +277,8 @@ impl DynPack for ConstantProductCurve {
 
 #[cfg(test)]
 mod tests {
+    use proptest::prelude::*;
+
     use super::*;
     use crate::curve::calculator::{
         test::{
@@ -288,7 +289,6 @@ mod tests {
         },
         RoundDirection, INITIAL_SWAP_POOL_AMOUNT,
     };
-    use proptest::prelude::*;
 
     #[test]
     fn initial_pool_amount() {
@@ -388,15 +388,20 @@ mod tests {
 
         let tests: &[(u128, u128, u128, u128, u128)] = &[
             (10, 4_000_000, 70_000_000_000, 10, 174_999), // spot: 10 * 70b / ~4m = 174,999.99
-            (20, 30_000 - 20, 10_000, 18, 6), // spot: 20 * 1 / 3.000 = 6.6667 (source can be 18 to get 6 dest.)
-            (19, 30_000 - 20, 10_000, 18, 6), // spot: 19 * 1 / 2.999 = 6.3334 (source can be 18 to get 6 dest.)
+            (20, 30_000 - 20, 10_000, 18, 6),             /* spot: 20 * 1 / 3.000 = 6.6667
+                                                           * (source can be 18
+                                                           * to get 6 dest.) */
+            (19, 30_000 - 20, 10_000, 18, 6), /* spot: 19 * 1 / 2.999 = 6.3334 (source can be 18
+                                               * to get 6 dest.) */
             (18, 30_000 - 20, 10_000, 18, 6), // spot: 18 * 1 / 2.999 = 6.0001
             (10, 20_000, 30_000, 10, 14),     // spot: 10 * 3 / 2.0010 = 14.99
             (10, 20_000 - 9, 30_000, 10, 14), // spot: 10 * 3 / 2.0001 = 14.999
             (10, 20_000 - 10, 30_000, 10, 15), // spot: 10 * 3 / 2.0000 = 15
-            (100, 60_000, 30_000, 99, 49), // spot: 100 * 3 / 6.001 = 49.99 (source can be 99 to get 49 dest.)
-            (99, 60_000, 30_000, 99, 49),  // spot: 99 * 3 / 6.001 = 49.49
-            (98, 60_000, 30_000, 97, 48), // spot: 98 * 3 / 6.001 = 48.99 (source can be 97 to get 48 dest.)
+            (100, 60_000, 30_000, 99, 49),    /* spot: 100 * 3 / 6.001 = 49.99 (source can be 99
+                                               * to get 49 dest.) */
+            (99, 60_000, 30_000, 99, 49), // spot: 99 * 3 / 6.001 = 49.49
+            (98, 60_000, 30_000, 97, 48), /* spot: 98 * 3 / 6.001 = 48.99 (source can be 97 to
+                                           * get 48 dest.) */
         ];
         for (
             source_amount,

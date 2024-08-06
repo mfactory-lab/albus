@@ -1,25 +1,24 @@
 //! The Uniswap invariant calculator with an extra offset
 
-use {
-    crate::{
-        curve::{
-            calculator::{
-                CurveCalculator, DynPack, RoundDirection, SwapWithoutFeesResult, TradeDirection,
-                TradingTokenResult,
-            },
-            constant_product::{
-                deposit_single_token_type, normalized_value, pool_tokens_to_trading_tokens, swap,
-                withdraw_single_token_type_exact_out,
-            },
+use arrayref::{array_mut_ref, array_ref};
+use solana_program::{
+    program_error::ProgramError,
+    program_pack::{IsInitialized, Pack, Sealed},
+};
+use spl_math::precise_number::PreciseNumber;
+
+use crate::{
+    curve::{
+        calculator::{
+            CurveCalculator, DynPack, RoundDirection, SwapWithoutFeesResult, TradeDirection,
+            TradingTokenResult,
         },
-        errors::SwapError,
+        constant_product::{
+            deposit_single_token_type, normalized_value, pool_tokens_to_trading_tokens, swap,
+            withdraw_single_token_type_exact_out,
+        },
     },
-    arrayref::{array_mut_ref, array_ref},
-    solana_program::{
-        program_error::ProgramError,
-        program_pack::{IsInitialized, Pack, Sealed},
-    },
-    spl_math::precise_number::PreciseNumber,
+    errors::SwapError,
 };
 
 /// Offset curve, uses ConstantProduct under the hood, but adds an offset to
@@ -186,6 +185,8 @@ impl DynPack for OffsetCurve {
 
 #[cfg(test)]
 mod tests {
+    use proptest::prelude::*;
+
     use super::*;
     use crate::curve::calculator::{
         test::{
@@ -196,7 +197,6 @@ mod tests {
         },
         INITIAL_SWAP_POOL_AMOUNT,
     };
-    use proptest::prelude::*;
 
     #[test]
     fn pack_curve() {

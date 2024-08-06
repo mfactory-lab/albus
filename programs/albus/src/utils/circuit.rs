@@ -26,8 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use std::collections::HashMap;
-use std::ops::Index;
+use std::{collections::HashMap, ops::Index};
 
 type SignalKey = String;
 
@@ -186,6 +185,6 @@ mod tests {
 //     let bytes = format_circuit_date(1690815541);
 //     assert_eq!(
 //         bytes,
-//         Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 52, 178, 75])
-//     );
+//         Some([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+// 1, 52, 178, 75])     );
 // }

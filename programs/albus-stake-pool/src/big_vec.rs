@@ -1,13 +1,12 @@
 //! Big vector type, used with vectors that can't be serde'd
 #![allow(clippy::arithmetic_side_effects)] // checked math involves too many compute units
 
-use {
-    arrayref::array_ref,
-    borsh::BorshDeserialize,
-    bytemuck::Pod,
-    solana_program::{program_error::ProgramError, program_memory::sol_memmove},
-    std::mem,
-};
+use std::mem;
+
+use arrayref::array_ref;
+use borsh::BorshDeserialize;
+use bytemuck::Pod;
+use solana_program::{program_error::ProgramError, program_memory::sol_memmove};
 
 /// Contains easy to use utilities for a big vector of Borsh-compatible types,
 /// to avoid managing the entire struct on-chain and blow through stack limits.
@@ -186,7 +185,9 @@ impl<'data> BigVec<'data> {
 
 #[cfg(test)]
 mod tests {
-    use {super::*, bytemuck::Zeroable};
+    use bytemuck::Zeroable;
+
+    use super::*;
 
     #[repr(C)]
     #[derive(Debug, Copy, Clone, PartialEq, Pod, Zeroable)]

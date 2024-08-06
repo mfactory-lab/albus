@@ -34,11 +34,7 @@ declare_id!("ATRh9CiamTjKiJ3XcsbxmGtDoeqg6XujUvgPLemEMCBe");
 pub mod albus_transfer {
     use albus_solana_verifier::AlbusVerifier;
     use anchor_lang::system_program;
-    use anchor_spl::token::transfer as token_transfer;
-    use anchor_spl::token::Mint;
-    use anchor_spl::token::Token;
-    use anchor_spl::token::TokenAccount;
-    use anchor_spl::token::Transfer;
+    use anchor_spl::token::{transfer as token_transfer, Mint, Token, TokenAccount, Transfer};
 
     use super::*;
 

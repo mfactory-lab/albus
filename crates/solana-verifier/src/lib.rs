@@ -31,13 +31,15 @@ mod constants;
 mod cpi;
 mod utils;
 
-use crate::constants::{ALBUS_DEV_PROGRAM_ID, ALBUS_PROGRAM_ID, PROOF_REQUEST_DISCRIMINATOR};
-use crate::utils::cmp_pubkeys;
-use arrayref::array_ref;
-use arrayref::array_refs;
+use arrayref::{array_ref, array_refs};
 use solana_program::{
     account_info::AccountInfo, clock::Clock, msg, program_error::ProgramError, pubkey::Pubkey,
     sysvar::Sysvar,
+};
+
+use crate::{
+    constants::{ALBUS_DEV_PROGRAM_ID, ALBUS_PROGRAM_ID, PROOF_REQUEST_DISCRIMINATOR},
+    utils::cmp_pubkeys,
 };
 
 pub struct AlbusVerifier<'a, 'info> {

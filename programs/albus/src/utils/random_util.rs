@@ -11,7 +11,6 @@ use std::convert::TryInto;
 
 ///
 /// Random based on slot hashes
-///
 pub fn get_random_bytes<const N: usize>(slot_hashes: &[u8], offset: &mut usize) -> [u8; N] {
     let out = &slot_hashes[*offset * 40 + 8..][..N];
     *offset += 1;

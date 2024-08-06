@@ -26,8 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::{utils::assert_authorized, ID};
 use anchor_lang::{prelude::*, system_program};
+
+use crate::{utils::assert_authorized, ID};
 
 pub fn handler(ctx: Context<AdminWithdraw>) -> Result<()> {
     assert_authorized(ctx.accounts.authority.key)?;

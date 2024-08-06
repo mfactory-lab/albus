@@ -26,10 +26,15 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use anchor_lang::solana_program::program_memory::sol_memcpy;
-use anchor_lang::{prelude::*, solana_program::system_program};
-use std::cmp;
-use std::io::{self, Write};
+use std::{
+    cmp,
+    io::{self, Write},
+};
+
+use anchor_lang::{
+    prelude::*,
+    solana_program::{program_memory::sol_memcpy, system_program},
+};
 
 /// Close an account
 pub fn close<'info>(acc: AccountInfo<'info>, sol_destination: AccountInfo<'info>) -> Result<()> {

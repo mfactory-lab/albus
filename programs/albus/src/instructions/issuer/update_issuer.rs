@@ -26,11 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::errors::AlbusError;
 use anchor_lang::prelude::*;
 
-use crate::state::Issuer;
-use crate::utils::{assert_authorized, cmp_pubkeys};
+use crate::{
+    errors::AlbusError,
+    state::Issuer,
+    utils::{assert_authorized, cmp_pubkeys},
+};
 
 pub fn handler(ctx: Context<UpdateIssuer>, data: UpdateIssuerData) -> Result<()> {
     let issuer = &mut ctx.accounts.issuer;

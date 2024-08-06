@@ -28,8 +28,10 @@
 
 use anchor_lang::prelude::*;
 
-use crate::state::{ContactInfo, Trustee};
-use crate::{errors::AlbusError, state::ServiceProvider};
+use crate::{
+    errors::AlbusError,
+    state::{ContactInfo, ServiceProvider, Trustee},
+};
 
 pub fn handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, UpdateServiceProvider<'info>>,

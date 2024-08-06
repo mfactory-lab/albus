@@ -136,9 +136,8 @@ impl<'a> Groth16Verifier<'a> {
         input.extend_from_slice(self.vk.alpha.as_slice());
         input.extend_from_slice(self.vk.beta.as_slice());
 
-
         let res = alt_bn128_pairing(input.as_slice()).map_err(Groth16Error::AltBn128Error)?;
-        
+
         if res[31] != 1 {
             return Err(Groth16Error::VerificationFailed);
         }

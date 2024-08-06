@@ -28,10 +28,9 @@
 
 use anchor_lang::prelude::*;
 
-use crate::state::Policy;
 use crate::{
     events::CreateProofRequestEvent,
-    state::{ProofRequest, ProofRequestStatus, ServiceProvider},
+    state::{Policy, ProofRequest, ProofRequestStatus, ServiceProvider},
 };
 
 pub fn handler(ctx: Context<CreateProofRequest>, data: CreateProofRequestData) -> Result<()> {

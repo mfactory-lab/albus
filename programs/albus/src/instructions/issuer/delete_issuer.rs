@@ -28,8 +28,7 @@
 
 use anchor_lang::prelude::*;
 
-use crate::state::Issuer;
-use crate::utils::assert_authorized;
+use crate::{state::Issuer, utils::assert_authorized};
 
 pub fn handler(ctx: Context<DeleteIssuer>) -> Result<()> {
     assert_authorized(ctx.accounts.authority.key)

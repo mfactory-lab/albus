@@ -26,8 +26,9 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::utils::{assert_authorized, close};
 use anchor_lang::prelude::*;
+
+use crate::utils::{assert_authorized, close};
 
 pub fn handler(ctx: Context<AdminCloseAccount>) -> Result<()> {
     assert_authorized(ctx.accounts.authority.key).and_then(|_| {

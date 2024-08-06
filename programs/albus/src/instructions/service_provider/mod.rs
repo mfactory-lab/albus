@@ -30,6 +30,6 @@ pub mod create_service_provider;
 pub mod delete_service_provider;
 pub mod update_service_provider;
 
-pub use self::create_service_provider::*;
-pub use self::delete_service_provider::*;
-pub use self::update_service_provider::*;
+pub use self::{
+    create_service_provider::*, delete_service_provider::*, update_service_provider::*,
+};

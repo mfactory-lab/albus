@@ -26,15 +26,18 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::errors::AlbusError;
-use crate::state::Issuer;
-use crate::utils::{assert_authorized, cmp_pubkeys};
-use crate::ID;
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::sysvar;
-use anchor_spl::metadata::mpl_token_metadata::{instructions::UpdateV1CpiBuilder, types::Data};
-use anchor_spl::metadata::Metadata as MetadataProgram;
-use anchor_spl::metadata::MetadataAccount;
+use anchor_lang::{prelude::*, solana_program::sysvar};
+use anchor_spl::metadata::{
+    mpl_token_metadata::{instructions::UpdateV1CpiBuilder, types::Data},
+    Metadata as MetadataProgram, MetadataAccount,
+};
+
+use crate::{
+    errors::AlbusError,
+    state::Issuer,
+    utils::{assert_authorized, cmp_pubkeys},
+    ID,
+};
 
 pub fn handler(ctx: Context<UpdateCredential>, data: UpdateCredentialData) -> Result<()> {
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];

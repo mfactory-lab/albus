@@ -1,12 +1,9 @@
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::program_option::COption;
-use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount, Transfer};
 use std::convert::TryFrom;
 
-use crate::constraints::*;
-use crate::errors::*;
-use crate::state::*;
-use crate::utils::*;
+use anchor_lang::{prelude::*, solana_program::program_option::COption};
+use anchor_spl::token::{self, Burn, Mint, MintTo, Token, TokenAccount, Transfer};
+
+use crate::{constraints::*, errors::*, state::*, utils::*};
 
 mod constraints;
 mod curve;
@@ -18,11 +15,14 @@ declare_id!("ASWfaoztykN8Lz1P2uwuvwWR61SvFrvn6acM1sJpxKtq");
 
 #[program]
 pub mod albus_swap {
-    use super::*;
-    use crate::curve::base::SwapCurve;
-    use crate::curve::calculator::{RoundDirection, TradeDirection};
-    use crate::curve::fees::Fees;
     use albus_solana_verifier::AlbusVerifier;
+
+    use super::*;
+    use crate::curve::{
+        base::SwapCurve,
+        calculator::{RoundDirection, TradeDirection},
+        fees::Fees,
+    };
 
     pub fn initialize(
         ctx: Context<Initialize>,
@@ -1205,11 +1205,13 @@ impl<'info> Swap<'info> {
 
 #[cfg(test)]
 mod tests {
-    use crate::curve::base::SwapCurve;
-    use crate::curve::calculator::RoundDirection;
-    use crate::errors::SwapError;
-    use crate::utils::to_u128;
     use solana_program::native_token::LAMPORTS_PER_SOL;
+
+    use crate::{
+        curve::{base::SwapCurve, calculator::RoundDirection},
+        errors::SwapError,
+        utils::to_u128,
+    };
 
     #[test]
     fn test1() {

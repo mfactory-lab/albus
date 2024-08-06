@@ -26,10 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::curve::base::SwapCurve;
-use crate::curve::fees::Fees;
 use anchor_lang::prelude::*;
 use solana_program::program_pack::Pack;
+
+use crate::curve::{base::SwapCurve, fees::Fees};
 
 #[account]
 pub struct TokenSwap {

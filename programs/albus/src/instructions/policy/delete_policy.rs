@@ -28,9 +28,10 @@
 
 use anchor_lang::prelude::*;
 
-use crate::errors::AlbusError;
-use crate::state::Policy;
-use crate::state::ServiceProvider;
+use crate::{
+    errors::AlbusError,
+    state::{Policy, ServiceProvider},
+};
 
 pub fn handler(ctx: Context<DeletePolicy>) -> Result<()> {
     let service = &mut ctx.accounts.service_provider;

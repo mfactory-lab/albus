@@ -1,30 +1,29 @@
 //! State transition types
 
-use {
-    crate::{
-        big_vec::BigVec, error::StakePoolError, MAX_WITHDRAWAL_FEE_INCREASE,
-        WITHDRAWAL_BASELINE_FEE,
-    },
-    borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
-    bytemuck::{Pod, Zeroable},
-    num_derive::{FromPrimitive, ToPrimitive},
-    num_traits::{FromPrimitive, ToPrimitive},
-    solana_program::{
-        account_info::AccountInfo,
-        borsh0_10::get_instance_packed_len,
-        msg,
-        program_error::ProgramError,
-        program_memory::sol_memcmp,
-        program_pack::{Pack, Sealed},
-        pubkey::{Pubkey, PUBKEY_BYTES},
-        stake::state::Lockup,
-    },
-    spl_pod::primitives::{PodU32, PodU64},
-    spl_token_2022::{
-        extension::{BaseStateWithExtensions, ExtensionType, StateWithExtensions},
-        state::{Account, AccountState, Mint},
-    },
-    std::{borrow::Borrow, convert::TryFrom, fmt, matches},
+use std::{borrow::Borrow, convert::TryFrom, fmt, matches};
+
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
+use bytemuck::{Pod, Zeroable};
+use num_derive::{FromPrimitive, ToPrimitive};
+use num_traits::{FromPrimitive, ToPrimitive};
+use solana_program::{
+    account_info::AccountInfo,
+    borsh0_10::get_instance_packed_len,
+    msg,
+    program_error::ProgramError,
+    program_memory::sol_memcmp,
+    program_pack::{Pack, Sealed},
+    pubkey::{Pubkey, PUBKEY_BYTES},
+    stake::state::Lockup,
+};
+use spl_pod::primitives::{PodU32, PodU64};
+use spl_token_2022::{
+    extension::{BaseStateWithExtensions, ExtensionType, StateWithExtensions},
+    state::{Account, AccountState, Mint},
+};
+
+use crate::{
+    big_vec::BigVec, error::StakePoolError, MAX_WITHDRAWAL_FEE_INCREASE, WITHDRAWAL_BASELINE_FEE,
 };
 
 /// Enum representing the account type managed by the program

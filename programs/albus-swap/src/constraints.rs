@@ -26,13 +26,18 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::curve::base::{CurveType, SwapCurve};
-use crate::curve::fees::Fees;
-use crate::errors::SwapError;
-use anchor_lang::Result;
-
 #[cfg(feature = "production")]
 use std::env;
+
+use anchor_lang::Result;
+
+use crate::{
+    curve::{
+        base::{CurveType, SwapCurve},
+        fees::Fees,
+    },
+    errors::SwapError,
+};
 
 /// Encodes fee constraints, used in multihost environments where the program
 /// may be used by multiple frontends, to ensure that proper fees are being

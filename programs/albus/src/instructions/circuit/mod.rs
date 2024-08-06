@@ -30,6 +30,4 @@ pub mod create_circuit;
 pub mod delete_circuit;
 pub mod update_circuit_vk;
 
-pub use self::create_circuit::*;
-pub use self::delete_circuit::*;
-pub use self::update_circuit_vk::*;
+pub use self::{create_circuit::*, delete_circuit::*, update_circuit_vk::*};

@@ -28,9 +28,11 @@
 
 use anchor_lang::prelude::*;
 
-use crate::constants::DEFAULT_SECRET_SHARE_THRESHOLD;
-use crate::state::ContactInfo;
-use crate::{state::ServiceProvider, utils::assert_authorized};
+use crate::{
+    constants::DEFAULT_SECRET_SHARE_THRESHOLD,
+    state::{ContactInfo, ServiceProvider},
+    utils::assert_authorized,
+};
 
 pub fn handler(ctx: Context<CreateServiceProvider>, data: CreateServiceProviderData) -> Result<()> {
     assert_authorized(&ctx.accounts.authority.key())?;

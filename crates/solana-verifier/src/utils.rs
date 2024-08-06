@@ -28,11 +28,14 @@
 
 #![allow(dead_code)]
 
-use crate::constants::{ALBUS_PROGRAM_ID, POLICY_DISCRIMINATOR, PROOF_REQUEST_DISCRIMINATOR};
 use arrayref::array_ref;
-use solana_program::account_info::AccountInfo;
-use solana_program::program_memory::sol_memcmp;
-use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
+use solana_program::{
+    account_info::AccountInfo,
+    program_memory::sol_memcmp,
+    pubkey::{Pubkey, PUBKEY_BYTES},
+};
+
+use crate::constants::{ALBUS_PROGRAM_ID, POLICY_DISCRIMINATOR, PROOF_REQUEST_DISCRIMINATOR};
 
 /// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`
 pub fn cmp_pubkeys(a: impl AsRef<[u8]>, b: impl AsRef<[u8]>) -> bool {

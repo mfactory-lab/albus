@@ -26,12 +26,14 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::errors::AlbusError;
-use crate::events::RevealSecretShareEvent;
 use anchor_lang::prelude::*;
 
-use crate::state::{InvestigationRequest, InvestigationRequestShare, RevelationStatus, Trustee};
-use crate::utils::cmp_pubkeys;
+use crate::{
+    errors::AlbusError,
+    events::RevealSecretShareEvent,
+    state::{InvestigationRequest, InvestigationRequestShare, RevelationStatus, Trustee},
+    utils::cmp_pubkeys,
+};
 
 pub fn handler(ctx: Context<RevealSecretShare>, data: RevealSecretShareData) -> Result<()> {
     let share = &mut ctx.accounts.investigation_request_share;

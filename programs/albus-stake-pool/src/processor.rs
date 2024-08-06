@@ -1,49 +1,48 @@
 //! Program state processor
 
+use std::num::NonZeroU32;
+
 use albus_solana_verifier::AlbusVerifier;
-use {
-    crate::{
-        error::StakePoolError,
-        find_deposit_authority_program_address,
-        inline_mpl_token_metadata::{
-            self,
-            instruction::{create_metadata_accounts_v3, update_metadata_accounts_v2},
-            pda::find_metadata_account,
-            state::DataV2,
-        },
-        instruction::{FundingType, PreferredValidatorType, StakePoolInstruction},
-        minimum_delegation, minimum_reserve_lamports, minimum_stake_lamports,
-        state::{
-            is_extension_supported_for_mint, AccountType, Fee, FeeType, FutureEpoch, StakePool,
-            StakeStatus, StakeWithdrawSource, ValidatorList, ValidatorListHeader,
-            ValidatorStakeInfo,
-        },
-        AUTHORITY_DEPOSIT, AUTHORITY_WITHDRAW, EPHEMERAL_STAKE_SEED_PREFIX,
-        TRANSIENT_STAKE_SEED_PREFIX,
+use borsh::BorshDeserialize;
+use num_traits::FromPrimitive;
+use solana_program::{
+    account_info::{next_account_info, AccountInfo},
+    borsh0_10::try_from_slice_unchecked,
+    clock::{Clock, Epoch},
+    decode_error::DecodeError,
+    entrypoint::ProgramResult,
+    msg,
+    program::{invoke, invoke_signed},
+    program_error::{PrintProgramError, ProgramError},
+    pubkey::Pubkey,
+    rent::Rent,
+    stake, system_instruction, system_program,
+    sysvar::Sysvar,
+};
+use spl_token_2022::{
+    check_spl_token_program_account,
+    extension::{BaseStateWithExtensions, StateWithExtensions},
+    native_mint,
+    state::Mint,
+};
+
+use crate::{
+    error::StakePoolError,
+    find_deposit_authority_program_address,
+    inline_mpl_token_metadata::{
+        self,
+        instruction::{create_metadata_accounts_v3, update_metadata_accounts_v2},
+        pda::find_metadata_account,
+        state::DataV2,
     },
-    borsh::BorshDeserialize,
-    num_traits::FromPrimitive,
-    solana_program::{
-        account_info::{next_account_info, AccountInfo},
-        borsh0_10::try_from_slice_unchecked,
-        clock::{Clock, Epoch},
-        decode_error::DecodeError,
-        entrypoint::ProgramResult,
-        msg,
-        program::{invoke, invoke_signed},
-        program_error::{PrintProgramError, ProgramError},
-        pubkey::Pubkey,
-        rent::Rent,
-        stake, system_instruction, system_program,
-        sysvar::Sysvar,
+    instruction::{FundingType, PreferredValidatorType, StakePoolInstruction},
+    minimum_delegation, minimum_reserve_lamports, minimum_stake_lamports,
+    state::{
+        is_extension_supported_for_mint, AccountType, Fee, FeeType, FutureEpoch, StakePool,
+        StakeStatus, StakeWithdrawSource, ValidatorList, ValidatorListHeader, ValidatorStakeInfo,
     },
-    spl_token_2022::{
-        check_spl_token_program_account,
-        extension::{BaseStateWithExtensions, StateWithExtensions},
-        native_mint,
-        state::Mint,
-    },
-    std::num::NonZeroU32,
+    AUTHORITY_DEPOSIT, AUTHORITY_WITHDRAW, EPHEMERAL_STAKE_SEED_PREFIX,
+    TRANSIENT_STAKE_SEED_PREFIX,
 };
 
 /// Deserialize the stake state from AccountInfo
@@ -2450,8 +2449,7 @@ impl Processor {
 
             // Status for validator stake
             //  * active -> do everything
-            //  * any other state / not a stake -> error state, but account for transient
-            //    stake
+            //  * any other state / not a stake -> error state, but account for transient stake
             let validator_stake_state = try_from_slice_unchecked::<stake::state::StakeStateV2>(
                 &validator_stake_info.data.borrow(),
             )

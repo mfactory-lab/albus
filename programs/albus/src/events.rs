@@ -26,8 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::state::RevelationStatus;
-use crate::*;
+use crate::{state::RevelationStatus, *};
 
 #[event]
 pub struct CreateProofRequestEvent {

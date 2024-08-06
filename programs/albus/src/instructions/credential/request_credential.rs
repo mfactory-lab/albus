@@ -25,16 +25,20 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-use crate::events::CreateCredentialRequestEvent;
-use crate::state::{CredentialRequest, CredentialRequestStatus, CredentialSpec, Issuer};
-use crate::ID;
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::sysvar;
-use anchor_spl::metadata::mpl_token_metadata::instructions::UpdateV1CpiBuilder;
-use anchor_spl::metadata::mpl_token_metadata::types::Data;
-use anchor_spl::metadata::Metadata as MetadataProgram;
-use anchor_spl::metadata::MetadataAccount;
-use anchor_spl::token::TokenAccount;
+use anchor_lang::{prelude::*, solana_program::sysvar};
+use anchor_spl::{
+    metadata::{
+        mpl_token_metadata::{instructions::UpdateV1CpiBuilder, types::Data},
+        Metadata as MetadataProgram, MetadataAccount,
+    },
+    token::TokenAccount,
+};
+
+use crate::{
+    events::CreateCredentialRequestEvent,
+    state::{CredentialRequest, CredentialRequestStatus, CredentialSpec, Issuer},
+    ID,
+};
 
 pub fn handler(ctx: Context<RequestCredential>, data: RequestCredentialData) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;

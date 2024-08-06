@@ -2,22 +2,22 @@
 
 #![allow(clippy::too_many_arguments)]
 
-use {
-    crate::{
-        find_deposit_authority_program_address, find_ephemeral_stake_program_address,
-        find_stake_program_address, find_transient_stake_program_address,
-        find_withdraw_authority_program_address,
-        inline_mpl_token_metadata::{self, pda::find_metadata_account},
-        state::{Fee, FeeType, StakePool, ValidatorList},
-        MAX_VALIDATORS_TO_UPDATE,
-    },
-    borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
-    solana_program::{
-        instruction::{AccountMeta, Instruction},
-        pubkey::Pubkey,
-        stake, system_program, sysvar,
-    },
-    std::num::NonZeroU32,
+use std::num::NonZeroU32;
+
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
+use solana_program::{
+    instruction::{AccountMeta, Instruction},
+    pubkey::Pubkey,
+    stake, system_program, sysvar,
+};
+
+use crate::{
+    find_deposit_authority_program_address, find_ephemeral_stake_program_address,
+    find_stake_program_address, find_transient_stake_program_address,
+    find_withdraw_authority_program_address,
+    inline_mpl_token_metadata::{self, pda::find_metadata_account},
+    state::{Fee, FeeType, StakePool, ValidatorList},
+    MAX_VALIDATORS_TO_UPDATE,
 };
 
 /// Defines which validator vote account is set during the
@@ -55,15 +55,13 @@ pub enum StakePoolInstruction {
     ///   2. `[]` Staker
     ///   3. `[]` Stake pool withdraw authority
     ///   4. `[w]` Uninitialized validator stake list storage account
-    ///   5. `[]` Reserve stake account must be initialized, have zero balance,
-    ///      and staker / withdrawer authority set to pool withdraw authority.
-    ///   6. `[]` Pool token mint. Must have zero supply, owned by withdraw
-    ///      authority.
+    ///   5. `[]` Reserve stake account must be initialized, have zero balance, and staker /
+    ///      withdrawer authority set to pool withdraw authority.
+    ///   6. `[]` Pool token mint. Must have zero supply, owned by withdraw authority.
     ///   7. `[]` Pool account to deposit the generated fee for manager.
     ///   8. `[]` Token program id
-    ///   9. `[]` (Optional) Deposit authority that must sign all deposits.
-    ///      Defaults to the program address generated using
-    ///      `find_deposit_authority_program_address`, making deposits
+    ///   9. `[]` (Optional) Deposit authority that must sign all deposits. Defaults to the program
+    ///      address generated using `find_deposit_authority_program_address`, making deposits
     ///      permissionless.
     Initialize {
         /// Fee assessed as percentage of perceived rewards
@@ -276,16 +274,13 @@ pub enum StakePoolInstruction {
     ///   1. `[w]` Validator stake list storage account
     ///   2. `[s]/[]` Stake pool deposit authority
     ///   3. `[]` Stake pool withdraw authority
-    ///   4. `[w]` Stake account to join the pool (withdraw authority for the
-    ///      stake account should be first set to the stake pool deposit
-    ///      authority)
-    ///   5. `[w]` Validator stake account for the stake account to be merged
-    ///      with
+    ///   4. `[w]` Stake account to join the pool (withdraw authority for the stake account should
+    ///      be first set to the stake pool deposit authority)
+    ///   5. `[w]` Validator stake account for the stake account to be merged with
     ///   6. `[w]` Reserve stake account, to withdraw rent exempt reserve
     ///   7. `[w]` User account to receive pool tokens
     ///   8. `[w]` Account to receive pool fee tokens
-    ///   9. `[w]` Account to receive a portion of pool fee tokens as referral
-    ///      fees
+    ///   9. `[w]` Account to receive a portion of pool fee tokens as referral fees
     ///   10. `[w]` Pool token mint account
     ///   11. '[]' Sysvar clock account
     ///   12. '[]' Sysvar stake history account
@@ -387,8 +382,7 @@ pub enum StakePoolInstruction {
     ///   2. `[s]` User transfer authority, for pool token account
     ///   3. `[w]` User account to burn pool tokens
     ///   4. `[w]` Reserve stake account, to withdraw SOL
-    ///   5. `[w]` Account receiving the lamports from the reserve, must be a
-    ///      system account
+    ///   5. `[w]` Account receiving the lamports from the reserve, must be a system account
     ///   6. `[w]` Account to receive pool fee tokens
     ///   7. `[w]` Pool token mint account
     ///   8. '[]' Clock sysvar
@@ -481,12 +475,11 @@ pub enum StakePoolInstruction {
     /// Works regardless if the transient stake account already exists.
     ///
     /// Internally, this instruction:
-    ///  * withdraws rent-exempt reserve lamports from the reserve into the
-    ///    ephemeral stake
+    ///  * withdraws rent-exempt reserve lamports from the reserve into the ephemeral stake
     ///  * splits a validator stake account into an ephemeral stake account
     ///  * deactivates the ephemeral account
-    ///  * merges or splits the ephemeral account into the transient stake
-    ///    account delegated to the appropriate validator
+    ///  * merges or splits the ephemeral account into the transient stake account delegated to the
+    ///    appropriate validator
     ///
     ///  The amount of lamports to move must be at least
     /// `max(crate::MINIMUM_ACTIVE_STAKE,
@@ -587,13 +580,10 @@ pub enum StakePoolInstruction {
     ///  3. `[w]` Validator list
     ///  4. `[w]` Reserve stake account, to withdraw rent exempt reserve
     ///  5. `[w]` Source canonical stake account to split from
-    ///  6. `[w]` Source transient stake account to receive split and be
-    ///     redelegated
+    ///  6. `[w]` Source transient stake account to receive split and be redelegated
     ///  7. `[w]` Uninitialized ephemeral stake account to receive redelegation
-    ///  8. `[w]` Destination transient stake account to receive ephemeral stake
-    ///     by merge
-    ///  9. `[]` Destination stake account to receive transient stake after
-    ///     activation
+    ///  8. `[w]` Destination transient stake account to receive ephemeral stake by merge
+    ///  9. `[]` Destination stake account to receive transient stake after activation
     /// 10. `[]` Destination validator vote account
     /// 11. `[]` Clock sysvar
     /// 12. `[]` Stake History sysvar
@@ -625,16 +615,13 @@ pub enum StakePoolInstruction {
     ///   1. `[w]` Validator stake list storage account
     ///   2. `[s]/[]` Stake pool deposit authority
     ///   3. `[]` Stake pool withdraw authority
-    ///   4. `[w]` Stake account to join the pool (withdraw authority for the
-    ///      stake account should be first set to the stake pool deposit
-    ///      authority)
-    ///   5. `[w]` Validator stake account for the stake account to be merged
-    ///      with
+    ///   4. `[w]` Stake account to join the pool (withdraw authority for the stake account should
+    ///      be first set to the stake pool deposit authority)
+    ///   5. `[w]` Validator stake account for the stake account to be merged with
     ///   6. `[w]` Reserve stake account, to withdraw rent exempt reserve
     ///   7. `[w]` User account to receive pool tokens
     ///   8. `[w]` Account to receive pool fee tokens
-    ///   9. `[w]` Account to receive a portion of pool fee tokens as referral
-    ///      fees
+    ///   9. `[w]` Account to receive a portion of pool fee tokens as referral fees
     ///   10. `[w]` Pool token mint account
     ///   11. '[]' Sysvar clock account
     ///   12. '[]' Sysvar stake history account
@@ -708,8 +695,7 @@ pub enum StakePoolInstruction {
     ///   2. `[s]` User transfer authority, for pool token account
     ///   3. `[w]` User account to burn pool tokens
     ///   4. `[w]` Reserve stake account, to withdraw SOL
-    ///   5. `[w]` Account receiving the lamports from the reserve, must be a
-    ///      system account
+    ///   5. `[w]` Account receiving the lamports from the reserve, must be a system account
     ///   6. `[w]` Account to receive pool fee tokens
     ///   7. `[w]` Pool token mint account
     ///   8. '[]' Clock sysvar

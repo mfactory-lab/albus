@@ -26,7 +26,6 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::ID;
 use anchor_lang::{prelude::*, solana_program::sysvar};
 use anchor_spl::{
     metadata::{
@@ -35,6 +34,8 @@ use anchor_spl::{
     },
     token::Token,
 };
+
+use crate::ID;
 
 pub fn handler(ctx: Context<DeleteCredential>) -> Result<()> {
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];

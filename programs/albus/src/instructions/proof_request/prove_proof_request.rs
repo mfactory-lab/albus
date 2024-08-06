@@ -28,16 +28,12 @@
 
 use anchor_lang::prelude::*;
 
-use crate::constants::{
-    ISSUER_PK_SIGNAL, META_VALID_UNTIL_SIGNAL, TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD,
-};
-use crate::state::{Circuit, Issuer, Policy, ProofData};
-use crate::utils::bytes_to_num;
 use crate::{
+    constants::{ISSUER_PK_SIGNAL, META_VALID_UNTIL_SIGNAL, TIMESTAMP_SIGNAL, TIMESTAMP_THRESHOLD},
     errors::AlbusError,
     events::ProveEvent,
-    state::{ProofRequest, ProofRequestStatus},
-    utils::cmp_pubkeys,
+    state::{Circuit, Issuer, Policy, ProofData, ProofRequest, ProofRequestStatus},
+    utils::{bytes_to_num, cmp_pubkeys},
 };
 
 /// Proves the [ProofRequest] by validating the proof metadata and updating its status to `Proved`.
@@ -81,7 +77,7 @@ pub fn handler(ctx: Context<ProveProofRequest>, data: ProveProofRequestData) -> 
                     return Err(AlbusError::InvalidData.into());
                 }
             } else {
-                msg!("Error: Missing timestamp, new proof required");
+                msg!("Error: Missing timestamp at index #{}", s.index);
                 return Err(AlbusError::InvalidData.into());
             }
         }

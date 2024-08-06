@@ -28,8 +28,9 @@
 
 use anchor_lang::prelude::*;
 
-use crate::errors::AlbusError;
-use crate::{events::DeleteProofRequestEvent, state::ProofRequest, utils::cmp_pubkeys};
+use crate::{
+    errors::AlbusError, events::DeleteProofRequestEvent, state::ProofRequest, utils::cmp_pubkeys,
+};
 
 pub fn handler(ctx: Context<DeleteProofRequest>) -> Result<()> {
     let req = &mut ctx.accounts.proof_request;

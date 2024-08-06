@@ -26,9 +26,12 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::errors::AlbusError;
-use crate::state::{CredentialRequest, CredentialRequestStatus, Issuer, MAX_CRED_REQ_MSG_LEN};
 use anchor_lang::prelude::*;
+
+use crate::{
+    errors::AlbusError,
+    state::{CredentialRequest, CredentialRequestStatus, Issuer, MAX_CRED_REQ_MSG_LEN},
+};
 
 pub fn handler(
     ctx: Context<UpdateCredentialRequest>,

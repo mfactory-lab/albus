@@ -26,18 +26,26 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::constants::{CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX};
-use crate::ID;
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::sysvar;
-use anchor_spl::associated_token::AssociatedToken as AssociatedTokenProgram;
-use anchor_spl::metadata::mpl_token_metadata::instructions::MintV1CpiBuilder;
-use anchor_spl::metadata::mpl_token_metadata::instructions::{
-    CreateV1CpiBuilder, DelegateStandardV1CpiBuilder, FreezeDelegatedAccountCpiBuilder,
+use anchor_lang::{prelude::*, solana_program::sysvar};
+use anchor_spl::{
+    associated_token::AssociatedToken as AssociatedTokenProgram,
+    metadata::{
+        mpl_token_metadata::{
+            instructions::{
+                CreateV1CpiBuilder, DelegateStandardV1CpiBuilder, FreezeDelegatedAccountCpiBuilder,
+                MintV1CpiBuilder,
+            },
+            types::{Creator, PrintSupply, TokenStandard},
+        },
+        Metadata as MetadataProgram,
+    },
+    token::Token as TokenProgram,
 };
-use anchor_spl::metadata::mpl_token_metadata::types::{Creator, PrintSupply, TokenStandard};
-use anchor_spl::metadata::Metadata as MetadataProgram;
-use anchor_spl::token::Token as TokenProgram;
+
+use crate::{
+    constants::{CREDENTIAL_NAME, CREDENTIAL_SYMBOL_CODE, NFT_SYMBOL_PREFIX},
+    ID,
+};
 
 pub fn handler(ctx: Context<CreateCredential>, data: CreateCredentialData) -> Result<()> {
     let signer_seeds = [ID.as_ref(), &[ctx.bumps.albus_authority]];

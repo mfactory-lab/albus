@@ -26,8 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use anchor_lang::solana_program::pubkey;
-use anchor_lang::solana_program::pubkey::Pubkey;
+use anchor_lang::solana_program::{pubkey, pubkey::Pubkey};
 
 /// List of root authorities
 pub const AUTHORIZED_AUTHORITY: &[Pubkey] = &[

@@ -27,15 +27,15 @@
  */
 
 use anchor_lang::prelude::*;
-
 #[cfg(feature = "verify-on-chain")]
 use groth16_solana::{Groth16Verifier, Proof, VK};
 
+use crate::{
+    errors::AlbusError,
+    state::{Circuit, ProofRequest},
+};
 #[cfg(feature = "verify-on-chain")]
 use crate::{events::VerifyEvent, state::ProofRequestStatus};
-
-use crate::state::Circuit;
-use crate::{errors::AlbusError, state::ProofRequest};
 
 pub fn handler(ctx: Context<VerifyProofRequest>) -> Result<()> {
     #[cfg(feature = "verify-on-chain")]

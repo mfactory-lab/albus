@@ -1,5 +1,14 @@
 //! Base curve implementation
 
+use std::{
+    convert::{TryFrom, TryInto},
+    fmt::Debug,
+    sync::Arc,
+};
+
+#[cfg(feature = "fuzz")]
+use arbitrary::Arbitrary;
+use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 use solana_program::{
     program_error::ProgramError,
     program_pack::{Pack, Sealed},
@@ -12,13 +21,6 @@ use crate::curve::{
     fees::Fees,
     offset::OffsetCurve,
 };
-use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-use std::convert::{TryFrom, TryInto};
-use std::fmt::Debug;
-use std::sync::Arc;
-
-#[cfg(feature = "fuzz")]
-use arbitrary::Arbitrary;
 
 /// Curve types supported by the token-swap program.
 #[cfg_attr(feature = "fuzz", derive(Arbitrary))]
@@ -262,9 +264,10 @@ impl TryFrom<u8> for CurveType {
 
 #[cfg(test)]
 mod test {
+    use proptest::prelude::*;
+
     use super::*;
     use crate::curve::calculator::test::total_and_intermediate;
-    use proptest::prelude::*;
 
     #[test]
     fn pack_swap_curve() {

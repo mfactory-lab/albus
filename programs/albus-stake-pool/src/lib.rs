@@ -14,12 +14,12 @@ pub mod entrypoint;
 
 // Export current sdk types for downstream users building with a different sdk
 // version
+use std::num::NonZeroU32;
+
 pub use solana_program;
-use {
-    crate::state::Fee,
-    solana_program::{pubkey::Pubkey, stake::state::Meta},
-    std::num::NonZeroU32,
-};
+use solana_program::{pubkey::Pubkey, stake::state::Meta};
+
+use crate::state::Fee;
 
 /// Seed for deposit authority seed
 const AUTHORITY_DEPOSIT: &[u8] = b"deposit";

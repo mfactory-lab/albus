@@ -26,12 +26,10 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::errors::SwapError;
-use crate::state::TokenSwap;
 use anchor_lang::prelude::*;
-use solana_program::entrypoint::ProgramResult;
-use solana_program::program_memory::sol_memcmp;
-use solana_program::pubkey::PUBKEY_BYTES;
+use solana_program::{entrypoint::ProgramResult, program_memory::sol_memcmp, pubkey::PUBKEY_BYTES};
+
+use crate::{errors::SwapError, state::TokenSwap};
 
 pub fn to_u128(val: u64) -> std::result::Result<u128, SwapError> {
     val.try_into().map_err(|_| SwapError::ConversionFailure)

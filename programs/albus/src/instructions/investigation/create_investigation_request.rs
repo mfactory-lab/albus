@@ -26,16 +26,17 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::errors::AlbusError;
-use crate::events::CreateInvestigationRequestEvent;
-use anchor_lang::prelude::*;
-use anchor_lang::Discriminator;
+use anchor_lang::{prelude::*, Discriminator};
 
-use crate::state::{
-    InvestigationRequest, InvestigationRequestShare, InvestigationStatus, ProofRequest,
-    ServiceProvider,
+use crate::{
+    errors::AlbusError,
+    events::CreateInvestigationRequestEvent,
+    state::{
+        InvestigationRequest, InvestigationRequestShare, InvestigationStatus, ProofRequest,
+        ServiceProvider,
+    },
+    utils::{cmp_pubkeys, initialize_account, BpfWriter},
 };
-use crate::utils::{cmp_pubkeys, initialize_account, BpfWriter};
 
 pub fn handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateInvestigationRequest<'info>>,

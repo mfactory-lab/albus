@@ -30,6 +30,6 @@ pub mod create_investigation_request;
 pub mod delete_investigation_request;
 pub mod reveal_secret_share;
 
-pub use self::create_investigation_request::*;
-pub use self::delete_investigation_request::*;
-pub use self::reveal_secret_share::*;
+pub use self::{
+    create_investigation_request::*, delete_investigation_request::*, reveal_secret_share::*,
+};

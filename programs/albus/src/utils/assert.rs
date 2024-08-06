@@ -32,9 +32,7 @@ use anchor_lang::{
 };
 
 // use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
-
-use crate::constants::AUTHORIZED_AUTHORITY;
-use crate::errors::AlbusError;
+use crate::{constants::AUTHORIZED_AUTHORITY, errors::AlbusError};
 
 /// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`
 pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {

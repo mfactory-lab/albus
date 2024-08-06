@@ -26,12 +26,13 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use crate::utils::Signals;
-use anchor_lang::prelude::*;
 use std::collections::HashMap;
 
+use anchor_lang::prelude::*;
 #[cfg(feature = "verify-on-chain")]
 use groth16_solana::Proof;
+
+use crate::utils::Signals;
 
 #[derive(AnchorSerialize, AnchorDeserialize, InitSpace, Clone, Debug)]
 pub struct ProofData {

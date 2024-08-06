@@ -30,6 +30,4 @@ pub mod create_policy;
 pub mod delete_policy;
 pub mod update_policy;
 
-pub use self::create_policy::*;
-pub use self::delete_policy::*;
-pub use self::update_policy::*;
+pub use self::{create_policy::*, delete_policy::*, update_policy::*};

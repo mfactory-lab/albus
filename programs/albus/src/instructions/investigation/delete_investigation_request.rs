@@ -28,10 +28,12 @@
 
 use anchor_lang::prelude::*;
 
-use crate::errors::AlbusError;
-use crate::events::DeleteInvestigationRequestEvent;
-use crate::state::{InvestigationRequest, InvestigationRequestShare};
-use crate::utils::close;
+use crate::{
+    errors::AlbusError,
+    events::DeleteInvestigationRequestEvent,
+    state::{InvestigationRequest, InvestigationRequestShare},
+    utils::close,
+};
 
 pub fn handler<'info>(
     ctx: Context<'_, '_, 'info, 'info, DeleteInvestigationRequest<'info>>,

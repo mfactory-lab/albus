@@ -25,10 +25,13 @@
  *
  * The developer of this program can be contacted at <info@albus.finance>.
  */
-use crate::errors::AlbusError;
-use crate::state::{CredentialSpec, Issuer};
-use crate::utils::{assert_authorized, cmp_pubkeys};
 use anchor_lang::prelude::*;
+
+use crate::{
+    errors::AlbusError,
+    state::{CredentialSpec, Issuer},
+    utils::{assert_authorized, cmp_pubkeys},
+};
 
 pub fn handler(ctx: Context<CreateCredentialSpec>, data: CreateCredentialSpecData) -> Result<()> {
     let authority = &ctx.accounts.authority;

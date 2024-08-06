@@ -28,8 +28,7 @@
 
 use anchor_lang::prelude::*;
 
-use crate::state::Trustee;
-use crate::utils::assert_authorized;
+use crate::{state::Trustee, utils::assert_authorized};
 
 pub fn handler(ctx: Context<CreateTrustee>, data: CreateTrusteeData) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;

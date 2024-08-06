@@ -26,8 +26,7 @@
  * The developer of this program can be contacted at <info@albus.finance>.
  */
 
-use solana_program::pubkey;
-use solana_program::pubkey::Pubkey;
+use solana_program::{pubkey, pubkey::Pubkey};
 
 pub const ALBUS_PROGRAM_ID: Pubkey = pubkey!("ALBUSbdydS2qoQXXeFfr4mqc9LFw5xWmUMdB4tcscHhi");
 pub const ALBUS_DEV_PROGRAM_ID: Pubkey = pubkey!("ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZZmQLMT3fp");
