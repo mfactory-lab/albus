@@ -372,11 +372,11 @@ export class ProofRequestManager extends BaseManager {
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
 
     // extending public inputs, length more than 19 does not fit into one transaction
-    // a transaction's maximum size is 1,232 bytes
+    // a transaction's maximum size is 1232 bytes
     // TODO: smart calculation
     const inputsLimit = { withProof: 18, withoutProof: 26 }
 
-    this.logger.log('prove', 'init', { proof, publicInputs })
+    this.logger.log('prove', 'init', JSON.stringify({ proof, publicInputs }))
 
     const txBuilder = props.txBuilder ?? this.txBuilder
 
@@ -408,7 +408,7 @@ export class ProofRequestManager extends BaseManager {
 
     txBuilder.addTransaction(
       new Transaction()
-        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: PROVE_PROOF_REQUEST_CU }))
+        .add(ComputeBudgetProgram.setComputeUnitLimit({ units: PROVE_PROOF_REQUEST_CU * 1.5 }))
         .add(createProveProofRequestInstruction(
           {
             proofRequest,
@@ -429,7 +429,6 @@ export class ProofRequestManager extends BaseManager {
     )
 
     if (props.verify) {
-      this.logger.log('prove', 'createVerifyProofRequestInstruction (setComputeUnitLimit: 400_000)')
       txBuilder.addTransaction(
         new Transaction()
           .add(ComputeBudgetProgram.setComputeUnitLimit({ units: VERIFY_PROOF_REQUEST_CU }))
@@ -491,7 +490,7 @@ export class ProofRequestManager extends BaseManager {
         const keys = (await this.service.loadTrusteeKeys(serviceProvider.trustees))
           .filter(p => p !== null) as [bigint, bigint][]
         for (const key of keys) {
-          this.logger.log('fullProve', 'trustee sharedKey', Albus.zkp.generateEcdhSharedKey(props.userPrivateKey, key))
+          this.logger.log('fullProve', 'trustee sharedKey', JSON.stringify(Albus.zkp.generateEcdhSharedKey(props.userPrivateKey, key)))
         }
         return keys
       })
@@ -518,7 +517,6 @@ export class ProofRequestManager extends BaseManager {
       // this.logger.log('fullProve', 'proving...', proofData)
       const { proof, publicSignals } = await Albus.zkp.generateProof(proofData)
 
-      this.logger.log('fullProve', 'sending transaction...')
       const { signatures } = await this.prove({
         proofRequest: props.proofRequest,
         circuit: props.circuit,
@@ -531,7 +529,9 @@ export class ProofRequestManager extends BaseManager {
         txBuilder: props.txBuilder,
       })
 
-      this.logger.log('fullProve', 'prove result', { signatures })
+      if (signatures.length > 0) {
+        this.logger.log('fullProve', 'prove result', { signatures })
+      }
 
       return { signatures, proof, publicSignals }
     } catch (e: any) {

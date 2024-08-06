@@ -14,5 +14,5 @@ export const DEV_PROGRAM_ID = new PublicKey('ALBSoqJrZeZZ423xWme5nozNcozCtMvDWTZ
 
 // Computation Units
 export const CREATE_CREDENTIAL_CU = 300_000
-export const PROVE_PROOF_REQUEST_CU = 300_000
+export const PROVE_PROOF_REQUEST_CU = 100_000
 export const VERIFY_PROOF_REQUEST_CU = 600_000
