@@ -28,9 +28,10 @@
 
 use anchor_lang::prelude::*;
 
-use crate::errors::AlbusError;
-use crate::state::{Circuit, ServiceProvider};
-use crate::state::{Policy, PolicyRule};
+use crate::{
+    errors::AlbusError,
+    state::{Circuit, Policy, PolicyRule, ServiceProvider},
+};
 
 pub fn handler(ctx: Context<CreatePolicy>, data: CreatePolicyData) -> Result<()> {
     let timestamp = Clock::get()?.unix_timestamp;

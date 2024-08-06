@@ -8,6 +8,8 @@ import { VerifyType } from '../types'
 const SERVICE_ENDPOINT = 'https://albus.finance/'
 const DEFAULT_CLUSTER = 'mainnet-beta'
 
+const ISSUER_DISCRIMINATOR = [216, 19, 83, 230, 108, 53, 80, 14]
+
 enum AccountType {
   Issuer = 'issuer',
 }
@@ -82,7 +84,7 @@ export function getResolver(ops?: AlbusResolverOpts): Record<string, DIDResolver
  */
 function parseIssuer(accountInfo: AccountInfo<Buffer>) {
   const discriminator = accountInfo.data.subarray(0, 8)
-  if (!discriminator.equals(Buffer.from([216, 19, 83, 230, 108, 53, 80, 14]))) {
+  if (!discriminator.equals(Buffer.from(ISSUER_DISCRIMINATOR))) {
     throw new Error('Invalid issuer discriminator')
   }
   const pubkey = Uint8Array.from(accountInfo.data.subarray(8, 40))
