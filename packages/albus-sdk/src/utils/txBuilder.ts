@@ -51,6 +51,10 @@ export class TxBuilder {
     return this
   }
 
+  get hasPriorityFee() {
+    return this.priorityFee !== undefined && this.priorityFee > 0
+  }
+
   withPriorityFee(microLamports: number | bigint) {
     this.priorityFee = microLamports
     return this

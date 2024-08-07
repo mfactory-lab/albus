@@ -371,14 +371,18 @@ export class ProofRequestManager extends BaseManager {
     const proof = Albus.zkp.encodeProof(props.proof)
     const publicInputs = Albus.zkp.encodePublicSignals(props.publicSignals)
 
-    // extending public inputs, length more than 19 does not fit into one transaction
-    // a transaction's maximum size is 1232 bytes
-    // TODO: smart calculation
-    const inputsLimit = { withProof: 18, withoutProof: 26 }
+    const txBuilder = props.txBuilder ?? this.txBuilder
+
+    const inputsLimit = {
+      // TODO: smart calculation
+      // extending public inputs, length more than 18 does not fit into one transaction
+      // a transaction's maximum size is 1232 bytes
+      // priory fee adds additional bytes to the transaction
+      withProof: txBuilder.hasPriorityFee ? 17 : 18,
+      withoutProof: txBuilder.hasPriorityFee ? 25 : 26,
+    }
 
     this.logger.log('prove', 'init', JSON.stringify({ proof, publicInputs }))
-
-    const txBuilder = props.txBuilder ?? this.txBuilder
 
     if (publicInputs.length > inputsLimit.withProof) {
       const inputChunks: any[] = chunk(publicInputs.slice(0, -inputsLimit.withProof), inputsLimit.withoutProof)
