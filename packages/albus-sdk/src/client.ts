@@ -52,6 +52,13 @@ import { IrysStorageDriver } from './storage/irys'
 import idl from './idl/albus.json'
 import type { StorageDriver } from './storage'
 
+// polyfill for JSON.stringify of BigInts
+if (!('toJSON' in BigInt.prototype)) {
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString()
+  }
+}
+
 export enum AlbusClientEnv { DEV = 'dev', STAGE = 'stage', PROD = 'prod' }
 
 export class AlbusClient {
