@@ -52,7 +52,8 @@ export class TxBuilder {
   }
 
   get hasPriorityFee() {
-    return this.priorityFee !== undefined && this.priorityFee > 0
+    return this.priorityFeeLoader !== undefined
+      || (this.priorityFee !== undefined && this.priorityFee > 0)
   }
 
   withPriorityFee(microLamports: number | bigint) {
