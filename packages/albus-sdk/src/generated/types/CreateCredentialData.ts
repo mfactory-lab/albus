@@ -5,11 +5,13 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import type * as web3 from '@solana/web3.js'
 import * as beet from '@metaplex-foundation/beet'
+import type * as web3 from '@solana/web3.js'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 
 export type CreateCredentialData = {
+  name: beet.COption<string>
+  uri: beet.COption<string>
   issuer: beet.COption<web3.PublicKey>
 }
 
@@ -19,6 +21,10 @@ export type CreateCredentialData = {
  */
 export const createCredentialDataBeet
   = new beet.FixableBeetArgsStruct<CreateCredentialData>(
-    [['issuer', beet.coption(beetSolana.publicKey)]],
+    [
+      ['name', beet.coption(beet.utf8String)],
+      ['uri', beet.coption(beet.utf8String)],
+      ['issuer', beet.coption(beetSolana.publicKey)],
+    ],
     'CreateCredentialData',
   )

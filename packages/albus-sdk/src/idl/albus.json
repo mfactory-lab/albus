@@ -2176,6 +2176,18 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "name",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "uri",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
             "name": "issuer",
             "type": {
               "option": "publicKey"

@@ -54,8 +54,8 @@ pub fn handler(ctx: Context<CreateCredential>, data: CreateCredentialData) -> Re
     let mut builder = CreateV1CpiBuilder::new(&ctx.accounts.metadata_program);
 
     builder
-        .name(CREDENTIAL_NAME.into())
-        .uri(Default::default())
+        .name(data.name.unwrap_or(CREDENTIAL_NAME.into()))
+        .uri(data.uri.unwrap_or_default())
         .symbol(format!("{}-{}", NFT_SYMBOL_PREFIX, CREDENTIAL_SYMBOL_CODE))
         .mint(&ctx.accounts.mint, true)
         .metadata(&ctx.accounts.metadata_account)
@@ -141,6 +141,8 @@ pub fn handler(ctx: Context<CreateCredential>, data: CreateCredentialData) -> Re
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateCredentialData {
+    pub name: Option<String>,
+    pub uri: Option<String>,
     pub issuer: Option<Pubkey>,
 }
 

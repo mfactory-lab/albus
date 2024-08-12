@@ -114,6 +114,8 @@ export class CredentialManager extends BaseManager {
     }, {
       data: {
         issuer: props?.issuer ? new PublicKey(props?.issuer) : null,
+        name: props?.name ?? null,
+        uri: props?.uri ?? null,
       },
     }, this.programId)
 
@@ -337,6 +339,8 @@ export type CredentialInfo = {
 export type CreateCredentialProps = {
   owner?: Keypair
   issuer?: PublicKeyInitData
+  name?: string
+  uri?: string
 }
 
 export type UpdateCredentialProps = {
