@@ -90,9 +90,11 @@ export class TxBuilder {
         if (this.opts?.simulate && this.provider.simulate) {
           try {
             const res = await this.provider.simulate(tx, signers, opts?.commitment)
-            this.logger?.log('simulation', res)
+            console.log('simulation', res)
+            // this.logger?.log('c', res)
           } catch (e) {
-            this.logger?.error('simulation', e)
+            console.log('simulation', e)
+            // this.logger?.error('simulation', e)
           }
         }
       }
