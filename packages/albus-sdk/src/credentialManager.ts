@@ -273,7 +273,12 @@ export class CredentialManager extends BaseManager {
     for (const account of accounts) {
       result.push({
         address: account.mint,
-        credential: await getCredentialInfo(account, props),
+        credential: await getCredentialInfo(account, {
+          albusResolver: {
+            connection: this.provider.connection,
+          },
+          ...props,
+        }),
       })
     }
     return result

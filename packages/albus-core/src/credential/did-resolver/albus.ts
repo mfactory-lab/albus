@@ -15,20 +15,21 @@ enum AccountType {
 }
 
 export type AlbusResolverOpts = {
-  rpcUrl?: Partial<Record<Cluster, string>>
+  connection?: Connection
+  rpcUrl?: Record<Cluster, string>
 }
 
 /**
  * Albus DID resolver.
  */
-export function getResolver(ops?: AlbusResolverOpts): Record<string, DIDResolver> {
+export function getResolver(opts?: AlbusResolverOpts): Record<string, DIDResolver> {
   async function resolve(did: string, parsed: ParsedDID): Promise<DIDResolutionResult> {
     const params = new URLSearchParams(parsed.query)
 
     const cluster = (params.get('cluster') ?? DEFAULT_CLUSTER) as Cluster
 
-    const connection = new Connection(
-      ops?.rpcUrl[cluster] ?? clusterApiUrl(cluster),
+    const connection = opts.connection ?? new Connection(
+      opts?.rpcUrl[cluster] ?? clusterApiUrl(cluster),
       'confirmed',
     )
 
