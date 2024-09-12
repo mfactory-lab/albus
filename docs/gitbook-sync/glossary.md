@@ -14,7 +14,7 @@ layout:
 
 # Glossary
 
-## Entities and modules
+## Entities and Modules
 
 ### Adapter
 
@@ -44,7 +44,7 @@ An individual or an entity that wants to transact with a Web3 protocol and uses 
 
 A blockchain-based business that uses Albus to verify that users who want to use its service comply with the policy that the business set for this service. Albus provides a tool for Web3 protocols to conduct this verification without accessing user data (claims), and to make the portion of user data required under applicable data retention regulations accessible to authorised entities with legitimate request. In the SSI model, a Web3 protocol plays the role of a Verifier.
 
-## General terms
+## General Terms
 
 ### Circuit
 

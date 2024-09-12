@@ -12,7 +12,7 @@ layout:
     visible: true
 ---
 
-# Albus architecture
+# Architecture
 
 <figure><img src="/docs/gitbook-sync/.gitbook/assets/albus-architecture.png" alt="Albus architecture diagram"><figcaption></figcaption></figure>
 
@@ -23,11 +23,11 @@ layout:
 * ZKP – Zero-Knowledge Proof
 {% endhint %}
 
-## Internal components
+## Internal Components
 
 Albus Protocol includes 3 layers: frontend, blockchain, and backend.
 
-### Frontend layer
+### Frontend Layer
 
 The frontend layer includes five accounts that provide their users with the following functionality:
 
@@ -51,7 +51,7 @@ The frontend layer includes five accounts that provide their users with the foll
   * Submit requests to disclose retained data to Trustees
   * Use key shares of Trustees to reconstruct a decryption key for decrypting retained user data
 
-### Blockchain layer
+### Blockchain Layer
 
 The blockchain layer includes:
 
@@ -66,7 +66,7 @@ The blockchain layer includes:
 For detailed definitions, please refer to the [Glossary](/docs/gitbook-sync/glossary.md).
 {% endhint %}
 
-### Backend layer
+### Backend Layer
 
 The backend layer includes the following methods:
 
@@ -81,7 +81,7 @@ The backend layer includes the following methods:
 For details, please refer to the [Integration](/docs/gitbook-sync/integration.md) and [CLI](/docs/gitbook-sync/albus-cli.md) sections.
 {% endhint %}
 
-## External components
+## External Components
 
 Albus interacts with the following external entities:
 

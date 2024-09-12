@@ -14,19 +14,17 @@ layout:
 
 # What is Albus Protocol?
 
-Albus Protocol provides on-chain Zero-Knowledge-based verification infrastructure for Web3 businesses and their users. Building on Self-Sovereign Identity (SSI) model, Albus harnesses the power of blockchain and Zero-Knowledge Proofs (ZKP) to create a **privacy-oriented environment** where Web3 businesses can **verify users**, and users can **prove claims** about themselves to Web3 businesses. Albus also adds an **extra layer of compliance** by ensuring that user data can be safely retained under data retention law and made available to authorised entities with legitimate requests.
+A highly adaptable infrastructure for monetizable decentralized identities (DID), providing privacy and compliance tools for secure identity verification
 
 ## Problem
 
-There is no effective way for Web3 businesses to verify their users on blockchain without compromising the privacy of user data. Without proper verification practices in place, Web3 businesses are unable to capitalize on a number of important benefits that could give them a **competitive edge** or unlock **new revenue streams**. Such verification practices could also be part of a broader AML compliance solution that would allow businesses to bring **institutional capital on-chain** and/or tap into **security token trading**.
+The shift to digital identity has created new challenges in managing identities. Traditional identity systems rely on centralized infrastructure, which leads to inefficiencies, security risks, and lack of user control. Each business has to independently build and maintain its own identity management system, resulting in redundant, siloed solutions. Centralized storage exposes sensitive data to breaches and unauthorized access, while users have little to no control over it.
 
 ## Solution
 
-Albus enables Web3 businesses to verify their users on-chain, while preserving user privacy and ensuring compliance with data retention laws. The Protocol relies on:
+Albus provides a decentralized identity (DID) infrastructure that addresses the inefficiencies of traditional centralized systems while introducing a [revenue-sharing model](revenue-sharing-model.md) for identity monetization. With [Self-Sovereign Identity (SSI)](self-sovereign-identity.md), users have full control over their identity data, and blockchain-enabled decentralization removes the need for centralized storage, enhancing security and minimizing risks. Albus also enables reusability, allowing identities to be easily shared across platforms and reducing redundancy.
 
-* [**Self-Sovereign Identity (SSI)**](self-sovereign-identity.md) and [**digital credentials**](digital-cred.md) to enable users to prove claims about themselves and to allow Web3 businesses to verify these claims in an environment where parties can trust each other and users are in control of their data.
-* [**Shamir's Secret Sharing (SSS)**](data-retention-compliance.md) and a network of [**Trustees**](data-retention-compliance.md) to securely retain user data under data retention laws and ensure that authorised entities can access it upon a legitimate request.
-* [**Zero-Knowledge Proofs**](zero-knowledge-proofs.md) to preserve the privacy of a user's claims during the verification.
+By combining these core features with compliance and privacy tools, Albus creates a secure environment where identities can be openly or privately verified for compliance with any requirements across a wide range of use cases both in Web2 and in Web3. These include KYC/KYB/KYT, due diligence, and proof-of-funds (PoF) checks, NFT-based point systems, member club cards, user profiling and verification in tokenized asset trading.
 
 {% hint style="info" %}
 * Albus Protocol is designed as a **blockchain-agnostic** solution, which means it can be deployed on any public blockchain, regardless of whether it's EVM-compatible or not. Currently, it's deployed on Solana.

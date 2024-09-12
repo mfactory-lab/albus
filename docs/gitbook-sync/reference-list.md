@@ -12,7 +12,7 @@ layout:
     visible: true
 ---
 
-# Reference list
+# Reference List
 
 This section lists the sources of all standards, cryptographic primitives, tools, and frameworks used to create Albus.
 

@@ -12,9 +12,9 @@ layout:
     visible: true
 ---
 
-# User workflows
+# User Workflows
 
-## Business user workflow
+## Business User Workflow
 
 To use Albus to verify its end users, a business user (Web3 protocol) has to set a policy that incorporates the requirements for them, and assign Trustees that will participate in a secret sharing scheme (for definitions, please refer to the [Glossary](/docs/gitbook-sync/glossary.md)).
 
@@ -26,7 +26,7 @@ _If it's not onboarded_, Albus displays a form that the business user needs to f
 
 After that, an end user who wants to use the service this policy applies to will have to prove compliance with it. To do this, this user has to pass verification with an Issuer, obtain a digital credential from it, and receive a Compliance Certificate that will confirm their eligibility to use the service.
 
-## End user workflows
+## End User Workflows
 
 End users can use Albus to obtain and manage Compliance Certificates for services of business users they want to transact with. They can also use Albus to digitise physical documents and store them in the form of digital credentials that they can use later.
 
@@ -64,7 +64,7 @@ _If the Certificate has expired or is missing but the user has a digital credent
 
 _If the user doesn't have a required digital credential_, they undergo verification with a chosen Issuer. After the verification, the Issuer issues the digital credential that is stored as NFT on-chain and controlled by the user. Then this credential is used to verify the user's compliance and issue a Certificate.
 
-### Document digitisation
+### Document Digitisation
 
 An end user can use Albus to digitise their physical documents and use their digital forms within the Albus ecosystem as needed.
 
