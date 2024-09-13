@@ -3,8 +3,8 @@
 ## Introduction
 
 * [What is Albus Protocol?](README.md)
-* [Self-Sovereign Identity (SSI)](self-sovereign-identity.md)
 * [Features](features.md)
+* [Self-Sovereign Identity (SSI)](self-sovereign-identity.md)
 * [User Data Security](data-security.md)
 
 ## Privacy & Compliance Tools

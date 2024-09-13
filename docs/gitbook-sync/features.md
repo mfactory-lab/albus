@@ -21,7 +21,7 @@ layout:
 | **Reusability**          | Allows verified identities to be reused across platforms, reducing redundancy                               |
 | **Monetization**         | Enables users and business clients to monetize identities through a proprietary [revenue-sharing model](revenue-sharing-model.md)        |
 | **Decentralization**     | Eliminates centralized data storage, enhancing security and mitigating risks                                |
-| **User-controlled identities** | Empowers users with full control over their digital identities, managing data access securely within a trust-based Self-Sovereign Identity (SSI) model |
+| **User-controlled identities** | Empowers users with full control over their digital identities, managing data access securely within a trust-based [Self-Sovereign Identity (SSI) model](self-sovereign-identity.md) |
 
 ---
 
