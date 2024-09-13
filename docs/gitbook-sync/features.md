@@ -29,6 +29,6 @@ layout:
 
 | Feature                 | Description                                                                                                 |
 |-------------------------|-------------------------------------------------------------------------------------------------------------|
-| **AML compliance**       | Provides due diligence functionality for AML officers that ensures compliance with AML regulations           |
-| **Privacy**              | Zero-Knowledge Proofs (ZKP) cryptographically guarantee complete privacy when users share their personal data |
-| **Data retention**       | Proprietary data retention mechanism secures ad-hoc compliance with data retention requirements              | 
+| **AML compliance**       | Provides [due diligence functionality](aml-officer.md) for AML officers that ensures compliance with AML regulations           |
+| **Privacy**              | [Zero-Knowledge Proofs (ZKP)](zero-knowledge-proofs.md) cryptographically guarantee complete privacy when users share their personal data |
+| **Data retention**       | Proprietary [data retention mechanism](data-retention-compliance.md) secures ad-hoc compliance with data retention requirements              | 
