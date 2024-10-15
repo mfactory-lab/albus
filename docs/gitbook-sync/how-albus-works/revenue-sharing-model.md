@@ -14,7 +14,7 @@ layout:
 
 # Revenue-Sharing Model
 
-<figure><img src="/docs/gitbook-sync/.gitbook/assets/albus-revenue-sharing.png" alt="Albus revenue-sharing model"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/albus-revenue-sharing.png" alt=""><figcaption></figcaption></figure>
 
 When a user requests a service from a business and doesn't have the neccessary identity data to pass the verification required by the business, this business pays for the user's onboarding to a data provider (such as Sumsub). The data provider then supplies the required identity data to Albus Protocol. Albus, acting as an infrastructure-as-a-service platform, steps in to create and store a decentralized identity (DID) for the user. This DID is fully controlled by the user.
 
