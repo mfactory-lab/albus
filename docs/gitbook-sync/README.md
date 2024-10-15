@@ -22,7 +22,7 @@ The shift to digital identity has created new challenges in managing identities.
 
 ## Solution
 
-Albus provides a decentralized identity (DID) infrastructure that addresses the inefficiencies of traditional centralized systems while introducing a [revenue-sharing model](revenue-sharing-model.md) for identity monetization. With [Self-Sovereign Identity (SSI)](self-sovereign-identity.md), users have full control over their identity data, and blockchain-enabled decentralization removes the need for centralized storage, enhancing security and minimizing risks. Albus also enables reusability, allowing identities to be easily shared across platforms and reducing redundancy.
+Albus provides a decentralized identity (DID) infrastructure that addresses the inefficiencies of traditional centralized systems while introducing a [revenue-sharing model](how-albus-works/revenue-sharing-model.md) for identity monetization. With [Self-Sovereign Identity (SSI)](introduction/self-sovereign-identity.md), users have full control over their identity data, and blockchain-enabled decentralization removes the need for centralized storage, enhancing security and minimizing risks. Albus also enables reusability, allowing identities to be easily shared across platforms and reducing redundancy.
 
 By combining these core features with compliance and privacy tools, Albus creates a secure environment where identities can be openly or privately verified for compliance with any requirements across a wide range of use cases both in Web2 and in Web3. These include KYC/KYB/KYT, due diligence, and proof-of-funds (PoF) checks, NFT-based point systems, member club cards, user profiling and verification in tokenized asset trading.
 

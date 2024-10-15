@@ -1,40 +1,39 @@
-# Summary
+# Table of contents
 
 ## Introduction
 
 * [What is Albus Protocol?](README.md)
-* [Features](features.md)
-* [Self-Sovereign Identity (SSI)](self-sovereign-identity.md)
-* [User Data Security](data-security.md)
+* [Features](introduction/features.md)
+* [Self-Sovereign Identity (SSI)](introduction/self-sovereign-identity.md)
+* [User Data Security](introduction/data-security.md)
 
 ## Privacy & Compliance Tools
 
-* [AML Compliance](aml-officer.md)
-* [Privacy](zero-knowledge-proofs.md)
-* [Data Retention Compliance](data-retention-compliance.md)
+* [AML Compliance](privacy-and-compliance-tools/aml-officer.md)
+* [Privacy](privacy-and-compliance-tools/zero-knowledge-proofs.md)
+* [Data Retention Compliance](privacy-and-compliance-tools/data-retention-compliance.md)
 
 ## How Albus Works
 
-* [Architecture](albus-architecture.md)
-* [Revenue-Sharing Model](revenue-sharing-model.md)
-* [User Workflows](user-workflows.md)
-* [Example: KYC + Data Retention](example.md)
+* [Architecture](how-albus-works/albus-architecture.md)
+* [Revenue-Sharing Model](how-albus-works/revenue-sharing-model.md)
+* [User Workflows](how-albus-works/user-workflows.md)
+* [Example: KYC + Data Retention](how-albus-works/example.md)
 
 ## For Developers
 
-* [Albus CLI](albus-cli.md)
-* [Integration](integration.md)
+* [Albus CLI](for-developers/albus-cli.md)
+* [Integration](for-developers/integration.md)
 
 ## Resources
 
-* [Glossary](glossary.md)
-* [Reference List](reference-list.md)
+* [Glossary](resources/glossary.md)
+* [Reference List](resources/reference-list.md)
 
 ## Links
 
 * [Website](https://albus.finance/)
 * [App](https://app.albus.finance/)
-<!-- * [Notion](https://www.notion.so/albus-protocol/Data-Room-Public-1e370850e94a4108835f7aa4fbbd4f05) -->
 * [LinkedIn](https://www.linkedin.com/company/albus-protocol/)
 * [X](https://twitter.com/AlbusProtocol)
 * [Telegram](https://t.me/albusprotocol)
