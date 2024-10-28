@@ -22,7 +22,7 @@ A dedicated service that runs on the Issuer node. It fetches user data (claims) 
 
 ### AML Officer
 
-A type of Issuer that conducts AML checks and issues Verifiable Credentials for AML-compliant users. It can be an in-house employee of a Web3 business or some other trusted entity.
+A type of Issuer that conducts due diligence checks and issues proofs of due diligence (DD) for compliant users. It can be an in-house employee of a Web3 business or some other trusted entity.
 
 ### Issuer node
 

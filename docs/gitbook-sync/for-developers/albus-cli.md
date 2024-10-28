@@ -32,7 +32,7 @@ pnpm cli [option(s)] [command]
 
 `-h`, `--help`: displays information about the command
 
-### Default values
+### Default Values
 
 Default values can be set or changed in an `.env` file via the following environmental variables:
 
@@ -40,7 +40,7 @@ Default values can be set or changed in an `.env` file via the following environ
 * `CLI_SOLANA_KEYPAIR=[value]`
 * `CLI_LOG_LEVEL=[value]`
 
-### Usage example
+### Usage Example
 
 * Running `admin sp add`:
 
@@ -78,7 +78,7 @@ pnpm cli vc all
 pnpm cli vc issue --encrypt
 ```
 
-### Proof generation
+### Proof Generation
 
 * Generate a ZK proof based on a corresponding circuit, and store it as NFT:
 
@@ -106,7 +106,7 @@ pnpm cli verify proof --circuit <ADDRESS> --proof <ADDRESS>
 pnpm cli request verify <ADDRESS>
 ```
 
-### Circuit management
+### Circuit Management
 
 * Register a new circuit:
 
@@ -114,7 +114,7 @@ pnpm cli request verify <ADDRESS>
 pnpm cli admin circuit create <CIRCUIT_CODE>
 ```
 
-### Web3 protocol management
+### Web3 Protocol Management
 
 * Register a Web3 protocol:
 
@@ -140,7 +140,7 @@ pnpm cli admin sp show <UNIQUE_CODE>
 pnpm cli admin sp all --authority <ADDRESS>
 ```
 
-### Proof request management
+### Proof Request Management
 
 * Create a proof request:
 

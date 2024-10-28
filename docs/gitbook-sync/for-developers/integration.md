@@ -17,10 +17,10 @@ layout:
 This section will guide you through integrating Albus into your workflow. The on-chain part is implemented in Rust, while the off-chain part is built with TypeScript.
 
 {% hint style="info" %}
-Web3 protocols (business users) are referred to as service providers in this section. For all definitions, please refer to the [Glossary](broken-reference).
+Web3 protocols (business users) are referred to as service providers in this section. For all definitions, please refer to the [Glossary](/docs/gitbook-sync/resources/glossary.md).
 {% endhint %}
 
-## On-chain component (Rust)
+## On-Chain Component (Rust)
 
 ### Installation
 
@@ -93,7 +93,7 @@ _Example_
 let (service_provider, _) = albus_solana_verifier::find_service_provider_address("<SERVICE_PROVIDER_CODE>");
 ```
 
-## Off-chain component (TypeScript)
+## Off-Chain Component (TypeScript)
 
 ### Installation
 
@@ -133,7 +133,7 @@ const keypair = Keypair.fromSecretCode('...')
 const client = AlbusClient.fromKeypair(new Connection(network), keypair)
 ```
 
-### Methods available to Web3 businesses
+### Methods Available to Web3 Businesses
 
 * Retrieve all service providers
 
@@ -333,7 +333,8 @@ Data passed to the `update` method:
 
 * `name`: service provider's name.
 * `website`: service provider's website.
-* `secretShareThreshold`: the number of shares into which a decryption key is split under a secret sharing scheme (for details, see the [Glossary](broken-reference)).
+* `secretShareThreshold`: the number of shares into which a decryption key is split under a secret sharing scheme (for details, see the [Glossary](/docs/gitbook-sync/resources/glossary.md#secret-sharing-scheme-shamirs-secret-sharing-sss)).
+
 * `contactInfo`:
   * `kind`: contact type:
     * `0`: Telegram

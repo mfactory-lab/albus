@@ -24,6 +24,6 @@ Trustees are compliance partners of Albus that are responsible for securely mana
 
 When an authorised entity submits a request to access retained user data, the Trustees holding the key shares for this data verify the legitimacy of the request. After confirming it, they decrypt and pass their key shares to the authorised entity. Upon receiving a specific threshold number of the key shares, the authorised entity can reconstruct the decryption key and decrypt the retained user data.
 
-## Retained user data
+## Retained User Data
 
 Retained data of a user contain the claim(s) passed to a circuit to generate a Zero-Knowledge Proof. This dataset also includes other personal data that a Web3 business needs to ensure compliance with local data retention requirements.
