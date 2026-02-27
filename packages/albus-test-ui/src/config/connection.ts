@@ -4,10 +4,10 @@ import type { Endpoint } from '@/stores/connection'
 
 export const ENDPOINTS: Endpoint[] = [
   {
-    id: 'helius-mainnet',
-    name: 'Helius RPC',
+    id: 'jpool-mainnet',
+    name: 'JPool RPC',
     cluster: 'mainnet-beta',
-    url: 'https://marketa-1sh8m6-fast-mainnet.helius-rpc.com/',
+    url: 'https://rpc.jpool.one',
   },
   {
     id: 'mainnet',
